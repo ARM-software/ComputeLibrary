@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 /** Tolerance for float operations */
@@ -51,15 +52,20 @@ constexpr float                     tolerance_num = 0.07f;      /**< Tolerance n
 /** Tolerance for quantized asymmetric operations */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 
-const auto FullyConnectedParameters = combine(framework::dataset::make("TransposeWeights", { false, true }), framework::dataset::make("ReshapeWeights", { false, true }));
+const auto FullyConnectedParameters = combine(make("TransposeWeights", { false, true }), make("ReshapeWeights", { false, true }));
 
-const auto QuantizationData = framework::dataset::make("QuantizationInfo",
+const auto QuantizationData = make("QuantizationInfo",
 {
     QuantizationInfo(1.f / 255.f, 10),
     QuantizationInfo(1.1f, 10),
 });
 
-const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto IgnoredQuantizationData = make("IgnoredQuantizationInfo",
+{
+    QuantizationInfo(),
+});
+
+const auto ActivationFunctionsDataset = make("ActivationInfo",
 {
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -68,11 +74,16 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH)
 });
 
-const auto ActivationFunctionsQuantizedDataset = concat(concat(concat(
-                                                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo()),
-                                                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f))),
-                                                        framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.75f, 0.25f)));
+// This dataset case only runs with dynamic quantization
+const auto NoActivationFunctionsQuantizedDataset = make("ActivationInfo",
+{
+    ActivationLayerInfo()
+});
+
+const auto ActivationFunctionsQuantizedDataset = concat(concat(
+                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)),
+                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f))),
+                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.75f, 0.25f)));
 } // namespace
 
 TEST_SUITE(CL)
@@ -81,33 +92,33 @@ TEST_SUITE(FullyConnectedLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Mismatching data types
+    make("InputInfo", { TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Mismatching data types
                                             TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Invalid weights dimensions
                                             TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Wrongly reshaped weights
                                           }),
-    framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(315U, 271U), 1, DataType::F16),
+    make("WeightsInfo",{ TensorInfo(TensorShape(315U, 271U), 1, DataType::F16),
                                              TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
                                              TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
                                              TensorInfo(TensorShape(217U, 231U), 1, DataType::F32),
                                              TensorInfo(TensorShape(217U, 315U), 1, DataType::F32),
                                           })),
-    framework::dataset::make("BiasInfo",{ TensorInfo(TensorShape(271U), 1, DataType::F32),
+    make("BiasInfo",{ TensorInfo(TensorShape(271U), 1, DataType::F32),
                                           TensorInfo(TensorShape(192U), 1, DataType::F32),
                                           TensorInfo(TensorShape(192U), 1, DataType::F32),
                                           TensorInfo(TensorShape(271U), 1, DataType::F32),
                                           TensorInfo(TensorShape(271U), 1, DataType::F32),
                                           })),
-    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
+    make("OutputInfo",{ TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                                             TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                                             TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                                            })),
-    framework::dataset::make("TransposeWeights",{ true, true, false, true, true })),
-    framework::dataset::make("ReshapedWeights",{ false, false, false, false, false})),
-    framework::dataset::make("Expected", { false, true, true, false, false })),
+    make("TransposeWeights",{ true, true, false, true, true })),
+    make("ReshapedWeights",{ false, false, false, false, false})),
+    make("Expected", { false, true, true, false, false })),
     input_info, weights_info, bias_info, output_info, transpose_weights, reshaped_weights, expected)
 {
     // Create Fully Connected layer info
@@ -136,64 +147,64 @@ using CLFullyConnectedNoBiasFixture = FullyConnectedDynamicNoBiasFixture<CLTenso
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                                                                                                                        FullyConnectedParameters),
-                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
+                                                                                                                        FullyConnectedParameters,
+                                                                                                                        make("DataType", DataType::F16),
                                                                                                                 ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(),
-                                                                                                                      FullyConnectedParameters),
-                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeFullyConnectedLayerDataset(),
+                                                                                                                      FullyConnectedParameters,
+                                                                                                                      make("DataType", DataType::F16),
                                                                                                               ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       framework::dataset::make("DataType", DataType::F16)),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                       framework::dataset::make("WeightsReshaped", { false, true })))
+FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
+                       make("DataType", DataType::F16),
+                       make("ActivationInfo", ActivationLayerInfo()),
+                       make("WeightsReshaped", { false, true })))
 {
 }
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters,
+                                                                                                                 make("DataType", DataType::F32),
                                                                                                                  ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(
-                           framework::dataset::make("Input", TensorShape(9U, 5U, 7U)),
-                           framework::dataset::make("Weights", TensorShape(315U, 271U))),
-                       framework::dataset::make("Biases", TensorShape(271U))),
-                       framework::dataset::make("Output", TensorShape(271U))),
-                       FullyConnectedParameters),
-                       framework::dataset::make("DataType", DataType::F32)),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(
+                           make("Input", TensorShape(9U, 5U, 7U)),
+                           make("Weights", TensorShape(315U, 271U)),
+                       make("Biases", TensorShape(271U)),
+                       make("Output", TensorShape(271U)),
+                       FullyConnectedParameters,
+                       make("DataType", DataType::F32),
+                       make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       framework::dataset::make("DataType", DataType::F32)),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                       framework::dataset::make("WeightsReshaped", { false, true })))
+FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
+                       make("DataType", DataType::F32),
+                       make("ActivationInfo", ActivationLayerInfo()),
+                       make("WeightsReshaped", { false, true })))
 {
 }
-FIXTURE_DATA_TEST_CASE(RunDynamicNoBias, CLFullyConnectedNoBiasFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       framework::dataset::make("DataType", DataType::F32)),
-                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),
-                       framework::dataset::make("WeightsReshaped", { false })))
+FIXTURE_DATA_TEST_CASE(RunDynamicNoBias, CLFullyConnectedNoBiasFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
+                       make("DataType", DataType::F32),
+                       make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) }),
+                       make("WeightsReshaped", { false })))
 {
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
-                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters,
+                                                                                                                make("DataType", DataType::F32),
                                                                                                                ActivationFunctionsDataset))
 {
     // Validate output
@@ -209,73 +220,130 @@ using CLFullyConnectedLayerQuantizedMixedDataLayoutFixture = FullyConnectedLayer
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData),
+FIXTURE_DATA_TEST_CASE(RunSmallWithActivation, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters, make("DataType", DataType::QASYMM8), QuantizationData,
                                ActivationFunctionsQuantizedDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(combine(combine(
-                                                                           framework::dataset::make("Input", TensorShape(9U, 5U, 7U)),
-                                                                           framework::dataset::make("Weights", TensorShape(315U, 271U))),
-                                                                       framework::dataset::make("Biases", TensorShape(271U))),
-                                                               framework::dataset::make("Output", TensorShape(271U))),
-                                                       FullyConnectedParameters),
-                                               framework::dataset::make("DataType", DataType::QASYMM8)),
-                                       QuantizationData),
-                               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation, CLFullyConnectedLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                                                                        combine(
+                                                                           make("Input", TensorShape(9U, 5U, 7U)),
+                                                                           make("Weights", TensorShape(315U, 271U)),
+                                                                       make("Biases", TensorShape(271U)),
+                                                               make("Output", TensorShape(271U)),
+                                                       FullyConnectedParameters,
+                                               make("DataType", DataType::QASYMM8),
+                                       QuantizationData,
+                               make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeWithActivation, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                            combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters, make("DataType", DataType::QASYMM8), QuantizationData,
+                               ActivationFunctionsQuantizedDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+// Dynamic Quantization Tests
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters, make("DataType", DataType::QASYMM8), IgnoredQuantizationData,
+                        NoActivationFunctionsQuantizedDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData),
-                               ActivationFunctionsQuantizedDataset))
+                        combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters, make("DataType", DataType::QASYMM8), IgnoredQuantizationData,
+                               NoActivationFunctionsQuantizedDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                       framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
+FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
+                       make("DataType", DataType::QASYMM8),
+                        NoActivationFunctionsQuantizedDataset,
+                       make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
 {
 }
+
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                                                                    combine(
+                                                                           make("Input", TensorShape(9U, 5U, 7U)),
+                                                                           make("Weights", TensorShape(315U, 271U)),
+                                                                       make("Biases", TensorShape(271U)),
+                                                               make("Output", TensorShape(271U)),
+                                                       FullyConnectedParameters,
+                                               make("DataType", DataType::QASYMM8),
+                                       IgnoredQuantizationData,
+                               NoActivationFunctionsQuantizedDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
 TEST_SUITE_END() /* QASYMM8 */
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), QuantizationData),
+FIXTURE_DATA_TEST_CASE(RunSmallWithActivation, CLFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters, make("DataType", DataType::QASYMM8_SIGNED), QuantizationData,
                                ActivationFunctionsQuantizedDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(combine(combine(
-                                                                           framework::dataset::make("Input", TensorShape(9U, 5U, 7U)),
-                                                                           framework::dataset::make("Weights", TensorShape(315U, 271U))),
-                                                                       framework::dataset::make("Biases", TensorShape(271U))),
-                                                               framework::dataset::make("Output", TensorShape(271U))),
-                                                       FullyConnectedParameters),
-                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                       QuantizationData),
-                               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation, CLFullyConnectedLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                                                                            combine(
+                                                                           make("Input", TensorShape(9U, 5U, 7U)),
+                                                                           make("Weights", TensorShape(315U, 271U)),
+                                                                       make("Biases", TensorShape(271U)),
+                                                               make("Output", TensorShape(271U)),
+                                                       FullyConnectedParameters,
+                                               make("DataType", DataType::QASYMM8_SIGNED),
+                                       QuantizationData,
+                               make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                       framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
+
+// Dynamic Quantization tests below
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                            combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters, make("DataType", DataType::QASYMM8_SIGNED), IgnoredQuantizationData,
+                               NoActivationFunctionsQuantizedDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                                                                    combine(
+                                                                           make("Input", TensorShape(9U, 5U, 7U)),
+                                                                           make("Weights", TensorShape(315U, 271U)),
+                                                                       make("Biases", TensorShape(271U)),
+                                                               make("Output", TensorShape(271U)),
+                                                       FullyConnectedParameters,
+                                               make("DataType", DataType::QASYMM8_SIGNED),
+                                       IgnoredQuantizationData,
+                               NoActivationFunctionsQuantizedDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
+                       make("DataType", DataType::QASYMM8_SIGNED),
+                       make("ActivationInfo", ActivationLayerInfo()),
+                       make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
 {
 }
-FIXTURE_DATA_TEST_CASE(RunDynamicNoBias, CLFullyConnectedNoBiasFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                       framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
+FIXTURE_DATA_TEST_CASE(RunDynamicNoBias, CLFullyConnectedNoBiasFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
+                       make("DataType", DataType::QASYMM8_SIGNED),
+                       make("ActivationInfo", ActivationLayerInfo()),
+                       make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
 {
 }
 TEST_SUITE_END() // QASYMM8_SIGNED

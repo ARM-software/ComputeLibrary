@@ -426,7 +426,7 @@ QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_
 }
 
 QuantizationHint suggest_mac_dst_q_info_and_bias(
-    const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int32_t K, DataType data_type, float bias_fraction)
+    const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int32_t K, DataType data_type, float bias_fraction, int num_sd)
 {
     QuantizationInfo c_q_info;
 
@@ -554,8 +554,8 @@ QuantizationHint suggest_mac_dst_q_info_and_bias(
     const float var_d      = std_d * std_d;
 
     // Also calculate the suggested bias range
-    const int32_t min_bias = mean_d_int - 2 * std_d_int;
-    const int32_t max_bias = mean_d_int + 2 * std_d_int;
+    const int32_t min_bias = mean_d_int - (num_sd * std_d_int);
+    const int32_t max_bias = mean_d_int + (num_sd * std_d_int);
 
     // Output/C stats
     const float mean_out = K * mean_a * mean_b + mean_d;
@@ -563,8 +563,8 @@ QuantizationHint suggest_mac_dst_q_info_and_bias(
     const float std_out  = sqrt(var_out);
 
     // Output quantization setup
-    const float   scale_out  = 4 * std_out / 255;
-    const int32_t offset_out = static_cast<int32_t>(t_min - (mean_out - 2.f * std_out) / scale_out);
+    const float   scale_out  = (2 * num_sd) * std_out / 255;
+    const int32_t offset_out = static_cast<int32_t>(t_min - (mean_out - (num_sd * std_out)) / scale_out);
 
     c_q_info = QuantizationInfo(scale_out, offset_out);
 

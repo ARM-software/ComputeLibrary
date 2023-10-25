@@ -286,12 +286,13 @@ QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_
  * @param[in] k             number of accumulations taking place in the sum, i.e. c_k = sum_k(a_k * b_k)
  * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
  * @param[in] bias_fraction the fraction of bias amplitude compared to integer accummulation.
+ * @param[in] num_sd        (Optional) number of standard deviations we allow from the mean. Default value is 2.
  *
  * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
 QuantizationHint suggest_mac_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
-                                                 const QuantizationInfo &rhs_q_info, int32_t k, DataType data_type,
-                                                 float bias_fraction);
+                                                 const QuantizationInfo &rhs_q_info, int32_t k, DataType data_type, float bias_fraction,
+                                                 int num_sd = 2);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
