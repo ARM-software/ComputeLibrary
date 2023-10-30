@@ -30,8 +30,10 @@
 
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
+#include "tests/framework/Asserts.h" // Required for ARM_COMPUTE_ASSERT
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/reference/GEMM.h"
 #include "tests/validation/reference/GEMMLowp.h"
 #include "tests/validation/reference/Permute.h"

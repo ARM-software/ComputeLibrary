@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FULLY_CONNECTED_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_FULLY_CONNECTED_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_FULLYCONNECTEDLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_FULLYCONNECTEDLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -34,6 +34,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/FullyConnectedLayer.h"
 #include "tests/validation/reference/Utils.h"
@@ -526,4 +527,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FULLY_CONNECTED_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_FULLYCONNECTEDLAYERFIXTURE_H

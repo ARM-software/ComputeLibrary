@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCALE_FIXTURE
-#define ARM_COMPUTE_TEST_SCALE_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SCALEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SCALEFIXTURE_H
 
+#include "tests/framework/Asserts.h" // Required for ARM_COMPUTE_ASSERT
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Scale.h"
@@ -266,4 +267,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCALE_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SCALEFIXTURE_H
