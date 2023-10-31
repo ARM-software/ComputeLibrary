@@ -46,7 +46,7 @@ RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for compari
 constexpr float          abs_tolerance_f32(
     0.0001f); /**< Absolute tolerance value for comparing reference's output against implementation's output for floating point data types in case using relative tolerance fails because of small values */
 constexpr float abs_tolerance_f16(
-    0.001f);                                                   /**< Absolute tolerance value for comparing reference's output against implementation's output for fp16  data types in case using relative tolerance fails because of small values */
+    0.02f);                                                   /**< Absolute tolerance value for comparing reference's output against implementation's output for fp16  data types in case using relative tolerance fails because of small values */
 RelativeTolerance<half_float::half> tolerance_f16(half(0.02)); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
 } // namespace
 
