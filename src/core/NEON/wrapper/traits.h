@@ -32,9 +32,9 @@
 
 #include <arm_neon.h>
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FEATURE_SVE)
 #include <arm_sve.h>
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FEATURE_SVE) */
 
 #include <cmath>
 #include <cstdint>
@@ -125,13 +125,13 @@ template <> struct neon_bitvector<float16_t, BitWidth::W128>{ using type = float
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FEATURE_SVE)
 /** Create the appropriate SVE vector given its type */
 template <typename T> struct sve_vector;
 
 template <> struct sve_vector<uint8_t>{ using scalar_type = uint8_t; using type = svuint8_t; };
 template <> struct sve_vector<int8_t>{ using scalar_type = int8_t; using type = svint8_t; };
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FEATURE_SVE) */
 
 #endif /* DOXYGEN_SKIP_THIS */
 
