@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ELEMENTWISE_OPERATIONS_FIXTURE
-#define ARM_COMPUTE_TEST_ELEMENTWISE_OPERATIONS_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ELEMENTWISEOPERATIONSFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ELEMENTWISEOPERATIONSFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -303,7 +303,7 @@ public:
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape0, shape1,
                                                                                              data_type0, data_type1, output_data_type,
-                                                                                             QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), is_inplace, true);
+                                                                                             QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), is_inplace, true /* use_dynamic_shape */);
     }
 };
 
@@ -315,7 +315,7 @@ public:
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
                                                                                              data_type0, data_type1, output_data_type,
-                                                                                             QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), is_inplace);
+                                                                                             QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), is_inplace, true /* use_dynamic_shape */);
     }
 };
 
@@ -700,4 +700,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ELEMENTWISEOPERATIONSFIXTURE_H
