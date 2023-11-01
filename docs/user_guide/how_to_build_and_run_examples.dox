@@ -178,6 +178,35 @@ An example build command with SME2 is:
 
         scons arch=armv8.6-a-sve2-sme2 os=linux build_dir=arm64 -j55 standalone=0 opencl=0 openmp=0 validation_tests=1 neon=1 cppthreads=1 toolchain_prefix=aarch64-none-linux-gnu-
 
+@subsection S1_2_5_clang_build_linux Building with LLVM+Clang Natively on Linux
+
+The library can be built with LLVM+Clang by specifying CC and CXX environment variables appropriately as below. The **minimum** supported clang version is 11, as LLVM 11 introduces SVE/SVE2 VLA intrinsics: https://developer.arm.com/Tools%20and%20Software/LLVM%20Toolchain#Supported-Devices.
+
+	CC=clang CXX=clang++ <build command>
+
+Or, if the environment has multiple clang versions:
+
+	CC=clang-16 CXX=clang++-16
+
+Examples for different build tools look like below.
+
+(experimental) CMake:
+
+	mkdir build
+	cd build
+	CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_OPENMP=1 -DARM_COMPUTE_WERROR=0 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
+	CC=clang CXX=clang++ cmake --build . -j32
+
+(experimental) Bazel:
+
+	CC=clang CXX=clang++ bazel build //...
+
+Scons:
+
+	CC=clang CXX=clang++ scons -j32 Werror=1 debug=0 neon=1 openmp=1 cppthreads=1 os=linux arch=armv8a multi_isa=1 build=native validation_tests=1
+
+Configurations supported are limited to the configurations supported by our CMake, Bazel and Multi ISA Scons builds. For more details on CMake and Bazel builds, please see @ref S1_8_experimental_builds
+
 @section S1_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
