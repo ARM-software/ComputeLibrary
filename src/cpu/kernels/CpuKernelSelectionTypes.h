@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_KERNEL_SELECTION_TYPES_H
-#define ARM_COMPUTE_CPU_KERNEL_SELECTION_TYPES_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUKERNELSELECTIONTYPES_H
+#define ACL_SRC_CPU_KERNELS_CPUKERNELSELECTIONTYPES_H
 
 #include "arm_compute/core/Types.h"
 
@@ -99,6 +99,13 @@ struct ScaleKernelDataTypeISASelectorData
     InterpolationPolicy interpolation_policy;
 };
 
+struct SoftmaxKernelDataTypeISASelectorData
+{
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
+    bool                is_log;
+};
+
 // Selector pointer types
 using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
 using DataTypeDataLayoutSelectorPtr     = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
@@ -113,9 +120,10 @@ using CpuAddKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const CpuAddKernelDataTypeISASelectorData &data)>::type;
 using ScaleKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const ScaleKernelDataTypeISASelectorData &data)>::type;
-
+using SoftmaxKernelDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const SoftmaxKernelDataTypeISASelectorData &data)>::type;
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // ARM_COMPUTE_CPU_KERNEL_SELECTION_TYPES_H
+#endif // ACL_SRC_CPU_KERNELS_CPUKERNELSELECTIONTYPES_H

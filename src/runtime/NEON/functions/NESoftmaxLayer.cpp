@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
-#include "src/cpu/kernels/CpuSoftmaxKernel.h"
 #include "src/cpu/operators/CpuSoftmax.h"
 
 namespace arm_compute
@@ -37,13 +36,12 @@ namespace arm_compute
 template <bool IS_LOG>
 struct NESoftmaxLayerGeneric<IS_LOG>::Impl
 {
-    const ITensor                                  *src{nullptr};
-    ITensor                                        *dst{nullptr};
-    Tensor                                          max{nullptr};
-    std::unique_ptr<cpu::CpuSoftmaxGeneric<IS_LOG>> op{nullptr};
-    MemoryGroup                                     memory_group{};
-    ITensorPack                                     run_pack{};
-    WorkspaceData<Tensor>                           workspace_tensors{};
+    const ITensor                          *src{nullptr};
+    ITensor                                *dst{nullptr};
+    std::unique_ptr<cpu::CpuSoftmaxGeneric> op{nullptr};
+    MemoryGroup                             memory_group{};
+    ITensorPack                             run_pack{};
+    WorkspaceData<Tensor>                   workspace_tensors{};
 };
 
 template <bool IS_LOG>
@@ -67,8 +65,8 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
 
     _impl->src = input;
     _impl->dst = output;
-    _impl->op  = std::make_unique<cpu::CpuSoftmaxGeneric<IS_LOG>>();
-    _impl->op->configure(input->info(), output->info(), beta, axis);
+    _impl->op  = std::make_unique<cpu::CpuSoftmaxGeneric>();
+    _impl->op->configure(input->info(), output->info(), beta, axis, IS_LOG);
 
     _impl->run_pack          = {{TensorType::ACL_SRC, _impl->src}, {TensorType::ACL_DST, _impl->dst}};
     _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
@@ -79,7 +77,7 @@ Status
 NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuSoftmaxGeneric<IS_LOG>::validate(input, output, beta, axis));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuSoftmaxGeneric::validate(input, output, beta, axis, IS_LOG));
     return Status{};
 }
 

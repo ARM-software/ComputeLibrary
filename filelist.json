@@ -2213,16 +2213,10 @@
             "qasymm8_signed":["src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp"]
           },
           "sve": {
-            "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ],
-            "fp32": ["src/cpu/kernels/softmax/generic/sve/fp32.cpp"],
-            "fp16": ["src/cpu/kernels/softmax/generic/sve/fp16.cpp"],
-            "qasymm8": ["src/cpu/kernels/softmax/generic/sve/qasymm8.cpp" ],
-            "qasymm8_signed": ["src/cpu/kernels/softmax/generic/sve/qasymm8_signed.cpp"]
+            "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ]
           },
           "sve2":{
-            "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],
-            "qasymm8":[ "src/cpu/kernels/softmax/generic/sve2/qasymm8.cpp"],
-            "qasymm8_signed":["src/cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp"]
+            "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"]
           }
         }
       },

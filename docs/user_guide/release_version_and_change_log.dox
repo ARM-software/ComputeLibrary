@@ -46,6 +46,8 @@ v24.01 Public major release
   You should link only to the main `libarm_compute` library for core functionality.
  - New features
    - Add support for FP16 in all multi_isa builds.
+ - Performance optimizations:
+   - Optimize @ref NESoftmaxLayer
 
 v23.11 Public major release
  - New features
@@ -438,8 +440,8 @@ v21.02 Public major release
    - @ref NEActivationLayer
    - @ref NEArithmeticAddition
    - @ref NEBatchNormalizationLayerKernel
-   - @ref cpu::kernels::CpuLogits1DSoftmaxKernel
-   - @ref cpu::kernels::CpuLogits1DMaxKernel
+   - cpu::kernels::CpuLogits1DSoftmaxKernel
+   - cpu::kernels::CpuLogits1DMaxKernel
    - @ref cpu::kernels::CpuElementwiseUnaryKernel
  - Remove padding from OpenCL kernels:
    - CLDirectConvolutionLayerKernel

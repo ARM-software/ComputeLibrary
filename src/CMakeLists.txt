@@ -317,11 +317,7 @@ target_sources(
 	cpu/kernels/scale/sve/integer.cpp
 	cpu/kernels/scale/sve/qasymm8.cpp
 	cpu/kernels/scale/sve/qasymm8_signed.cpp
-	cpu/kernels/softmax/generic/sve/fp16.cpp
-	cpu/kernels/softmax/generic/sve/fp32.cpp
 	cpu/kernels/softmax/generic/sve/impl.cpp
-	cpu/kernels/softmax/generic/sve/qasymm8.cpp
-	cpu/kernels/softmax/generic/sve/qasymm8_signed.cpp
 )
 
 target_sources(
@@ -339,8 +335,6 @@ target_sources(
 	cpu/kernels/elementwise_unary/generic/sve2/q8.cpp
 	cpu/kernels/lut/generic/sve2/u8.cpp
 	cpu/kernels/softmax/generic/sve2/impl.cpp
-	cpu/kernels/softmax/generic/sve2/qasymm8.cpp
-	cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp
 )
 
 target_sources(
