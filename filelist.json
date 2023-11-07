@@ -1945,16 +1945,11 @@
           "neon": {
             "common": [
               "src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_nhwc_1x1_stride_any_depthfirst/generic.cpp",
-              "src/core/NEON/kernels/arm_conv/pooling/pooling_fp16.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/pooling_fp32.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/pooling_s8.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/pooling_s8q.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/pooling_u8.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/pooling_u8q.cpp",
-              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
-              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_generic_depthfirst/generic.cpp",
-              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
-              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_max_generic_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp32_nhwc_avg_generic_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
@@ -1971,7 +1966,14 @@
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8q_nhwc_max_generic_depthfirst/generic.cpp"
             ],
             "nchw": [ "src/cpu/kernels/pool2d/neon/nchw/all.cpp" ],
-            "fp16": [ "src/cpu/kernels/pool2d/neon/fp16.cpp" ],
+            "fp16": [
+                "src/cpu/kernels/pool2d/neon/fp16.cpp",
+                "src/core/NEON/kernels/arm_conv/pooling/pooling_fp16.cpp",
+                "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
+                "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_generic_depthfirst/generic.cpp",
+                "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+                "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_max_generic_depthfirst/generic.cpp"
+             ],
             "fp32": [ "src/cpu/kernels/pool2d/neon/fp32.cpp" ],
             "qasymm8":[ "src/cpu/kernels/pool2d/neon/qasymm8.cpp" ],
             "qasymm8_signed":["src/cpu/kernels/pool2d/neon/qasymm8_signed.cpp"]
