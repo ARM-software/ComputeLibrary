@@ -109,7 +109,7 @@ MatMulKernelInfo ClMatMulNativeDefaultConfigValhall::configure_G715_u8(
     unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b, rhs_lock_padding);
-    return {info.adj_lhs(), info.adj_rhs(), /* m0 */ 1, /* n0 */ 16, /* k0 */ 4, /* export_to_cl_image */ false};
+    return {info.adj_lhs(), info.adj_rhs(), /* m0 */ 4, /* n0 */ 16, /* k0 */ 4, /* export_to_cl_image */ false};
 }
 
 MatMulKernelInfo ClMatMulNativeDefaultConfigValhall::configure_G710_f32(
