@@ -109,6 +109,26 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>F32<td>F32
     </table>
 <tr>
+  <td rowspan="1">AddMulAdd
+  <td rowspan="1" style="width:200px;"> Performs a fused Add + Mul + Add [+ Relu-based-Activation] operation.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEAddMulAdd
+  <td>
+      <ul>
+       <li>Any
+      </ul>
+  <td>
+    <table>
+    <tr><th>input1<th>input2<th>bn_mul<th>bn_add<th>add_output<th>final_output
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8<td>QASYMM8<td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>F16<td>F16<td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
   <td rowspan="2">ArgMinMaxLayer
   <td rowspan="2" style="width:200px;"> Function to calculate the index of the minimum or maximum values in a tensor based on an axis.
   <td rowspan="2">
@@ -2055,6 +2075,40 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8<td>S32<td>QSYMM16<td>QASYMM8<td>QSYMM16<td>QASYMM8
     </table>
 <tr>
+  <td rowspan="2">MatMul
+  <td rowspan="2" style="width:200px;"> Computes a matrix multiplication in batches.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_BATCH_MATMUL
+      </ul>
+  <td>NEMatMul
+  <td>
+      <ul>
+       <li>Any
+      </ul>
+  <td>
+    <table>
+    <tr><th>lhs<th>rhs<th>dst
+    <tr><td>F32<td>F32<td>F32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    </table>
+<tr>
+  <td>CLMatMul
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>lhs<th>rhs<th>dst
+    <tr><td>F32<td>F32<td>F32
+    <tr><td>F16<td>F16<td>F16
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
+    </table>
+<tr>
   <td rowspan="2">MaxUnpoolingLayer
   <td rowspan="2" style="width:200px;"> Function to perform MaxUnpooling.
   <td rowspan="2">
@@ -2153,6 +2207,27 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><th>src<th>dst
     <tr><td>F32<td>F32
     <tr><td>F16<td>F16
+    </table>
+<tr>
+  <td rowspan="1">NormalizePlanarYUVLayer
+  <td rowspan="1" style="width:200px;"> Function to compute normalization planar YUV layer.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>CLNormalizePlanarYUVLayer
+  <td>
+      <ul>
+       <li>NHWC
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
+    <tr><td>F16<td>F16
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
     </table>
 <tr>
   <td rowspan="2">PadLayer
@@ -2580,6 +2655,23 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>F16<td>F16
     <tr><td>F32<td>F32
     <tr><td>S32<td>S32
+    </table>
+<tr>
+  <td rowspan="1">ReorderLayer
+  <td rowspan="1" style="width:200px;"> Reorders a tensor to a different weights format.
+  <td rowspan="1">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEReorderLayer
+  <td>
+      <ul>
+       <li>NCHW
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F32<td>F32
     </table>
 <tr>
   <td rowspan="2">ReorgLayer
