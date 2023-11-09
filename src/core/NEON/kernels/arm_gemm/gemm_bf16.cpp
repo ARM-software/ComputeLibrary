@@ -206,30 +206,6 @@ GemmImplementation<bfloat16, float>::with_estimate(
     [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_dot_8x12, bfloat16, float>::estimate_cycles<bfloat16>(args); },
     [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_dot_8x12, bfloat16, float>(args); }
 ),
-GemmImplementation<bfloat16, float>::with_estimate(
-    GemmMethod::GEMM_INTERLEAVED,
-    "a64_ffinterleaved_bf16fp32_mmla_8x12",
-    KernelWeightFormat::VL256_BL64,
-    [](const GemmArgs &args) { return args._ci->has_bf16(); },
-    [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, float>::estimate_cycles<bfloat16>(args); },
-    [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, float>(args); }
-),
-GemmImplementation<bfloat16, float>::with_estimate(
-    GemmMethod::GEMM_INTERLEAVED,
-    "a64_ffhybrid_bf16fp32_mmla_6x16",
-    KernelWeightFormat::VL256_BL64,
-    [](const GemmArgs &args) { return args._ci->has_bf16(); },
-    [](const GemmArgs &args) { return GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_bf16fp32_mmla_6x16, bfloat16, float>::estimate_cycles<bfloat16>(args); },
-    [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_bf16fp32_mmla_6x16, bfloat16, float>(args); }
-),
-GemmImplementation<bfloat16, float>::with_estimate(
-    GemmMethod::GEMM_INTERLEAVED,
-    "a64_ffinterleaved_bf16fp32_dot_8x12",
-    KernelWeightFormat::VL128_BL32,
-    [](const GemmArgs &args) { return args._ci->has_bf16(); },
-    [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_dot_8x12, bfloat16, float>::estimate_cycles<bfloat16>(args); },
-    [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_dot_8x12, bfloat16, float>(args); }
-),
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 GemmImplementation<bfloat16, float>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
