@@ -74,15 +74,20 @@ public:
     /** Create a temporary handle to the original tensor with a new @ref TensorInfo
      * This is useful if we want to change a tensor's tensor info at run time without modifying the original tensor
      *
-     * @param[in] info   New tensor info to "assign" to @p tensor
-     * @param[in] tensor Tensor to be assigned a new @ref TensorInfo
+     * @param[in] info          New tensor info to "assign" to @p tensor
+     * @param[in] tensor        Tensor to be assigned a new @ref TensorInfo
+     * @param[in] bypass_import Bypass importing @p tensor's memory into the handler
      */
-    CpuAuxTensorHandler(TensorInfo &info, const ITensor &tensor) : _tensor()
+    CpuAuxTensorHandler(TensorInfo &info, const ITensor &tensor, bool bypass_import = false) : _tensor()
     {
         _tensor.allocator()->soft_init(info);
-        if (info.total_size() <= tensor.info()->total_size())
+        if (!bypass_import)
         {
-            _tensor.allocator()->import_memory(tensor.buffer());
+            ARM_COMPUTE_ERROR_ON(tensor.info() == nullptr);
+            if (info.total_size() <= tensor.info()->total_size())
+            {
+                _tensor.allocator()->import_memory(tensor.buffer());
+            }
         }
     }
 

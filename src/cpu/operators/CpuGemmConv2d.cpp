@@ -836,10 +836,13 @@ void CpuGemmConv2d::run(ITensorPack &tensors)
     gemm_pack.add_const_tensor(TensorType::ACL_SRC_0, gemm_input_to_use);
     gemm_pack.add_tensor(TensorType::ACL_DST, gemm_output_to_use);
     // Allocate reshaped weights if required
-    auto                weights = gemm_pack.get_const_tensor(TensorType::ACL_SRC_1);
+    auto weights = gemm_pack.get_const_tensor(TensorType::ACL_SRC_1);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(weights);
+    // Re-interpreted weights. Only tensor shape is changed. Only memory import, no allocation
     CpuAuxTensorHandler reinterpreted_wei(
-        _weights_reshaped,
-        *weights); // Re-interpreted weights. Only tensor shape is changed. No allocation
+        _weights_reshaped, *weights,
+        /* import only if we chose the ReinterpretThenTranspose path, because otherwise the weight may have been freed */
+        !(_run_wt && _wt_method == WeightTransformMethod::ReinterpretThenTranspose));
     CpuAuxTensorHandler reshaped_wei(offset_int_vec(WeightsReshaped), _weights_reshaped, tensors);
     // Update the weights to use if it has been reshaped
     if (_run_wt)
