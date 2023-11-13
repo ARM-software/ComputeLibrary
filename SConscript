@@ -31,13 +31,6 @@ import zlib
 import json
 import codecs
 
-from SCons.Warnings import warn, DeprecatedWarning
-
-warn(DeprecatedWarning,
-     "DEPRECATION NOTICE: Legacy libarm_compute_core has been deprecated and is scheduled for removal in 24.02 release."
-     " Link your application only to libarm_compute for core library functionality"
-     )
-
 VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 33
 LIBRARY_VERSION_MINOR =  0
@@ -708,18 +701,6 @@ if env['os'] != 'bare_metal' and not env['standalone']:
 
     Export('arm_compute_so')
 
-# Generate dummy core lib for backwards compatibility
-if env['os'] == 'macos':
-    # macos static library archiver fails if given an empty list of files
-    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, lib_files, static=True)
-else:
-    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
-
-Export('arm_compute_core_a')
-
-if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_core_a_so = build_library('arm_compute_core', arm_compute_env, [], static=False)
-    Export('arm_compute_core_a_so')
 
 arm_compute_graph_env = arm_compute_env.Clone()
 

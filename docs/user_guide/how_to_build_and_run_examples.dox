@@ -76,21 +76,21 @@ The examples get automatically built by scons as part of the build process of th
 
 To cross compile a Arm® Neon™ example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute -larm_compute_core -o neon_cnn
+	arm-linux-gnueabihf-g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute -o neon_cnn
 
 To cross compile a Arm® Neon™ example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -L. -larm_compute -larm_compute_core -o neon_cnn
+	aarch64-linux-gnu-g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -L. -larm_compute -o neon_cnn
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
 To cross compile an OpenCL example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute -larm_compute_core -o cl_sgemm -DARM_COMPUTE_CL
+	arm-linux-gnueabihf-g++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute -o cl_sgemm -DARM_COMPUTE_CL
 
 To cross compile an OpenCL example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -L. -larm_compute -larm_compute_core -o cl_sgemm -DARM_COMPUTE_CL
+	aarch64-linux-gnu-g++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -L. -larm_compute -o cl_sgemm -DARM_COMPUTE_CL
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
@@ -98,43 +98,43 @@ To cross compile the examples with the Graph API, such as graph_lenet.cpp, you n
 
 i.e. to cross compile the "graph_lenet" example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute_graph -larm_compute -Wl,--allow-shlib-undefined -o graph_lenet
 
 i.e. to cross compile the "graph_lenet" example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -L. -larm_compute_graph -larm_compute -Wl,--allow-shlib-undefined -o graph_lenet
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
-@note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
+@note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute
 
 To compile natively (i.e directly on an Arm device) for Arm® Neon™ for Linux 32bit:
 
-	g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -mfpu=neon -larm_compute -larm_compute_core -o neon_cnn
+	g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -mfpu=neon -larm_compute -o neon_cnn
 
 To compile natively (i.e directly on an Arm device) for Arm® Neon™ for Linux 64bit:
 
-	g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute -larm_compute_core -o neon_cnn
+	g++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute -o neon_cnn
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option)
 
 To compile natively (i.e directly on an Arm device) for OpenCL for Linux 32bit or Linux 64bit:
 
-	g++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute -larm_compute_core -o cl_sgemm -DARM_COMPUTE_CL
+	g++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute -o cl_sgemm -DARM_COMPUTE_CL
 
 To compile natively the examples with the Graph API, such as graph_lenet.cpp, you need to link the examples against arm_compute_graph.so too.
 
 i.e. to natively compile the "graph_lenet" example for Linux 32bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -mfpu=neon -L. -larm_compute_graph -larm_compute -Wl,--allow-shlib-undefined -o graph_lenet
 
 i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -L. -larm_compute_graph -larm_compute -Wl,--allow-shlib-undefined -o graph_lenet
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option)
 
-@note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
+@note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute
 
 @note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L (e.g. -Llib/linux-armv8a-neon-cl-asserts/)
 @note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was built with OpenCL enabled.
@@ -265,23 +265,23 @@ Once you've got your Android standalone toolchain built and added to your path y
 To cross compile a Arm® Neon™ example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o neon_cnn_arm -static-libstdc++ -pie
+	arm-linux-androideabi-clang++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -L. -o neon_cnn_arm -static-libstdc++ -pie
 	#64 bit:
-	aarch64-linux-android-clang++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o neon_cnn_aarch64 -static-libstdc++ -pie
+	aarch64-linux-android-clang++ examples/neon_cnn.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -L. -o neon_cnn_aarch64 -static-libstdc++ -pie
 
 To cross compile an OpenCL example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o cl_sgemm_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
+	arm-linux-androideabi-clang++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -L. -o cl_sgemm_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-clang++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -larm_compute_core-static -L. -o cl_sgemm_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
+	aarch64-linux-android-clang++ examples/cl_sgemm.cpp utils/Utils.cpp -I. -Iinclude -std=c++14 -larm_compute-static -L. -o cl_sgemm_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
 
 To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the library arm_compute_graph also.
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
+	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
+	aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++14 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
 
 @note Due to some issues in older versions of the Arm® Mali™ OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 @note When linked statically the arm_compute_graph library currently needs the --whole-archive linker flag in order to work properly

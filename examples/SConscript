@@ -38,15 +38,14 @@ utils = examples_env.Object("../utils/Utils.cpp")
 if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import('arm_compute_graph_a')
     Import('arm_compute_a')
-    Import('arm_compute_core_a')
-    arm_compute_libs = [ arm_compute_a, arm_compute_core_a ]
+    arm_compute_libs = [ arm_compute_a ]
     arm_compute_graph_libs = arm_compute_libs # The graph library needs to be linked separately with --whole-archive
     arm_compute_dependency = arm_compute_a
     graph_dependency = [arm_compute_graph_a]
 else:
     Import('arm_compute_graph_so')
     Import('arm_compute_so')
-    arm_compute_libs = ["arm_compute", "arm_compute_core"]
+    arm_compute_libs = ["arm_compute"]
     arm_compute_graph_libs = [ "arm_compute_graph" ] + arm_compute_libs
     arm_compute_dependency = arm_compute_so
     graph_dependency = [arm_compute_graph_so]
