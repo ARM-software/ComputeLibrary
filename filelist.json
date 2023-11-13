@@ -1913,7 +1913,11 @@
           "common": [
             "src/core/NEON/kernels/NENormalizationLayerKernel.cpp",
             "src/runtime/NEON/functions/NENormalizationLayer.cpp"
-          ]
+          ],
+        "neon":{
+          "fp16":["src/cpu/kernels/norm_layer/generic/neon/fp16.cpp"],
+          "fp32":["src/cpu/kernels/norm_layer/generic/neon/fp32.cpp"]
+        }
         }
       },
       "Pad": {

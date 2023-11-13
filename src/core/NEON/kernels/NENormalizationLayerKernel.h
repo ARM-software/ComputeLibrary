@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NENORMALIZATIONLAYERKERNEL_H
-#define ARM_COMPUTE_NENORMALIZATIONLAYERKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NENORMALIZATIONLAYERKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NENORMALIZATIONLAYERKERNEL_H
 
 #include "src/core/NEON/INEKernel.h"
 
@@ -82,24 +82,12 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Function to perform normalization depending on the given template
-     *  dimension. The second template parameter specifies whether the
-     *  normalization has to be 1D or 2D.
-     *
-     * @note Only supported normalizations are:
-     *  - 1D over X or Z
-     *  - 2D over X and Y
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    template <typename T, unsigned int S, unsigned int dim, bool do_2D_norm>
-    void normalize_float(const Window &window);
-
     /** Common signature for all the specialised normalization functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using NormalizationFunction = void (NENormalizationLayerKernel::*)(const Window &window);
+    using NormalizationFunction = void (*)(
+        const Window &window, const ITensor *in, const ITensor *in_squared, ITensor *out, NormalizationLayerInfo ninfo);
 
 private:
     NormalizationFunction  _func;
@@ -109,4 +97,4 @@ private:
     NormalizationLayerInfo _norm_info;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NENORMALIZATIONLAYERKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NENORMALIZATIONLAYERKERNEL_H
