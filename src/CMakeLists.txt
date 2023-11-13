@@ -724,6 +724,8 @@ target_sources(
 	cpu/kernels/crop/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp32.cpp
 	cpu/kernels/crop/generic/neon/integer.cpp
+	cpu/kernels/depth_to_space/nchw/any/impl.cpp
+	cpu/kernels/depth_to_space/nhwc/any/impl.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/fp16.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/fp32.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/impl.cpp

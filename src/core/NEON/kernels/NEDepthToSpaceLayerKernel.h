@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEDEPTHTOSPACELAYERKERNEL_H
-#define ARM_COMPUTE_NEDEPTHTOSPACELAYERKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NEDEPTHTOSPACELAYERKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NEDEPTHTOSPACELAYERKERNEL_H
 
 #include "src/core/NEON/INEKernel.h"
 
@@ -68,14 +68,18 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape);
 
+    /** Get the dimension the scheduler should use to split. */
+    size_t get_split_dimension() const;
+
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ITensor *_input;       /**< Source tensor */
-    ITensor       *_output;      /**< Destination tensor */
-    int32_t        _block_shape; /**< Block shape */
-    DataLayout     _data_layout; /**< Data layout of the operation */
+    const ITensor *_input;           /**< Source tensor */
+    ITensor       *_output;          /**< Destination tensor */
+    int32_t        _block_shape;     /**< Block shape */
+    DataLayout     _data_layout;     /**< Data layout of the operation */
+    size_t         _split_dimension; /**< The dimension the scheduler should use to split the workload. */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEDEPTHTOSPACELAYERKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NEDEPTHTOSPACELAYERKERNEL_H

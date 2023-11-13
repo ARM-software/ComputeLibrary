@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,40 +22,26 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/runtime/NEON/functions/NEDepthToSpaceLayer.h"
+#ifndef ACL_SRC_CPU_KERNELS_DEPTH_TO_SPACE_LIST_H
+#define ACL_SRC_CPU_KERNELS_DEPTH_TO_SPACE_LIST_H
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-
-#include "src/common/utils/Log.h"
-#include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
+#include <cstdint>
 
 namespace arm_compute
 {
-NEDepthToSpaceLayer::NEDepthToSpaceLayer() : _kernel{}
+namespace cpu
 {
-}
 
-NEDepthToSpaceLayer::~NEDepthToSpaceLayer() = default;
+#define DECLARE_DEPTHTOSPACE_KERNEL(func_name)                                                                     \
+    void func_name(const uint8_t *src, uint8_t *dst, const uintptr_t src_shape[4], const uintptr_t src_strides[4], \
+                   const uintptr_t dst_strides[4], uintptr_t element_size, uintptr_t block_size)
 
-void NEDepthToSpaceLayer::configure(const ITensor *input, ITensor *output, int32_t block_shape)
-{
-    ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
+DECLARE_DEPTHTOSPACE_KERNEL(depth_to_space_nhwc_any);
+DECLARE_DEPTHTOSPACE_KERNEL(depth_to_space_nchw_any);
 
-    auto k = std::make_unique<NEDepthToSpaceLayerKernel>();
-    k->configure(input, output, block_shape);
-    _kernel = std::move(k);
-}
+#undef DECLARE_DEPTHTOSPACE_KERNEL
 
-Status NEDepthToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
-{
-    return NEDepthToSpaceLayerKernel::validate(input, output, block_shape);
-}
-
-void NEDepthToSpaceLayer::run()
-{
-    NEScheduler::get().schedule(_kernel.get(), _kernel->get_split_dimension());
-}
-
+} // namespace cpu
 } // namespace arm_compute
+
+#endif // ACL_SRC_CPU_KERNELS_DEPTH_TO_SPACE_LIST_H

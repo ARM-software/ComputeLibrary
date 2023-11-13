@@ -1217,7 +1217,9 @@
         "files": {
           "common": [
             "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.cpp",
-            "src/runtime/NEON/functions/NEDepthToSpaceLayer.cpp"
+            "src/runtime/NEON/functions/NEDepthToSpaceLayer.cpp",
+            "src/cpu/kernels/depth_to_space/nhwc/any/impl.cpp",
+            "src/cpu/kernels/depth_to_space/nchw/any/impl.cpp"
           ]
         }
       },

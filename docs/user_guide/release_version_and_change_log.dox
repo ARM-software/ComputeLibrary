@@ -48,6 +48,7 @@ v24.01 Public major release
    - Add support for FP16 in all multi_isa builds.
  - Performance optimizations:
    - Optimize @ref NESoftmaxLayer
+   - Optimize @ref NEDepthToSpaceLayer.
 
 v23.11 Public major release
  - New features

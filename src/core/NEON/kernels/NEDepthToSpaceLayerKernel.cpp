@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 
+#include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
@@ -31,12 +32,9 @@
 
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/depth_to_space/list.h"
 
-#include <arm_neon.h>
 #include <cstdint>
-
-using namespace arm_compute::misc::shape_calculator;
 
 namespace arm_compute
 {
@@ -70,15 +68,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 } // namespace
 
 NEDepthToSpaceLayerKernel::NEDepthToSpaceLayerKernel()
-    : _input(nullptr), _output(nullptr), _block_shape(), _data_layout(DataLayout::UNKNOWN)
+    : _input(nullptr),
+      _output(nullptr),
+      _block_shape(),
+      _data_layout(DataLayout::UNKNOWN),
+      _split_dimension(Window::DimY)
 {
 }
 
 void NEDepthToSpaceLayerKernel::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    TensorShape output_shape =
-        compute_depth_to_space_shape(input->info()->tensor_shape(), input->info()->data_layout(), block_shape);
+    TensorShape output_shape = misc::shape_calculator::compute_depth_to_space_shape(
+        input->info()->tensor_shape(), input->info()->data_layout(), block_shape);
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
@@ -90,9 +92,31 @@ void NEDepthToSpaceLayerKernel::configure(const ITensor *input, ITensor *output,
     _block_shape = block_shape;
     _data_layout = input->info()->data_layout();
 
+    constexpr size_t dim_b = 3;
+    const auto       dim_h = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const auto       dim_w = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const auto       dim_c = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
+
+    ARM_COMPUTE_ERROR_ON(get_data_layout_dimension_index(_data_layout, DataLayoutDimension::BATCHES) != dim_b);
+
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
+    Steps steps;
+    steps.set(dim_h, block_shape);
+    steps.set(dim_w, block_shape);
+    steps.set(dim_c, output->info()->dimension(dim_c));
+
+    Window win = calculate_max_window(*output->info(), steps);
     ICPPKernel::configure(win);
+
+    const auto num_batches = input->info()->tensor_shape().total_size_upper(dim_b);
+    if (num_batches > 1)
+    {
+        _split_dimension = dim_b;
+    }
+    else
+    {
+        _split_dimension = dim_h;
+    }
 }
 
 Status NEDepthToSpaceLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
@@ -102,68 +126,80 @@ Status NEDepthToSpaceLayerKernel::validate(const ITensorInfo *input, const ITens
     return Status{};
 }
 
+size_t NEDepthToSpaceLayerKernel::get_split_dimension() const
+{
+    return _split_dimension;
+}
+
 void NEDepthToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
 
-    const int idx_channel  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
-    const int depth_size   = _input->info()->dimension(idx_channel);
-    const int r            = (depth_size / (_block_shape * _block_shape));
-    const int element_size = _input->info()->element_size();
+    const auto *input_info  = _input->info();
+    const auto *output_info = _output->info();
 
-    Window slice_out = window.first_slice_window_3D();
+    const auto  element_size   = input_info->element_size();
+    const auto &input_strides  = input_info->strides_in_bytes();
+    const auto &output_strides = output_info->strides_in_bytes();
 
-    // The slice_out slice does not move
-    slice_out.set(Window::DimX, Window::Dimension(0, 0, 0));
-    slice_out.set(Window::DimY, Window::Dimension(0, 0, 0));
-    slice_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
+    const auto &input_shape = input_info->tensor_shape();
 
-    // Main loop for NCHW and NHWC
+    const uintptr_t k_input_strides[]  = {input_strides[0], input_strides[1], input_strides[2], input_strides[3]};
+    const uintptr_t k_output_strides[] = {output_strides[0], output_strides[1], output_strides[2], output_strides[3]};
+
+    const uint8_t *k_input_ptr  = _input->buffer();
+    uint8_t       *k_output_ptr =               //
+        _output->buffer() +                     //
+        window[3].start() * output_strides[3] + //
+        window[2].start() * output_strides[2] + //
+        window[1].start() * output_strides[1] + //
+        window[0].start() * output_strides[0];
+
     if (_data_layout == DataLayout::NCHW)
     {
-        Window slice_in = window.first_slice_window_2D();
-        do
-        {
-            Iterator in(_input, slice_in);
-            execute_window_loop(
-                slice_in,
-                [&](const Coordinates &id)
-                {
-                    const int x = id.x();
-                    const int y = id.y();
+        ARM_COMPUTE_ERROR_ON_MSG(window[2].start() != 0 || window[2].end() != window[2].step(),
+                                 "The window cannot be splitted in channel dimension");
 
-                    const int   z     = id.z() % r;
-                    const int   out_x = x * _block_shape + (id.z() / r) % _block_shape;
-                    const int   out_y = y * _block_shape + (id.z() / r) / _block_shape;
-                    Coordinates output_coords{out_x, out_y, z, id[3]};
-                    memcpy(_output->ptr_to_element(output_coords), in.ptr(), element_size);
-                },
-                in);
-        } while (window.slide_window_slice_2D(slice_in));
+        const uintptr_t k_input_shape[] = {
+            window.num_iterations(0), //
+            window.num_iterations(1), //
+            input_shape[2],           // The window cannot be splitted in channel dimension.
+            window.num_iterations(3)  //
+        };
+
+        k_input_ptr += window[3].start() * input_strides[3] +                               //
+                       window[2].start() * _block_shape * _block_shape * input_strides[2] + //
+                       (window[1].start() / _block_shape) * input_strides[1] +              //
+                       (window[0].start() / _block_shape) * input_strides[0];
+
+        cpu::depth_to_space_nchw_any(                         //
+            k_input_ptr, k_output_ptr,                        //
+            k_input_shape, k_input_strides, k_output_strides, //
+            element_size, _block_shape);
     }
     else
     {
-        Window slice_in = window.first_slice_window_3D();
-        do
-        {
-            Iterator in(_input, slice_in);
-            execute_window_loop(
-                slice_in,
-                [&](const Coordinates &id)
-                {
-                    const int x = id.y();
-                    const int y = id.z();
+        ARM_COMPUTE_ERROR_ON_MSG(window[0].start() != 0 || window[0].end() != window[0].step(),
+                                 "The window cannot be splitted in channel dimension");
 
-                    const int   z     = id.x() % r;
-                    const int   out_x = x * _block_shape + (id.x() / r) % _block_shape;
-                    const int   out_y = y * _block_shape + (id.x() / r) / _block_shape;
-                    Coordinates output_coords{z, out_x, out_y, id[3]};
-                    memcpy(_output->ptr_to_element(output_coords), in.ptr(), element_size);
-                },
-                in);
-        } while (window.slide_window_slice_3D(slice_in));
+        const uintptr_t k_input_shape[] = {
+            input_shape[0],           // The window cannot be splitted in channel dimension.
+            window.num_iterations(1), //
+            window.num_iterations(2), //
+            window.num_iterations(3)  //
+        };
+
+        k_input_ptr += window[3].start() * input_strides[3] +                  //
+                       (window[2].start() / _block_shape) * input_strides[2] + //
+                       (window[1].start() / _block_shape) * input_strides[1] + //
+                       window[0].start() * _block_shape * _block_shape * input_strides[0];
+
+        cpu::depth_to_space_nhwc_any(                         //
+            k_input_ptr, k_output_ptr,                        //
+            k_input_shape, k_input_strides, k_output_strides, //
+            element_size, _block_shape);
     }
 }
 } // namespace arm_compute

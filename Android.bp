@@ -488,6 +488,8 @@ cc_library_static {
         "src/cpu/kernels/crop/generic/neon/fp16.cpp",
         "src/cpu/kernels/crop/generic/neon/fp32.cpp",
         "src/cpu/kernels/crop/generic/neon/integer.cpp",
+        "src/cpu/kernels/depth_to_space/nchw/any/impl.cpp",
+        "src/cpu/kernels/depth_to_space/nhwc/any/impl.cpp",
         "src/cpu/kernels/depthwiseconv2d/generic/neon/fp16.cpp",
         "src/cpu/kernels/depthwiseconv2d/generic/neon/fp32.cpp",
         "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.cpp",
