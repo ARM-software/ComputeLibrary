@@ -51,8 +51,10 @@ v23.11 Public major release
      - @ref experimental::dynamic_fusion::GpuCkwDepthwiseConv2d
      - @ref experimental::dynamic_fusion::GpuCkwMatMul
    - Add support for OpenCL™ comand buffer with mutable dispatch extension.
- - Update OpenCL™ API headers to v2023.04.17.
- - Remove legacy PostOps interface. PostOps was the experimental interface for kernel fusion and is replaced by the new Dynamic Fusion interface.
+   - Add support for Arm® Cortex®-A520 and Arm® Cortex®-R82.
+   - Add support for negative axis values and inverted axis values in @ref arm_compute::NEReverse and @ref arm_compute::CLReverse.
+   - Add new OpenCL™ kernels:
+     - @ref opencl::kernels::ClMatMulLowpNativeMMULKernel support for QASYMM8 and QASYMM8_SIGNED, with batch support
  - Performance optimizations:
    - Optimize @ref cpu::CpuReshape
    - Optimize @ref opencl::ClTranspose
@@ -60,12 +62,11 @@ v23.11 Public major release
    - Optimize @ref CLReductionOperation.
    - Optimize @ref CLSoftmaxLayer.
    - Optimize start-up time of @ref NEConvolutionLayer for some input configurations where GeMM is selected as the convolution algorithm
- - Add new OpenCL™ kernels:
-   - @ref opencl::kernels::ClMatMulLowpNativeMMULKernel support for QASYMM8 and QASYMM8_SIGNED, with batch support
+   - Reduce CPU Overhead by optimal flushing of CL kernels.
  - Deprecate support for Bfloat16 in @ref cpu::CpuCast.
- - Add support for negative axis values and inverted axis values in @ref arm_compute::NEReverse and @ref arm_compute::CLReverse.
  - Support for U32 axis in @ref arm_compute::NEReverse and @ref arm_compute::CLReverse will be deprecated in 24.02.
- - Add support for Arm® Cortex®-A520 and Arm® Cortex®-R82.
+ - Remove legacy PostOps interface. PostOps was the experimental interface for kernel fusion and is replaced by the new Dynamic Fusion interface.
+ - Update OpenCL™ API headers to v2023.04.17
 
 v23.08 Public major release
  - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.
