@@ -48,7 +48,6 @@ public:
      *
      * Similar to @ref ClMatMulLowpNativeKernel::configure()
      *
-     * @return a status
      */
     void configure(const ClCompileContext    &compile_context,
                    ITensorInfo               *lhs,

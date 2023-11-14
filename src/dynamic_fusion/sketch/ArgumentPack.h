@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK
-#define SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK_H
 
 #include "arm_compute/core/experimental/Types.h"
 
@@ -46,7 +46,7 @@ template <typename T>
 class ArgumentPack
 {
 public:
-    /** @ref TensorType encodes the position of a tensor argument within the pack */
+    /** @ref arm_compute::TensorType encodes the position of a tensor argument within the pack */
     using Id = TensorType;
     /** A single argument element within the pack
      * It contains either a const pointer or a non-const pointer to the Tensor-related type T, but never at the same time
@@ -234,4 +234,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK_H

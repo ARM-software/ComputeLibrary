@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef GRAPH_VALIDATE_UTILS_H
-#define GRAPH_VALIDATE_UTILS_H
+#ifndef ACL_TESTS_VALIDATE_EXAMPLES_GRAPH_VALIDATE_UTILS_H
+#define ACL_TESTS_VALIDATE_EXAMPLES_GRAPH_VALIDATE_UTILS_H
 
 #include "arm_compute/graph.h"
 
@@ -287,7 +287,6 @@ public:
      * @param[out] os            Output stream.
      * @param[in]  common_params Example parameters to output
      *
-     * @return None.
      */
     virtual void print_parameters(::std::ostream &os, const ExampleParams &common_params)
     {
@@ -394,7 +393,6 @@ public:
      * @param[out] bias    The tensor with the bias data.
      * @param[in]  tensor  Tensor result of the actual operation passed into the Accessor.
      *
-     * @return None.
      */
     virtual void create_tensors(arm_compute::test::SimpleTensor<D>     &src,
                                 arm_compute::test::SimpleTensor<D>     &weights,
@@ -680,4 +678,4 @@ public:
 
 } // graph_validate_utils
 } // arm_compute
-#endif //GRAPH_VALIDATE_UTILS_H
+#endif // ACL_TESTS_VALIDATE_EXAMPLES_GRAPH_VALIDATE_UTILS_H
