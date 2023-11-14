@@ -541,6 +541,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::prepare(ITensorPack &tensors)
     {
         auto b = tensors.get_const_tensor(TensorType::ACL_SRC_1);
         auto c = tensors.get_const_tensor(TensorType::ACL_SRC_2);
+        ARM_COMPUTE_ERROR_ON_NULLPTR(b);
 
         // Setup up matrix bias in the assembly kernel, it's just a pointer to matrix C.
         if (c && c->info()->data_type() == DataType::S32)
@@ -614,6 +615,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
     auto b = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto c = tensors.get_const_tensor(TensorType::ACL_SRC_2);
     auto d = tensors.get_tensor(TensorType::ACL_DST);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a, d);
 
     int       lda = a->info()->strides_in_bytes().y() / a->info()->element_size();
     int       ldb = 0;
@@ -652,7 +654,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
     }
 
     // Check if B is pre-tranposed and de-reference if not
-    if (!_gemm_kernel_asm->B_is_pretransposed())
+    if (b_to_use && !_gemm_kernel_asm->B_is_pretransposed())
     {
         ldb            = b_to_use->info()->strides_in_bytes().y() / b_to_use->info()->element_size();
         multi_stride_b = b_to_use->info()->strides_in_bytes().z() / b_to_use->info()->element_size();
@@ -670,7 +672,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
         }
 
         // Pretranspose B if required
-        if (_B_pretranspose_required)
+        if (b_to_use && _B_pretranspose_required)
         {
             // Fixed format kernels need no pretranspose.
             ARM_COMPUTE_ERROR_ON(arm_compute::is_fixed_format(

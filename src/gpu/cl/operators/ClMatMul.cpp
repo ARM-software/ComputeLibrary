@@ -91,8 +91,6 @@ MatMulKernelType get_matmul_kernel(const ITensorInfo         *lhs,
 
         return MatMulKernelType::NATIVE_FP;
     }
-
-    return is_quantized ? MatMulKernelType::NATIVE_QUANTIZED : MatMulKernelType::NATIVE_FP;
 }
 } // namespace
 using namespace arm_compute::opencl::kernels;
