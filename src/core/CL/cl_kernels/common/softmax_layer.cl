@@ -272,6 +272,22 @@ __kernel void softmax_non_x(
     dst_ptr += dst_offset_first_element + dim_2 * dst_stride_2 + dim_1 * dst_stride_1 + dim_0 * dst_stride_0;
     tmp_ptr += tmp_offset_first_element + dim_2 * tmp_stride_2 + dim_1 * tmp_stride_1 + dim_0 * tmp_stride_0;
 
+    // In case of processing quantized data, i.e. DATA_TYPE is smaller than TMP_DATA_TYPE:
+    //
+    // In the first pass (finding max), the quantized data is copied from the input tensor to the temporary tensor.
+    // Dequantization is not needed to find the max value and since dequantization widens the data, we defer it
+    // to the second pass pass to reduce memory bandwidth of the first pass.
+    //
+    // In the second pass, it reads the quantized data from the temporary tensor and writes the dequantized data
+    // back to the temporary tensor.
+    //
+    // To avoid dequantized data overwritting the unprocessed quantized data in the temporary tensor,
+    // this extra offset is introduced to store the quantized data at the end of the temporary tensor.
+    //
+    // Note: Another approach is to perform the second pass in reverse order, but for unexplanable reason
+    // it doesn't work in some devices.
+    uint tmp_extra_offset = LENGTH * VEC_SIZE * (sizeof(TMP_DATA_TYPE) - sizeof(DATA_TYPE));
+
     // Calculate max value and store the input data to the temporary tensor in suitable format.
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) max_value = MIN_VALUE;
     int i = 0;
@@ -282,7 +298,7 @@ __kernel void softmax_non_x(
 
         max_value = max(max_value, data);
 
-        VSTORE(VEC_SIZE)(data, 0, (__global DATA_TYPE *)(tmp_ptr + i * VEC_SIZE * sizeof(DATA_TYPE)));
+        VSTORE(VEC_SIZE)(data, 0, (__global DATA_TYPE *)(tmp_ptr + tmp_extra_offset + i * VEC_SIZE * sizeof(DATA_TYPE)));
     }
 
     // Regularize the data.
@@ -296,18 +312,9 @@ __kernel void softmax_non_x(
 # define REGULARIZE(x) (((x) - max_value) * (TMP_DATA_TYPE)BETA)
 #endif // IS_QUANTIZED
 
-    for (i = LENGTH - 1; i >= 0; --i)
+    for (i = 0; i < LENGTH; ++i)
     {
-        // In case of processing quantized data, i.e. DATA_TYPE is smaller than TMP_DATA_TYPE:
-        //
-        // In the first pass (finding max), the quantized data is copied from the input tensor to the temporary tensor.
-        // Dequantization is not needed to find the max value and since dequantization widens the data, we defer it
-        // to the second pass pass to reduce memory bandwidth of the first pass.
-        //
-        // This pass reads the quantized data from the temporary tensor and writes the dequantized data
-        // back to the temporary tensor, hence we need to loop in reverse to avoid overwriting unprocessed data.
-
-        VEC_DATA_TYPE(TMP_DATA_TYPE, VEC_SIZE) data = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(tmp_ptr + i * VEC_SIZE * sizeof(DATA_TYPE))), VEC_DATA_TYPE(TMP_DATA_TYPE, VEC_SIZE));
+        VEC_DATA_TYPE(TMP_DATA_TYPE, VEC_SIZE) data = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(tmp_ptr + tmp_extra_offset + i * VEC_SIZE * sizeof(DATA_TYPE))), VEC_DATA_TYPE(TMP_DATA_TYPE, VEC_SIZE));
 
         data = REGULARIZE(data);
 
