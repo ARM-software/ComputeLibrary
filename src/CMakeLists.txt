@@ -785,6 +785,8 @@ target_sources(
 	cpu/kernels/meanstddevnorm/generic/neon/fp32.cpp
 	cpu/kernels/meanstddevnorm/generic/neon/impl.cpp
 	cpu/kernels/meanstddevnorm/generic/neon/qasymm8.cpp
+	cpu/kernels/mul/generic/neon/fp16.cpp
+	cpu/kernels/mul/generic/neon/fp32.cpp
 	cpu/kernels/norm_layer/generic/neon/fp16.cpp
 	cpu/kernels/norm_layer/generic/neon/fp32.cpp
 	cpu/kernels/pool2d/neon/fp16.cpp

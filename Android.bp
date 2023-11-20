@@ -543,6 +543,8 @@ cc_library_static {
         "src/cpu/kernels/meanstddevnorm/generic/neon/fp32.cpp",
         "src/cpu/kernels/meanstddevnorm/generic/neon/impl.cpp",
         "src/cpu/kernels/meanstddevnorm/generic/neon/qasymm8.cpp",
+        "src/cpu/kernels/mul/generic/neon/fp16.cpp",
+        "src/cpu/kernels/mul/generic/neon/fp32.cpp",
         "src/cpu/kernels/norm_layer/generic/neon/fp16.cpp",
         "src/cpu/kernels/norm_layer/generic/neon/fp32.cpp",
         "src/cpu/kernels/pool2d/neon/fp16.cpp",

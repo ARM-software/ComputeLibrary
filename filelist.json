@@ -1904,7 +1904,11 @@
             "src/cpu/operators/CpuMul.cpp",
             "src/cpu/kernels/CpuMulKernel.cpp",
             "src/runtime/NEON/functions/NEPixelWiseMultiplication.cpp"
-          ]
+          ],
+        "neon":{
+          "fp16":["src/cpu/kernels/mul/generic/neon/fp16.cpp"],
+          "fp32":["src/cpu/kernels/mul/generic/neon/fp32.cpp"]
+        }
         }
       },
       "Normalize": {
