@@ -25,15 +25,15 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/IClOperator.h"
 #include "src/gpu/cl/operators/ClTransposedConvolution.h"
-
-#include "src/common/utils/Log.h"
 
 #include <cmath>
 #include <memory>
@@ -44,11 +44,11 @@ using namespace arm_compute::misc::shape_calculator;
 
 struct CLDeconvolutionLayer::Impl
 {
-    const ICLTensor                     *src{ nullptr };
-    const ICLTensor                     *weights{ nullptr };
-    const ICLTensor                     *biases{ nullptr };
-    ICLTensor                           *dst{ nullptr };
-    std::unique_ptr<opencl::IClOperator> op{ nullptr };
+    const ICLTensor                     *src{nullptr};
+    const ICLTensor                     *weights{nullptr};
+    const ICLTensor                     *biases{nullptr};
+    ICLTensor                           *dst{nullptr};
+    std::unique_ptr<opencl::IClOperator> op{nullptr};
 };
 
 CLDeconvolutionLayer::~CLDeconvolutionLayer() = default;
@@ -58,24 +58,35 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
 {
 }
 
-void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
-                                     const WeightsInfo &weights_info)
+void CLDeconvolutionLayer::configure(ICLTensor           *input,
+                                     ICLTensor           *weights,
+                                     const ICLTensor     *bias,
+                                     ICLTensor           *output,
+                                     const PadStrideInfo &deconv_info,
+                                     const WeightsInfo   &weights_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, bias, output, deconv_info, weights_info);
 }
 
-void CLDeconvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
-                                     const WeightsInfo &weights_info)
+void CLDeconvolutionLayer::configure(const CLCompileContext &compile_context,
+                                     ICLTensor              *input,
+                                     ICLTensor              *weights,
+                                     const ICLTensor        *bias,
+                                     ICLTensor              *output,
+                                     const PadStrideInfo    &deconv_info,
+                                     const WeightsInfo      &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, deconv_info, weights_info);
 
-    switch(CLDeconvolutionLayer::get_deconvolution_method(input->info(), weights->info(), nullptr, output->info(), deconv_info, weights_info))
+    switch (CLDeconvolutionLayer::get_deconvolution_method(input->info(), weights->info(), nullptr, output->info(),
+                                                           deconv_info, weights_info))
     {
         case DeconvolutionMethod::DIRECT:
         {
             auto op = std::make_unique<opencl::ClTransposedConvolution>();
-            op->configure(compile_context, input->info(), weights->info(), bias != nullptr ? bias->info() : nullptr, output->info(), deconv_info);
+            op->configure(compile_context, input->info(), weights->info(), bias != nullptr ? bias->info() : nullptr,
+                          output->info(), deconv_info);
 
             _impl->src     = input;
             _impl->weights = weights;
@@ -105,22 +116,28 @@ void CLDeconvolutionLayer::configure(const CLCompileContext &compile_context, IC
     }
 }
 
-Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
-                                      const WeightsInfo &weights_info)
+Status CLDeconvolutionLayer::validate(const ITensorInfo   *input,
+                                      const ITensorInfo   *weights,
+                                      const ITensorInfo   *bias,
+                                      ITensorInfo         *output,
+                                      const PadStrideInfo &deconv_info,
+                                      const WeightsInfo   &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    switch(CLDeconvolutionLayer::get_deconvolution_method(input, weights, bias, output, deconv_info, weights_info))
+    switch (CLDeconvolutionLayer::get_deconvolution_method(input, weights, bias, output, deconv_info, weights_info))
     {
         case DeconvolutionMethod::DIRECT:
         {
             // Validate transposed convolution operator
-            ARM_COMPUTE_RETURN_ON_ERROR(opencl::ClTransposedConvolution::validate(input, weights, bias, output, deconv_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(
+                opencl::ClTransposedConvolution::validate(input, weights, bias, output, deconv_info));
             break;
         }
         case DeconvolutionMethod::UPSCALE_CONV2D:
         {
             // Validate direct convolution layer
-            ARM_COMPUTE_RETURN_ON_ERROR(CLDirectDeconvolutionLayer::validate(input, weights, bias, output, deconv_info, weights_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(
+                CLDirectDeconvolutionLayer::validate(input, weights, bias, output, deconv_info, weights_info));
             break;
         }
         case DeconvolutionMethod::GEMM:
@@ -137,12 +154,16 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     return Status{};
 }
 
-DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
-                                                                   const WeightsInfo &weights_info)
+DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensorInfo   *input,
+                                                                   const ITensorInfo   *weights,
+                                                                   const ITensorInfo   *bias,
+                                                                   ITensorInfo         *output,
+                                                                   const PadStrideInfo &deconv_info,
+                                                                   const WeightsInfo   &weights_info)
 {
     ARM_COMPUTE_UNUSED(output, bias, weights_info);
 
-    if(is_data_type_quantized_per_channel(weights->data_type()))
+    if (is_data_type_quantized_per_channel(weights->data_type()))
     {
         return DeconvolutionMethod::UPSCALE_CONV2D;
     }
@@ -154,11 +175,12 @@ DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensor
     const size_t idx_n = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
     const size_t ofm   = weights->tensor_shape()[idx_n];
 
-    if(weights->dimension(idx_w) != deconv_info.stride().first || weights->dimension(idx_h) != deconv_info.stride().second)
+    if (weights->dimension(idx_w) != deconv_info.stride().first ||
+        weights->dimension(idx_h) != deconv_info.stride().second)
     {
-        // We observe better performance for FP32 types only when ofm <= 16.
-        // A better heuristic is required for selecting the method for FP16 data types.
-        if(input->data_layout() == DataLayout::NHWC && !((input->data_type() == DataType::F32) && (ofm > 16)))
+        // We observe better performance for FP32 types only when ofm <= 16, and for FP16 only when ofm <= 32.
+        if (input->data_layout() == DataLayout::NHWC && !((input->data_type() == DataType::F32) && (ofm > 16)) &&
+            !((input->data_type() == DataType::F16) && (ofm > 32)))
         {
             return DeconvolutionMethod::DIRECT;
         }
@@ -175,7 +197,7 @@ void CLDeconvolutionLayer::run()
 {
     prepare();
 
-    if(_impl->op != nullptr)
+    if (_impl->op != nullptr)
     {
         // Optimized Operator will be used
         ITensorPack pack;
@@ -195,7 +217,7 @@ void CLDeconvolutionLayer::run()
 
 void CLDeconvolutionLayer::prepare()
 {
-    if(_impl->op == nullptr)
+    if (_impl->op == nullptr)
     {
         _function->prepare();
     }

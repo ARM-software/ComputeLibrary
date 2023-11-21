@@ -28,9 +28,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 
@@ -41,8 +42,8 @@ namespace
 void scale_complex(float *c_in, float *c_out, bool is_conjugate, float scale)
 {
     const auto a = wrapper::vload(c_in);
-    auto       b = wrapper::vdiv(a, float32x2_t{ scale, scale });
-    if(is_conjugate)
+    auto       b = wrapper::vdiv(a, float32x2_t{scale, scale});
+    if (is_conjugate)
     {
         const float img_part = wrapper::vgetlane(b, 1);
         b                    = wrapper::vsetlane(-img_part, b, 1);
@@ -56,7 +57,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F32);
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_channels() != 1 && output->num_channels() != 2);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
@@ -71,7 +72,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps());
 
-    if(output != nullptr)
+    if (output != nullptr)
     {
         // Output auto inizialitation if not yet initialized
         auto_init_if_empty(*output, *input->clone());
@@ -126,10 +127,10 @@ void NEFFTScaleKernel::run(const Window &window, const ThreadInfo &info)
     Iterator in(_input, input_window);
     Iterator out(_run_in_place ? _input : _output, input_window);
 
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        scale_complex(reinterpret_cast<float *>(in.ptr()), reinterpret_cast<float *>(out.ptr()), _is_conj, _scale);
-    },
-    in, out);
+    execute_window_loop(
+        window,
+        [&](const Coordinates &)
+        { scale_complex(reinterpret_cast<float *>(in.ptr()), reinterpret_cast<float *>(out.ptr()), _is_conj, _scale); },
+        in, out);
 }
 } // namespace arm_compute

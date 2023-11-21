@@ -30,9 +30,8 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-#include "src/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 
 namespace arm_compute
 {
@@ -43,24 +42,40 @@ CLBatchNormalizationLayer::CLBatchNormalizationLayer()
 
 CLBatchNormalizationLayer::~CLBatchNormalizationLayer() = default;
 
-void CLBatchNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon,
+void CLBatchNormalizationLayer::configure(ICLTensor          *input,
+                                          ICLTensor          *output,
+                                          const ICLTensor    *mean,
+                                          const ICLTensor    *var,
+                                          const ICLTensor    *beta,
+                                          const ICLTensor    *gamma,
+                                          float               epsilon,
                                           ActivationLayerInfo act_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
-void CLBatchNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta,
-                                          const ICLTensor *gamma, float epsilon,
-                                          ActivationLayerInfo act_info)
+void CLBatchNormalizationLayer::configure(const CLCompileContext &compile_context,
+                                          ICLTensor              *input,
+                                          ICLTensor              *output,
+                                          const ICLTensor        *mean,
+                                          const ICLTensor        *var,
+                                          const ICLTensor        *beta,
+                                          const ICLTensor        *gamma,
+                                          float                   epsilon,
+                                          ActivationLayerInfo     act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, mean, var, beta, gamma, epsilon, act_info);
     _norm_kernel->configure(compile_context, input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
-Status CLBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
-                                           const ITensorInfo *mean, const ITensorInfo *var,
-                                           const ITensorInfo *beta, const ITensorInfo *gamma,
-                                           float epsilon, ActivationLayerInfo act_info)
+Status CLBatchNormalizationLayer::validate(const ITensorInfo  *input,
+                                           const ITensorInfo  *output,
+                                           const ITensorInfo  *mean,
+                                           const ITensorInfo  *var,
+                                           const ITensorInfo  *beta,
+                                           const ITensorInfo  *gamma,
+                                           float               epsilon,
+                                           ActivationLayerInfo act_info)
 {
     return CLBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon, act_info);
 }

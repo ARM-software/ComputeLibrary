@@ -30,6 +30,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
@@ -38,7 +39,7 @@ void CLSplit::run()
 {
     cl::CommandQueue q = CLScheduler::get().queue();
 
-    for(unsigned i = 0; i < _num_outputs; ++i)
+    for (unsigned i = 0; i < _num_outputs; ++i)
     {
         _slice_functions[i].run();
     }

@@ -26,7 +26,9 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -61,7 +63,7 @@ public:
     DirectConvComputeKernelInfo direct_conv_descriptor() const;
 
 private:
-    bool                        _fast_relaxed_math{ true };
+    bool                        _fast_relaxed_math{true};
     DirectConvComputeKernelInfo _desc{}; // Direct convolution descriptor
 };
 
@@ -111,22 +113,20 @@ public:
      * |F16            |F16            |F16            |F16            |
      * |F32            |F32            |F32            |F32            |
      */
-    static Status validate(
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes,
-        const Settings                  &settings);
+    static Status validate(const Properties                &properties,
+                           const ArgumentPack<ITensorInfo> &tensors,
+                           const Attributes                &attributes,
+                           const Settings                  &settings);
 
     /** Constructor
      *
      * Similar to @ref ClComponentDirectConv2d::validate()
      */
-    ClComponentDirectConv2d(
-        ComponentId                      id,
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes,
-        const Settings                  &settings);
+    ClComponentDirectConv2d(ComponentId                      id,
+                            const Properties                &properties,
+                            const ArgumentPack<ITensorInfo> &tensors,
+                            const Attributes                &attributes,
+                            const Settings                  &settings);
 
     /** Destructor */
     ~ClComponentDirectConv2d() override;
@@ -142,7 +142,7 @@ public:
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuTemplateComponentWriter *template_writer() const override;
 #else  // ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuCkwComponentDriver *ckw_component_driver() const override;
+    const IGpuCkwComponentDriver       *ckw_component_driver() const override;
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
     /** Get component type */
     GpuComponentType type() const override

@@ -50,7 +50,10 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      * @param[in]  pool_info       Contains pooling operation information described in @ref Pooling3dLayerInfo.
      */
-    void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const Pooling3dLayerInfo &pool_info);
+    void configure(const ClCompileContext   &compile_context,
+                   const ITensorInfo        *src,
+                   ITensorInfo              *dst,
+                   const Pooling3dLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClPool3dKernel::configure()
@@ -64,8 +67,8 @@ public:
 
 private:
     Pooling3dLayerInfo _pool_info{};
-    DataLayout         _data_layout{ DataLayout::UNKNOWN };
-    unsigned int       _num_elems_processed_per_iteration{ 1 };
+    DataLayout         _data_layout{DataLayout::UNKNOWN};
+    unsigned int       _num_elems_processed_per_iteration{1};
 };
 } // namespace kernels
 } // namespace opencl

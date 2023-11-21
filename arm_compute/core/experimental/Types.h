@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_EXPERIMENTAL_TYPES_H
-#define ARM_COMPUTE_EXPERIMENTAL_TYPES_H
+#ifndef ACL_ARM_COMPUTE_CORE_EXPERIMENTAL_TYPES_H
+#define ACL_ARM_COMPUTE_CORE_EXPERIMENTAL_TYPES_H
 
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorShape.h"
@@ -78,11 +78,6 @@ enum TensorType : int32_t
     ACL_VEC_COL_SUM = ACL_SRC_4,
     ACL_SHIFTS      = ACL_SRC_5,
     ACL_MULTIPLIERS = ACL_SRC_6,
-
-    // (EXPERIMENTAL_POST_OPS) Post ops arguments begin after everything else
-    EXPERIMENTAL_ACL_POST_OP_ARG       = 2048,
-    EXPERIMENTAL_ACL_POST_OP_ARG_FIRST = EXPERIMENTAL_ACL_POST_OP_ARG,
-    EXPERIMENTAL_ACL_POST_OP_ARG_LAST  = EXPERIMENTAL_ACL_POST_OP_ARG_FIRST + 1024, // Max number of post op arguments
 };
 
 namespace experimental
@@ -97,24 +92,18 @@ struct MemoryInfo
 {
     MemoryInfo() = default;
 
-    MemoryInfo(int slot, size_t size, size_t alignment = 0) noexcept
-        : slot(slot),
-          size(size),
-          alignment(alignment)
+    MemoryInfo(int slot, size_t size, size_t alignment = 0) noexcept : slot(slot), size(size), alignment(alignment)
     {
     }
 
     MemoryInfo(int slot, MemoryLifetime lifetime, size_t size, size_t alignment = 0) noexcept
-        : slot(slot),
-          lifetime(lifetime),
-          size(size),
-          alignment(alignment)
+        : slot(slot), lifetime(lifetime), size(size), alignment(alignment)
     {
     }
 
     bool merge(int slot, size_t new_size, size_t new_alignment = 0) noexcept
     {
-        if(slot != this->slot)
+        if (slot != this->slot)
         {
             return false;
         }
@@ -125,13 +114,13 @@ struct MemoryInfo
         return true;
     }
 
-    int            slot{ ACL_UNKNOWN };
-    MemoryLifetime lifetime{ MemoryLifetime::Temporary };
-    size_t         size{ 0 };
-    size_t         alignment{ 64 };
+    int            slot{ACL_UNKNOWN};
+    MemoryLifetime lifetime{MemoryLifetime::Temporary};
+    size_t         size{0};
+    size_t         alignment{64};
 };
 
 using MemoryRequirements = std::vector<MemoryInfo>;
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_EXPERIMENTAL_TYPES_H */
+#endif // ACL_ARM_COMPUTE_CORE_EXPERIMENTAL_TYPES_H

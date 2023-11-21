@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_ICLTENSOR_H
 #define ARM_COMPUTE_ICLTENSOR_H
 
-#include "arm_compute/core/ITensor.h"
-
 #include "arm_compute/core/CL/CLTypes.h"
+#include "arm_compute/core/ITensor.h"
 
 #include <cstdint>
 
@@ -34,7 +33,7 @@ namespace cl
 {
 class Buffer;
 class CommandQueue;
-}
+} // namespace cl
 
 namespace arm_compute
 {
@@ -113,5 +112,5 @@ private:
 };
 
 using ICLImage = ICLTensor;
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_ICLTENSOR_H */

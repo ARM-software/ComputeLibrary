@@ -31,35 +31,31 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-std::vector<DependencyGraph::TensorId> GpuKernelComponentGraph::get_tensor_ids(const std::vector<const ITensorInfo *> tensors)
+std::vector<DependencyGraph::TensorId>
+GpuKernelComponentGraph::get_tensor_ids(const std::vector<const ITensorInfo *> tensors)
 {
     std::vector<DependencyGraph::TensorId> tensor_ids{};
-    std::transform(
-        std::begin(tensors), std::end(tensors),
-        std::back_inserter(tensor_ids),
-        [](const auto & t)
-    {
-        return t->id();
-    });
+    std::transform(std::begin(tensors), std::end(tensors), std::back_inserter(tensor_ids),
+                   [](const auto &t) { return t->id(); });
     return tensor_ids;
 }
 
 GpuKernelComponentGraph::GpuKernelComponentGraph(GpuWorkloadContext *context, GpuComponentServices *services)
-    : _context{ context }, _services{ services }, _components{}, _tensors{}, _dependency_graph{}
+    : _context{context}, _services{services}, _components{}, _tensors{}, _dependency_graph{}
 {
 }
 
 GpuKernelComponentStream GpuKernelComponentGraph::fuse(const MemoryDescriptorMap &mem_map) const
 {
-    GpuKernelComponentStream stream{ _context, _services, mem_map };
+    GpuKernelComponentStream stream{_context, _services, mem_map};
     const auto               op_seq = _dependency_graph.build_operators_sequence();
 
     stream.new_component_group();
-    for(auto op : op_seq)
+    for (auto op : op_seq)
     {
         const auto component = _components.at(op.op).get();
         const auto success   = stream.add_component(component);
-        if(!success) // Assume first failure was because the root component is unfusable
+        if (!success) // Assume first failure was because the root component is unfusable
         {
             stream.new_component_group();
             const auto success = stream.add_component(component);

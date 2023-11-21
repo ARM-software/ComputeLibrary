@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -37,17 +38,20 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, const FFTDigitReverseKernelInfo &config)
+Status validate_arguments(const ITensorInfo               *input,
+                          const ITensorInfo               *output,
+                          const ITensorInfo               *idx,
+                          const FFTDigitReverseKernelInfo &config)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() != 1 && input->num_channels() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(idx, 1, DataType::U32);
-    ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({ 0, 1 }).count(config.axis) == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({0, 1}).count(config.axis) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[config.axis] != idx->tensor_shape().x());
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_channels() != 2);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
@@ -57,7 +61,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, ITensorInfo *idx, const FFTDigitReverseKernelInfo &config)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo                     *input,
+                                                        ITensorInfo                     *output,
+                                                        ITensorInfo                     *idx,
+                                                        const FFTDigitReverseKernelInfo &config)
 {
     ARM_COMPUTE_UNUSED(idx, config);
 
@@ -69,21 +76,27 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-CLFFTDigitReverseKernel::CLFFTDigitReverseKernel()
-    : _input(nullptr), _output(nullptr), _idx(nullptr)
+CLFFTDigitReverseKernel::CLFFTDigitReverseKernel() : _input(nullptr), _output(nullptr), _idx(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLFFTDigitReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config)
+void CLFFTDigitReverseKernel::configure(const ICLTensor                 *input,
+                                        ICLTensor                       *output,
+                                        const ICLTensor                 *idx,
+                                        const FFTDigitReverseKernelInfo &config)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, idx, config);
 }
 
-void CLFFTDigitReverseKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config)
+void CLFFTDigitReverseKernel::configure(const CLCompileContext          &compile_context,
+                                        const ICLTensor                 *input,
+                                        ICLTensor                       *output,
+                                        const ICLTensor                 *idx,
+                                        const FFTDigitReverseKernelInfo &config)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, idx);
-    auto padding_info = get_padding_info({ input, output, idx });
+    auto padding_info = get_padding_info({input, output, idx});
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), idx->info(), config));
 
     _input  = input;
@@ -114,10 +127,14 @@ void CLFFTDigitReverseKernel::configure(const CLCompileContext &compile_context,
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLFFTDigitReverseKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, const FFTDigitReverseKernelInfo &config)
+Status CLFFTDigitReverseKernel::validate(const ITensorInfo               *input,
+                                         const ITensorInfo               *output,
+                                         const ITensorInfo               *idx,
+                                         const FFTDigitReverseKernelInfo &config)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, idx, config));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), idx->clone().get(), config).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_and_configure_window(input->clone().get(), output->clone().get(), idx->clone().get(), config).first);
 
     return Status{};
 }
@@ -137,7 +154,6 @@ void CLFFTDigitReverseKernel::run(const Window &window, cl::CommandQueue &queue)
         add_3D_tensor_argument(idx, _output, slice);
         add_1D_tensor_argument(idx, _idx, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

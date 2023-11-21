@@ -22,8 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+
 #include "arm_compute/core/Error.h"
+
 #include "src/gpu/cl/ClKernelLibrary.h"
+
 #include <algorithm>
 #include <array>
 #include <fstream>
@@ -31,8 +34,7 @@
 #include <vector>
 namespace arm_compute
 {
-CLKernelLibrary::CLKernelLibrary()
-    : _compile_context()
+CLKernelLibrary::CLKernelLibrary() : _compile_context()
 {
     opencl_is_available(); // Make sure the OpenCL symbols are initialised *before* the CLKernelLibrary is built
 }
@@ -41,13 +43,15 @@ CLKernelLibrary &CLKernelLibrary::get()
     static CLKernelLibrary _kernel_library;
     return _kernel_library;
 }
-Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const std::set<std::string> &build_options_set) const
+Kernel CLKernelLibrary::create_kernel(const std::string           &kernel_name,
+                                      const std::set<std::string> &build_options_set) const
 {
     const opencl::ClKernelLibrary &klib         = opencl::ClKernelLibrary::get();
     const std::string              program_name = klib.program_name(kernel_name);
     auto                           program      = klib.program(program_name);
     const std::string             &kernel_path  = CLKernelLibrary::get().get_kernel_path();
-    return _compile_context.create_kernel(kernel_name, program_name, program.program, kernel_path, build_options_set, program.is_binary);
+    return _compile_context.create_kernel(kernel_name, program_name, program.program, kernel_path, build_options_set,
+                                          program.is_binary);
 }
 std::string CLKernelLibrary::get_program_name(const std::string &kernel_name) const
 {

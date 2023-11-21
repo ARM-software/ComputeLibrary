@@ -24,13 +24,12 @@
 #ifndef ARM_COMPUTE_UTILS_COMMANDLINEPARSER
 #define ARM_COMPUTE_UTILS_COMMANDLINEPARSER
 
-#include "Option.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 
+#include "Option.h"
 #include <cstring>
 #include <iostream>
 #include <map>
-#include <memory>
 #include <memory>
 #include <regex>
 #include <string>
@@ -56,7 +55,7 @@ public:
      * @return Pointer to the option. The option is owned by the parser.
      */
     template <typename T, typename... As>
-    T *add_option(const std::string &name, As &&... args);
+    T *add_option(const std::string &name, As &&...args);
 
     /** Function to add a new positional argument to the parser.
      *
@@ -65,7 +64,7 @@ public:
      * @return Pointer to the option. The option is owned by the parser.
      */
     template <typename T, typename... As>
-    T *add_positional_option(As &&... args);
+    T *add_positional_option(As &&...args);
 
     /** Parses the command line arguments and updates the options accordingly.
      *
@@ -101,14 +100,14 @@ private:
 };
 
 template <typename T, typename... As>
-inline T *CommandLineParser::add_option(const std::string &name, As &&... args)
+inline T *CommandLineParser::add_option(const std::string &name, As &&...args)
 {
     auto result = _options.emplace(name, std::make_unique<T>(name, std::forward<As>(args)...));
     return static_cast<T *>(result.first->second.get());
 }
 
 template <typename T, typename... As>
-inline T *CommandLineParser::add_positional_option(As &&... args)
+inline T *CommandLineParser::add_positional_option(As &&...args)
 {
     _positional_options.emplace_back(std::make_unique<T>(std::forward<As>(args)...));
     return static_cast<T *>(_positional_options.back().get());
@@ -116,11 +115,11 @@ inline T *CommandLineParser::add_positional_option(As &&... args)
 
 inline void CommandLineParser::parse(int argc, char **argv)
 {
-    const std::regex option_regex{ "--((?:no-)?)([^=]+)(?:=(.*))?" };
+    const std::regex option_regex{"--((?:no-)?)([^=]+)(?:=(.*))?"};
 
-    const auto set_option = [&](const std::string & option, const std::string & name, const std::string & value)
+    const auto set_option = [&](const std::string &option, const std::string &name, const std::string &value)
     {
-        if(_options.find(name) == _options.end())
+        if (_options.find(name) == _options.end())
         {
             _unknown_options.push_back(option);
             return;
@@ -128,7 +127,7 @@ inline void CommandLineParser::parse(int argc, char **argv)
 
         const bool success = _options[name]->parse(value);
 
-        if(!success)
+        if (!success)
         {
             _invalid_options.push_back(option);
         }
@@ -136,26 +135,27 @@ inline void CommandLineParser::parse(int argc, char **argv)
 
     unsigned int positional_index = 0;
 
-    for(int i = 1; i < argc; ++i)
+    for (int i = 1; i < argc; ++i)
     {
-        std::string mixed_case_opt{ argv[i] };
+        std::string mixed_case_opt{argv[i]};
         int         equal_sign = mixed_case_opt.find('=');
         int         pos        = (equal_sign == -1) ? strlen(argv[i]) : equal_sign;
 
-        const std::string option = arm_compute::utility::tolower(mixed_case_opt.substr(0, pos)) + mixed_case_opt.substr(pos);
-        std::smatch       option_matches;
+        const std::string option =
+            arm_compute::utility::tolower(mixed_case_opt.substr(0, pos)) + mixed_case_opt.substr(pos);
+        std::smatch option_matches;
 
-        if(std::regex_match(option, option_matches, option_regex))
+        if (std::regex_match(option, option_matches, option_regex))
         {
             // Boolean option
-            if(option_matches.str(3).empty())
+            if (option_matches.str(3).empty())
             {
                 set_option(option, option_matches.str(2), option_matches.str(1).empty() ? "true" : "false");
             }
             else
             {
                 // Can't have "no-" and a value
-                if(!option_matches.str(1).empty())
+                if (!option_matches.str(1).empty())
                 {
                     _invalid_options.emplace_back(option);
                 }
@@ -167,7 +167,7 @@ inline void CommandLineParser::parse(int argc, char **argv)
         }
         else
         {
-            if(positional_index >= _positional_options.size())
+            if (positional_index >= _positional_options.size())
             {
                 _invalid_options.push_back(mixed_case_opt);
             }
@@ -184,30 +184,30 @@ inline bool CommandLineParser::validate() const
 {
     bool is_valid = true;
 
-    for(const auto &option : _options)
+    for (const auto &option : _options)
     {
-        if(option.second->is_required() && !option.second->is_set())
+        if (option.second->is_required() && !option.second->is_set())
         {
             is_valid = false;
             std::cerr << "ERROR: Option '" << option.second->name() << "' is required but not given!\n";
         }
     }
 
-    for(const auto &option : _positional_options)
+    for (const auto &option : _positional_options)
     {
-        if(option->is_required() && !option->is_set())
+        if (option->is_required() && !option->is_set())
         {
             is_valid = false;
             std::cerr << "ERROR: Option '" << option->name() << "' is required but not given!\n";
         }
     }
 
-    for(const auto &option : _unknown_options)
+    for (const auto &option : _unknown_options)
     {
         std::cerr << "WARNING: Skipping unknown option '" << option << "'!\n";
     }
 
-    for(const auto &option : _invalid_options)
+    for (const auto &option : _invalid_options)
     {
         std::cerr << "WARNING: Skipping invalid option '" << option << "'!\n";
     }
@@ -219,19 +219,19 @@ inline void CommandLineParser::print_help(const std::string &program_name) const
 {
     std::cout << "usage: " << program_name << " \n";
 
-    for(const auto &option : _options)
+    for (const auto &option : _options)
     {
         std::cout << option.second->help() << "\n";
     }
 
-    for(const auto &option : _positional_options)
+    for (const auto &option : _positional_options)
     {
         std::string help_to_print;
 
         // Extract help sub-string
         const std::string help_str = option->help();
         const size_t      help_pos = help_str.find(" - ");
-        if(help_pos != std::string::npos)
+        if (help_pos != std::string::npos)
         {
             help_to_print = help_str.substr(help_pos);
         }

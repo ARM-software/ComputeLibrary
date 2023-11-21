@@ -23,8 +23,10 @@
  */
 
 #include "src/cl/CLTensorComponent.h"
+
 #include "ckw/Error.h"
 #include "ckw/types/TensorComponentType.h"
+
 #include "src/cl/CLTensorArgument.h"
 #include "src/cl/CLTile.h"
 
@@ -38,7 +40,7 @@ std::string create_component_name(const std::string &name, TensorComponentType x
 {
     std::string var_name(name);
 
-    switch(x)
+    switch (x)
     {
         case TensorComponentType::OffsetFirstElement:
             var_name += "_offset_first_element";
@@ -93,12 +95,13 @@ std::string create_component_name(const std::string &name, TensorComponentType x
 } // namespace
 
 CLTensorComponent::CLTensorComponent(const CLTensorArgument &tensor, TensorComponentType component_type)
-    : CLTile(create_component_name(tensor.name(), component_type), TileInfo(DataType::Int32)), _component_type(component_type)
+    : CLTile(create_component_name(tensor.name(), component_type), TileInfo(DataType::Int32)),
+      _component_type(component_type)
 {
 }
 
 CLTensorComponent::CLTensorComponent(const CLTensorArgument &tensor, TensorComponentType component_type, int32_t value)
-    : CLTile({ { std::to_string(value) } }, DataType::Int32), _component_type(component_type)
+    : CLTile({{std::to_string(value)}}, DataType::Int32), _component_type(component_type)
 {
     CKW_UNUSED(tensor);
 }

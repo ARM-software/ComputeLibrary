@@ -59,7 +59,7 @@ namespace
  */
 void discard_comments(std::ifstream &fs)
 {
-    while(fs.peek() == '#')
+    while (fs.peek() == '#')
     {
         fs.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
@@ -71,11 +71,11 @@ void discard_comments(std::ifstream &fs)
  */
 void discard_comments_and_spaces(std::ifstream &fs)
 {
-    while(true)
+    while (true)
     {
         discard_comments(fs);
 
-        if(isspace(fs.peek()) == 0)
+        if (isspace(fs.peek()) == 0)
         {
             break;
         }
@@ -88,13 +88,12 @@ void discard_comments_and_spaces(std::ifstream &fs)
 #ifndef BENCHMARK_EXAMPLES
 int run_example(int argc, char **argv, std::unique_ptr<Example> example)
 {
-    std::cout << "\n"
-              << argv[0] << "\n\n";
+    std::cout << "\n" << argv[0] << "\n\n";
 
     try
     {
         bool status = example->do_setup(argc, argv);
-        if(!status)
+        if (!status)
         {
             return 1;
         }
@@ -105,19 +104,17 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
         return 0;
     }
 #ifdef ARM_COMPUTE_CL
-    catch(cl::Error &err)
+    catch (cl::Error &err)
     {
         std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cerr << std::endl
-                  << "ERROR " << err.what() << "(" << err.err() << ")" << std::endl;
+        std::cerr << std::endl << "ERROR " << err.what() << "(" << err.err() << ")" << std::endl;
         std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     }
 #endif /* ARM_COMPUTE_CL */
-    catch(std::runtime_error &err)
+    catch (std::runtime_error &err)
     {
         std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cerr << std::endl
-                  << "ERROR " << err.what() << " " << (errno ? strerror(errno) : "") << std::endl;
+        std::cerr << std::endl << "ERROR " << err.what() << " " << (errno ? strerror(errno) : "") << std::endl;
         std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     }
 
@@ -131,13 +128,15 @@ void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint
 {
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(tensor, Format::RGB888);
 
-    uint8_t *top    = tensor->info()->offset_element_in_bytes(Coordinates(rect.x, rect.y)) + tensor->buffer();
-    uint8_t *bottom = tensor->info()->offset_element_in_bytes(Coordinates(rect.x, rect.y + rect.height)) + tensor->buffer();
-    uint8_t *left   = top;
-    uint8_t *right  = tensor->info()->offset_element_in_bytes(Coordinates(rect.x + rect.width, rect.y)) + tensor->buffer();
-    size_t   stride = tensor->info()->strides_in_bytes()[Window::DimY];
+    uint8_t *top = tensor->info()->offset_element_in_bytes(Coordinates(rect.x, rect.y)) + tensor->buffer();
+    uint8_t *bottom =
+        tensor->info()->offset_element_in_bytes(Coordinates(rect.x, rect.y + rect.height)) + tensor->buffer();
+    uint8_t *left = top;
+    uint8_t *right =
+        tensor->info()->offset_element_in_bytes(Coordinates(rect.x + rect.width, rect.y)) + tensor->buffer();
+    size_t stride = tensor->info()->strides_in_bytes()[Window::DimY];
 
-    for(size_t x = 0; x < rect.width; ++x)
+    for (size_t x = 0; x < rect.width; ++x)
     {
         top[0]    = r;
         top[1]    = g;
@@ -150,7 +149,7 @@ void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint
         bottom += 3;
     }
 
-    for(size_t y = 0; y < rect.height; ++y)
+    for (size_t y = 0; y < rect.height; ++y)
     {
         left[0]  = r;
         left[1]  = g;
@@ -176,22 +175,22 @@ ImageType get_image_type_from_file(const std::string &filename)
         fs.open(filename, std::ios::in | std::ios::binary);
 
         // Identify type from magic number
-        std::array<unsigned char, 2> magic_number{ { 0 } };
+        std::array<unsigned char, 2> magic_number{{0}};
         fs >> magic_number[0] >> magic_number[1];
 
         // PPM check
-        if(static_cast<char>(magic_number[0]) == 'P' && static_cast<char>(magic_number[1]) == '6')
+        if (static_cast<char>(magic_number[0]) == 'P' && static_cast<char>(magic_number[1]) == '6')
         {
             type = ImageType::PPM;
         }
-        else if(magic_number[0] == 0xFF && magic_number[1] == 0xD8)
+        else if (magic_number[0] == 0xFF && magic_number[1] == 0xD8)
         {
             type = ImageType::JPEG;
         }
 
         fs.close();
     }
-    catch(std::runtime_error &e)
+    catch (std::runtime_error &e)
     {
         ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
     }
@@ -202,7 +201,7 @@ ImageType get_image_type_from_file(const std::string &filename)
 std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs)
 {
     // Check the PPM magic number is valid
-    std::array<char, 2> magic_number{ { 0 } };
+    std::array<char, 2> magic_number{{0}};
     fs >> magic_number[0] >> magic_number[1];
     ARM_COMPUTE_ERROR_ON_MSG(magic_number[0] != 'P' || magic_number[1] != '6', "Invalid file type");
     ARM_COMPUTE_UNUSED(magic_number);
@@ -238,12 +237,12 @@ npy::header_t parse_npy_header(std::ifstream &fs) //NOLINT
     // Parse header
     npy::header_t header = npy::parse_header(header_s);
 
-    bool fortran_order = false;
-    std::vector<unsigned long> shape = header.shape;
+    bool                       fortran_order = false;
+    std::vector<unsigned long> shape         = header.shape;
 
     std::reverse(shape.begin(), shape.end());
 
-    return npy::header_t{ header.dtype, fortran_order, shape };
+    return npy::header_t{header.dtype, fortran_order, shape};
 }
 
 /** This function returns the amount of memory free reading from /proc/meminfo
@@ -255,15 +254,15 @@ uint64_t get_mem_free_from_meminfo()
     std::string   line_attribute;
     std::ifstream file_meminfo("/proc/meminfo");
 
-    if(file_meminfo.is_open())
+    if (file_meminfo.is_open())
     {
-        while(!(file_meminfo >> line_attribute).fail())
+        while (!(file_meminfo >> line_attribute).fail())
         {
             //Test if is the line containing MemFree
-            if(line_attribute == "MemFree:")
+            if (line_attribute == "MemFree:")
             {
                 uint64_t mem_available;
-                if(!(file_meminfo >> mem_available).fail())
+                if (!(file_meminfo >> mem_available).fail())
                 {
                     return mem_available;
                 }

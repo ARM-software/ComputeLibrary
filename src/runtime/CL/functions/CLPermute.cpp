@@ -27,22 +27,21 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/gpu/cl/operators/ClPermute.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/gpu/cl/operators/ClPermute.h"
 
 namespace arm_compute
 {
 struct CLPermute::Impl
 {
-    const ICLTensor                   *src{ nullptr };
-    ICLTensor                         *dst{ nullptr };
-    std::unique_ptr<opencl::ClPermute> op{ nullptr };
+    const ICLTensor                   *src{nullptr};
+    ICLTensor                         *dst{nullptr};
+    std::unique_ptr<opencl::ClPermute> op{nullptr};
 };
 
-CLPermute::CLPermute()
-    : _impl(std::make_unique<Impl>())
+CLPermute::CLPermute() : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -53,7 +52,10 @@ void CLPermute::configure(const ICLTensor *input, ICLTensor *output, const Permu
     configure(CLKernelLibrary::get().get_compile_context(), input, output, perm);
 }
 
-void CLPermute::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+void CLPermute::configure(const CLCompileContext  &compile_context,
+                          const ICLTensor         *input,
+                          ICLTensor               *output,
+                          const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_LOG_PARAMS(input, output, perm);

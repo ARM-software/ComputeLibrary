@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigBifrost.h"
-#include "src/runtime/heuristics/dwc_native/ClDWCNativeHeuristicsHelpers.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/GPUTarget.h"
@@ -30,28 +29,34 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 
+#include "src/runtime/heuristics/dwc_native/ClDWCNativeHeuristicsHelpers.h"
+
 namespace arm_compute
 {
 namespace cl_dwc
 {
 namespace
 {
-DWCComputeKernelInfo configure_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                   unsigned int depth_multiplier, bool is_g71)
+DWCComputeKernelInfo configure_f32(const ITensorInfo   *src,
+                                   const ITensorInfo   *wei,
+                                   const PadStrideInfo &conv_info,
+                                   const Size2D        &dilation,
+                                   unsigned int         depth_multiplier,
+                                   bool                 is_g71)
 {
     DWCComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
-        const size_t idx_c          = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::CHANNEL);
-        const size_t idx_w          = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::WIDTH);
+        const size_t      idx_c     = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::CHANNEL);
+        const size_t      idx_w     = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::WIDTH);
         const TensorShape wei_shape = wei->tensor_shape();
         const size_t      kernel_c  = wei_shape[idx_c];
         const size_t      kernel_w  = wei_shape[idx_w];
 
         desc.export_input_to_cl_image = false;
 
-        if(is_g71)
+        if (is_g71)
         {
             desc.export_weights_to_cl_image = false;
         }
@@ -60,17 +65,17 @@ DWCComputeKernelInfo configure_f32(const ITensorInfo *src, const ITensorInfo *we
             desc.export_weights_to_cl_image = use_cl_image_for_weights(wei, depth_multiplier);
         }
 
-        if(depth_multiplier == 1)
+        if (depth_multiplier == 1)
         {
             desc.n0 = 4;
         }
         else
         {
-            if((depth_multiplier % 4) == 0)
+            if ((depth_multiplier % 4) == 0)
             {
                 desc.n0 = 4;
             }
-            else if((depth_multiplier % 2) == 0)
+            else if ((depth_multiplier % 2) == 0)
             {
                 desc.n0 = 2;
             }
@@ -81,14 +86,15 @@ DWCComputeKernelInfo configure_f32(const ITensorInfo *src, const ITensorInfo *we
         }
 
         // Note: If we reduce n0, export to cl_image must be false
-        ARM_COMPUTE_ERROR_ON((adjust_vec_size(desc.n0, kernel_c) != desc.n0) && (desc.export_weights_to_cl_image == true));
+        ARM_COMPUTE_ERROR_ON((adjust_vec_size(desc.n0, kernel_c) != desc.n0) &&
+                             (desc.export_weights_to_cl_image == true));
 
         desc.n0 = adjust_vec_size(desc.n0, kernel_c);
 
         // Set m0 only if stride_x == 1 and dilation_x == 1
-        if(conv_info.stride().first == 1 && dilation.x() == 1)
+        if (conv_info.stride().first == 1 && dilation.x() == 1)
         {
-            if((kernel_w >= 9) || (kernel_w == 1))
+            if ((kernel_w >= 9) || (kernel_w == 1))
             {
                 desc.m0 = 1;
             }
@@ -106,16 +112,20 @@ DWCComputeKernelInfo configure_f32(const ITensorInfo *src, const ITensorInfo *we
     return desc;
 }
 
-DWCComputeKernelInfo configure_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                   unsigned int depth_multiplier, bool is_g71)
+DWCComputeKernelInfo configure_f16(const ITensorInfo   *src,
+                                   const ITensorInfo   *wei,
+                                   const PadStrideInfo &conv_info,
+                                   const Size2D        &dilation,
+                                   unsigned int         depth_multiplier,
+                                   bool                 is_g71)
 {
     DWCComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Src and weights have the same dimension indices
-        const size_t idx_c          = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::CHANNEL);
-        const size_t idx_w          = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::WIDTH);
+        const size_t      idx_c     = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::CHANNEL);
+        const size_t      idx_w     = get_data_layout_dimension_index(wei->data_layout(), DataLayoutDimension::WIDTH);
         const TensorShape src_shape = src->tensor_shape();
         const TensorShape wei_shape = wei->tensor_shape();
         const size_t      src_w     = src_shape[idx_w];
@@ -124,7 +134,7 @@ DWCComputeKernelInfo configure_f16(const ITensorInfo *src, const ITensorInfo *we
 
         desc.export_input_to_cl_image = false;
 
-        if(is_g71)
+        if (is_g71)
         {
             desc.export_weights_to_cl_image = false;
         }
@@ -133,9 +143,9 @@ DWCComputeKernelInfo configure_f16(const ITensorInfo *src, const ITensorInfo *we
             desc.export_weights_to_cl_image = use_cl_image_for_weights(wei, depth_multiplier);
         }
 
-        if(depth_multiplier == 1)
+        if (depth_multiplier == 1)
         {
-            if(desc.export_weights_to_cl_image == false)
+            if (desc.export_weights_to_cl_image == false)
             {
                 desc.n0 = 8;
             }
@@ -146,11 +156,11 @@ DWCComputeKernelInfo configure_f16(const ITensorInfo *src, const ITensorInfo *we
         }
         else
         {
-            if((depth_multiplier % 4) == 0)
+            if ((depth_multiplier % 4) == 0)
             {
                 desc.n0 = 4;
             }
-            else if((depth_multiplier % 2) == 0)
+            else if ((depth_multiplier % 2) == 0)
             {
                 desc.n0 = 2;
             }
@@ -161,20 +171,21 @@ DWCComputeKernelInfo configure_f16(const ITensorInfo *src, const ITensorInfo *we
         }
 
         // Note: If we reduce n0, export to cl_image must be false
-        ARM_COMPUTE_ERROR_ON((adjust_vec_size(desc.n0, kernel_c) != desc.n0) && (desc.export_weights_to_cl_image == true));
+        ARM_COMPUTE_ERROR_ON((adjust_vec_size(desc.n0, kernel_c) != desc.n0) &&
+                             (desc.export_weights_to_cl_image == true));
 
         desc.n0 = adjust_vec_size(desc.n0, kernel_c);
 
         // Set m0 only if stride_x == 1 and dilation_x == 1
-        if(conv_info.stride().first == 1 && dilation.x() == 1)
+        if (conv_info.stride().first == 1 && dilation.x() == 1)
         {
-            if((kernel_w >= 9) || (kernel_w == 1))
+            if ((kernel_w >= 9) || (kernel_w == 1))
             {
                 desc.m0 = 1;
             }
             else
             {
-                if((src_w % 5) == 0)
+                if ((src_w % 5) == 0)
                 {
                     desc.m0 = 5;
                 }
@@ -194,27 +205,30 @@ DWCComputeKernelInfo configure_f16(const ITensorInfo *src, const ITensorInfo *we
 }
 } // namespace
 
-ClDWCNativeDefaultConfigBifrost::ClDWCNativeDefaultConfigBifrost(GPUTarget gpu)
-    : IClDWCNativeKernelConfig(gpu)
+ClDWCNativeDefaultConfigBifrost::ClDWCNativeDefaultConfigBifrost(GPUTarget gpu) : IClDWCNativeKernelConfig(gpu)
 {
 }
 
-DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                                                unsigned int depth_multiplier)
+DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure(const ITensorInfo   *src,
+                                                                const ITensorInfo   *wei,
+                                                                const PadStrideInfo &conv_info,
+                                                                const Size2D        &dilation,
+                                                                unsigned int         depth_multiplier)
 {
-    using ConfigurationFunctionExecutorPtr = DWCComputeKernelInfo (ClDWCNativeDefaultConfigBifrost::*)(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                                                   unsigned int depth_multiplier);
+    using ConfigurationFunctionExecutorPtr = DWCComputeKernelInfo (ClDWCNativeDefaultConfigBifrost::*)(
+        const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
+        unsigned int depth_multiplier);
 
-    ClDWCNativeConfigArray<ConfigurationFunctionExecutorPtr> configs_G71(&ClDWCNativeDefaultConfigBifrost::configure_G71_f32,
-                                                                         &ClDWCNativeDefaultConfigBifrost::configure_G71_f16,
-                                                                         &ClDWCNativeDefaultConfigBifrost::configure_G7x_u8);
+    ClDWCNativeConfigArray<ConfigurationFunctionExecutorPtr> configs_G71(
+        &ClDWCNativeDefaultConfigBifrost::configure_G71_f32, &ClDWCNativeDefaultConfigBifrost::configure_G71_f16,
+        &ClDWCNativeDefaultConfigBifrost::configure_G7x_u8);
 
-    ClDWCNativeConfigArray<ConfigurationFunctionExecutorPtr> configs_G7x(&ClDWCNativeDefaultConfigBifrost::configure_G7x_f32,
-                                                                         &ClDWCNativeDefaultConfigBifrost::configure_G7x_f16,
-                                                                         &ClDWCNativeDefaultConfigBifrost::configure_G7x_u8);
+    ClDWCNativeConfigArray<ConfigurationFunctionExecutorPtr> configs_G7x(
+        &ClDWCNativeDefaultConfigBifrost::configure_G7x_f32, &ClDWCNativeDefaultConfigBifrost::configure_G7x_f16,
+        &ClDWCNativeDefaultConfigBifrost::configure_G7x_u8);
 
     ConfigurationFunctionExecutorPtr func = nullptr;
-    switch(_target)
+    switch (_target)
     {
         case GPUTarget::G71:
             func = configs_G71.get_function(src->data_type());
@@ -228,43 +242,58 @@ DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure(const ITensorInf
     return (this->*func)(src, wei, conv_info, dilation, depth_multiplier);
 }
 
-DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G71_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                                                        unsigned int depth_multiplier)
+DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G71_f32(const ITensorInfo   *src,
+                                                                        const ITensorInfo   *wei,
+                                                                        const PadStrideInfo &conv_info,
+                                                                        const Size2D        &dilation,
+                                                                        unsigned int         depth_multiplier)
 {
     return configure_f32(src, wei, conv_info, dilation, depth_multiplier, true);
 }
 
-DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G71_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                                                        unsigned int depth_multiplier)
+DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G71_f16(const ITensorInfo   *src,
+                                                                        const ITensorInfo   *wei,
+                                                                        const PadStrideInfo &conv_info,
+                                                                        const Size2D        &dilation,
+                                                                        unsigned int         depth_multiplier)
 {
     return configure_f16(src, wei, conv_info, dilation, depth_multiplier, true);
 }
 
-DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G7x_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                                                        unsigned int depth_multiplier)
+DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G7x_f32(const ITensorInfo   *src,
+                                                                        const ITensorInfo   *wei,
+                                                                        const PadStrideInfo &conv_info,
+                                                                        const Size2D        &dilation,
+                                                                        unsigned int         depth_multiplier)
 {
     return configure_f32(src, wei, conv_info, dilation, depth_multiplier, false);
 }
 
-DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G7x_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                                                        unsigned int depth_multiplier)
+DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G7x_f16(const ITensorInfo   *src,
+                                                                        const ITensorInfo   *wei,
+                                                                        const PadStrideInfo &conv_info,
+                                                                        const Size2D        &dilation,
+                                                                        unsigned int         depth_multiplier)
 {
     return configure_f16(src, wei, conv_info, dilation, depth_multiplier, false);
 }
 
-DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G7x_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                                                        unsigned int depth_multiplier)
+DWCComputeKernelInfo ClDWCNativeDefaultConfigBifrost::configure_G7x_u8(const ITensorInfo   *src,
+                                                                       const ITensorInfo   *wei,
+                                                                       const PadStrideInfo &conv_info,
+                                                                       const Size2D        &dilation,
+                                                                       unsigned int         depth_multiplier)
 {
     ARM_COMPUTE_UNUSED(wei);
 
     DWCComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         desc.export_input_to_cl_image   = false;
         desc.export_weights_to_cl_image = false;
         desc.n0                         = (depth_multiplier == 1) ? 4 : 1;
-        if(conv_info.stride().first == 1 && dilation.x() == 1 && depth_multiplier == 1)
+        if (conv_info.stride().first == 1 && dilation.x() == 1 && depth_multiplier == 1)
         {
             desc.m0 = 2;
         }

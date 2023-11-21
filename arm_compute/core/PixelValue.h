@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_PIXELVALUE_H
 #define ARM_COMPUTE_PIXELVALUE_H
 
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/QuantizationInfo.h"
+#include "arm_compute/core/Types.h"
 
 #include <cstdint>
 
@@ -36,11 +36,7 @@ class PixelValue
 {
 public:
     /** Default constructor: value initialized to 0 */
-    PixelValue() noexcept
-        : value
-    {
-        int64_t(0)
-    }
+    PixelValue() noexcept : value{int64_t(0)}
     {
     }
     /** Initialize the union with a pixel value of chosen datatype
@@ -49,10 +45,9 @@ public:
      * @param[in] datatype DataType that @p v have to be stored
      * @param[in] qinfo    (Optional) QuantizationInfo to apply in case of quantized data types to @p v
      */
-    PixelValue(double v, DataType datatype, QuantizationInfo qinfo = QuantizationInfo())
-        : PixelValue()
+    PixelValue(double v, DataType datatype, QuantizationInfo qinfo = QuantizationInfo()) : PixelValue()
     {
-        switch(datatype)
+        switch (datatype)
         {
             case DataType::U8:
                 value.u8 = static_cast<uint8_t>(v);
@@ -112,8 +107,7 @@ public:
      *
      * @param[in] v S8 value.
      */
-    PixelValue(int8_t v)
-        : PixelValue()
+    PixelValue(int8_t v) : PixelValue()
     {
         value.s8 = v;
     }
@@ -121,8 +115,7 @@ public:
      *
      * @param[in] v U8 value.
      */
-    PixelValue(uint8_t v)
-        : PixelValue()
+    PixelValue(uint8_t v) : PixelValue()
     {
         value.u8 = v;
     }
@@ -130,8 +123,7 @@ public:
      *
      * @param[in] v U16 value.
      */
-    PixelValue(uint16_t v)
-        : PixelValue()
+    PixelValue(uint16_t v) : PixelValue()
     {
         value.u16 = v;
     }
@@ -139,8 +131,7 @@ public:
      *
      * @param[in] v S16 value.
      */
-    PixelValue(int16_t v)
-        : PixelValue()
+    PixelValue(int16_t v) : PixelValue()
     {
         value.s16 = v;
     }
@@ -148,8 +139,7 @@ public:
      *
      * @param[in] v U32 value.
      */
-    PixelValue(uint32_t v)
-        : PixelValue()
+    PixelValue(uint32_t v) : PixelValue()
     {
         value.u32 = v;
     }
@@ -157,8 +147,7 @@ public:
      *
      * @param[in] v S32 value.
      */
-    PixelValue(int32_t v)
-        : PixelValue()
+    PixelValue(int32_t v) : PixelValue()
     {
         value.s32 = v;
     }
@@ -167,8 +156,7 @@ public:
      *
      * @param[in] v U64 value.
      */
-    PixelValue(uint64_t v)
-        : PixelValue()
+    PixelValue(uint64_t v) : PixelValue()
     {
         value.u64 = v;
     }
@@ -176,8 +164,7 @@ public:
      *
      * @param[in] v S64 value.
      */
-    PixelValue(int64_t v)
-        : PixelValue()
+    PixelValue(int64_t v) : PixelValue()
     {
         value.s64 = v;
     }
@@ -185,8 +172,7 @@ public:
      *
      * @param[in] v F16 value.
      */
-    PixelValue(bfloat16 v)
-        : PixelValue()
+    PixelValue(bfloat16 v) : PixelValue()
     {
         value.bf16 = v;
     }
@@ -194,8 +180,7 @@ public:
      *
      * @param[in] v F16 value.
      */
-    PixelValue(half v)
-        : PixelValue()
+    PixelValue(half v) : PixelValue()
     {
         value.f16 = v;
     }
@@ -203,8 +188,7 @@ public:
      *
      * @param[in] v F32 value.
      */
-    PixelValue(float v)
-        : PixelValue()
+    PixelValue(float v) : PixelValue()
     {
         value.f32 = v;
     }
@@ -212,8 +196,7 @@ public:
      *
      * @param[in] v F64 value.
      */
-    PixelValue(double v)
-        : PixelValue()
+    PixelValue(double v) : PixelValue()
     {
         value.f64 = v;
     }
@@ -221,23 +204,23 @@ public:
      * Use the field corresponding to the image format
      */
     union
-        {
-            uint64_t u64;     /**< Single channel U64 */
-            int64_t  s64;     /**< Single channel S64 */
-            uint8_t  rgb[3];  /**< 3 channels: RGB888 */
-            uint8_t  yuv[3];  /**< 3 channels: Any YUV format */
-            uint8_t  rgbx[4]; /**< 4 channels: RGBX8888 */
-            double   f64;     /**< Single channel double */
-            float    f32;     /**< Single channel float 32 */
-            half     f16;     /**< Single channel F16 */
-            bfloat16 bf16;    /**< Single channel brain floating-point number */
-            uint8_t  u8;      /**< Single channel U8 */
-            int8_t   s8;      /**< Single channel S8 */
-            uint16_t u16;     /**< Single channel U16 */
-            int16_t  s16;     /**< Single channel S16 */
-            uint32_t u32;     /**< Single channel U32 */
-            int32_t  s32;     /**< Single channel S32 */
-        } value;
+    {
+        uint64_t u64;     /**< Single channel U64 */
+        int64_t  s64;     /**< Single channel S64 */
+        uint8_t  rgb[3];  /**< 3 channels: RGB888 */
+        uint8_t  yuv[3];  /**< 3 channels: Any YUV format */
+        uint8_t  rgbx[4]; /**< 4 channels: RGBX8888 */
+        double   f64;     /**< Single channel double */
+        float    f32;     /**< Single channel float 32 */
+        half     f16;     /**< Single channel F16 */
+        bfloat16 bf16;    /**< Single channel brain floating-point number */
+        uint8_t  u8;      /**< Single channel U8 */
+        int8_t   s8;      /**< Single channel S8 */
+        uint16_t u16;     /**< Single channel U16 */
+        int16_t  s16;     /**< Single channel S16 */
+        uint32_t u32;     /**< Single channel U32 */
+        int32_t  s32;     /**< Single channel S32 */
+    } value;
     /** Interpret the pixel value as a U8
      *
      * @param[out] v Returned value

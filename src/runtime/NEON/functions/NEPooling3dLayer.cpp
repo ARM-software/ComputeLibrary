@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuPool3d.h"
 
@@ -33,9 +34,9 @@ namespace arm_compute
 {
 struct NEPooling3dLayer::Impl
 {
-    const ITensor                  *src{ nullptr };
-    ITensor                        *dst{ nullptr };
-    std::unique_ptr<cpu::CpuPool3d> op{ nullptr };
+    const ITensor                  *src{nullptr};
+    ITensor                        *dst{nullptr};
+    std::unique_ptr<cpu::CpuPool3d> op{nullptr};
     MemoryGroup                     memory_group{};
     ITensorPack                     run_pack{};
     WorkspaceData<Tensor>           workspace_tensors{};
@@ -43,8 +44,7 @@ struct NEPooling3dLayer::Impl
 
 NEPooling3dLayer::~NEPooling3dLayer() = default;
 
-NEPooling3dLayer::NEPooling3dLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _impl(std::make_unique<Impl>())
+NEPooling3dLayer::NEPooling3dLayer(std::shared_ptr<IMemoryManager> memory_manager) : _impl(std::make_unique<Impl>())
 {
     _impl->memory_group = MemoryGroup(std::move(memory_manager));
 }
@@ -56,11 +56,12 @@ void NEPooling3dLayer::configure(const ITensor *input, ITensor *output, const Po
     _impl->op  = std::make_unique<cpu::CpuPool3d>();
     _impl->op->configure(input->info(), output->info(), pool_info);
 
-    _impl->run_pack          = { { TensorType::ACL_SRC, _impl->src }, { TensorType::ACL_DST_0, _impl->dst } };
+    _impl->run_pack          = {{TensorType::ACL_SRC, _impl->src}, {TensorType::ACL_DST_0, _impl->dst}};
     _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
-Status NEPooling3dLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const Pooling3dLayerInfo &pool_info)
+Status
+NEPooling3dLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const Pooling3dLayerInfo &pool_info)
 {
     return cpu::CpuPool3d::validate(input, output, pool_info);
 }

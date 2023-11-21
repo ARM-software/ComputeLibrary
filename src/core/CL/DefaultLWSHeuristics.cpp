@@ -31,13 +31,13 @@ cl::NDRange get_gemm_lws(size_t gws_x, size_t gws_y, size_t gws_z)
 {
     ARM_COMPUTE_UNUSED(gws_y);
 
-    if(gws_z != 1)
+    if (gws_z != 1)
     {
         return cl::NDRange(4, 4, 2);
     }
     else
     {
-        if(gws_x > 256)
+        if (gws_x > 256)
         {
             return cl::NDRange(2, 16, 1);
         }
@@ -59,9 +59,9 @@ cl::NDRange get_direct_lws(size_t gws_x, size_t gws_y, size_t gws_z)
 {
     ARM_COMPUTE_UNUSED(gws_z);
 
-    if(gws_x < gws_y)
+    if (gws_x < gws_y)
     {
-        if(gws_x < 4)
+        if (gws_x < 4)
         {
             return cl::NDRange(std::min(gws_x, static_cast<size_t>(2u)), 32, 1);
         }
@@ -81,7 +81,7 @@ cl::NDRange get_dwc_lws(size_t gws_x, size_t gws_y, size_t gws_z)
     ARM_COMPUTE_UNUSED(gws_y);
     ARM_COMPUTE_UNUSED(gws_z);
 
-    if(gws_x < 32)
+    if (gws_x < 32)
     {
         return cl::NDRange(gws_x, 4, 4);
     }
@@ -100,7 +100,7 @@ cl::NDRange get_default_lws_for_type(CLKernelType kernel_type, cl::NDRange gws)
     const size_t gws_y = gws[1];
     const size_t gws_z = gws[2];
 
-    switch(kernel_type)
+    switch (kernel_type)
     {
         case CLKernelType::GEMM:
         {

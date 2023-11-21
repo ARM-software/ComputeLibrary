@@ -88,15 +88,28 @@ public:
      *
      * @note: For in-place support, please check @ref CLDepthwiseConvolutionLayerNativeKernel
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                   unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   const ICLTensor        *weights,
+                   const ICLTensor        *biases,
+                   ICLTensor              *output,
+                   const PadStrideInfo    &conv_info,
+                   unsigned int            depth_multiplier = 1,
+                   ActivationLayerInfo     act_info         = ActivationLayerInfo(),
+                   const Size2D           &dilation         = Size2D(1U, 1U));
 
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * Similar to @ref CLDepthwiseConvolutionLayer::configure()
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                   unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+    void configure(ICLTensor           *input,
+                   const ICLTensor     *weights,
+                   const ICLTensor     *biases,
+                   ICLTensor           *output,
+                   const PadStrideInfo &conv_info,
+                   unsigned int         depth_multiplier = 1,
+                   ActivationLayerInfo  act_info         = ActivationLayerInfo(),
+                   const Size2D        &dilation         = Size2D(1U, 1U));
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer
      *
@@ -104,8 +117,14 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+    static Status validate(const ITensorInfo   *input,
+                           const ITensorInfo   *weights,
+                           const ITensorInfo   *biases,
+                           const ITensorInfo   *output,
+                           const PadStrideInfo &conv_info,
+                           unsigned int         depth_multiplier = 1,
+                           ActivationLayerInfo  act_info         = ActivationLayerInfo(),
+                           const Size2D        &dilation         = Size2D(1U, 1U));
 
     // Inherited methods overriden:
     void run() override;

@@ -45,8 +45,7 @@ public:
      * @param[in] steps Values to initialize the steps.
      */
     template <typename... Ts>
-    Steps(Ts... steps)
-        : Dimensions{ steps... }
+    Steps(Ts... steps) : Dimensions{steps...}
     {
         // Initialize empty dimensions to 1
         std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
@@ -62,5 +61,5 @@ public:
     /** Default destructor */
     ~Steps() = default;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_STEPS_H*/

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_ICPUKERNEL_H
 
 #include "arm_compute/core/CPP/ICPPKernel.h"
+
 #include "src/cpu/kernels/CpuKernelSelectionTypes.h"
 
 namespace arm_compute
@@ -34,7 +35,7 @@ namespace cpu
 enum class KernelSelectionType
 {
     Preferred, /**< Retrieve the best implementation available for the given Cpu ISA, ignoring the build flags */
-    Supported  /**< Retrieve the best implementation available for the given Cpu ISA that is supported by the current build */
+    Supported /**< Retrieve the best implementation available for the given Cpu ISA that is supported by the current build */
 };
 
 template <class Derived>
@@ -50,13 +51,15 @@ public:
      */
 
     template <typename SelectorType>
-    static const auto *get_implementation(const SelectorType &selector, KernelSelectionType selection_type = KernelSelectionType::Supported)
+    static const auto *get_implementation(const SelectorType &selector,
+                                          KernelSelectionType selection_type = KernelSelectionType::Supported)
     {
-        using kernel_type = typename std::remove_reference<decltype(Derived::get_available_kernels())>::type::value_type;
+        using kernel_type =
+            typename std::remove_reference<decltype(Derived::get_available_kernels())>::type::value_type;
 
-        for(const auto &uk : Derived::get_available_kernels())
+        for (const auto &uk : Derived::get_available_kernels())
         {
-            if(uk.is_selected(selector) && (selection_type == KernelSelectionType::Preferred || uk.ukernel != nullptr))
+            if (uk.is_selected(selector) && (selection_type == KernelSelectionType::Preferred || uk.ukernel != nullptr))
             {
                 return &uk;
             }

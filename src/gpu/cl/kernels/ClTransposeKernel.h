@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_TRANSPOSE_KERNEL_H
-#define ARM_COMPUTE_CL_TRANSPOSE_KERNEL_H
+#ifndef ACL_SRC_GPU_CL_KERNELS_CLTRANSPOSEKERNEL_H
+#define ACL_SRC_GPU_CL_KERNELS_CLTRANSPOSEKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
@@ -34,7 +34,7 @@ namespace opencl
 {
 namespace kernels
 {
-/** OpenCL kernel to transpose a 2D tensor. */
+/** OpenCL kernel to transpose a tensor. Only the first two dimensions (width, height) are transposed. */
 class ClTransposeKernel : public IClKernel
 {
 public:
@@ -61,4 +61,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_TRANSPOSE_KERNEL_H */
+#endif // ACL_SRC_GPU_CL_KERNELS_CLTRANSPOSEKERNEL_H

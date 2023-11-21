@@ -250,8 +250,12 @@ public:
      *
      * @return The created kernel.
      */
-    Kernel create_kernel(const std::string &kernel_name, const std::string &program_name, const std::string &program_source,
-                         const std::string &kernel_path, const StringSet &build_options_set, bool is_binary) const;
+    Kernel create_kernel(const std::string &kernel_name,
+                         const std::string &program_name,
+                         const std::string &program_source,
+                         const std::string &kernel_path,
+                         const StringSet   &build_options_set,
+                         bool               is_binary) const;
 
     /** Clear the library's cache of binary programs
      */
@@ -323,7 +327,8 @@ private:
      * @param[in] program_source Source of the program.
      * @param[in] is_binary      Flag to indicate if the program source is binary.
      */
-    const Program &load_program(const std::string &program_name, const std::string &program_source, bool is_binary) const;
+    const Program &
+    load_program(const std::string &program_name, const std::string &program_source, bool is_binary) const;
 
     /** Generates the build options given a string of user defined ones
      *
@@ -343,11 +348,11 @@ private:
      */
     std::string stringify_set(const StringSet &s, const std::string &kernel_path) const;
 
-    cl::Context _context;                                             /**< Underlying CL context. */
-    CLDevice    _device;                                              /**< Underlying CL device. */
+    cl::Context                                  _context;            /**< Underlying CL context. */
+    CLDevice                                     _device;             /**< Underlying CL device. */
     mutable std::map<std::string, const Program> _programs_map;       /**< Map with all already loaded program data. */
     mutable std::map<std::string, cl::Program>   _built_programs_map; /**< Map with all already built program data. */
-    bool _is_wbsm_supported;                                          /**< Support of worksize batch size modifier support boolean*/
+    bool _is_wbsm_supported; /**< Support of worksize batch size modifier support boolean*/
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLCOMPILECONTEXT_H */

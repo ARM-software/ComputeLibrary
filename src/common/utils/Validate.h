@@ -29,7 +29,7 @@
 
 #include <cassert>
 
-#define ARM_COMPUTE_ASSERT(cond) assert(cond)
+#define ARM_COMPUTE_ASSERT(cond)            assert(cond)
 #define ARM_COMPUTE_ASSERT_NOT_NULLPTR(ptr) assert((ptr) != nullptr)
 
 #else /* defined(ARM_COMPUTE_ASSERTS_ENABLED) */

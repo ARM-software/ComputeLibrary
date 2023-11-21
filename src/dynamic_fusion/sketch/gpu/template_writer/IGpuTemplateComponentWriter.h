@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/components/Types.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
@@ -57,8 +58,7 @@ public:
      * @param[in] id      Component id
      * @param[in] tensors Tensor arguments to the components
      */
-    IGpuTemplateComponentWriter(ComponentId id, const ArgumentPack<ITensorInfo> &tensors)
-        : _id{ id }, _tensors{ tensors }
+    IGpuTemplateComponentWriter(ComponentId id, const ArgumentPack<ITensorInfo> &tensors) : _id{id}, _tensors{tensors}
     {
     }
     /** Destructor */
@@ -112,7 +112,7 @@ public:
     /** Generate the header list used in the component */
     virtual std::set<std::string> get_headers_list() const
     {
-        return std::set<std::string> {};
+        return std::set<std::string>{};
     }
     /** Generate the execution window for the component */
     virtual Window get_window() const
@@ -131,7 +131,7 @@ public:
     }
 
 private:
-    ComponentId               _id{ -1 };
+    ComponentId               _id{-1};
     ArgumentPack<ITensorInfo> _tensors{};
 };
 } // namespace dynamic_fusion

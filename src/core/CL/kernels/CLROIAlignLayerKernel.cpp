@@ -31,6 +31,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -42,24 +43,29 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status validate_arguments(const ITensorInfo         *input,
+                          const ITensorInfo         *rois,
+                          ITensorInfo               *output,
+                          const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC, DataLayout::NCHW);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(compute_roi_align_shape(*input, *rois, pool_info), output->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(compute_roi_align_shape(*input, *rois, pool_info),
+                                                           output->tensor_shape());
     }
 
-    if(is_data_type_quantized_asymmetric(input->data_type()))
+    if (is_data_type_quantized_asymmetric(input->data_type()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(rois, 1, DataType::QASYMM16);
 
@@ -82,12 +88,19 @@ CLROIAlignLayerKernel::CLROIAlignLayerKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIAlignLayerKernel::configure(const ICLTensor           *input,
+                                      const ICLTensor           *rois,
+                                      ICLTensor                 *output,
+                                      const ROIPoolingLayerInfo &pool_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
 }
 
-void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIAlignLayerKernel::configure(const CLCompileContext    &compile_context,
+                                      const ICLTensor           *input,
+                                      const ICLTensor           *rois,
+                                      ICLTensor                 *output,
+                                      const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));
@@ -97,7 +110,7 @@ void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, c
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
     output->info()->set_data_layout(input->info()->data_layout());
 
-    auto padding_info = get_padding_info({ input, rois, output });
+    auto padding_info = get_padding_info({input, rois, output});
 
     _input     = input;
     _output    = output;
@@ -111,16 +124,23 @@ void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, c
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
-    build_opts.add_option("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH))));
-    build_opts.add_option("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT))));
-    build_opts.add_option("-DMAX_DIM_Z=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL))));
+    build_opts.add_option("-DMAX_DIM_X=" +
+                          support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(
+                              input->info()->data_layout(), DataLayoutDimension::WIDTH))));
+    build_opts.add_option("-DMAX_DIM_Y=" +
+                          support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(
+                              input->info()->data_layout(), DataLayoutDimension::HEIGHT))));
+    build_opts.add_option("-DMAX_DIM_Z=" +
+                          support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(
+                              input->info()->data_layout(), DataLayoutDimension::CHANNEL))));
     build_opts.add_option("-DPOOLED_DIM_X=" + support::cpp11::to_string(pool_info.pooled_width()));
     build_opts.add_option("-DPOOLED_DIM_Y=" + support::cpp11::to_string(pool_info.pooled_height()));
     build_opts.add_option("-DSPATIAL_SCALE=" + float_to_string_with_full_precision(pool_info.spatial_scale()));
     build_opts.add_option_if(input->info()->data_layout() == DataLayout::NHWC, "-DNHWC");
-    build_opts.add_option_if(pool_info.sampling_ratio() > 0, "-DSAMPLING_RATIO=" + support::cpp11::to_string(pool_info.sampling_ratio()));
+    build_opts.add_option_if(pool_info.sampling_ratio() > 0,
+                             "-DSAMPLING_RATIO=" + support::cpp11::to_string(pool_info.sampling_ratio()));
 
-    if(is_qasymm)
+    if (is_qasymm)
     {
         const UniformQuantizationInfo iq_info    = input->info()->quantization_info().uniform();
         const UniformQuantizationInfo roisq_info = rois->info()->quantization_info().uniform();
@@ -144,7 +164,10 @@ void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, c
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLROIAlignLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status CLROIAlignLayerKernel::validate(const ITensorInfo         *input,
+                                       const ITensorInfo         *rois,
+                                       ITensorInfo               *output,
+                                       const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, rois, output, pool_info));
     return Status{};

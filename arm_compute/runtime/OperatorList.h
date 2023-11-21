@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_OPERATOR_LIST_H
-#define ARM_COMPUTE_OPERATOR_LIST_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_OPERATORLIST_H
+#define ACL_ARM_COMPUTE_RUNTIME_OPERATORLIST_H
 
 /** ActivationLayer
  *
@@ -37,6 +37,16 @@
  * ANEURALNETWORKS_RELU1
  * ANEURALNETWORKS_RELU6
  * ANEURALNETWORKS_TANH
+ *
+ */
+
+/** AddMulAdd
+ *
+ * Description:
+ * Performs a fused Add + Mul + Add [+ Relu-based-Activation] operation.
+ *
+ * Equivalent Android NNAPI Op:
+ * n/a
  *
  */
 
@@ -647,6 +657,16 @@
  *
  */
 
+/** MatMul
+ *
+ * Description:
+ * Computes a matrix multiplication in batches.
+ *
+ * Equivalent Android NNAPI Op:
+ * ANEURALNETWORKS_BATCH_MATMUL
+ *
+ */
+
 /** MaxUnpoolingLayer
  *
  * Description:
@@ -674,6 +694,16 @@
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_LOCAL_RESPONSE_NORMALIZATION
+ *
+ */
+
+/** NormalizePlanarYUVLayer
+ *
+ * Description:
+ * Function to compute normalization planar YUV layer.
+ *
+ * Equivalent Android NNAPI Op:
+ * n/a
  *
  */
 
@@ -811,6 +841,16 @@
  * ANEURALNETWORKS_REDUCE_MIN
  * ANEURALNETWORKS_REDUCE_PROD
  * ANEURALNETWORKS_REDUCE_SUM
+ *
+ */
+
+/** ReorderLayer
+ *
+ * Description:
+ * Reorders a tensor to a different weights format.
+ *
+ * Equivalent Android NNAPI Op:
+ * n/a
  *
  */
 
@@ -1009,4 +1049,4 @@
  *
  */
 
-#endif /* ARM_COMPUTE_OPERATOR_LIST_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_OPERATORLIST_H

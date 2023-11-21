@@ -28,7 +28,6 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Window.h"
 
-
 namespace arm_compute
 {
 /** Convert an offset in window steps into absolute coordinates.
@@ -41,7 +40,7 @@ namespace arm_compute
 inline Coordinates convert_window_coord_to_position(const Window &w, const Coordinates &offset)
 {
     Coordinates position;
-    for(unsigned int i = 0; i < Coordinates::num_max_dimensions; ++i)
+    for (unsigned int i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
         position.set(i, w[i].start() + offset[i] * w[i].step());
     }
@@ -165,7 +164,7 @@ public:
     template <typename M>
     void iterate_3D(M &&on_new_row_size)
     {
-        while(_end.z() != _position.z())
+        while (_end.z() != _position.z())
         {
             iterate_2D_internal(on_new_row_size, _w.x().end() - _w.x().step(), _w.y().end() - _w.y().step());
             _position[2] += _w.z().step();
@@ -212,7 +211,7 @@ private:
     void iterate_2D_internal(M &&on_new_row_size, int end_x, int end_y)
     {
         //Is there more than one row to process ?
-        if(end_y == _position.y())
+        if (end_y == _position.y())
         {
             // Both start and end belong to the same row:
             iterate_over_dim0(end_x + _w.x().step(), on_new_row_size);
@@ -220,7 +219,7 @@ private:
         else
         {
             // Do we start from the beginning of the row ?
-            if(_w.x().start() != _position.x())
+            if (_w.x().start() != _position.x())
             {
                 //Start in the middle of a row: process left-over X
                 iterate_over_dim0(_w.x().end(), on_new_row_size);
@@ -229,7 +228,7 @@ private:
 
             //Middle rows
             bool no_leftover = end_x + _w.x().step() == _w.x().end();
-            if(no_leftover)
+            if (no_leftover)
             {
                 //Switch to full row size:
                 on_new_row_size(_w[0].start(), _w.x().end());
@@ -241,7 +240,7 @@ private:
             else
             {
                 // Are there full rows to process ?
-                if(_position[1] != end_y)
+                if (_position[1] != end_y)
                 {
                     //Switch to full row size:
                     on_new_row_size(_w[0].start(), _w.x().end());
@@ -261,7 +260,7 @@ private:
      */
     void iterate_over_dim1(int end)
     {
-        for(; _position[1] != end; _position[1] += _w[1].step())
+        for (; _position[1] != end; _position[1] += _w[1].step())
         {
             _position[0] = _w[0].start();
             iterate_over_dim0(_w[0].end());
@@ -288,7 +287,7 @@ private:
     {
         // Both start and end belong to the same row:
         ARM_COMPUTE_ERROR_ON(_position[0] > end);
-        for(; _position.x() < end; _position[0] += _w[0].step())
+        for (; _position.x() < end; _position[0] += _w[0].step())
         {
             _lambda_function(_position);
         }
@@ -310,9 +309,10 @@ private:
  * @return A WindowIterator object.
  */
 template <typename L>
-WindowIterator<L> create_window_iterator(const Window &w, const Coordinates &start, const Coordinates &end, L &&lambda_function)
+WindowIterator<L>
+create_window_iterator(const Window &w, const Coordinates &start, const Coordinates &end, L &&lambda_function)
 {
     return WindowIterator<L>(w, start, end, std::move(lambda_function));
 }
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_WINDOW_ITERATOR_H*/

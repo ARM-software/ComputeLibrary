@@ -30,14 +30,19 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/kernels/NEFillBorderKernel.h"
+
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/kernels/NEFillBorderKernel.h"
 
 namespace arm_compute
 {
 namespace
 {
-inline void fill_constant_value_single_channel_special(ITensor *tensor, const Window &window, unsigned int right, unsigned int bottom, const PixelValue &constant_border_value)
+inline void fill_constant_value_single_channel_special(ITensor          *tensor,
+                                                       const Window     &window,
+                                                       unsigned int      right,
+                                                       unsigned int      bottom,
+                                                       const PixelValue &constant_border_value)
 {
     float border_value;
     constant_border_value.get(border_value);
@@ -52,39 +57,43 @@ inline void fill_constant_value_single_channel_special(ITensor *tensor, const Wi
 
     Iterator vertical_it(tensor, vertical);
 
-    execute_window_loop(vertical, [&](const Coordinates &)
-    {
-        const auto row_start = reinterpret_cast<float *>(start_valid_region + vertical_it.offset());
+    execute_window_loop(
+        vertical,
+        [&](const Coordinates &)
+        {
+            const auto row_start = reinterpret_cast<float *>(start_valid_region + vertical_it.offset());
 
-        // Fill left and right borders
-        *(row_start - 1) = border_value;
-        std::fill_n(row_start + width, right, border_value);
-    },
-    vertical_it);
+            // Fill left and right borders
+            *(row_start - 1) = border_value;
+            std::fill_n(row_start + width, right, border_value);
+        },
+        vertical_it);
 
     // Top and bottom border
     Iterator plane_it(tensor, window);
 
     // Iterate over all XY planes
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        uint8_t *base_addr = start_valid_region + plane_it.offset();
-        // Top border
-        const auto row_start = reinterpret_cast<float *>(base_addr - stridey);
-        // Fill top rows including left/right borders
-        std::fill_n(row_start - 1, 1 + width + right, border_value);
-
-        // Bottom border
-        const unsigned low_border_size = height + bottom;
-        for(unsigned int i = height; i < low_border_size; ++i)
+    execute_window_loop(
+        window,
+        [&](const Coordinates &)
         {
-            const auto row_start = reinterpret_cast<float *>(base_addr + i * stridey);
-
-            // Fill bottom rows including left/right borders
+            uint8_t *base_addr = start_valid_region + plane_it.offset();
+            // Top border
+            const auto row_start = reinterpret_cast<float *>(base_addr - stridey);
+            // Fill top rows including left/right borders
             std::fill_n(row_start - 1, 1 + width + right, border_value);
-        }
-    },
-    plane_it);
+
+            // Bottom border
+            const unsigned low_border_size = height + bottom;
+            for (unsigned int i = height; i < low_border_size; ++i)
+            {
+                const auto row_start = reinterpret_cast<float *>(base_addr + i * stridey);
+
+                // Fill bottom rows including left/right borders
+                std::fill_n(row_start - 1, 1 + width + right, border_value);
+            }
+        },
+        plane_it);
 }
 } // namespace
 
@@ -93,14 +102,20 @@ NEFillBorderKernel::NEFillBorderKernel()
 {
 }
 
-void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
+void NEFillBorderKernel::configure(ITensor          *tensor,
+                                   BorderSize        border_size,
+                                   BorderMode        border_mode,
+                                   const PixelValue &constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
     _tensor = tensor;
     configure(tensor->info(), border_size, border_mode, constant_border_value);
 }
 
-void NEFillBorderKernel::configure(ITensorInfo *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
+void NEFillBorderKernel::configure(ITensorInfo      *tensor,
+                                   BorderSize        border_size,
+                                   BorderMode        border_mode,
+                                   const PixelValue &constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
@@ -124,7 +139,7 @@ void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_UNUSED(info);
 
     // If there is no border: early exit
-    if(_border_size.empty())
+    if (_border_size.empty())
     {
         return;
     }
@@ -132,13 +147,14 @@ void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    switch(_mode)
+    switch (_mode)
     {
         case BorderMode::CONSTANT:
         {
-            if(_border_size.left == 1 && _border_size.top == 1 && _tensor->info()->data_type() == DataType::F32)
+            if (_border_size.left == 1 && _border_size.top == 1 && _tensor->info()->data_type() == DataType::F32)
             {
-                fill_constant_value_single_channel_special(_tensor, window, _border_size.right, _border_size.bottom, _constant_border_value);
+                fill_constant_value_single_channel_special(_tensor, window, _border_size.right, _border_size.bottom,
+                                                           _constant_border_value);
             }
             else
             {
@@ -176,46 +192,56 @@ void NEFillBorderKernel::fill_replicate_single_channel(const Window &window)
 
     Iterator vertical_it(_tensor, vertical);
 
-    execute_window_loop(vertical, [&](const Coordinates &)
-    {
-        uint8_t *base_addr = start_valid_region + vertical_it.offset();
-        // Fill left and right borders
-        for(unsigned int i = 0; i < _border_size.left; ++i)
+    execute_window_loop(
+        vertical,
+        [&](const Coordinates &)
         {
-            std::memcpy(base_addr + static_cast<int>(i - _border_size.left) * element_size, vertical_it.ptr(), element_size);
-        }
+            uint8_t *base_addr = start_valid_region + vertical_it.offset();
+            // Fill left and right borders
+            for (unsigned int i = 0; i < _border_size.left; ++i)
+            {
+                std::memcpy(base_addr + static_cast<int>(i - _border_size.left) * element_size, vertical_it.ptr(),
+                            element_size);
+            }
 
-        for(unsigned int i = 0; i < _border_size.right; ++i)
-        {
-            std::memcpy(base_addr + (width + i) * element_size, vertical_it.ptr() + (width - 1) * element_size, element_size);
-        }
-    },
-    vertical_it);
+            for (unsigned int i = 0; i < _border_size.right; ++i)
+            {
+                std::memcpy(base_addr + (width + i) * element_size, vertical_it.ptr() + (width - 1) * element_size,
+                            element_size);
+            }
+        },
+        vertical_it);
 
     // Top and bottom border
     Iterator plane_it(_tensor, window);
 
     // Iterate over all XY planes
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        uint8_t *base_addr = start_valid_region + plane_it.offset();
-        // Top border
-        for(int i = -_border_size.top; i < 0; ++i)
+    execute_window_loop(
+        window,
+        [&](const Coordinates &)
         {
-            // Copy top rows including left/right borders
-            std::memcpy(base_addr + i * static_cast<int>(_tensor->info()->strides_in_bytes()[1]) - _border_size.left * element_size,
-                        base_addr - _border_size.left * element_size, (_border_size.left + width + _border_size.right) * element_size);
-        }
+            uint8_t *base_addr = start_valid_region + plane_it.offset();
+            // Top border
+            for (int i = -_border_size.top; i < 0; ++i)
+            {
+                // Copy top rows including left/right borders
+                std::memcpy(base_addr + i * static_cast<int>(_tensor->info()->strides_in_bytes()[1]) -
+                                _border_size.left * element_size,
+                            base_addr - _border_size.left * element_size,
+                            (_border_size.left + width + _border_size.right) * element_size);
+            }
 
-        // Bottom border
-        for(unsigned int i = height; i < height + _border_size.bottom; ++i)
-        {
-            // Copy bottom rows including left/right borders
-            std::memcpy(base_addr + i * _tensor->info()->strides_in_bytes()[1] - _border_size.left * element_size,
-                        base_addr + (height - 1) * _tensor->info()->strides_in_bytes()[1] - _border_size.left * element_size, (_border_size.left + width + _border_size.right) * element_size);
-        }
-    },
-    plane_it);
+            // Bottom border
+            for (unsigned int i = height; i < height + _border_size.bottom; ++i)
+            {
+                // Copy bottom rows including left/right borders
+                std::memcpy(base_addr + i * _tensor->info()->strides_in_bytes()[1] - _border_size.left * element_size,
+                            base_addr + (height - 1) * _tensor->info()->strides_in_bytes()[1] -
+                                _border_size.left * element_size,
+                            (_border_size.left + width + _border_size.right) * element_size);
+            }
+        },
+        plane_it);
 }
 
 void NEFillBorderKernel::fill_constant_value_single_channel(const Window &window)
@@ -232,50 +258,57 @@ void NEFillBorderKernel::fill_constant_value_single_channel(const Window &window
 
     Iterator vertical_it(_tensor, vertical);
 
-    execute_window_loop(vertical, [&](const Coordinates &)
-    {
-        uint8_t *base_addr = start_valid_region + vertical_it.offset();
-        // Fill left and right borders
-        for(unsigned int i = 0; i < _border_size.left; ++i)
+    execute_window_loop(
+        vertical,
+        [&](const Coordinates &)
         {
-            std::memcpy(base_addr + static_cast<int>(i - _border_size.left) * element_size, &_constant_border_value, element_size);
-        }
+            uint8_t *base_addr = start_valid_region + vertical_it.offset();
+            // Fill left and right borders
+            for (unsigned int i = 0; i < _border_size.left; ++i)
+            {
+                std::memcpy(base_addr + static_cast<int>(i - _border_size.left) * element_size, &_constant_border_value,
+                            element_size);
+            }
 
-        for(unsigned int i = 0; i < _border_size.right; ++i)
-        {
-            std::memcpy(base_addr + (width + i) * element_size, &_constant_border_value, element_size);
-        }
-    },
-    vertical_it);
+            for (unsigned int i = 0; i < _border_size.right; ++i)
+            {
+                std::memcpy(base_addr + (width + i) * element_size, &_constant_border_value, element_size);
+            }
+        },
+        vertical_it);
 
     // Top and bottom border
     Iterator plane_it(_tensor, window);
 
     // Iterate over all XY planes
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        uint8_t *base_addr = start_valid_region + plane_it.offset();
-        // Top border
-        for(int i = -_border_size.top; i < 0; ++i)
+    execute_window_loop(
+        window,
+        [&](const Coordinates &)
         {
-            // Fill top rows including left/right borders
-            for(unsigned int j = 0; j < (_border_size.left + width + _border_size.right); ++j)
+            uint8_t *base_addr = start_valid_region + plane_it.offset();
+            // Top border
+            for (int i = -_border_size.top; i < 0; ++i)
             {
-                std::memcpy(base_addr + i * stridey + static_cast<int>(j - _border_size.left) * element_size, &_constant_border_value, element_size);
+                // Fill top rows including left/right borders
+                for (unsigned int j = 0; j < (_border_size.left + width + _border_size.right); ++j)
+                {
+                    std::memcpy(base_addr + i * stridey + static_cast<int>(j - _border_size.left) * element_size,
+                                &_constant_border_value, element_size);
+                }
             }
-        }
 
-        // Bottom border
-        const unsigned low_border_size = height + _border_size.bottom;
-        for(unsigned int i = height; i < low_border_size; ++i)
-        {
-            // Fill bottom rows including left/right borders
-            for(unsigned int j = 0; j < (_border_size.left + width + _border_size.right); ++j)
+            // Bottom border
+            const unsigned low_border_size = height + _border_size.bottom;
+            for (unsigned int i = height; i < low_border_size; ++i)
             {
-                std::memcpy(base_addr + i * stridey + static_cast<int>(j - _border_size.left) * element_size, &_constant_border_value, element_size);
+                // Fill bottom rows including left/right borders
+                for (unsigned int j = 0; j < (_border_size.left + width + _border_size.right); ++j)
+                {
+                    std::memcpy(base_addr + i * stridey + static_cast<int>(j - _border_size.left) * element_size,
+                                &_constant_border_value, element_size);
+                }
             }
-        }
-    },
-    plane_it);
+        },
+        plane_it);
 }
 } // namespace arm_compute

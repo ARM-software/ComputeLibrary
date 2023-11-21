@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_ICLOPERATOR_H
 
 #include "arm_compute/core/Types.h"
-
 #include "arm_compute/runtime/IOperator.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Types.h"
@@ -56,8 +55,8 @@ public:
     ICLOperator &operator=(ICLOperator &&) = default;
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void               run(ITensorPack &tensors) override;
+    void               prepare(ITensorPack &constants) override;
     MemoryRequirements workspace() const override;
 
 protected:

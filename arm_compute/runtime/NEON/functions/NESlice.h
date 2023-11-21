@@ -85,7 +85,8 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
 
     // Inherited methods overridden:
     void run() override;
@@ -129,7 +130,8 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
 };
 } // namespace experimental
 } // namespace arm_compute

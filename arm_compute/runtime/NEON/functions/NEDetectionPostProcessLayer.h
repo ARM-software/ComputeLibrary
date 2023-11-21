@@ -24,13 +24,12 @@
 #ifndef ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H
 #define ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
+#include "arm_compute/runtime/NEON/INESimpleFunction.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <map>
@@ -78,8 +77,14 @@ public:
      *
      * @note Output contains all the detections. Of those, only the ones selected by the valid region are valid.
      */
-    void configure(const ITensor *input_box_encoding, const ITensor *input_score, const ITensor *input_anchors,
-                   ITensor *output_boxes, ITensor *output_classes, ITensor *output_scores, ITensor *num_detection, DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo());
+    void configure(const ITensor                *input_box_encoding,
+                   const ITensor                *input_score,
+                   const ITensor                *input_anchors,
+                   ITensor                      *output_boxes,
+                   ITensor                      *output_classes,
+                   ITensor                      *output_scores,
+                   ITensor                      *num_detection,
+                   DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEDetectionPostProcessLayer
      *
      * @param[in] input_box_encoding The bounding box input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F32.
@@ -93,8 +98,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input_box_encoding, const ITensorInfo *input_class_score, const ITensorInfo *input_anchors,
-                           ITensorInfo *output_boxes, ITensorInfo *output_classes, ITensorInfo *output_scores, ITensorInfo *num_detection,
+    static Status validate(const ITensorInfo            *input_box_encoding,
+                           const ITensorInfo            *input_class_score,
+                           const ITensorInfo            *input_anchors,
+                           ITensorInfo                  *output_boxes,
+                           ITensorInfo                  *output_classes,
+                           ITensorInfo                  *output_scores,
+                           ITensorInfo                  *num_detection,
                            DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo());
     // Inherited methods overridden:
     void run() override;

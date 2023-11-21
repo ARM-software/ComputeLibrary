@@ -1,0 +1,3 @@
+flatbuffers==2.0
+numpy==1.19.5
+tflite==2.4.0

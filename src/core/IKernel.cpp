@@ -30,8 +30,7 @@ const Window &IKernel::window() const
     return _window;
 }
 
-IKernel::IKernel()
-    : _window()
+IKernel::IKernel() : _window()
 {
     // Create an empty window to make sure the children classes set the window values themselves
     _window.set(Window::DimX, Window::Dimension(0, 0, 1));

@@ -25,23 +25,23 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
-#include "CommonGemmExampleOptions.h"
-#include "GemmTunerHelpers.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+
 #include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.h"
 #include "src/gpu/cl/kernels/ClGemmLowpReductionKernel.h"
 #include "tests/CL/Helper.h"
-#include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
+#include "utils/Utils.h"
 
+#include "CommonGemmExampleOptions.h"
+#include "GemmTunerHelpers.h"
 #include <cstdlib>
 #include <memory>
 
@@ -56,12 +56,12 @@ namespace
 /** Structure holding all tunable gemm configs specific to this example/strategy */
 struct GemmConfigs
 {
-    size_t m0{ 4 };                /**< Number of rows processed by the matrix multiplication */
-    size_t n0{ 4 };                /**< Number of columns processed by the matrix multiplication */
-    size_t k0{ 4 };                /**< Number of partial accumulations performed by the matrix multiplication */
-    size_t h0{ 1 };                /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
-    bool   interleave_rhs{ true }; /**< Interleave rhs matrix */
-    bool   transpose_rhs{ true };  /**< Transpose rhs matrix */
+    size_t m0{4};                /**< Number of rows processed by the matrix multiplication */
+    size_t n0{4};                /**< Number of columns processed by the matrix multiplication */
+    size_t k0{4};                /**< Number of partial accumulations performed by the matrix multiplication */
+    size_t h0{1};                /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool   interleave_rhs{true}; /**< Interleave rhs matrix */
+    bool   transpose_rhs{true};  /**< Transpose rhs matrix */
 };
 
 /** Formatted output of the GemmConfigs type
@@ -119,10 +119,10 @@ public:
     /** Default destructor */
     ~GemmConfigOptions() = default;
 
-    SimpleOption<size_t> *m0;             /**< Number of rows processed by the matrix multiplication option */
-    SimpleOption<size_t> *n0;             /**< Number of columns processed by the matrix multiplication option */
-    SimpleOption<size_t> *k0;             /**< Number of partial accumulations performed by the matrix multiplication option */
-    SimpleOption<size_t> *h0;             /**< Number of horizontal blocks of size (k0xn0) stored on the same output row option */
+    SimpleOption<size_t> *m0; /**< Number of rows processed by the matrix multiplication option */
+    SimpleOption<size_t> *n0; /**< Number of columns processed by the matrix multiplication option */
+    SimpleOption<size_t> *k0; /**< Number of partial accumulations performed by the matrix multiplication option */
+    SimpleOption<size_t> *h0; /**< Number of horizontal blocks of size (k0xn0) stored on the same output row option */
     SimpleOption<size_t> *interleave_rhs; /**< Interleave rhs matrix option (1 enable; 0 disable) */
     SimpleOption<size_t> *transpose_rhs;  /**< Transpose rhs matrix option (1 enable; 0 disable) */
 };
@@ -147,8 +147,9 @@ GemmConfigs consume_gemm_configs(const GemmConfigOptions &options)
 
 } // namespace
 
-using ClGemmLowpMatrixMultiplyReshapedOnlyRhs = test::CLSynthetizeOperator<ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel>;
-using ClGemmLowpMatrixAReduction              = test::CLSynthetizeOperator<ClGemmLowpMatrixAReductionKernel>;
+using ClGemmLowpMatrixMultiplyReshapedOnlyRhs =
+    test::CLSynthetizeOperator<ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel>;
+using ClGemmLowpMatrixAReduction = test::CLSynthetizeOperator<ClGemmLowpMatrixAReductionKernel>;
 
 class CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFusedOutputStageFixedpointExample : public Example
 {
@@ -165,12 +166,12 @@ public:
         GemmConfigOptions        config_options(parser);
 
         parser.parse(argc, argv);
-        if(param_options.help->is_set() && param_options.help->value())
+        if (param_options.help->is_set() && param_options.help->value())
         {
             parser.print_help(argv[0]);
             return false;
         }
-        if(!parser.validate())
+        if (!parser.validate())
         {
             // Invalid arguments. Use default parameters and configs
             std::cerr << "Invalid arguments." << std::endl;
@@ -199,10 +200,7 @@ public:
 
         // Set arbitrary quantization information (non-zero offset to ensure offset contribution stage is included)
         // Could be extended in the future to include a user-controlled option for offset == 0
-        const QuantizationInfo q_info
-        {
-            0.012, 3
-        };
+        const QuantizationInfo q_info{0.012, 3};
         lhs.info()->set_quantization_info(q_info);
         rhs.info()->set_quantization_info(q_info);
         bias.info()->set_quantization_info(q_info);
@@ -220,16 +218,17 @@ public:
         rhs_info.transpose          = configs.transpose_rhs;
         rhs_info.export_to_cl_image = false; // CL image not supported for quantized cases yet
 
-        if(rhs_info.h0 == 0)
+        if (rhs_info.h0 == 0)
         {
             rhs_info.h0 = std::max(static_cast<unsigned int>(params.N) / rhs_info.n0, 1U);
         }
 
-        rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
+        rhs_reshaped.allocator()->init(
+            TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
         rhs_reshaped.info()->set_quantization_info(q_info);
-        if(rhs_info.export_to_cl_image)
+        if (rhs_info.export_to_cl_image)
         {
-            if(!examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info()))
+            if (!examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info()))
             {
                 std::cerr << "cl_image is not supported on the device, disable export_to_cl_image" << std::endl;
                 return false;
@@ -251,9 +250,7 @@ public:
 
             gemmlowp_output_stage.gemmlowp_multipliers.resize(num_filters);
             gemmlowp_output_stage.gemmlowp_shifts.resize(num_filters);
-            quantization::compute_quantized_multipliers_and_shifts(lhs.info(),
-                                                                   rhs.info(),
-                                                                   dst.info(),
+            quantization::compute_quantized_multipliers_and_shifts(lhs.info(), rhs.info(), dst.info(),
                                                                    gemmlowp_output_stage.gemmlowp_multipliers.data(),
                                                                    gemmlowp_output_stage.gemmlowp_shifts.data());
             gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];
@@ -290,14 +287,14 @@ public:
         gemm_info.output_stage            = gemmlowp_output_stage;
 
         // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
-        if(gemm_info.b_offset != 0)
+        if (gemm_info.b_offset != 0)
         {
             const TensorInfo info_vector_sum_row(compute_reductionB_shape(*lhs.info()), 1, DataType::S32);
             vector_sum_row.allocator()->init(info_vector_sum_row);
 
             mtx_a_reduction = std::make_unique<ClGemmLowpMatrixAReduction>();
 
-            if(!mtx_a_reduction->validate(lhs.info(), vector_sum_row.info(), GEMMLowpReductionKernelInfo{}))
+            if (!mtx_a_reduction->validate(lhs.info(), vector_sum_row.info(), GEMMLowpReductionKernelInfo{}))
             {
                 std::cerr << "Invalid arguments for CLGEMMLowpMatrixAReductionKernel." << std::endl;
                 return false;
@@ -306,7 +303,7 @@ public:
             mtx_a_reduction->configure(lhs.info(), vector_sum_row.info(), GEMMLowpReductionKernelInfo{});
         }
         // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
-        if(gemm_info.a_offset != 0)
+        if (gemm_info.a_offset != 0)
         {
             const TensorInfo info_vector_sum_col(compute_reductionA_shape(*rhs.info()), 1, DataType::S32);
             vector_sum_col.allocator()->init(info_vector_sum_col);
@@ -314,8 +311,10 @@ public:
         }
 
         // Validate argments
-        if(!gemm.validate(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info, gemm_info.a_offset == 0 ? nullptr : vector_sum_col.info(),
-                          gemm_info.b_offset == 0 ? nullptr : vector_sum_row.info(), bias.info(), dst_multipliers.info(), dst_shifts.info()))
+        if (!gemm.validate(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info,
+                           gemm_info.a_offset == 0 ? nullptr : vector_sum_col.info(),
+                           gemm_info.b_offset == 0 ? nullptr : vector_sum_row.info(), bias.info(),
+                           dst_multipliers.info(), dst_shifts.info()))
         {
             std::cerr << "Invalid arguments for ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel." << std::endl;
             return false;
@@ -323,8 +322,9 @@ public:
 
         // Configure function
         gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info,
-                       gemm_info.a_offset == 0 ? nullptr : vector_sum_col.info(), gemm_info.b_offset == 0 ? nullptr : vector_sum_row.info(),
-                       bias.info(), dst_multipliers.info(), dst_shifts.info());
+                       gemm_info.a_offset == 0 ? nullptr : vector_sum_col.info(),
+                       gemm_info.b_offset == 0 ? nullptr : vector_sum_row.info(), bias.info(), dst_multipliers.info(),
+                       dst_shifts.info());
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -341,13 +341,20 @@ public:
     }
     void do_run() override
     {
-        if(mtx_a_reduction != nullptr)
+        if (mtx_a_reduction != nullptr)
         {
-            ITensorPack red_pack({ { ACL_SRC, &lhs }, { ACL_DST, &dst } });
+            ITensorPack red_pack({{ACL_SRC, &lhs}, {ACL_DST, &dst}});
             mtx_a_reduction->run(red_pack);
         }
 
-        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs }, { ACL_BIAS, &bias }, { ACL_VEC_COL_SUM, &vector_sum_col }, { ACL_VEC_ROW_SUM, &vector_sum_row }, { ACL_SHIFTS, &dst_shifts }, { ACL_MULTIPLIERS, &dst_multipliers }, { ACL_DST, &dst } });
+        ITensorPack gemm_pack({{ACL_SRC_0, &lhs},
+                               {ACL_SRC_1, &rhs},
+                               {ACL_BIAS, &bias},
+                               {ACL_VEC_COL_SUM, &vector_sum_col},
+                               {ACL_VEC_ROW_SUM, &vector_sum_row},
+                               {ACL_SHIFTS, &dst_shifts},
+                               {ACL_MULTIPLIERS, &dst_multipliers},
+                               {ACL_DST, &dst}});
         gemm.run(gemm_pack);
 
         // Make sure all the OpenCL jobs are done executing:
@@ -370,7 +377,7 @@ private:
     CLTensor                                    dst_shifts{};
     CLTuner                                     tuner{};
     ClGemmLowpMatrixMultiplyReshapedOnlyRhs     gemm{};
-    std::unique_ptr<ClGemmLowpMatrixAReduction> mtx_a_reduction{ nullptr };
+    std::unique_ptr<ClGemmLowpMatrixAReduction> mtx_a_reduction{nullptr};
 };
 
 /** Main test program for gemmlowp reshaped rhs only with fused output stage fixedpoint

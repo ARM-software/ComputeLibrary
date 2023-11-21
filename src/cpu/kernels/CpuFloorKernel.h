@@ -65,7 +65,7 @@ public:
     Window infer_window(const ITensorInfo *src, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct FloorKernel
@@ -78,7 +78,7 @@ public:
     static const std::vector<FloorKernel> &get_available_kernels();
 
 private:
-    FloorKernelPtr _run_method{ nullptr };
+    FloorKernelPtr _run_method{nullptr};
     std::string    _name{};
 };
 } // namespace kernels

@@ -34,14 +34,14 @@
  *
  */
 #define SCALAR_ACCESS_STR(offset, n0, x) scalar_access_##offset##_##n0(x)
-#define SCALAR_ACCESS(offset, n0, x) SCALAR_ACCESS_STR(offset, n0, x)
+#define SCALAR_ACCESS(offset, n0, x)     SCALAR_ACCESS_STR(offset, n0, x)
 
 // offset == 0
-#define scalar_access_0_1(x) ((x).s0)
-#define scalar_access_0_2(x) ((x).s01)
-#define scalar_access_0_3(x) ((x).s012)
-#define scalar_access_0_4(x) ((x).s0123)
-#define scalar_access_0_8(x) ((x).s01234567)
+#define scalar_access_0_1(x)  ((x).s0)
+#define scalar_access_0_2(x)  ((x).s01)
+#define scalar_access_0_3(x)  ((x).s012)
+#define scalar_access_0_4(x)  ((x).s0123)
+#define scalar_access_0_8(x)  ((x).s01234567)
 #define scalar_access_0_16(x) ((x).s0123456789ABCDEF)
 
 // offset == 1
@@ -100,8 +100,7 @@
  * @param[in] Z          The z-axis offset vector
  * @{
  */
-#define LOAD_TENSOR_ROW_0(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
-    ({})
+#define LOAD_TENSOR_ROW_0(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) ({})
 
 #define LOAD_TENSOR_ROW_1(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
     SCALAR_ACCESS(COL_OFFSET, N0, BASENAME##0) = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + 0 * STRIDE_Y + Z##0));
@@ -186,8 +185,10 @@
  * @param[in] Z          The z-axis offset vector
  * @{
  */
-#define LOAD_TENSOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) LOAD_TENSOR_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)
-#define LOAD_TENSOR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) LOAD_TENSOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)
+#define LOAD_TENSOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)
+#define LOAD_TENSOR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z) \
+    LOAD_TENSOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, COL_OFFSET, STRIDE_Y, Z)
 /** @} */ // end of group LOAD_TENSOR
 
 /** Load 2D tensor (consecutive rows and columns) with Z offset.
@@ -202,8 +203,7 @@
  * @param[in] Z         The z-axis offset vector
  * @{
  */
-#define LOAD_TENSOR_M0X0(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
-    ({})
+#define LOAD_TENSOR_M0X0(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) ({})
 
 #define LOAD_TENSOR_M0X1(M0, N0, DATA_TYPE, a, input_ptr, src_stride_y, zin) \
     LOAD_TENSOR(M0, N0, DATA_TYPE, a, input_ptr, 0, src_stride_y, zin);
@@ -279,8 +279,10 @@
  * @param[in] Z         The z-axis offset vector
  * @{
  */
-#define LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) LOAD_TENSOR_M0X##N0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
-#define LOAD_TENSOR_M0XN0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    LOAD_TENSOR_M0X##N0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define LOAD_TENSOR_M0XN0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 /** @}*/ // end of group LOAD_TENSOR_M0XN0
 
 /** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
@@ -395,8 +397,10 @@
  * @param[in] Z         The z-axis offset vector
  * @{
  */
-#define LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
-#define LOAD_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
+#define LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) \
+    LOAD_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
+#define LOAD_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) \
+    LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
 /** @} */ // end of group LOAD_BLOCK
 
 /** Partially load the 0 to (n-1)th rows of the given variables
@@ -517,8 +521,10 @@
  * @param[in] Z         The offset in z-axis direction
  * @{
  */
-#define LOAD_BLOCK_PARTIAL_STR(LOAD_M0, LOAD_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_ROW_PARTIAL_##LOAD_M0(N0, LOAD_N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
-#define LOAD_BLOCK_PARTIAL(LOAD_M0, LOAD_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_BLOCK_PARTIAL_STR(LOAD_M0, LOAD_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
+#define LOAD_BLOCK_PARTIAL_STR(LOAD_M0, LOAD_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) \
+    LOAD_ROW_PARTIAL_##LOAD_M0(N0, LOAD_N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
+#define LOAD_BLOCK_PARTIAL(LOAD_M0, LOAD_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) \
+    LOAD_BLOCK_PARTIAL_STR(LOAD_M0, LOAD_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
 /** Load a block that can be partial in both x and y dimensions
  *
  * @note in cases @p PARTIAL_STORE_N0 != 1, 2, 3, 4, 8, 16, extra vload(s) will be invoked, thus incurring small performance penalty.
@@ -541,22 +547,23 @@
  * @param[in] PARTIAL_COND_Y   Condition on the y axis to perform the partial load Y. True to use PARTIAL_STORE_M0 rather than M0.
  * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial load X. True to use PARTIAL_STORE_N0 rather than N0.
  */
-#define LOAD_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
-    if(!(PARTIAL_COND_X) && !(PARTIAL_COND_Y))                                                                                                                   \
-    {                                                                                                                                                            \
-        LOAD_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                                                                           \
-    }                                                                                                                                                            \
-    else if((PARTIAL_COND_Y) && !(PARTIAL_COND_X))                                                                                                               \
-    {                                                                                                                                                            \
-        LOAD_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                                                             \
-    }                                                                                                                                                            \
-    else if(!(PARTIAL_COND_Y) && (PARTIAL_COND_X))                                                                                                               \
-    {                                                                                                                                                            \
-        LOAD_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                                                             \
-    }                                                                                                                                                            \
-    else                                                                                                                                                         \
-    {                                                                                                                                                            \
-        LOAD_BLOCK_PARTIAL(PARTIAL_STORE_M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                                               \
+#define LOAD_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0,     \
+                                      PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                            \
+    if (!(PARTIAL_COND_X) && !(PARTIAL_COND_Y))                                                                    \
+    {                                                                                                              \
+        LOAD_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                             \
+    }                                                                                                              \
+    else if ((PARTIAL_COND_Y) && !(PARTIAL_COND_X))                                                                \
+    {                                                                                                              \
+        LOAD_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);               \
+    }                                                                                                              \
+    else if (!(PARTIAL_COND_Y) && (PARTIAL_COND_X))                                                                \
+    {                                                                                                              \
+        LOAD_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);               \
+    }                                                                                                              \
+    else                                                                                                           \
+    {                                                                                                              \
+        LOAD_BLOCK_PARTIAL(PARTIAL_STORE_M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z); \
     }
 /** Load a block that can only be partial in x but not y.
  *
@@ -578,14 +585,15 @@
  * @param[in] PARTIAL_STORE_N0 The partial size in x, for partial blocks. Supported range: [1, @p N0)
  * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial load X. True to use PARTIAL_STORE_N0 rather than N0.
  */
-#define LOAD_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_N0, PARTIAL_COND_X) \
-    if(!(PARTIAL_COND_X))                                                                                                \
-    {                                                                                                                    \
-        LOAD_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                                   \
-    }                                                                                                                    \
-    else                                                                                                                 \
-    {                                                                                                                    \
-        LOAD_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                     \
+#define LOAD_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_N0, \
+                                PARTIAL_COND_X)                                                          \
+    if (!(PARTIAL_COND_X))                                                                               \
+    {                                                                                                    \
+        LOAD_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                   \
+    }                                                                                                    \
+    else                                                                                                 \
+    {                                                                                                    \
+        LOAD_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);     \
     }
 /** Load a block that can only be partial in y but not x.
  *
@@ -607,14 +615,15 @@
  * @param[in] PARTIAL_STORE_M0 The partial size in y, for partial blocks. Supported range: [1, @p M0)
  * @param[in] PARTIAL_COND_Y   Condition on the y axis to perform the partial store Y. True to use PARTIAL_STORE_M0 rather than M0.
  */
-#define LOAD_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_COND_Y) \
-    if(!(PARTIAL_COND_Y))                                                                                                \
-    {                                                                                                                    \
-        LOAD_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                                   \
-    }                                                                                                                    \
-    else                                                                                                                 \
-    {                                                                                                                    \
-        LOAD_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                     \
+#define LOAD_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, \
+                                PARTIAL_COND_Y)                                                          \
+    if (!(PARTIAL_COND_Y))                                                                               \
+    {                                                                                                    \
+        LOAD_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);                   \
+    }                                                                                                    \
+    else                                                                                                 \
+    {                                                                                                    \
+        LOAD_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z);     \
     }
 /** @} */ // end of group LOAD_BLOCK_PARTIAL
 /** Boundary-aware GeMM block load
@@ -676,28 +685,33 @@
  */
 #if PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 // Case1: No partial blocks in either x or y
-#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
+#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, \
+                                  PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                        \
     LOAD_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
 
 #elif PARTIAL_STORE_M0 > 0 && PARTIAL_STORE_N0 == 0
 // Case2: Partial blocks in y
-#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), BASENAME, 0);                                                                                 \
+#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, \
+                                  PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                        \
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), BASENAME, 0);                               \
     LOAD_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_COND_Y)
 
 #elif PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 > 0
 // Case3: Partial blocks in x
-#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), BASENAME, 0);                                                                                 \
+#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, \
+                                  PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                        \
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), BASENAME, 0);                               \
     LOAD_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_N0, PARTIAL_COND_X)
 
 #else // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 // Case4: Partial blocks in both x and y
-#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), BASENAME, 0);                                                                                 \
-    LOAD_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)
+#define LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, \
+                                  PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                        \
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), BASENAME, 0);                               \
+    LOAD_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, \
+                                  PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)
 
-#endif // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
+#endif    // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 /** @} */ // end of group LOAD_BLOCK_BOUNDARY_AWARE
 
 /** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
@@ -795,8 +809,10 @@
  * @param[in] Y_STEP_ROW The incremental step row for the y coordinate (in pixels)
  * @{
  */
-#define LOAD_TEXTURE2D_STR(M0, N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW) LOAD_TEXTURE2D_ROW_##M0(N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW)
-#define LOAD_TEXTURE2D(M0, N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW) LOAD_TEXTURE2D_STR(M0, N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW)
+#define LOAD_TEXTURE2D_STR(M0, N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW) \
+    LOAD_TEXTURE2D_ROW_##M0(N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW)
+#define LOAD_TEXTURE2D(M0, N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW) \
+    LOAD_TEXTURE2D_STR(M0, N0, DATA_TYPE, BASENAME, IMG, X_COORD, Y_COORD, X_STEP_ROW, Y_STEP_ROW)
 /** @} */ // end of group LOAD_TEXTURE2D
 
 /** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1) passing the Y index for each row to be loaded.
@@ -815,7 +831,7 @@
 #define LOAD_ROW_INDIRECT_1(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)      \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##0;                                                                            \
-    if(Y_MASK##0 != 0)                                                                      \
+    if (Y_MASK##0 != 0)                                                                     \
         BASENAME##0 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##0 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##0 = 0;
@@ -824,7 +840,7 @@
     LOAD_ROW_INDIRECT_1(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##1;                                                                            \
-    if(Y_MASK##1 != 0)                                                                      \
+    if (Y_MASK##1 != 0)                                                                     \
         BASENAME##1 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##1 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##1 = 0;
@@ -833,7 +849,7 @@
     LOAD_ROW_INDIRECT_2(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##2;                                                                            \
-    if(Y_MASK##2 != 0)                                                                      \
+    if (Y_MASK##2 != 0)                                                                     \
         BASENAME##2 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##2 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##2 = 0;
@@ -842,7 +858,7 @@
     LOAD_ROW_INDIRECT_3(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##3;                                                                            \
-    if(Y_MASK##3 != 0)                                                                      \
+    if (Y_MASK##3 != 0)                                                                     \
         BASENAME##3 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##3 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##3 = 0;
@@ -851,7 +867,7 @@
     LOAD_ROW_INDIRECT_4(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##4;                                                                            \
-    if(Y_MASK##4 != 0)                                                                      \
+    if (Y_MASK##4 != 0)                                                                     \
         BASENAME##4 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##4 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##4 = 0;
@@ -860,7 +876,7 @@
     LOAD_ROW_INDIRECT_5(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##5;                                                                            \
-    if(Y_MASK##5 != 0)                                                                      \
+    if (Y_MASK##5 != 0)                                                                     \
         BASENAME##5 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##5 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##5 = 0;
@@ -869,7 +885,7 @@
     LOAD_ROW_INDIRECT_6(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##6;                                                                            \
-    if(Y_MASK##6 != 0)                                                                      \
+    if (Y_MASK##6 != 0)                                                                     \
         BASENAME##6 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##6 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##6 = 0;
@@ -878,7 +894,7 @@
     LOAD_ROW_INDIRECT_7(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##7;                                                                            \
-    if(Y_MASK##7 != 0)                                                                      \
+    if (Y_MASK##7 != 0)                                                                     \
         BASENAME##7 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##7 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##7 = 0;
@@ -887,7 +903,7 @@
     LOAD_ROW_INDIRECT_8(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##8;                                                                            \
-    if(Y_MASK##8 != 0)                                                                      \
+    if (Y_MASK##8 != 0)                                                                     \
         BASENAME##8 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##8 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##8 = 0;
@@ -896,7 +912,7 @@
     LOAD_ROW_INDIRECT_9(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)          \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##9;                                                                            \
-    if(Y_MASK##9 != 0)                                                                      \
+    if (Y_MASK##9 != 0)                                                                     \
         BASENAME##9 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##9 * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##9 = 0;
@@ -905,7 +921,7 @@
     LOAD_ROW_INDIRECT_10(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)         \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##A;                                                                            \
-    if(Y_MASK##A != 0)                                                                      \
+    if (Y_MASK##A != 0)                                                                     \
         BASENAME##A = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##A * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##A = 0;
@@ -914,7 +930,7 @@
     LOAD_ROW_INDIRECT_11(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)         \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##B;                                                                            \
-    if(Y_MASK##B != 0)                                                                      \
+    if (Y_MASK##B != 0)                                                                     \
         BASENAME##B = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##B * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##B = 0;
@@ -923,7 +939,7 @@
     LOAD_ROW_INDIRECT_12(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)         \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##C;                                                                            \
-    if(Y_MASK##C != 0)                                                                      \
+    if (Y_MASK##C != 0)                                                                     \
         BASENAME##C = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##C * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##C = 0;
@@ -932,7 +948,7 @@
     LOAD_ROW_INDIRECT_13(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)         \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##D;                                                                            \
-    if(Y_MASK##D != 0)                                                                      \
+    if (Y_MASK##D != 0)                                                                     \
         BASENAME##D = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##D * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##D = 0;
@@ -941,7 +957,7 @@
     LOAD_ROW_INDIRECT_14(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)         \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##E;                                                                            \
-    if(Y_MASK##E != 0)                                                                      \
+    if (Y_MASK##E != 0)                                                                     \
         BASENAME##E = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##E * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##E = 0;
@@ -950,7 +966,7 @@
     LOAD_ROW_INDIRECT_15(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)         \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                                            \
     BASENAME##F;                                                                            \
-    if(Y_MASK##F != 0)                                                                      \
+    if (Y_MASK##F != 0)                                                                     \
         BASENAME##F = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##F * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##F = 0;
@@ -976,8 +992,10 @@
  * @param[in] Y_MASK    The y-axis mask vector. If 0, forces BASENAMEn to 0
  * @{
  */
-#define LOAD_BLOCK_INDIRECT_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK) LOAD_ROW_INDIRECT_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)
-#define LOAD_BLOCK_INDIRECT(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK) LOAD_BLOCK_INDIRECT_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)
+#define LOAD_BLOCK_INDIRECT_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK) \
+    LOAD_ROW_INDIRECT_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)
+#define LOAD_BLOCK_INDIRECT(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK) \
+    LOAD_BLOCK_INDIRECT_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)
 /** @} */ // end of group LOAD_BLOCK_INDIRECT
 
 /** Loads the elements from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
@@ -1088,8 +1106,10 @@
  * @param[in] STRIDE_Y  The stride in y-axis direction
  * @{
  */
-#define LOAD_SCALAR_AS_VECTOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) LOAD_ELEMENT_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)
-#define LOAD_SCALAR_AS_VECTOR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) LOAD_SCALAR_AS_VECTOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)
+#define LOAD_SCALAR_AS_VECTOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)
+#define LOAD_SCALAR_AS_VECTOR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_SCALAR_AS_VECTOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)
 /** @} */ // end of group LOAD_SCALAR_AS_VECTOR
 
 /** Basic macros to calculate Z offset values from Z0 to Zn-1
@@ -1187,8 +1207,10 @@
  * @param[in] STRIDE_Y        The stride value in y-axis direction
  * @{
  */
-#define CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) CALCULATE_Z_OFFSET_##M0(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
-#define CALCULATE_Z_OFFSET(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
+#define CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
+    CALCULATE_Z_OFFSET_##M0(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
+#define CALCULATE_Z_OFFSET(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
+    CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
 /** @} */ // end of group CALCULATE_Z_OFFSET
 
 /** Scale the rows in the given variables (BASENAME0 to BASENAMEn-1)
@@ -1199,8 +1221,7 @@
  * @param[in] SCALE     The scale factor
  * @{
  */
-#define SCALE_ROW_1(DATA_TYPE, BASENAME, SCALE) \
-    BASENAME##0 *= (DATA_TYPE)SCALE;
+#define SCALE_ROW_1(DATA_TYPE, BASENAME, SCALE) BASENAME##0 *= (DATA_TYPE)SCALE;
 
 #define SCALE_ROW_2(DATA_TYPE, BASENAME, SCALE) \
     SCALE_ROW_1(DATA_TYPE, BASENAME, SCALE)     \
@@ -1275,7 +1296,7 @@
  * @{
  */
 #define SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE) SCALE_ROW_##N(DATA_TYPE, BASENAME, SCALE)
-#define SCALE_BLOCK(N, DATA_TYPE, BASENAME, SCALE) SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE)
+#define SCALE_BLOCK(N, DATA_TYPE, BASENAME, SCALE)     SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE)
 /** @} */ // end of group SCALE_BLOCK
 
 /** Create a new vector containing the values at the given index for a set of given vectors
@@ -1287,8 +1308,7 @@
  * @param[in] TYPE     The data type of the destination vectors
  * @{
  */
-#define COLUMN_VECTOR1(IDX_COL, BASENAME, X, TYPE) \
-    TYPE BASENAME##IDX_COL = (TYPE)((X##0).s##IDX_COL);
+#define COLUMN_VECTOR1(IDX_COL, BASENAME, X, TYPE) TYPE BASENAME##IDX_COL = (TYPE)((X##0).s##IDX_COL);
 #define COLUMN_VECTOR2(IDX_COL, BASENAME, X, TYPE) \
     VEC_DATA_TYPE(TYPE, 2)                         \
     BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 2))((X##0).s##IDX_COL, (X##1).s##IDX_COL);
@@ -1297,13 +1317,20 @@
     BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 3))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL);
 #define COLUMN_VECTOR4(IDX_COL, BASENAME, X, TYPE) \
     VEC_DATA_TYPE(TYPE, 4)                         \
-    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 4))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL);
-#define COLUMN_VECTOR8(IDX_COL, BASENAME, X, TYPE) \
-    VEC_DATA_TYPE(TYPE, 8)                         \
-    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 8))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL);
-#define COLUMN_VECTOR16(IDX_COL, BASENAME, X, TYPE) \
-    VEC_DATA_TYPE(TYPE, 16)                         \
-    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 16))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL, (X##8).s##IDX_COL, (X##9).s##IDX_COL, (X##A).s##IDX_COL, (X##B).s##IDX_COL, (X##C).s##IDX_COL, (X##D).s##IDX_COL, (X##E).s##IDX_COL, (X##F).s##IDX_COL);
+    BASENAME##IDX_COL =                            \
+        (VEC_DATA_TYPE(TYPE, 4))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL);
+#define COLUMN_VECTOR8(IDX_COL, BASENAME, X, TYPE)                                                           \
+    VEC_DATA_TYPE(TYPE, 8)                                                                                   \
+    BASENAME##IDX_COL =                                                                                      \
+        (VEC_DATA_TYPE(TYPE, 8))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, \
+                                 (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL);
+#define COLUMN_VECTOR16(IDX_COL, BASENAME, X, TYPE)                                                           \
+    VEC_DATA_TYPE(TYPE, 16)                                                                                   \
+    BASENAME##IDX_COL =                                                                                       \
+        (VEC_DATA_TYPE(TYPE, 16))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, \
+                                  (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL, \
+                                  (X##8).s##IDX_COL, (X##9).s##IDX_COL, (X##A).s##IDX_COL, (X##B).s##IDX_COL, \
+                                  (X##C).s##IDX_COL, (X##D).s##IDX_COL, (X##E).s##IDX_COL, (X##F).s##IDX_COL);
 /** @} */ // end of group COLUMN_VECTORn
 
 /** Create a new vector containing the values at the given index. Utility macros for transposing a colum-vector
@@ -1315,8 +1342,7 @@
  * @param[in] TYPE     The data type of the destination vectors
  * @{
  */
-#define COLUMN_VECTOR_SCALAR1(IDX_COL, BASENAME, X, TYPE) \
-    TYPE BASENAME##IDX_COL = (TYPE)((X##0));
+#define COLUMN_VECTOR_SCALAR1(IDX_COL, BASENAME, X, TYPE) TYPE BASENAME##IDX_COL = (TYPE)((X##0));
 #define COLUMN_VECTOR_SCALAR2(IDX_COL, BASENAME, X, TYPE) \
     VEC_DATA_TYPE(TYPE, 2)                                \
     BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 2))((X##0), (X##1));
@@ -1329,9 +1355,10 @@
 #define COLUMN_VECTOR_SCALAR8(IDX_COL, BASENAME, X, TYPE) \
     VEC_DATA_TYPE(TYPE, 8)                                \
     BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 8))((X##0), (X##1), (X##2), (X##3), (X##4), (X##5), (X##6), (X##7));
-#define COLUMN_VECTOR_SCALAR16(IDX_COL, BASENAME, X, TYPE) \
-    VEC_DATA_TYPE(TYPE, 16)                                \
-    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 16))((X##0), (X##1), (X##2), (X##3), (X##4), (X##5), (X##6), (X##7), (X##8), (X##9), (X##A), (X##B), (X##C), (X##D), (X##E), (X##F));
+#define COLUMN_VECTOR_SCALAR16(IDX_COL, BASENAME, X, TYPE)                                                        \
+    VEC_DATA_TYPE(TYPE, 16)                                                                                       \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 16))((X##0), (X##1), (X##2), (X##3), (X##4), (X##5), (X##6), (X##7), \
+                                                  (X##8), (X##9), (X##A), (X##B), (X##C), (X##D), (X##E), (X##F));
 /** @} */ // end of group COLUMN_VECTOR_SCALARn
 
 /** Create transposed vectors of the given vectors
@@ -1343,8 +1370,7 @@
  * @param[in] TYPE     The data type of the transposed vectors
  * @{
  */
-#define TRANSPOSE_K0X1(K0, BASENAME, BS, TYPE) \
-    COLUMN_VECTOR_SCALAR(K0, 0, BASENAME, BS, TYPE);
+#define TRANSPOSE_K0X1(K0, BASENAME, BS, TYPE) COLUMN_VECTOR_SCALAR(K0, 0, BASENAME, BS, TYPE);
 #define TRANSPOSE_K0X2(K0, BASENAME, BS, TYPE) \
     COLUMN_VECTOR(K0, 0, BASENAME, BS, TYPE);  \
     COLUMN_VECTOR(K0, 1, BASENAME, BS, TYPE);
@@ -1417,8 +1443,7 @@
  * @param[in] BIAS     The basename of the added variables
  * @{
  */
-#define ADD_ROW_1(BASENAME, BIAS) \
-    BASENAME##0 += BIAS##0;
+#define ADD_ROW_1(BASENAME, BIAS) BASENAME##0 += BIAS##0;
 
 #define ADD_ROW_2(BASENAME, BIAS) \
     ADD_ROW_1(BASENAME, BIAS)     \
@@ -1493,7 +1518,7 @@
  * @{
  */
 #define ADD_BLOCK_STR(N, BASENAME, BIAS) ADD_ROW_##N(BASENAME, BIAS)
-#define ADD_BLOCK(N, BASENAME, BIAS) ADD_BLOCK_STR(N, BASENAME, BIAS)
+#define ADD_BLOCK(N, BASENAME, BIAS)     ADD_BLOCK_STR(N, BASENAME, BIAS)
 /** @} */ // end of group ADD_BLOCK
 
 /** Broadcast (add single value) to the each element of the destination variables
@@ -1503,8 +1528,7 @@
  * @param[in] BIAS     The variable containing the value to add
  * @{
  */
-#define ADD_ROW_BROADCAST_1(BASENAME, BIAS) \
-    BASENAME##0 += BIAS;
+#define ADD_ROW_BROADCAST_1(BASENAME, BIAS) BASENAME##0 += BIAS;
 
 #define ADD_ROW_BROADCAST_2(BASENAME, BIAS) \
     ADD_ROW_BROADCAST_1(BASENAME, BIAS)     \
@@ -1578,7 +1602,7 @@
  * @{
  */
 #define ADD_BLOCK_BROADCAST_STR(N, BASENAME, BIAS) ADD_ROW_BROADCAST_##N(BASENAME, BIAS)
-#define ADD_BLOCK_BROADCAST(N, BASENAME, BIAS) ADD_BLOCK_BROADCAST_STR(N, BASENAME, BIAS)
+#define ADD_BLOCK_BROADCAST(N, BASENAME, BIAS)     ADD_BLOCK_BROADCAST_STR(N, BASENAME, BIAS)
 /** @} */ // end of group ADD_BLOCK_BROADCAST
 
 /** Apply activation to the given variables
@@ -1668,8 +1692,10 @@
  * @param[in] B_VAL           Additional value required by the activation
  * @{
  */
-#define ACTIVATION_BLOCK_STR(N, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL) ACTIVATION_ROW_##N(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL)
-#define ACTIVATION_BLOCK(N, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL) ACTIVATION_BLOCK_STR(N, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL)
+#define ACTIVATION_BLOCK_STR(N, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL) \
+    ACTIVATION_ROW_##N(ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL)
+#define ACTIVATION_BLOCK(N, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL) \
+    ACTIVATION_BLOCK_STR(N, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, BASENAME, A_VAL, B_VAL)
 /** @} */ // end of group ACTIVATION_BLOCK
 
 /** Apply convert_<data_type> to the given variables
@@ -1773,6 +1799,8 @@
  * @param[in] BASENAME_DST The basename of the destination variables
  * @{
  */
-#define CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) CONVERT_ROW_##M(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
-#define CONVERT_BLOCK(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
+#define CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) \
+    CONVERT_ROW_##M(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
+#define CONVERT_BLOCK(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) \
+    CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
 /** @} */ // end of group CONVERT_BLOCK

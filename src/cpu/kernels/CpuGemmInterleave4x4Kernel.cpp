@@ -24,9 +24,10 @@
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -60,7 +61,7 @@ Status CpuGemmInterleave4x4Kernel::validate(const ITensorInfo *src, const ITenso
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         const TensorShape dst_shape = compute_interleaved_shape(*src);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
@@ -111,35 +112,42 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     Iterator in(src, win);
     Iterator out(dst, win_out);
 
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        if(id.y() + 4 <= static_cast<int>(in_height))
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
         {
-            for(size_t x = window_start_x; x < window_end_x; ++x)
+            if (id.y() + 4 <= static_cast<int>(in_height))
             {
-                std::memcpy(out.ptr() + (x * 4 + 0) * element_size, (in.ptr() + 0 * in_stride) + x * element_size, element_size);
-                std::memcpy(out.ptr() + (x * 4 + 1) * element_size, (in.ptr() + 1 * in_stride) + x * element_size, element_size);
-                std::memcpy(out.ptr() + (x * 4 + 2) * element_size, (in.ptr() + 2 * in_stride) + x * element_size, element_size);
-                std::memcpy(out.ptr() + (x * 4 + 3) * element_size, (in.ptr() + 3 * in_stride) + x * element_size, element_size);
-            }
-        }
-        else
-        {
-            for(size_t x = window_start_x; x < window_end_x; ++x)
-            {
-                size_t y = 0;
-                for(; y < partial_y; ++y)
+                for (size_t x = window_start_x; x < window_end_x; ++x)
                 {
-                    std::memcpy(out.ptr() + (x * 4 + y) * element_size, (in.ptr() + y * in_stride) + x * element_size, element_size);
-                }
-                for(; y < 4; ++y)
-                {
-                    std::memset(out.ptr() + (x * 4 + y) * element_size, 0, element_size);
+                    std::memcpy(out.ptr() + (x * 4 + 0) * element_size, (in.ptr() + 0 * in_stride) + x * element_size,
+                                element_size);
+                    std::memcpy(out.ptr() + (x * 4 + 1) * element_size, (in.ptr() + 1 * in_stride) + x * element_size,
+                                element_size);
+                    std::memcpy(out.ptr() + (x * 4 + 2) * element_size, (in.ptr() + 2 * in_stride) + x * element_size,
+                                element_size);
+                    std::memcpy(out.ptr() + (x * 4 + 3) * element_size, (in.ptr() + 3 * in_stride) + x * element_size,
+                                element_size);
                 }
             }
-        }
-    },
-    in, out);
+            else
+            {
+                for (size_t x = window_start_x; x < window_end_x; ++x)
+                {
+                    size_t y = 0;
+                    for (; y < partial_y; ++y)
+                    {
+                        std::memcpy(out.ptr() + (x * 4 + y) * element_size,
+                                    (in.ptr() + y * in_stride) + x * element_size, element_size);
+                    }
+                    for (; y < 4; ++y)
+                    {
+                        std::memset(out.ptr() + (x * 4 + y) * element_size, 0, element_size);
+                    }
+                }
+            }
+        },
+        in, out);
 }
 
 const char *CpuGemmInterleave4x4Kernel::name() const

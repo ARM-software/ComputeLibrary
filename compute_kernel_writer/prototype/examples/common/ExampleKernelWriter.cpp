@@ -23,26 +23,27 @@
  */
 
 #include "ExampleKernelWriter.h"
-#include "ExampleComponentArgument.h"
+
 #include "ckw/Error.h"
 #include "ckw/TileInfo.h"
 
-ExampleKernelWriter::ExampleKernelWriter(ckw::Kernel &kernel)
-    : KernelWriter(kernel)
+#include "ExampleComponentArgument.h"
+
+ExampleKernelWriter::ExampleKernelWriter(ckw::Kernel &kernel) : KernelWriter(kernel)
 {
 }
 
 void ExampleKernelWriter::op_load_once(ExampleComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler)
 {
-    if(!tensor_or_tile->has_tile())
+    if (!tensor_or_tile->has_tile())
     {
         CKW_ASSERT(tensor_or_tile->has_tensor());
 
         auto &tensor = tensor_or_tile->tensor();
 
         const auto tile_name = tensor.name() + "_tile";
-        auto      &tile      = declare_tile(tile_name.c_str(),
-                                            ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
+        auto      &tile =
+            declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
 
         op_load(tile, tensor, sampler);
 

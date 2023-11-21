@@ -24,6 +24,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "utils/Utils.h"
 
 #include <cstdlib>
@@ -43,15 +44,16 @@ public:
         beta  = 0.0f;
 
         std::ifstream stream;
-        if(argc > 1)
+        if (argc > 1)
         {
             stream.open(argv[1], std::fstream::in);
         }
 
-        if(argc < 3 || (argc < 4 && stream.bad()))
+        if (argc < 3 || (argc < 4 && stream.bad()))
         {
             // Print help
-            std::cout << "Usage: 1) ./build/neon_sgemm input_matrix_1.npy input_matrix_2.npy [input_matrix_3.npy] [alpha = 1] [beta = 0]\n";
+            std::cout << "Usage: 1) ./build/neon_sgemm input_matrix_1.npy input_matrix_2.npy [input_matrix_3.npy] "
+                         "[alpha = 1] [beta = 0]\n";
             std::cout << "       2) ./build/neon_sgemm M N K [alpha = 1.0f] [beta = 0.0f]\n\n";
             std::cout << "Too few or no input_matrices provided. Using M=7, N=3, K=5, alpha=1.0f and beta=0.0f\n\n";
 
@@ -61,29 +63,29 @@ public:
         }
         else
         {
-            if(stream.good()) /* case file1.npy file2.npy [file3.npy] [alpha = 1.0f] [beta = 0.0f] */
+            if (stream.good()) /* case file1.npy file2.npy [file3.npy] [alpha = 1.0f] [beta = 0.0f] */
             {
                 npy0.open(argv[1]);
                 npy0.init_tensor(src0, DataType::F32);
                 npy1.open(argv[2]);
                 npy1.init_tensor(src1, DataType::F32);
 
-                if(argc > 3)
+                if (argc > 3)
                 {
                     stream.close();
                     stream.clear();
                     stream.open(argv[3], std::fstream::in);
-                    if(stream.good()) /* case with third file */
+                    if (stream.good()) /* case with third file */
                     {
                         npy2.open(argv[3]);
                         npy2.init_tensor(src2, DataType::F32);
 
-                        if(argc > 4)
+                        if (argc > 4)
                         {
                             // Convert string to float
                             alpha = strtof(argv[4], nullptr);
 
-                            if(argc > 5)
+                            if (argc > 5)
                             {
                                 // Convert string to float
                                 beta = strtof(argv[5], nullptr);
@@ -94,7 +96,7 @@ public:
                     {
                         alpha = strtof(argv[3], nullptr);
 
-                        if(argc > 4)
+                        if (argc > 4)
                         {
                             beta = strtof(argv[4], nullptr);
                         }
@@ -111,11 +113,11 @@ public:
                 src1.allocator()->init(TensorInfo(TensorShape(N, K), 1, DataType::F32));
                 src2.allocator()->init(TensorInfo(TensorShape(N, M), 1, DataType::F32));
 
-                if(argc > 4)
+                if (argc > 4)
                 {
                     alpha = strtof(argv[4], nullptr);
 
-                    if(argc > 5)
+                    if (argc > 5)
                     {
                         beta = strtof(argv[5], nullptr);
                     }
@@ -134,7 +136,7 @@ public:
         dst.allocator()->allocate();
 
         // Fill the input images with either the data provided or random data
-        if(npy0.is_open())
+        if (npy0.is_open())
         {
             npy0.fill_tensor(src0);
             npy1.fill_tensor(src1);
@@ -142,7 +144,7 @@ public:
             output_filename = "sgemm_out.npy";
             is_fortran      = npy0.is_fortran();
 
-            if(npy2.is_open())
+            if (npy2.is_open())
             {
                 src2.allocator()->allocate();
                 npy2.fill_tensor(src2);
@@ -169,7 +171,7 @@ public:
     }
     void do_teardown() override
     {
-        if(!output_filename.empty()) /* Save to .npy file */
+        if (!output_filename.empty()) /* Save to .npy file */
         {
             save_to_npy(dst, output_filename, is_fortran);
         }

@@ -37,10 +37,11 @@
 #pragma GCC diagnostic pop
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif /* __cplusplus */
 
-/** Extract the underlying OpenCL context used by a given Compute Library context object
+    /** Extract the underlying OpenCL context used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
  *
@@ -49,9 +50,9 @@ extern "C" {
  *
  * @return Status code
  */
-AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
+    AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
 
-/** Extract the underlying OpenCL device id used by a given Compute Library context object
+    /** Extract the underlying OpenCL device id used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
  *
@@ -60,9 +61,9 @@ AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
  *
  * @return Status code
  */
-AclStatus AclGetClDevice(AclContext ctx, cl_device_id *opencl_device);
+    AclStatus AclGetClDevice(AclContext ctx, cl_device_id *opencl_device);
 
-/** Set the underlying OpenCL context to be used by a given Compute Library context object
+    /** Set the underlying OpenCL context to be used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
  *
@@ -71,9 +72,9 @@ AclStatus AclGetClDevice(AclContext ctx, cl_device_id *opencl_device);
  *
  * @return Status code
  */
-AclStatus AclSetClContext(AclContext ctx, cl_context opencl_context);
+    AclStatus AclSetClContext(AclContext ctx, cl_context opencl_context);
 
-/** Extract the underlying OpenCL queue used by a given Compute Library queue object
+    /** Extract the underlying OpenCL queue used by a given Compute Library queue object
  *
  * @note @ref AclQueue should be of an OpenCL backend target
  * @note @ref AclQueue refcount should be 0, meaning not used by other objects
@@ -83,9 +84,9 @@ AclStatus AclSetClContext(AclContext ctx, cl_context opencl_context);
  *
  * @return Status code
  */
-AclStatus AclGetClQueue(AclQueue queue, cl_command_queue *opencl_queue);
+    AclStatus AclGetClQueue(AclQueue queue, cl_command_queue *opencl_queue);
 
-/** Set the underlying OpenCL queue to be used by a given Compute Library queue object
+    /** Set the underlying OpenCL queue to be used by a given Compute Library queue object
  *
  * @note @ref AclQueue should be of an OpenCL backend target
  * @note opecl_queue needs to be created from the same context that the AclContext that the queue will use
@@ -95,16 +96,16 @@ AclStatus AclGetClQueue(AclQueue queue, cl_command_queue *opencl_queue);
  *
  * @return Status code
  */
-AclStatus AclSetClQueue(AclQueue queue, cl_command_queue opencl_queue);
+    AclStatus AclSetClQueue(AclQueue queue, cl_command_queue opencl_queue);
 
-/** Extract the underlying OpenCL memory object by a given Compute Library tensor object
+    /** Extract the underlying OpenCL memory object by a given Compute Library tensor object
  *
  * @param[in]  tensor     A valid non-zero tensor
  * @param[out] opencl_mem Underlyig OpenCL memory object
  *
  * @return Status code
  */
-AclStatus AclGetClMem(AclTensor tensor, cl_mem *opencl_mem);
+    AclStatus AclGetClMem(AclTensor tensor, cl_mem *opencl_mem);
 
 #ifdef __cplusplus
 }

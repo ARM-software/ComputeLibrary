@@ -29,6 +29,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -40,7 +41,8 @@ CLDeconvolutionLayerUpsampleKernel::CLDeconvolutionLayerUpsampleKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, const ITensorInfo *output,
+Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo   *input,
+                                                    const ITensorInfo   *output,
                                                     const PadStrideInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
@@ -60,7 +62,7 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_h) == 0);
 
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_c) != output->dimension(idx_c));
-    for(size_t i = 3; i < Coordinates::num_max_dimensions; ++i)
+    for (size_t i = 3; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(i) != output->dimension(i));
     }
@@ -68,20 +70,21 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
     return Status{};
 }
 
-void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTensor *output,
-                                                   const PadStrideInfo &info)
+void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTensor *output, const PadStrideInfo &info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
 }
 
-void CLDeconvolutionLayerUpsampleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
-                                                   const PadStrideInfo &info)
+void CLDeconvolutionLayerUpsampleKernel::configure(const CLCompileContext &compile_context,
+                                                   const ICLTensor        *input,
+                                                   ICLTensor              *output,
+                                                   const PadStrideInfo    &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayerUpsampleKernel::validate(input->info(), output->info(), info));
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     _input       = input;
     _output      = output;
@@ -119,7 +122,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
     const int out_end_y   = _output->info()->dimension(idx_h) - _info.pad_bottom() + _info.stride().second - 1;
     const int out_step_y  = _info.stride().second;
 
-    switch(_data_layout)
+    switch (_data_layout)
     {
         case DataLayout::NCHW:
         {
@@ -137,8 +140,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
                 add_3D_tensor_argument(idx, _input, slice_in);
                 add_3D_tensor_argument(idx, _output, slice_out);
                 enqueue(queue, *this, slice_out, lws_hint());
-            }
-            while(collapsed.slide_window_slice_3D(slice_in) && collapsed.slide_window_slice_3D(slice_out));
+            } while (collapsed.slide_window_slice_3D(slice_in) && collapsed.slide_window_slice_3D(slice_out));
             break;
         }
         case DataLayout::NHWC:
@@ -156,8 +158,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
                 add_3D_tensor_argument(idx, _input, slice_in);
                 add_3D_tensor_argument(idx, _output, slice_out);
                 enqueue(queue, *this, slice_out, lws_hint());
-            }
-            while(window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
+            } while (window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
             break;
         }
         default:

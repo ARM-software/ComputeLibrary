@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,33 +29,68 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/functions/NECast.h"
+#include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
+#include "arm_compute/runtime/Tensor.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
 namespace arm_compute
 {
+struct NEArgMinMaxLayer::Impl
+{
+    MemoryGroup                           memory_group{};
+    std::shared_ptr<IMemoryManager>       memory_manager{};
+    std::unique_ptr<NEReductionOperation> reduction_function{};
+    std::unique_ptr<NECast>               cast_function{};
+    std::unique_ptr<Tensor>               tmp_reduction_result{};
+};
+
 NEArgMinMaxLayer::~NEArgMinMaxLayer() = default;
 
-NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _reduction_function(std::make_unique<NEReductionOperation>())
+NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager) : _impl(std::make_unique<Impl>())
 {
-    ARM_COMPUTE_UNUSED(memory_manager);
+    _impl->memory_manager = std::move(memory_manager);
 }
+
 void NEArgMinMaxLayer::configure(ITensor *input, int axis, ITensor *output, const ReductionOperation &op)
 {
     ARM_COMPUTE_LOG_PARAMS(input, axis, output, op);
-    _reduction_function->configure(input, output, axis, op, false);
+    _impl->reduction_function = std::make_unique<NEReductionOperation>();
+    if (output->info() &&
+        (output->info()->data_type() == DataType::S64 || output->info()->data_type() == DataType::U64))
+    {
+        _impl->memory_group         = MemoryGroup(std::move(_impl->memory_manager));
+        _impl->cast_function        = std::make_unique<NECast>();
+        _impl->tmp_reduction_result = std::make_unique<Tensor>();
+        _impl->reduction_function->configure(input, _impl->tmp_reduction_result.get(), axis, op, false);
+        _impl->cast_function->configure(_impl->tmp_reduction_result.get(), output, ConvertPolicy::SATURATE);
+        _impl->memory_group.manage(_impl->tmp_reduction_result.get());
+        _impl->tmp_reduction_result->allocator()->allocate();
+    }
+    else
+    {
+        _impl->reduction_function->configure(input, output, axis, op, false);
+    }
 }
 
-Status NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
+Status
+NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN, "Invalid operation");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN,
+                                    "Invalid operation");
     return NEReductionOperation::validate(input, output, axis, op, false);
 }
 
 void NEArgMinMaxLayer::run()
 {
-    _reduction_function->run();
+    MemoryGroupResourceScope scope_mg(_impl->memory_group);
+    _impl->reduction_function->run();
+    if (_impl->tmp_reduction_result != nullptr)
+    {
+        _impl->cast_function->run();
+    }
 }
 
 } // namespace arm_compute

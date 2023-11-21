@@ -23,11 +23,13 @@
  */
 
 #include "src/cl/CLTensorArgument.h"
+
 #include "ckw/Error.h"
-#include "src/ITensorArgument.h"
-#include "src/ITensorComponent.h"
+
 #include "src/cl/CLHelpers.h"
 #include "src/cl/CLTensorComponent.h"
+#include "src/ITensorArgument.h"
+#include "src/ITensorComponent.h"
 #include "src/types/TensorComponentType.h"
 
 #include <algorithm>
@@ -48,25 +50,23 @@ CLTensorComponent &CLTensorArgument::cl_component(TensorComponentType x)
 {
     // Return the component if it has already been created.
     {
-        const auto it = std::find_if(
-            _components_used.begin(), _components_used.end(),
-            [=](const std::unique_ptr<CLTensorComponent> &item)
-            {
-                return item->component_type() == x;
-            });
+        const auto it =
+            std::find_if(_components_used.begin(), _components_used.end(),
+                         [=](const std::unique_ptr<CLTensorComponent> &item) { return item->component_type() == x; });
 
-        if(it != _components_used.end())
+        if (it != _components_used.end())
         {
             return **it;
         }
     }
 
-    if(_return_dims_by_value)
+    if (_return_dims_by_value)
     {
         uint32_t component_type = static_cast<uint32_t>(x);
 
-        const bool is_dimension         = (component_type & static_cast<uint32_t>(TensorComponentBitmask::Dimension)) != 0;
-        const bool is_folded_dimensions = (component_type & static_cast<uint32_t>(TensorComponentBitmask::FoldedDimensions)) != 0;
+        const bool is_dimension = (component_type & static_cast<uint32_t>(TensorComponentBitmask::Dimension)) != 0;
+        const bool is_folded_dimensions =
+            (component_type & static_cast<uint32_t>(TensorComponentBitmask::FoldedDimensions)) != 0;
 
         constexpr auto bitmask_all     = static_cast<uint32_t>(TensorComponentIndexBitmask::All);
         constexpr auto bitmask_index_0 = static_cast<uint32_t>(TensorComponentIndexBitmask::Index0);
@@ -83,16 +83,16 @@ CLTensorComponent &CLTensorArgument::cl_component(TensorComponentType x)
         CKW_ASSERT(bitmask_index_2 == bitmask_index_3 >> 4);
 
         // If we have a dimension or folded dimensions, we can return the corresponding value if it is not dynamic (not equal to -1)
-        if(is_dimension == true || is_folded_dimensions == true)
+        if (is_dimension == true || is_folded_dimensions == true)
         {
             component_type = component_type & bitmask_all;
 
             int32_t idx = 1;
-            for(int32_t i = 0; i < tensor_component_index_max_count; ++i)
+            for (int32_t i = 0; i < tensor_component_index_max_count; ++i)
             {
                 uint32_t dim_idx = component_type & bitmask_index_0;
 
-                if(dim_idx == 0)
+                if (dim_idx == 0)
                 {
                     // Stop at the first nibble containing 0
                     break;
@@ -104,7 +104,7 @@ CLTensorComponent &CLTensorArgument::cl_component(TensorComponentType x)
                 // Get the dimension value
                 const int32_t dim_val = _info.shape()[dim_idx];
 
-                if(dim_val == kDynamicTensorDimensionValue)
+                if (dim_val == kDynamicTensorDimensionValue)
                 {
                     // We cannot return the dimension by value if it is dynamic.
                     // Therefore, force the idx variable to kDynamicTensorDimensionValue and break the loop.
@@ -118,7 +118,7 @@ CLTensorComponent &CLTensorArgument::cl_component(TensorComponentType x)
                 component_type >>= 4;
             }
 
-            if(idx != kDynamicTensorDimensionValue)
+            if (idx != kDynamicTensorDimensionValue)
             {
                 _components_used.emplace_back(std::make_unique<CLTensorComponent>(*this, x, idx));
 
@@ -141,14 +141,10 @@ TensorStorageVariable &CLTensorArgument::storage(TensorStorageType x)
 {
     // Return the storage if it has already been created.
     {
-        const auto it = std::find_if(
-            _storages_used.begin(), _storages_used.end(),
-            [=](const TensorStorageVariable &item)
-            {
-                return item.type == x;
-            });
+        const auto it = std::find_if(_storages_used.begin(), _storages_used.end(),
+                                     [=](const TensorStorageVariable &item) { return item.type == x; });
 
-        if(it != _storages_used.end())
+        if (it != _storages_used.end())
         {
             return *it;
         }
@@ -167,7 +163,7 @@ std::string CLTensorArgument::create_storage_name(TensorStorageType x) const
 {
     std::string var_name = _basename;
 
-    switch(x)
+    switch (x)
     {
         case TensorStorageType::BufferUint8Ptr:
             var_name += "_ptr";
@@ -198,9 +194,9 @@ std::vector<const ITensorComponent *> CLTensorArgument::components() const
 {
     std::vector<const ITensorComponent *> components;
 
-    for(const auto &component : _components_used)
+    for (const auto &component : _components_used)
     {
-        if(component->is_assignable())
+        if (component->is_assignable())
         {
             components.push_back(component.get());
         }

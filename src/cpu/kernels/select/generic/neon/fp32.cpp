@@ -22,20 +22,22 @@
  * SOFTWARE.
  */
 
-#include "src/cpu/kernels/select/generic/neon/impl.h"
-
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/select/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void neon_f32_select_same_rank(const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
+void neon_f32_select_same_rank(
+    const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
     return select_op_32<float, uint32x4_t>(c, x, y, output, window);
 }
-void neon_f32_select_not_same_rank(const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
+void neon_f32_select_not_same_rank(
+    const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
     return select_op_not_same_rank<float>(c, x, y, output, window);
 }

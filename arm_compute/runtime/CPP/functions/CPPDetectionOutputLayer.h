@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H
 #define ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H
 
-#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
 namespace arm_compute
 {
@@ -52,7 +51,11 @@ public:
      *
      * @note Output contains all the detections. Of those, only the ones selected by the valid region are valid.
      */
-    void configure(const ITensor *input_loc, const ITensor *input_conf, const ITensor *input_priorbox, ITensor *output, DetectionOutputLayerInfo info = DetectionOutputLayerInfo());
+    void configure(const ITensor           *input_loc,
+                   const ITensor           *input_conf,
+                   const ITensor           *input_priorbox,
+                   ITensor                 *output,
+                   DetectionOutputLayerInfo info = DetectionOutputLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CPPDetectionOutputLayer
      *
      * @param[in] input_loc      The mbox location input tensor info. Data types supported: F32.
@@ -63,7 +66,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input_loc, const ITensorInfo *input_conf, const ITensorInfo *input_priorbox, const ITensorInfo *output,
+    static Status validate(const ITensorInfo       *input_loc,
+                           const ITensorInfo       *input_conf,
+                           const ITensorInfo       *input_priorbox,
+                           const ITensorInfo       *output,
                            DetectionOutputLayerInfo info = DetectionOutputLayerInfo());
     // Inherited methods overridden:
     void run() override;
@@ -82,12 +88,12 @@ private:
     int _num_priors;
     int _num;
 
-    std::vector<LabelBBox> _all_location_predictions;
+    std::vector<LabelBBox>                         _all_location_predictions;
     std::vector<std::map<int, std::vector<float>>> _all_confidence_scores;
-    std::vector<BBox> _all_prior_bboxes;
-    std::vector<std::array<float, 4>> _all_prior_variances;
-    std::vector<LabelBBox> _all_decode_bboxes;
-    std::vector<std::map<int, std::vector<int>>> _all_indices;
+    std::vector<BBox>                              _all_prior_bboxes;
+    std::vector<std::array<float, 4>>              _all_prior_variances;
+    std::vector<LabelBBox>                         _all_decode_bboxes;
+    std::vector<std::map<int, std::vector<int>>>   _all_indices;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H */

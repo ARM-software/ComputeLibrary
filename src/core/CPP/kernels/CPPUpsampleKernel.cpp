@@ -24,6 +24,7 @@
 #include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
 
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 
 #include <cstddef>
@@ -31,8 +32,7 @@
 
 namespace arm_compute
 {
-CPPUpsampleKernel::CPPUpsampleKernel()
-    : _input(nullptr), _output(nullptr), _info()
+CPPUpsampleKernel::CPPUpsampleKernel() : _input(nullptr), _output(nullptr), _info()
 {
 }
 
@@ -82,7 +82,7 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     const size_t element_size  = _input->info()->element_size();
 
     // The fill value is normally 0, but for quantized types '0' corresponds to the offset
-    switch(_output->info()->data_type())
+    switch (_output->info()->data_type())
     {
         case DataType::QASYMM8:
         {
@@ -102,7 +102,7 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
 
     // Create window
     Window window_out(window);
-    if(data_layout == DataLayout::NCHW)
+    if (data_layout == DataLayout::NCHW)
     {
         window_out.set(Window::DimX, Window::Dimension(start_width, end_width, stride_width));
         window_out.set(Window::DimY, Window::Dimension(start_height, end_height, stride_height));
@@ -117,10 +117,7 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     Iterator in(_input, window);
     Iterator out(_output, window_out);
 
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        memcpy(out.ptr(), in.ptr(), element_size);
-    },
-    in, out);
+    execute_window_loop(
+        window, [&](const Coordinates &) { memcpy(out.ptr(), in.ptr(), element_size); }, in, out);
 }
 } // namespace arm_compute

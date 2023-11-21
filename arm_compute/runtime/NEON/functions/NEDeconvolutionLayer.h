@@ -24,15 +24,14 @@
 #ifndef ARM_COMPUTE_NEDECONVOLUTIONLAYER_H
 #define ARM_COMPUTE_NEDECONVOLUTIONLAYER_H
 
-#include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
-#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEReverse.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEReverse.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -117,7 +116,13 @@ public:
      *                                 the GEMM convolution.
      *
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info, bool enable_fast_math = false, const WeightsInfo &weights_info = WeightsInfo());
+    void configure(ITensor             *input,
+                   const ITensor       *weights,
+                   const ITensor       *bias,
+                   ITensor             *output,
+                   const PadStrideInfo &info,
+                   bool                 enable_fast_math = false,
+                   const WeightsInfo   &weights_info     = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEDeconvolutionLayer
      *
      * @param[in] input            Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
@@ -134,8 +139,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info,
-                           bool enable_fast_math = false, const WeightsInfo &weights_info = WeightsInfo());
+    static Status validate(const ITensorInfo   *input,
+                           const ITensorInfo   *weights,
+                           const ITensorInfo   *bias,
+                           const ITensorInfo   *output,
+                           const PadStrideInfo &info,
+                           bool                 enable_fast_math = false,
+                           const WeightsInfo   &weights_info     = WeightsInfo());
 
     // Inherited methods overridden:
     void run() override;

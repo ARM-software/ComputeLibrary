@@ -29,14 +29,20 @@
 
 namespace arm_compute
 {
-Status NEROIAlignLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status NEROIAlignLayer::validate(const ITensorInfo         *input,
+                                 const ITensorInfo         *rois,
+                                 ITensorInfo               *output,
+                                 const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(NEROIAlignLayerKernel::validate(input, rois, output, pool_info));
 
     return Status{};
 }
 
-void NEROIAlignLayer::configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info)
+void NEROIAlignLayer::configure(const ITensor             *input,
+                                const ITensor             *rois,
+                                ITensor                   *output,
+                                const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, rois, output, pool_info);
 

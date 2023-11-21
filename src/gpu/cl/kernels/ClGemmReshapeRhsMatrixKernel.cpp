@@ -31,6 +31,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -52,8 +53,10 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.h0 == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3), "Only 2,3,4,8,16 are supported for n0");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.k0 & (rhs_info.k0 - 1)) && (rhs_info.k0 != 1) && (rhs_info.k0 != 3)), "Only 1,2,3,4,8,16 are supported for k0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3),
+                                    "Only 2,3,4,8,16 are supported for n0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.k0 & (rhs_info.k0 - 1)) && (rhs_info.k0 != 1) && (rhs_info.k0 != 3)),
+                                    "Only 1,2,3,4,8,16 are supported for k0");
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON((rhs_info.k0 == 1) && (rhs_info.transpose));
@@ -61,15 +64,17 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
-    if(rhs_info.export_to_cl_image)
+    if (rhs_info.export_to_cl_image)
     {
-        const TensorInfo tensor_reshaped_info(misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info), 1, src->data_type());
+        const TensorInfo tensor_reshaped_info(misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info), 1,
+                                              src->data_type());
         ARM_COMPUTE_RETURN_ON_ERROR(gemm::validate_image2d_support_on_rhs(tensor_reshaped_info, rhs_info));
     }
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+            dst->tensor_shape(), misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
     }
@@ -77,23 +82,27 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *dst, const GEMMRHSMatrixInfo &rhs_info)
+std::pair<Status, Window>
+validate_and_configure_window(ITensorInfo *src, ITensorInfo *dst, const GEMMRHSMatrixInfo &rhs_info)
 {
     const unsigned int num_elems_processed_per_iteration_x = rhs_info.n0;
     const unsigned int num_elems_processed_per_iteration_y = rhs_info.k0;
     bool               window_changed                      = false;
 
     // dst auto initialization if not yet initialized
-    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info)));
+    auto_init_if_empty(
+        *dst, src->clone()->set_tensor_shape(misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info)));
 
     // Configure window
-    Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    Window win =
+        calculate_max_window(*src, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-    AccessWindowRectangle src_access(src, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+    AccessWindowRectangle src_access(src, 0, 0, num_elems_processed_per_iteration_x,
+                                     num_elems_processed_per_iteration_y);
 
     window_changed = update_window_and_padding(win, src_access);
 
-    if(rhs_info.export_to_cl_image)
+    if (rhs_info.export_to_cl_image)
     {
         gemm::update_padding_for_cl_image(dst);
     }
@@ -102,7 +111,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     // This collapse needs to be here in order to tune the Z dimension of LWS
     Window collapsed = win.collapse(win, Window::DimZ);
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    Status err =
+        (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, collapsed);
 }
 } // namespace
@@ -112,7 +122,10 @@ ClGemmReshapeRhsMatrixKernel::ClGemmReshapeRhsMatrixKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClGemmReshapeRhsMatrixKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const GEMMRHSMatrixInfo &rhs_info)
+void ClGemmReshapeRhsMatrixKernel::configure(const CLCompileContext  &compile_context,
+                                             ITensorInfo             *src,
+                                             ITensorInfo             *dst,
+                                             const GEMMRHSMatrixInfo &rhs_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
@@ -143,7 +156,9 @@ void ClGemmReshapeRhsMatrixKernel::configure(const CLCompileContext &compile_con
     _kernel.setArg<cl_int>(idx++, rhs_info.h0);
 }
 
-Status ClGemmReshapeRhsMatrixKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const GEMMRHSMatrixInfo &rhs_info)
+Status ClGemmReshapeRhsMatrixKernel::validate(const ITensorInfo       *src,
+                                              const ITensorInfo       *dst,
+                                              const GEMMRHSMatrixInfo &rhs_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, rhs_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get(), rhs_info).first);
@@ -156,8 +171,9 @@ void ClGemmReshapeRhsMatrixKernel::run_op(ITensorPack &tensors, const Window &wi
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
@@ -169,8 +185,7 @@ void ClGemmReshapeRhsMatrixKernel::run_op(ITensorPack &tensors, const Window &wi
         add_3d_tensor_nhw_argument(idx, src);
         add_3d_tensor_nhw_argument(idx, dst);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_3D(slice));
+    } while (window.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

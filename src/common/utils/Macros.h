@@ -28,7 +28,7 @@
 
 #define ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status)                 \
     {                                                               \
-        if(status != arm_compute::StatusCode::Success)              \
+        if (status != arm_compute::StatusCode::Success)             \
         {                                                           \
             return arm_compute::utils::as_cenum<AclStatus>(status); \
         }                                                           \

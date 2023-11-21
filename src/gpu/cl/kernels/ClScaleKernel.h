@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_SCALE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -49,7 +50,8 @@ public:
      *                             All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]  info            @ref ScaleKernelInfo Kernel descriptor to be used to configure.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info);
+    void
+    configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClScaleKernel::configure()
@@ -62,7 +64,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    DataLayout _data_layout{ DataLayout::UNKNOWN };
+    DataLayout _data_layout{DataLayout::UNKNOWN};
 };
 } // namespace kernels
 } // namespace opencl

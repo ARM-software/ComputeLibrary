@@ -25,8 +25,7 @@
 
 namespace
 {
-constexpr AclVersion version_info
-{
+constexpr AclVersion version_info{
     ARM_COMPUTE_LIBRARY_VERSION_MAJOR,
     ARM_COMPUTE_LIBRARY_VERSION_MINOR,
     ARM_COMPUTE_LIBRARY_VERSION_PATCH,

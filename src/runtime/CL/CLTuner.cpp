@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/CLTuner.h"
-#include "arm_compute/runtime/CL/tuners/CLTuningParametersList.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/tuners/CLTuningParametersList.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/CL/ICLKernel.h"
 #include "support/StringSupport.h"
@@ -37,19 +38,23 @@
 namespace arm_compute
 {
 CLTuner::CLTuner(bool tune_new_kernels, CLTuningInfo tuning_info)
-    : real_clEnqueueNDRangeKernel(nullptr), _tuning_params_table(), _lws_table(), _kernel_event(), _tune_new_kernels(tune_new_kernels), _tuning_info(tuning_info)
+    : real_clEnqueueNDRangeKernel(nullptr),
+      _tuning_params_table(),
+      _lws_table(),
+      _kernel_event(),
+      _tune_new_kernels(tune_new_kernels),
+      _tuning_info(tuning_info)
 {
 }
 
 struct CLTuner::IKernelData
 {
-    virtual ~IKernelData() = default;
+    virtual ~IKernelData()                                          = default;
     virtual void do_run(ICLKernel &kernel, cl::CommandQueue &queue) = 0;
 };
 struct DefaultKernelData : public CLTuner::IKernelData
 {
-    DefaultKernelData(ITensorPack &tensors)
-        : _tensors{ tensors }
+    DefaultKernelData(ITensorPack &tensors) : _tensors{tensors}
     {
     }
     ~DefaultKernelData() override = default;
@@ -100,16 +105,17 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
 void CLTuner::do_tune_kernel_dynamic(ICLKernel &kernel, IKernelData *data)
 {
     // Get the configuration ID from the kernel and append GPU target name and number of available compute units
-    const std::string config_id = kernel.config_id() + "_" + string_from_target(kernel.get_target()) + "_MP" + support::cpp11::to_string(CLKernelLibrary::get().get_num_compute_units());
+    const std::string config_id = kernel.config_id() + "_" + string_from_target(kernel.get_target()) + "_MP" +
+                                  support::cpp11::to_string(CLKernelLibrary::get().get_num_compute_units());
 
     // Check if we need to find the Optimal LWS. If the kernel's config_id is equal to default_config_id, the kernel does not require to be tuned
-    if(kernel.config_id() != arm_compute::default_config_id)
+    if (kernel.config_id() != arm_compute::default_config_id)
     {
         auto p = _tuning_params_table.find(config_id);
 
-        if(p == _tuning_params_table.end())
+        if (p == _tuning_params_table.end())
         {
-            if(_tune_new_kernels)
+            if (_tune_new_kernels)
             {
                 // Find the optimal LWS for the kernel
                 CLTuningParams opt_tuning_params = find_optimal_tuning_params(kernel, data);
@@ -119,7 +125,7 @@ void CLTuner::do_tune_kernel_dynamic(ICLKernel &kernel, IKernelData *data)
 
                 // Set Local-Workgroup-Size
                 kernel.set_lws_hint(opt_tuning_params.get_lws());
-                if(_tuning_info.tune_wbsm)
+                if (_tuning_info.tune_wbsm)
                 {
                     kernel.set_wbsm_hint(opt_tuning_params.get_wbsm());
                 }
@@ -129,7 +135,7 @@ void CLTuner::do_tune_kernel_dynamic(ICLKernel &kernel, IKernelData *data)
         {
             // Set Local-Workgroup-Size
             kernel.set_lws_hint(p->second.get_lws());
-            if(_tuning_info.tune_wbsm)
+            if (_tuning_info.tune_wbsm)
             {
                 kernel.set_wbsm_hint(p->second.get_wbsm());
             }
@@ -138,7 +144,7 @@ void CLTuner::do_tune_kernel_dynamic(ICLKernel &kernel, IKernelData *data)
 }
 void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
 {
-    DefaultKernelData data{ tensors };
+    DefaultKernelData data{tensors};
 
     do_tune_kernel_dynamic(kernel, &data);
 }
@@ -154,7 +160,7 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
     cl::CommandQueue queue_profiler;
 
     // Extract real OpenCL function to intercept
-    if(real_clEnqueueNDRangeKernel == nullptr)
+    if (real_clEnqueueNDRangeKernel == nullptr)
     {
         real_clEnqueueNDRangeKernel = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
     }
@@ -165,7 +171,7 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
     // Check if we can use the OpenCL timer with the default queue
     cl_command_queue_properties props = default_queue.getInfo<CL_QUEUE_PROPERTIES>();
 
-    if((props & CL_QUEUE_PROFILING_ENABLE) == 0)
+    if ((props & CL_QUEUE_PROFILING_ENABLE) == 0)
     {
         // Set the queue for profiling
         queue_profiler = cl::CommandQueue(CLScheduler::get().context(), props | CL_QUEUE_PROFILING_ENABLE);
@@ -176,21 +182,23 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
     }
 
     // Start intercepting enqueues:
-    auto interceptor = [this](cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
-                              const cl_event * event_wait_list, cl_event * event)
+    auto interceptor = [this](cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo,
+                              const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
+                              const cl_event *event_wait_list, cl_event *event)
     {
-        if(this->kernel_event_is_set())
+        if (this->kernel_event_is_set())
         {
             // If the event is already set it means the kernel enqueue is sliced: given that we only time the first slice we can save time by skipping the other enqueues.
             return CL_SUCCESS;
         }
         cl_event tmp;
-        cl_int   retval = this->real_clEnqueueNDRangeKernel(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+        cl_int   retval = this->real_clEnqueueNDRangeKernel(command_queue, kernel, work_dim, gwo, gws, lws,
+                                                            num_events_in_wait_list, event_wait_list, &tmp);
 
         // Set OpenCL event
         this->set_cl_kernel_event(tmp);
 
-        if(event != nullptr)
+        if (event != nullptr)
         {
             //return cl_event from the intercepted call
             clRetainEvent(tmp);
@@ -209,9 +217,10 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
     /// This is only a temporary workaround. An ideal solution involves decoupling the execution window from run() / run_op()
     /// Please see COMPMID-5934
     cl::NDRange gws = kernel.get_cached_gws();
-    ARM_COMPUTE_LOG_MSG_WITH_FORMAT_ACL(arm_compute::logging::LogLevel::INFO,
-                                        "[CLTuner] Kernel with config_id '%s' uses %s as the upper-bound for lws search",
-                                        kernel.config_id().c_str(), to_string(gws).c_str());
+    ARM_COMPUTE_LOG_MSG_WITH_FORMAT_ACL(
+        arm_compute::logging::LogLevel::INFO,
+        "[CLTuner] Kernel with config_id '%s' uses %s as the upper-bound for lws search", kernel.config_id().c_str(),
+        to_string(gws).c_str());
 
     queue_profiler.finish();
 
@@ -224,7 +233,7 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
 
     // Construct the list of tuning parameters values to be tested based on the tuner mode.
     auto tuning_list = cl_tuner::get_tuning_parameters_list(_tuning_info, gws);
-    for(size_t i = 0; i < tuning_list->size(); ++i)
+    for (size_t i = 0; i < tuning_list->size(); ++i)
     {
         CLTuningParams tuning_test = (*tuning_list)[i];
         // Setting the lws
@@ -234,19 +243,18 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
         auto        z           = lws_test[2];
         const bool  invalid_lws = (x * y * z > kernel.get_max_workgroup_size()) || (x == 1 && y == 1 && z == 1);
 
-        if(invalid_lws)
+        if (invalid_lws)
         {
             continue;
         }
 
         kernel.set_lws_hint(lws_test);
-        if(_tuning_info.tune_wbsm && CLKernelLibrary::get().is_wbsm_supported())
+        if (_tuning_info.tune_wbsm && CLKernelLibrary::get().is_wbsm_supported())
         {
             cl_int wbsm_test = tuning_test.get_wbsm();
             kernel.set_wbsm_hint(wbsm_test);
         }
-        ARM_COMPUTE_LOG_MSG_WITH_FORMAT_ACL(arm_compute::logging::LogLevel::INFO,
-                                            "[CLTuner] Trying LWS: %s, WBSM: %d",
+        ARM_COMPUTE_LOG_MSG_WITH_FORMAT_ACL(arm_compute::logging::LogLevel::INFO, "[CLTuner] Trying LWS: %s, WBSM: %d",
                                             to_string(kernel.lws_hint()).c_str(), kernel.wbsm_hint());
 
         // Run the kernel
@@ -260,11 +268,11 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
         _kernel_event        = nullptr;
 
         // Check the execution time
-        if(diff < min_exec_time)
+        if (diff < min_exec_time)
         {
             min_exec_time = diff;
             opt_tuning_params.set_lws(tuning_test.get_lws());
-            if(_tuning_info.tune_wbsm)
+            if (_tuning_info.tune_wbsm)
             {
                 opt_tuning_params.set_wbsm(tuning_test.get_wbsm());
             }
@@ -292,30 +300,30 @@ void CLTuner::load_from_file(const std::string &filename)
     std::ifstream fs;
     fs.exceptions(std::ifstream::badbit);
     fs.open(filename, std::ios::in);
-    if(!fs.is_open())
+    if (!fs.is_open())
     {
         ARM_COMPUTE_ERROR_VAR("Failed to open '%s' (%s [%d])", filename.c_str(), strerror(errno), errno);
     }
     std::string line;
     bool        header_line = true;
-    while(!std::getline(fs, line).fail())
+    while (!std::getline(fs, line).fail())
     {
-        if(header_line)
+        if (header_line)
         {
             header_line            = false;
             size_t pos_lws         = line.find("lws");
             size_t pos_wbsm        = line.find("wbsm");
             _tuning_info.tune_wbsm = false;
-            if(pos_lws != std::string::npos || pos_wbsm != std::string::npos)
+            if (pos_lws != std::string::npos || pos_wbsm != std::string::npos)
             {
                 // The file has in the first line the parameters it has been tuned on
-                if(pos_wbsm != std::string::npos)
+                if (pos_wbsm != std::string::npos)
                 {
                     _tuning_info.tune_wbsm = true;
                 }
                 // Once the line with the tuning parameter is read we can
                 // read the next one to start collecting the values
-                if(std::getline(fs, line).fail())
+                if (std::getline(fs, line).fail())
                 {
                     break;
                 }
@@ -324,13 +332,13 @@ void CLTuner::load_from_file(const std::string &filename)
 
         CLTuningParams tuning_params;
         size_t         pos = line.find(";");
-        if(pos == std::string::npos)
+        if (pos == std::string::npos)
         {
             ARM_COMPUTE_ERROR_VAR("Malformed row '%s' in %s", line.c_str(), filename.c_str());
         }
         std::string kernel_id = line.substr(0, pos);
         line.erase(0, pos + 1);
-        if(!tuning_params.from_string(_tuning_info, line))
+        if (!tuning_params.from_string(_tuning_info, line))
         {
             ARM_COMPUTE_ERROR_VAR("Malformed row '%s' in %s", line.c_str(), filename.c_str());
         }
@@ -341,7 +349,7 @@ void CLTuner::load_from_file(const std::string &filename)
 
 bool CLTuner::save_to_file(const std::string &filename) const
 {
-    if(!_tune_new_kernels || _tuning_params_table.empty() || filename.empty())
+    if (!_tune_new_kernels || _tuning_params_table.empty() || filename.empty())
     {
         return false;
     }
@@ -350,16 +358,16 @@ bool CLTuner::save_to_file(const std::string &filename) const
     fs.open(filename, std::ios::out);
     std::string header_string = "";
     header_string += "lws";
-    if(_tuning_info.tune_wbsm)
+    if (_tuning_info.tune_wbsm)
     {
-        if(!header_string.empty())
+        if (!header_string.empty())
         {
             header_string += " ";
         }
         header_string += "wbsm";
     }
     fs << header_string << std::endl;
-    for(auto const &kernel_data : _tuning_params_table)
+    for (auto const &kernel_data : _tuning_params_table)
     {
         CLTuningParams tun_pams(kernel_data.second);
         fs << kernel_data.first << tun_pams.to_string(_tuning_info) << std::endl;

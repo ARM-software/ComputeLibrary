@@ -64,7 +64,10 @@ public:
      * @param[out] output          Destination tensor. Same as @p input
      *
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Multiples &multiples);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const Multiples        &multiples);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTileKernel
      *
      * @param[in] input     Source tensor info. Data type supported: All.

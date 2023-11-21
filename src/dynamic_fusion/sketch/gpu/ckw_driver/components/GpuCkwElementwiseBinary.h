@@ -46,17 +46,17 @@ public:
      * @param[in] tensors    Tensor arguments to the component
      * @param[in] attributes Component attributes
      */
-    GpuCkwElementwiseBinary(ComponentId                      id,
-                            const ArgumentPack<ITensorInfo> &tensors,
-                            const Attributes                &attributes);
+    GpuCkwElementwiseBinary(ComponentId id, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes);
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(GpuCkwElementwiseBinary);
     /** Destructor */
     ~GpuCkwElementwiseBinary() override = default;
     // Inherited methods overriden:
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
-    Window      get_window() const override;
-    std::string get_name(const ComponentGroup &comp_group) const override;
-    std::string get_tuner_id(const ComponentGroup &comp_group) const override;
+    virtual void write_component_code(const ComponentGroup    &comp_group,
+                                      GpuCkwVariableTable     &vtable,
+                                      GpuCkwScopedKernelWriter writer) const override;
+    Window       get_window() const override;
+    std::string  get_name(const ComponentGroup &comp_group) const override;
+    std::string  get_tuner_id(const ComponentGroup &comp_group) const override;
 
 private:
     const ITensorInfo *_lhs;

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_POOL3D_H
 
 #include "arm_compute/core/experimental/Types.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 
@@ -61,7 +62,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const Pooling3dLayerInfo &pool_info);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

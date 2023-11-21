@@ -31,6 +31,6 @@ namespace arm_compute
 typedef __fp16 float16_t;
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 typedef float float32_t;
-}
+} // namespace arm_compute
 
 #endif /* ARM_COMPUTE_CPUTYPES */

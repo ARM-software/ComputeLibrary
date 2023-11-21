@@ -28,10 +28,11 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/wrapper/traits.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/traits.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include "support/ToolchainSupport.h"
 
 #include <arm_neon.h>
@@ -70,7 +71,7 @@ float32x2_t c_mul_neon(float32x2_t a, float32x2_t b)
 {
     using ExactTagType = typename wrapper::traits::neon_vector<float, 2>::tag_type;
 
-    const float32x2_t mask = { -1.0, 1.0 };
+    const float32x2_t mask = {-1.0, 1.0};
     const float32x2_t tmp0 = wrapper::vdup_n(wrapper::vgetlane(a, 0), ExactTagType{});
     const float32x2_t tmp1 = wrapper::vdup_n(wrapper::vgetlane(a, 1), ExactTagType{});
 
@@ -88,7 +89,7 @@ float32x2_t c_mul_neon_img(float32x2_t a, float img_constant)
     const float a_r = wrapper::vgetlane(a, 0);
     const float a_i = wrapper::vgetlane(a, 1);
 
-    const auto out = wrapper::vmul(float32x2_t{ -a_i, a_r }, float32x2_t{ img_constant, img_constant });
+    const auto out = wrapper::vmul(float32x2_t{-a_i, a_r}, float32x2_t{img_constant, img_constant});
     return out;
 }
 
@@ -100,7 +101,8 @@ float32x2_t reduce_sum_5(float32x2_t a, float32x2_t b, float32x2_t c, float32x2_
     return wrapper::vadd(t2, e);
 }
 
-float32x2_t reduce_sum_7(float32x2_t x1, float32x2_t x2, float32x2_t x3, float32x2_t x4, float32x2_t x5, float32x2_t x6, float32x2_t x7)
+float32x2_t reduce_sum_7(
+    float32x2_t x1, float32x2_t x2, float32x2_t x3, float32x2_t x4, float32x2_t x5, float32x2_t x6, float32x2_t x7)
 {
     const auto t0  = wrapper::vadd(x1, x2);
     const auto t1  = wrapper::vadd(x3, x4);
@@ -111,7 +113,14 @@ float32x2_t reduce_sum_7(float32x2_t x1, float32x2_t x2, float32x2_t x3, float32
     return wrapper::vadd(t00, t01);
 }
 
-float32x2_t reduce_sum_8(float32x2_t x1, float32x2_t x2, float32x2_t x3, float32x2_t x4, float32x2_t x5, float32x2_t x6, float32x2_t x7, float32x2_t x8)
+float32x2_t reduce_sum_8(float32x2_t x1,
+                         float32x2_t x2,
+                         float32x2_t x3,
+                         float32x2_t x4,
+                         float32x2_t x5,
+                         float32x2_t x6,
+                         float32x2_t x7,
+                         float32x2_t x8)
 {
     const auto t0  = wrapper::vadd(x1, x2);
     const auto t1  = wrapper::vadd(x3, x4);
@@ -141,15 +150,21 @@ void fft_3(float32x2_t &x, float32x2_t &y, float32x2_t &z, const float32x2_t &w,
     x = wrapper::vadd(a, b);
     x = wrapper::vadd(x, c);
 
-    const auto v1 = wrapper::vmul(float32x2_t{ 0.5f, 0.5 }, wrapper::vadd(b, c));
-    const auto v2 = c_mul_neon(float32x2_t{ 0.f, -kSqrt3Div2 }, wrapper::vsub(b, c));
+    const auto v1 = wrapper::vmul(float32x2_t{0.5f, 0.5}, wrapper::vadd(b, c));
+    const auto v2 = c_mul_neon(float32x2_t{0.f, -kSqrt3Div2}, wrapper::vsub(b, c));
 
     y = z = wrapper::vsub(a, v1);
     y     = wrapper::vadd(y, v2);
     z     = wrapper::vsub(z, v2);
 }
 
-void fft_4(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, const float32x2_t &w, const float32x2_t &w2, const float32x2_t &w3)
+void fft_4(float32x2_t       &x1,
+           float32x2_t       &x2,
+           float32x2_t       &x3,
+           float32x2_t       &x4,
+           const float32x2_t &w,
+           const float32x2_t &w2,
+           const float32x2_t &w3)
 {
     float32x2_t a = x1;
     float32x2_t b = c_mul_neon(w, x2);
@@ -173,7 +188,15 @@ void fft_4(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, c
     x4             = wrapper::vadd(x41, x42);
 }
 
-void fft_5(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, float32x2_t &x5, const float32x2_t &w, const float32x2_t &w2, const float32x2_t &w3, const float32x2_t &w4)
+void fft_5(float32x2_t       &x1,
+           float32x2_t       &x2,
+           float32x2_t       &x3,
+           float32x2_t       &x4,
+           float32x2_t       &x5,
+           const float32x2_t &w,
+           const float32x2_t &w2,
+           const float32x2_t &w3,
+           const float32x2_t &w4)
 {
     const auto a = x1;
     const auto b = c_mul_neon(w, x2);
@@ -181,25 +204,25 @@ void fft_5(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, f
     const auto d = c_mul_neon(w3, x4);
     const auto e = c_mul_neon(w4, x5);
 
-    const auto b0 = c_mul_neon(float32x2_t{ kW5_0, -kW5_1 }, b);
-    const auto b1 = c_mul_neon(float32x2_t{ -kW5_2, -kW5_3 }, b);
-    const auto b2 = c_mul_neon(float32x2_t{ -kW5_2, kW5_3 }, b);
-    const auto b3 = c_mul_neon(float32x2_t{ kW5_0, kW5_1 }, b);
+    const auto b0 = c_mul_neon(float32x2_t{kW5_0, -kW5_1}, b);
+    const auto b1 = c_mul_neon(float32x2_t{-kW5_2, -kW5_3}, b);
+    const auto b2 = c_mul_neon(float32x2_t{-kW5_2, kW5_3}, b);
+    const auto b3 = c_mul_neon(float32x2_t{kW5_0, kW5_1}, b);
 
-    const auto c0 = c_mul_neon(float32x2_t{ -kW5_2, -kW5_3 }, c);
-    const auto c1 = c_mul_neon(float32x2_t{ kW5_0, kW5_1 }, c);
-    const auto c2 = c_mul_neon(float32x2_t{ kW5_0, -kW5_1 }, c);
-    const auto c3 = c_mul_neon(float32x2_t{ -kW5_2, kW5_3 }, c);
+    const auto c0 = c_mul_neon(float32x2_t{-kW5_2, -kW5_3}, c);
+    const auto c1 = c_mul_neon(float32x2_t{kW5_0, kW5_1}, c);
+    const auto c2 = c_mul_neon(float32x2_t{kW5_0, -kW5_1}, c);
+    const auto c3 = c_mul_neon(float32x2_t{-kW5_2, kW5_3}, c);
 
-    const auto d0 = c_mul_neon(float32x2_t{ -kW5_2, kW5_3 }, d);
-    const auto d1 = c_mul_neon(float32x2_t{ kW5_0, -kW5_1 }, d);
-    const auto d2 = c_mul_neon(float32x2_t{ kW5_0, kW5_1 }, d);
-    const auto d3 = c_mul_neon(float32x2_t{ -kW5_2, -kW5_3 }, d);
+    const auto d0 = c_mul_neon(float32x2_t{-kW5_2, kW5_3}, d);
+    const auto d1 = c_mul_neon(float32x2_t{kW5_0, -kW5_1}, d);
+    const auto d2 = c_mul_neon(float32x2_t{kW5_0, kW5_1}, d);
+    const auto d3 = c_mul_neon(float32x2_t{-kW5_2, -kW5_3}, d);
 
-    const auto e0 = c_mul_neon(float32x2_t{ kW5_0, kW5_1 }, e);
-    const auto e1 = c_mul_neon(float32x2_t{ -kW5_2, kW5_3 }, e);
-    const auto e2 = c_mul_neon(float32x2_t{ -kW5_2, -kW5_3 }, e);
-    const auto e3 = c_mul_neon(float32x2_t{ kW5_0, -kW5_1 }, e);
+    const auto e0 = c_mul_neon(float32x2_t{kW5_0, kW5_1}, e);
+    const auto e1 = c_mul_neon(float32x2_t{-kW5_2, kW5_3}, e);
+    const auto e2 = c_mul_neon(float32x2_t{-kW5_2, -kW5_3}, e);
+    const auto e3 = c_mul_neon(float32x2_t{kW5_0, -kW5_1}, e);
 
     x1 = reduce_sum_5(a, b, c, d, e);
     x2 = reduce_sum_5(a, b0, c0, d0, e0);
@@ -208,9 +231,19 @@ void fft_5(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, f
     x5 = reduce_sum_5(a, b3, c3, d3, e3);
 }
 
-void fft_7(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, float32x2_t &x5, float32x2_t &x6, float32x2_t &x7, const float32x2_t &w, const float32x2_t &w2, const float32x2_t &w3,
+void fft_7(float32x2_t       &x1,
+           float32x2_t       &x2,
+           float32x2_t       &x3,
+           float32x2_t       &x4,
+           float32x2_t       &x5,
+           float32x2_t       &x6,
+           float32x2_t       &x7,
+           const float32x2_t &w,
+           const float32x2_t &w2,
+           const float32x2_t &w3,
            const float32x2_t &w4,
-           const float32x2_t &w5, const float32x2_t &w6)
+           const float32x2_t &w5,
+           const float32x2_t &w6)
 {
     const auto a = x1;
     const auto b = c_mul_neon(w, x2);
@@ -220,47 +253,47 @@ void fft_7(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, f
     const auto f = c_mul_neon(w5, x6);
     const auto g = c_mul_neon(w6, x7);
 
-    const auto b0 = c_mul_neon(float32x2_t{ kW7_0, -kW7_1 }, b);
-    const auto b1 = c_mul_neon(float32x2_t{ -kW7_2, -kW7_3 }, b);
-    const auto b2 = c_mul_neon(float32x2_t{ -kW7_4, -kW7_5 }, b);
-    const auto b3 = c_mul_neon(float32x2_t{ -kW7_4, kW7_5 }, b);
-    const auto b4 = c_mul_neon(float32x2_t{ -kW7_2, kW7_3 }, b);
-    const auto b5 = c_mul_neon(float32x2_t{ kW7_0, kW7_1 }, b);
+    const auto b0 = c_mul_neon(float32x2_t{kW7_0, -kW7_1}, b);
+    const auto b1 = c_mul_neon(float32x2_t{-kW7_2, -kW7_3}, b);
+    const auto b2 = c_mul_neon(float32x2_t{-kW7_4, -kW7_5}, b);
+    const auto b3 = c_mul_neon(float32x2_t{-kW7_4, kW7_5}, b);
+    const auto b4 = c_mul_neon(float32x2_t{-kW7_2, kW7_3}, b);
+    const auto b5 = c_mul_neon(float32x2_t{kW7_0, kW7_1}, b);
 
-    const auto c0 = c_mul_neon(float32x2_t{ -kW7_2, -kW7_3 }, c);
-    const auto c1 = c_mul_neon(float32x2_t{ -kW7_4, kW7_5 }, c);
-    const auto c2 = c_mul_neon(float32x2_t{ kW7_0, kW7_1 }, c);
-    const auto c3 = c_mul_neon(float32x2_t{ kW7_0, -kW7_1 }, c);
-    const auto c4 = c_mul_neon(float32x2_t{ -kW7_4, -kW7_5 }, c);
-    const auto c5 = c_mul_neon(float32x2_t{ -kW7_2, kW7_3 }, c);
+    const auto c0 = c_mul_neon(float32x2_t{-kW7_2, -kW7_3}, c);
+    const auto c1 = c_mul_neon(float32x2_t{-kW7_4, kW7_5}, c);
+    const auto c2 = c_mul_neon(float32x2_t{kW7_0, kW7_1}, c);
+    const auto c3 = c_mul_neon(float32x2_t{kW7_0, -kW7_1}, c);
+    const auto c4 = c_mul_neon(float32x2_t{-kW7_4, -kW7_5}, c);
+    const auto c5 = c_mul_neon(float32x2_t{-kW7_2, kW7_3}, c);
 
-    const auto d0 = c_mul_neon(float32x2_t{ -kW7_4, -kW7_5 }, d);
-    const auto d1 = c_mul_neon(float32x2_t{ kW7_0, kW7_1 }, d);
-    const auto d2 = c_mul_neon(float32x2_t{ -kW7_2, -kW7_3 }, d);
-    const auto d3 = c_mul_neon(float32x2_t{ -kW7_2, +kW7_3 }, d);
-    const auto d4 = c_mul_neon(float32x2_t{ kW7_0, -kW7_1 }, d);
-    const auto d5 = c_mul_neon(float32x2_t{ -kW7_4, kW7_5 }, d);
+    const auto d0 = c_mul_neon(float32x2_t{-kW7_4, -kW7_5}, d);
+    const auto d1 = c_mul_neon(float32x2_t{kW7_0, kW7_1}, d);
+    const auto d2 = c_mul_neon(float32x2_t{-kW7_2, -kW7_3}, d);
+    const auto d3 = c_mul_neon(float32x2_t{-kW7_2, +kW7_3}, d);
+    const auto d4 = c_mul_neon(float32x2_t{kW7_0, -kW7_1}, d);
+    const auto d5 = c_mul_neon(float32x2_t{-kW7_4, kW7_5}, d);
 
-    const auto e0 = c_mul_neon(float32x2_t{ -kW7_4, kW7_5 }, e);
-    const auto e1 = c_mul_neon(float32x2_t{ kW7_0, -kW7_1 }, e);
-    const auto e2 = c_mul_neon(float32x2_t{ -kW7_2, kW7_3 }, e);
-    const auto e3 = c_mul_neon(float32x2_t{ -kW7_2, -kW7_3 }, e);
-    const auto e4 = c_mul_neon(float32x2_t{ kW7_0, kW7_1 }, e);
-    const auto e5 = c_mul_neon(float32x2_t{ -kW7_4, -kW7_5 }, e);
+    const auto e0 = c_mul_neon(float32x2_t{-kW7_4, kW7_5}, e);
+    const auto e1 = c_mul_neon(float32x2_t{kW7_0, -kW7_1}, e);
+    const auto e2 = c_mul_neon(float32x2_t{-kW7_2, kW7_3}, e);
+    const auto e3 = c_mul_neon(float32x2_t{-kW7_2, -kW7_3}, e);
+    const auto e4 = c_mul_neon(float32x2_t{kW7_0, kW7_1}, e);
+    const auto e5 = c_mul_neon(float32x2_t{-kW7_4, -kW7_5}, e);
 
-    const auto f0 = c_mul_neon(float32x2_t{ -kW7_2, kW7_3 }, f);
-    const auto f1 = c_mul_neon(float32x2_t{ -kW7_4, -kW7_5 }, f);
-    const auto f2 = c_mul_neon(float32x2_t{ kW7_0, -kW7_1 }, f);
-    const auto f3 = c_mul_neon(float32x2_t{ kW7_0, kW7_1 }, f);
-    const auto f4 = c_mul_neon(float32x2_t{ -kW7_4, kW7_5 }, f);
-    const auto f5 = c_mul_neon(float32x2_t{ -kW7_2, -kW7_3 }, f);
+    const auto f0 = c_mul_neon(float32x2_t{-kW7_2, kW7_3}, f);
+    const auto f1 = c_mul_neon(float32x2_t{-kW7_4, -kW7_5}, f);
+    const auto f2 = c_mul_neon(float32x2_t{kW7_0, -kW7_1}, f);
+    const auto f3 = c_mul_neon(float32x2_t{kW7_0, kW7_1}, f);
+    const auto f4 = c_mul_neon(float32x2_t{-kW7_4, kW7_5}, f);
+    const auto f5 = c_mul_neon(float32x2_t{-kW7_2, -kW7_3}, f);
 
-    const auto g0 = c_mul_neon(float32x2_t{ kW7_0, kW7_1 }, g);
-    const auto g1 = c_mul_neon(float32x2_t{ -kW7_2, kW7_3 }, g);
-    const auto g2 = c_mul_neon(float32x2_t{ -kW7_4, kW7_5 }, g);
-    const auto g3 = c_mul_neon(float32x2_t{ -kW7_4, -kW7_5 }, g);
-    const auto g4 = c_mul_neon(float32x2_t{ -kW7_2, -kW7_3 }, g);
-    const auto g5 = c_mul_neon(float32x2_t{ kW7_0, -kW7_1 }, g);
+    const auto g0 = c_mul_neon(float32x2_t{kW7_0, kW7_1}, g);
+    const auto g1 = c_mul_neon(float32x2_t{-kW7_2, kW7_3}, g);
+    const auto g2 = c_mul_neon(float32x2_t{-kW7_4, kW7_5}, g);
+    const auto g3 = c_mul_neon(float32x2_t{-kW7_4, -kW7_5}, g);
+    const auto g4 = c_mul_neon(float32x2_t{-kW7_2, -kW7_3}, g);
+    const auto g5 = c_mul_neon(float32x2_t{kW7_0, -kW7_1}, g);
 
     x1 = reduce_sum_7(a, b, c, d, e, f, g);
     x2 = reduce_sum_7(a, b0, c0, d0, e0, f0, g0);
@@ -271,9 +304,20 @@ void fft_7(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, f
     x7 = reduce_sum_7(a, b5, c5, d5, e5, f5, g5);
 }
 
-void fft_8(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, float32x2_t &x5, float32x2_t &x6, float32x2_t &x7, float32x2_t &x8, const float32x2_t &w, const float32x2_t &w2,
+void fft_8(float32x2_t       &x1,
+           float32x2_t       &x2,
+           float32x2_t       &x3,
+           float32x2_t       &x4,
+           float32x2_t       &x5,
+           float32x2_t       &x6,
+           float32x2_t       &x7,
+           float32x2_t       &x8,
+           const float32x2_t &w,
+           const float32x2_t &w2,
            const float32x2_t &w3,
-           const float32x2_t &w4, const float32x2_t &w5, const float32x2_t &w6,
+           const float32x2_t &w4,
+           const float32x2_t &w5,
+           const float32x2_t &w6,
            const float32x2_t &w7)
 {
     const auto a = x1;
@@ -285,61 +329,61 @@ void fft_8(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, f
     const auto g = c_mul_neon(w6, x7);
     const auto h = c_mul_neon(w7, x8);
 
-    const auto b0 = c_mul_neon(float32x2_t{ kSqrt2Div2, -kSqrt2Div2 }, b);
-    const auto b1 = c_mul_neon(float32x2_t{ 0, -1 }, b);
-    const auto b2 = c_mul_neon(float32x2_t{ -kSqrt2Div2, -kSqrt2Div2 }, b);
-    const auto b3 = c_mul_neon(float32x2_t{ -1, 0 }, b);
-    const auto b4 = c_mul_neon(float32x2_t{ -kSqrt2Div2, kSqrt2Div2 }, b);
-    const auto b5 = c_mul_neon(float32x2_t{ 0, 1 }, b);
-    const auto b6 = c_mul_neon(float32x2_t{ kSqrt2Div2, kSqrt2Div2 }, b);
+    const auto b0 = c_mul_neon(float32x2_t{kSqrt2Div2, -kSqrt2Div2}, b);
+    const auto b1 = c_mul_neon(float32x2_t{0, -1}, b);
+    const auto b2 = c_mul_neon(float32x2_t{-kSqrt2Div2, -kSqrt2Div2}, b);
+    const auto b3 = c_mul_neon(float32x2_t{-1, 0}, b);
+    const auto b4 = c_mul_neon(float32x2_t{-kSqrt2Div2, kSqrt2Div2}, b);
+    const auto b5 = c_mul_neon(float32x2_t{0, 1}, b);
+    const auto b6 = c_mul_neon(float32x2_t{kSqrt2Div2, kSqrt2Div2}, b);
 
-    const auto c0 = c_mul_neon(float32x2_t{ 0, -1 }, c);
-    const auto c1 = c_mul_neon(float32x2_t{ -1, 0 }, c);
-    const auto c2 = c_mul_neon(float32x2_t{ 0, 1 }, c);
-    const auto c3 = c_mul_neon(float32x2_t{ 1, 0 }, c);
-    const auto c4 = c_mul_neon(float32x2_t{ 0, -1 }, c);
-    const auto c5 = c_mul_neon(float32x2_t{ -1, 0 }, c);
-    const auto c6 = c_mul_neon(float32x2_t{ 0, 1 }, c);
+    const auto c0 = c_mul_neon(float32x2_t{0, -1}, c);
+    const auto c1 = c_mul_neon(float32x2_t{-1, 0}, c);
+    const auto c2 = c_mul_neon(float32x2_t{0, 1}, c);
+    const auto c3 = c_mul_neon(float32x2_t{1, 0}, c);
+    const auto c4 = c_mul_neon(float32x2_t{0, -1}, c);
+    const auto c5 = c_mul_neon(float32x2_t{-1, 0}, c);
+    const auto c6 = c_mul_neon(float32x2_t{0, 1}, c);
 
-    const auto d0 = c_mul_neon(float32x2_t{ -kSqrt2Div2, -kSqrt2Div2 }, d);
-    const auto d1 = c_mul_neon(float32x2_t{ 0, 1 }, d);
-    const auto d2 = c_mul_neon(float32x2_t{ kSqrt2Div2, -kSqrt2Div2 }, d);
-    const auto d3 = c_mul_neon(float32x2_t{ -1, 0 }, d);
-    const auto d4 = c_mul_neon(float32x2_t{ kSqrt2Div2, kSqrt2Div2 }, d);
-    const auto d5 = c_mul_neon(float32x2_t{ 0, -1 }, d);
-    const auto d6 = c_mul_neon(float32x2_t{ -kSqrt2Div2, kSqrt2Div2 }, d);
+    const auto d0 = c_mul_neon(float32x2_t{-kSqrt2Div2, -kSqrt2Div2}, d);
+    const auto d1 = c_mul_neon(float32x2_t{0, 1}, d);
+    const auto d2 = c_mul_neon(float32x2_t{kSqrt2Div2, -kSqrt2Div2}, d);
+    const auto d3 = c_mul_neon(float32x2_t{-1, 0}, d);
+    const auto d4 = c_mul_neon(float32x2_t{kSqrt2Div2, kSqrt2Div2}, d);
+    const auto d5 = c_mul_neon(float32x2_t{0, -1}, d);
+    const auto d6 = c_mul_neon(float32x2_t{-kSqrt2Div2, kSqrt2Div2}, d);
 
-    const auto e0 = c_mul_neon(float32x2_t{ -1, 0 }, e);
-    const auto e1 = c_mul_neon(float32x2_t{ 1, 0 }, e);
-    const auto e2 = c_mul_neon(float32x2_t{ -1, 0 }, e);
-    const auto e3 = c_mul_neon(float32x2_t{ 1, 0 }, e);
-    const auto e4 = c_mul_neon(float32x2_t{ -1, 0 }, e);
-    const auto e5 = c_mul_neon(float32x2_t{ 1, 0 }, e);
-    const auto e6 = c_mul_neon(float32x2_t{ -1, 0 }, e);
+    const auto e0 = c_mul_neon(float32x2_t{-1, 0}, e);
+    const auto e1 = c_mul_neon(float32x2_t{1, 0}, e);
+    const auto e2 = c_mul_neon(float32x2_t{-1, 0}, e);
+    const auto e3 = c_mul_neon(float32x2_t{1, 0}, e);
+    const auto e4 = c_mul_neon(float32x2_t{-1, 0}, e);
+    const auto e5 = c_mul_neon(float32x2_t{1, 0}, e);
+    const auto e6 = c_mul_neon(float32x2_t{-1, 0}, e);
 
-    const auto f0 = c_mul_neon(float32x2_t{ -kSqrt2Div2, kSqrt2Div2 }, f);
-    const auto f1 = c_mul_neon(float32x2_t{ 0, -1 }, f);
-    const auto f2 = c_mul_neon(float32x2_t{ kSqrt2Div2, kSqrt2Div2 }, f);
-    const auto f3 = c_mul_neon(float32x2_t{ -1, 0 }, f);
-    const auto f4 = c_mul_neon(float32x2_t{ kSqrt2Div2, -kSqrt2Div2 }, f);
-    const auto f5 = c_mul_neon(float32x2_t{ 0, 1 }, f);
-    const auto f6 = c_mul_neon(float32x2_t{ -kSqrt2Div2, -kSqrt2Div2 }, f);
+    const auto f0 = c_mul_neon(float32x2_t{-kSqrt2Div2, kSqrt2Div2}, f);
+    const auto f1 = c_mul_neon(float32x2_t{0, -1}, f);
+    const auto f2 = c_mul_neon(float32x2_t{kSqrt2Div2, kSqrt2Div2}, f);
+    const auto f3 = c_mul_neon(float32x2_t{-1, 0}, f);
+    const auto f4 = c_mul_neon(float32x2_t{kSqrt2Div2, -kSqrt2Div2}, f);
+    const auto f5 = c_mul_neon(float32x2_t{0, 1}, f);
+    const auto f6 = c_mul_neon(float32x2_t{-kSqrt2Div2, -kSqrt2Div2}, f);
 
-    const auto g0 = c_mul_neon(float32x2_t{ 0, 1 }, g);
-    const auto g1 = c_mul_neon(float32x2_t{ -1, 0 }, g);
-    const auto g2 = c_mul_neon(float32x2_t{ 0, -1 }, g);
-    const auto g3 = c_mul_neon(float32x2_t{ 1, 0 }, g);
-    const auto g4 = c_mul_neon(float32x2_t{ 0, 1 }, g);
-    const auto g5 = c_mul_neon(float32x2_t{ -1, 0 }, g);
-    const auto g6 = c_mul_neon(float32x2_t{ 0, -1 }, g);
+    const auto g0 = c_mul_neon(float32x2_t{0, 1}, g);
+    const auto g1 = c_mul_neon(float32x2_t{-1, 0}, g);
+    const auto g2 = c_mul_neon(float32x2_t{0, -1}, g);
+    const auto g3 = c_mul_neon(float32x2_t{1, 0}, g);
+    const auto g4 = c_mul_neon(float32x2_t{0, 1}, g);
+    const auto g5 = c_mul_neon(float32x2_t{-1, 0}, g);
+    const auto g6 = c_mul_neon(float32x2_t{0, -1}, g);
 
-    const auto h0 = c_mul_neon(float32x2_t{ kSqrt2Div2, kSqrt2Div2 }, h);
-    const auto h1 = c_mul_neon(float32x2_t{ 0, 1 }, h);
-    const auto h2 = c_mul_neon(float32x2_t{ -kSqrt2Div2, kSqrt2Div2 }, h);
-    const auto h3 = c_mul_neon(float32x2_t{ -1, 0 }, h);
-    const auto h4 = c_mul_neon(float32x2_t{ -kSqrt2Div2, -kSqrt2Div2 }, h);
-    const auto h5 = c_mul_neon(float32x2_t{ 0, -1 }, h);
-    const auto h6 = c_mul_neon(float32x2_t{ kSqrt2Div2, -kSqrt2Div2 }, h);
+    const auto h0 = c_mul_neon(float32x2_t{kSqrt2Div2, kSqrt2Div2}, h);
+    const auto h1 = c_mul_neon(float32x2_t{0, 1}, h);
+    const auto h2 = c_mul_neon(float32x2_t{-kSqrt2Div2, kSqrt2Div2}, h);
+    const auto h3 = c_mul_neon(float32x2_t{-1, 0}, h);
+    const auto h4 = c_mul_neon(float32x2_t{-kSqrt2Div2, -kSqrt2Div2}, h);
+    const auto h5 = c_mul_neon(float32x2_t{0, -1}, h);
+    const auto h6 = c_mul_neon(float32x2_t{kSqrt2Div2, -kSqrt2Div2}, h);
 
     x1 = reduce_sum_8(a, b, c, d, e, f, g, h);
     x2 = reduce_sum_8(a, b0, c0, d0, e0, f0, g0, h0);
@@ -352,18 +396,19 @@ void fft_8(float32x2_t &x1, float32x2_t &x2, float32x2_t &x3, float32x2_t &x4, f
 }
 
 template <bool first_stage>
-void fft_radix_2_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
+void fft_radix_2_axes_0(
+    float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
-        for(unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
         {
-            auto a = float32x2_t{ 0, 0 };
-            auto b = float32x2_t{ 0, 0 };
+            auto a = float32x2_t{0, 0};
+            auto b = float32x2_t{0, 0};
 
             // Load inputs
-            if(first_stage)
+            if (first_stage)
             {
                 const auto ab = wrapper::vloadq(in + k);
                 a             = wrapper::vgetlow(ab);
@@ -379,7 +424,7 @@ void fft_radix_2_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
             fft_2(a, b, w);
 
             // Write outputs
-            if(first_stage)
+            if (first_stage)
             {
                 wrapper::vstore(out + k, wrapper::vcombine(a, b));
             }
@@ -394,12 +439,20 @@ void fft_radix_2_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
     }
 }
 
-void fft_radix_2_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N, unsigned int M, unsigned int in_pad_x, unsigned int out_pad_x)
+void fft_radix_2_axes_1(float             *out,
+                        float             *in,
+                        unsigned int       Nx,
+                        unsigned int       NxRadix,
+                        const float32x2_t &w_m,
+                        unsigned int       N,
+                        unsigned int       M,
+                        unsigned int       in_pad_x,
+                        unsigned int       out_pad_x)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
-        for(unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
         {
             // Load inputs
             float32x2_t a = wrapper::vload(in + (N + in_pad_x) * k);
@@ -418,20 +471,21 @@ void fft_radix_2_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxR
 }
 
 template <bool first_stage>
-void fft_radix_3_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
+void fft_radix_3_axes_0(
+    float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const auto w2 = c_mul_neon(w, w);
 
-        for(unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
         {
             // Load inputs
-            float32x2_t a = { 0, 0 };
-            float32x2_t b = { 0, 0 };
-            float32x2_t c = { 0, 0 };
-            if(first_stage)
+            float32x2_t a = {0, 0};
+            float32x2_t b = {0, 0};
+            float32x2_t c = {0, 0};
+            if (first_stage)
             {
                 const auto ab = wrapper::vloadq(in + k);
                 a             = wrapper::vgetlow(ab);
@@ -447,7 +501,7 @@ void fft_radix_3_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
             // Base-case prime transform
             fft_3(a, b, c, w, w2);
 
-            if(first_stage)
+            if (first_stage)
             {
                 wrapper::vstore(out + k, wrapper::vcombine(a, b));
             }
@@ -462,14 +516,22 @@ void fft_radix_3_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
     }
 }
 
-void fft_radix_3_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N, unsigned int M, unsigned int in_pad_x, unsigned int out_pad_x)
+void fft_radix_3_axes_1(float             *out,
+                        float             *in,
+                        unsigned int       Nx,
+                        unsigned int       NxRadix,
+                        const float32x2_t &w_m,
+                        unsigned int       N,
+                        unsigned int       M,
+                        unsigned int       in_pad_x,
+                        unsigned int       out_pad_x)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const auto w2 = c_mul_neon(w, w);
 
-        for(unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
         {
             // Load inputs
             float32x2_t a = wrapper::vload(in + (N + in_pad_x) * k);
@@ -489,21 +551,22 @@ void fft_radix_3_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxR
 }
 
 template <bool first_stage>
-void fft_radix_4_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
+void fft_radix_4_axes_0(
+    float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const auto w2 = c_mul_neon(w, w);
         const auto w3 = c_mul_neon(w2, w);
 
-        for(unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
         {
-            float32x2_t a = { 0, 0 };
-            float32x2_t b = { 0, 0 };
-            float32x2_t c = { 0, 0 };
-            float32x2_t d = { 0, 0 };
-            if(first_stage)
+            float32x2_t a = {0, 0};
+            float32x2_t b = {0, 0};
+            float32x2_t c = {0, 0};
+            float32x2_t d = {0, 0};
+            if (first_stage)
             {
                 const auto ab = wrapper::vloadq(in + k);
                 const auto cd = wrapper::vloadq(in + k + 4 * Nx);
@@ -524,7 +587,7 @@ void fft_radix_4_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
             // Base-case prime transform
             fft_4(a, b, c, d, w, w2, w3);
 
-            if(first_stage)
+            if (first_stage)
             {
                 wrapper::vstore(out + k, wrapper::vcombine(a, b));
                 wrapper::vstore(out + k + 4 * Nx, wrapper::vcombine(c, d));
@@ -542,15 +605,23 @@ void fft_radix_4_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
     }
 }
 
-void fft_radix_4_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N, unsigned int M, unsigned int in_pad_x, unsigned int out_pad_x)
+void fft_radix_4_axes_1(float             *out,
+                        float             *in,
+                        unsigned int       Nx,
+                        unsigned int       NxRadix,
+                        const float32x2_t &w_m,
+                        unsigned int       N,
+                        unsigned int       M,
+                        unsigned int       in_pad_x,
+                        unsigned int       out_pad_x)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const auto w2 = c_mul_neon(w, w);
         const auto w3 = c_mul_neon(w2, w);
 
-        for(unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
         {
             // Load inputs
             float32x2_t a = wrapper::vload(in + (N + in_pad_x) * k);
@@ -572,25 +643,26 @@ void fft_radix_4_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxR
 }
 
 template <bool first_stage>
-void fft_radix_5_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
+void fft_radix_5_axes_0(
+    float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const float32x2_t w2 = c_mul_neon(w, w);
         const float32x2_t w3 = c_mul_neon(w2, w);
         const float32x2_t w4 = c_mul_neon(w3, w);
 
-        for(unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
         {
-            float32x2_t a = { 0, 0 };
-            float32x2_t b = { 0, 0 };
-            float32x2_t c = { 0, 0 };
-            float32x2_t d = { 0, 0 };
-            float32x2_t e = { 0, 0 };
+            float32x2_t a = {0, 0};
+            float32x2_t b = {0, 0};
+            float32x2_t c = {0, 0};
+            float32x2_t d = {0, 0};
+            float32x2_t e = {0, 0};
 
             // Load inputs
-            if(first_stage)
+            if (first_stage)
             {
                 const auto ab = wrapper::vloadq(in + k);
                 const auto cd = wrapper::vloadq(in + k + 4 * Nx);
@@ -613,7 +685,7 @@ void fft_radix_5_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
             fft_5(a, b, c, d, e, w, w2, w3, w4);
 
             // Store outputs
-            if(first_stage)
+            if (first_stage)
             {
                 wrapper::vstore(out + k, wrapper::vcombine(a, b));
                 wrapper::vstore(out + k + 4 * Nx, wrapper::vcombine(c, d));
@@ -632,16 +704,24 @@ void fft_radix_5_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
     }
 }
 
-void fft_radix_5_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N, unsigned int M, unsigned int in_pad_x, unsigned int out_pad_x)
+void fft_radix_5_axes_1(float             *out,
+                        float             *in,
+                        unsigned int       Nx,
+                        unsigned int       NxRadix,
+                        const float32x2_t &w_m,
+                        unsigned int       N,
+                        unsigned int       M,
+                        unsigned int       in_pad_x,
+                        unsigned int       out_pad_x)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const float32x2_t w2 = c_mul_neon(w, w);
         const float32x2_t w3 = c_mul_neon(w2, w);
         const float32x2_t w4 = c_mul_neon(w3, w);
 
-        for(unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
         {
             // Load inputs
             float32x2_t a = wrapper::vload(in + (N + in_pad_x) * k);
@@ -666,10 +746,11 @@ void fft_radix_5_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxR
 }
 
 template <bool first_stage>
-void fft_radix_7_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
+void fft_radix_7_axes_0(
+    float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const float32x2_t w2 = c_mul_neon(w, w);
         const float32x2_t w3 = c_mul_neon(w2, w);
@@ -677,18 +758,18 @@ void fft_radix_7_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
         const float32x2_t w5 = c_mul_neon(w4, w);
         const float32x2_t w6 = c_mul_neon(w5, w);
 
-        for(unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
         {
-            float32x2_t a = { 0, 0 };
-            float32x2_t b = { 0, 0 };
-            float32x2_t c = { 0, 0 };
-            float32x2_t d = { 0, 0 };
-            float32x2_t e = { 0, 0 };
-            float32x2_t f = { 0, 0 };
-            float32x2_t g = { 0, 0 };
+            float32x2_t a = {0, 0};
+            float32x2_t b = {0, 0};
+            float32x2_t c = {0, 0};
+            float32x2_t d = {0, 0};
+            float32x2_t e = {0, 0};
+            float32x2_t f = {0, 0};
+            float32x2_t g = {0, 0};
 
             // Load inputs
-            if(first_stage)
+            if (first_stage)
             {
                 const auto ab = wrapper::vloadq(in + k);
                 const auto cd = wrapper::vloadq(in + k + 4 * Nx);
@@ -715,7 +796,7 @@ void fft_radix_7_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
             // Base-case prime transform
             fft_7(a, b, c, d, e, f, g, w, w2, w3, w4, w5, w6);
 
-            if(first_stage)
+            if (first_stage)
             {
                 wrapper::vstore(out + k, wrapper::vcombine(a, b));
                 wrapper::vstore(out + k + 4 * Nx, wrapper::vcombine(c, d));
@@ -737,10 +818,18 @@ void fft_radix_7_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
     }
 }
 
-void fft_radix_7_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N, unsigned int M, unsigned int in_pad_x, unsigned int out_pad_x)
+void fft_radix_7_axes_1(float             *out,
+                        float             *in,
+                        unsigned int       Nx,
+                        unsigned int       NxRadix,
+                        const float32x2_t &w_m,
+                        unsigned int       N,
+                        unsigned int       M,
+                        unsigned int       in_pad_x,
+                        unsigned int       out_pad_x)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const float32x2_t w2 = c_mul_neon(w, w);
         const float32x2_t w3 = c_mul_neon(w2, w);
@@ -748,7 +837,7 @@ void fft_radix_7_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxR
         const float32x2_t w5 = c_mul_neon(w4, w);
         const float32x2_t w6 = c_mul_neon(w5, w);
 
-        for(unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
         {
             // Load inputs
             float32x2_t a = wrapper::vload(in + (N + in_pad_x) * k);
@@ -777,10 +866,11 @@ void fft_radix_7_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxR
 }
 
 template <bool first_stage>
-void fft_radix_8_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
+void fft_radix_8_axes_0(
+    float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const float32x2_t w2 = c_mul_neon(w, w);
         const float32x2_t w3 = c_mul_neon(w2, w);
@@ -789,20 +879,20 @@ void fft_radix_8_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
         const float32x2_t w6 = c_mul_neon(w5, w);
         const float32x2_t w7 = c_mul_neon(w6, w);
 
-        for(unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * N; k += 2 * NxRadix)
         {
             // Load inputs
-            float32x2_t a = { 0, 0 };
-            float32x2_t b = { 0, 0 };
-            float32x2_t c = { 0, 0 };
-            float32x2_t d = { 0, 0 };
-            float32x2_t e = { 0, 0 };
-            float32x2_t f = { 0, 0 };
-            float32x2_t g = { 0, 0 };
-            float32x2_t h = { 0, 0 };
+            float32x2_t a = {0, 0};
+            float32x2_t b = {0, 0};
+            float32x2_t c = {0, 0};
+            float32x2_t d = {0, 0};
+            float32x2_t e = {0, 0};
+            float32x2_t f = {0, 0};
+            float32x2_t g = {0, 0};
+            float32x2_t h = {0, 0};
 
             // Base-case prime transform
-            if(first_stage)
+            if (first_stage)
             {
                 const auto ab = wrapper::vloadq(in + k);
                 const auto cd = wrapper::vloadq(in + k + 4 * Nx);
@@ -834,7 +924,7 @@ void fft_radix_8_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
             fft_8(a, b, c, d, e, f, g, h, w, w2, w3, w4, w5, w6, w7);
 
             // Store outputs
-            if(first_stage)
+            if (first_stage)
             {
                 wrapper::vstore(out + k, wrapper::vcombine(a, b));
                 wrapper::vstore(out + k + 4 * Nx, wrapper::vcombine(c, d));
@@ -858,10 +948,18 @@ void fft_radix_8_axes_0(float *out, float *in, unsigned int Nx, unsigned int NxR
     }
 }
 
-void fft_radix_8_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxRadix, const float32x2_t &w_m, unsigned int N, unsigned int M, unsigned int in_pad_x, unsigned int out_pad_x)
+void fft_radix_8_axes_1(float             *out,
+                        float             *in,
+                        unsigned int       Nx,
+                        unsigned int       NxRadix,
+                        const float32x2_t &w_m,
+                        unsigned int       N,
+                        unsigned int       M,
+                        unsigned int       in_pad_x,
+                        unsigned int       out_pad_x)
 {
-    float32x2_t w{ 1.0f, 0.0f };
-    for(unsigned int j = 0; j < Nx; j++)
+    float32x2_t w{1.0f, 0.0f};
+    for (unsigned int j = 0; j < Nx; j++)
     {
         const float32x2_t w2 = c_mul_neon(w, w);
         const float32x2_t w3 = c_mul_neon(w2, w);
@@ -870,7 +968,7 @@ void fft_radix_8_axes_1(float *out, float *in, unsigned int Nx, unsigned int NxR
         const float32x2_t w6 = c_mul_neon(w5, w);
         const float32x2_t w7 = c_mul_neon(w6, w);
 
-        for(unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
+        for (unsigned int k = 2 * j; k < 2 * M; k += 2 * NxRadix)
         {
             // Load inputs
             float32x2_t a = wrapper::vload(in + (N + in_pad_x) * k);
@@ -908,7 +1006,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_UNUSED(config);
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -917,11 +1015,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const FFTRadixStageKernelInfo &config)
+std::pair<Status, Window>
+validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const FFTRadixStageKernelInfo &config)
 {
     ARM_COMPUTE_UNUSED(config);
 
-    if(output != nullptr)
+    if (output != nullptr)
     {
         auto_init_if_empty(*output, *input);
     }
@@ -942,7 +1041,7 @@ void NEFFTRadixStageKernel::set_radix_stage_axis0(const FFTRadixStageKernelInfo 
     // FFT table axis 0: [radix, first_stage]
     static std::map<unsigned int, std::map<bool, FFTFunctionPointerAxis0>> fft_table_axis0;
 
-    if(fft_table_axis0.empty())
+    if (fft_table_axis0.empty())
     {
         fft_table_axis0[2][false] = &fft_radix_2_axes_0<false>;
         fft_table_axis0[3][false] = &fft_radix_3_axes_0<false>;
@@ -967,7 +1066,7 @@ void NEFFTRadixStageKernel::set_radix_stage_axis1(const FFTRadixStageKernelInfo 
     // FFT table axis 1: [radix, first_stage]
     static std::map<unsigned int, FFTFunctionPointerAxis1> fft_table_axis1;
 
-    if(fft_table_axis1.empty())
+    if (fft_table_axis1.empty())
     {
         fft_table_axis1[2] = &fft_radix_2_axes_1;
         fft_table_axis1[3] = &fft_radix_3_axes_1;
@@ -985,12 +1084,13 @@ void NEFFTRadixStageKernel::configure(ITensor *input, ITensor *output, const FFT
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     // Output auto inizialitation if not yet initialized
-    if(output != nullptr)
+    if (output != nullptr)
     {
         auto_init_if_empty(*output->info(), *input->info()->clone());
     }
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, config));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, config));
 
     _input  = input;
     _output = (output == nullptr) ? input : output;
@@ -998,7 +1098,7 @@ void NEFFTRadixStageKernel::configure(ITensor *input, ITensor *output, const FFT
     _axis   = config.axis;
     _radix  = config.radix;
 
-    switch(config.axis)
+    switch (config.axis)
     {
         case 0:
             set_radix_stage_axis0(config);
@@ -1012,26 +1112,28 @@ void NEFFTRadixStageKernel::configure(ITensor *input, ITensor *output, const FFT
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (output != nullptr) ? output->info() : nullptr, config);
+    auto win_config =
+        validate_and_configure_window(input->info(), (output != nullptr) ? output->info() : nullptr, config);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 }
 
-Status NEFFTRadixStageKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const FFTRadixStageKernelInfo &config)
+Status NEFFTRadixStageKernel::validate(const ITensorInfo             *input,
+                                       const ITensorInfo             *output,
+                                       const FFTRadixStageKernelInfo &config)
 {
     const bool run_in_place = (output == nullptr) || (output == input);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, config));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
-                                                              (run_in_place) ? nullptr : output->clone().get(),
-                                                              config)
-                                .first);
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_and_configure_window(input->clone().get(), (run_in_place) ? nullptr : output->clone().get(), config)
+            .first);
 
     return Status{};
 }
 
 std::set<unsigned int> NEFFTRadixStageKernel::supported_radix()
 {
-    return std::set<unsigned int> { 2, 3, 4, 5, 7, 8 };
+    return std::set<unsigned int>{2, 3, 4, 5, 7, 8};
 }
 
 void NEFFTRadixStageKernel::run(const Window &window, const ThreadInfo &info)
@@ -1049,28 +1151,32 @@ void NEFFTRadixStageKernel::run(const Window &window, const ThreadInfo &info)
     // Precompute FFT constants
     const unsigned int NxRadix = _radix * _Nx;
     const float        alpha   = 2.0f * kPi / float(NxRadix);
-    const float32x2_t  w_m{ cosf(alpha), -sinf(alpha) };
+    const float32x2_t  w_m{cosf(alpha), -sinf(alpha)};
 
-    if(_axis == 0)
+    if (_axis == 0)
     {
         const unsigned int N = _input->info()->dimension(0);
-        execute_window_loop(input_window, [&](const Coordinates &)
-        {
-            _func_0(reinterpret_cast<float *>(out.ptr()), reinterpret_cast<float *>(in.ptr()), _Nx, NxRadix, w_m, N);
-        },
-        in, out);
+        execute_window_loop(
+            input_window,
+            [&](const Coordinates &) {
+                _func_0(reinterpret_cast<float *>(out.ptr()), reinterpret_cast<float *>(in.ptr()), _Nx, NxRadix, w_m,
+                        N);
+            },
+            in, out);
     }
     else
     {
         const unsigned int N = _input->info()->dimension(0);
         const unsigned int M = _input->info()->dimension(1);
-        execute_window_loop(input_window, [&](const Coordinates &)
-        {
-            _func_1(reinterpret_cast<float *>(out.ptr()), reinterpret_cast<float *>(in.ptr()), _Nx, NxRadix, w_m, N, M,
-                    _input->info()->padding().right + _input->info()->padding().left,
-                    _output->info()->padding().right + _output->info()->padding().left);
-        },
-        in, out);
+        execute_window_loop(
+            input_window,
+            [&](const Coordinates &)
+            {
+                _func_1(reinterpret_cast<float *>(out.ptr()), reinterpret_cast<float *>(in.ptr()), _Nx, NxRadix, w_m, N,
+                        M, _input->info()->padding().right + _input->info()->padding().left,
+                        _output->info()->padding().right + _output->info()->padding().left);
+            },
+            in, out);
     }
 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);

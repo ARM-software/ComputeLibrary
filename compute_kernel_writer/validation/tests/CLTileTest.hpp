@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP
-#define COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP
+#ifndef CKW_VALIDATION_TESTS_CLTILETEST_HPP
+#define CKW_VALIDATION_TESTS_CLTILETEST_HPP
 
 #include "common/Common.h"
 #include "src/Helpers.h"
@@ -63,7 +63,7 @@ public:
 
             for(int32_t y = 0; y < height; ++y)
             {
-                const std::string expected_var_name = tile_name + "_" + std::to_string(y);
+                const std::string expected_var_name = tile_name + "__" + std::to_string(y);
                 const std::string actual_var_name   = vars[y].str;
                 VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
             }
@@ -172,7 +172,7 @@ public:
 
             const std::string actual_var_name   = var.str;
             std::string       expected_var_name = tile_name;
-            expected_var_name += "_" + std::to_string(y_coord);
+            expected_var_name += "__" + std::to_string(y_coord);
             expected_var_name += ".s" + dec_to_hex_as_string(x_coord);
 
             VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
@@ -238,7 +238,7 @@ public:
 
             const std::string actual_var_name   = var.str;
             std::string       expected_var_name = tile_name;
-            expected_var_name += "_" + std::to_string(y_coord);
+            expected_var_name += "__" + std::to_string(y_coord);
             if(width != 1)
             {
                 expected_var_name += ".s" + dec_to_hex_as_string(x_coord_clamped);
@@ -310,7 +310,7 @@ public:
             std::string       expected_var_name = tile_name;
             if(height != 1)
             {
-                expected_var_name += "_" + std::to_string(y_coord_clamped);
+                expected_var_name += "__" + std::to_string(y_coord_clamped);
             }
 
             if(width != 1)
@@ -367,7 +367,7 @@ public:
                 std::string       expected_var_name = tile_name;
                 if(height != 1)
                 {
-                    expected_var_name += "_" + std::to_string(row);
+                    expected_var_name += "__" + std::to_string(row);
                 }
 
                 VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
@@ -423,7 +423,7 @@ public:
                     std::string expected_var_name = tile_name;
                     if(height != 1)
                     {
-                        expected_var_name += "_" + std::to_string(row);
+                        expected_var_name += "__" + std::to_string(row);
                     }
 
                     if(width != 1)
@@ -464,4 +464,4 @@ private:
 };
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP */
+#endif // CKW_VALIDATION_TESTS_CLTILETEST_HPP

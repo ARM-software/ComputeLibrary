@@ -28,8 +28,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_FLOOR_KERNEL(func_name) \
-    void func_name(const void *src, void *dst, int len)
+#define DECLARE_FLOOR_KERNEL(func_name) void func_name(const void *src, void *dst, int len)
 
 DECLARE_FLOOR_KERNEL(fp16_neon_floor);
 DECLARE_FLOOR_KERNEL(fp32_neon_floor);

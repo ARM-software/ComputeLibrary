@@ -24,6 +24,7 @@
 #include "arm_compute/graph/backends/NEON/NETensorHandle.h"
 
 #include "arm_compute/runtime/MemoryGroup.h"
+
 #include "support/Cast.h"
 
 namespace arm_compute
@@ -32,8 +33,7 @@ namespace graph
 {
 namespace backends
 {
-NETensorHandle::NETensorHandle(const ITensorInfo &info)
-    : _tensor()
+NETensorHandle::NETensorHandle(const ITensorInfo &info) : _tensor()
 {
     _tensor.allocator()->init(info);
 }
@@ -50,7 +50,7 @@ void NETensorHandle::free()
 
 void NETensorHandle::manage(IMemoryGroup *mg)
 {
-    if(mg != nullptr)
+    if (mg != nullptr)
     {
         mg->manage(&_tensor);
     }
@@ -68,7 +68,7 @@ void NETensorHandle::unmap()
 void NETensorHandle::release_if_unused()
 {
     // TODO (geopin01): Release tensor only if all sub-tensors are marked as not used
-    if(!_tensor.is_used())
+    if (!_tensor.is_used())
     {
         _tensor.allocator()->free();
     }

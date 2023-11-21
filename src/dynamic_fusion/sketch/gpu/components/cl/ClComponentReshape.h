@@ -73,10 +73,7 @@ public:
      * @param[in] properties Component properties @ref Properties
      * @param[in] tensors    Tensor arguments to the component
      */
-    ClComponentReshape(
-        ComponentId                      id,
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors);
+    ClComponentReshape(ComponentId id, const Properties &properties, const ArgumentPack<ITensorInfo> &tensors);
 
     /** Destructor */
     ~ClComponentReshape() override;

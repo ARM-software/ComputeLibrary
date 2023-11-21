@@ -39,17 +39,17 @@ enum class ActivationFunction
     RELU,            /**< Rectifier ( \f$ f(x) = max(0,x) \f$ ) */
     BOUNDED_RELU,    /**< Upper Bounded Rectifier ( \f$ f(x) = min(a, max(0,x)) \f$ ) */
     LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
-    LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
-    SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
-    ELU,             /**< Exponential Linear Unit ( \f$ f(x) = \begin{cases}  \alpha (exp(x) - 1) & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
-    ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
-    SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
-    SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
-    LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
-    IDENTITY,        /**< Identity ( \f$ f(x)= x \f$ ) */
-    HARD_SWISH,      /**< Hard-swish ( \f$ f(x) = (x \text{ReLU6}(x+3))/6 = x \min(\max(0,x+3),6)/6 \f$ ) */
-    SWISH,           /**< Swish ( \f$ f(x) = \frac{x}{1 + e^{-ax}} = x \text{logistic}(ax) \f$ ) */
-    GELU             /**< GELU ( \f$ f(x) = x * 1/2 * 1 + erf(x / \sqrt{2}) \f$ ) */
+    LEAKY_RELU, /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
+    SOFT_RELU,  /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+    ELU, /**< Exponential Linear Unit ( \f$ f(x) = \begin{cases}  \alpha (exp(x) - 1) & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
+    ABS, /**< Absolute ( \f$ f(x)= |x| \f$ ) */
+    SQUARE,     /**< Square ( \f$ f(x)= x^2 \f$ )*/
+    SQRT,       /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
+    LINEAR,     /**< Linear ( \f$ f(x)= ax + b \f$ ) */
+    IDENTITY,   /**< Identity ( \f$ f(x)= x \f$ ) */
+    HARD_SWISH, /**< Hard-swish ( \f$ f(x) = (x \text{ReLU6}(x+3))/6 = x \min(\max(0,x+3),6)/6 \f$ ) */
+    SWISH,      /**< Swish ( \f$ f(x) = \frac{x}{1 + e^{-ax}} = x \text{logistic}(ax) \f$ ) */
+    GELU        /**< GELU ( \f$ f(x) = x * 1/2 * 1 + erf(x / \sqrt{2}) \f$ ) */
 };
 /** Activation Layer Information class */
 class ActivationLayerInfo
@@ -68,8 +68,7 @@ public:
      *              (@ref ActivationFunction::BOUNDED_RELU, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::LINEAR, @ref ActivationFunction::TANH).
      * @param[in] b (Optional) The beta parameter used by some activation functions (@ref ActivationFunction::LINEAR, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::TANH).
      */
-    ActivationLayerInfo(ActivationFunction f, float a = 0.0f, float b = 0.0f)
-        : _act(f), _a(a), _b(b), _enabled(true)
+    ActivationLayerInfo(ActivationFunction f, float a = 0.0f, float b = 0.0f) : _act(f), _a(a), _b(b), _enabled(true)
     {
     }
     /** Get the type of activation function */
@@ -104,10 +103,10 @@ public:
     }
 #endif // __aarch64__
 private:
-    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::IDENTITY };
+    ActivationFunction _act     = {ActivationLayerInfo::ActivationFunction::IDENTITY};
     float              _a       = {};
     float              _b       = {};
-    bool               _enabled = { false };
+    bool               _enabled = {false};
 
 #ifdef __aarch64__
     LookupTable256 _lut = {};

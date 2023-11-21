@@ -30,14 +30,13 @@ namespace arm_compute
 {
 namespace experimental
 {
-ICLOperator::ICLOperator(IRuntimeContext *ctx)
-    : _kernel(), _ctx(ctx), _workspace()
+ICLOperator::ICLOperator(IRuntimeContext *ctx) : _kernel(), _ctx(ctx), _workspace()
 {
 }
 
 void ICLOperator::run(ITensorPack &tensors)
 {
-    if(tensors.empty())
+    if (tensors.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");
     }

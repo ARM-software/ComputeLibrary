@@ -43,7 +43,7 @@ ISimpleLifetimeManager::ISimpleLifetimeManager()
 
 void ISimpleLifetimeManager::register_group(IMemoryGroup *group)
 {
-    if(_active_group == nullptr)
+    if (_active_group == nullptr)
     {
         ARM_COMPUTE_ERROR_ON(group == nullptr);
         _active_group = group;
@@ -52,12 +52,12 @@ void ISimpleLifetimeManager::register_group(IMemoryGroup *group)
 
 bool ISimpleLifetimeManager::release_group(IMemoryGroup *group)
 {
-    if(group == nullptr)
+    if (group == nullptr)
     {
         return false;
     }
     const bool status = bool(_finalized_groups.erase(group));
-    if(status)
+    if (status)
     {
         group->mappings().clear();
     }
@@ -67,12 +67,13 @@ bool ISimpleLifetimeManager::release_group(IMemoryGroup *group)
 void ISimpleLifetimeManager::start_lifetime(void *obj)
 {
     ARM_COMPUTE_ERROR_ON(obj == nullptr);
-    ARM_COMPUTE_ERROR_ON_MSG(_active_elements.find(obj) != std::end(_active_elements), "Memory object is already registered!");
+    ARM_COMPUTE_ERROR_ON_MSG(_active_elements.find(obj) != std::end(_active_elements),
+                             "Memory object is already registered!");
 
     // Check if there is a free blob
-    if(_free_blobs.empty())
+    if (_free_blobs.empty())
     {
-        _occupied_blobs.emplace_front(Blob{ obj, 0, 0, { obj } });
+        _occupied_blobs.emplace_front(Blob{obj, 0, 0, {obj}});
     }
     else
     {
@@ -100,10 +101,8 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t
     el.status    = true;
 
     // Find object in the occupied lists
-    auto occupied_blob_it = std::find_if(std::begin(_occupied_blobs), std::end(_occupied_blobs), [&obj](const Blob & b)
-    {
-        return obj == b.id;
-    });
+    auto occupied_blob_it = std::find_if(std::begin(_occupied_blobs), std::end(_occupied_blobs),
+                                         [&obj](const Blob &b) { return obj == b.id; });
     ARM_COMPUTE_ERROR_ON(occupied_blob_it == std::end(_occupied_blobs));
 
     // Update occupied blob and return as free
@@ -114,7 +113,7 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t
     _free_blobs.splice(std::begin(_free_blobs), _occupied_blobs, occupied_blob_it);
 
     // Check if all objects are finalized and reset active group
-    if(are_all_finalized())
+    if (are_all_finalized())
     {
         ARM_COMPUTE_ERROR_ON(!_occupied_blobs.empty());
 
@@ -133,9 +132,7 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t
 
 bool ISimpleLifetimeManager::are_all_finalized() const
 {
-    return !std::any_of(std::begin(_active_elements), std::end(_active_elements), [](const std::pair<void *, Element> &e)
-    {
-        return !e.second.status;
-    });
+    return !std::any_of(std::begin(_active_elements), std::end(_active_elements),
+                        [](const std::pair<void *, Element> &e) { return !e.second.status; });
 }
 } // namespace arm_compute

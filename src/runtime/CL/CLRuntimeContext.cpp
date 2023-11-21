@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
+
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -29,7 +30,10 @@
 namespace arm_compute
 {
 CLRuntimeContext::CLRuntimeContext()
-    : _gpu_owned_scheduler(std::make_unique<CLScheduler>()), _gpu_scheduler(_gpu_owned_scheduler.get()), _symbols(), _backend_type()
+    : _gpu_owned_scheduler(std::make_unique<CLScheduler>()),
+      _gpu_scheduler(_gpu_owned_scheduler.get()),
+      _symbols(),
+      _backend_type()
 {
     _symbols.load_default();
     auto ctx_dev_err = create_opencl_context_and_device(_backend_type);

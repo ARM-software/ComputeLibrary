@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H
 
 #include "arm_compute/runtime/ILifetimeManager.h"
-
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
 
@@ -70,7 +69,11 @@ protected:
     /** Element struct */
     struct Element
     {
-        Element(void *id_ = nullptr, IMemory *handle_ = nullptr, size_t size_ = 0, size_t alignment_ = 0, bool status_ = false)
+        Element(void    *id_        = nullptr,
+                IMemory *handle_    = nullptr,
+                size_t   size_      = 0,
+                size_t   alignment_ = 0,
+                bool     status_    = false)
             : id(id_), handle(handle_), size(size_), alignment(alignment_), status(status_)
         {
         }
@@ -90,11 +93,12 @@ protected:
         std::set<void *> bound_elements;
     };
 
-    IMemoryGroup *_active_group;                                           /**< Active group */
-    std::map<void *, Element> _active_elements;                            /**< A map that contains the active elements */
-    std::list<Blob> _free_blobs;                                           /**< Free blobs */
-    std::list<Blob> _occupied_blobs;                                       /**< Occupied blobs */
-    std::map<IMemoryGroup *, std::map<void *, Element>> _finalized_groups; /**< A map that contains the finalized groups */
+    IMemoryGroup             *_active_group;    /**< Active group */
+    std::map<void *, Element> _active_elements; /**< A map that contains the active elements */
+    std::list<Blob>           _free_blobs;      /**< Free blobs */
+    std::list<Blob>           _occupied_blobs;  /**< Occupied blobs */
+    std::map<IMemoryGroup *, std::map<void *, Element>>
+        _finalized_groups; /**< A map that contains the finalized groups */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H */

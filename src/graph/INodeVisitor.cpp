@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph/INodeVisitor.h"
+
 #include "arm_compute/graph/nodes/Nodes.h"
 
 namespace arm_compute
@@ -82,14 +83,6 @@ void DefaultNodeVisitor::visit(FullyConnectedLayerNode &n)
     default_visit(n);
 }
 void DefaultNodeVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
-{
-    default_visit(n);
-}
-void DefaultNodeVisitor::visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n)
-{
-    default_visit(n);
-}
-void DefaultNodeVisitor::visit(FusedConvolutionWithPostOpNode &n)
 {
     default_visit(n);
 }

@@ -30,6 +30,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -51,7 +52,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
-    if(dst->tensor_shape().total_size() != 0)
+    if (dst->tensor_shape().total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
@@ -72,27 +73,17 @@ void ClReshapeKernel::configure(const CLCompileContext &compile_context, const I
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     // Create kernel
-    std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(src->element_size()) };
+    std::set<std::string> build_opts = {"-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(src->element_size())};
     _kernel                          = create_kernel(compile_context, "reshape_layer", build_opts);
 
     // Add static arguments
-    const cl_int2 src_shape =
-    {
-        {
-            static_cast<cl_int>(src->tensor_shape()[0]),
-            static_cast<cl_int>(src->tensor_shape()[1])
-        }
-    };
-    const cl_int2 dst_shape =
-    {
-        {
-            static_cast<cl_int>(dst->tensor_shape()[0]),
-            static_cast<cl_int>(dst->tensor_shape()[1])
-        }
-    };
+    const cl_int2 src_shape = {
+        {static_cast<cl_int>(src->tensor_shape()[0]), static_cast<cl_int>(src->tensor_shape()[1])}};
+    const cl_int2 dst_shape = {
+        {static_cast<cl_int>(dst->tensor_shape()[0]), static_cast<cl_int>(dst->tensor_shape()[1])}};
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the src and dst parameters
     _kernel.setArg<cl_int2>(idx++, src_shape);
     _kernel.setArg<cl_int2>(idx++, dst_shape);
@@ -119,8 +110,9 @@ void ClReshapeKernel::run_op(ITensorPack &tensors, const Window &window, cl::Com
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice            = window_collapsed.first_slice_window_3D();
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     // Set srcs
     unsigned int idx = 0;

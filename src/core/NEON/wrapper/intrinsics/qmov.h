@@ -31,15 +31,13 @@ namespace arm_compute
 namespace wrapper
 {
 template <typename T>
-inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8x8_t>::type
-vqmov(const int16x8_t &a)
+inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8x8_t>::type vqmov(const int16x8_t &a)
 {
     return vqmovun_s16(a);
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_same<T, int8_t>::value, int8x8_t>::type
-vqmov(const int16x8_t &a)
+inline typename std::enable_if<std::is_same<T, int8_t>::value, int8x8_t>::type vqmov(const int16x8_t &a)
 {
     return vqmovn_s16(a);
 }

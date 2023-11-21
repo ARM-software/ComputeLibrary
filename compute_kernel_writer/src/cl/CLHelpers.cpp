@@ -21,17 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #include "src/cl/CLHelpers.h"
+
 #include "ckw/Error.h"
 #include "ckw/types/DataType.h"
+#include "ckw/types/Operators.h"
 #include "ckw/types/TensorStorageType.h"
+
+#include "src/types/DataTypeHelpers.h"
 
 namespace ckw
 {
 bool cl_validate_vector_length(int32_t len)
 {
     bool valid_vector_length = true;
-    if(len < 1 || len > 16 || (len > 4 && len < 8) || (len > 8 && len < 16))
+    if (len < 1 || len > 16 || (len > 4 && len < 8) || (len > 8 && len < 16))
     {
         valid_vector_length = false;
     }
@@ -40,14 +45,14 @@ bool cl_validate_vector_length(int32_t len)
 
 std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len)
 {
-    if(cl_validate_vector_length(len) == false)
+    if (cl_validate_vector_length(len) == false)
     {
         CKW_THROW_MSG("Unsupported vector length");
         return "";
     }
 
     std::string res;
-    switch(dt)
+    switch (dt)
     {
         case DataType::Fp32:
             res += "float";
@@ -81,7 +86,7 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len)
             return "";
     }
 
-    if(len > 1)
+    if (len > 1)
     {
         res += std::to_string(len);
     }
@@ -91,7 +96,7 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len)
 
 int32_t cl_round_up_to_nearest_valid_vector_width(int32_t width)
 {
-    switch(width)
+    switch (width)
     {
         case 1:
             return 1;
@@ -124,7 +129,7 @@ int32_t cl_round_up_to_nearest_valid_vector_width(int32_t width)
 std::string cl_get_variable_storagetype_as_string(TensorStorageType storage)
 {
     std::string res;
-    switch(storage)
+    switch (storage)
     {
         case TensorStorageType::BufferUint8Ptr:
             res += "__global uchar*";
@@ -142,12 +147,134 @@ std::string cl_get_variable_storagetype_as_string(TensorStorageType storage)
     return res;
 }
 
+std::string cl_get_assignment_op_as_string(AssignmentOp op)
+{
+    switch (op)
+    {
+        case AssignmentOp::Increment:
+            return "+=";
+
+        case AssignmentOp::Decrement:
+            return "-=";
+
+        default:
+            CKW_THROW_MSG("Unsupported assignment operator!");
+    }
+}
+
+std::tuple<bool, std::string> cl_get_unary_op(UnaryOp op)
+{
+    switch (op)
+    {
+        case UnaryOp::LogicalNot:
+            return {false, "!"};
+
+        case UnaryOp::BitwiseNot:
+            return {false, "~"};
+
+        case UnaryOp::Exp:
+            return {true, "exp"};
+
+        case UnaryOp::Tanh:
+            return {true, "tanh"};
+
+        case UnaryOp::Sqrt:
+            return {true, "sqrt"};
+
+        case UnaryOp::Erf:
+            return {true, "erf"};
+
+        case UnaryOp::Fabs:
+            return {true, "fabs"};
+
+        case UnaryOp::Log:
+            return {true, "log"};
+
+        case UnaryOp::Round:
+            return {true, "round"};
+
+        default:
+            CKW_THROW_MSG("Unsupported unary operation!");
+    }
+}
+
+std::tuple<bool, std::string> cl_get_binary_op(BinaryOp op, DataType data_type)
+{
+    const auto is_float = is_data_type_float(data_type);
+
+    switch (op)
+    {
+        case BinaryOp::Add:
+            return {false, "+"};
+
+        case BinaryOp::Sub:
+            return {false, "-"};
+
+        case BinaryOp::Mul:
+            return {false, "*"};
+
+        case BinaryOp::Div:
+            return {false, "/"};
+
+        case BinaryOp::Mod:
+            return {false, "%"};
+
+        case BinaryOp::Equal:
+            return {false, "=="};
+
+        case BinaryOp::Less:
+            return {false, "<"};
+
+        case BinaryOp::LessEqual:
+            return {false, "<="};
+
+        case BinaryOp::Greater:
+            return {false, ">"};
+
+        case BinaryOp::GreaterEqual:
+            return {false, ">="};
+
+        case BinaryOp::LogicalAnd:
+            return {false, "&&"};
+
+        case BinaryOp::LogicalOr:
+            return {false, "||"};
+
+        case BinaryOp::BitwiseXOR:
+            return {false, "^"};
+
+        case BinaryOp::Min:
+            return {true, is_float ? "fmin" : "min"};
+
+        case BinaryOp::Max:
+            return {true, is_float ? "fmax" : "max"};
+
+        default:
+            CKW_THROW_MSG("Unsupported binary operator/function!");
+    }
+}
+
+std::tuple<bool, std::string> cl_get_ternary_op(TernaryOp op)
+{
+    switch (op)
+    {
+        case TernaryOp::Select:
+            return {true, "select"};
+
+        case TernaryOp::Clamp:
+            return {true, "clamp"};
+
+        default:
+            CKW_THROW_MSG("Unsupported ternary function!");
+    }
+}
+
 std::string cl_data_type_rounded_up_to_valid_vector_width(DataType dt, int32_t width)
 {
-    std::string data_type;
-    const int32_t     w = cl_round_up_to_nearest_valid_vector_width(width);
+    std::string   data_type;
+    const int32_t w = cl_round_up_to_nearest_valid_vector_width(width);
     data_type += cl_get_variable_datatype_as_string(dt, 1);
-    if(w != 1)
+    if (w != 1)
     {
         data_type += std::to_string(w);
     }
@@ -158,7 +285,7 @@ std::vector<int32_t> cl_decompose_vector_width(int32_t vector_width)
 {
     std::vector<int32_t> x;
 
-    switch(vector_width)
+    switch (vector_width)
     {
         case 0:
             break;

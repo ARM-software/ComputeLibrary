@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H
 #define ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H
 
-#include "arm_compute/graph/Types.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
+#include "arm_compute/graph/Types.h"
 
 #include <utility>
 

@@ -23,47 +23,43 @@
  */
 
 #include "ckw/TileOperand.h"
+
 #include "ckw/Error.h"
+
 #include "src/Prototype.h"
 
 namespace ckw
 {
 
 TileOperand::TileOperand(const std::string &name, const TileInfo &info)
-    : OperandBase(name),
-      _info(info),
-      _value{ std::vector<std::string>{ "0" } },
-      _constant(false)
+    : OperandBase(name), _info(info), _value{std::vector<std::string>{"0"}}, _constant(false)
 {
 }
 
 TileOperand::TileOperand(const std::string &name, DataType data_type)
-    : OperandBase(name),
-      _info(TileInfo{ data_type }),
-      _value{ std::vector<std::string>{ "0" } },
-      _constant(false)
+    : OperandBase(name), _info(TileInfo{data_type}), _value{std::vector<std::string>{"0"}}, _constant(false)
 {
 }
 
 TileOperand::TileOperand(const std::string &name, int32_t value)
     : OperandBase(name),
-      _info(TileInfo{ DataType::Int32 }),
-      _value{ std::vector<std::string>{ std::to_string(value) } },
+      _info(TileInfo{DataType::Int32}),
+      _value{std::vector<std::string>{std::to_string(value)}},
       _constant(true)
 {
 }
 
 TileOperand::TileOperand(const std::string &name, float value)
     : OperandBase(name),
-      _info(TileInfo{ DataType::Fp32 }),
-      _value{ std::vector<std::string>{ std::to_string(value) } },
+      _info(TileInfo{DataType::Fp32}),
+      _value{std::vector<std::string>{std::to_string(value)}},
       _constant(true)
 {
 }
 
 TileOperand::TileOperand(const std::string &name, const TileContainer &vals, DataType dt)
     : OperandBase(name),
-      _info(TileInfo{ dt, static_cast<int32_t>(vals.size()), static_cast<int32_t>(vals[0].size()) }),
+      _info(TileInfo{dt, static_cast<int32_t>(vals.size()), static_cast<int32_t>(vals[0].size())}),
       _value(vals),
       _constant(true)
 {
@@ -73,17 +69,20 @@ prototype::Operand TileOperand::create_impl_operand(prototype::IGpuKernelWriter 
 {
     CKW_UNUSED(writer);
 
-    if(_constant)
+    if (_constant)
     {
-        if(is_scalar())
+        if (is_scalar())
         {
-            switch(_info.data_type())
+            switch (_info.data_type())
             {
                 case DataType::Int32:
                     return prototype::Operand(_value[0][0], prototype::OperandType::ScalarInt32);
 
                 case DataType::Fp32:
                     return prototype::Operand(_value[0][0], prototype::OperandType::ScalarFp32);
+
+                case DataType::Fp16:
+                    return prototype::Operand(_value[0][0], prototype::OperandType::ScalarFp16);
 
                 default:
                     CKW_ASSERT(false);

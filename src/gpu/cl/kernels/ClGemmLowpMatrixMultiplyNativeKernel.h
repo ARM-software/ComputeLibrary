@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_NATIVE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -55,25 +56,34 @@ public:
      *                             rhs_info.k0: same as lhs_info.k0
      * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *dst,
-                   const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info);
+    void configure(const CLCompileContext  &compile_context,
+                   const ITensorInfo       *src0,
+                   ITensorInfo             *src1,
+                   ITensorInfo             *dst,
+                   const GEMMLHSMatrixInfo &lhs_info,
+                   const GEMMRHSMatrixInfo &rhs_info,
+                   const GEMMReshapeInfo   &gemm_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmLowpMatrixMultiplyNativeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst,
-                           const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info);
+    static Status validate(const ITensorInfo       *src0,
+                           const ITensorInfo       *src1,
+                           const ITensorInfo       *dst,
+                           const GEMMLHSMatrixInfo &lhs_info,
+                           const GEMMRHSMatrixInfo &rhs_info,
+                           const GEMMReshapeInfo   &gemm_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    bool _slide_matrix_b{ true };
-    bool _reinterpret_input_as_3d{ false };
-    bool _reinterpret_output_as_3d{ false };
-    bool _use_dummy_work_items{ false };
+    bool _slide_matrix_b{true};
+    bool _reinterpret_input_as_3d{false};
+    bool _reinterpret_output_as_3d{false};
+    bool _use_dummy_work_items{false};
 };
 } // namespace kernels
 } // namespace opencl

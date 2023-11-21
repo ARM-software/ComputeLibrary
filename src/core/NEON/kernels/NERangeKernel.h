@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NERANGEKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute

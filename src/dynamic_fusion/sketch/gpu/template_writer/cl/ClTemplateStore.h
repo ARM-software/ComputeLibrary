@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATESTORE
 
 #include "arm_compute/core/experimental/Types.h"
+
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
 

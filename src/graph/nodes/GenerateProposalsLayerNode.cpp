@@ -23,17 +23,15 @@
  */
 #include "arm_compute/graph/nodes/GenerateProposalsLayerNode.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
-
-#include "arm_compute/core/Helpers.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-GenerateProposalsLayerNode::GenerateProposalsLayerNode(GenerateProposalsInfo &info)
-    : _info(info)
+GenerateProposalsLayerNode::GenerateProposalsLayerNode(GenerateProposalsInfo &info) : _info(info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(3, NullTensorID);
@@ -46,10 +44,10 @@ const GenerateProposalsInfo &GenerateProposalsLayerNode::info() const
 
 bool GenerateProposalsLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (input_id(2) != NullTensorID) && (output_id(0) != NullTensorID) && (output_id(1) != NullTensorID)
-       && (output_id(2) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (input_id(2) != NullTensorID) &&
+        (output_id(0) != NullTensorID) && (output_id(1) != NullTensorID) && (output_id(2) != NullTensorID))
     {
-        for(unsigned int i = 0; i < 3; ++i)
+        for (unsigned int i = 0; i < 3; ++i)
         {
             Tensor *dst = output(i);
             ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -68,7 +66,7 @@ TensorDescriptor GenerateProposalsLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr);
     TensorDescriptor output_desc = src->desc();
 
-    switch(idx)
+    switch (idx)
     {
         case 0:
             // Configure proposals output

@@ -56,20 +56,22 @@ TensorDescriptor DeconvolutionLayerNode::compute_output_descriptor(const TensorD
     const unsigned int kernel_width  = get_dimension_size(weights_descriptor, DataLayoutDimension::WIDTH);
     const unsigned int kernel_height = get_dimension_size(weights_descriptor, DataLayoutDimension::HEIGHT);
 
-    std::tie(output_width, output_height) = deconvolution_output_dimensions(input_width, input_height, kernel_width, kernel_height, info);
+    std::tie(output_width, output_height) =
+        deconvolution_output_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
     const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), output_width);
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), output_height);
-    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL), weights_descriptor.shape[3]);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL),
+                                weights_descriptor.shape[3]);
 
     return output_descriptor;
 }
 
 bool DeconvolutionLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -89,7 +91,7 @@ TensorDescriptor DeconvolutionLayerNode::configure_output(size_t idx) const
 
     TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), descriptor.info);
 
-    if(!descriptor.out_quant_info.empty())
+    if (!descriptor.out_quant_info.empty())
     {
         output_info.set_quantization_info(descriptor.out_quant_info);
     }

@@ -22,14 +22,16 @@
  * SOFTWARE.
  */
 #include "src/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
+
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/INEKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/INEKernel.h"
 
 #include <arm_neon.h>
 
@@ -41,7 +43,10 @@ namespace kernels
 {
 using namespace arm_compute::misc::shape_calculator;
 
-void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
+void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo      *src,
+                                               ITensorInfo            *dst,
+                                               const PoolingLayerInfo &info,
+                                               const CPUInfo          &cpu_info)
 {
     ARM_COMPUTE_UNUSED(cpu_info);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
@@ -52,10 +57,10 @@ void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorIn
 #if defined(__aarch64__)
     const bool requantize = src->quantization_info() != dst->quantization_info();
 
-    switch(src->data_type())
+    switch (src->data_type())
     {
         case DataType::QASYMM8:
-            if(requantize)
+            if (requantize)
             {
                 create_arm_pooling_requant<uint8_t, uint8_t>(src, dst, info, cpu_info);
             }
@@ -65,7 +70,7 @@ void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorIn
             }
             break;
         case DataType::QASYMM8_SIGNED:
-            if(requantize)
+            if (requantize)
             {
                 create_arm_pooling_requant<int8_t, int8_t>(src, dst, info, cpu_info);
             }
@@ -91,7 +96,8 @@ void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo *src, ITensorIn
     INEKernel::configure(win);
 }
 
-Status CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info)
+Status
+CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
@@ -99,43 +105,52 @@ Status CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const IT
     ARM_COMPUTE_RETURN_ERROR_MSG("32-bit is not supported by assembly kernels");
 #endif /* __aarch64__ */
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((src->data_layout() != DataLayout::NHWC) || (info.data_layout != DataLayout::NHWC), "Only NHWC is supported by assembly kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((src->data_layout() != DataLayout::NHWC) || (info.data_layout != DataLayout::NHWC),
+                                    "Only NHWC is supported by assembly kernels");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((info.pool_type != PoolingType::AVG) && (info.pool_type != PoolingType::MAX),
                                     "Only AVG and MAX pooling are supported by assembly kernels");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_region_entirely_outside_input(info), "Pooling region that is entirely outside input tensor is unsupported by assembly kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        is_pool_region_entirely_outside_input(info),
+        "Pooling region that is entirely outside input tensor is unsupported by assembly kernels");
 
-    if(dst->total_size() > 0)
+    if (dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
 
         const auto src_qinfo = src->quantization_info().uniform();
         const auto dst_qinfo = dst->quantization_info().uniform();
 
-        if(src_qinfo != dst_qinfo)
+        if (src_qinfo != dst_qinfo)
         {
             const float multiplier = src_qinfo.scale / dst_qinfo.scale;
             int32_t     dst_multiplier{};
             int32_t     dst_shift{};
-            ARM_COMPUTE_RETURN_ERROR_ON(quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift));
+            ARM_COMPUTE_RETURN_ERROR_ON(
+                quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift));
         }
         else
         {
-            if(src->data_type() == DataType::QASYMM8)
+            if (src->data_type() == DataType::QASYMM8)
             {
                 const bool has_padding = info.pad_stride_info.has_padding();
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!info.exclude_padding && has_padding, "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                    !info.exclude_padding && has_padding,
+                    "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
             }
         }
     }
     else
     {
-        if(src->data_type() == DataType::QASYMM8)
+        if (src->data_type() == DataType::QASYMM8)
         {
             // If dst is not configured, the quantization info are the same
             const bool has_padding = info.pad_stride_info.has_padding();
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!info.exclude_padding && has_padding, "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                !info.exclude_padding && has_padding,
+                "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
         }
     }
     return Status{};
@@ -154,9 +169,10 @@ void CpuPool2dAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window &
     ITensor       *dst       = tensors.get_tensor(TensorType::ACL_DST);
     ITensor       *workspace = tensors.get_tensor(TensorType::ACL_INT_0);
 
-    const auto in_ptr        = src->buffer() + src->info()->offset_first_element_in_bytes();
-    auto       out_ptr       = dst->buffer() + dst->info()->offset_first_element_in_bytes();
-    auto       working_space = (workspace == nullptr) ? nullptr : workspace->buffer() + workspace->info()->offset_first_element_in_bytes();
+    const auto in_ptr  = src->buffer() + src->info()->offset_first_element_in_bytes();
+    auto       out_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes();
+    auto       working_space =
+        (workspace == nullptr) ? nullptr : workspace->buffer() + workspace->info()->offset_first_element_in_bytes();
 
     const auto src_shape   = src->info()->tensor_shape();
     const auto dst_shape   = dst->info()->tensor_shape();
@@ -170,8 +186,7 @@ void CpuPool2dAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window &
     const size_t ld_dst_row   = ld_dst_col * (dst_shape[1] + dst_padding.top + dst_padding.bottom);
     const size_t ld_dst_batch = ld_dst_row * dst_shape[2];
 
-    _kernel_asm->execute(in_ptr, ld_src_col, ld_src_row, ld_src_batch,
-                         out_ptr, ld_dst_col, ld_dst_row, ld_dst_batch,
+    _kernel_asm->execute(in_ptr, ld_src_col, ld_src_row, ld_src_batch, out_ptr, ld_dst_col, ld_dst_row, ld_dst_batch,
                          working_space, info.thread_id, info.num_threads);
 }
 
@@ -186,9 +201,14 @@ bool CpuPool2dAssemblyWrapperKernel::is_configured() const
 }
 
 template <typename Typesrc, typename Typedst>
-void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
+void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo      *src,
+                                                        ITensorInfo            *dst,
+                                                        const PoolingLayerInfo &info,
+                                                        const CPUInfo          &cpu_info)
 {
-    const arm_conv::pooling::PoolingType pool_type = (info.pool_type == PoolingType::AVG) ? arm_conv::pooling::PoolingType::AVERAGE : arm_conv::pooling::PoolingType::MAX;
+    const arm_conv::pooling::PoolingType pool_type = (info.pool_type == PoolingType::AVG)
+                                                         ? arm_conv::pooling::PoolingType::AVERAGE
+                                                         : arm_conv::pooling::PoolingType::MAX;
 
     arm_conv::pooling::PoolingWindow window{};
     window.cols = static_cast<unsigned int>(info.pool_size.x());
@@ -197,7 +217,8 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, 
     arm_conv::pooling::PoolingStride stride{};
     std::tie(stride.cols, stride.rows) = info.pad_stride_info.stride();
 
-    const arm_conv::pooling::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
+    const arm_conv::pooling::PaddingValues padding{info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(),
+                                                   info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom()};
 
     constexpr unsigned int idx_width    = 1;
     constexpr unsigned int idx_height   = 2;
@@ -211,11 +232,12 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, 
     const unsigned int dst_rows   = dst->dimension(idx_height);
     const unsigned int dst_cols   = dst->dimension(idx_width);
 
-    arm_conv::pooling::PoolingArgs args(&cpu_info, pool_type, window, stride, info.exclude_padding, n_batches, src_rows, src_cols, n_channels, dst_rows, dst_cols, padding, nullptr);
+    arm_conv::pooling::PoolingArgs args(&cpu_info, pool_type, window, stride, info.exclude_padding, n_batches, src_rows,
+                                        src_cols, n_channels, dst_rows, dst_cols, padding, nullptr);
 
     // Configure assembly pooling kernel
     auto pooling_kernel_asm = arm_conv::pooling::pooling<Typesrc, Typedst>(args);
-    if(pooling_kernel_asm == nullptr)
+    if (pooling_kernel_asm == nullptr)
     {
         // Configuration not supported: Leave function unconfigured:
         return;
@@ -225,9 +247,14 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, 
 }
 
 template <typename Typesrc, typename Typedst>
-void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info)
+void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInfo      *src,
+                                                                ITensorInfo            *dst,
+                                                                const PoolingLayerInfo &info,
+                                                                const CPUInfo          &cpu_info)
 {
-    const arm_conv::pooling::PoolingType pool_type = (info.pool_type == PoolingType::AVG) ? arm_conv::pooling::PoolingType::AVERAGE : arm_conv::pooling::PoolingType::MAX;
+    const arm_conv::pooling::PoolingType pool_type = (info.pool_type == PoolingType::AVG)
+                                                         ? arm_conv::pooling::PoolingType::AVERAGE
+                                                         : arm_conv::pooling::PoolingType::MAX;
 
     arm_conv::pooling::PoolingWindow window{};
     window.cols = static_cast<unsigned int>(info.pool_size.x());
@@ -236,7 +263,8 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
     arm_conv::pooling::PoolingStride stride{};
     std::tie(stride.cols, stride.rows) = info.pad_stride_info.stride();
 
-    const arm_conv::pooling::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
+    const arm_conv::pooling::PaddingValues padding{info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(),
+                                                   info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom()};
 
     constexpr unsigned int idx_width    = 1;
     constexpr unsigned int idx_height   = 2;
@@ -250,7 +278,8 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
     const unsigned int dst_rows   = dst->dimension(idx_height);
     const unsigned int dst_cols   = dst->dimension(idx_width);
 
-    arm_conv::pooling::PoolingArgs args(&cpu_info, pool_type, window, stride, info.exclude_padding, n_batches, src_rows, src_cols, n_channels, dst_rows, dst_cols, padding, nullptr);
+    arm_conv::pooling::PoolingArgs args(&cpu_info, pool_type, window, stride, info.exclude_padding, n_batches, src_rows,
+                                        src_cols, n_channels, dst_rows, dst_cols, padding, nullptr);
 
     const auto src_qinfo = src->quantization_info().uniform();
     const auto dst_qinfo = dst->quantization_info().uniform();
@@ -260,15 +289,15 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
     int32_t     dst_shift{};
     quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift);
 
-    const arm_conv::pooling::Requantize32 requant_args(src_qinfo.offset,
-                                                       dst_qinfo.offset,
+    const arm_conv::pooling::Requantize32 requant_args(src_qinfo.offset, dst_qinfo.offset,
                                                        dst_shift, // left shift
                                                        0,         // right shift
                                                        dst_multiplier);
 
     // Configure assembly pooling kernel with requantization
-    auto pooling_kernel_asm = arm_conv::pooling::pooling<Typesrc, Typedst, arm_conv::pooling::Requantize32>(args, requant_args);
-    if(pooling_kernel_asm == nullptr)
+    auto pooling_kernel_asm =
+        arm_conv::pooling::pooling<Typesrc, Typedst, arm_conv::pooling::Requantize32>(args, requant_args);
+    if (pooling_kernel_asm == nullptr)
     {
         // Configuration not supported: Leave function unconfigured:
         return;

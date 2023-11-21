@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_RESHAPE_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_RESHAPE_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_RESHAPELAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_RESHAPELAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -31,6 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ReshapeLayer.h"
 
 namespace arm_compute
@@ -41,12 +42,12 @@ namespace validation
 {
 /** [ReshapeLayer fixture] **/
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ReshapeLayerValidationFixture : public framework::Fixture
+class ReshapeLayerGenericValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type)
+    void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type, bool add_x_padding = false)
     {
-        _target    = compute_target(input_shape, output_shape, data_type);
+        _target    = compute_target(input_shape, output_shape, data_type, add_x_padding);
         _reference = compute_reference(input_shape, output_shape, data_type);
     }
 
@@ -57,7 +58,7 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
+    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type, bool add_x_padding = false)
     {
         // Check if indeed the input shape can be reshape to the output one
         ARM_COMPUTE_ASSERT(input_shape.total_size() == output_shape.total_size());
@@ -73,6 +74,12 @@ protected:
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+
+        if(add_x_padding)
+        {
+            // Add random padding in x dimension
+            add_padding_x({ &src, &dst });
+        }
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -104,8 +111,27 @@ protected:
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ReshapeLayerValidationFixture : public ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type)
+    {
+        ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, output_shape, data_type);
+    }
+};
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ReshapeLayerPaddedValidationFixture : public ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type)
+    {
+        ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, output_shape, data_type, true /* add_x_padding */);
+    }
+};
 /** [ReshapeLayer fixture] **/
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_RESHAPE_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_RESHAPELAYERFIXTURE_H

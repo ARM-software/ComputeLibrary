@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FULLY_CONNECTED_H
-#define ARM_COMPUTE_CPU_FULLY_CONNECTED_H
-
-#include "src/cpu/ICpuOperator.h"
+#ifndef ACL_SRC_CPU_OPERATORS_CPUFULLYCONNECTED_H
+#define ACL_SRC_CPU_OPERATORS_CPUFULLYCONNECTED_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/function_info/FullyConnectedLayerInfo.h"
+
+#include "src/cpu/ICpuOperator.h"
 
 #include <memory>
 
@@ -86,16 +86,24 @@ public:
      * @param[in]  fc_info      (Optional) Fully connected layer additional info
      * @param[in]  weights_info (Optional) Stores neccessary compute information when weights are already reshaped
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst,
-                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo(), const WeightsInfo &weights_info = WeightsInfo());
+    void configure(const ITensorInfo      *src,
+                   const ITensorInfo      *weights,
+                   const ITensorInfo      *biases,
+                   ITensorInfo            *dst,
+                   FullyConnectedLayerInfo fc_info      = FullyConnectedLayerInfo(),
+                   const WeightsInfo      &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CpuFullyConnected
      *
      * Similar to @ref CpuFullyConnected::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                           FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo(), const WeightsInfo &weights_info = WeightsInfo());
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *weights,
+                           const ITensorInfo      *biases,
+                           const ITensorInfo      *dst,
+                           FullyConnectedLayerInfo fc_info      = FullyConnectedLayerInfo(),
+                           const WeightsInfo      &weights_info = WeightsInfo());
 
     /** Static function that queries whether there exists fixed-format kernel and if it exists it will return in the first argument in what format
      * weights are expected to be reshaped as defined by WeightFormat class. Apart from the first argument the rest of the arguments are the same
@@ -103,31 +111,49 @@ public:
      *
      * @return a status
      */
-    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights,
-                               const ITensorInfo *biases, const ITensorInfo *dst,
-                               FullyConnectedLayerInfo fc_info, WeightsInfo weights_info);
+    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format,
+                               const ITensorInfo         *src,
+                               const ITensorInfo         *weights,
+                               const ITensorInfo         *biases,
+                               const ITensorInfo         *dst,
+                               FullyConnectedLayerInfo    fc_info,
+                               WeightsInfo                weights_info);
 
     //Inherited methods override
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
-    void configure_fc_fc(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act);
-    void configure_conv_fc(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act);
-    void configure_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act);
+    void configure_fc_fc(const ITensorInfo         *src,
+                         const ITensorInfo         *weights,
+                         const ITensorInfo         *biases,
+                         ITensorInfo               *dst,
+                         const ActivationLayerInfo &act);
+    void configure_conv_fc(const ITensorInfo         *src,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           ITensorInfo               *dst,
+                           const ActivationLayerInfo &act);
+    void configure_mm(const ITensorInfo         *src,
+                      const ITensorInfo         *weights,
+                      const ITensorInfo         *biases,
+                      ITensorInfo               *dst,
+                      const ActivationLayerInfo &act);
 
     enum AuxTensorIdx
     {
         AsmGemmWorkspace = 0,
         Pretranspose,
-        GemmTemp1, // Both CpuGemm and CpuGemmLowpMatrixMultiplyCore
-        GemmTemp2, // Both CpuGemm and CpuGemmLowpMatrixMultiplyCore
-        GemmTemp3, // Both CpuGemm and CpuGemmLowpMatrixMultiplyCore
-        GemmTemp4, // CpuGemmLowpMatrixMultiplyCore only
-        GemmTemp5, // CpuGemmLowpMatrixMultiplyCore only
-        GemmTemp6, // CpuGemmLowpMatrixMultiplyCore only
-        GemmTemp7, // CpuGemmLowpMatrixMultiplyCore only
+        GemmTemp1,
+        GemmTemp2,
+        GemmTemp3,
+        GemmTemp4,
+        GemmTemp5,
+        GemmTemp6,
+        GemmTemp7,
+        GemmTemp8,
+        // Slots above (0-9) reserved for either CpuGemm or CpuGemmLowpMatrixMultiplyCore
         TransposedWeights,
         ConvertedWeights,
         FlattenedSrc,
@@ -165,4 +191,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FULLY_CONNECTED_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUFULLYCONNECTED_H

@@ -32,8 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-DummyNode::DummyNode(TensorShape shape)
-    : _shape(shape)
+DummyNode::DummyNode(TensorShape shape) : _shape(shape)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -41,7 +40,7 @@ DummyNode::DummyNode(TensorShape shape)
 
 bool DummyNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

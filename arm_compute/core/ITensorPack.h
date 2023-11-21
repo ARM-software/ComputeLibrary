@@ -42,18 +42,16 @@ public:
     struct PackElement
     {
         PackElement() = default;
-        PackElement(int id, ITensor *tensor)
-            : id(id), tensor(tensor), ctensor(nullptr)
+        PackElement(int id, ITensor *tensor) : id(id), tensor(tensor), ctensor(nullptr)
         {
         }
-        PackElement(int id, const ITensor *ctensor)
-            : id(id), tensor(nullptr), ctensor(ctensor)
+        PackElement(int id, const ITensor *ctensor) : id(id), tensor(nullptr), ctensor(ctensor)
         {
         }
 
-        int            id{ -1 };
-        ITensor       *tensor{ nullptr };
-        const ITensor *ctensor{ nullptr };
+        int            id{-1};
+        ITensor       *tensor{nullptr};
+        const ITensor *ctensor{nullptr};
     };
 
 public:

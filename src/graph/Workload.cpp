@@ -40,12 +40,12 @@ void ExecutionTask::operator()()
 
 void execute_task(ExecutionTask &task)
 {
-    if(task.task)
+    if (task.task)
     {
         task.task->run();
     }
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-    else if(task.node->type() == NodeType::PrintLayer)
+    else if (task.node->type() == NodeType::PrintLayer)
     {
         auto print_node   = utils::cast::polymorphic_downcast<PrintLayerNode *>(task.node);
         auto input_handle = print_node->input(0)->handle();
@@ -61,14 +61,13 @@ void execute_task(ExecutionTask &task)
 
 void ExecutionTask::prepare()
 {
-    if(task)
+    if (task)
     {
         task->prepare();
     }
 }
 
-TaskExecutor::TaskExecutor()
-    : execute_function(execute_task)
+TaskExecutor::TaskExecutor() : execute_function(execute_task)
 {
 }
 

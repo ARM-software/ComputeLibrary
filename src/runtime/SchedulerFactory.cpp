@@ -48,7 +48,7 @@ const SchedulerFactory::Type SchedulerFactory::_default_type = SchedulerFactory:
 
 std::unique_ptr<IScheduler> SchedulerFactory::create(Type type)
 {
-    switch(type)
+    switch (type)
     {
         case Type::ST:
         {

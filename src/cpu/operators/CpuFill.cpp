@@ -23,9 +23,8 @@
  */
 #include "src/cpu/operators/CpuFill.h"
 
-#include "src/cpu/kernels/CpuFillKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuFillKernel.h"
 
 namespace arm_compute
 {

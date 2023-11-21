@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClReshape.h"
 
@@ -35,17 +36,16 @@ namespace arm_compute
 {
 struct CLReshapeLayer::Impl
 {
-    const ICLTensor                   *src{ nullptr };
-    ICLTensor                         *dst{ nullptr };
-    std::unique_ptr<opencl::ClReshape> op{ nullptr };
+    const ICLTensor                   *src{nullptr};
+    ICLTensor                         *dst{nullptr};
+    std::unique_ptr<opencl::ClReshape> op{nullptr};
 };
 
-CLReshapeLayer::CLReshapeLayer()
-    : _impl(std::make_unique<Impl>())
+CLReshapeLayer::CLReshapeLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLReshapeLayer::CLReshapeLayer(CLReshapeLayer &&) = default;
+CLReshapeLayer::CLReshapeLayer(CLReshapeLayer &&)            = default;
 CLReshapeLayer &CLReshapeLayer::operator=(CLReshapeLayer &&) = default;
 CLReshapeLayer::~CLReshapeLayer()                            = default;
 
@@ -78,4 +78,4 @@ void CLReshapeLayer::run()
     _impl->op->run(pack);
 }
 } // namespace arm_compute
-/** [CLReshapeLayer snippet] **/
+  /** [CLReshapeLayer snippet] **/

@@ -40,8 +40,7 @@ public:
      *
      * @param[in] arch GPU target
      */
-    ICLGEMMKernelSelection(GPUTarget arch)
-        : _target(arch)
+    ICLGEMMKernelSelection(GPUTarget arch) : _target(arch)
     {
     }
     /** Default Move Constructor. */
@@ -59,7 +58,8 @@ public:
     virtual CLGEMMKernelType select_kernel(const CLGEMMKernelSelectionParams &params) = 0;
 
 protected:
-    GPUTarget _target; /**< GPU target could be used to call a dedicated heuristic for each GPU IP for a given GPU architecture */
+    GPUTarget
+        _target; /**< GPU target could be used to call a dedicated heuristic for each GPU IP for a given GPU architecture */
 };
 } // namespace cl_gemm
 } // namespace arm_compute

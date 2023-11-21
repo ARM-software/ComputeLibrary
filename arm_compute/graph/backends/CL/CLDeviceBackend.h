@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_GRAPH_CLDEVICEBACKEND_H
 
 #include "arm_compute/graph/IDeviceBackend.h"
-
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
 #include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
@@ -59,22 +58,23 @@ public:
     void set_kernel_tuning_mode(CLTunerMode tuning_mode);
 
     // Inherited overridden methods
-    void initialize_backend() override;
-    void setup_backend_context(GraphContext &ctx) override;
-    void release_backend_context(GraphContext &ctx) override;
+    void                           initialize_backend() override;
+    void                           setup_backend_context(GraphContext &ctx) override;
+    void                           release_backend_context(GraphContext &ctx) override;
     bool                           is_backend_supported() override;
     IAllocator                    *backend_allocator() override;
     std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
-    std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) override;
-    std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
-    Status validate_node(INode &node) override;
-    std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
+    std::unique_ptr<ITensorHandle>
+    create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) override;
+    std::unique_ptr<arm_compute::IFunction>       configure_node(INode &node, GraphContext &ctx) override;
+    Status                                        validate_node(INode &node) override;
+    std::shared_ptr<arm_compute::IMemoryManager>  create_memory_manager(MemoryManagerAffinity affinity) override;
     std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
     void                                          sync() override;
 
 private:
-    int                                _context_count;   /**< Counts how many contexts are currently using the backend */
-    CLTuner                            _tuner;           /**< CL kernel tuner */
+    int                                _context_count; /**< Counts how many contexts are currently using the backend */
+    CLTuner                            _tuner;         /**< CL kernel tuner */
     CLGEMMHeuristicsHandle             _gemm_heuristics; /**< GEMM heuristics */
     std::unique_ptr<CLBufferAllocator> _allocator;       /**< CL buffer affinity allocator */
     std::string                        _tuner_file;      /**< Filename to load/store the tuner's values from */

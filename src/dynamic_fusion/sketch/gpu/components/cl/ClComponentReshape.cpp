@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "ClComponentReshape.h"
+
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateReshape.h"
 
@@ -49,12 +51,10 @@ Status ClComponentReshape::validate(const ArgumentPack<ITensorInfo> &tensors)
     return Status{};
 }
 
-ClComponentReshape::ClComponentReshape(
-    ComponentId                      id,
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateReshape>(id, tensors) }
+ClComponentReshape::ClComponentReshape(ComponentId                      id,
+                                       const Properties                &properties,
+                                       const ArgumentPack<ITensorInfo> &tensors)
+    : IGpuKernelComponent{id, properties, tensors}, _component_writer{std::make_unique<ClTemplateReshape>(id, tensors)}
 {
 }
 ClComponentReshape::~ClComponentReshape()

@@ -32,6 +32,7 @@
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -53,7 +54,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, N
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
@@ -63,7 +64,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, N
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, NormalizationLayerInfo norm_info)
+std::pair<Status, Window>
+validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output, *input->clone());
@@ -71,9 +73,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     bool             window_changed = false;
     Window           win;
     const DataLayout data_layout = input->data_layout();
-    if(data_layout == DataLayout::NCHW)
+    if (data_layout == DataLayout::NCHW)
     {
-        const unsigned int vec_size_x           = adjust_vec_size(max_cl_vector_width / input->element_size(), input->dimension(0));
+        const unsigned int vec_size_x =
+            adjust_vec_size(max_cl_vector_width / input->element_size(), input->dimension(0));
         const unsigned int norm_idx             = get_normalization_dimension_index(input->data_layout(), norm_info);
         const bool         is_norm_across_width = norm_idx == 0;
 
@@ -87,15 +90,16 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         // The output has 1 right padding because of the vec_size_x.
         // The input has 1 left padding because radius = 1.
         // The input has 2 right padding because of radius = 1 AND because of the extra output padding
-        const unsigned int border_width_left  = is_norm_across_width ? norm_radius : 0;
-        const unsigned int border_width_right = is_norm_across_width ? norm_radius + (vec_size_x - input->dimension(0) % vec_size_x) : 0;
-        const BorderSize   border_size        = BorderSize(0, border_width_right, 0, border_width_left);
+        const unsigned int border_width_left = is_norm_across_width ? norm_radius : 0;
+        const unsigned int border_width_right =
+            is_norm_across_width ? norm_radius + (vec_size_x - input->dimension(0) % vec_size_x) : 0;
+        const BorderSize border_size = BorderSize(0, border_width_right, 0, border_width_left);
 
         win = calculate_max_window(*input, Steps(vec_size_x));
 
         // We do not use a Rectangle window for IN_MAP_2D as we clamp the top and bottom accesses inside the kernel, avoiding padding
         // Reads can occur within the valid region of the input
-        if(is_norm_across_width)
+        if (is_norm_across_width)
         {
             AccessWindowStatic input_access(input, -border_size.left, 0, input->dimension(0) + border_size.right, 0);
             window_changed = window_changed || update_window_and_padding(win, input_access);
@@ -112,13 +116,14 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     else
     {
         unsigned int vec_size_x = adjust_vec_size(max_cl_vector_width / input->element_size(), input->dimension(0));
-        if(norm_info.is_cross_map())
+        if (norm_info.is_cross_map())
         {
             vec_size_x = 1;
         }
         win = calculate_max_window(*input, Steps(vec_size_x));
     }
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    Status err =
+        (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -139,10 +144,13 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     configure(CLKernelLibrary::get().get_compile_context(), input, output, norm_info);
 }
 
-void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
+void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_context,
+                                           const ICLTensor        *input,
+                                           ICLTensor              *output,
+                                           NormalizationLayerInfo  norm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), norm_info));
@@ -152,16 +160,17 @@ void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_conte
     _input  = input;
     _output = output;
 
-    const DataLayout data_layout          = input->info()->data_layout();
-    unsigned int     vec_size_x           = adjust_vec_size(max_cl_vector_width / input->info()->element_size(), input->info()->dimension(0));
-    int              vec_size_x_leftovers = input->info()->dimension(0) % vec_size_x;
-    if(norm_info.is_cross_map() && data_layout == DataLayout::NHWC)
+    const DataLayout data_layout = input->info()->data_layout();
+    unsigned int     vec_size_x =
+        adjust_vec_size(max_cl_vector_width / input->info()->element_size(), input->info()->dimension(0));
+    int vec_size_x_leftovers = input->info()->dimension(0) % vec_size_x;
+    if (norm_info.is_cross_map() && data_layout == DataLayout::NHWC)
     {
         vec_size_x           = 1;
         vec_size_x_leftovers = 0;
     }
 
-    if(data_layout == DataLayout::NCHW)
+    if (data_layout == DataLayout::NCHW)
     {
         const unsigned int norm_idx    = get_normalization_dimension_index(data_layout, norm_info);
         _is_norm_across_width          = norm_idx == 0;
@@ -175,9 +184,10 @@ void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_conte
         // The output has 1 right padding because of the vec_size_x.
         // The input has 1 left padding because radius = 1.
         // The input has 2 right padding because of radius = 1 AND the extra output padding
-        const unsigned int border_width_left  = _is_norm_across_width ? norm_radius : 0;
-        const unsigned int border_width_right = _is_norm_across_width ? norm_radius + (vec_size_x - input->info()->dimension(0) % vec_size_x) : 0;
-        _border_size                          = BorderSize(0, border_width_right, 0, border_width_left);
+        const unsigned int border_width_left = _is_norm_across_width ? norm_radius : 0;
+        const unsigned int border_width_right =
+            _is_norm_across_width ? norm_radius + (vec_size_x - input->info()->dimension(0) % vec_size_x) : 0;
+        _border_size = BorderSize(0, border_width_right, 0, border_width_left);
     }
 
     const bool is_in_map_2D = (norm_info.type() == NormType::IN_MAP_2D);
@@ -193,12 +203,14 @@ void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_conte
     build_opts.add_option(("-DRADIUS=" + support::cpp11::to_string(norm_info.norm_size() / 2)));
     build_opts.add_option(("-DNUM_SLICES=" + support::cpp11::to_string(input->info()->dimension(2))));
     build_opts.add_option_if(is_in_map_2D, "-DIN_MAP_2D");
-    build_opts.add_option_if(norm_info.is_in_map() || (data_layout == DataLayout::NHWC && norm_info.is_cross_map()), "-DWIDTH_SIZE=" + support::cpp11::to_string(input->info()->dimension(0)));
-    build_opts.add_option_if(norm_info.is_in_map() && data_layout == DataLayout::NHWC, "-DDIM1_SIZE=" + support::cpp11::to_string(input->info()->dimension(1)));
+    build_opts.add_option_if(norm_info.is_in_map() || (data_layout == DataLayout::NHWC && norm_info.is_cross_map()),
+                             "-DWIDTH_SIZE=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.add_option_if(norm_info.is_in_map() && data_layout == DataLayout::NHWC,
+                             "-DDIM1_SIZE=" + support::cpp11::to_string(input->info()->dimension(1)));
 
     // Create kernel
     std::string kernel_name;
-    if(norm_info.is_in_map())
+    if (norm_info.is_in_map())
     {
         kernel_name = "normalization_layer_in_map_" + lower_string(string_from_data_layout(data_layout));
     }
@@ -222,16 +234,19 @@ void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_conte
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
-    if(data_layout == DataLayout::NHWC)
+    if (data_layout == DataLayout::NHWC)
     {
         ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
     }
 }
 
-Status CLNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
+Status CLNormalizationLayerKernel::validate(const ITensorInfo     *input,
+                                            const ITensorInfo     *output,
+                                            NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, norm_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), norm_info).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_and_configure_window(input->clone().get(), output->clone().get(), norm_info).first);
 
     return Status{};
 }
@@ -251,7 +266,6 @@ void CLNormalizationLayerKernel::run(const Window &window, cl::CommandQueue &que
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window_collapsed.slide_window_slice_3D(slice));
+    } while (window_collapsed.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

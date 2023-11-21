@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEREVERSEKERNEL_H
-#define ARM_COMPUTE_NEREVERSEKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NEREVERSEKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NEREVERSEKERNEL_H
 
 #include "src/core/NEON/INEKernel.h"
 
@@ -52,21 +52,24 @@ public:
     ~NEReverseKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]  input  Input tensor. Data types supported: All
-     * @param[out] output Output tensor. Data type supported: Same as @p input
-     * @param[in]  axis   Axis tensor. Contains the indices of the dimensions to reverse. Data type supported: U32
+     * @param[in]  input             Input tensor. Data types supported: All
+     * @param[out] output            Output tensor. Data type supported: Same as @p input
+     * @param[in]  axis              Axis tensor. Contains the indices of the dimensions to reverse. Data type supported: U32/S32
+     * @param[in]  use_inverted_axis Reverse ACL axis indices convention i.e. acl.dim(0) = tensor_rank -1
      */
-    void configure(const ITensor *input, ITensor *output, const ITensor *axis);
+    void configure(const ITensor *input, ITensor *output, const ITensor *axis, bool use_inverted_axis);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReverseKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: All
-     * @param[in] output Output tensor info. Data type supported: Same as @p input
-     * @param[in] axis   Axis tensor info. Contains the indices of the dimensions to reverse. Data type supported: U32
+     * @param[in] input             Input tensor info. Data types supported: All
+     * @param[in] output            Output tensor info. Data type supported: Same as @p input
+     * @param[in] axis              Axis tensor info. Contains the indices of the dimensions to reverse. Data type supported: U32/S32
+     * @param[in] use_inverted_axis Reverse ACL axis indices convention i.e. acl.dim(0) = tensor_rank -1
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -75,6 +78,7 @@ private:
     const ITensor *_input;
     ITensor       *_output;
     const ITensor *_axis;
+    bool           _use_inverted_axis;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEREVERSEKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NEREVERSEKERNEL_H

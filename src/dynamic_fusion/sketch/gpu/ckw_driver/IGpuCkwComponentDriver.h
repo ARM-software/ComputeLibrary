@@ -25,6 +25,7 @@
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_IGPUCKWCOMPONENTDRIVER
 
 #include "arm_compute/core/Window.h"
+
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/components/Types.h"
 
@@ -73,8 +74,7 @@ public:
      * @param[in] id      Component id
      * @param[in] tensors Tensor arguments to the components
      */
-    IGpuCkwComponentDriver(ComponentId id, const ArgumentPack<ITensorInfo> &tensors)
-        : _id{ id }, _tensors{ tensors }
+    IGpuCkwComponentDriver(ComponentId id, const ArgumentPack<ITensorInfo> &tensors) : _id{id}, _tensors{tensors}
     {
     }
     /** Destructor */
@@ -89,7 +89,9 @@ public:
      *
      *                            @note @p writer can only be passed via value since the new scope is created in the copy constructor
      */
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const = 0;
+    virtual void write_component_code(const ComponentGroup    &comp_group,
+                                      GpuCkwVariableTable     &vtable,
+                                      GpuCkwScopedKernelWriter writer) const = 0;
     /** Get tensor arguments */
     ArgumentPack<ITensorInfo> tensors() const
     {
@@ -128,7 +130,7 @@ public:
     }
 
 private:
-    ComponentId               _id{ -1 };
+    ComponentId               _id{-1};
     ArgumentPack<ITensorInfo> _tensors{};
 };
 } // namespace dynamic_fusion

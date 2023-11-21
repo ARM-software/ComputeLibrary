@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
@@ -32,9 +33,14 @@ namespace arm_compute
 {
 namespace experimental
 {
-void NEStridedSlice::configure(const ITensorInfo *input, ITensorInfo *output,
-                               const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+void NEStridedSlice::configure(const ITensorInfo *input,
+                               ITensorInfo       *output,
+                               const Coordinates &starts,
+                               const Coordinates &ends,
+                               const BiStrides   &strides,
+                               int32_t            begin_mask,
+                               int32_t            end_mask,
+                               int32_t            shrink_axis_mask)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 
@@ -43,9 +49,14 @@ void NEStridedSlice::configure(const ITensorInfo *input, ITensorInfo *output,
     _kernel = std::move(k);
 }
 
-Status NEStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *output,
-                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+Status NEStridedSlice::validate(const ITensorInfo *input,
+                                const ITensorInfo *output,
+                                const Coordinates &starts,
+                                const Coordinates &ends,
+                                const BiStrides   &strides,
+                                int32_t            begin_mask,
+                                int32_t            end_mask,
+                                int32_t            shrink_axis_mask)
 {
     return NEStridedSliceKernel::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
@@ -53,22 +64,26 @@ Status NEStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *out
 
 struct NEStridedSlice::Impl
 {
-    const ITensor                                *src{ nullptr };
-    ITensor                                      *dst{ nullptr };
-    std::unique_ptr<experimental::NEStridedSlice> op{ nullptr };
+    const ITensor                                *src{nullptr};
+    ITensor                                      *dst{nullptr};
+    std::unique_ptr<experimental::NEStridedSlice> op{nullptr};
 };
 
-NEStridedSlice::NEStridedSlice()
-    : _impl(std::make_unique<Impl>())
+NEStridedSlice::NEStridedSlice() : _impl(std::make_unique<Impl>())
 {
 }
-NEStridedSlice::NEStridedSlice(NEStridedSlice &&) = default;
+NEStridedSlice::NEStridedSlice(NEStridedSlice &&)            = default;
 NEStridedSlice &NEStridedSlice::operator=(NEStridedSlice &&) = default;
 NEStridedSlice::~NEStridedSlice()                            = default;
 
-void NEStridedSlice::configure(const ITensor *input, ITensor *output,
-                               const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+void NEStridedSlice::configure(const ITensor     *input,
+                               ITensor           *output,
+                               const Coordinates &starts,
+                               const Coordinates &ends,
+                               const BiStrides   &strides,
+                               int32_t            begin_mask,
+                               int32_t            end_mask,
+                               int32_t            shrink_axis_mask)
 {
     _impl->src = input;
     _impl->dst = output;
@@ -84,10 +99,16 @@ void NEStridedSlice::run()
     _impl->op->run(pack);
 }
 
-Status NEStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *output,
-                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+Status NEStridedSlice::validate(const ITensorInfo *input,
+                                const ITensorInfo *output,
+                                const Coordinates &starts,
+                                const Coordinates &ends,
+                                const BiStrides   &strides,
+                                int32_t            begin_mask,
+                                int32_t            end_mask,
+                                int32_t            shrink_axis_mask)
 {
-    return experimental::NEStridedSlice::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+    return experimental::NEStridedSlice::validate(input, output, starts, ends, strides, begin_mask, end_mask,
+                                                  shrink_axis_mask);
 }
 } // namespace arm_compute

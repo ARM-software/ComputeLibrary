@@ -30,26 +30,16 @@ namespace arm_compute
 {
 const std::string &string_from_format(Format format)
 {
-    static std::map<Format, const std::string> formats_map =
-    {
-        { Format::UNKNOWN, "UNKNOWN" },
-        { Format::U8, "U8" },
-        { Format::S16, "S16" },
-        { Format::U16, "U16" },
-        { Format::S32, "S32" },
-        { Format::U32, "U32" },
-        { Format::F16, "F16" },
-        { Format::F32, "F32" },
-        { Format::UV88, "UV88" },
-        { Format::RGB888, "RGB888" },
-        { Format::RGBA8888, "RGBA8888" },
-        { Format::YUV444, "YUV444" },
-        { Format::YUYV422, "YUYV422" },
-        { Format::NV12, "NV12" },
-        { Format::NV21, "NV21" },
-        { Format::IYUV, "IYUV" },
-        { Format::UYVY422, "UYVY422" }
-    };
+    static std::map<Format, const std::string> formats_map = {
+        {Format::UNKNOWN, "UNKNOWN"},   {Format::U8, "U8"},
+        {Format::S16, "S16"},           {Format::U16, "U16"},
+        {Format::S32, "S32"},           {Format::U32, "U32"},
+        {Format::F16, "F16"},           {Format::F32, "F32"},
+        {Format::UV88, "UV88"},         {Format::RGB888, "RGB888"},
+        {Format::RGBA8888, "RGBA8888"}, {Format::YUV444, "YUV444"},
+        {Format::YUYV422, "YUYV422"},   {Format::NV12, "NV12"},
+        {Format::NV21, "NV21"},         {Format::IYUV, "IYUV"},
+        {Format::UYVY422, "UYVY422"}};
 
     return formats_map[format];
 }

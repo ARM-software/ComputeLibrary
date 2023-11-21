@@ -31,10 +31,9 @@ namespace arm_compute
 {
 arm_compute::DataLayout data_layout_from_name(const std::string &name)
 {
-    static const std::map<std::string, arm_compute::DataLayout> data_layouts =
-    {
-        { "nhwc", DataLayout::NHWC },
-        { "nchw", DataLayout::NCHW },
+    static const std::map<std::string, arm_compute::DataLayout> data_layouts = {
+        {"nhwc", DataLayout::NHWC},
+        {"nchw", DataLayout::NCHW},
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
@@ -45,7 +44,7 @@ arm_compute::DataLayout data_layout_from_name(const std::string &name)
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }
@@ -55,11 +54,10 @@ namespace graph
 {
 Target target_from_name(const std::string &name)
 {
-    static const std::map<std::string, Target> targets =
-    {
-        { "neon", Target::NEON },
-        { "cl", Target::CL },
-        { "clvk", Target::CLVK },
+    static const std::map<std::string, Target> targets = {
+        {"neon", Target::NEON},
+        {"cl", Target::CL},
+        {"clvk", Target::CLVK},
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
@@ -70,7 +68,7 @@ Target target_from_name(const std::string &name)
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }
@@ -79,12 +77,11 @@ Target target_from_name(const std::string &name)
 
 ConvolutionMethod Convolution_method_from_name(const std::string &name)
 {
-    static const std::map<std::string, ConvolutionMethod> methods =
-    {
-        { "default", ConvolutionMethod::Default },
-        { "direct", ConvolutionMethod::Direct },
-        { "gemm", ConvolutionMethod::GEMM },
-        { "winograd", ConvolutionMethod::Winograd },
+    static const std::map<std::string, ConvolutionMethod> methods = {
+        {"default", ConvolutionMethod::Default},
+        {"direct", ConvolutionMethod::Direct},
+        {"gemm", ConvolutionMethod::GEMM},
+        {"winograd", ConvolutionMethod::Winograd},
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
@@ -95,7 +92,7 @@ ConvolutionMethod Convolution_method_from_name(const std::string &name)
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }
@@ -104,10 +101,9 @@ ConvolutionMethod Convolution_method_from_name(const std::string &name)
 
 DepthwiseConvolutionMethod depthwise_convolution_method_from_name(const std::string &name)
 {
-    static const std::map<std::string, DepthwiseConvolutionMethod> methods =
-    {
-        { "default", DepthwiseConvolutionMethod::Default },
-        { "optimized3x3", DepthwiseConvolutionMethod::Optimized3x3 },
+    static const std::map<std::string, DepthwiseConvolutionMethod> methods = {
+        {"default", DepthwiseConvolutionMethod::Default},
+        {"optimized3x3", DepthwiseConvolutionMethod::Optimized3x3},
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
@@ -118,7 +114,7 @@ DepthwiseConvolutionMethod depthwise_convolution_method_from_name(const std::str
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }

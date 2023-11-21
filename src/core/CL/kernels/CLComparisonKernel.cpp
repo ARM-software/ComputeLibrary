@@ -25,7 +25,9 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -38,22 +40,16 @@ namespace arm_compute
 namespace
 {
 // Create supported comparisons map
-const std::map<ComparisonOperation, std::string> supported_comparison_ops =
-{
-    { ComparisonOperation::Equal, "EQUAL" },
-    { ComparisonOperation::NotEqual, "NOTEQUAL" },
-    { ComparisonOperation::Greater, "GREATER" },
-    { ComparisonOperation::GreaterEqual, "GREATEREQUAL" },
-    { ComparisonOperation::Less, "LESS" },
-    { ComparisonOperation::LessEqual, "LESSEQUAL" },
+const std::map<ComparisonOperation, std::string> supported_comparison_ops = {
+    {ComparisonOperation::Equal, "EQUAL"},     {ComparisonOperation::NotEqual, "NOTEQUAL"},
+    {ComparisonOperation::Greater, "GREATER"}, {ComparisonOperation::GreaterEqual, "GREATEREQUAL"},
+    {ComparisonOperation::Less, "LESS"},       {ComparisonOperation::LessEqual, "LESSEQUAL"},
 };
 
-int calculate_num_elems_processed_per_iteration(const ITensorInfo &input)
-{
-    return 16 / input.element_size();
-}
-
-Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output, ComparisonOperation operation)
+Status validate_arguments(const ITensorInfo  &input1,
+                          const ITensorInfo  &input2,
+                          const ITensorInfo  &output,
+                          ComparisonOperation operation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
     ARM_COMPUTE_RETURN_ERROR_ON(input1.data_type() == DataType::UNKNOWN);
@@ -64,7 +60,7 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
 
     // Validate in case of configured output
-    if(output.total_size() > 0)
+    if (output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
@@ -76,41 +72,37 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
-    const TensorShape &out_shape                         = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
-    const unsigned int num_elems_processed_per_iteration = calculate_num_elems_processed_per_iteration(input1);
+    const TensorShape &out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
+    const unsigned int num_elems_processed_per_iteration =
+        adjust_vec_size(16 / input1.element_size(), output.dimension(0));
 
     // Auto initialize output if not initialized
     auto_init_if_empty(output, out_shape, 1, DataType::U8, QuantizationInfo());
 
-    Window win        = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration));
-    Window win_input1 = win.broadcast_if_dimension_le_one(input1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(input2);
+    Window win = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration));
 
-    AccessWindowHorizontal input1_access(&input1, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input2_access(&input2, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access)
-                          || update_window_and_padding(win_input2, input2_access)
-                          || update_window_and_padding(win, output_access);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(Status{}, win);
 }
 } // namespace
 
-CLComparisonKernel::CLComparisonKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr)
+CLComparisonKernel::CLComparisonKernel() : _input1(nullptr), _input2(nullptr), _output(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLComparisonKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
+void CLComparisonKernel::configure(const ICLTensor    *input1,
+                                   const ICLTensor    *input2,
+                                   ICLTensor          *output,
+                                   ComparisonOperation operation)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, operation);
 }
 
-void CLComparisonKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
+void CLComparisonKernel::configure(const CLCompileContext &compile_context,
+                                   const ICLTensor        *input1,
+                                   const ICLTensor        *input2,
+                                   ICLTensor              *output,
+                                   ComparisonOperation     operation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info(), operation));
@@ -126,17 +118,29 @@ void CLComparisonKernel::configure(const CLCompileContext &compile_context, cons
     const std::string &operation_name = supported_comparison_ops.at(operation);
     std::string        kernel_name    = "compare_" + lower_string(operation_name);
 
+    const unsigned int num_elems_processed_per_iteration =
+        adjust_vec_size(16 / input1->info()->element_size(), output->info()->dimension(0));
+
     // Set kernel build options
     std::set<std::string> build_opts;
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input1->info()->data_type()));
-    build_opts.emplace("-DVEC_SIZE=" + support::cpp11::to_string(calculate_num_elems_processed_per_iteration(*input1->info())));
+    build_opts.emplace("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.emplace("-DVEC_SIZE_LEFTOVER=" +
+                       support::cpp11::to_string(output->info()->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.emplace(
+        "-DVEC_SIZE_IN1=" + //
+        support::cpp11::to_string(input1->info()->dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
+    build_opts.emplace(
+        "-DVEC_SIZE_IN2=" + //
+        support::cpp11::to_string(input2->info()->dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
     build_opts.emplace("-DOP=" + operation_name);
     build_opts.emplace("-DOP_NAME=" + lower_string(operation_name));
-    if(is_data_type_quantized(input1->info()->data_type()))
+    if (is_data_type_quantized(input1->info()->data_type()))
     {
         const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
         const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
 
+        build_opts.emplace("-DIS_QUANTIZED");
         build_opts.emplace("-DOFFSET_IN1=" + support::cpp11::to_string(iq1_info.offset));
         build_opts.emplace("-DOFFSET_IN2=" + support::cpp11::to_string(iq2_info.offset));
         build_opts.emplace("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1_info.scale));
@@ -160,12 +164,16 @@ void CLComparisonKernel::configure(const CLCompileContext &compile_context, cons
     _config_id += lower_string(string_from_data_layout(input1->info()->data_layout()));
 }
 
-Status CLComparisonKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation operation)
+Status CLComparisonKernel::validate(const ITensorInfo  *input1,
+                                    const ITensorInfo  *input2,
+                                    const ITensorInfo  *output,
+                                    ComparisonOperation operation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*input1, *input2, *output, operation));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(*input1->clone(), *input2->clone(), *output->clone()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_and_configure_window(*input1->clone(), *input2->clone(), *output->clone()).first);
 
     return Status{};
 }
@@ -181,17 +189,18 @@ void CLComparisonKernel::run(const Window &window, cl::CommandQueue &queue)
 
     bool       can_collapse = true;
     const bool is_vector    = in_shape1.num_dimensions() == 1 || in_shape2.num_dimensions() == 1;
-    if(std::min(in_shape1.total_size(), in_shape2.total_size()) > 1 && !is_vector)
+    if (std::min(in_shape1.total_size(), in_shape2.total_size()) > 1 && !is_vector)
     {
         can_collapse = (std::min(in_shape1.num_dimensions(), in_shape2.num_dimensions()) > Window::DimZ);
-        for(size_t d = Window::DimZ; can_collapse && (d < out_shape.num_dimensions()); d++)
+        for (size_t d = Window::DimZ; can_collapse && (d < out_shape.num_dimensions()); d++)
         {
             can_collapse = (in_shape1[d] == in_shape2[d]);
         }
     }
 
     bool   has_collapsed = false;
-    Window collapsed     = can_collapse ? window.collapse_if_possible(ICLKernel::window(), Window::DimZ, &has_collapsed) : window;
+    Window collapsed =
+        can_collapse ? window.collapse_if_possible(ICLKernel::window(), Window::DimZ, &has_collapsed) : window;
 
     const TensorShape &in_shape1_collapsed = has_collapsed ? in_shape1.collapsed_from(Window::DimZ) : in_shape1;
     const TensorShape &in_shape2_collapsed = has_collapsed ? in_shape2.collapsed_from(Window::DimZ) : in_shape2;
@@ -212,16 +221,7 @@ void CLComparisonKernel::run(const Window &window, cl::CommandQueue &queue)
 
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 
-BorderSize CLComparisonKernel::border_size() const
-{
-    const int num_elems_processed_per_iteration = calculate_num_elems_processed_per_iteration(*_input1->info());
-
-    const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
-    const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
-    return BorderSize{ 0, border, 0, 0 };
-}
 } // namespace arm_compute

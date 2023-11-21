@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLPReluLayer.h"
+
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/gpu/cl/IClKernel.h"
 #include "src/gpu/cl/operators/ClPRelu.h"
 
@@ -33,17 +35,16 @@ using OperatorType = opencl::ClPRelu;
 
 struct CLPReluLayer::Impl
 {
-    const ICLTensor              *src_0{ nullptr };
-    const ICLTensor              *src_1{ nullptr };
-    ICLTensor                    *dst{ nullptr };
-    std::unique_ptr<OperatorType> op{ nullptr };
+    const ICLTensor              *src_0{nullptr};
+    const ICLTensor              *src_1{nullptr};
+    ICLTensor                    *dst{nullptr};
+    std::unique_ptr<OperatorType> op{nullptr};
 };
 
-CLPReluLayer::CLPReluLayer()
-    : _impl(std::make_unique<Impl>())
+CLPReluLayer::CLPReluLayer() : _impl(std::make_unique<Impl>())
 {
 }
-CLPReluLayer::CLPReluLayer(CLPReluLayer &&) = default;
+CLPReluLayer::CLPReluLayer(CLPReluLayer &&)            = default;
 CLPReluLayer &CLPReluLayer::operator=(CLPReluLayer &&) = default;
 CLPReluLayer::~CLPReluLayer()                          = default;
 
@@ -52,13 +53,17 @@ void CLPReluLayer::configure(ICLTensor *input, ICLTensor *alpha, ICLTensor *outp
     configure(CLKernelLibrary::get().get_compile_context(), input, alpha, output);
 }
 
-void CLPReluLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *alpha, ICLTensor *output)
+void CLPReluLayer::configure(const CLCompileContext &compile_context,
+                             ICLTensor              *input,
+                             ICLTensor              *alpha,
+                             ICLTensor              *output)
 {
     _impl->src_0 = input;
     _impl->src_1 = alpha;
     _impl->dst   = output;
     _impl->op    = std::make_unique<OperatorType>();
-    _impl->op->configure(compile_context, input->info(), alpha->info(), (output == nullptr ? input->info() : output->info()));
+    _impl->op->configure(compile_context, input->info(), alpha->info(),
+                         (output == nullptr ? input->info() : output->info()));
 }
 
 Status CLPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)

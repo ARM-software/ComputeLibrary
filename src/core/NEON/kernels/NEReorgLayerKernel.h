@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEREORGLAYERKERNEL_H
-#define ARM_COMPUTE_NEREORGLAYERKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NEREORGLAYERKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NEREORGLAYERKERNEL_H
 
 #include "src/core/NEON/INEKernel.h"
 
@@ -60,7 +60,7 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, int32_t stride);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuReshapeKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
      * @param[in] input  Source tensor info. Data type supported: All
      * @param[in] output Destination tensor info. Data type supported: Same as @p input
@@ -80,4 +80,4 @@ private:
     int32_t        _stride;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEREORGLAYERKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NEREORGLAYERKERNEL_H

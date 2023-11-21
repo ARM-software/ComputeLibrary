@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_GPUKERNELVARIABLETABLE
 
 #include "arm_compute/core/ITensorInfo.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "support/AclRequires.h"
 #include "support/StringSupport.h"
@@ -55,11 +56,11 @@ public:
     struct TensorVariable
     {
     public:
-        TensorVariable()                       = default;
-        TensorVariable(const TensorVariable &) = default;
+        TensorVariable()                                        = default;
+        TensorVariable(const TensorVariable &)                  = default;
         TensorVariable       &operator=(const TensorVariable &) = default;
-        ITensorInfo::Id       id{ ITensorInfo::invalid_tensor_id };
-        std::string           uniq_name{ "empty" }; // Unique name, also the final variable name used in the built code
+        ITensorInfo::Id       id{ITensorInfo::invalid_tensor_id};
+        std::string           uniq_name{"empty"}; // Unique name, also the final variable name used in the built code
         GpuKernelArgumentInfo kernel_argument_info{};
         bool                  has_valid_id() const
         {
@@ -76,7 +77,10 @@ public:
      * @param[in] argument_info Kernel argument information
      * @param[in] alias         Alias for the variable. Will be used as part of the variable name
      */
-    void declare_variable(const GpuKernelComponentGroup &comp_group, const ITensorInfo *tensor, GpuKernelArgumentInfo argument_info, const std::string &alias = "unnamed");
+    void declare_variable(const GpuKernelComponentGroup &comp_group,
+                          const ITensorInfo             *tensor,
+                          GpuKernelArgumentInfo          argument_info,
+                          const std::string             &alias = "unnamed");
     /** Get the @ref TensorVariable associated with @p tensor
      *
      * @param[in] tensor Tensor info to be queried
@@ -106,8 +110,7 @@ struct TagVal
     TagVal(const GpuKernelVariableTable::TensorVariable &var);
     /** Construct a @ref TagVal from an integral type */
     template <typename T, ARM_COMPUTE_REQUIRES_TA(std::is_integral<T>::value)>
-    TagVal(T val)
-        : value{ support::cpp11::to_string(val) }
+    TagVal(T val) : value{support::cpp11::to_string(val)}
     {
     }
     /** Construct a @ref TagVal from a string */

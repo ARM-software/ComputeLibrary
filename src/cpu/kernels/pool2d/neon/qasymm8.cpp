@@ -25,15 +25,21 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
-#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
+
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/cpu/kernels/pool2d/neon/list.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void poolingMxN_qasymm8_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1, PoolingLayerInfo &pool_info, const Window &window_src, const Window &window)
+void poolingMxN_qasymm8_neon_nhwc(const ITensor    *src,
+                                  ITensor          *dst0,
+                                  ITensor          *dst1,
+                                  PoolingLayerInfo &pool_info,
+                                  const Window     &window_src,
+                                  const Window     &window)
 {
     poolingMxN_q8_neon_nhwc<uint8_t>(src, dst0, dst1, pool_info, window_src, window);
 }

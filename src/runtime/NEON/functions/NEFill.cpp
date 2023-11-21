@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFill.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuFill.h"
 
 #include <utility>
@@ -32,15 +33,14 @@ namespace arm_compute
 {
 struct NEFill::Impl
 {
-    ITensor                      *tensor{ nullptr };
-    std::unique_ptr<cpu::CpuFill> op{ nullptr };
+    ITensor                      *tensor{nullptr};
+    std::unique_ptr<cpu::CpuFill> op{nullptr};
 };
 
-NEFill::NEFill()
-    : _impl(std::make_unique<Impl>())
+NEFill::NEFill() : _impl(std::make_unique<Impl>())
 {
 }
-NEFill::NEFill(NEFill &&) = default;
+NEFill::NEFill(NEFill &&)            = default;
 NEFill &NEFill::operator=(NEFill &&) = default;
 NEFill::~NEFill()                    = default;
 

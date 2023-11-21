@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NEON_REDUCE_MEAN_H
 #define ARM_COMPUTE_NEON_REDUCE_MEAN_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
@@ -81,7 +80,8 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output);
+    static Status
+    validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;

@@ -24,11 +24,10 @@
 #ifndef ARM_COMPUTE_NECONV3D_H
 #define ARM_COMPUTE_NECONV3D_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -76,14 +75,19 @@ public:
      * @param[out] output    Destination tensor. 4 lower dimensions represent a single output [OFM, width, height, depth], while the rest represent batch of outputs.
      * @param[in]  conv_info Contains padding, stride, acitvation information described in @ref Conv3dInfo.
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv3dInfo &conv_info);
+    void configure(
+        ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv3dInfo &conv_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to NEConv3D::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const Conv3dInfo &conv_info);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *weights,
+                           const ITensorInfo *biases,
+                           const ITensorInfo *output,
+                           const Conv3dInfo  &conv_info);
 
     // Inherited methods overridden:
     void run() override;

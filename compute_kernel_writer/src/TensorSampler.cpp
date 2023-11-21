@@ -32,7 +32,11 @@ TensorSampler::TensorSampler(TensorStorageType         storage,
                              TensorSamplerAddressModeX address_mode_x,
                              TensorSamplerAddressModeY address_mode_y,
                              TensorSamplerAddressModeZ address_mode_z)
-    : _storage(storage), _format(format), _address_mode_x(address_mode_x), _address_mode_y(address_mode_y), _address_mode_z(address_mode_z)
+    : _storage(storage),
+      _format(format),
+      _address_mode_x(address_mode_x),
+      _address_mode_y(address_mode_y),
+      _address_mode_z(address_mode_z)
 {
 }
 

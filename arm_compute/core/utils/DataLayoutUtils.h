@@ -36,5 +36,5 @@ namespace arm_compute
  * @return The string describing the data layout.
  */
 const std::string &string_from_data_layout(DataLayout dl);
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CORE_UTILS_DATALAYOUTUTILS_H */

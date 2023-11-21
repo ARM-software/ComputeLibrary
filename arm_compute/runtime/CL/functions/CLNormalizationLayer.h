@@ -89,7 +89,10 @@ public:
      *                                 Data types supported: same as @p input. Data layouts supported: same as @p input.
      * @param[in]      norm_info       Normalization layer information like the normalization type, normalization size and other parameters.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info);
+    void configure(const CLCompileContext       &compile_context,
+                   ICLTensor                    *input,
+                   ICLTensor                    *output,
+                   const NormalizationLayerInfo &norm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizationLayer
      *
      * @param[in] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
@@ -100,7 +103,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info);
 
     // Inherited methods overridden:
     void run() override;

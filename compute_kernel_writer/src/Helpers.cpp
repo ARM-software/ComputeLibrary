@@ -22,15 +22,15 @@
  * SOFTWARE.
  */
 
-#include "ckw/Error.h"
-
 #include "src/Helpers.h"
+
+#include "ckw/Error.h"
 
 namespace ckw
 {
 std::string dec_to_hex_as_string(int32_t dec)
 {
-    switch(dec)
+    switch (dec)
     {
         case 0:
         case 1:

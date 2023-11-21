@@ -33,37 +33,38 @@ namespace graph
 namespace frontend
 {
 // Import types for graph
-using graph::DataType;
 using graph::DataLayout;
 using graph::DataLayoutDimension;
-using graph::TensorShape;
+using graph::DataType;
 using graph::PermutationVector;
+using graph::TensorShape;
 
 using graph::ActivationLayerInfo;
+using graph::ConvolutionMethod;
+using graph::DepthwiseConvolutionMethod;
+using graph::DimensionRoundingType;
 using graph::EltwiseOperation;
+using graph::FastMathHint;
 using graph::FullyConnectedLayerInfo;
+using graph::GraphConfig;
+using graph::InterpolationPolicy;
 using graph::NormalizationLayerInfo;
 using graph::NormType;
 using graph::PadStrideInfo;
 using graph::PoolingLayerInfo;
 using graph::PoolingType;
-using graph::Target;
-using graph::ConvolutionMethod;
-using graph::FastMathHint;
-using graph::DepthwiseConvolutionMethod;
-using graph::TensorDescriptor;
-using graph::DimensionRoundingType;
-using graph::GraphConfig;
-using graph::InterpolationPolicy;
 using graph::Size2D;
+using graph::Target;
+using graph::TensorDescriptor;
 
 /** Hints that can be passed to the stream to expose parameterization */
 struct StreamHints
 {
-    Target                     target_hint                       = { Target::UNSPECIFIED };                 /**< Target execution hint */
-    ConvolutionMethod          convolution_method_hint           = { ConvolutionMethod::Default };          /**< Convolution method hint */
-    DepthwiseConvolutionMethod depthwise_convolution_method_hint = { DepthwiseConvolutionMethod::Default }; /**< Depthwise Convolution method hint */
-    FastMathHint               fast_math_hint                    = { FastMathHint::Disabled };              /**< Fast math hint */
+    Target                     target_hint             = {Target::UNSPECIFIED};        /**< Target execution hint */
+    ConvolutionMethod          convolution_method_hint = {ConvolutionMethod::Default}; /**< Convolution method hint */
+    DepthwiseConvolutionMethod depthwise_convolution_method_hint = {
+        DepthwiseConvolutionMethod::Default};               /**< Depthwise Convolution method hint */
+    FastMathHint fast_math_hint = {FastMathHint::Disabled}; /**< Fast math hint */
 };
 } // namespace frontend
 } // namespace graph

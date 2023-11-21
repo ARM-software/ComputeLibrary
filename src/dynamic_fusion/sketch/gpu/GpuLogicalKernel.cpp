@@ -26,9 +26,9 @@
 #include "arm_compute/core/experimental/Types.h"
 
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuComponentServices.h"
-#include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.h"
+#include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuComponentServices.h"
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.h"
 #else // ACL_INTERNAL_TEST_CKW_IN_DF
@@ -42,7 +42,7 @@ namespace experimental
 namespace dynamic_fusion
 {
 GpuLogicalKernel::GpuLogicalKernel(GpuComponentServices *services, const GpuKernelComponentGroup &components)
-    : _comp_group{ components }, _store_components{}
+    : _comp_group{components}, _store_components{}
 {
     ARM_COMPUTE_UNUSED(services);
 }
@@ -51,9 +51,9 @@ GpuKernelSourceCode GpuLogicalKernel::write_kernel_code()
 {
     GpuKernelSourceCode code;
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    ClTemplateWriter writer { _comp_group };
+    ClTemplateWriter writer{_comp_group};
 #else  // ACL_INTERNAL_TEST_CKW_IN_DF
-    GpuCkwDriver writer { _comp_group };
+    GpuCkwDriver writer{_comp_group};
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
     code.name(writer.get_name());

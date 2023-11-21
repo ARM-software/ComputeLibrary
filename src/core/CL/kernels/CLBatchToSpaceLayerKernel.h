@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLBATCHTOSPACELAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -65,7 +66,10 @@ public:
      *
      * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const ICLTensor        *block_shape,
+                   ICLTensor              *output);
     /** Initialise the kernel's inputs and output (Static block shape).
      *
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -74,7 +78,11 @@ public:
      * @param[out] output        Tensor output. Data types supported: same as @p input
      * @param[in]  crop_info     Specifies how the output shape is cropped after batch to space is performed
      */
-    void configure(const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info);
+    void configure(const ICLTensor *input,
+                   const int32_t    block_shape_x,
+                   const int32_t    block_shape_y,
+                   ICLTensor       *output,
+                   const CropInfo  &crop_info);
     /** Initialise the kernel's inputs and output (Static block shape).
      *
      * @param[in]  compile_context The compile context to be used.
@@ -84,7 +92,12 @@ public:
      * @param[out] output          Tensor output. Data types supported: same as @p input
      * @param[in]  crop_info       Specifies how the output shape is cropped after batch to space is performed
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const int32_t           block_shape_x,
+                   const int32_t           block_shape_y,
+                   ICLTensor              *output,
+                   const CropInfo         &crop_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayerKernel
      *
      * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -106,7 +119,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const int32_t block_shape_x, const int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info);
+    static Status validate(const ITensorInfo *input,
+                           const int32_t      block_shape_x,
+                           const int32_t      block_shape_y,
+                           const ITensorInfo *output,
+                           const CropInfo    &crop_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

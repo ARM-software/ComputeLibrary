@@ -26,15 +26,19 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
-#include "src/core/CL/kernels/CLStridedSliceKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLStridedSliceKernel.h"
 
 namespace arm_compute
 {
 namespace experimental
 {
-void CLSlice::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+void CLSlice::configure(const CLCompileContext &compile_context,
+                        const ITensorInfo      *input,
+                        ITensorInfo            *output,
+                        const Coordinates      &starts,
+                        const Coordinates      &ends)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends);
@@ -47,15 +51,16 @@ void CLSlice::configure(const CLCompileContext &compile_context, const ITensorIn
     _kernel = std::move(k);
 }
 
-Status CLSlice::validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+Status CLSlice::validate(const ITensorInfo *input,
+                         const ITensorInfo *output,
+                         const Coordinates &starts,
+                         const Coordinates &ends)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
 
     // Check start dimensions for being non-negative
-    ARM_COMPUTE_RETURN_ERROR_ON(std::any_of(starts.cbegin(), starts.cbegin() + starts.num_dimensions(), [](int i)
-    {
-        return i < 0;
-    }));
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        std::any_of(starts.cbegin(), starts.cbegin() + starts.num_dimensions(), [](int i) { return i < 0; }));
 
     // Get absolute end coordinates
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
@@ -66,20 +71,22 @@ Status CLSlice::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
 struct CLSlice::Impl
 {
-    const ICLTensor                       *src{ nullptr };
-    ICLTensor                             *dst{ nullptr };
-    std::unique_ptr<experimental::CLSlice> op{ nullptr };
+    const ICLTensor                       *src{nullptr};
+    ICLTensor                             *dst{nullptr};
+    std::unique_ptr<experimental::CLSlice> op{nullptr};
 };
 
-CLSlice::CLSlice()
-    : _impl(std::make_unique<Impl>())
+CLSlice::CLSlice() : _impl(std::make_unique<Impl>())
 {
 }
-CLSlice::CLSlice(CLSlice &&) = default;
+CLSlice::CLSlice(CLSlice &&)            = default;
 CLSlice &CLSlice::operator=(CLSlice &&) = default;
 CLSlice::~CLSlice()                     = default;
 
-Status CLSlice::validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+Status CLSlice::validate(const ITensorInfo *input,
+                         const ITensorInfo *output,
+                         const Coordinates &starts,
+                         const Coordinates &ends)
 {
     return experimental::CLSlice::validate(input, output, starts, ends);
 }
@@ -89,7 +96,11 @@ void CLSlice::configure(const ICLTensor *input, ICLTensor *output, const Coordin
     configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends);
 }
 
-void CLSlice::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends)
+void CLSlice::configure(const CLCompileContext &compile_context,
+                        const ICLTensor        *input,
+                        ICLTensor              *output,
+                        const Coordinates      &starts,
+                        const Coordinates      &ends)
 {
     _impl->src = input;
     _impl->dst = output;

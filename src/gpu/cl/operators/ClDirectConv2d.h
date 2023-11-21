@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_DIRECT_CONV2D_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
 #include "src/gpu/cl/IClOperator.h"
@@ -59,7 +60,12 @@ public:
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      *
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info,
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *src,
+                   ITensorInfo               *weights,
+                   ITensorInfo               *biases,
+                   ITensorInfo               *dst,
+                   const PadStrideInfo       &conv_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -67,16 +73,20 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo         *src,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *dst,
+                           const PadStrideInfo       &conv_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited method overridden
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<IClKernel> _direct_conv_kernel{ nullptr };
-    std::unique_ptr<IClKernel> _src_border_handler{ nullptr };
-    std::unique_ptr<IClKernel> _activation_kernel{ nullptr };
+    std::unique_ptr<IClKernel> _direct_conv_kernel{nullptr};
+    std::unique_ptr<IClKernel> _src_border_handler{nullptr};
+    std::unique_ptr<IClKernel> _activation_kernel{nullptr};
 };
 } // namespace opencl
 } // namespace arm_compute

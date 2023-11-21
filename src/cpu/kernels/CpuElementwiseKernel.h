@@ -43,7 +43,8 @@ template <class Derived>
 class CpuElementwiseKernel : public ICpuKernel<Derived>
 {
 private:
-    using ElementwiseKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const Window &)>::type;
+    using ElementwiseKernelPtr =
+        std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const Window &)>::type;
 
 public:
     CpuElementwiseKernel() = default;
@@ -72,7 +73,7 @@ protected:
     static Status validate_arguments_common(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst);
 
 protected:
-    ElementwiseKernelPtr _run_method{ nullptr };
+    ElementwiseKernelPtr _run_method{nullptr};
     std::string          _name{};
 };
 
@@ -96,7 +97,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(ArithmeticOperation op, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
+    static Status
+    validate(ArithmeticOperation op, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
     static const std::vector<CpuElementwiseKernel<CpuArithmeticKernel>::ElementwiseKernel> &get_available_kernels();
 
@@ -200,7 +202,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(ComparisonOperation op, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
+    static Status
+    validate(ComparisonOperation op, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
     static const std::vector<CpuElementwiseKernel<CpuComparisonKernel>::ElementwiseKernel> &get_available_kernels();
 

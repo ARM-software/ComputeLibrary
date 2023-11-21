@@ -31,6 +31,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -50,11 +51,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Window
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
     // Validate dst if initialized
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
-        if(dst_window == nullptr)
+        if (dst_window == nullptr)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(src->tensor_shape(), dst->tensor_shape());
         }
@@ -74,12 +75,15 @@ ClCopyKernel::ClCopyKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClCopyKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, Window *dst_window)
+void ClCopyKernel::configure(const CLCompileContext &compile_context,
+                             const ITensorInfo      *src,
+                             ITensorInfo            *dst,
+                             Window                 *dst_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, dst_window));
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -93,7 +97,7 @@ void ClCopyKernel::configure(const CLCompileContext &compile_context, const ITen
 
     const Window win_config = calculate_max_window(*src, Steps(vec_size_x));
 
-    if(dst_window != nullptr)
+    if (dst_window != nullptr)
     {
         _has_dst_window                = true;
         _dst_window                    = Window(*dst_window);
@@ -101,9 +105,11 @@ void ClCopyKernel::configure(const CLCompileContext &compile_context, const ITen
         const int  vec_size_x_leftover = width_x % vec_size_x;
         const bool multi_access_x      = width_x >= static_cast<int32_t>(vec_size_x);
 
-        if(multi_access_x)
+        if (multi_access_x)
         {
-            _dst_window.set(Window::DimX, Window::Dimension(dst_window->x().start(), ceil_to_multiple(dst_window->x().end(), vec_size_x), vec_size_x));
+            _dst_window.set(Window::DimX,
+                            Window::Dimension(dst_window->x().start(),
+                                              ceil_to_multiple(dst_window->x().end(), vec_size_x), vec_size_x));
         }
 
         build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftover));
@@ -127,7 +133,8 @@ void ClCopyKernel::configure(const CLCompileContext &compile_context, const ITen
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClCopyKernel::validate(const arm_compute::ITensorInfo *src, const arm_compute::ITensorInfo *dst, Window *dst_window)
+Status
+ClCopyKernel::validate(const arm_compute::ITensorInfo *src, const arm_compute::ITensorInfo *dst, Window *dst_window)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, dst_window));
 
@@ -139,12 +146,13 @@ void ClCopyKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comman
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window slice;
 
-    if(_has_dst_window)
+    if (_has_dst_window)
     {
         slice            = window.first_slice_window_3D();
         Window out_slice = _dst_window.first_slice_window_3D();
@@ -154,8 +162,7 @@ void ClCopyKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comman
             add_3D_tensor_argument(idx, src, slice);
             add_3D_tensor_argument(idx, dst, out_slice);
             enqueue(queue, *this, slice, lws_hint());
-        }
-        while(window.slide_window_slice_3D(slice) && _dst_window.slide_window_slice_3D(out_slice));
+        } while (window.slide_window_slice_3D(slice) && _dst_window.slide_window_slice_3D(out_slice));
     }
     else
     {
@@ -167,8 +174,7 @@ void ClCopyKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comman
             add_3D_tensor_argument(idx, src, slice);
             add_3D_tensor_argument(idx, dst, slice);
             enqueue(queue, *this, slice, lws_hint());
-        }
-        while(collapsed.slide_window_slice_3D(slice));
+        } while (collapsed.slide_window_slice_3D(slice));
     }
 }
 } // namespace kernels

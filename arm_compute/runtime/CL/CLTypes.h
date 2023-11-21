@@ -43,12 +43,12 @@ enum class CLGEMMKernelType
 /** OpenCL GEMM kernel selection parameters. These information are retrieved to select the GEMM kernel on OpenCL */
 struct CLGEMMKernelSelectionParams
 {
-    unsigned int m{ 0 };                         /**< Number of rows for the lhs matrix. Lhs matrix NOT transposed */
-    unsigned int n{ 0 };                         /**< Number of columns for the rhs matrix. Rhs matrix NOT transposed */
-    unsigned int k{ 0 };                         /**< Number of rows for the rhs matrix. Rhs matrix NOT transposed */
-    unsigned int b{ 0 };                         /**< Batch size */
-    bool         is_rhs_constant{ false };       /**< True if the content of the rhs matrix is constant */
-    DataType     data_type{ DataType::UNKNOWN }; /**< Data type */
+    unsigned int m{0};                         /**< Number of rows for the lhs matrix. Lhs matrix NOT transposed */
+    unsigned int n{0};                         /**< Number of columns for the rhs matrix. Rhs matrix NOT transposed */
+    unsigned int k{0};                         /**< Number of rows for the rhs matrix. Rhs matrix NOT transposed */
+    unsigned int b{0};                         /**< Batch size */
+    bool         is_rhs_constant{false};       /**< True if the content of the rhs matrix is constant */
+    DataType     data_type{DataType::UNKNOWN}; /**< Data type */
 };
 
 /** List the possible OpenCL backends */

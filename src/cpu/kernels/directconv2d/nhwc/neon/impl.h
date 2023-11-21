@@ -26,6 +26,7 @@
 #define SRC_CORE_NEON_KERNELS_CONV2D_IMPL_H
 
 #include "arm_compute/core/ITensor.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
@@ -35,7 +36,8 @@ namespace cpu
 namespace kernels
 {
 template <typename T>
-void convolve_nhwc(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info);
+void convolve_nhwc(
+    const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info);
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

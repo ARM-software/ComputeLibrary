@@ -65,15 +65,15 @@ public:
     static Status validate(const ITensorInfo *src, unsigned int depth_offset, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
     using DepthConcatFunction = void(const ITensor *, ITensor *, unsigned int, const Window &);
 
 private:
-    DepthConcatFunction *_func{ nullptr };
-    unsigned int         _depth_offset{ 0 };
+    DepthConcatFunction *_func{nullptr};
+    unsigned int         _depth_offset{0};
 };
 } // namespace kernels
 } // namespace cpu

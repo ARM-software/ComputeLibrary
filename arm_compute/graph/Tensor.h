@@ -24,11 +24,10 @@
 #ifndef ARM_COMPUTE_GRAPH_TENSOR_H
 #define ARM_COMPUTE_GRAPH_TENSOR_H
 
-#include "arm_compute/graph/Types.h"
-
 #include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/ITensorHandle.h"
 #include "arm_compute/graph/TensorDescriptor.h"
+#include "arm_compute/graph/Types.h"
 
 #include <memory>
 #include <set>

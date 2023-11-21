@@ -25,15 +25,16 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
+#include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
 #include "src/core/NEON/kernels/NEFFTScaleKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
-#include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/fft.h"
 
 namespace arm_compute
@@ -46,11 +47,11 @@ int pad_decomposable(int N)
 
     int  pad           = 0;
     bool is_decomposed = false;
-    while(!is_decomposed)
+    while (!is_decomposed)
     {
         const auto decomposed_vector = arm_compute::helpers::fft::decompose_stages(N++, supported_radix);
         is_decomposed                = !decomposed_vector.empty();
-        if(!is_decomposed)
+        if (!is_decomposed)
         {
             ++pad;
         }
@@ -102,8 +103,13 @@ NEFFTConvolutionLayer::NEFFTConvolutionLayer(std::shared_ptr<IMemoryManager> mem
 }
 NEFFTConvolutionLayer::~NEFFTConvolutionLayer() = default;
 
-void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                      const ActivationLayerInfo &act_info, bool enable_fast_math)
+void NEFFTConvolutionLayer::configure(ITensor                   *input,
+                                      const ITensor             *weights,
+                                      const ITensor             *biases,
+                                      ITensor                   *output,
+                                      const PadStrideInfo       &conv_info,
+                                      const ActivationLayerInfo &act_info,
+                                      bool                       enable_fast_math)
 {
     ARM_COMPUTE_UNUSED(enable_fast_math);
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, act_info, enable_fast_math);
@@ -115,21 +121,24 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     _has_bias = biases != nullptr;
 
     // Get indices for the width and height
-    const size_t idx_width  = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_width = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_height =
+        get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
 
     // Input shape, kernel size and output tile
-    const Size2D input_dims  = Size2D(input->info()->tensor_shape()[idx_width], input->info()->tensor_shape()[idx_height]);
-    const Size2D kernel_size = Size2D(weights->info()->tensor_shape()[idx_width], weights->info()->tensor_shape()[idx_height]);
-    const Size2D pad_valid   = Size2D(pad_decomposable(input_dims.x() + kernel_size.x() - 1),
-                                      pad_decomposable(input_dims.y() + kernel_size.y() - 1));
+    const Size2D input_dims =
+        Size2D(input->info()->tensor_shape()[idx_width], input->info()->tensor_shape()[idx_height]);
+    const Size2D kernel_size =
+        Size2D(weights->info()->tensor_shape()[idx_width], weights->info()->tensor_shape()[idx_height]);
+    const Size2D pad_valid = Size2D(pad_decomposable(input_dims.x() + kernel_size.x() - 1),
+                                    pad_decomposable(input_dims.y() + kernel_size.y() - 1));
     // Tensors to use
     ITensor       *input_to_use   = input;
     const ITensor *weights_to_use = weights;
     ITensor       *output_to_use  = _has_bias ? &_bias_output : output;
 
     // Permute bias
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         _permute_bias_func.configure(biases, &_permuted_bias, PermutationVector(1U, 2U, 0U));
         _permuted_bias.info()->set_data_layout(DataLayout::NCHW);
@@ -137,7 +146,7 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
 
     // Permute input if needed
     _needs_permute = input->info()->data_layout() == DataLayout::NHWC;
-    if(_needs_permute)
+    if (_needs_permute)
     {
         _memory_group.manage(&_permuted_input);
         // Configure the function to transform the input tensor from NHWC -> NCHW
@@ -158,7 +167,7 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     _flip_weights_func.configure(weights_to_use, &_flipped_weights, &_flip_axis);
 
     // Pad weights
-    const PaddingList padding_w = { { 0, input_dims.x() + pad_valid.x() - 1 }, { 0, input_dims.y() + pad_valid.y() - 1 } };
+    const PaddingList padding_w = {{0, input_dims.x() + pad_valid.x() - 1}, {0, input_dims.y() + pad_valid.y() - 1}};
     _pad_weights_func.configure(&_flipped_weights, &_padded_weights, padding_w);
 
     // Transform weights
@@ -166,10 +175,10 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     _transform_weights_func->configure(&_padded_weights, &_transformed_weights, FFT2DInfo());
 
     // Pad input
-    const PaddingList padding_in = { { 0, kernel_size.x() + pad_valid.x() - 1 }, { 0, kernel_size.y() + pad_valid.y() - 1 } };
+    const PaddingList padding_in = {{0, kernel_size.x() + pad_valid.x() - 1}, {0, kernel_size.y() + pad_valid.y() - 1}};
     _memory_group.manage(&_padded_input);
     _pad_input_func.configure(input_to_use, &_padded_input, padding_in);
-    if(_needs_permute)
+    if (_needs_permute)
     {
         _permuted_input.allocator()->allocate();
     }
@@ -193,7 +202,8 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     _memory_group.manage(&_itransformed_output);
     FFT2DInfo itranform_info;
     itranform_info.direction = FFTDirection::Inverse;
-    _itransformed_output.allocator()->init(_output_reduced.info()->clone()->set_is_resizable(true).set_num_channels(1).reset_padding());
+    _itransformed_output.allocator()->init(
+        _output_reduced.info()->clone()->set_is_resizable(true).set_num_channels(1).reset_padding());
     _itransform_output_func.configure(&_output_reduced, &_itransformed_output, itranform_info);
     _output_reduced.allocator()->allocate();
 
@@ -205,26 +215,29 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     // Extract correct region
     const int start_left = kernel_size.x() - conv_info.pad_left() - 1;
     const int start_top  = kernel_size.y() - conv_info.pad_top() - 1;
-    const int end_right  = _reshaped_output.info()->tensor_shape().x() - (kernel_size.x() - conv_info.pad_right() - 1) - pad_valid.x();
-    const int end_botton = _reshaped_output.info()->tensor_shape().y() - (kernel_size.y() - conv_info.pad_bottom() - 1) - pad_valid.y();
-    if(_has_bias)
+    const int end_right =
+        _reshaped_output.info()->tensor_shape().x() - (kernel_size.x() - conv_info.pad_right() - 1) - pad_valid.x();
+    const int end_botton =
+        _reshaped_output.info()->tensor_shape().y() - (kernel_size.y() - conv_info.pad_bottom() - 1) - pad_valid.y();
+    if (_has_bias)
     {
         _memory_group.manage(&_bias_output);
     }
-    else if(_needs_permute)
+    else if (_needs_permute)
     {
         output_to_use = &_permuted_output;
         _memory_group.manage(&_permuted_output);
     }
-    _extract_output_func.configure(&_reshaped_output, output_to_use, Coordinates(start_left, start_top), Coordinates(end_right, end_botton));
+    _extract_output_func.configure(&_reshaped_output, output_to_use, Coordinates(start_left, start_top),
+                                   Coordinates(end_right, end_botton));
     _reshaped_output.allocator()->allocate();
     _itransformed_output.allocator()->allocate();
 
     // Add bias
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         output_to_use = output;
-        if(_needs_permute)
+        if (_needs_permute)
         {
             output_to_use = &_permuted_output;
             _memory_group.manage(&_permuted_output);
@@ -235,7 +248,7 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     }
 
     // Permute output
-    if(_needs_permute)
+    if (_needs_permute)
     {
         // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
@@ -247,7 +260,7 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
 
     // Configure Activation Layer
     _is_activationlayer_enabled = act_info.enabled();
-    if(_is_activationlayer_enabled)
+    if (_is_activationlayer_enabled)
     {
         _activation_layer_func.configure(output, nullptr, act_info);
     }
@@ -260,8 +273,13 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
     axis_data[1]   = 1;
 }
 
-Status NEFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                       const ActivationLayerInfo &act_info, bool enable_fast_math)
+Status NEFFTConvolutionLayer::validate(const ITensorInfo         *input,
+                                       const ITensorInfo         *weights,
+                                       const ITensorInfo         *biases,
+                                       const ITensorInfo         *output,
+                                       const PadStrideInfo       &conv_info,
+                                       const ActivationLayerInfo &act_info,
+                                       bool                       enable_fast_math)
 {
     ARM_COMPUTE_UNUSED(enable_fast_math);
 
@@ -279,11 +297,13 @@ Status NEFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorIn
     const auto strides = conv_info.stride();
     ARM_COMPUTE_RETURN_ERROR_ON(strides.first != strides.second && strides.first != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(kernel_size.x() != kernel_size.y());
-    ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_left() != (kernel_size.x() / 2) || conv_info.pad_right() != (kernel_size.x() / 2));
-    ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_top() != (kernel_size.y() / 2) || conv_info.pad_bottom() != (kernel_size.y() / 2));
+    ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_left() != (kernel_size.x() / 2) ||
+                                conv_info.pad_right() != (kernel_size.x() / 2));
+    ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_top() != (kernel_size.y() / 2) ||
+                                conv_info.pad_bottom() != (kernel_size.y() / 2));
 
     // Validate biases
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         const size_t idx_channels = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
@@ -291,13 +311,14 @@ Status NEFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorIn
     }
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON((input->tensor_shape()[idx_height] != output->tensor_shape()[idx_height]) || (input->tensor_shape()[idx_width] != output->tensor_shape()[idx_width]));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->tensor_shape()[idx_height] != output->tensor_shape()[idx_height]) ||
+                                    (input->tensor_shape()[idx_width] != output->tensor_shape()[idx_width]));
 
         // Validate Activation Layer
-        if(act_info.enabled())
+        if (act_info.enabled())
         {
             ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
         }
@@ -313,7 +334,7 @@ void NEFFTConvolutionLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Transform input
-    if(_needs_permute)
+    if (_needs_permute)
     {
         _permute_input_func.run();
     }
@@ -331,17 +352,17 @@ void NEFFTConvolutionLayer::run()
     _extract_output_func.run();
 
     // Add bias
-    if(_has_bias)
+    if (_has_bias)
     {
         _bias_add_func.run();
     }
-    if(_needs_permute)
+    if (_needs_permute)
     {
         _permute_output_func.run();
     }
 
     // Run activation layer
-    if(_is_activationlayer_enabled)
+    if (_is_activationlayer_enabled)
     {
         _activation_layer_func.run();
     }
@@ -349,10 +370,10 @@ void NEFFTConvolutionLayer::run()
 
 void NEFFTConvolutionLayer::prepare()
 {
-    if(!_is_prepared)
+    if (!_is_prepared)
     {
         // Permute bias to NCHW
-        if(_original_bias != nullptr)
+        if (_original_bias != nullptr)
         {
             _permuted_bias.allocator()->allocate();
             _permute_bias_func.run();
@@ -362,7 +383,7 @@ void NEFFTConvolutionLayer::prepare()
         const ITensor *cur_weights = _original_weights;
 
         // Permute weights
-        if(_needs_permute)
+        if (_needs_permute)
         {
             ARM_COMPUTE_ERROR_ON(!cur_weights->is_used());
 

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -38,15 +39,14 @@ namespace cpu
 {
 struct CpuDepthwiseConv2dAssemblyDispatch::LocalImpl
 {
-    std::unique_ptr<kernels::CpuDepthwiseConv2dAssemblyWrapperKernel> asm_kernel{ nullptr };
-    bool                                                              is_prepared{ false };
-    bool                                                              are_weights_const{ true };
+    std::unique_ptr<kernels::CpuDepthwiseConv2dAssemblyWrapperKernel> asm_kernel{nullptr};
+    bool                                                              is_prepared{false};
+    bool                                                              are_weights_const{true};
     experimental::MemoryRequirements                                  mem_req{};
 };
 
 #ifndef DOXYGEN_SKIP_THIS
-CpuDepthwiseConv2dAssemblyDispatch::CpuDepthwiseConv2dAssemblyDispatch()
-    : _pImpl(std::make_unique<LocalImpl>())
+CpuDepthwiseConv2dAssemblyDispatch::CpuDepthwiseConv2dAssemblyDispatch() : _pImpl(std::make_unique<LocalImpl>())
 {
 }
 #endif /* DOXYGEN_SKIP_THIS */
@@ -66,7 +66,7 @@ void CpuDepthwiseConv2dAssemblyDispatch::configure(const ITensorInfo     *src,
     _pImpl->are_weights_const      = weights->are_values_constant();
 
     // If we don't support a combination of data types, silently return: it is the caller's responsibility to check if configure() was successful via is_configured()
-    if(!CpuDepthwiseConv2dAssemblyDispatch::validate(src, weights, bias, dst, info))
+    if (!CpuDepthwiseConv2dAssemblyDispatch::validate(src, weights, bias, dst, info))
     {
         return;
     }
@@ -77,12 +77,16 @@ void CpuDepthwiseConv2dAssemblyDispatch::configure(const ITensorInfo     *src,
 
     // Compute memory requirements for assembly kernels
     constexpr size_t alignment = 4096;
-    _pImpl->mem_req.push_back({ TensorType::ACL_INT_0, dwc_wrapper->get_working_size(num_threads), alignment });
-    _pImpl->mem_req.push_back({ TensorType::ACL_INT_1, dwc_wrapper->get_storage_size(), alignment });
+    _pImpl->mem_req.push_back({TensorType::ACL_INT_0, dwc_wrapper->get_working_size(num_threads), alignment});
+    _pImpl->mem_req.push_back({TensorType::ACL_INT_1, dwc_wrapper->get_storage_size(), alignment});
     _pImpl->asm_kernel = std::move(dwc_wrapper);
 }
 
-Status CpuDepthwiseConv2dAssemblyDispatch::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const ConvolutionInfo &info)
+Status CpuDepthwiseConv2dAssemblyDispatch::validate(const ITensorInfo     *src,
+                                                    const ITensorInfo     *weights,
+                                                    const ITensorInfo     *bias,
+                                                    const ITensorInfo     *dst,
+                                                    const ConvolutionInfo &info)
 {
     return kernels::CpuDepthwiseConv2dAssemblyWrapperKernel::validate(src, weights, bias, dst, info);
 }
@@ -111,7 +115,7 @@ void CpuDepthwiseConv2dAssemblyDispatch::prepare(ITensorPack &tensors)
 {
     const ITensor *weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
 
-    if((!_pImpl->are_weights_const && weights != nullptr) || !_pImpl->is_prepared)
+    if ((!_pImpl->are_weights_const && weights != nullptr) || !_pImpl->is_prepared)
     {
         // Pack weights and bias
         const ITensor *bias    = tensors.get_const_tensor(TensorType::ACL_SRC_2);
@@ -125,11 +129,12 @@ void CpuDepthwiseConv2dAssemblyDispatch::prepare(ITensorPack &tensors)
         const auto weights_padding = weights->info()->padding();
 
         const size_t ld_weights_col = weights_shape[0] + weights_padding.left + weights_padding.right;
-        const size_t ld_weights_row = ld_weights_col * (weights_shape[1] + weights_padding.top + weights_padding.bottom);
+        const size_t ld_weights_row =
+            ld_weights_col * (weights_shape[1] + weights_padding.top + weights_padding.bottom);
         _pImpl->asm_kernel->pack_parameters(parameters_ptr, bias_ptr, weights_ptr, ld_weights_col, ld_weights_row);
 
         weights->mark_as_unused();
-        if(bias != nullptr)
+        if (bias != nullptr)
         {
             bias->mark_as_unused();
         }

@@ -25,18 +25,16 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
 #include "arm_compute/graph/Utils.h"
-
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-StackLayerNode::StackLayerNode(unsigned int total_nodes, int axis)
-    : _total_nodes(total_nodes), _axis(axis)
+StackLayerNode::StackLayerNode(unsigned int total_nodes, int axis) : _total_nodes(total_nodes), _axis(axis)
 {
     _input_edges.resize(_total_nodes, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -64,7 +62,7 @@ TensorDescriptor StackLayerNode::compute_output_descriptor(const std::vector<Ten
 
 bool StackLayerNode::forward_descriptors()
 {
-    if(_outputs[0] != NullTensorID)
+    if (_outputs[0] != NullTensorID)
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -80,17 +78,15 @@ TensorDescriptor StackLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
 
     // Check if all input tensors are set
-    bool are_all_inputs_set = std::all_of(std::begin(_input_edges), std::end(_input_edges), [](const EdgeID & eid)
-    {
-        return eid != EmptyEdgeID;
-    });
+    bool are_all_inputs_set = std::all_of(std::begin(_input_edges), std::end(_input_edges),
+                                          [](const EdgeID &eid) { return eid != EmptyEdgeID; });
 
     TensorDescriptor output_info = {};
 
-    if(are_all_inputs_set)
+    if (are_all_inputs_set)
     {
         std::vector<TensorDescriptor> inputs_descriptors;
-        for(unsigned int i = 0; i < _input_edges.size(); ++i)
+        for (unsigned int i = 0; i < _input_edges.size(); ++i)
         {
             const Tensor *t = _graph->tensor(input_id(i));
             ARM_COMPUTE_ERROR_ON(t == nullptr);

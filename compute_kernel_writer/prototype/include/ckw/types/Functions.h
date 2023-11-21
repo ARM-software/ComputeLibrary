@@ -32,27 +32,29 @@ namespace ckw
 
 enum class UnaryFunction : int32_t
 {
-    Exp            = 0x0000,
-    Tanh           = 0x0001,
-    Sqrt           = 0x0002,
-    Erf            = 0x0003,
-    Fabs           = 0x0004,
-    Log            = 0x0006,
-    Round          = 0x0007,
+    Exp   = 0x0000,
+    Tanh  = 0x0001,
+    Sqrt  = 0x0002,
+    Erf   = 0x0003,
+    Fabs  = 0x0004,
+    Log   = 0x0006,
+    Round = 0x0007,
+    Floor = 0x0008,
 
     // Misc
-    SizeOf = 0x0008,
+    SizeOf = 0x0009,
 };
 
 enum class BinaryFunction : int32_t
 {
-    Min  = 0x0000,
-    Max  = 0x0001,
+    Min = 0x0000,
+    Max = 0x0001,
 };
 
 enum class TernaryFunction : int32_t
 {
     Select = 0x0000,
+    Clamp  = 0x0001,
 };
 
 } // namespace ckw

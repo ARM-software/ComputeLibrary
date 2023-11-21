@@ -31,7 +31,10 @@ namespace graph
 {
 namespace backends
 {
-CLSubTensorHandle::CLSubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent)
+CLSubTensorHandle::CLSubTensorHandle(ITensorHandle     *parent_handle,
+                                     const TensorShape &shape,
+                                     const Coordinates &coords,
+                                     bool               extend_parent)
     : _sub_tensor(), _parent_handle(nullptr)
 {
     ARM_COMPUTE_ERROR_ON(!parent_handle);

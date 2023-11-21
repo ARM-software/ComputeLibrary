@@ -27,8 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_GEMMMATRIXMUL_KERNEL(func_name) \
-    void func_name(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha, const bool is_dst_vector)
+#define DECLARE_GEMMMATRIXMUL_KERNEL(func_name)                                                                        \
+    void func_name(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, \
+                   float alpha, const bool is_dst_vector)
 DECLARE_GEMMMATRIXMUL_KERNEL(neon_fp32_gemm_matrix_mul);
 DECLARE_GEMMMATRIXMUL_KERNEL(neon_fp16_gemm_matrix_mul);
 #undef DECLARE_GEMMMATRIXMUL_KERNEL

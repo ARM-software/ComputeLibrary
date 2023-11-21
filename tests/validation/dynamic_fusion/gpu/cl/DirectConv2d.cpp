@@ -58,7 +58,7 @@ TEST_SUITE(DYNAMIC_FUSION)
  * No quantized tests               | Not supported yet
  * No grouped CNN tests             | Not supported yet
  * No mixed layout tests            | Not needed; only NHWC is supported
- * No activation/post op tests      | Not needed in fusion
+ * No activation                    | Not needed in fusion
  * No ValidateConvolutionMethod     | Only a single method (direct conv2d) is supported
  * No ReshapeWeights = true tests   | Not applicable yet. This parameter only concerns gemm-based conv2d
  * No RunSmallWithPadding tests     | Padding is removed
@@ -70,9 +70,7 @@ template <typename T>
 using DynamicFusionGpuConv2dFixture = DynamicFusionGpuConv2dValidationFixture<CLTensor, CLAccessor, GpuConv2d, T>;
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-                                                                                                            framework::dataset::make("QuantizationInfo", QuantizationInfo())))
+                                                                                                                    framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NHWC })), framework::dataset::make("QuantizationInfo", QuantizationInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -81,9 +79,7 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-                                                                                                           framework::dataset::make("QuantizationInfo", QuantizationInfo())))
+                                                                                                                   framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("DataLayout", { DataLayout::NHWC })), framework::dataset::make("QuantizationInfo", QuantizationInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);

@@ -27,15 +27,14 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/gpu/cl/kernels/ClIndirectConv2dAddressPrecalculationKernel.h"
-#include "src/gpu/cl/kernels/ClIndirectConv2dKernel.h"
-#include "src/runtime/heuristics/indirect_conv/ClIndirectConvKernelConfig.h"
-#include "src/runtime/heuristics/indirect_conv/IClIndirectConvKernelConfig.h"
-
-#include "src/core/helpers/MemoryHelpers.h"
-#include "src/gpu/cl/utils/ClAuxTensorHandler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/gpu/cl/kernels/ClIndirectConv2dAddressPrecalculationKernel.h"
+#include "src/gpu/cl/kernels/ClIndirectConv2dKernel.h"
+#include "src/gpu/cl/utils/ClAuxTensorHandler.h"
+#include "src/runtime/heuristics/indirect_conv/ClIndirectConvKernelConfig.h"
+#include "src/runtime/heuristics/indirect_conv/IClIndirectConvKernelConfig.h"
 
 using namespace arm_compute::cl_indirect_conv;
 
@@ -47,7 +46,8 @@ using namespace arm_compute::experimental;
 
 namespace
 {
-DirectConvComputeKernelInfo config_indirect_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo
+config_indirect_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
 {
     // Get GPU target
     GPUTarget gpu_target = CLScheduler::get().target();
@@ -59,8 +59,13 @@ DirectConvComputeKernelInfo config_indirect_convolution_nhwc(const ITensorInfo *
 
 } // namespace
 
-void ClIndirectConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                                 const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void ClIndirectConv2d::configure(const CLCompileContext    &compile_context,
+                                 ITensorInfo               *src,
+                                 ITensorInfo               *weights,
+                                 ITensorInfo               *biases,
+                                 ITensorInfo               *dst,
+                                 const PadStrideInfo       &conv_info,
+                                 const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info);
@@ -86,25 +91,29 @@ void ClIndirectConv2d::configure(const CLCompileContext &compile_context, ITenso
     CLScheduler::get().tune_kernel_static(*_indirect_conv_kernel);
 
     // Request memory for the indirect buffer
-    _aux_mem[IndirectBuffer] = MemoryInfo(offset_int_vec(IndirectBuffer), MemoryLifetime::Persistent, _indirect_buffer.total_size());
+    _aux_mem[IndirectBuffer] =
+        MemoryInfo(offset_int_vec(IndirectBuffer), MemoryLifetime::Persistent, _indirect_buffer.total_size());
 }
 
-Status ClIndirectConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                  const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+Status ClIndirectConv2d::validate(const ITensorInfo         *src,
+                                  const ITensorInfo         *weights,
+                                  const ITensorInfo         *biases,
+                                  const ITensorInfo         *dst,
+                                  const PadStrideInfo       &conv_info,
+                                  const ActivationLayerInfo &act_info)
 {
     // Initialize the direct convolution descriptor
     const DirectConvComputeKernelInfo desc = config_indirect_convolution_nhwc(src, weights, conv_info);
 
-    TensorShape ind_buffer_shape = misc::shape_calculator::compute_indirect_buffer_shape(src->tensor_shape(),
-                                                                                         src->data_layout(),
-                                                                                         weights->tensor_shape(),
-                                                                                         conv_info,
-                                                                                         desc);
+    TensorShape ind_buffer_shape = misc::shape_calculator::compute_indirect_buffer_shape(
+        src->tensor_shape(), src->data_layout(), weights->tensor_shape(), conv_info, desc);
 
     TensorInfo indirect_buffer(ind_buffer_shape, 1, DataType::S32);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClIndirectConv2dAddressPrecalculationKernel::validate(src, weights, &indirect_buffer, conv_info, desc));
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClIndirectConv2dKernel::validate(src, weights, biases, &indirect_buffer, dst, conv_info, act_info, desc));
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClIndirectConv2dAddressPrecalculationKernel::validate(
+        src, weights, &indirect_buffer, conv_info, desc));
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClIndirectConv2dKernel::validate(src, weights, biases, &indirect_buffer, dst,
+                                                                          conv_info, act_info, desc));
 
     return Status{};
 }
@@ -124,9 +133,10 @@ void ClIndirectConv2d::run(ITensorPack &tensors)
 
 void ClIndirectConv2d::prepare(ITensorPack &constants)
 {
-    if(!_is_prepared)
+    if (!_is_prepared)
     {
-        ICLTensor *indirect_buffer_aux = utils::cast::polymorphic_downcast<ICLTensor *>(constants.get_tensor(offset_int_vec(IndirectBuffer)));
+        ICLTensor *indirect_buffer_aux =
+            utils::cast::polymorphic_downcast<ICLTensor *>(constants.get_tensor(offset_int_vec(IndirectBuffer)));
         ARM_COMPUTE_ERROR_ON(indirect_buffer_aux == nullptr);
 
         ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL("Preparing indirect buffer");
@@ -134,7 +144,7 @@ void ClIndirectConv2d::prepare(ITensorPack &constants)
         CLAuxTensorHandler indirect_buffer(_indirect_buffer, *indirect_buffer_aux);
         ARM_COMPUTE_ERROR_ON(indirect_buffer.get()->cl_buffer().get() == nullptr);
 
-        ITensorPack indirect_buffer_pack{ { ACL_DST, indirect_buffer.get() } };
+        ITensorPack indirect_buffer_pack{{ACL_DST, indirect_buffer.get()}};
         CLScheduler::get().enqueue_op(*_addr_precalculation_kernel, indirect_buffer_pack, true);
 
         _is_prepared = true;

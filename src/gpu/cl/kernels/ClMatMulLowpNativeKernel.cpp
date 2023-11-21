@@ -23,11 +23,12 @@
  */
 #include "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.h"
 
-#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/ITensorPack.h"
+#include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
@@ -37,9 +38,7 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/ClCompileContext.h"
-
-#include "arm_compute/core/QuantizationInfo.h"
-
+#include "src/gpu/cl/kernels/helpers/MatMulKernelHelpers.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
 
@@ -62,69 +61,62 @@ Status validate_matmul_kernel_info(const MatMulKernelInfo &matmul_kernel_info)
     // Validate M0
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(m0 < 1, "Only positive integers are supported for M0");
 
-    if(adj_lhs)
+    if (adj_lhs)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(((m0 & (m0 - 1)) && (m0 != 3)) || (m0 > 16), "Only 1,2,3,4,8,16 are supported for M0 for Lhs transposed");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(((m0 & (m0 - 1)) && (m0 != 3)) || (m0 > 16),
+                                        "Only 1,2,3,4,8,16 are supported for M0 for Lhs transposed");
     }
 
     // Validate N0
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(n0 < 1, "Only positive integers are supported for N0");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((n0 & (n0 - 1)) && (n0 != 3)) || (n0 > 16), "Only 1,2,3,4,8,16 are supported for N0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((n0 & (n0 - 1)) && (n0 != 3)) || (n0 > 16),
+                                    "Only 1,2,3,4,8,16 are supported for N0");
 
     // Validate K0
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(k0 < 1, "Only positive integers are supported for K0");
-    if(!adj_lhs || adj_rhs)
+    if (!adj_lhs || adj_rhs)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(((k0 & (k0 - 1)) && (k0 != 3)) || (k0 > 16), "Only 1,2,3,4,8,16 are supported for K0");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(((k0 & (k0 - 1)) && (k0 != 3)) || (k0 > 16),
+                                        "Only 1,2,3,4,8,16 are supported for K0");
     }
 
     return Status{};
 }
-
-Status validate_input_shapes(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const MatMulKernelInfo &matmul_kernel_info)
-{
-    const size_t lhs_k = matmul_kernel_info.adj_lhs ? lhs_shape.y() : lhs_shape.x();
-    const size_t rhs_k = matmul_kernel_info.adj_rhs ? rhs_shape.x() : rhs_shape.y();
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_k != rhs_k, "K dimension in Lhs and Rhs matrices must match.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_shape.total_size() == 0, "Lhs tensor can't be empty");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_shape.total_size() == 0, "Rhs tensor can't be empty");
-
-    constexpr size_t batch_dim_start = 2;
-    for(size_t i = batch_dim_start; i < Coordinates::num_max_dimensions; ++i)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_shape[i] != rhs_shape[i], "Batch dimension broadcasting is not supported");
-    }
-
-    return Status{};
-}
-}
+} // namespace
 ClMatMulLowpNativeKernel::ClMatMulLowpNativeKernel()
 {
     _type = CLKernelType::GEMM;
 }
-Status ClMatMulLowpNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *bias, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+Status ClMatMulLowpNativeKernel::validate(const ITensorInfo         *lhs,
+                                          const ITensorInfo         *rhs,
+                                          const ITensorInfo         *bias,
+                                          const ITensorInfo         *dst,
+                                          const MatMulKernelInfo    &matmul_kernel_info,
                                           const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_matmul_kernel_info(matmul_kernel_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_input_shapes(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_matmul_input_shapes(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info));
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.activation() != ActivationFunction::IDENTITY && act_info.activation() != ActivationFunction::RELU
-                                     && act_info.activation() != ActivationFunction::LU_BOUNDED_RELU && act_info.activation() != ActivationFunction::BOUNDED_RELU),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.activation() != ActivationFunction::IDENTITY &&
+                                     act_info.activation() != ActivationFunction::RELU &&
+                                     act_info.activation() != ActivationFunction::LU_BOUNDED_RELU &&
+                                     act_info.activation() != ActivationFunction::BOUNDED_RELU),
                                     "Activation Function specified is unsupported.");
-    const TensorShape expected_output_shape = misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info);
+    const TensorShape expected_output_shape =
+        misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info);
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         const TensorInfo tensor_info_output = dst->clone()->set_tensor_shape(expected_output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
     }
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
@@ -133,7 +125,12 @@ Status ClMatMulLowpNativeKernel::validate(const ITensorInfo *lhs, const ITensorI
 
     return Status{};
 }
-void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *bias, ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+void ClMatMulLowpNativeKernel::configure(const ClCompileContext    &compile_context,
+                                         ITensorInfo               *lhs,
+                                         ITensorInfo               *rhs,
+                                         ITensorInfo               *bias,
+                                         ITensorInfo               *dst,
+                                         const MatMulKernelInfo    &matmul_kernel_info,
                                          const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst, &compile_context, &matmul_kernel_info);
@@ -141,7 +138,8 @@ void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context
     ARM_COMPUTE_ERROR_THROW_ON(validate(lhs, rhs, bias, dst, matmul_kernel_info));
 
     // dst tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info)));
+    auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_matmul_shape(
+                                 lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info)));
 
     const int  m       = dst->dimension(1);
     const int  n       = dst->dimension(0);
@@ -235,10 +233,13 @@ void ClMatMulLowpNativeKernel::run_op(ITensorPack &tensors, const Window &window
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const ICLTensor *lhs  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const ICLTensor *rhs  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
-    const ICLTensor *bias = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
-    ICLTensor       *dst  = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const ICLTensor *lhs =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const ICLTensor *rhs =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const ICLTensor *bias =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
+    ICLTensor *dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, bias, dst);
 
@@ -247,7 +248,7 @@ void ClMatMulLowpNativeKernel::run_op(ITensorPack &tensors, const Window &window
 
     add_3d_tensor_nhw_argument(idx, lhs);
     add_3d_tensor_nhw_argument(idx, rhs);
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         add_3d_tensor_nhw_argument(idx, bias);
     }

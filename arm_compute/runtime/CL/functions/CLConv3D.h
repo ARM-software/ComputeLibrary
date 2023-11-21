@@ -77,20 +77,33 @@ public:
      * @param[in]  conv3d_info     Contains strides, padding, rounding, activation, dilation and fast math information. Activation and fast math are currently unused.
      *
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *src, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *dst, const Conv3dInfo &conv3d_info);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *src,
+                   const ICLTensor        *weights,
+                   const ICLTensor        *biases,
+                   ICLTensor              *dst,
+                   const Conv3dInfo       &conv3d_info);
     /** Set the src and dst tensors.
      *
      * Similar to CLConv3D::configure() but using the default compile context
      *
      */
-    void configure(const ICLTensor *src, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *dst, const Conv3dInfo &conv3d_info);
+    void configure(const ICLTensor  *src,
+                   const ICLTensor  *weights,
+                   const ICLTensor  *biases,
+                   ICLTensor        *dst,
+                   const Conv3dInfo &conv3d_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConv3D
      *
      * Similar to CLConv3D::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv3dInfo &conv3d_info);
+    static Status validate(const ITensorInfo *src,
+                           const ITensorInfo *weights,
+                           const ITensorInfo *biases,
+                           const ITensorInfo *dst,
+                           const Conv3dInfo  &conv3d_info);
 
     // Inherited methods overridden:
     void run() override;
@@ -99,5 +112,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLCONVOLUTION3DLAYER_H */

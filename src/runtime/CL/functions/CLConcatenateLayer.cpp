@@ -24,24 +24,23 @@
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/gpu/cl/operators/ClConcatenate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/gpu/cl/operators/ClConcatenate.h"
 
 namespace arm_compute
 {
 struct CLConcatenateLayer::Impl
 {
     std::vector<const ICLTensor *>         srcs{};
-    ICLTensor                             *dst{ nullptr };
-    unsigned int                           num_inputs{ 0 };
-    unsigned int                           axis{ 0 };
-    std::unique_ptr<opencl::ClConcatenate> op{ nullptr };
+    ICLTensor                             *dst{nullptr};
+    unsigned int                           num_inputs{0};
+    unsigned int                           axis{0};
+    std::unique_ptr<opencl::ClConcatenate> op{nullptr};
 };
 
-CLConcatenateLayer::CLConcatenateLayer()
-    : _impl(std::make_unique<Impl>())
+CLConcatenateLayer::CLConcatenateLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
@@ -56,7 +55,10 @@ void CLConcatenateLayer::configure(std::vector<const ICLTensor *> &inputs_vector
     configure(CLKernelLibrary::get().get_compile_context(), inputs_vector, output, axis);
 }
 
-void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+void CLConcatenateLayer::configure(const CLCompileContext         &compile_context,
+                                   std::vector<const ICLTensor *> &inputs_vector,
+                                   ICLTensor                      *output,
+                                   size_t                          axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     ARM_COMPUTE_LOG_PARAMS(inputs_vector, output, axis);
@@ -68,7 +70,7 @@ void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std:
     _impl->op         = std::make_unique<opencl::ClConcatenate>();
 
     std::vector<ITensorInfo *> inputs_vector_info;
-    for(unsigned int i = 0; i < inputs_vector.size(); ++i)
+    for (unsigned int i = 0; i < inputs_vector.size(); ++i)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(inputs_vector.at(i));
         inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
@@ -76,7 +78,9 @@ void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std:
     _impl->op->configure(compile_context, inputs_vector_info, _impl->dst->info(), axis);
 }
 
-Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector,
+                                    const ITensorInfo                      *output,
+                                    size_t                                  axis)
 {
     return opencl::ClConcatenate::validate(inputs_vector, output, axis);
 }
@@ -84,7 +88,7 @@ Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
 void CLConcatenateLayer::run()
 {
     ITensorPack pack;
-    for(unsigned i = 0; i < _impl->num_inputs; ++i)
+    for (unsigned i = 0; i < _impl->num_inputs; ++i)
     {
         pack.add_tensor(TensorType::ACL_SRC_VEC + i, _impl->srcs.at(i));
     }

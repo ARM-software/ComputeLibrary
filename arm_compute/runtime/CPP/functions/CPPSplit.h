@@ -29,7 +29,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -39,8 +38,7 @@ template <typename SliceType, typename TensorInterfaceType = ITensor>
 class CPPSplit : public IFunction
 {
 public:
-    CPPSplit()
-        : _outputs_vector(), _slice_functions(), _num_outputs(0)
+    CPPSplit() : _outputs_vector(), _slice_functions(), _num_outputs(0)
     {
     }
     /** Static function to check if given info will lead to a valid configuration of @ref CPPSplit
@@ -64,14 +62,16 @@ public:
         unsigned int total_output_shape_size = 0;
 
         // Sum the output sizes and fall back to evenly-sized splits if any are zero
-        const bool using_split_shapes = std::none_of(outputs.begin(), outputs.end(), [&total_output_shape_size](ITensorInfo * info)
-        {
-            unsigned int output_shape_size = info->tensor_shape().total_size();
-            total_output_shape_size += output_shape_size;
-            return output_shape_size == 0;
-        });
+        const bool using_split_shapes = std::none_of(outputs.begin(), outputs.end(),
+                                                     [&total_output_shape_size](ITensorInfo *info)
+                                                     {
+                                                         unsigned int output_shape_size =
+                                                             info->tensor_shape().total_size();
+                                                         total_output_shape_size += output_shape_size;
+                                                         return output_shape_size == 0;
+                                                     });
 
-        if(using_split_shapes)
+        if (using_split_shapes)
         {
             ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().total_size() != total_output_shape_size);
         }
@@ -83,10 +83,10 @@ public:
 
         // Validate output tensors
         unsigned int axis_offset = 0;
-        for(const auto &output : outputs)
+        for (const auto &output : outputs)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-            if(using_split_shapes)
+            if (using_split_shapes)
             {
                 output_shape = output->tensor_shape();
                 ARM_COMPUTE_RETURN_ERROR_ON(output_shape.total_size() == 0);
@@ -97,14 +97,14 @@ public:
             // Start/End coordinates
             Coordinates start_coords;
             Coordinates end_coords;
-            for(unsigned int d = 0; d < output_shape.num_dimensions(); ++d)
+            for (unsigned int d = 0; d < output_shape.num_dimensions(); ++d)
             {
                 end_coords.set(d, -1);
             }
 
             // Output auto inizialitation if not yet initialized
             TensorInfo tmp_output_info = *output->clone();
-            if(tmp_output_info.tensor_shape().total_size() == 0)
+            if (tmp_output_info.tensor_shape().total_size() == 0)
             {
                 tmp_output_info = input->clone()->set_is_resizable(true).set_tensor_shape(output_shape);
             }
@@ -128,7 +128,8 @@ public:
      *                     from the split dimension.
      * @param[in]  axis    Axis on which to split the input.
      */
-    void configure(const TensorInterfaceType *input, const std::vector<TensorInterfaceType *> &outputs, unsigned int axis)
+    void
+    configure(const TensorInterfaceType *input, const std::vector<TensorInterfaceType *> &outputs, unsigned int axis)
     {
         // Create Slice functions
         _num_outputs = outputs.size();
@@ -136,17 +137,16 @@ public:
 
         // Extract output tensor info
         std::vector<ITensorInfo *> outputs_info;
-        for(auto &output : outputs)
+        for (auto &output : outputs)
         {
             ARM_COMPUTE_ERROR_ON_NULLPTR(output);
             outputs_info.emplace_back(output->info());
         }
 
         // If any of the outputs have a zero size, fall-back to using evenly-sized output splits
-        const bool outputs_have_sizes = std::none_of(outputs_info.begin(), outputs_info.end(), [](ITensorInfo * info)
-        {
-            return info->tensor_shape().total_size() == 0;
-        });
+        const bool outputs_have_sizes =
+            std::none_of(outputs_info.begin(), outputs_info.end(),
+                         [](ITensorInfo *info) { return info->tensor_shape().total_size() == 0; });
 
         // Validate
         ARM_COMPUTE_ERROR_THROW_ON(CPPSplit::validate(input->info(), outputs_info, axis));
@@ -154,12 +154,13 @@ public:
         unsigned int axis_offset = 0;
         unsigned int i           = 0;
 
-        for(const auto &output_info : outputs_info)
+        for (const auto &output_info : outputs_info)
         {
             // Get output shape
-            TensorShape output_shape = (outputs_have_sizes ?
-                                        output_info->tensor_shape() :
-                                        arm_compute::misc::shape_calculator::compute_split_shape(input->info(), axis, _num_outputs));
+            TensorShape output_shape =
+                (outputs_have_sizes
+                     ? output_info->tensor_shape()
+                     : arm_compute::misc::shape_calculator::compute_split_shape(input->info(), axis, _num_outputs));
 
             const size_t axis_split_step = output_shape[axis];
 
@@ -167,7 +168,7 @@ public:
             Coordinates start_coords;
             Coordinates end_coords;
 
-            for(unsigned int d = 0; d < output_shape.num_dimensions(); ++d)
+            for (unsigned int d = 0; d < output_shape.num_dimensions(); ++d)
             {
                 end_coords.set(d, -1);
             }

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 
 namespace arm_compute
@@ -30,8 +31,7 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-GpuWorkloadSketch::GpuWorkloadSketch(Context *context)
-    : _impl{ std::make_unique<Implementation>(context) }
+GpuWorkloadSketch::GpuWorkloadSketch(Context *context) : _impl{std::make_unique<Implementation>(context)}
 {
 }
 GpuWorkloadSketch::~GpuWorkloadSketch()

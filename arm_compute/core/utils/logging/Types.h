@@ -44,8 +44,7 @@ enum class LogLevel
 struct LogMsg
 {
     /** Default constructor */
-    LogMsg()
-        : raw_(), log_level_(LogLevel::OFF)
+    LogMsg() : raw_(), log_level_(LogLevel::OFF)
     {
     }
     /** Construct a log message
@@ -53,8 +52,7 @@ struct LogMsg
      * @param[in] msg       Message to log.
      * @param[in] log_level Logging level. Default: OFF
      */
-    LogMsg(std::string msg, LogLevel log_level = LogLevel::OFF)
-        : raw_(msg), log_level_(log_level)
+    LogMsg(std::string msg, LogLevel log_level = LogLevel::OFF) : raw_(msg), log_level_(log_level)
     {
     }
 

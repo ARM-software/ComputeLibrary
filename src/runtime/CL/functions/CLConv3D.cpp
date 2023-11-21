@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLConv3D.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/gpu/cl/operators/ClDirectConv3d.h"
 
 namespace arm_compute
@@ -32,29 +33,38 @@ using namespace arm_compute::experimental;
 
 struct CLConv3D::Impl
 {
-    const ICLTensor                        *src{ nullptr };
-    const ICLTensor                        *weights{ nullptr };
-    const ICLTensor                        *biases{ nullptr };
-    ICLTensor                              *dst{ nullptr };
-    std::unique_ptr<opencl::ClDirectConv3d> op{ nullptr };
+    const ICLTensor                        *src{nullptr};
+    const ICLTensor                        *weights{nullptr};
+    const ICLTensor                        *biases{nullptr};
+    ICLTensor                              *dst{nullptr};
+    std::unique_ptr<opencl::ClDirectConv3d> op{nullptr};
 };
 
-CLConv3D::CLConv3D()
-    : _impl(std::make_unique<Impl>())
+CLConv3D::CLConv3D() : _impl(std::make_unique<Impl>())
 {
 }
 
 CLConv3D::~CLConv3D() = default;
 
-void CLConv3D::configure(const ICLTensor *src, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *dst, const Conv3dInfo &conv3d_info)
+void CLConv3D::configure(const ICLTensor  *src,
+                         const ICLTensor  *weights,
+                         const ICLTensor  *biases,
+                         ICLTensor        *dst,
+                         const Conv3dInfo &conv3d_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), src, weights, biases, dst, conv3d_info);
 }
 
-void CLConv3D::configure(const CLCompileContext &compile_context, const ICLTensor *src, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *dst, const Conv3dInfo &conv3d_info)
+void CLConv3D::configure(const CLCompileContext &compile_context,
+                         const ICLTensor        *src,
+                         const ICLTensor        *weights,
+                         const ICLTensor        *biases,
+                         ICLTensor              *dst,
+                         const Conv3dInfo       &conv3d_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(CLConv3D::validate(src->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), dst->info(), conv3d_info));
+    ARM_COMPUTE_ERROR_THROW_ON(CLConv3D::validate(
+        src->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), dst->info(), conv3d_info));
 
     _impl->src     = src;
     _impl->weights = weights;
@@ -62,10 +72,15 @@ void CLConv3D::configure(const CLCompileContext &compile_context, const ICLTenso
     _impl->dst     = dst;
 
     _impl->op = std::make_unique<opencl::ClDirectConv3d>();
-    _impl->op->configure(compile_context, _impl->src->info(), _impl->weights->info(), _impl->biases ? _impl->biases->info() : nullptr, _impl->dst->info(), conv3d_info);
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->weights->info(),
+                         _impl->biases ? _impl->biases->info() : nullptr, _impl->dst->info(), conv3d_info);
 }
 
-Status CLConv3D::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
+Status CLConv3D::validate(const ITensorInfo *src,
+                          const ITensorInfo *weights,
+                          const ITensorInfo *biases,
+                          const ITensorInfo *dst,
+                          const Conv3dInfo  &conv3d_info)
 {
     return opencl::ClDirectConv3d::validate(src, weights, biases, dst, conv3d_info);
 }

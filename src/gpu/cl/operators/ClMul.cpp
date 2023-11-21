@@ -24,17 +24,23 @@
 #include "src/gpu/cl/operators/ClMul.h"
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/gpu/cl/ClCompileContext.h"
-#include "src/gpu/cl/kernels/ClMulKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/ClCompileContext.h"
+#include "src/gpu/cl/kernels/ClMulKernel.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClMul::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
-                      ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+void ClMul::configure(const CLCompileContext    &compile_context,
+                      ITensorInfo               *src1,
+                      ITensorInfo               *src2,
+                      ITensorInfo               *dst,
+                      float                      scale,
+                      ConvertPolicy              overflow_policy,
+                      RoundingPolicy             rounding_policy,
+                      const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
     auto k = std::make_unique<kernels::ClMulKernel>();
@@ -42,20 +48,32 @@ void ClMul::configure(const CLCompileContext &compile_context, ITensorInfo *src1
     _kernel = std::move(k);
 }
 
-Status ClMul::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
-                       ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+Status ClMul::validate(const ITensorInfo         *src1,
+                       const ITensorInfo         *src2,
+                       const ITensorInfo         *dst,
+                       float                      scale,
+                       ConvertPolicy              overflow_policy,
+                       RoundingPolicy             rounding_policy,
+                       const ActivationLayerInfo &act_info)
 {
     return kernels::ClMulKernel::validate(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
 }
 
-void ClComplexMul::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClComplexMul::configure(const CLCompileContext    &compile_context,
+                             ITensorInfo               *src1,
+                             ITensorInfo               *src2,
+                             ITensorInfo               *dst,
+                             const ActivationLayerInfo &act_info)
 {
     auto k = std::make_unique<kernels::ClComplexMulKernel>();
     k->configure(compile_context, src1, src2, dst, act_info);
     _kernel = std::move(k);
 }
 
-Status ClComplexMul::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClComplexMul::validate(const ITensorInfo         *src1,
+                              const ITensorInfo         *src2,
+                              const ITensorInfo         *dst,
+                              const ActivationLayerInfo &act_info)
 {
     return kernels::ClComplexMulKernel::validate(src1, src2, dst, act_info);
 }

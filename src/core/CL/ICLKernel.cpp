@@ -25,18 +25,23 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/helpers/Utils.h"
 
 #include <cstddef>
 
-void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint, bool use_dummy_work_items)
+void arm_compute::enqueue(cl::CommandQueue  &queue,
+                          ICLKernel         &kernel,
+                          const Window      &window,
+                          const cl::NDRange &lws_hint,
+                          bool               use_dummy_work_items)
 {
-    if(kernel.kernel()() == nullptr)
+    if (kernel.kernel()() == nullptr)
     {
         return;
     }
 
-    for(unsigned int i = 0; i < Coordinates::num_max_dimensions; ++i)
+    for (unsigned int i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_ERROR_ON(window[i].step() == 0);
         // Make sure that dimensions > Z are 1
@@ -46,7 +51,7 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
     cl::NDRange gws = ICLKernel::gws_from_window(window, use_dummy_work_items);
 
     // Check for empty NDRange
-    if(gws.dimensions() == 0)
+    if (gws.dimensions() == 0)
     {
         return;
     }
@@ -54,7 +59,7 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
     kernel.cache_gws(gws);
 
     cl::NDRange valid_lws;
-    if(lws_hint[0] * lws_hint[1] * lws_hint[2] > kernel.get_max_workgroup_size())
+    if (lws_hint[0] * lws_hint[1] * lws_hint[2] > kernel.get_max_workgroup_size())
     {
         valid_lws = cl::NullRange;
     }
@@ -65,12 +70,12 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
 
     cl::NDRange lws = cl::NullRange;
 
-    if((valid_lws[0] <= gws[0]) && (valid_lws[1] <= gws[1]) && (valid_lws[2] <= gws[2]))
+    if ((valid_lws[0] <= gws[0]) && (valid_lws[1] <= gws[1]) && (valid_lws[2] <= gws[2]))
     {
         lws = valid_lws;
     }
 
-    if(CLKernelLibrary::get().is_wbsm_supported())
+    if (CLKernelLibrary::get().is_wbsm_supported())
     {
         set_wbsm(kernel.kernel(), kernel.wbsm_hint());
     }
@@ -90,7 +95,7 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
     // Calculate offset to the start of the window
     unsigned int offset_first_element = info->offset_first_element_in_bytes();
 
-    for(unsigned int n = 0; n < info->num_dimensions(); ++n)
+    for (unsigned int n = 0; n < info->num_dimensions(); ++n)
     {
         offset_first_element += (window.is_broadcasted(n) ? 0 : window[n].start()) * strides[n];
     }
@@ -98,7 +103,7 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
     unsigned int idx_start = idx;
     _kernel.setArg(idx++, tensor->cl_buffer());
 
-    for(unsigned int d = 0; d < dimension_size; ++d)
+    for (unsigned int d = 0; d < dimension_size; ++d)
     {
         _kernel.setArg<cl_uint>(idx++, window.is_broadcasted(d) ? 0 : strides[d]);
         _kernel.setArg<cl_uint>(idx++, window.is_broadcasted(d) ? 0 : (strides[d] * window[d].step()));
@@ -107,7 +112,8 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
     _kernel.setArg<cl_uint>(idx++, offset_first_element);
 
     ARM_COMPUTE_ERROR_ON_MSG_VAR(idx_start + num_arguments_per_tensor<dimension_size>() != idx,
-                                 "add_%dD_tensor_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_tensor<dimension_size>());
+                                 "add_%dD_tensor_argument() is supposed to add exactly %d arguments to the kernel",
+                                 dimension_size, num_arguments_per_tensor<dimension_size>());
     ARM_COMPUTE_UNUSED(idx_start);
 }
 
@@ -178,7 +184,7 @@ void ICLKernel::set_target(cl::Device &device)
 
 size_t ICLKernel::get_max_workgroup_size()
 {
-    if(_max_workgroup_size == 0)
+    if (_max_workgroup_size == 0)
     {
         _max_workgroup_size = CLKernelLibrary::get().max_local_workgroup_size(_kernel);
     }
@@ -187,7 +193,7 @@ size_t ICLKernel::get_max_workgroup_size()
 
 cl::NDRange ICLKernel::gws_from_window(const Window &window, bool use_dummy_work_items)
 {
-    if((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
+    if ((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
     {
         return cl::NullRange;
     }
@@ -196,7 +202,7 @@ cl::NDRange ICLKernel::gws_from_window(const Window &window, bool use_dummy_work
                     (window.y().end() - window.y().start()) / window.y().step(),
                     (window.z().end() - window.z().start()) / window.z().step());
 
-    if(use_dummy_work_items)
+    if (use_dummy_work_items)
     {
         gws.get()[0] = get_next_power_two(gws[0]);
         gws.get()[1] = get_next_power_two(gws[1]);

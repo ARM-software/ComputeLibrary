@@ -32,8 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-DetectionOutputLayerNode::DetectionOutputLayerNode(DetectionOutputLayerInfo detection_info)
-    : _info(detection_info)
+DetectionOutputLayerNode::DetectionOutputLayerNode(DetectionOutputLayerInfo detection_info) : _info(detection_info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -47,7 +46,8 @@ DetectionOutputLayerInfo DetectionOutputLayerNode::detection_output_info() const
 TensorDescriptor DetectionOutputLayerNode::compute_output_descriptor(const TensorDescriptor         &input_descriptor,
                                                                      const DetectionOutputLayerInfo &info)
 {
-    const unsigned int max_size = info.keep_top_k() * ((input_descriptor.shape.num_dimensions() > 1) ? input_descriptor.shape[1] : 1);
+    const unsigned int max_size =
+        info.keep_top_k() * ((input_descriptor.shape.num_dimensions() > 1) ? input_descriptor.shape[1] : 1);
 
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(0, detection_size);
@@ -58,7 +58,8 @@ TensorDescriptor DetectionOutputLayerNode::compute_output_descriptor(const Tenso
 
 bool DetectionOutputLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (input_id(2) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (input_id(2) != NullTensorID) &&
+        (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

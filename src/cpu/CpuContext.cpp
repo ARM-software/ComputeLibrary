@@ -24,6 +24,7 @@
 #include "src/cpu/CpuContext.h"
 
 #include "arm_compute/core/CPP/CPPTypes.h"
+
 #include "src/cpu/CpuQueue.h"
 #include "src/cpu/CpuTensor.h"
 
@@ -32,7 +33,7 @@
 #include <malloc.h>
 
 #if defined(_WIN64)
-#define posix_memalign _aligned_realloc
+#define posix_memalign      _aligned_realloc
 #define posix_memalign_free _aligned_free
 #endif // defined(_WIN64)
 #endif // !defined(__APPLE__) && !defined(__OpenBSD__)
@@ -66,7 +67,7 @@ void *default_aligned_allocate(void *user_data, size_t size, size_t alignment)
     size_t real_size = (rem) ? (size + alignment - rem) : size;
     ptr              = memalign(alignment, real_size);
 #else  /* defined(BARE_METAL) */
-    if(posix_memalign(&ptr, alignment, size) != 0)
+    if (posix_memalign(&ptr, alignment, size) != 0)
     {
         // posix_memalign returns non-zero on failures, the return values will be
         // - EINVAL: wrong alignment
@@ -81,17 +82,13 @@ void default_aligned_free(void *user_data, void *ptr)
     ARM_COMPUTE_UNUSED(user_data);
     free(ptr);
 }
-static AclAllocator default_allocator = { &default_allocate,
-                                          &default_free,
-                                          &default_aligned_allocate,
-                                          &default_aligned_free,
-                                          nullptr
-                                        };
+static AclAllocator default_allocator = {&default_allocate, &default_free, &default_aligned_allocate,
+                                         &default_aligned_free, nullptr};
 
 AllocatorWrapper populate_allocator(AclAllocator *external_allocator)
 {
     bool is_valid = (external_allocator != nullptr);
-    if(is_valid)
+    if (is_valid)
     {
         is_valid = is_valid && (external_allocator->alloc != nullptr);
         is_valid = is_valid && (external_allocator->free != nullptr);
@@ -123,14 +120,13 @@ cpuinfo::CpuIsaInfo populate_capabilities_flags(AclTargetCapabilities external_c
     return isa_caps;
 }
 
-CpuCapabilities populate_capabilities(AclTargetCapabilities external_caps,
-                                      int32_t               max_threads)
+CpuCapabilities populate_capabilities(AclTargetCapabilities external_caps, int32_t max_threads)
 {
     CpuCapabilities caps;
 
     // Populate capabilities with system information
     caps.cpu_info = cpuinfo::CpuInfo::build();
-    if(external_caps != AclCpuCapabilitiesAuto)
+    if (external_caps != AclCpuCapabilitiesAuto)
     {
         cpuinfo::CpuIsaInfo isa  = populate_capabilities_flags(external_caps);
         auto                cpus = caps.cpu_info.cpus();
@@ -151,11 +147,9 @@ CpuCapabilities populate_capabilities(AclTargetCapabilities external_caps,
 } // namespace
 
 CpuContext::CpuContext(const AclContextOptions *options)
-    : IContext(Target::Cpu),
-      _allocator(default_allocator),
-      _caps(populate_capabilities(AclCpuCapabilitiesAuto, -1))
+    : IContext(Target::Cpu), _allocator(default_allocator), _caps(populate_capabilities(AclCpuCapabilitiesAuto, -1))
 {
-    if(options != nullptr)
+    if (options != nullptr)
     {
         _allocator = populate_allocator(options->allocator);
         _caps      = populate_capabilities(options->capabilities, options->max_compute_units);
@@ -175,7 +169,7 @@ AllocatorWrapper &CpuContext::allocator()
 ITensorV2 *CpuContext::create_tensor(const AclTensorDescriptor &desc, bool allocate)
 {
     CpuTensor *tensor = new CpuTensor(this, desc);
-    if(tensor != nullptr && allocate)
+    if (tensor != nullptr && allocate)
     {
         tensor->allocate();
     }

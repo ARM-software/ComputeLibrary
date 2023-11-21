@@ -23,6 +23,7 @@
  */
 
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
+
 #include "ckw/Error.h"
 
 namespace arm_compute
@@ -36,12 +37,12 @@ GpuCkwComponentArgument::GpuCkwComponentArgument()
 {
 }
 
-GpuCkwComponentArgument::GpuCkwComponentArgument(ckw::TensorOperand &tensor)
-    : _tensor(&tensor)
+GpuCkwComponentArgument::GpuCkwComponentArgument(ckw::TensorOperand &tensor) : _tensor(&tensor)
 {
 }
 
-GpuCkwComponentArgument &GpuCkwComponentArgument::init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &tile_sampler)
+GpuCkwComponentArgument &GpuCkwComponentArgument::init_virtual_tensor(ckw::TileOperand             &tile,
+                                                                      const ckw::TensorTileSampler &tile_sampler)
 {
     CKW_ASSERT(_tile == nullptr);
 

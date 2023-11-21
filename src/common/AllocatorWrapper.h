@@ -37,8 +37,8 @@ public:
      * @param[in] backing_allocator Backing memory allocator to be used
      */
     AllocatorWrapper(const AclAllocator &backing_allocator) noexcept;
-    AllocatorWrapper(const AllocatorWrapper &) noexcept = default;
-    AllocatorWrapper(AllocatorWrapper &&) noexcept      = default;
+    AllocatorWrapper(const AllocatorWrapper &) noexcept            = default;
+    AllocatorWrapper(AllocatorWrapper &&) noexcept                 = default;
     AllocatorWrapper &operator=(const AllocatorWrapper &) noexcept = delete;
     AllocatorWrapper &operator=(AllocatorWrapper &&other) noexcept = default;
     /** Allocate a chunk of memory of a given size in bytes

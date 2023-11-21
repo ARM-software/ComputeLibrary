@@ -27,8 +27,7 @@
 namespace ckw
 {
 
-OperandBase::OperandBase(const std::string &name)
-    : _name(name)
+OperandBase::OperandBase(const std::string &name) : _name(name)
 {
 }
 

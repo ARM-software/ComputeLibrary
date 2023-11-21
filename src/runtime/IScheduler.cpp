@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/common/cpuinfo/CpuInfo.h"
 #include "src/runtime/SchedulerUtils.h"
 
@@ -59,7 +60,7 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 #ifndef BARE_METAL
     const Window &max_window = window;
-    if(hints.split_dimension() == IScheduler::split_dimensions_all)
+    if (hints.split_dimension() == IScheduler::split_dimensions_all)
     {
         /*
          * if the split dim is size_t max then this signals we should parallelise over
@@ -73,27 +74,27 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
         std::tie(m_threads, n_threads) = scheduler_utils::split_2d(this->num_threads(), m, n);
 
         std::vector<IScheduler::Workload> workloads;
-        for(unsigned int ni = 0; ni != n_threads; ++ni)
+        for (unsigned int ni = 0; ni != n_threads; ++ni)
         {
-            for(unsigned int mi = 0; mi != m_threads; ++mi)
+            for (unsigned int mi = 0; mi != m_threads; ++mi)
             {
                 workloads.push_back(
-                    [ni, mi, m_threads, n_threads, &max_window, &kernel](const ThreadInfo & info)
-                {
-                    //narrow the window to our mi-ni workload
-                    Window win = max_window.split_window(Window::DimX, mi, m_threads)
-                                 .split_window(Window::DimY, ni, n_threads);
+                    [ni, mi, m_threads, n_threads, &max_window, &kernel](const ThreadInfo &info)
+                    {
+                        //narrow the window to our mi-ni workload
+                        Window win = max_window.split_window(Window::DimX, mi, m_threads)
+                                         .split_window(Window::DimY, ni, n_threads);
 
-                    win.validate();
+                        win.validate();
 
-                    Window thread_locator;
-                    thread_locator.set(Window::DimX, Window::Dimension(mi, m_threads));
-                    thread_locator.set(Window::DimY, Window::Dimension(ni, n_threads));
+                        Window thread_locator;
+                        thread_locator.set(Window::DimX, Window::Dimension(mi, m_threads));
+                        thread_locator.set(Window::DimY, Window::Dimension(ni, n_threads));
 
-                    thread_locator.validate();
+                        thread_locator.validate();
 
-                    kernel->run_nd(win, info, thread_locator);
-                });
+                        kernel->run_nd(win, info, thread_locator);
+                    });
             }
         }
         run_workloads(workloads);
@@ -103,16 +104,16 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
         const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
         const unsigned int num_threads    = std::min(num_iterations, this->num_threads());
 
-        if(num_iterations == 0)
+        if (num_iterations == 0)
         {
             return;
         }
 
-        if(!kernel->is_parallelisable() || num_threads == 1)
+        if (!kernel->is_parallelisable() || num_threads == 1)
         {
             ThreadInfo info;
             info.cpu_info = &cpu_info();
-            if(tensors.empty())
+            if (tensors.empty())
             {
                 kernel->run(max_window, info);
             }
@@ -124,14 +125,15 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
         else
         {
             unsigned int num_windows = 0;
-            switch(hints.strategy())
+            switch (hints.strategy())
             {
                 case StrategyHint::STATIC:
                     num_windows = num_threads;
                     break;
                 case StrategyHint::DYNAMIC:
                 {
-                    const unsigned int granule_threshold = (hints.threshold() <= 0) ? num_threads : static_cast<unsigned int>(hints.threshold());
+                    const unsigned int granule_threshold =
+                        (hints.threshold() <= 0) ? num_threads : static_cast<unsigned int>(hints.threshold());
                     // Make sure we don't use some windows which are too small as this might create some contention on the ThreadFeeder
                     num_windows = num_iterations > granule_threshold ? granule_threshold : num_iterations;
                     break;
@@ -143,15 +145,15 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
             num_windows = adjust_num_of_windows(max_window, hints.split_dimension(), num_windows, *kernel, cpu_info());
 
             std::vector<IScheduler::Workload> workloads(num_windows);
-            for(unsigned int t = 0; t < num_windows; ++t)
+            for (unsigned int t = 0; t < num_windows; ++t)
             {
                 //Capture 't' by copy, all the other variables by reference:
-                workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo & info)
+                workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo &info)
                 {
                     Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
                     win.validate();
 
-                    if(tensors.empty())
+                    if (tensors.empty())
                     {
                         kernel->run(win, info);
                     }
@@ -175,36 +177,43 @@ void IScheduler::run_tagged_workloads(std::vector<Workload> &workloads, const ch
     run_workloads(workloads);
 }
 
-std::size_t IScheduler::adjust_num_of_windows(const Window &window, std::size_t split_dimension, std::size_t init_num_windows, const ICPPKernel &kernel, const CPUInfo &cpu_info)
+std::size_t IScheduler::adjust_num_of_windows(const Window     &window,
+                                              std::size_t       split_dimension,
+                                              std::size_t       init_num_windows,
+                                              const ICPPKernel &kernel,
+                                              const CPUInfo    &cpu_info)
 {
     // Mitigation of the narrow split issue, which occurs when the split dimension is too small to split (hence "narrow").
-    if(window.num_iterations(split_dimension) < init_num_windows)
+    if (window.num_iterations(split_dimension) < init_num_windows)
     {
         auto recommended_split_dim = Window::DimX;
-        for(std::size_t dims = Window::DimY; dims <= Window::DimW; ++dims)
+        for (std::size_t dims = Window::DimY; dims <= Window::DimW; ++dims)
         {
-            if(window.num_iterations(recommended_split_dim) < window.num_iterations(dims))
+            if (window.num_iterations(recommended_split_dim) < window.num_iterations(dims))
             {
                 recommended_split_dim = dims;
             }
         }
-        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("%zu dimension is not a suitable dimension to split the workload. Recommended: %zu recommended_split_dim", split_dimension,
-                                                  recommended_split_dim);
+        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE(
+            "%zu dimension is not a suitable dimension to split the workload. Recommended: %zu recommended_split_dim",
+            split_dimension, recommended_split_dim);
     }
 
-    for(auto t = init_num_windows; t > 0; --t) // Trying the highest number of windows ,init_num_windows, first
+    for (auto t = init_num_windows; t > 0; --t) // Trying the highest number of windows ,init_num_windows, first
     {
         // Try splitting the workload into t, subject to each subworkload size <= mws.
-        if((window.num_iterations(split_dimension) / kernel.get_mws(cpu_info, t)) >= t)
+        if ((window.num_iterations(split_dimension) / kernel.get_mws(cpu_info, t)) >= t)
         {
-            if(t != init_num_windows)
+            if (t != init_num_windows)
             {
-                ARM_COMPUTE_LOG_INFO_MSG_CORE("The scheduler is using a different thread count than the one assigned by the user.");
+                ARM_COMPUTE_LOG_INFO_MSG_CORE(
+                    "The scheduler is using a different thread count than the one assigned by the user.");
             }
             return t;
         }
     }
-    ARM_COMPUTE_LOG_INFO_MSG_CORE("The scheduler is using single thread instead of the thread count assigned by the user.");
+    ARM_COMPUTE_LOG_INFO_MSG_CORE(
+        "The scheduler is using single thread instead of the thread count assigned by the user.");
     return 1; //  If the workload is so small that it can't be split, we should run a single thread
 }
 

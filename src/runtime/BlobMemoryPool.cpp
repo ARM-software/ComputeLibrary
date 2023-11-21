@@ -47,7 +47,7 @@ BlobMemoryPool::~BlobMemoryPool()
 void BlobMemoryPool::acquire(MemoryMappings &handles)
 {
     // Set memory to handlers
-    for(auto &handle : handles)
+    for (auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
         handle.first->set_region(_blobs[handle.second].get());
@@ -56,7 +56,7 @@ void BlobMemoryPool::acquire(MemoryMappings &handles)
 
 void BlobMemoryPool::release(MemoryMappings &handles)
 {
-    for(auto &handle : handles)
+    for (auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
         handle.first->set_region(nullptr);
@@ -78,7 +78,7 @@ void BlobMemoryPool::allocate_blobs(const std::vector<BlobInfo> &blob_info)
 {
     ARM_COMPUTE_ERROR_ON(!_allocator);
 
-    for(const auto &bi : blob_info)
+    for (const auto &bi : blob_info)
     {
         _blobs.push_back(_allocator->make_region(bi.size, bi.alignment));
     }

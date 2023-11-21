@@ -28,8 +28,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_RANGE_KERNEL(func_name) \
-    void func_name(ITensor *output, float start, float step, const Window &window)
+#define DECLARE_RANGE_KERNEL(func_name) void func_name(ITensor *output, float start, float step, const Window &window)
 
 DECLARE_RANGE_KERNEL(fp16_neon_range_function);
 DECLARE_RANGE_KERNEL(fp32_neon_range_function);

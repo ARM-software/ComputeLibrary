@@ -24,9 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLChannelShuffleLayer.h"
 
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/kernels/CLChannelShuffleLayerKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLChannelShuffleLayerKernel.h"
 
 namespace arm_compute
 {
@@ -35,7 +35,10 @@ void CLChannelShuffleLayer::configure(const ICLTensor *input, ICLTensor *output,
     configure(CLKernelLibrary::get().get_compile_context(), input, output, num_groups);
 }
 
-void CLChannelShuffleLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
+void CLChannelShuffleLayer::configure(const CLCompileContext &compile_context,
+                                      const ICLTensor        *input,
+                                      ICLTensor              *output,
+                                      unsigned int            num_groups)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, num_groups);
     auto k = std::make_unique<CLChannelShuffleLayerKernel>();

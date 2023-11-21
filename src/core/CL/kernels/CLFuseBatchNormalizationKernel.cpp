@@ -30,20 +30,26 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var,
-                          const ITensorInfo *fused_weights, const ITensorInfo *fused_bias,
-                          const ITensorInfo *input_bias, const ITensorInfo *bn_beta, const ITensorInfo *bn_gamma,
-                          float epsilon, FuseBatchNormalizationType fbn_type)
+Status validate_arguments(const ITensorInfo         *input_weights,
+                          const ITensorInfo         *bn_mean,
+                          const ITensorInfo         *bn_var,
+                          const ITensorInfo         *fused_weights,
+                          const ITensorInfo         *fused_bias,
+                          const ITensorInfo         *input_bias,
+                          const ITensorInfo         *bn_beta,
+                          const ITensorInfo         *bn_gamma,
+                          float                      epsilon,
+                          FuseBatchNormalizationType fbn_type)
 {
     ARM_COMPUTE_UNUSED(epsilon);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_weights, bn_mean, bn_var);
@@ -54,43 +60,44 @@ Status validate_arguments(const ITensorInfo *input_weights, const ITensorInfo *b
     ARM_COMPUTE_RETURN_ERROR_ON(input_bias == nullptr && fused_bias == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(bn_mean->num_dimensions() > 1);
 
-    if(fbn_type == FuseBatchNormalizationType::CONVOLUTION)
+    if (fbn_type == FuseBatchNormalizationType::CONVOLUTION)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(input_weights->dimension(3) != bn_mean->dimension(0));
     }
     else
     {
-        const size_t channel_idx = get_data_layout_dimension_index(input_weights->data_layout(), DataLayoutDimension::CHANNEL);
+        const size_t channel_idx =
+            get_data_layout_dimension_index(input_weights->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON(input_weights->dimension(channel_idx) != bn_mean->dimension(0));
     }
 
     // Validate bias
-    if(input_bias != nullptr)
+    if (input_bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(bn_mean, input_bias);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_weights, input_bias);
     }
     // Validate beta
-    if(bn_beta != nullptr)
+    if (bn_beta != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(bn_mean, bn_beta);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_weights, bn_beta);
     }
     // Validate gamma
-    if(bn_gamma != nullptr)
+    if (bn_gamma != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(bn_mean, bn_gamma);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_weights, bn_gamma);
     }
     // Validate output weights
-    if(fused_weights != nullptr && fused_weights->total_size() != 0)
+    if (fused_weights != nullptr && fused_weights->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input_weights, fused_weights);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input_weights, fused_weights);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_weights, fused_weights);
     }
     // Validate output bias
-    if(fused_bias != nullptr && fused_bias->total_size() != 0)
+    if (fused_bias != nullptr && fused_bias->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(bn_mean, fused_bias);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_weights, fused_bias);
@@ -101,28 +108,52 @@ Status validate_arguments(const ITensorInfo *input_weights, const ITensorInfo *b
 } // namespace
 
 CLFuseBatchNormalizationKernel::CLFuseBatchNormalizationKernel()
-    : _input_weights(nullptr), _input_bias(nullptr), _bn_mean(nullptr), _bn_var(nullptr), _bn_gamma(nullptr), _bn_beta(nullptr), _fused_weights(nullptr), _fused_bias(nullptr), _epsilon(),
-      _run_in_place_weights(false), _run_in_place_bias(false)
+    : _input_weights(nullptr),
+      _input_bias(nullptr),
+      _bn_mean(nullptr),
+      _bn_var(nullptr),
+      _bn_gamma(nullptr),
+      _bn_beta(nullptr),
+      _fused_weights(nullptr),
+      _fused_bias(nullptr),
+      _epsilon(),
+      _run_in_place_weights(false),
+      _run_in_place_bias(false)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLFuseBatchNormalizationKernel::configure(const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,
-                                               ICLTensor *fused_weights, ICLTensor *fused_bias,
-                                               const ICLTensor *input_bias, const ICLTensor *bn_beta, const ICLTensor *bn_gamma,
-                                               float epsilon, FuseBatchNormalizationType fbn_type)
+void CLFuseBatchNormalizationKernel::configure(const ICLTensor           *input_weights,
+                                               const ICLTensor           *bn_mean,
+                                               const ICLTensor           *bn_var,
+                                               ICLTensor                 *fused_weights,
+                                               ICLTensor                 *fused_bias,
+                                               const ICLTensor           *input_bias,
+                                               const ICLTensor           *bn_beta,
+                                               const ICLTensor           *bn_gamma,
+                                               float                      epsilon,
+                                               FuseBatchNormalizationType fbn_type)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, epsilon, fbn_type);
+    configure(CLKernelLibrary::get().get_compile_context(), input_weights, bn_mean, bn_var, fused_weights, fused_bias,
+              input_bias, bn_beta, bn_gamma, epsilon, fbn_type);
 }
 
-void CLFuseBatchNormalizationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,
-                                               ICLTensor *fused_weights, ICLTensor *fused_bias,
-                                               const ICLTensor *input_bias, const ICLTensor *bn_beta, const ICLTensor *bn_gamma,
-                                               float epsilon, FuseBatchNormalizationType fbn_type)
+void CLFuseBatchNormalizationKernel::configure(const CLCompileContext    &compile_context,
+                                               const ICLTensor           *input_weights,
+                                               const ICLTensor           *bn_mean,
+                                               const ICLTensor           *bn_var,
+                                               ICLTensor                 *fused_weights,
+                                               ICLTensor                 *fused_bias,
+                                               const ICLTensor           *input_bias,
+                                               const ICLTensor           *bn_beta,
+                                               const ICLTensor           *bn_gamma,
+                                               float                      epsilon,
+                                               FuseBatchNormalizationType fbn_type)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_weights, bn_mean, bn_var);
 
-    auto padding_info = get_padding_info({ input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma });
+    auto padding_info =
+        get_padding_info({input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma});
 
     _input_weights = input_weights;
     _input_bias    = input_bias;
@@ -135,28 +166,28 @@ void CLFuseBatchNormalizationKernel::configure(const CLCompileContext &compile_c
     _epsilon       = epsilon;
 
     _run_in_place_weights = (fused_weights == nullptr) || (fused_weights == input_weights);
-    _run_in_place_bias    = (input_bias != nullptr && fused_bias == nullptr) || (input_bias != nullptr && fused_bias == input_bias);
+    _run_in_place_bias =
+        (input_bias != nullptr && fused_bias == nullptr) || (input_bias != nullptr && fused_bias == input_bias);
 
     // Auto initialize outputs
-    if(_fused_weights != nullptr)
+    if (_fused_weights != nullptr)
     {
         // Output tensor auto initialization if not yet initialized
         auto_init_if_empty(*_fused_weights->info(), *_input_weights->info()->clone());
     }
-    if(_fused_bias != nullptr)
+    if (_fused_bias != nullptr)
     {
         // Output tensor auto initialization if not yet initialized
         auto_init_if_empty(*_fused_bias->info(), *_bn_mean->info()->clone());
     }
 
     // Validate arguments
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input_weights->info(), bn_mean->info(), bn_var->info(),
-                                                  (fused_weights != nullptr) ? fused_weights->info() : nullptr,
-                                                  (fused_bias != nullptr) ? fused_bias->info() : nullptr,
-                                                  (input_bias != nullptr) ? input_bias->info() : nullptr,
-                                                  (bn_beta != nullptr) ? bn_beta->info() : nullptr,
-                                                  (bn_gamma != nullptr) ? bn_gamma->info() : nullptr,
-                                                  epsilon, fbn_type));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(
+        input_weights->info(), bn_mean->info(), bn_var->info(),
+        (fused_weights != nullptr) ? fused_weights->info() : nullptr,
+        (fused_bias != nullptr) ? fused_bias->info() : nullptr, (input_bias != nullptr) ? input_bias->info() : nullptr,
+        (bn_beta != nullptr) ? bn_beta->info() : nullptr, (bn_gamma != nullptr) ? bn_gamma->info() : nullptr, epsilon,
+        fbn_type));
 
     // Configure kernel window
     Window win = calculate_max_window(*input_weights->info());
@@ -165,7 +196,8 @@ void CLFuseBatchNormalizationKernel::configure(const CLCompileContext &compile_c
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input_weights->info()->data_type()));
-    build_opts.add_option_if(fbn_type == FuseBatchNormalizationType::CONVOLUTION, "-DDIM2=" + support::cpp11::to_string(input_weights->info()->dimension(2)));
+    build_opts.add_option_if(fbn_type == FuseBatchNormalizationType::CONVOLUTION,
+                             "-DDIM2=" + support::cpp11::to_string(input_weights->info()->dimension(2)));
     build_opts.add_option("-DEPSILON=" + float_to_string_with_full_precision(epsilon));
     build_opts.add_option_if(_input_weights->info()->data_layout() == DataLayout::NHWC, "-DNHWC");
     build_opts.add_option_if(_run_in_place_weights, "-DIN_PLACE_W");
@@ -180,12 +212,19 @@ void CLFuseBatchNormalizationKernel::configure(const CLCompileContext &compile_c
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLFuseBatchNormalizationKernel::validate(const ITensorInfo *input_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var,
-                                                const ITensorInfo *fused_weights, const ITensorInfo *fused_bias,
-                                                const ITensorInfo *input_bias, const ITensorInfo *bn_beta, const ITensorInfo *bn_gamma,
-                                                float epsilon, FuseBatchNormalizationType fbn_type)
+Status CLFuseBatchNormalizationKernel::validate(const ITensorInfo         *input_weights,
+                                                const ITensorInfo         *bn_mean,
+                                                const ITensorInfo         *bn_var,
+                                                const ITensorInfo         *fused_weights,
+                                                const ITensorInfo         *fused_bias,
+                                                const ITensorInfo         *input_bias,
+                                                const ITensorInfo         *bn_beta,
+                                                const ITensorInfo         *bn_gamma,
+                                                float                      epsilon,
+                                                FuseBatchNormalizationType fbn_type)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, epsilon, fbn_type));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input_weights, bn_mean, bn_var, fused_weights, fused_bias,
+                                                   input_bias, bn_beta, bn_gamma, epsilon, fbn_type));
     return Status{};
 }
 
@@ -202,25 +241,25 @@ void CLFuseBatchNormalizationKernel::run(const arm_compute::Window &window, cl::
     // Add kernel arguments
     unsigned int idx = 0;
     add_3D_tensor_argument(idx, _input_weights, slice_3d);
-    if(_input_bias != nullptr)
+    if (_input_bias != nullptr)
     {
         add_1D_tensor_argument(idx, _input_bias, slice_1d);
     }
     add_1D_tensor_argument(idx, _bn_mean, slice_1d);
     add_1D_tensor_argument(idx, _bn_var, slice_1d);
-    if(!_run_in_place_weights)
+    if (!_run_in_place_weights)
     {
         add_3D_tensor_argument(idx, _fused_weights, slice_3d);
     }
-    if(!_run_in_place_bias)
+    if (!_run_in_place_bias)
     {
         add_1D_tensor_argument(idx, _fused_bias, slice_1d);
     }
-    if(_bn_beta != nullptr)
+    if (_bn_beta != nullptr)
     {
         add_1D_tensor_argument(idx, _bn_beta, slice_1d);
     }
-    if(_bn_gamma != nullptr)
+    if (_bn_gamma != nullptr)
     {
         add_1D_tensor_argument(idx, _bn_gamma, slice_1d);
     }

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_IARRAY_H
 
 #include "arm_compute/core/Error.h"
+
 #include <cstddef>
 #include <cstdint>
 
@@ -36,14 +37,12 @@ class IArray
 {
 public:
     /** Default constructor */
-    IArray()
-        : _num_values(0), _max_size(0) {};
+    IArray() : _num_values(0), _max_size(0){};
     /** Constructor: initializes an array which can contain up to max_num_points values
      *
      * @param[in] max_num_values Maximum number of values the array will be able to stored
      */
-    IArray(size_t max_num_values)
-        : _num_values(0), _max_size(max_num_values)
+    IArray(size_t max_num_values) : _num_values(0), _max_size(max_num_values)
     {
     }
     /** Maximum number of values which can be stored in this array
@@ -73,7 +72,7 @@ public:
     bool push_back(const T &val)
     {
         ARM_COMPUTE_ERROR_ON(0 == _max_size);
-        if(_num_values >= max_num_values())
+        if (_num_values >= max_num_values())
         {
             _num_values = max_num_values() + 1;
             return false;
@@ -142,5 +141,5 @@ using IInt16Array = IArray<int16_t>;
 using IInt32Array = IArray<int32_t>;
 /** Interface for Array of floats. */
 using IFloatArray = IArray<float>;
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_IARRAY_H */

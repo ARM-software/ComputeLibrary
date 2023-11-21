@@ -66,9 +66,16 @@ public:
      * @param[in]  epsilon       (Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.
      * @param[in]  fbn_type      (Optional) Fused batch normalization type. Defaults to CONVOLUTION.
      */
-    void configure(const ITensor *input_weights, const ITensor *bn_mean, const ITensor *bn_var, ITensor *fused_weights, ITensor *fused_bias,
-                   const ITensor *input_bias = nullptr, const ITensor *bn_beta = nullptr, const ITensor *bn_gamma = nullptr,
-                   float epsilon = 0.001f, FuseBatchNormalizationType fbn_type = FuseBatchNormalizationType::CONVOLUTION);
+    void configure(const ITensor             *input_weights,
+                   const ITensor             *bn_mean,
+                   const ITensor             *bn_var,
+                   ITensor                   *fused_weights,
+                   ITensor                   *fused_bias,
+                   const ITensor             *input_bias = nullptr,
+                   const ITensor             *bn_beta    = nullptr,
+                   const ITensor             *bn_gamma   = nullptr,
+                   float                      epsilon    = 0.001f,
+                   FuseBatchNormalizationType fbn_type   = FuseBatchNormalizationType::CONVOLUTION);
     /** Static function to check if given info will lead to a valid configuration of @ref NEFuseBatchNormalizationKernel
      *
      * @param[in] input_weights Input weights tensor info for convolution or depthwise convolution layer. Data type supported: F16/F32. Data layout supported: NCHW, NHWC
@@ -86,10 +93,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var,
-                           const ITensorInfo *fused_weights, const ITensorInfo *fused_bias,
-                           const ITensorInfo *input_bias = nullptr, const ITensorInfo *bn_beta = nullptr, const ITensorInfo *bn_gamma = nullptr,
-                           float epsilon = 0.001f, FuseBatchNormalizationType fbn_type = FuseBatchNormalizationType::CONVOLUTION);
+    static Status validate(const ITensorInfo         *input_weights,
+                           const ITensorInfo         *bn_mean,
+                           const ITensorInfo         *bn_var,
+                           const ITensorInfo         *fused_weights,
+                           const ITensorInfo         *fused_bias,
+                           const ITensorInfo         *input_bias = nullptr,
+                           const ITensorInfo         *bn_beta    = nullptr,
+                           const ITensorInfo         *bn_gamma   = nullptr,
+                           float                      epsilon    = 0.001f,
+                           FuseBatchNormalizationType fbn_type   = FuseBatchNormalizationType::CONVOLUTION);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -107,8 +120,16 @@ private:
     bool           _run_in_place_weights;
     bool           _run_in_place_bias;
 
-    using FuseBatchNormFunction = void(const ITensor *input_weights, const ITensor *input_bias, ITensor *fused_weights, ITensor *fused_bias,
-                                       const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma, float epsilon, const Window &window);
+    using FuseBatchNormFunction = void(const ITensor *input_weights,
+                                       const ITensor *input_bias,
+                                       ITensor       *fused_weights,
+                                       ITensor       *fused_bias,
+                                       const ITensor *bn_mean,
+                                       const ITensor *bn_var,
+                                       const ITensor *bn_beta,
+                                       const ITensor *bn_gamma,
+                                       float          epsilon,
+                                       const Window  &window);
 
     FuseBatchNormFunction *_func;
 };

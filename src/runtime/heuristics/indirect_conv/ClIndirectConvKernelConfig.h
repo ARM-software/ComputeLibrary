@@ -45,7 +45,7 @@ public:
      */
     static std::unique_ptr<IClIndirectConvKernelConfig> create(GPUTarget gpu)
     {
-        switch(get_arch_from_target(gpu))
+        switch (get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
             case GPUTarget::BIFROST:

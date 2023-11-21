@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NESpaceToDepthLayerKernel.h"
 
@@ -36,8 +37,7 @@ namespace arm_compute
 {
 NESpaceToDepthLayer::~NESpaceToDepthLayer() = default;
 
-NESpaceToDepthLayer::NESpaceToDepthLayer()
-    : _space_to_depth_kernel()
+NESpaceToDepthLayer::NESpaceToDepthLayer() : _space_to_depth_kernel()
 {
 }
 

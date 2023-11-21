@@ -57,14 +57,14 @@ inline int stoi(const std::string &str, std::size_t *pos = 0, NumericBase base =
     assert(base == NumericBase::BASE_10 || base == NumericBase::BASE_16);
     unsigned int      x;
     std::stringstream ss;
-    if(base == NumericBase::BASE_16)
+    if (base == NumericBase::BASE_16)
     {
         ss << std::hex;
     }
     ss << str;
     ss >> x;
 
-    if(pos)
+    if (pos)
     {
         std::string       s;
         std::stringstream ss_p;
@@ -93,14 +93,14 @@ inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, Numeric
     assert(base == NumericBase::BASE_10 || base == NumericBase::BASE_16);
     std::stringstream stream;
     unsigned long     value = 0;
-    if(base == NumericBase::BASE_16)
+    if (base == NumericBase::BASE_16)
     {
         stream << std::hex;
     }
     stream << str;
     stream >> value;
 
-    if(pos)
+    if (pos)
     {
         std::string       s;
         std::stringstream ss_p;
@@ -113,7 +113,7 @@ inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, Numeric
     return value;
 }
 
-#if(__ANDROID__ || BARE_METAL)
+#if (__ANDROID__ || BARE_METAL)
 /** Convert integer and float values to string.
  *
  * @note This function implements the same behaviour as std::to_string. The
@@ -124,7 +124,7 @@ inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, Numeric
  * @return String representation of @p value.
  */
 template <typename T, typename std::enable_if<std::is_arithmetic<typename std::decay<T>::type>::value, int>::type = 0>
-inline std::string to_string(T && value)
+inline std::string to_string(T &&value)
 {
     std::stringstream stream;
     stream << std::forward<T>(value);
@@ -186,7 +186,7 @@ inline std::string to_string(const std::string &value)
  * @return Float representation of input string.
  */
 template <typename... Ts>
-int stof(Ts &&... args)
+int stof(Ts &&...args)
 {
     return ::std::stof(std::forward<Ts>(args)...);
 }

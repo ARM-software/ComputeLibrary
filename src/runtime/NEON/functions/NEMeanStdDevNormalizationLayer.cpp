@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 
-#include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 
 namespace arm_compute
 {

@@ -27,8 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_L2NORMLAYER_KERNEL(func_name) \
-    void func_name(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)
+#define DECLARE_L2NORMLAYER_KERNEL(func_name)                                                                \
+    void func_name(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, \
+                   size_t axis)
 
 DECLARE_L2NORMLAYER_KERNEL(neon_fp16_l2_normalize_x);
 DECLARE_L2NORMLAYER_KERNEL(neon_fp16_l2_normalize_yz);

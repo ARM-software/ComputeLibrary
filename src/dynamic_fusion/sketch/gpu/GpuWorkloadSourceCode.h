@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelSourceCode.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadContextImpl.h"
 
@@ -45,7 +46,7 @@ namespace
  */
 GpuKernelArgumentList extract_kernel_args_for_one_tensor(GpuKernelArgumentList &flat_kernel_args)
 {
-    if(flat_kernel_args.empty())
+    if (flat_kernel_args.empty())
     {
         return {};
     }
@@ -56,10 +57,10 @@ GpuKernelArgumentList extract_kernel_args_for_one_tensor(GpuKernelArgumentList &
     flat_kernel_args.pop_front();
     const auto tensor_id = karg_head.id();
 
-    while(!flat_kernel_args.empty())
+    while (!flat_kernel_args.empty())
     {
         const GpuKernelArgumentBinding &karg = flat_kernel_args.front();
-        if(karg.id() != tensor_id) // Encounter the next tensor, return the current tensor's kernel arguments
+        if (karg.id() != tensor_id) // Encounter the next tensor, return the current tensor's kernel arguments
         {
             return tensor_kargs;
         }
@@ -68,7 +69,7 @@ GpuKernelArgumentList extract_kernel_args_for_one_tensor(GpuKernelArgumentList &
     }
     return tensor_kargs;
 }
-}
+} // namespace
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 /** Uniquely identifies a @ref GpuUnitWorkload within a @ref GpuWorkloadSourceCode */
 using UnitWorkloadId = int32_t;
@@ -92,9 +93,7 @@ public:
     GpuWorkloadArgument(const ITensorInfo           &tensor_info,
                         const MemoryDescriptor      &mem_desc,
                         const GpuKernelArgumentInfo &kernel_arg_info)
-        : _tensor_info{ tensor_info },
-          _mem_desc{ mem_desc },
-          _kernel_arg_info{ kernel_arg_info }
+        : _tensor_info{tensor_info}, _mem_desc{mem_desc}, _kernel_arg_info{kernel_arg_info}
     {
     }
 #else  // ACL_INTERNAL_TEST_CKW_IN_DF
@@ -107,9 +106,7 @@ public:
     GpuWorkloadArgument(const ITensorInfo           &tensor_info,
                         const MemoryDescriptor      &mem_desc,
                         const GpuKernelArgumentList &kernel_args)
-        : _tensor_info{ tensor_info },
-          _mem_desc{ mem_desc },
-          _kernel_args{ kernel_args }
+        : _tensor_info{tensor_info}, _mem_desc{mem_desc}, _kernel_args{kernel_args}
     {
     }
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
@@ -175,9 +172,9 @@ private:
     TensorInfo       _tensor_info{};
     MemoryDescriptor _mem_desc{};
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    GpuKernelArgumentInfo _kernel_arg_info {};
+    GpuKernelArgumentInfo _kernel_arg_info{};
 #else  // ACL_INTERNAL_TEST_CKW_IN_DF
-    GpuKernelArgumentList     _kernel_args {};
+    GpuKernelArgumentList _kernel_args{};
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };
 
@@ -190,7 +187,7 @@ struct UnitWorkloadStage
         Prepare, /**< Only run once at the beginning. */
         Run,     /**< Run every time after the first time. */
     };
-    Stage stage{ Stage::Run };
+    Stage stage{Stage::Run};
 };
 
 inline bool operator==(const UnitWorkloadStage &stage0, const UnitWorkloadStage &stage1)
@@ -212,7 +209,7 @@ public:
      * @param[in] stage       Stage of the unit workload
      */
     GpuUnitWorkload(UnitWorkloadId id, const GpuKernelSourceCode &kernel_code, const UnitWorkloadStage &stage)
-        : _id{ id }, _kernel_code{ kernel_code }, _stage{ stage }
+        : _id{id}, _kernel_code{kernel_code}, _stage{stage}
     {
     }
     /** Get the id of the unit workload */
@@ -253,7 +250,10 @@ public:
      *
      * @return UnitWorkloadId  Allocated unit workload id
      */
-    UnitWorkloadId add_unit_workload(const GpuKernelSourceCode &kernel_code, const UnitWorkloadStage &stage, const MemoryDescriptorMap &mem_map, const GpuWorkloadContext *context)
+    UnitWorkloadId add_unit_workload(const GpuKernelSourceCode &kernel_code,
+                                     const UnitWorkloadStage   &stage,
+                                     const MemoryDescriptorMap &mem_map,
+                                     const GpuWorkloadContext  *context)
     {
         // Use the size of the kernel codes as Id
         const auto uwk_id    = static_cast<UnitWorkloadId>(_unit_workloads.size());
@@ -262,12 +262,13 @@ public:
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
         ARM_COMPUTE_UNUSED(context);
         // Assemble kernel argument with memory descriptor to form workload argument
-        for(const auto &id_arg : kernel_code.arguments())
+        for (const auto &id_arg : kernel_code.arguments())
         {
-            const auto arg_id           = id_arg.first;
-            const auto arg              = id_arg.second;
-            _workload_arguments[arg_id] = GpuWorkloadArgument{ *arg.tensor_info(), mem_map.at(arg_id), *arg.kernel_argument_info() };
-            if(_tensor_uwork_map.find(arg_id) == _tensor_uwork_map.end())
+            const auto arg_id = id_arg.first;
+            const auto arg    = id_arg.second;
+            _workload_arguments[arg_id] =
+                GpuWorkloadArgument{*arg.tensor_info(), mem_map.at(arg_id), *arg.kernel_argument_info()};
+            if (_tensor_uwork_map.find(arg_id) == _tensor_uwork_map.end())
             {
                 _tensor_uwork_map[arg_id] = std::set<UnitWorkloadId>();
             }
@@ -276,18 +277,19 @@ public:
 #else  // ACL_INTERNAL_TEST_CKW_IN_DF
         GpuKernelArgumentList flat_kernel_args = kernel_code.arguments();
         GpuKernelArgumentList tensor_kargs{};
-        while(true)
+        while (true)
         {
             tensor_kargs = extract_kernel_args_for_one_tensor(flat_kernel_args);
-            if(tensor_kargs.empty())
+            if (tensor_kargs.empty())
             {
                 break;
             }
             else
             {
                 const auto tensor_id           = tensor_kargs.at(0).id();
-                _workload_arguments[tensor_id] = GpuWorkloadArgument{ *context->implementation().get_tensor_info(tensor_id), mem_map.at(tensor_id), tensor_kargs };
-                if(_tensor_uwork_map.find(tensor_id) == _tensor_uwork_map.end())
+                _workload_arguments[tensor_id] = GpuWorkloadArgument{
+                    *context->implementation().get_tensor_info(tensor_id), mem_map.at(tensor_id), tensor_kargs};
+                if (_tensor_uwork_map.find(tensor_id) == _tensor_uwork_map.end())
                 {
                     _tensor_uwork_map[tensor_id] = std::set<UnitWorkloadId>();
                 }
@@ -308,7 +310,7 @@ public:
     {
         std::vector<UnitWorkloadId> ids{};
 
-        for(const auto &uwk : _unit_workloads)
+        for (const auto &uwk : _unit_workloads)
         {
             ids.push_back(uwk.id());
         }
@@ -323,7 +325,7 @@ public:
     std::vector<ITensorInfo::Id> tensors() const
     {
         std::vector<ITensorInfo::Id> ids{};
-        for(const auto &id_tensor : _workload_arguments)
+        for (const auto &id_tensor : _workload_arguments)
         {
             ids.push_back(id_tensor.first);
         }
@@ -337,7 +339,7 @@ public:
     }
 
 private:
-    std::vector<GpuUnitWorkload> _unit_workloads{};
+    std::vector<GpuUnitWorkload>                        _unit_workloads{};
     std::map<ITensorInfo::Id, GpuWorkloadArgument>      _workload_arguments{};
     std::map<ITensorInfo::Id, std::set<UnitWorkloadId>> _tensor_uwork_map{};
 };

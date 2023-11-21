@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_CLFFTRADIXSTAGEKERNEL_H
 #define ARM_COMPUTE_CLFFTRADIXSTAGEKERNEL_H
 
-#include "src/core/CL/ICLKernel.h"
-
 #include "arm_compute/core/KernelDescriptors.h"
+
+#include "src/core/CL/ICLKernel.h"
 
 #include <set>
 
@@ -69,7 +69,10 @@ public:
      * @param[out]    output          Destination tensor. Can be nullptr. Data type supported: same as @p input
      * @param[in]     config          FFT descriptor metadata.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config);
+    void configure(const CLCompileContext        &compile_context,
+                   ICLTensor                     *input,
+                   ICLTensor                     *output,
+                   const FFTRadixStageKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTRadixStageKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F16/F32.

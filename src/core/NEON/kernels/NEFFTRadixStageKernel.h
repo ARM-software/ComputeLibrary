@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEFFTRADIXSTAGEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 #include <arm_neon.h>
@@ -92,8 +93,17 @@ private:
     void set_radix_stage_axis0(const FFTRadixStageKernelInfo &config);
     void set_radix_stage_axis1(const FFTRadixStageKernelInfo &config);
 
-    using FFTFunctionPointerAxis0 = std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int)>;
-    using FFTFunctionPointerAxis1 = std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int, unsigned int, unsigned int, unsigned int)>;
+    using FFTFunctionPointerAxis0 =
+        std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int)>;
+    using FFTFunctionPointerAxis1 = std::function<void(float *,
+                                                       float *,
+                                                       unsigned int,
+                                                       unsigned int,
+                                                       const float32x2_t &,
+                                                       unsigned int,
+                                                       unsigned int,
+                                                       unsigned int,
+                                                       unsigned int)>;
 
     FFTFunctionPointerAxis0 _func_0;
     FFTFunctionPointerAxis1 _func_1;

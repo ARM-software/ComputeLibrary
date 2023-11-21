@@ -66,7 +66,11 @@ public:
      * @param[out] output          Destination tensor. Data types supported: U8.
      * @param[out] operation       Comparison operation to be used.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ComparisonOperation operation);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input1,
+                   ICLTensor              *input2,
+                   ICLTensor              *output,
+                   ComparisonOperation     operation);
     /** Static function to check if given info will lead to a valid configuration of @ref CLComparison
      *
      * @param[in]  input1    Source tensor. Data types supported: All.
@@ -76,7 +80,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation operation);
+    static Status validate(const ITensorInfo  *input1,
+                           const ITensorInfo  *input2,
+                           const ITensorInfo  *output,
+                           ComparisonOperation operation);
 };
 
 /** Basic function to run @ref CLComparisonKernel */

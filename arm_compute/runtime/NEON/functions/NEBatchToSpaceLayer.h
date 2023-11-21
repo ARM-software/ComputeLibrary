@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NEBATCHTOSPACELAYER_H
 #define ARM_COMPUTE_NEBATCHTOSPACELAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
@@ -77,7 +76,11 @@ public:
      * @param[out] output        Tensor output. Data types supported: same as @p input
      * @param[in]  crop_info     Specifies how the output shape is cropped after batch to space is performed
      */
-    void configure(const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info = CropInfo{});
+    void configure(const ITensor  *input,
+                   int32_t         block_shape_x,
+                   int32_t         block_shape_y,
+                   ITensor        *output,
+                   const CropInfo &crop_info = CropInfo{});
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayer
      *
      * @param[in]  input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
@@ -99,7 +102,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info = CropInfo{});
+    static Status validate(const ITensorInfo *input,
+                           int32_t            block_shape_x,
+                           int32_t            block_shape_y,
+                           const ITensorInfo *output,
+                           const CropInfo    &crop_info = CropInfo{});
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEBATCHTOSPACELAYER_H */

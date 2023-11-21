@@ -26,15 +26,16 @@
 
 #if defined(__cplusplus) && (__cplusplus >= 201402L)
 
-#define ARM_COMPUTE_DEPRECATED [[deprecated]]
-#define ARM_COMPUTE_DEPRECATED_REL(rel) [[deprecated("Deprecated in : " #rel)]]
+#define ARM_COMPUTE_DEPRECATED                           [[deprecated]]
+#define ARM_COMPUTE_DEPRECATED_REL(rel)                  [[deprecated("Deprecated in : " #rel)]]
 #define ARM_COMPUTE_DEPRECATED_REL_REPLACE(rel, replace) [[deprecated("Deprecated in : " #rel " - Use : " #replace)]]
 
 #elif defined(__GNUC__) || defined(__clang__)
 
-#define ARM_COMPUTE_DEPRECATED __attribute__((deprecated))
+#define ARM_COMPUTE_DEPRECATED          __attribute__((deprecated))
 #define ARM_COMPUTE_DEPRECATED_REL(rel) __attribute__((deprecated("Deprecated in : " #rel)))
-#define ARM_COMPUTE_DEPRECATED_REL_REPLACE(rel, replace) __attribute__((deprecated("Deprecated in : " #rel " - Use : " #replace)))
+#define ARM_COMPUTE_DEPRECATED_REL_REPLACE(rel, replace) \
+    __attribute__((deprecated("Deprecated in : " #rel " - Use : " #replace)))
 
 #else // defined(__cplusplus) && (__cplusplus >= 201402L)
 

@@ -24,9 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h"
 
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/kernels/CLMeanStdDevNormalizationKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLMeanStdDevNormalizationKernel.h"
 
 namespace arm_compute
 {
@@ -35,7 +35,10 @@ void CLMeanStdDevNormalizationLayer::configure(ICLTensor *input, ICLTensor *outp
     configure(CLKernelLibrary::get().get_compile_context(), input, output, epsilon);
 }
 
-void CLMeanStdDevNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float epsilon)
+void CLMeanStdDevNormalizationLayer::configure(const CLCompileContext &compile_context,
+                                               ICLTensor              *input,
+                                               ICLTensor              *output,
+                                               float                   epsilon)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, epsilon);
     auto k = std::make_unique<CLMeanStdDevNormalizationKernel>();

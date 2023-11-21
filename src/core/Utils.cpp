@@ -49,7 +49,7 @@ std::string read_file(const std::string &filename, bool binary)
         fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         std::ios_base::openmode mode = std::ios::in;
 
-        if(binary)
+        if (binary)
         {
             mode |= std::ios::binary;
         }
@@ -66,7 +66,7 @@ std::string read_file(const std::string &filename, bool binary)
         out.assign(std::istreambuf_iterator<char>(fs), std::istreambuf_iterator<char>());
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::ifstream::failure &e)
+    catch (const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
     }
@@ -77,32 +77,28 @@ std::string read_file(const std::string &filename, bool binary)
 
 const std::string &string_from_channel(Channel channel)
 {
-    static std::map<Channel, const std::string> channels_map =
-    {
-        { Channel::UNKNOWN, "UNKNOWN" },
-        { Channel::R, "R" },
-        { Channel::G, "G" },
-        { Channel::B, "B" },
-        { Channel::A, "A" },
-        { Channel::Y, "Y" },
-        { Channel::U, "U" },
-        { Channel::V, "V" },
-        { Channel::C0, "C0" },
-        { Channel::C1, "C1" },
-        { Channel::C2, "C2" },
-        { Channel::C3, "C3" }
-    };
+    static std::map<Channel, const std::string> channels_map = {{Channel::UNKNOWN, "UNKNOWN"},
+                                                                {Channel::R, "R"},
+                                                                {Channel::G, "G"},
+                                                                {Channel::B, "B"},
+                                                                {Channel::A, "A"},
+                                                                {Channel::Y, "Y"},
+                                                                {Channel::U, "U"},
+                                                                {Channel::V, "V"},
+                                                                {Channel::C0, "C0"},
+                                                                {Channel::C1, "C1"},
+                                                                {Channel::C2, "C2"},
+                                                                {Channel::C3, "C3"}};
 
     return channels_map[channel];
 }
 
 const std::string &string_from_border_mode(BorderMode border_mode)
 {
-    static std::map<BorderMode, const std::string> border_mode_map =
-    {
-        { BorderMode::UNDEFINED, "UNDEFINED" },
-        { BorderMode::CONSTANT, "CONSTANT" },
-        { BorderMode::REPLICATE, "REPLICATE" },
+    static std::map<BorderMode, const std::string> border_mode_map = {
+        {BorderMode::UNDEFINED, "UNDEFINED"},
+        {BorderMode::CONSTANT, "CONSTANT"},
+        {BorderMode::REPLICATE, "REPLICATE"},
     };
 
     return border_mode_map[border_mode];
@@ -110,11 +106,10 @@ const std::string &string_from_border_mode(BorderMode border_mode)
 
 const std::string &string_from_norm_type(NormType type)
 {
-    static std::map<NormType, const std::string> norm_type_map =
-    {
-        { NormType::IN_MAP_1D, "IN_MAP_1D" },
-        { NormType::IN_MAP_2D, "IN_MAP_2D" },
-        { NormType::CROSS_MAP, "CROSS_MAP" },
+    static std::map<NormType, const std::string> norm_type_map = {
+        {NormType::IN_MAP_1D, "IN_MAP_1D"},
+        {NormType::IN_MAP_2D, "IN_MAP_2D"},
+        {NormType::CROSS_MAP, "CROSS_MAP"},
     };
 
     return norm_type_map[type];
@@ -122,11 +117,10 @@ const std::string &string_from_norm_type(NormType type)
 
 const std::string &string_from_pooling_type(PoolingType type)
 {
-    static std::map<PoolingType, const std::string> pool_type_map =
-    {
-        { PoolingType::MAX, "MAX" },
-        { PoolingType::AVG, "AVG" },
-        { PoolingType::L2, "L2" },
+    static std::map<PoolingType, const std::string> pool_type_map = {
+        {PoolingType::MAX, "MAX"},
+        {PoolingType::AVG, "AVG"},
+        {PoolingType::L2, "L2"},
     };
 
     return pool_type_map[type];
@@ -134,38 +128,36 @@ const std::string &string_from_pooling_type(PoolingType type)
 
 bool is_pool_region_entirely_outside_input(const PoolingLayerInfo &info)
 {
-    if(info.is_global_pooling || info.exclude_padding || info.pool_size.x() == 0 || info.pool_size.y() == 0)
+    if (info.is_global_pooling || info.exclude_padding || info.pool_size.x() == 0 || info.pool_size.y() == 0)
     {
         return false;
     }
     const auto ps                = info.pad_stride_info;
-    const auto pool_le_padding_x = info.pool_size.x() <= std::max({ ps.pad_left(), ps.pad_right() });
-    const auto pool_le_padding_y = info.pool_size.y() <= std::max({ ps.pad_top(), ps.pad_bottom() });
+    const auto pool_le_padding_x = info.pool_size.x() <= std::max({ps.pad_left(), ps.pad_right()});
+    const auto pool_le_padding_y = info.pool_size.y() <= std::max({ps.pad_top(), ps.pad_bottom()});
     return pool_le_padding_x || pool_le_padding_y;
 }
 
 bool is_pool_3d_region_entirely_outside_input(const Pooling3dLayerInfo &info)
 {
-    if(info.is_global_pooling || info.pool_size.x() == 0 || info.pool_size.y() == 0 || info.pool_size.z() == 0)
+    if (info.is_global_pooling || info.pool_size.x() == 0 || info.pool_size.y() == 0 || info.pool_size.z() == 0)
     {
         return false;
     }
     const auto ps                = info.padding;
-    const auto pool_le_padding_x = info.pool_size.x() <= std::max({ ps.left, ps.right });
-    const auto pool_le_padding_y = info.pool_size.y() <= std::max({ ps.top, ps.bottom });
-    const auto pool_le_padding_z = info.pool_size.z() <= std::max({ ps.front, ps.back });
+    const auto pool_le_padding_x = info.pool_size.x() <= std::max({ps.left, ps.right});
+    const auto pool_le_padding_y = info.pool_size.y() <= std::max({ps.top, ps.bottom});
+    const auto pool_le_padding_z = info.pool_size.z() <= std::max({ps.front, ps.back});
     return pool_le_padding_x || pool_le_padding_y || pool_le_padding_z;
 }
 
 const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage)
 {
-    static std::map<GEMMLowpOutputStageType, const std::string> output_stage_map =
-    {
-        { GEMMLowpOutputStageType::NONE, "" },
-        { GEMMLowpOutputStageType::QUANTIZE_DOWN, "quantize_down" },
-        { GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, "quantize_down_fixedpoint" },
-        { GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT, "quantize_down_float" }
-    };
+    static std::map<GEMMLowpOutputStageType, const std::string> output_stage_map = {
+        {GEMMLowpOutputStageType::NONE, ""},
+        {GEMMLowpOutputStageType::QUANTIZE_DOWN, "quantize_down"},
+        {GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, "quantize_down_fixedpoint"},
+        {GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT, "quantize_down_float"}};
 
     return output_stage_map[output_stage];
 }
@@ -175,7 +167,7 @@ std::string string_from_pixel_value(const PixelValue &value, const DataType data
     std::stringstream ss;
     std::string       converted_string;
 
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -223,11 +215,16 @@ std::string string_from_pixel_value(const PixelValue &value, const DataType data
     return converted_string;
 }
 
-PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation,
+PadStrideInfo calculate_same_pad(TensorShape                  input_shape,
+                                 TensorShape                  weights_shape,
+                                 PadStrideInfo                conv_info,
+                                 DataLayout                   data_layout,
+                                 const Size2D                &dilation,
                                  const DimensionRoundingType &rounding_type)
 {
     const auto &strides = conv_info.stride();
-    ARM_COMPUTE_ERROR_ON_MSG((strides.first < 1 || strides.second < 1), "Stride values should be greater than or equal to 1.");
+    ARM_COMPUTE_ERROR_ON_MSG((strides.first < 1 || strides.second < 1),
+                             "Stride values should be greater than or equal to 1.");
 
     const unsigned int width_idx     = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -246,8 +243,9 @@ PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_sh
     const int real_weight_height = (kernel_height - 1) * dilation.y() + 1;
 
     // Calculate total pad
-    const int pad_width  = std::max(0, static_cast<int>((out_width - 1) * strides.first + real_weight_width - in_width));
-    const int pad_height = std::max(0, static_cast<int>((out_height - 1) * strides.second + real_weight_height - in_height));
+    const int pad_width = std::max(0, static_cast<int>((out_width - 1) * strides.first + real_weight_width - in_width));
+    const int pad_height =
+        std::max(0, static_cast<int>((out_height - 1) * strides.second + real_weight_height - in_height));
 
     // Calculate individual paddings
     const unsigned int pad_left   = pad_width / 2;
@@ -265,8 +263,10 @@ PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_sh
     return same_info;
 }
 
-std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
-                                                                      unsigned int kernel_width, unsigned int kernel_height,
+std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int         in_width,
+                                                                      unsigned int         in_height,
+                                                                      unsigned int         kernel_width,
+                                                                      unsigned int         kernel_height,
                                                                       const PadStrideInfo &pad_stride_info)
 {
     const unsigned int pad_left   = pad_stride_info.pad_left();
@@ -285,8 +285,10 @@ std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned i
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }
 
-std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
-                                                        int kernel_width, int kernel_height,
+std::pair<unsigned int, unsigned int> scaled_dimensions(int                  width,
+                                                        int                  height,
+                                                        int                  kernel_width,
+                                                        int                  kernel_height,
                                                         const PadStrideInfo &pad_stride_info,
                                                         const Size2D        &dilation)
 {
@@ -300,15 +302,25 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
     const int stride_y   = pad_stride_info.stride().second;
     int       w          = 0;
     int       h          = 0;
-    switch(pad_stride_info.round())
+    switch (pad_stride_info.round())
     {
         case DimensionRoundingType::FLOOR:
-            w = static_cast<int>(std::floor((static_cast<float>(width + pad_left + pad_right - (dilation_x * (kernel_width - 1) + 1)) / stride_x) + 1));
-            h = static_cast<int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - (dilation_y * (kernel_height - 1) + 1)) / stride_y) + 1));
+            w = static_cast<int>(std::floor(
+                (static_cast<float>(width + pad_left + pad_right - (dilation_x * (kernel_width - 1) + 1)) / stride_x) +
+                1));
+            h = static_cast<int>(
+                std::floor((static_cast<float>(height + pad_top + pad_bottom - (dilation_y * (kernel_height - 1) + 1)) /
+                            stride_y) +
+                           1));
             break;
         case DimensionRoundingType::CEIL:
-            w = static_cast<int>(std::ceil((static_cast<float>(width + pad_left + pad_right - (dilation_x * (kernel_width - 1) + 1)) / stride_x) + 1));
-            h = static_cast<int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - (dilation_y * (kernel_height - 1) + 1)) / stride_y) + 1));
+            w = static_cast<int>(std::ceil(
+                (static_cast<float>(width + pad_left + pad_right - (dilation_x * (kernel_width - 1) + 1)) / stride_x) +
+                1));
+            h = static_cast<int>(
+                std::ceil((static_cast<float>(height + pad_top + pad_bottom - (dilation_y * (kernel_height - 1) + 1)) /
+                           stride_y) +
+                          1));
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");
@@ -319,9 +331,8 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
     return std::make_pair(static_cast<unsigned int>(w), static_cast<unsigned int>(h));
 }
 
-std::pair<int, int> scaled_dimensions_signed(int width, int height,
-                                             int kernel_width, int kernel_height,
-                                             const PadStrideInfo &pad_stride_info)
+std::pair<int, int> scaled_dimensions_signed(
+    int width, int height, int kernel_width, int kernel_height, const PadStrideInfo &pad_stride_info)
 {
     const int pad_left   = pad_stride_info.pad_left();
     const int pad_top    = pad_stride_info.pad_top();
@@ -331,15 +342,19 @@ std::pair<int, int> scaled_dimensions_signed(int width, int height,
     const int stride_y   = pad_stride_info.stride().second;
     int       w          = 0;
     int       h          = 0;
-    switch(pad_stride_info.round())
+    switch (pad_stride_info.round())
     {
         case DimensionRoundingType::FLOOR:
-            w = static_cast<int>(std::floor((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
-            h = static_cast<int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            w = static_cast<int>(
+                std::floor((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(
+                std::floor((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
             break;
         case DimensionRoundingType::CEIL:
-            w = static_cast<int>(std::ceil((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
-            h = static_cast<int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            w = static_cast<int>(
+                std::ceil((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(
+                std::ceil((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");
@@ -348,8 +363,12 @@ std::pair<int, int> scaled_dimensions_signed(int width, int height,
     return std::make_pair(static_cast<int>(w), static_cast<int>(h));
 }
 
-std::tuple<int, int, int> scaled_3d_dimensions_signed(int width, int height, int depth,
-                                                      int kernel_width, int kernel_height, int kernel_depth,
+std::tuple<int, int, int> scaled_3d_dimensions_signed(int                       width,
+                                                      int                       height,
+                                                      int                       depth,
+                                                      int                       kernel_width,
+                                                      int                       kernel_height,
+                                                      int                       kernel_depth,
                                                       const Pooling3dLayerInfo &pool3d_info)
 {
     const int pad_left   = pool3d_info.padding.left;
@@ -365,17 +384,23 @@ std::tuple<int, int, int> scaled_3d_dimensions_signed(int width, int height, int
     int       h          = 0;
     int       d          = 0;
 
-    switch(pool3d_info.round_type)
+    switch (pool3d_info.round_type)
     {
         case DimensionRoundingType::FLOOR:
-            w = static_cast<int>(std::floor((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
-            h = static_cast<int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
-            d = static_cast<int>(std::floor((static_cast<float>(depth + pad_front + pad_back - kernel_depth) / stride_z) + 1));
+            w = static_cast<int>(
+                std::floor((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(
+                std::floor((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            d = static_cast<int>(
+                std::floor((static_cast<float>(depth + pad_front + pad_back - kernel_depth) / stride_z) + 1));
             break;
         case DimensionRoundingType::CEIL:
-            w = static_cast<int>(std::ceil((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
-            h = static_cast<int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
-            d = static_cast<int>(std::ceil((static_cast<float>(depth + pad_front + pad_back - kernel_depth) / stride_z) + 1));
+            w = static_cast<int>(
+                std::ceil((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(
+                std::ceil((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            d = static_cast<int>(
+                std::ceil((static_cast<float>(depth + pad_front + pad_back - kernel_depth) / stride_z) + 1));
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");
@@ -390,7 +415,7 @@ bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int
     const bool is_quantized_type = is_data_type_quantized(dt);
     const bool is_first_dim      = (axis == 0);
 
-    return !is_first_dim || is_min_max || is_quantized_type;
+    return !is_first_dim || (is_quantized_type && !is_min_max);
 }
 
 QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool is_log)
@@ -400,9 +425,9 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
     // * Softmax with QASYMM8_SIGNED: scale = 1/256, offset = -128
     // * LogSoftmax with QASYMM8: scale = 1/256, offset = 0
     // * LogSoftmax with QASYMM8_SIGNED: scale = 16/256, offset = 127
-    if(is_data_type_quantized_asymmetric_signed(input_type))
+    if (is_data_type_quantized_asymmetric_signed(input_type))
     {
-        if(is_log)
+        if (is_log)
         {
             return QuantizationInfo(16.f / 256, 127);
         }
@@ -414,17 +439,21 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
     return QuantizationInfo(1.f / 256, 0);
 }
 
-std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo &act_info, DataType data_type, UniformQuantizationInfo oq_info)
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo &act_info,
+                                                             DataType                   data_type,
+                                                             UniformQuantizationInfo    oq_info)
 {
     const bool is_qasymm8_signed = is_data_type_quantized_asymmetric_signed(data_type);
     const auto a                 = act_info.a();
     const auto b                 = act_info.b();
-    const int  a_int             = is_qasymm8_signed ? quantize_qasymm8_signed(a, oq_info) : quantize_qasymm8(a, oq_info);
-    const int  b_int             = is_qasymm8_signed ? quantize_qasymm8_signed(b, oq_info) : quantize_qasymm8(b, oq_info);
-    const auto type_max_value    = std::get<1>(get_min_max(data_type)).get<int32_t>();
+    const int  a_int          = is_qasymm8_signed ? quantize_qasymm8_signed(a, oq_info) : quantize_qasymm8(a, oq_info);
+    const int  b_int          = is_qasymm8_signed ? quantize_qasymm8_signed(b, oq_info) : quantize_qasymm8(b, oq_info);
+    const auto type_max_value = std::get<1>(get_min_max(data_type)).get<int32_t>();
 
-    const int32_t min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? oq_info.offset : b_int;
-    const int32_t max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? type_max_value : a_int;
+    const int32_t min_activation =
+        act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? oq_info.offset : b_int;
+    const int32_t max_activation =
+        act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? type_max_value : a_int;
 
     return std::make_pair(min_activation, max_activation);
 }
@@ -433,11 +462,11 @@ std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initi
 {
     std::unordered_map<const ITensorInfo *, PaddingSize> res;
 
-    for(const ITensor *tensor : tensors)
+    for (const ITensor *tensor : tensors)
     {
-        if(tensor)
+        if (tensor)
         {
-            res.insert({ tensor->info(), tensor->info()->padding() });
+            res.insert({tensor->info(), tensor->info()->padding()});
         }
     }
 
@@ -448,11 +477,11 @@ std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initi
 {
     std::unordered_map<const ITensorInfo *, PaddingSize> res;
 
-    for(const ITensorInfo *info : infos)
+    for (const ITensorInfo *info : infos)
     {
-        if(info)
+        if (info)
         {
-            res.insert({ info, info->padding() });
+            res.insert({info, info->padding()});
         }
     }
 
@@ -461,17 +490,20 @@ std::unordered_map<const ITensorInfo *, PaddingSize> get_padding_info(std::initi
 
 bool has_padding_changed(const std::unordered_map<const ITensorInfo *, PaddingSize> &padding_map)
 {
-    return std::find_if(padding_map.begin(), padding_map.end(), [](const std::pair<const ITensorInfo *, PaddingSize> &padding_info)
-    {
-        return (padding_info.first->padding() != padding_info.second);
-    })
-    != padding_map.end();
+    return std::find_if(padding_map.begin(), padding_map.end(),
+                        [](const std::pair<const ITensorInfo *, PaddingSize> &padding_info)
+                        { return (padding_info.first->padding() != padding_info.second); }) != padding_map.end();
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
+void print_consecutive_elements(std::ostream      &s,
+                                DataType           dt,
+                                const uint8_t     *ptr,
+                                unsigned int       n,
+                                int                stream_width,
+                                const std::string &element_delim)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -481,36 +513,46 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
         case DataType::QSYMM8:
         case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
-            print_consecutive_elements_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n, stream_width,
+                                                    element_delim);
             break;
         case DataType::U16:
         case DataType::QASYMM16:
-            print_consecutive_elements_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n, stream_width,
+                                                      element_delim);
             break;
         case DataType::S16:
         case DataType::QSYMM16:
-            print_consecutive_elements_impl<int16_t>(s, reinterpret_cast<const int16_t *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<int16_t>(s, reinterpret_cast<const int16_t *>(ptr), n, stream_width,
+                                                     element_delim);
             break;
         case DataType::U32:
-            print_consecutive_elements_impl<uint32_t>(s, reinterpret_cast<const uint32_t *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<uint32_t>(s, reinterpret_cast<const uint32_t *>(ptr), n, stream_width,
+                                                      element_delim);
             break;
         case DataType::S32:
-            print_consecutive_elements_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n, stream_width,
+                                                     element_delim);
             break;
         case DataType::U64:
-            print_consecutive_elements_impl<uint64_t>(s, reinterpret_cast<const uint64_t *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<uint64_t>(s, reinterpret_cast<const uint64_t *>(ptr), n, stream_width,
+                                                      element_delim);
             break;
         case DataType::S64:
-            print_consecutive_elements_impl<int64_t>(s, reinterpret_cast<const int64_t *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<int64_t>(s, reinterpret_cast<const int64_t *>(ptr), n, stream_width,
+                                                     element_delim);
             break;
         case DataType::BFLOAT16:
-            print_consecutive_elements_impl<bfloat16>(s, reinterpret_cast<const bfloat16 *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<bfloat16>(s, reinterpret_cast<const bfloat16 *>(ptr), n, stream_width,
+                                                      element_delim);
             break;
         case DataType::F16:
-            print_consecutive_elements_impl<half>(s, reinterpret_cast<const half *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<half>(s, reinterpret_cast<const half *>(ptr), n, stream_width,
+                                                  element_delim);
             break;
         case DataType::F32:
-            print_consecutive_elements_impl<float>(s, reinterpret_cast<const float *>(ptr), n, stream_width, element_delim);
+            print_consecutive_elements_impl<float>(s, reinterpret_cast<const float *>(ptr), n, stream_width,
+                                                   element_delim);
             break;
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
@@ -519,7 +561,7 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
 
 int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:

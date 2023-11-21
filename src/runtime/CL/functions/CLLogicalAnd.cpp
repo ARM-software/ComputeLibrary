@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLLogicalAnd.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include <utility>
 
@@ -33,7 +34,10 @@ namespace arm_compute
 {
 namespace experimental
 {
-void CLLogicalAnd::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
+void CLLogicalAnd::configure(const CLCompileContext &compile_context,
+                             ITensorInfo            *input1,
+                             ITensorInfo            *input2,
+                             ITensorInfo            *output)
 {
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
     auto k = std::make_unique<arm_compute::opencl::kernels::ClLogicalBinaryKernel>();
@@ -54,17 +58,16 @@ void CLLogicalAnd::run(ITensorPack &tensors)
 
 struct CLLogicalAnd::Impl
 {
-    const ICLTensor                            *src0{ nullptr };
-    const ICLTensor                            *src1{ nullptr };
-    ICLTensor                                  *dst{ nullptr };
-    std::unique_ptr<experimental::CLLogicalAnd> op{ nullptr };
+    const ICLTensor                            *src0{nullptr};
+    const ICLTensor                            *src1{nullptr};
+    ICLTensor                                  *dst{nullptr};
+    std::unique_ptr<experimental::CLLogicalAnd> op{nullptr};
 };
 
-CLLogicalAnd::CLLogicalAnd()
-    : _impl(std::make_unique<Impl>())
+CLLogicalAnd::CLLogicalAnd() : _impl(std::make_unique<Impl>())
 {
 }
-CLLogicalAnd::CLLogicalAnd(CLLogicalAnd &&) = default;
+CLLogicalAnd::CLLogicalAnd(CLLogicalAnd &&)            = default;
 CLLogicalAnd &CLLogicalAnd::operator=(CLLogicalAnd &&) = default;
 CLLogicalAnd::~CLLogicalAnd()                          = default;
 
@@ -73,7 +76,10 @@ void CLLogicalAnd::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *ou
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
 }
 
-void CLLogicalAnd::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
+void CLLogicalAnd::configure(const CLCompileContext &compile_context,
+                             ICLTensor              *input1,
+                             ICLTensor              *input2,
+                             ICLTensor              *output)
 {
     _impl->src0 = input1;
     _impl->src1 = input2;

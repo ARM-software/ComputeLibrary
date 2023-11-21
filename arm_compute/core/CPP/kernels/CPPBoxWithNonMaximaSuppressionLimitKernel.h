@@ -63,8 +63,16 @@ public:
      * @param[out] keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: U32
      * @param[in]  info             (Optional) BoxNMSLimitInfo information.
      */
-    void configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in, ITensor *scores_out, ITensor *boxes_out, ITensor *classes,
-                   ITensor *batch_splits_out = nullptr, ITensor *keeps = nullptr, ITensor *keeps_size = nullptr, const BoxNMSLimitInfo info = BoxNMSLimitInfo());
+    void configure(const ITensor        *scores_in,
+                   const ITensor        *boxes_in,
+                   const ITensor        *batch_splits_in,
+                   ITensor              *scores_out,
+                   ITensor              *boxes_out,
+                   ITensor              *classes,
+                   ITensor              *batch_splits_out = nullptr,
+                   ITensor              *keeps            = nullptr,
+                   ITensor              *keeps_size       = nullptr,
+                   const BoxNMSLimitInfo info             = BoxNMSLimitInfo());
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -74,9 +82,9 @@ public:
     void run_nmslimit();
 
 private:
-    const ITensor *_scores_in;
-    const ITensor *_boxes_in;
-    const ITensor *_batch_splits_in;
+    const ITensor  *_scores_in;
+    const ITensor  *_boxes_in;
+    const ITensor  *_batch_splits_in;
     ITensor        *_scores_out;
     ITensor        *_boxes_out;
     ITensor        *_classes;

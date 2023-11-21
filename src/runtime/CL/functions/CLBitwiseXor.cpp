@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBitwiseXor.h"
 
-#include "src/core/CL/kernels/CLBitwiseKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLBitwiseKernel.h"
 
 #include <utility>
 
@@ -36,7 +35,10 @@ void CLBitwiseXor::configure(const ICLTensor *input1, const ICLTensor *input2, I
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
 }
 
-void CLBitwiseXor::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLBitwiseXor::configure(const CLCompileContext &compile_context,
+                             const ICLTensor        *input1,
+                             const ICLTensor        *input2,
+                             ICLTensor              *output)
 {
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
     auto k = std::make_unique<CLBitwiseKernel>();

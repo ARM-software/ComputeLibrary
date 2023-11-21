@@ -86,9 +86,12 @@ public:
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region) const;
 
     // Inherited methods overriden:
-    bool update_window_if_needed(Window &window) const override;
-    bool update_padding_if_needed(const Window &window) override;
-    ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
+    bool        update_window_if_needed(Window &window) const override;
+    bool        update_padding_if_needed(const Window &window) override;
+    ValidRegion compute_valid_region(const Window &window,
+                                     ValidRegion   input_valid_region,
+                                     bool          border_undefined,
+                                     BorderSize    border_size) const override;
 
 private:
     ITensorInfo *_info;

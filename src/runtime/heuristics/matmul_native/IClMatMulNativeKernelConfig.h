@@ -28,6 +28,7 @@
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/MatMulInfo.h"
+
 #include "src/core/common/Macros.h"
 
 namespace arm_compute
@@ -53,8 +54,7 @@ public:
      * @param[in] func_int8 Function to call for matmul native Int8 (QASYMM8, QASYMM8_SIGNED, QSYMM8_PER_CHANNEL)
      *
      */
-    ClMatMulNativeConfigArray(T func_f32, T func_f16, T func_int8)
-        : _configs{ func_f32, func_f16, func_int8 }
+    ClMatMulNativeConfigArray(T func_f32, T func_f16, T func_int8) : _configs{func_f32, func_f16, func_int8}
     {
     }
 
@@ -66,7 +66,7 @@ public:
      */
     T get_function(DataType data_type)
     {
-        switch(data_type)
+        switch (data_type)
         {
             case DataType::F32:
                 return _configs.at(DT_F32);
@@ -93,8 +93,7 @@ public:
      *
      * @param[in] arch GPU target
      */
-    IClMatMulNativeKernelConfig(GPUTarget arch)
-        : _target(arch)
+    IClMatMulNativeKernelConfig(GPUTarget arch) : _target(arch)
     {
     }
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(IClMatMulNativeKernelConfig);

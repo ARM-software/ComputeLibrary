@@ -43,8 +43,7 @@ size_t align_offset(size_t offset, size_t alignment)
     return (remainder != 0U) ? offset + (alignment - remainder) : offset;
 }
 } // namespace
-OffsetLifetimeManager::OffsetLifetimeManager()
-    : _blob(0)
+OffsetLifetimeManager::OffsetLifetimeManager() : _blob(0)
 {
 }
 
@@ -71,21 +70,22 @@ void OffsetLifetimeManager::update_blobs_and_mappings()
 
     // Update blob size
     size_t max_aggregated_size = 0;
-    std::for_each(std::begin(_free_blobs), std::end(_free_blobs), [&](const Blob & b)
-    {
-        max_aggregated_size += b.max_size;
-        _blob.alignment = std::max(_blob.alignment, b.max_alignment);
-    });
+    std::for_each(std::begin(_free_blobs), std::end(_free_blobs),
+                  [&](const Blob &b)
+                  {
+                      max_aggregated_size += b.max_size;
+                      _blob.alignment = std::max(_blob.alignment, b.max_alignment);
+                  });
     max_aggregated_size += _free_blobs.size() * _blob.alignment;
     _blob.owners = std::max(_blob.owners, _free_blobs.size());
     _blob.size   = std::max(_blob.size, max_aggregated_size);
 
     // Calculate group mappings
-    auto &group_mappings = _active_group->mappings();
+    auto  &group_mappings = _active_group->mappings();
     size_t offset         = 0;
-    for(auto &free_blob : _free_blobs)
+    for (auto &free_blob : _free_blobs)
     {
-        for(auto &bound_element_id : free_blob.bound_elements)
+        for (auto &bound_element_id : free_blob.bound_elements)
         {
             ARM_COMPUTE_ERROR_ON(_active_elements.find(bound_element_id) == std::end(_active_elements));
             Element &bound_element               = _active_elements[bound_element_id];

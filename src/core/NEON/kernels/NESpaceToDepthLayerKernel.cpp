@@ -26,11 +26,12 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 #include <cstdint>
@@ -50,7 +51,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape < 1);
 
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         const DataLayout data_layout = input->data_layout();
         const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -115,43 +116,45 @@ void NESpaceToDepthLayerKernel::run(const Window &window, const ThreadInfo &info
     int batch_id = 0;
 
     // Main loop for NCHW and NHWC
-    if(_data_layout == DataLayout::NCHW)
+    if (_data_layout == DataLayout::NCHW)
     {
         do
         {
             Iterator out(_output, slice_out);
-            execute_window_loop(slice_out, [&](const Coordinates & id)
-            {
-                const size_t channel_id = id.z();
-                const size_t in_x       = id.x() * _block_shape + (channel_id / channel_size) % _block_shape;
-                const size_t in_y       = id.y() * _block_shape + (channel_id / channel_size) / _block_shape;
-                const int    z          = channel_id % channel_size;
-                Coordinates  input_coords{ in_x, in_y, z, batch_id };
-                memcpy(out.ptr(), _input->ptr_to_element(input_coords), element_size);
-            },
-            out);
+            execute_window_loop(
+                slice_out,
+                [&](const Coordinates &id)
+                {
+                    const size_t channel_id = id.z();
+                    const size_t in_x       = id.x() * _block_shape + (channel_id / channel_size) % _block_shape;
+                    const size_t in_y       = id.y() * _block_shape + (channel_id / channel_size) / _block_shape;
+                    const int    z          = channel_id % channel_size;
+                    Coordinates  input_coords{in_x, in_y, z, batch_id};
+                    memcpy(out.ptr(), _input->ptr_to_element(input_coords), element_size);
+                },
+                out);
             ++batch_id;
-        }
-        while(window.slide_window_slice_3D(slice_out));
+        } while (window.slide_window_slice_3D(slice_out));
     }
     else
     {
         do
         {
             Iterator out(_output, slice_out);
-            execute_window_loop(slice_out, [&](const Coordinates & id)
-            {
-                const size_t channel_id = id.x();
-                const size_t in_x       = id.y() * _block_shape + (channel_id / channel_size) % _block_shape;
-                const size_t in_y       = id.z() * _block_shape + (channel_id / channel_size) / _block_shape;
-                const int    z          = channel_id % channel_size;
-                Coordinates  input_coords{ z, in_x, in_y, batch_id };
-                memcpy(out.ptr(), _input->ptr_to_element(input_coords), element_size);
-            },
-            out);
+            execute_window_loop(
+                slice_out,
+                [&](const Coordinates &id)
+                {
+                    const size_t channel_id = id.x();
+                    const size_t in_x       = id.y() * _block_shape + (channel_id / channel_size) % _block_shape;
+                    const size_t in_y       = id.z() * _block_shape + (channel_id / channel_size) / _block_shape;
+                    const int    z          = channel_id % channel_size;
+                    Coordinates  input_coords{z, in_x, in_y, batch_id};
+                    memcpy(out.ptr(), _input->ptr_to_element(input_coords), element_size);
+                },
+                out);
             ++batch_id;
-        }
-        while(window.slide_window_slice_3D(slice_out));
+        } while (window.slide_window_slice_3D(slice_out));
     }
 }
 } // namespace arm_compute

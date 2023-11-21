@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
@@ -69,7 +70,8 @@ Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
     sum_sq.set_tensor_shape(shape);
 
     const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperation::validate(input, &sum_sq, actual_axis, ReductionOperation::SUM_SQUARE));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        NEReductionOperation::validate(input, &sum_sq, actual_axis, ReductionOperation::SUM_SQUARE));
 
     // Reduce shape on axis
     shape.set(actual_axis, 1);

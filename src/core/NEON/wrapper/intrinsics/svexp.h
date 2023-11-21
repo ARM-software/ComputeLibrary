@@ -26,6 +26,7 @@
 
 #if defined(__ARM_FEATURE_SVE)
 #include "src/core/NEON/SVEMath.h"
+
 #include <arm_sve.h>
 
 namespace arm_compute

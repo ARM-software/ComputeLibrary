@@ -95,7 +95,12 @@ public:
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the @ref GenerateProposalsInfo struct.
      * @note Proposals contains all the proposals. Of those, only the first num_valid_proposals are valid.
      */
-    void configure(const ITensor *scores, const ITensor *deltas, const ITensor *anchors, ITensor *proposals, ITensor *scores_out, ITensor *num_valid_proposals,
+    void configure(const ITensor               *scores,
+                   const ITensor               *deltas,
+                   const ITensor               *anchors,
+                   ITensor                     *proposals,
+                   ITensor                     *scores_out,
+                   ITensor                     *num_valid_proposals,
                    const GenerateProposalsInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEGenerateProposalsLayer
@@ -112,7 +117,11 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *scores, const ITensorInfo *deltas, const ITensorInfo *anchors, const ITensorInfo *proposals, const ITensorInfo *scores_out,
+    static Status validate(const ITensorInfo           *scores,
+                           const ITensorInfo           *deltas,
+                           const ITensorInfo           *anchors,
+                           const ITensorInfo           *proposals,
+                           const ITensorInfo           *scores_out,
                            const ITensorInfo           *num_valid_proposals,
                            const GenerateProposalsInfo &info);
 

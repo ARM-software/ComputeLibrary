@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/AclEntrypoints.h"
+
 #include "src/common/ITensorV2.h"
 #include "src/common/TensorPack.h"
 #include "src/common/utils/Macros.h"
@@ -36,7 +37,7 @@ StatusCode PackTensorInternal(TensorPack &pack, AclTensor external_tensor, int32
 
     status = detail::validate_internal_tensor(tensor);
 
-    if(status != StatusCode::Success)
+    if (status != StatusCode::Success)
     {
         return status;
     }
@@ -57,7 +58,7 @@ extern "C" AclStatus AclCreateTensorPack(AclTensorPack *external_pack, AclContex
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
     auto pack = new TensorPack(ctx);
-    if(pack == nullptr)
+    if (pack == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Couldn't allocate internal resources!");
         return AclOutOfMemory;
@@ -77,14 +78,15 @@ extern "C" AclStatus AclPackTensor(AclTensorPack external_pack, AclTensor extern
     return AclStatus::AclSuccess;
 }
 
-extern "C" AclStatus AclPackTensors(AclTensorPack external_pack, AclTensor *external_tensors, int32_t *slot_ids, size_t num_tensors)
+extern "C" AclStatus
+AclPackTensors(AclTensorPack external_pack, AclTensor *external_tensors, int32_t *slot_ids, size_t num_tensors)
 {
     using namespace arm_compute;
 
     auto pack = get_internal(external_pack);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(detail::validate_internal_pack(pack));
 
-    for(unsigned i = 0; i < num_tensors; ++i)
+    for (unsigned i = 0; i < num_tensors; ++i)
     {
         ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(PackTensorInternal(*pack, external_tensors[i], slot_ids[i]));
     }

@@ -22,14 +22,30 @@
  * SOFTWARE.
  */
 
-#include "tests/CLConstantTileTest.hpp"
-#include "tests/CLKernelWriterCommentTest.h"
-#include "tests/CLKernelWriterDeclareTileTest.h"
-#include "tests/CLTensorArgumentTest.h"
-#include "tests/CLTileTest.hpp"
-#include "tests/TensorBitMaskTest.h"
-#include "tests/UtilsTest.h"
+#include "validation/tests/CLConstantTileTest.hpp"
+#include "validation/tests/CLKernelWriterAssignTest.h"
+#include "validation/tests/CLKernelWriterBinaryOpTest.h"
+#include "validation/tests/CLKernelWriterCastTest.h"
+#include "validation/tests/CLKernelWriterCommentTest.h"
+#include "validation/tests/CLKernelWriterDeclareConstantTileTest.h"
+#include "validation/tests/CLKernelWriterDeclareTensorTest.h"
+#include "validation/tests/CLKernelWriterDeclareTileTest.h"
+#include "validation/tests/CLKernelWriterForTest.h"
+#include "validation/tests/CLKernelWriterGetGlobalIdTest.h"
+#include "validation/tests/CLKernelWriterIfTest.h"
+#include "validation/tests/CLKernelWriterOpLoadIndirectTest.h"
+#include "validation/tests/CLKernelWriterOpLoadStoreTest.h"
+#include "validation/tests/CLKernelWriterPrintTest.h"
+#include "validation/tests/CLKernelWriterReturnTest.h"
+#include "validation/tests/CLKernelWriterSubTileTest.h"
+#include "validation/tests/CLKernelWriterTernaryOpTest.h"
+#include "validation/tests/CLKernelWriterUnaryExpressionTest.h"
+#include "validation/tests/CLTensorArgumentTest.h"
+#include "validation/tests/CLTileTest.hpp"
+#include "validation/tests/TensorBitMaskTest.h"
+#include "validation/tests/UtilsTest.h"
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -73,6 +89,21 @@ int32_t main()
     const auto test21 = std::make_unique<CLTensorArgumentComponentsUsedPassByValueTrueTest>();
     const auto test22 = std::make_unique<CLTensorArgumentStoragesUsedTest>();
     const auto test23 = std::make_unique<CLTensorArgumentComponentsUsedPassByValueTrueDynamicDimTrueTest>();
+    const auto test24 = std::make_unique<CLKernelWriterDeclareTensorTest>();
+    const auto test25 = std::make_unique<CLKernelWriterOpLoadStoreTest>();
+    const auto test26 = std::make_unique<CLKernelWriterAssignTest>();
+    const auto test27 = std::make_unique<CLKernelWriterCastTest>();
+    const auto test28 = std::make_unique<CLKernelWriterUnaryExpressionTest>();
+    const auto test29 = std::make_unique<CLKernelWriterBinaryOpTest>();
+    const auto test30 = std::make_unique<CLKernelWriterTernaryOpTest>();
+    const auto test31 = std::make_unique<CLKernelWriterDeclareConstantTileTest>();
+    const auto test32 = std::make_unique<CLKernelWriterIfTest>();
+    const auto test33 = std::make_unique<CLKernelWriterForTest>();
+    const auto test34 = std::make_unique<CLKernelWriterReturnTest>();
+    const auto test35 = std::make_unique<CLKernelWriterGetGlobalIdTest>();
+    const auto test36 = std::make_unique<CLKernelWriterPrintTest>();
+    const auto test37 = std::make_unique<CLKernelWriterOpLoadIndirectTest>();
+    const auto test38 = std::make_unique<CLKernelWriterSubTileTest>();
 
     tests.push_back(test3.get());
     tests.push_back(test4.get());
@@ -97,6 +128,21 @@ int32_t main()
     tests.push_back(test21.get());
     tests.push_back(test22.get());
     tests.push_back(test23.get());
+    tests.push_back(test24.get());
+    tests.push_back(test25.get());
+    tests.push_back(test26.get());
+    tests.push_back(test27.get());
+    tests.push_back(test28.get());
+    tests.push_back(test29.get());
+    tests.push_back(test30.get());
+    tests.push_back(test31.get());
+    tests.push_back(test32.get());
+    tests.push_back(test33.get());
+    tests.push_back(test34.get());
+    tests.push_back(test35.get());
+    tests.push_back(test36.get());
+    tests.push_back(test37.get());
+    tests.push_back(test38.get());
 #endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;

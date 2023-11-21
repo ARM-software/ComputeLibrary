@@ -46,18 +46,16 @@ using namespace experimental::dynamic_fusion;
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ClComponentElementwiseBinary::Attributes::ElementwiseOp &op)
 {
-    const std::map<ClComponentElementwiseBinary::Attributes::ElementwiseOp, std::string> op_name =
-    {
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Add, "add" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Div, "div" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Max, "max" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Min, "min" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Mul, "mul" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Power, "power" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Prelu, "prelu" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::SquaredDiff, "squareddiff" },
-        { ClComponentElementwiseBinary::Attributes::ElementwiseOp::Sub, "sub" }
-    };
+    const std::map<ClComponentElementwiseBinary::Attributes::ElementwiseOp, std::string> op_name = {
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Add, "add"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Div, "div"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Max, "max"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Min, "min"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Mul, "mul"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Power, "power"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Prelu, "prelu"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::SquaredDiff, "squareddiff"},
+        {ClComponentElementwiseBinary::Attributes::ElementwiseOp::Sub, "sub"}};
     os << op_name.at(op);
     return os;
 }

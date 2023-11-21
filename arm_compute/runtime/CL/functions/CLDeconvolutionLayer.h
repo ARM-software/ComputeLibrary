@@ -70,7 +70,12 @@ public:
      * @param[in]     weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
      *
      */
-    void configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info, const WeightsInfo &weights_info = WeightsInfo());
+    void configure(ICLTensor           *input,
+                   ICLTensor           *weights,
+                   const ICLTensor     *bias,
+                   ICLTensor           *output,
+                   const PadStrideInfo &deconv_info,
+                   const WeightsInfo   &weights_info = WeightsInfo());
     /** Set the input, weights, biases and output tensors.
      *
      * @param[in]     compile_context The compile context to be used.
@@ -82,8 +87,13 @@ public:
      * @param[in]     weights_info    (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
      *
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
-                   const WeightsInfo &weights_info = WeightsInfo());
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *weights,
+                   const ICLTensor        *bias,
+                   ICLTensor              *output,
+                   const PadStrideInfo    &deconv_info,
+                   const WeightsInfo      &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
      * @param[in] input        Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
@@ -95,11 +105,19 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
-                           const WeightsInfo &weights_info = WeightsInfo());
+    static Status validate(const ITensorInfo   *input,
+                           const ITensorInfo   *weights,
+                           const ITensorInfo   *bias,
+                           ITensorInfo         *output,
+                           const PadStrideInfo &deconv_info,
+                           const WeightsInfo   &weights_info = WeightsInfo());
 
-    static DeconvolutionMethod get_deconvolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
-                                                        const WeightsInfo &weights_info);
+    static DeconvolutionMethod get_deconvolution_method(const ITensorInfo   *input,
+                                                        const ITensorInfo   *weights,
+                                                        const ITensorInfo   *bias,
+                                                        ITensorInfo         *output,
+                                                        const PadStrideInfo &deconv_info,
+                                                        const WeightsInfo   &weights_info);
     // Inherited methods overridden:
     void run() override;
     void prepare() override;

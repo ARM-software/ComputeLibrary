@@ -30,10 +30,11 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/NEAsymm.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <cstdint>
 
@@ -53,7 +54,7 @@ Status validate_arguments(const ITensorInfo *src, unsigned int height_offset, co
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(Window::DimX) != dst->dimension(Window::DimX));
     ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(Window::DimY) + height_offset > dst->dimension(Window::DimY));
-    for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
+    for (size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(i) != dst->dimension(i));
     }
@@ -91,13 +92,14 @@ void CpuConcatenateHeightKernel::run_op(ITensorPack &tensors, const Window &wind
     auto       dst = tensors.get_tensor(TensorType::ACL_DST);
 
     // Offset destination pointer to the correct position
-    uint8_t *dst_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes() + _height_offset * dst->info()->strides_in_bytes()[Window::DimY];
+    uint8_t *dst_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes() +
+                       _height_offset * dst->info()->strides_in_bytes()[Window::DimY];
 
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end()) * static_cast<int>(dst->info()->element_size());
     const int  window_step_x  = 16;
 
-    Window win{ window };
+    Window win{window};
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     win.set(Window::DimY, Window::Dimension(0, src->info()->tensor_shape().y(), 1));
 
@@ -108,64 +110,74 @@ void CpuConcatenateHeightKernel::run_op(ITensorPack &tensors, const Window &wind
     const DataType                 dt        = src->info()->data_type();
     const UniformQuantizationInfo &src_qinfo = src->info()->quantization_info().uniform();
     const UniformQuantizationInfo &dst_qinfo = dst->info()->quantization_info().uniform();
-    if(dt == DataType::QASYMM8 && src_qinfo != dst_qinfo)
+    if (dt == DataType::QASYMM8 && src_qinfo != dst_qinfo)
     {
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                vst1q_u8(dst_ptr + dst_it.offset() + x, vquantize(vdequantize(vld1q_u8(src_it.ptr() + x), src_qinfo), dst_qinfo));
-            }
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    vst1q_u8(dst_ptr + dst_it.offset() + x,
+                             vquantize(vdequantize(vld1q_u8(src_it.ptr() + x), src_qinfo), dst_qinfo));
+                }
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                *(dst_ptr + dst_it.offset() + x) = quantize_qasymm8(dequantize_qasymm8(*(src_it.ptr() + x), src_qinfo), dst_qinfo);
-            }
-
-        },
-        src_it, dst_it);
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    *(dst_ptr + dst_it.offset() + x) =
+                        quantize_qasymm8(dequantize_qasymm8(*(src_it.ptr() + x), src_qinfo), dst_qinfo);
+                }
+            },
+            src_it, dst_it);
     }
-    else if(dt == DataType::QASYMM8_SIGNED && src_qinfo != dst_qinfo)
+    else if (dt == DataType::QASYMM8_SIGNED && src_qinfo != dst_qinfo)
     {
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                vst1q_s8(reinterpret_cast<int8_t *>(dst_ptr + dst_it.offset() + x),
-                         vquantize_signed(vdequantize(vld1q_s8(reinterpret_cast<int8_t *>(src_it.ptr()) + x), src_qinfo), dst_qinfo));
-            }
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    vst1q_s8(
+                        reinterpret_cast<int8_t *>(dst_ptr + dst_it.offset() + x),
+                        vquantize_signed(vdequantize(vld1q_s8(reinterpret_cast<int8_t *>(src_it.ptr()) + x), src_qinfo),
+                                         dst_qinfo));
+                }
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                *(dst_ptr + dst_it.offset() + x) = quantize_qasymm8_signed(dequantize_qasymm8_signed(*(src_it.ptr() + x), src_qinfo), dst_qinfo);
-            }
-        },
-        src_it, dst_it);
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    *(dst_ptr + dst_it.offset() + x) =
+                        quantize_qasymm8_signed(dequantize_qasymm8_signed(*(src_it.ptr() + x), src_qinfo), dst_qinfo);
+                }
+            },
+            src_it, dst_it);
     }
     else
     {
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto in_ptr  = src_it.ptr();
-            const auto out_ptr = dst_ptr + dst_it.offset();
-
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                wrapper::vstore(out_ptr + x, wrapper::vloadq(in_ptr + x));
-            }
+                const auto in_ptr  = src_it.ptr();
+                const auto out_ptr = dst_ptr + dst_it.offset();
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                *(out_ptr + x) = *(in_ptr + x);
-            }
-        },
-        src_it, dst_it);
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    wrapper::vstore(out_ptr + x, wrapper::vloadq(in_ptr + x));
+                }
+
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    *(out_ptr + x) = *(in_ptr + x);
+                }
+            },
+            src_it, dst_it);
     }
 }
 

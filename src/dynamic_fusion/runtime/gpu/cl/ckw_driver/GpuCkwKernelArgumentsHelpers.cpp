@@ -30,14 +30,17 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, const ICLTensor *tensor, TensorComponentType component)
+void cl_add_tensor_component_argument(cl::Kernel         &kernel,
+                                      unsigned int       &idx,
+                                      const ICLTensor    *tensor,
+                                      TensorComponentType component)
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
 
     const auto *info    = tensor->info();
     const auto &strides = info->strides_in_bytes();
 
-    switch(component)
+    switch (component)
     {
         case TensorComponentType::OffsetFirstElement:
             kernel.setArg<cl_uint>(idx++, info->offset_first_element_in_bytes());

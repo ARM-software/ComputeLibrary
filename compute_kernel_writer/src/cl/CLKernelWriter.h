@@ -27,15 +27,26 @@
 
 #include "ckw/KernelWriter.h"
 
+#include "src/TileView.h"
+
 #include <memory>
 #include <set>
+#include <string>
 #include <utility>
 
 namespace ckw
 {
 
+// Forward Declarations
 class CLTile;
 class CLTensorArgument;
+class ConstantData;
+class TensorOperand;
+class TensorSampler;
+class TileOperand;
+
+enum class DataType;
+enum class MemoryOperation;
 
 /** OpenCL kernel writer. */
 class CLKernelWriter : public KernelWriter
@@ -52,14 +63,55 @@ public:
     ~CLKernelWriter();
 
     // =============================================================================================
+    // Data processing
+    // =============================================================================================
+
+    void op_assign(const TileOperand &dst, const TileOperand &src) override;
+
+    void op_cast(const TileOperand &dst, const TileOperand &src, ConvertPolicy policy) override;
+
+    void op_unary(const TileOperand &dst, UnaryOp op, const TileOperand &src) override;
+
+    void op_binary(const TileOperand &dst, BinaryOp op, const TileOperand &first, const TileOperand &second) override;
+
+    void op_ternary(const TileOperand &dst,
+                    TernaryOp          op,
+                    const TileOperand &first,
+                    const TileOperand &second,
+                    const TileOperand &third) override;
+
+    // =============================================================================================
+    // Flow control
+    // =============================================================================================
+
+    void op_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body) override;
+
+    void
+    op_else_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body) override;
+
+    void op_else(const std::function<void()> &body) override;
+
+    void op_for_loop(const TileOperand           &var,
+                     BinaryOp                     cond_op,
+                     const TileOperand           &cond_value,
+                     const TileOperand           &update_var,
+                     AssignmentOp                 update_op,
+                     const TileOperand           &update_value,
+                     const std::function<void()> &body) override;
+
+    void op_return() override;
+
+    // =============================================================================================
     // Misc
     // =============================================================================================
 
-    /** Similar to @ref KernelWriter::comment() */
-    void comment(const std::string &text) override;
+    void op_get_global_id(const TileOperand &dst, int32_t dim) override;
 
-    /** Similar to @ref KernelWriter::op_write_raw_code() */
+    void op_comment(const std::string &text) override;
+
     void op_write_raw_code(const std::string &raw_code) override;
+
+    void op_print(const std::string &prefix, const std::vector<TileOperand> &operands) override;
 
     // =============================================================================================
     // Code generation
@@ -76,10 +128,70 @@ public:
     /** Declare a tile given name and tile information
      *
      * Similar to @ref KernelWriter::declare_tile()
-    */
+     */
     TileOperand declare_tile(const std::string &name, const TileInfo &tile_info) override;
 
+    /** Declare a constant tile given a @ref:ConstantData object
+     *
+     * Similar to @ref KernelWriter::declare_constant_tile()
+     */
+    TileOperand declare_constant_tile(const ConstantData &data) override;
+
+    // =============================================================================================
+    // Memory Operations
+    // =============================================================================================
+
+    void op_load(const TileOperand   &tile_op,
+                 const TensorOperand &tensor_op,
+                 TensorSampler       &sampler,
+                 const TileOperand   &x,
+                 const TileOperand   &y,
+                 const TileOperand   &z,
+                 const TileOperand   &batch) override;
+
+    void op_load_dilated(const TileOperand   &tile_op,
+                         const TensorOperand &tensor_op,
+                         TensorSampler       &sampler,
+                         const TileOperand   &x,
+                         const TileOperand   &y,
+                         const TileOperand   &z,
+                         const TileOperand   &batch,
+                         const TileOperand   &dilation_x,
+                         const TileOperand   &dilation_y) override;
+
+    void op_store(const TensorOperand &tensor_op,
+                  const TileOperand   &tile_op,
+                  TensorSampler       &sampler,
+                  const TileOperand   &x,
+                  const TileOperand   &y,
+                  const TileOperand   &z,
+                  const TileOperand   &batch) override;
+
+    void op_store_dilated(const TensorOperand &tensor_op,
+                          const TileOperand   &tile_op,
+                          TensorSampler       &sampler,
+                          const TileOperand   &x,
+                          const TileOperand   &y,
+                          const TileOperand   &z,
+                          const TileOperand   &batch,
+                          const TileOperand   &dilation_x,
+                          const TileOperand   &dilation_y) override;
+
+    void op_load_indirect(const TileOperand   &tile_op,
+                          const TensorOperand &tensor_op,
+                          TensorSampler       &sampler,
+                          const TileOperand   &x,
+                          const TileOperand   &y,
+                          const TileOperand   &z,
+                          const TileOperand   &batch) override;
+
 protected:
+    /** Return a tile view containing a reference to @ref CLTile object and the active area.
+     *
+     * This function performs appropriate check before doing type casting.
+     */
+    TileView<CLTile> to_cl_tile_view(const TileOperand &operand) const;
+
     /** Append the specified code to the kernel body source code. */
     template <typename T, typename... TArgs>
     void append_code(T &&code, TArgs &&...args)
@@ -98,6 +210,38 @@ protected:
     /** Get the current kernel body source code. */
     const std::string &body_source_code() const;
 
+    // For helper functions
+private:
+    /** Helper method to consolidate all load/store logic in this class */
+    void op_load_store(MemoryOperation         op,
+                       const TileOperand      &tile_op,
+                       const TensorOperand    &tensor_op,
+                       TensorSampler          &sampler,
+                       const TileOperand      &x,
+                       const TileOperand      &y,
+                       const TileOperand      &z,
+                       const TileOperand      &batch,
+                       const TileView<CLTile> &dilation_x,
+                       const TileView<CLTile> &dilation_y,
+                       bool                    indirect_buffer);
+
+    /** This function is the generic function to write both `if` and `else if` blocks.
+     *
+     * It is used for both @ref CLKernelWriter::op_if and @ref CLKernelWriter::op_else_if.
+     *
+     * @param[in] lhs        The LHS tile of the condition.
+     * @param[in] op         The relational binary operator.
+     * @param[in] rhs        The RHS tile of the condition.
+     * @param[in] body       The function that writes the body of the else-if block.
+     * @param[in] is_else_if True if this is an `else if` block, otherwise this is an `if` block.
+     */
+    void op_if_generic(const TileOperand           &lhs,
+                       BinaryOp                     op,
+                       const TileOperand           &rhs,
+                       const std::function<void()> &body,
+                       bool                         is_else_if);
+
+    // For attributes
 private:
     /** This string contains the kernel body source code, not the full CL source code.
      * The full source code will only be generated when the user calls @ref KernelWriter::emit_kernel.
@@ -109,6 +253,7 @@ private:
 
     std::set<std::unique_ptr<CLTensorArgument>> _tensors{};
     std::set<std::unique_ptr<CLTile>>           _tiles{};
+    std::set<std::unique_ptr<CLTile>>           _constant_tiles{};
 };
 
 } // namespace ckw

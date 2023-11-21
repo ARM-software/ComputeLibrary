@@ -66,7 +66,7 @@ public:
      * @param[in] bgr   Boolean specifying if the preprocessing should assume BGR format
      * @param[in] scale Scale value
      */
-    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, bool bgr = true, float scale = 1.f);
+    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3>{{0, 0, 0}}, bool bgr = true, float scale = 1.f);
     void preprocess(ITensor &tensor) override;
 
 private:
@@ -74,8 +74,8 @@ private:
     void preprocess_typed(ITensor &tensor);
 
     std::array<float, 3> _mean;
-    bool  _bgr;
-    float _scale;
+    bool                 _bgr;
+    float                _scale;
 };
 
 /** TF preproccessor */
@@ -155,7 +155,11 @@ public:
      * @param[in]  data_layout   (Optional) DataLayout of the numpy tensor data.
      * @param[out] output_stream (Optional) Output stream
      */
-    NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, DataLayout data_layout = DataLayout::NCHW, std::ostream &output_stream = std::cout);
+    NumPyAccessor(std::string   npy_path,
+                  TensorShape   shape,
+                  DataType      data_type,
+                  DataLayout    data_layout   = DataLayout::NCHW,
+                  std::ostream &output_stream = std::cout);
     /** Allow instances of this class to be move constructed */
     NumPyAccessor(NumPyAccessor &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -353,7 +357,9 @@ public:
      * @param[in]  imgs_tensor_shapes Network input images tensor shapes.
      * @param[out] output_stream      (Optional) Output stream
      */
-    DetectionOutputAccessor(const std::string &labels_path, std::vector<TensorShape> &imgs_tensor_shapes, std::ostream &output_stream = std::cout);
+    DetectionOutputAccessor(const std::string        &labels_path,
+                            std::vector<TensorShape> &imgs_tensor_shapes,
+                            std::ostream             &output_stream = std::cout);
     /** Allow instances of this class to be move constructed */
     DetectionOutputAccessor(DetectionOutputAccessor &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -422,7 +428,7 @@ public:
 
 private:
     template <typename T, typename D>
-    void fill(ITensor &tensor, D &&distribution);
+    void                            fill(ITensor &tensor, D &&distribution);
     PixelValue                      _lower;
     PixelValue                      _upper;
     std::random_device::result_type _seed;
@@ -458,7 +464,8 @@ private:
  *
  * @return A ramdom accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_random_accessor(PixelValue lower, PixelValue upper, const std::random_device::result_type seed = 0)
+inline std::unique_ptr<graph::ITensorAccessor>
+get_random_accessor(PixelValue lower, PixelValue upper, const std::random_device::result_type seed = 0)
 {
     return std::make_unique<RandomAccessor>(lower, upper, seed);
 }
@@ -473,11 +480,10 @@ inline std::unique_ptr<graph::ITensorAccessor> get_random_accessor(PixelValue lo
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::string &path,
-                                                                    const std::string &data_file,
-                                                                    DataLayout         file_layout = DataLayout::NCHW)
+inline std::unique_ptr<graph::ITensorAccessor>
+get_weights_accessor(const std::string &path, const std::string &data_file, DataLayout file_layout = DataLayout::NCHW)
 {
-    if(path.empty())
+    if (path.empty())
     {
         return std::make_unique<DummyAccessor>();
     }
@@ -495,30 +501,28 @@ inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::s
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
-                                                                  std::unique_ptr<IPreprocessor>               preprocessor = nullptr,
-                                                                  bool                                         bgr          = true)
+inline std::unique_ptr<graph::ITensorAccessor>
+get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
+                   std::unique_ptr<IPreprocessor>               preprocessor = nullptr,
+                   bool                                         bgr          = true)
 {
-    if(!graph_parameters.validation_file.empty())
+    if (!graph_parameters.validation_file.empty())
     {
-        return std::make_unique<ValidationInputAccessor>(graph_parameters.validation_file,
-                                                         graph_parameters.validation_path,
-                                                         std::move(preprocessor),
-                                                         bgr,
-                                                         graph_parameters.validation_range_start,
-                                                         graph_parameters.validation_range_end);
+        return std::make_unique<ValidationInputAccessor>(
+            graph_parameters.validation_file, graph_parameters.validation_path, std::move(preprocessor), bgr,
+            graph_parameters.validation_range_start, graph_parameters.validation_range_end);
     }
     else
     {
         const std::string &image_file       = graph_parameters.image;
         const std::string &image_file_lower = lower_string(image_file);
-        if(arm_compute::utility::endswith(image_file_lower, ".npy"))
+        if (arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
             return std::make_unique<NumPyBinLoader>(image_file, graph_parameters.data_layout);
         }
-        else if(arm_compute::utility::endswith(image_file_lower, ".jpeg")
-                || arm_compute::utility::endswith(image_file_lower, ".jpg")
-                || arm_compute::utility::endswith(image_file_lower, ".ppm"))
+        else if (arm_compute::utility::endswith(image_file_lower, ".jpeg") ||
+                 arm_compute::utility::endswith(image_file_lower, ".jpg") ||
+                 arm_compute::utility::endswith(image_file_lower, ".ppm"))
         {
             return std::make_unique<ImageAccessor>(image_file, bgr, std::move(preprocessor));
         }
@@ -541,20 +545,20 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const arm_comp
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
-                                                                   size_t                                       top_n         = 5,
-                                                                   bool                                         is_validation = false,
-                                                                   std::ostream                                &output_stream = std::cout)
+inline std::unique_ptr<graph::ITensorAccessor>
+get_output_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
+                    size_t                                       top_n         = 5,
+                    bool                                         is_validation = false,
+                    std::ostream                                &output_stream = std::cout)
 {
     ARM_COMPUTE_UNUSED(is_validation);
-    if(!graph_parameters.validation_file.empty())
+    if (!graph_parameters.validation_file.empty())
     {
-        return std::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file,
-                                                          output_stream,
+        return std::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file, output_stream,
                                                           graph_parameters.validation_range_start,
                                                           graph_parameters.validation_range_end);
     }
-    else if(graph_parameters.labels.empty())
+    else if (graph_parameters.labels.empty())
     {
         return std::make_unique<DummyAccessor>(0);
     }
@@ -575,20 +579,20 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const arm_com
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_detection_output_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
-                                                                             std::vector<TensorShape>                     tensor_shapes,
-                                                                             bool                                         is_validation = false,
-                                                                             std::ostream                                &output_stream = std::cout)
+inline std::unique_ptr<graph::ITensorAccessor>
+get_detection_output_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
+                              std::vector<TensorShape>                     tensor_shapes,
+                              bool                                         is_validation = false,
+                              std::ostream                                &output_stream = std::cout)
 {
     ARM_COMPUTE_UNUSED(is_validation);
-    if(!graph_parameters.validation_file.empty())
+    if (!graph_parameters.validation_file.empty())
     {
-        return std::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file,
-                                                          output_stream,
+        return std::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file, output_stream,
                                                           graph_parameters.validation_range_start,
                                                           graph_parameters.validation_range_end);
     }
-    else if(graph_parameters.labels.empty())
+    else if (graph_parameters.labels.empty())
     {
         return std::make_unique<DummyAccessor>(0);
     }
@@ -609,10 +613,13 @@ inline std::unique_ptr<graph::ITensorAccessor> get_detection_output_accessor(con
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std::string &npy_path, TensorShape shape, DataType data_type, DataLayout data_layout = DataLayout::NCHW,
+inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std::string &npy_path,
+                                                                       TensorShape        shape,
+                                                                       DataType           data_type,
+                                                                       DataLayout    data_layout   = DataLayout::NCHW,
                                                                        std::ostream &output_stream = std::cout)
 {
-    if(npy_path.empty())
+    if (npy_path.empty())
     {
         return std::make_unique<DummyAccessor>(0);
     }
@@ -631,9 +638,10 @@ inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_save_npy_output_accessor(const std::string &npy_name, const bool is_fortran = false)
+inline std::unique_ptr<graph::ITensorAccessor> get_save_npy_output_accessor(const std::string &npy_name,
+                                                                            const bool         is_fortran = false)
 {
-    if(npy_name.empty())
+    if (npy_name.empty())
     {
         return std::make_unique<DummyAccessor>(0);
     }
@@ -664,9 +672,11 @@ inline std::unique_ptr<graph::ITensorAccessor> get_print_output_accessor(std::os
  */
 inline TensorShape permute_shape(TensorShape tensor_shape, DataLayout in_data_layout, DataLayout out_data_layout)
 {
-    if(in_data_layout != out_data_layout)
+    if (in_data_layout != out_data_layout)
     {
-        arm_compute::PermutationVector perm_vec = (in_data_layout == DataLayout::NCHW) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
+        arm_compute::PermutationVector perm_vec = (in_data_layout == DataLayout::NCHW)
+                                                      ? arm_compute::PermutationVector(2U, 0U, 1U)
+                                                      : arm_compute::PermutationVector(1U, 2U, 0U);
         arm_compute::permute(tensor_shape, perm_vec);
     }
     return tensor_shape;
@@ -681,7 +691,7 @@ inline TensorShape permute_shape(TensorShape tensor_shape, DataLayout in_data_la
 inline graph::Target set_target_hint(int target)
 {
     ARM_COMPUTE_ERROR_ON_MSG(target > 2, "Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner)");
-    if((target == 1 || target == 2))
+    if ((target == 1 || target == 2))
     {
         return graph::Target::CL;
     }

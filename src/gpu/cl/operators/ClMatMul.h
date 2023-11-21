@@ -21,14 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_GPU_CL_OPERATORS_CLMATMUL
-#define ACL_SRC_GPU_CL_OPERATORS_CLMATMUL
+#ifndef ACL_SRC_GPU_CL_OPERATORS_CLMATMUL_H
+#define ACL_SRC_GPU_CL_OPERATORS_CLMATMUL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/function_info/MatMulInfo.h"
+
+#include "src/gpu/cl/IClKernel.h"
 #include "src/gpu/cl/IClOperator.h"
-#include "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.h"
-#include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
 
 #include <memory>
 
@@ -73,7 +73,11 @@ public:
      * @param[in]  matmul_info     Contains MatMul operation information described in @ref MatMulInfo.
      * @param[in]  act_info        Class containing information about fused activation function.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulInfo &matmul_info,
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *lhs,
+                   ITensorInfo               *rhs,
+                   ITensorInfo               *dst,
+                   const MatMulInfo          &matmul_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -81,16 +85,17 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &matmul_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *lhs,
+                           const ITensorInfo         *rhs,
+                           const ITensorInfo         *dst,
+                           const MatMulInfo          &matmul_info,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<kernels::ClMatMulNativeKernel>     _matmul_native_kernel{ nullptr };
-    std::unique_ptr<kernels::ClMatMulLowpNativeKernel> _matmul_lowp_native_kernel{ nullptr };
-
-    bool _is_quantized{ false };
+    std::unique_ptr<opencl::IClKernel> _matmul_kernel{nullptr};
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ACL_SRC_GPU_CL_OPERATORS_CLMATMUL */
+#endif // ACL_SRC_GPU_CL_OPERATORS_CLMATMUL_H

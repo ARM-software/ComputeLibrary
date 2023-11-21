@@ -26,15 +26,18 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+
 #include "src/core/NEON/SVEMath.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
+
 #include <arm_sve.h>
 
 namespace arm_compute
 {
 namespace cpu
 {
-void add_qsymm16_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_qsymm16_sve2(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -59,7 +62,7 @@ void add_qsymm16_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, co
     const auto invvscaleo  = svdup_n_f32(1.f / oq_info.scale);
     const auto all_true_pg = svptrue_b16();
 
-    if(is_broadcast_across_x)
+    if (is_broadcast_across_x)
     {
         const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
         Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
@@ -74,39 +77,40 @@ void add_qsymm16_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, co
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator output(dst, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto non_broadcast_input_ptr = reinterpret_cast<const int16_t *>(non_broadcast_input.ptr());
-            const auto output_ptr              = reinterpret_cast<int16_t *>(output.ptr());
-
-            const int16_t broadcast_value     = *reinterpret_cast<const int16_t *>(broadcast_input.ptr());
-            const auto    broadcast_value_vec = svdup_n_s16(broadcast_value);
-
-            int      x  = window_start_x;
-            svbool_t pg = svwhilelt_b16(x, window_end_x);
-
-            const auto bf_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(broadcast_value_vec)), vscale2);
-            const auto bf_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(broadcast_value_vec)), vscale2);
-
-            do
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                const auto a    = svld1_s16(pg, non_broadcast_input_ptr + x);
-                const auto af_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(a)), vscale1);
-                const auto af_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(a)), vscale1);
+                const auto non_broadcast_input_ptr = reinterpret_cast<const int16_t *>(non_broadcast_input.ptr());
+                const auto output_ptr              = reinterpret_cast<int16_t *>(output.ptr());
 
-                const auto rf_0 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
-                const auto rf_1 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
+                const int16_t broadcast_value     = *reinterpret_cast<const int16_t *>(broadcast_input.ptr());
+                const auto    broadcast_value_vec = svdup_n_s16(broadcast_value);
 
-                const auto res = svqxtnt_s32(svqxtnb_s32(rf_0), rf_1);
+                int      x  = window_start_x;
+                svbool_t pg = svwhilelt_b16(x, window_end_x);
 
-                svst1_s16(pg, output_ptr + x, res);
+                const auto bf_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(broadcast_value_vec)), vscale2);
+                const auto bf_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(broadcast_value_vec)), vscale2);
 
-                x += svcnth();
-                pg = svwhilelt_b16(x, window_end_x);
-            }
-            while(svptest_any(all_true_pg, pg));
-        },
-        broadcast_input, non_broadcast_input, output);
+                do
+                {
+                    const auto a    = svld1_s16(pg, non_broadcast_input_ptr + x);
+                    const auto af_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(a)), vscale1);
+                    const auto af_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(a)), vscale1);
+
+                    const auto rf_0 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
+                    const auto rf_1 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
+
+                    const auto res = svqxtnt_s32(svqxtnb_s32(rf_0), rf_1);
+
+                    svst1_s16(pg, output_ptr + x, res);
+
+                    x += svcnth();
+                    pg = svwhilelt_b16(x, window_end_x);
+                } while (svptest_any(all_true_pg, pg));
+            },
+            broadcast_input, non_broadcast_input, output);
     }
     else
     {
@@ -118,37 +122,38 @@ void add_qsymm16_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, co
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
-            const auto input2_ptr = reinterpret_cast<const int16_t *>(input2.ptr());
-            const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
-
-            int      x  = window_start_x;
-            svbool_t pg = svwhilelt_b16(x, window_end_x);
-            do
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                auto a = svld1_s16(pg, input1_ptr + x);
-                auto b = svld1_s16(pg, input2_ptr + x);
+                const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
+                const auto input2_ptr = reinterpret_cast<const int16_t *>(input2.ptr());
+                const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
 
-                const auto af_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(a)), vscale1);
-                const auto af_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(a)), vscale1);
+                int      x  = window_start_x;
+                svbool_t pg = svwhilelt_b16(x, window_end_x);
+                do
+                {
+                    auto a = svld1_s16(pg, input1_ptr + x);
+                    auto b = svld1_s16(pg, input2_ptr + x);
 
-                const auto bf_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(b)), vscale2);
-                const auto bf_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(b)), vscale2);
+                    const auto af_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(a)), vscale1);
+                    const auto af_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(a)), vscale1);
 
-                const auto rf_0 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
-                const auto rf_1 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
+                    const auto bf_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(b)), vscale2);
+                    const auto bf_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(b)), vscale2);
 
-                const auto res = svqxtnt_s32(svqxtnb_s32(rf_0), rf_1);
-                svst1_s16(pg, output_ptr + x, res);
+                    const auto rf_0 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
+                    const auto rf_1 = svcvt_s32_f32_z(pg, svmul_f32_z(pg, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
 
-                x += svcnth();
-                pg = svwhilelt_b16(x, window_end_x);
-            }
-            while(svptest_any(all_true_pg, pg));
-        },
-        input1, input2, output);
+                    const auto res = svqxtnt_s32(svqxtnb_s32(rf_0), rf_1);
+                    svst1_s16(pg, output_ptr + x, res);
+
+                    x += svcnth();
+                    pg = svwhilelt_b16(x, window_end_x);
+                } while (svptest_any(all_true_pg, pg));
+            },
+            input1, input2, output);
     }
 }
 } // namespace cpu

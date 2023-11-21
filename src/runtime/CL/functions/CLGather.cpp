@@ -24,9 +24,9 @@
 #include "arm_compute/runtime/CL/functions/CLGather.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/CL/kernels/CLGatherKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLGatherKernel.h"
 
 namespace arm_compute
 {
@@ -35,7 +35,11 @@ void CLGather::configure(const ICLTensor *input, const ICLTensor *indices, ICLTe
     configure(CLKernelLibrary::get().get_compile_context(), input, indices, output, axis);
 }
 
-void CLGather::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
+void CLGather::configure(const CLCompileContext &compile_context,
+                         const ICLTensor        *input,
+                         const ICLTensor        *indices,
+                         ICLTensor              *output,
+                         int                     axis)
 {
     ARM_COMPUTE_LOG_PARAMS(input, indices, output, axis);
     auto k = std::make_unique<CLGatherKernel>();

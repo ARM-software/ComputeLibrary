@@ -153,9 +153,9 @@ private:
 
     std::unordered_map<std::string, CLTuningParams> _tuning_params_table;
     std::unordered_map<std::string, cl::NDRange>    _lws_table;
-    cl::Event    _kernel_event;
-    bool         _tune_new_kernels;
-    CLTuningInfo _tuning_info;
+    cl::Event                                       _kernel_event;
+    bool                                            _tune_new_kernels;
+    CLTuningInfo                                    _tuning_info;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLTUNER_H */

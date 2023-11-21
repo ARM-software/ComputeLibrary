@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_ELEMENTWISE_UNARY_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute

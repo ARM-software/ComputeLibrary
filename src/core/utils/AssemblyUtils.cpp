@@ -34,12 +34,12 @@ arm_gemm::Activation map_to_arm_gemm_activation(const ActivationLayerInfo &act)
     arm_gemm::Activation gemm_act;
 
     // Early exit in case lower bound is other than 0, as it's not yet supported
-    if(act.b() != 0.f)
+    if (act.b() != 0.f)
     {
         return gemm_act;
     }
 
-    switch(act.activation())
+    switch (act.activation())
     {
         case ActivationLayerInfo::ActivationFunction::RELU:
             gemm_act.type = arm_gemm::Activation::Type::ReLU;
@@ -63,17 +63,15 @@ arm_gemm::Activation map_to_arm_gemm_activation(const ActivationLayerInfo &act)
 
 arm_conv::PaddingValues map_to_arm_conv_padding(const PadStrideInfo &pad_stride_info)
 {
-    return arm_conv::PaddingValues{ pad_stride_info.pad_left(),
-                                    pad_stride_info.pad_top(),
-                                    pad_stride_info.pad_right(),
-                                    pad_stride_info.pad_bottom() };
+    return arm_conv::PaddingValues{pad_stride_info.pad_left(), pad_stride_info.pad_top(), pad_stride_info.pad_right(),
+                                   pad_stride_info.pad_bottom()};
 }
 
 arm_gemm::WeightFormat map_to_arm_gemm_weight_format(const arm_compute::WeightFormat &weight_format)
 {
     arm_gemm::WeightFormat gemm_weight_fromat;
 
-    switch(weight_format)
+    switch (weight_format)
     {
         case arm_compute::WeightFormat::UNSPECIFIED:
             gemm_weight_fromat = arm_gemm::WeightFormat::UNSPECIFIED;
@@ -193,7 +191,7 @@ arm_compute::WeightFormat map_to_arm_compute_weight_format(const arm_gemm::Weigh
 {
     arm_compute::WeightFormat acl_weight_fromat;
 
-    switch(weight_format)
+    switch (weight_format)
     {
         case arm_gemm::WeightFormat::UNSPECIFIED:
             acl_weight_fromat = arm_compute::WeightFormat::UNSPECIFIED;

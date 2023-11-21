@@ -31,7 +31,8 @@
 
 namespace arm_compute
 {
-MemoryManagerOnDemand::MemoryManagerOnDemand(std::shared_ptr<ILifetimeManager> lifetime_manager, std::shared_ptr<IPoolManager> pool_manager)
+MemoryManagerOnDemand::MemoryManagerOnDemand(std::shared_ptr<ILifetimeManager> lifetime_manager,
+                                             std::shared_ptr<IPoolManager>     pool_manager)
     : _lifetime_mgr(std::move(lifetime_manager)), _pool_mgr(std::move(pool_manager))
 {
     ARM_COMPUTE_ERROR_ON_MSG(!_lifetime_mgr, "Lifetime manager not specified correctly!");
@@ -57,7 +58,7 @@ void MemoryManagerOnDemand::populate(arm_compute::IAllocator &allocator, size_t 
 
     // Create pools
     auto pool_template = _lifetime_mgr->create_pool(&allocator);
-    for(int i = num_pools; i > 1; --i)
+    for (int i = num_pools; i > 1; --i)
     {
         auto pool = pool_template->duplicate();
         _pool_mgr->register_pool(std::move(pool));

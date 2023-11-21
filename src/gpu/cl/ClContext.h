@@ -24,10 +24,10 @@
 #ifndef SRC_GPU_CLCONTEXT_H
 #define SRC_GPU_CLCONTEXT_H
 
+#include "arm_compute/core/CL/OpenCL.h"
+
 #include "src/common/IContext.h"
 #include "src/runtime/CL/mlgo/MLGOHeuristics.h"
-
-#include "arm_compute/core/CL/OpenCL.h"
 
 namespace arm_compute
 {
@@ -74,9 +74,9 @@ public:
     bool set_cl_ctx(::cl::Context ctx);
 
     // Inherrited methods overridden
-    ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) override;
-    IQueue *create_queue(const AclQueueOptions *options) override;
-    std::tuple<IOperator *, StatusCode> create_activation(const AclTensorDescriptor &src,
+    ITensorV2                          *create_tensor(const AclTensorDescriptor &desc, bool allocate) override;
+    IQueue                             *create_queue(const AclQueueOptions *options) override;
+    std::tuple<IOperator *, StatusCode> create_activation(const AclTensorDescriptor     &src,
                                                           const AclTensorDescriptor     &dst,
                                                           const AclActivationDescriptor &act,
                                                           bool                           is_validate) override;

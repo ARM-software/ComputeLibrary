@@ -24,24 +24,22 @@
 #include "arm_compute/runtime/CL/CLMemory.h"
 
 #include "arm_compute/core/Error.h"
+
 #include "support/Cast.h"
 
 namespace arm_compute
 {
-CLMemory::CLMemory()
-    : _region(nullptr), _region_owned(nullptr)
+CLMemory::CLMemory() : _region(nullptr), _region_owned(nullptr)
 {
 }
 
-CLMemory::CLMemory(const std::shared_ptr<ICLMemoryRegion> &memory)
-    : _region(nullptr), _region_owned(memory)
+CLMemory::CLMemory(const std::shared_ptr<ICLMemoryRegion> &memory) : _region(nullptr), _region_owned(memory)
 {
     _region_owned = memory;
     _region       = _region_owned.get();
 }
 
-CLMemory::CLMemory(ICLMemoryRegion *memory)
-    : _region(memory), _region_owned(nullptr)
+CLMemory::CLMemory(ICLMemoryRegion *memory) : _region(memory), _region_owned(nullptr)
 {
     _region = memory;
 }

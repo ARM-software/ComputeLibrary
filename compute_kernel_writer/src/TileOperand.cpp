@@ -24,12 +24,52 @@
 
 #include "ckw/TileOperand.h"
 
+#include "ckw/Error.h"
+
+#include "src/ITile.h"
+
 namespace ckw
 {
 
 TileOperand::TileOperand(ITile &tile)
-    : _tile(tile)
+    : _tile(&tile), _row_start(0), _row_end(tile.info().height()), _col_start(0), _col_end(tile.info().width())
 {
+}
+
+TileOperand::TileOperand(
+    const TileOperand &operand, int32_t row_start, int32_t row_end, int32_t col_start, int32_t col_end)
+    : _tile(operand._tile), _row_start(row_start), _row_end(row_end), _col_start(col_start), _col_end(col_end)
+{
+    CKW_ASSERT(row_start >= 0 && row_start < _tile->info().height());
+    CKW_ASSERT(row_end > row_start && row_end <= _tile->info().height());
+    CKW_ASSERT(col_start >= 0 && col_start < _tile->info().width());
+    CKW_ASSERT(col_end > col_start && col_end <= _tile->info().width());
+}
+
+TileOperand TileOperand::tile(int32_t row_start, int32_t row_end, int32_t col_start, int32_t col_end) const
+{
+    CKW_ASSERT(row_start >= 0 && _row_start + row_start < _row_end);
+    CKW_ASSERT(row_end > row_start && _row_start + row_end <= _row_end);
+    CKW_ASSERT(col_start >= 0 && _col_start + col_start < _col_end);
+    CKW_ASSERT(col_end > col_start && _col_start + col_end <= _col_end);
+
+    return TileOperand(*this, _row_start + row_start, _row_start + row_end, _col_start + col_start,
+                       _col_start + col_end);
+}
+
+TileOperand TileOperand::row(int32_t row) const
+{
+    CKW_ASSERT(row >= 0 && _row_start + row < _row_end);
+
+    return tile(_row_start + row, _row_start + row + 1, _col_start, _col_end);
+}
+
+TileOperand TileOperand::scalar(int32_t row, int32_t col) const
+{
+    CKW_ASSERT(row >= 0 && _row_start + row < _row_end);
+    CKW_ASSERT(col >= 0 && _col_start + col < _col_end);
+
+    return tile(_row_start + row, _row_start + row + 1, _col_start + col, _col_start + col + 1);
 }
 
 } // namespace ckw

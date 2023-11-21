@@ -28,8 +28,8 @@
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDepthwiseConv2d.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "src/runtime/heuristics/dwc_native/ClDWCNativeKernelConfig.h"
 #include "src/runtime/heuristics/dwc_native/IClDWCNativeKernelConfig.h"
@@ -42,20 +42,20 @@ namespace dynamic_fusion
 {
 namespace
 {
-void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *src, const ITensorInfo *wei, const DepthwiseConv2dAttributes &attributes)
+void calculate_and_init_dst_if_empty(ITensorInfo                     *dst,
+                                     const ITensorInfo               *src,
+                                     const ITensorInfo               *wei,
+                                     const DepthwiseConv2dAttributes &attributes)
 {
-    if(dst->total_size() == 0U)
+    if (dst->total_size() == 0U)
     {
-        const PadStrideInfo pad_stride_info(attributes.stride().x(),
-                                            attributes.stride().y(),
-                                            attributes.pad().left,
-                                            attributes.pad().right,
-                                            attributes.pad().top,
-                                            attributes.pad().bottom,
+        const PadStrideInfo pad_stride_info(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
+                                            attributes.pad().right, attributes.pad().top, attributes.pad().bottom,
                                             attributes.dimension_rounding_type());
 
-        const ConvolutionInfo conv_info{ pad_stride_info, attributes.depth_multiplier(), ActivationLayerInfo(), attributes.dilation() };
-        const TensorShape     shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *wei, conv_info);
+        const ConvolutionInfo conv_info{pad_stride_info, attributes.depth_multiplier(), ActivationLayerInfo(),
+                                        attributes.dilation()};
+        const TensorShape shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *wei, conv_info);
 
         auto_init_if_empty(*dst, src->clone()->set_tensor_shape(shape));
     }
@@ -76,7 +76,7 @@ Status is_supported_op_helper(const GpuWorkloadContext        &context,
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
     }
@@ -91,40 +91,44 @@ Status is_supported_op_helper(const GpuWorkloadContext        &context,
 
     const GpuTarget gpu_target = context.gpu_target();
 
-    if(context.gpu_language() == GpuLanguage::OpenCL)
+    if (context.gpu_language() == GpuLanguage::OpenCL)
     {
         const CLCompileContext *cl_compile_ctx = context.cl_compile_context();
         ARM_COMPUTE_RETURN_ERROR_ON(cl_compile_ctx == nullptr);
 
         // Validate Depthwise Conv2d Component
         {
-            const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
-            auto       settings   = ClComponentDepthwiseConv2d::Settings();
+            const auto properties =
+                IGpuKernelComponent::Properties().stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
+            auto settings = ClComponentDepthwiseConv2d::Settings();
 
-            const PadStrideInfo legacy_conv_info(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
-                                                 attributes.pad().right,
-                                                 attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
+            const PadStrideInfo legacy_conv_info(attributes.stride().x(), attributes.stride().y(),
+                                                 attributes.pad().left, attributes.pad().right, attributes.pad().top,
+                                                 attributes.pad().bottom, DimensionRoundingType::FLOOR);
 
             // Get the depthwise convolution compute parameters
-            auto                       t        = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
-            const DWCComputeKernelInfo dwc_info = t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
+            auto t = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+            const DWCComputeKernelInfo dwc_info =
+                t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
 
             settings.fast_relaxed_math(
-                (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
-                && (dst_info_to_validate_ptr->data_type() == DataType::F32 || dst_info_to_validate_ptr->data_type() == DataType::F16));
+                (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST) &&
+                (dst_info_to_validate_ptr->data_type() == DataType::F32 ||
+                 dst_info_to_validate_ptr->data_type() == DataType::F16));
 
             settings.is_fma_available(get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
-            .m0(dwc_info.m0)
-            .n0(dwc_info.n0)
-            .export_input_to_cl_image(dwc_info.export_input_to_cl_image)
-            .export_weights_to_cl_image(dwc_info.export_weights_to_cl_image);
+                .m0(dwc_info.m0)
+                .n0(dwc_info.n0)
+                .export_input_to_cl_image(dwc_info.export_input_to_cl_image)
+                .export_weights_to_cl_image(dwc_info.export_weights_to_cl_image);
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);
             arguments.add_const_tensor(ACL_SRC_1, wei);
             arguments.add_const_tensor(ACL_SRC_2, bia);
             arguments.add_const_tensor(ACL_DST_0, dst_info_to_validate_ptr);
-            ARM_COMPUTE_RETURN_ON_ERROR(ClComponentDepthwiseConv2d::validate(properties, arguments, attributes, settings));
+            ARM_COMPUTE_RETURN_ON_ERROR(
+                ClComponentDepthwiseConv2d::validate(properties, arguments, attributes, settings));
         }
     }
     else
@@ -158,7 +162,7 @@ Status GpuDepthwiseConv2d::validate_op(const GpuWorkloadSketch         &sketch,
 
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !wei->has_valid_id());
 
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(!bia->has_valid_id());
     }
@@ -205,35 +209,37 @@ ITensorInfo *GpuDepthwiseConv2d::create_op(GpuWorkloadSketch               &sket
     const auto              *sketch_ctx = sketch.implementation().context();
     const GpuTarget          gpu_target = sketch_ctx->gpu_target();
 
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(sketch_ctx->cl_compile_context());
 
         // Add Depthwise Conv2d Component
         {
-            const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
-            auto       settings   = ClComponentDepthwiseConv2d::Settings();
+            const auto properties =
+                IGpuKernelComponent::Properties().stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
+            auto settings = ClComponentDepthwiseConv2d::Settings();
 
-            const PadStrideInfo legacy_conv_info(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
-                                                 attributes.pad().right,
-                                                 attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
+            const PadStrideInfo legacy_conv_info(attributes.stride().x(), attributes.stride().y(),
+                                                 attributes.pad().left, attributes.pad().right, attributes.pad().top,
+                                                 attributes.pad().bottom, DimensionRoundingType::FLOOR);
 
             // Get the depthwise convolution compute parameters
-            auto                       t        = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
-            const DWCComputeKernelInfo dwc_info = t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
+            auto t = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+            const DWCComputeKernelInfo dwc_info =
+                t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
 
             settings.is_fma_available(get_arch_from_target(gpu_target) != GPUTarget::MIDGARD)
-            .m0(dwc_info.m0)
-            .n0(dwc_info.n0)
-            .export_input_to_cl_image(dwc_info.export_input_to_cl_image)
-            .export_weights_to_cl_image(dwc_info.export_weights_to_cl_image);
+                .m0(dwc_info.m0)
+                .n0(dwc_info.n0)
+                .export_input_to_cl_image(dwc_info.export_input_to_cl_image)
+                .export_weights_to_cl_image(dwc_info.export_weights_to_cl_image);
 
-            if(settings.export_input_to_cl_image())
+            if (settings.export_input_to_cl_image())
             {
                 arm_compute::opencl::kernels::gemm::update_padding_for_cl_image(src);
             }
 
-            if(settings.export_weights_to_cl_image())
+            if (settings.export_weights_to_cl_image())
             {
                 arm_compute::opencl::kernels::gemm::update_padding_for_cl_image(wei);
             }

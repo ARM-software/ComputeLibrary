@@ -54,11 +54,11 @@ public:
     CLKernelLibrary &kernel_library();
 
 private:
-    std::unique_ptr<CLScheduler> _gpu_owned_scheduler{ nullptr };
-    CLScheduler                 *_gpu_scheduler{ nullptr };
-    CLTuner                      _tuner{ false };
+    std::unique_ptr<CLScheduler> _gpu_owned_scheduler{nullptr};
+    CLScheduler                 *_gpu_scheduler{nullptr};
+    CLTuner                      _tuner{false};
     CLSymbols                    _symbols{};
-    CLBackendType                _backend_type{ CLBackendType::Native };
+    CLBackendType                _backend_type{CLBackendType::Native};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLRUNTIME_CONTEXT_H */

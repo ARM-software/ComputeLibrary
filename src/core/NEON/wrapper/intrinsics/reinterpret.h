@@ -35,7 +35,7 @@ namespace wrapper
     {                                                               \
         return prefix##_##postfix1##_##postfix2(a);                 \
     }                                                               \
-    \
+                                                                    \
     inline ptype vreinterpret(const ptype &a)                       \
     {                                                               \
         return a;                                                   \

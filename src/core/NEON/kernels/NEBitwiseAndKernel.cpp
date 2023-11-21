@@ -27,9 +27,10 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 #include <cstdint>
@@ -55,8 +56,7 @@ inline void bitwise_and(const T *__restrict input1, const T *__restrict input2, 
 }
 } // namespace
 
-NEBitwiseAndKernel::NEBitwiseAndKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr)
+NEBitwiseAndKernel::NEBitwiseAndKernel() : _input1(nullptr), _input2(nullptr), _output(nullptr)
 {
 }
 
@@ -86,8 +86,7 @@ void NEBitwiseAndKernel::configure(const ITensor *input1, const ITensor *input2,
     Window                 win = calculate_max_window(*input1->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration),
+    update_window_and_padding(win, AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration),
                               AccessWindowHorizontal(input2->info(), 0, num_elems_processed_per_iteration),
                               output_access);
 
@@ -103,9 +102,7 @@ void NEBitwiseAndKernel::run(const Window &window, const ThreadInfo &info)
     Iterator input2(_input2, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        bitwise_and<uint8_t>(input1.ptr(), input2.ptr(), output.ptr());
-    },
-    input1, input2, output);
+    execute_window_loop(
+        window, [&](const Coordinates &) { bitwise_and<uint8_t>(input1.ptr(), input2.ptr(), output.ptr()); }, input1,
+        input2, output);
 }

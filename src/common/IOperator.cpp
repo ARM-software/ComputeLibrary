@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 #include "src/common/IOperator.h"
+
 #include "src/common/utils/Validate.h"
 
 namespace arm_compute
 {
 #ifndef DOXYGEN_SKIP_THIS
-IOperator::IOperator(IContext *ctx)
-    : AclOperator_()
+IOperator::IOperator(IContext *ctx) : AclOperator_()
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(ctx);
     this->header.ctx = ctx;

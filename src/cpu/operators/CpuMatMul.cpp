@@ -23,14 +23,16 @@
  */
 
 #include "src/cpu/operators/CpuMatMul.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
+
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/function_info/MatMulInfo.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEMatMul.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -46,8 +48,11 @@ namespace cpu
 {
 namespace
 {
-Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const ActivationLayerInfo &act,
-                                      GEMMLowpOutputStageInfo &gemmlowp_output_stage_info)
+Status get_gemmlowp_output_stage_info(const ITensorInfo         *src,
+                                      const ITensorInfo         *weights,
+                                      const ITensorInfo         *dst,
+                                      const ActivationLayerInfo &act,
+                                      GEMMLowpOutputStageInfo   &gemmlowp_output_stage_info)
 {
     const auto                    data_type = src->data_type();
     const QuantizationInfo        oq_info   = dst->quantization_info();
@@ -59,10 +64,11 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
     int32_t output_multiplier;
     int32_t output_shift;
 
-    ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
-    int32_t type_min = 0;
-    int32_t type_max = 0;
+    int32_t type_min             = 0;
+    int32_t type_max             = 0;
     std::tie(type_min, type_max) = quantization::get_quantized_asymmetric_output_min_max(oq_info, act, data_type);
 
     gemmlowp_output_stage_info.gemmlowp_multiplier = output_multiplier;
@@ -77,14 +83,27 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
 } // namespace
 
 CpuMatMul::CpuMatMul()
-    : _transpose_kernel_lhs(), _transpose_kernel_rhs(), _asm_glue(), _lhs_transposed(), _rhs_transposed(), _original_lhs_shape(), _original_rhs_shape(), _original_dst_shape()
+    : _transpose_kernel_lhs(),
+      _transpose_kernel_rhs(),
+      _asm_glue(),
+      _lhs_transposed(),
+      _rhs_transposed(),
+      _original_lhs_shape(),
+      _original_rhs_shape(),
+      _original_dst_shape()
 {
 }
 
-Status CpuMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info)
+Status CpuMatMul::validate(const ITensorInfo         *lhs,
+                           const ITensorInfo         *rhs,
+                           const ITensorInfo         *dst,
+                           const MatMulInfo          &info,
+                           const CpuMatMulSettings   &settings,
+                           const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs->are_values_constant(), "LHS Tensor must be dynamic.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs->are_values_constant(), "RHS Tensor must be dynamic.");
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(lhs);
@@ -103,34 +122,39 @@ Status CpuMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const
     gemm_info.fast_mode       = settings.fast_math();
 
     // Validate and then permute a/b
-    if(adj_lhs)
+    if (adj_lhs)
     {
-        auto_init_if_empty(lhs_transposed, lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*lhs)));
+        auto_init_if_empty(lhs_transposed,
+                           lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*lhs)));
         ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuTransposeKernel::validate(lhs_to_use, &lhs_transposed));
         // Assign lhs_to_use pointer to use transposed TensorInfo
         lhs_to_use = &lhs_transposed;
     }
-    if(adj_rhs)
+    if (adj_rhs)
     {
-        auto_init_if_empty(rhs_transposed, rhs->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*rhs)));
+        auto_init_if_empty(rhs_transposed,
+                           rhs->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*rhs)));
         ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuTransposeKernel::validate(rhs_to_use, &rhs_transposed));
         // Assign rhs_to_use pointer to use transposed TensorInfo
         rhs_to_use = &rhs_transposed;
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_to_use->dimension(0) != rhs_to_use->dimension(1),
-                                    "The product AB is defined only if the number of columns in A is equal to the number of rows in B (after transpose)");
+                                    "The product AB is defined only if the number of columns in A is equal to the "
+                                    "number of rows in B (after transpose)");
 
     // Iterate over dimensions to be collapsed in operator - check dimensions are equivalent between tensors
-    for(unsigned int i = 2; i < Coordinates::num_max_dimensions; i++)
+    for (unsigned int i = 2; i < Coordinates::num_max_dimensions; i++)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_to_use->dimension(i) != rhs_to_use->dimension(i), "Broadcasting in Batch dimension is unsupported by this operator.");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_to_use->dimension(i) != rhs_to_use->dimension(i),
+                                        "Broadcasting in Batch dimension is unsupported by this operator.");
     }
 
     // Quantized-specific configuration
-    if(is_data_type_quantized(lhs->data_type()))
+    if (is_data_type_quantized(lhs->data_type()))
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(get_gemmlowp_output_stage_info(lhs_to_use, rhs_to_use, dst, gemm_info.activation_info, gemm_info.output_stage));
+        ARM_COMPUTE_RETURN_ON_ERROR(get_gemmlowp_output_stage_info(lhs_to_use, rhs_to_use, dst,
+                                                                   gemm_info.activation_info, gemm_info.output_stage));
     }
 
     cpu::CpuGemmAssemblyDispatch::validate(lhs_to_use, rhs_to_use, nullptr, dst, gemm_info);
@@ -138,7 +162,12 @@ Status CpuMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const
     return Status{};
 }
 
-void CpuMatMul::configure(ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info)
+void CpuMatMul::configure(ITensorInfo               *lhs,
+                          ITensorInfo               *rhs,
+                          ITensorInfo               *dst,
+                          const MatMulInfo          &info,
+                          const CpuMatMulSettings   &settings,
+                          const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, dst, info, settings);
@@ -163,21 +192,23 @@ void CpuMatMul::configure(ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, 
     _original_rhs_shape = rhs_to_use.tensor_shape();
 
     // Reshape lhs for use with assembly kernels.
-    lhs_to_use.set_tensor_shape(TensorShape(_original_lhs_shape.x(), _original_lhs_shape.y(), 1, _original_lhs_shape.collapsed_from(2).z()));
-    dst_to_use.set_tensor_shape(TensorShape(_original_dst_shape.x(), _original_dst_shape.y(), 1, _original_dst_shape.collapsed_from(2).z()));
+    lhs_to_use.set_tensor_shape(
+        TensorShape(_original_lhs_shape.x(), _original_lhs_shape.y(), 1, _original_lhs_shape.collapsed_from(2).z()));
+    dst_to_use.set_tensor_shape(
+        TensorShape(_original_dst_shape.x(), _original_dst_shape.y(), 1, _original_dst_shape.collapsed_from(2).z()));
     rhs_to_use.set_tensor_shape(_original_rhs_shape.collapsed_from(2));
 
     // 2.  Configuration for transpose of lhs/rhs
     // ------------------------------------------------------
     // Initialise transposed TensorInfo class for aux tensors (intermediary tensors)
-    if(_adj_lhs)
+    if (_adj_lhs)
     {
         // Setup transpose LHS
         _transpose_kernel_lhs = std::make_unique<cpu::kernels::CpuTransposeKernel>();
         _transpose_kernel_lhs->configure(&lhs_to_use, &_lhs_transposed);
     }
 
-    if(_adj_rhs)
+    if (_adj_rhs)
     {
         // Setup transpose RHS
         _transpose_kernel_rhs = std::make_unique<cpu::kernels::CpuTransposeKernel>();
@@ -196,20 +227,22 @@ void CpuMatMul::configure(ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, 
     rhs_to_use = (_adj_rhs) ? _rhs_transposed : rhs_to_use;
 
     // Quantized-specific configuration
-    if(is_data_type_quantized(lhs->data_type()))
+    if (is_data_type_quantized(lhs->data_type()))
     {
-        get_gemmlowp_output_stage_info(&lhs_to_use, &rhs_to_use, &dst_to_use, _gemm_info.activation_info, _gemm_info.output_stage);
+        get_gemmlowp_output_stage_info(&lhs_to_use, &rhs_to_use, &dst_to_use, _gemm_info.activation_info,
+                                       _gemm_info.output_stage);
     }
 
     // Configure Asm Kernel
     _asm_glue = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
-    _asm_glue->configure(&lhs_to_use, &rhs_to_use, nullptr, &dst_to_use, _gemm_info); // c is nullptr as bias not supported in MatMul
+    _asm_glue->configure(&lhs_to_use, &rhs_to_use, nullptr, &dst_to_use,
+                         _gemm_info); // c is nullptr as bias not supported in MatMul
 
     // Specify memory requirements for intermediate tensors
     auto asm_mem_req = _asm_glue->workspace();
     // Specify memory required by gemm kernel
     int idx = 0;
-    for(const auto &aux : asm_mem_req)
+    for (const auto &aux : asm_mem_req)
     {
         _aux_mem[idx] = aux;
         idx++;
@@ -228,8 +261,12 @@ void CpuMatMul::run(ITensorPack &tensors)
 
     // Reshape LHS and DST to ensure compatibility with GEMM asm kernel (Batch dimensions is 4th for lhs and dst within asm)
     // Collapse RHS (necessary to support dimensions larger than 3 in gemm assembly)
-    lhs->info()->set_tensor_shape(TensorShape(_original_lhs_shape.x(), _original_lhs_shape.y(), 1, _original_lhs_shape.collapsed_from(2).z())); // Collapsed 3+ dimensions into z
-    dst->info()->set_tensor_shape(TensorShape(_original_dst_shape.x(), _original_dst_shape.y(), 1, _original_dst_shape.collapsed_from(2).z())); // Collapsed 3+ dimensions into z
+    lhs->info()->set_tensor_shape(
+        TensorShape(_original_lhs_shape.x(), _original_lhs_shape.y(), 1,
+                    _original_lhs_shape.collapsed_from(2).z())); // Collapsed 3+ dimensions into z
+    dst->info()->set_tensor_shape(
+        TensorShape(_original_dst_shape.x(), _original_dst_shape.y(), 1,
+                    _original_dst_shape.collapsed_from(2).z())); // Collapsed 3+ dimensions into z
     rhs->info()->set_tensor_shape(_original_rhs_shape.collapsed_from(2));
 
     // Initialise object to handle stored transposed tensors in auxillary memory
@@ -240,17 +277,19 @@ void CpuMatMul::run(ITensorPack &tensors)
     ITensorPack asm_tensors(tensors);
 
     // Run transpose lhs if necessary
-    if(_adj_lhs)
+    if (_adj_lhs)
     {
-        ITensorPack lhs_transpose_pack = { { TensorType::ACL_SRC, lhs }, { TensorType::ACL_DST, lhs_transposed.get() } };
-        NEScheduler::get().schedule_op(_transpose_kernel_lhs.get(), Window::DimY, _transpose_kernel_lhs->window(), lhs_transpose_pack);
+        ITensorPack lhs_transpose_pack = {{TensorType::ACL_SRC, lhs}, {TensorType::ACL_DST, lhs_transposed.get()}};
+        NEScheduler::get().schedule_op(_transpose_kernel_lhs.get(), Window::DimY, _transpose_kernel_lhs->window(),
+                                       lhs_transpose_pack);
         asm_tensors.add_const_tensor(TensorType::ACL_SRC_0, lhs_transposed.get());
     }
     // Run transpose rhs if necessary
-    if(_adj_rhs)
+    if (_adj_rhs)
     {
-        ITensorPack rhs_transpose_pack = { { TensorType::ACL_SRC, rhs }, { TensorType::ACL_DST, rhs_transposed.get() } };
-        NEScheduler::get().schedule_op(_transpose_kernel_rhs.get(), Window::DimY, _transpose_kernel_rhs->window(), rhs_transpose_pack);
+        ITensorPack rhs_transpose_pack = {{TensorType::ACL_SRC, rhs}, {TensorType::ACL_DST, rhs_transposed.get()}};
+        NEScheduler::get().schedule_op(_transpose_kernel_rhs.get(), Window::DimY, _transpose_kernel_rhs->window(),
+                                       rhs_transpose_pack);
         asm_tensors.add_const_tensor(TensorType::ACL_SRC_1, rhs_transposed.get());
     }
     // Run asm kernel

@@ -52,7 +52,10 @@ public:
      * @param[in] dst             The dst tensor info. Data types supported: Same as @p src
      * @param[in] perm            Permutation vector
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
+    void configure(const CLCompileContext  &compile_context,
+                   const ITensorInfo       *src,
+                   ITensorInfo             *dst,
+                   const PermutationVector &perm);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClPermuteKernel::configure()

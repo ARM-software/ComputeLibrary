@@ -605,103 +605,197 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture
 TEST_SUITE_END() // FP32_CustomDataset
 TEST_SUITE_END() // Float
 
+/// @note: Every quantized test has a version with or without activation because the quantization info given is
+/// ignored when there is no activation. Instead of using the same quantization information for all the tensors, the
+/// fixture generates separate quantization info for each input and the output tensor.
+/// When we can also support dynamic quantization with the presence of activation, these two versions should be merged
+/// again, with the explicitly specified quantization info removed
 const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
-    ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
 });
+const auto NoActivation = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo()
+});
+const auto IgnoredQuantizationInfo = framework::dataset::make("IgnoredQuantizationInfo",
+{
+    QuantizationInfo()
+});
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data_precommit,
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })),
-                       QuantizedActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(data_precommit,
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       IgnoredQuantizationInfo,
+                       NoActivation,
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data_precommit,
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
-                       QuantizedActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(data_precommit,
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) }),
+                       QuantizedActivationFunctionsDataset,
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data_precommit_9x9,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(data_precommit,
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       IgnoredQuantizationInfo,
+                       NoActivation,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallWithActivation, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(data_precommit,
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) }),
+                       QuantizedActivationFunctionsDataset,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(data_precommit_9x9,
                        framework::dataset::make("DataType",
-                                                DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(3.f / 255, 10), QuantizationInfo(1.1f, 10) })),
-                       QuantizedActivationFunctionsDataset),
+                                                DataType::QASYMM8),
+                       IgnoredQuantizationInfo,
+                       NoActivation,
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data_nightly, framework::dataset::make("DataType",
-                       DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
-                       QuantizedActivationFunctionsDataset),
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge9x9, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data_nightly_9x9,
+FIXTURE_DATA_TEST_CASE(RunSmall9x9WithActivation, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(data_precommit_9x9,
                        framework::dataset::make("DataType",
-                                                DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(3.f / 255, 10), QuantizationInfo(1.1f, 10) })),
-                       QuantizedActivationFunctionsDataset),
+                                                DataType::QASYMM8),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(3.f / 255, 10), QuantizationInfo(1.1f, 10) }),
+                       QuantizedActivationFunctionsDataset,
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-
-TEST_SUITE_END() // QASYMM8
-
-TEST_SUITE(QASYMM8_CustomDataset)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::DirectConvolutionLayerDataset(),
-                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127), QuantizationInfo(1.1f, 10) })),
-                                       QuantizedActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(data_nightly, framework::dataset::make("DataType",
+                       DataType::QASYMM8),
+                       IgnoredQuantizationInfo,
+                       NoActivation,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeWithActivation, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(data_nightly, framework::dataset::make("DataType",
+                       DataType::QASYMM8),
+                       framework::dataset::make("QuantizationInfoIf", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) }),
+                       QuantizedActivationFunctionsDataset,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge9x9, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(data_nightly_9x9,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8),
+                       IgnoredQuantizationInfo,
+                       NoActivation,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge9x9WithActivation, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(data_nightly_9x9,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(3.f / 255, 10), QuantizationInfo(1.1f, 10) }),
+                       QuantizedActivationFunctionsDataset,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(CustomDataset, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(datasets::DirectConvolutionLayerDataset(),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                               IgnoredQuantizationInfo,
+                                       NoActivation,
                                framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END() // QASYMM8_CustomDataset
+FIXTURE_DATA_TEST_CASE(CustomDatasetWithActivation, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(datasets::DirectConvolutionLayerDataset(),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127), QuantizationInfo(1.1f, 10) }),
+                                       QuantizedActivationFunctionsDataset,
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(data_precommit, framework::dataset::make("DataType",
-                                                                                                                        DataType::QASYMM8_SIGNED)),
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, -10) })),
-                                                                                                                        QuantizedActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(data_precommit, framework::dataset::make("DataType",
+                                                                                                                        DataType::QASYMM8_SIGNED),
+                                                                                                                        IgnoredQuantizationInfo,
+                                                                                                                        NoActivation,
                                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(data_precommit,
+FIXTURE_DATA_TEST_CASE(RunSmallWithActivation, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(data_precommit, framework::dataset::make("DataType",
+                                                                                                                        DataType::QASYMM8_SIGNED),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, -10) }),
+                                                                                                                        QuantizedActivationFunctionsDataset,
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL, combine(data_precommit,
                        framework::dataset::make("DataType",
-                                                DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.1f, -10) })),
-                       QuantizedActivationFunctionsDataset),
+                                                DataType::QASYMM8_SIGNED),
+                       IgnoredQuantizationInfo,
+                       NoActivation,
                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(data_precommit_9x9,
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation, CLDirectConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL, combine(data_precommit,
                        framework::dataset::make("DataType",
-                                                DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
-                       QuantizedActivationFunctionsDataset),
+                                                DataType::QASYMM8_SIGNED),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.1f, -10) }),
+                       QuantizedActivationFunctionsDataset,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(data_precommit_9x9,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8_SIGNED),
+                       IgnoredQuantizationInfo,
+                       NoActivation,
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall9x9WithActivation, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(data_precommit_9x9,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8_SIGNED),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) }),
+                       QuantizedActivationFunctionsDataset,
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
@@ -709,10 +803,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<int
 }
 
 FIXTURE_DATA_TEST_CASE(RunCustomDataset, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::DirectConvolutionLayerDataset(),
-                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127), QuantizationInfo(1.1f, 10) })),
-                                       QuantizedActivationFunctionsDataset),
+                       combine(datasets::DirectConvolutionLayerDataset(),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                               IgnoredQuantizationInfo,
+                                       NoActivation,
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunCustomDatasetWithActivation, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(datasets::DirectConvolutionLayerDataset(),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127), QuantizationInfo(1.1f, 10) }),
+                                       QuantizedActivationFunctionsDataset,
                                framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output

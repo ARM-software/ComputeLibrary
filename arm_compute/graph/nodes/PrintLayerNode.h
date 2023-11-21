@@ -43,7 +43,9 @@ public:
      * @param[in] format_info (Optional) Format info.
      * @param[in] transform   (Optional) Input transform function.
      */
-    PrintLayerNode(std::ostream &stream, const IOFormatInfo &format_info = IOFormatInfo(), const std::function<ITensor *(ITensor *)> transform = nullptr);
+    PrintLayerNode(std::ostream                             &stream,
+                   const IOFormatInfo                       &format_info = IOFormatInfo(),
+                   const std::function<ITensor *(ITensor *)> transform   = nullptr);
 
     /** Stream metadata accessor
      *
@@ -67,7 +69,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
 private:
     std::ostream                             &_stream;

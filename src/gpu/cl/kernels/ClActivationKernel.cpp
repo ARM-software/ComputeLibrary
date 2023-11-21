@@ -28,14 +28,14 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/ActivationFunctionUtils.h"
-#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
-
 #include "support/StringSupport.h"
 
 #include <set>
@@ -51,36 +51,47 @@ namespace
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    static std::set<ActivationLayerInfo::ActivationFunction> quantized_supported_activations =
-    {
-        ActivationLayerInfo::ActivationFunction::RELU,
-        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-        ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-        ActivationLayerInfo::ActivationFunction::LOGISTIC,
-        ActivationLayerInfo::ActivationFunction::TANH,
-        ActivationLayerInfo::ActivationFunction::HARD_SWISH,
+    static std::set<ActivationLayerInfo::ActivationFunction> quantized_supported_activations = {
+        ActivationLayerInfo::ActivationFunction::RELU,         ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+        ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, ActivationLayerInfo::ActivationFunction::LOGISTIC,
+        ActivationLayerInfo::ActivationFunction::TANH,         ActivationLayerInfo::ActivationFunction::HARD_SWISH,
         ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
     };
-    const DataType                                data_type = src->data_type();
-    const QuantizationInfo                       &oq_info   = (dst != nullptr) ? dst->quantization_info() : src->quantization_info();
-    const ActivationLayerInfo::ActivationFunction f_act     = act_info.activation();
+    const DataType          data_type = src->data_type();
+    const QuantizationInfo &oq_info   = (dst != nullptr) ? dst->quantization_info() : src->quantization_info();
+    const ActivationLayerInfo::ActivationFunction f_act = act_info.activation();
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(data_type) && (quantized_supported_activations.count(f_act) == 0),
-                                    "For Quantized data type only hard swish, leaky relu, tanh, logistic, relu and lower/upper bounded relu are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(data_type) &&
+                                        (quantized_supported_activations.count(f_act) == 0),
+                                    "For Quantized data type only hard swish, leaky relu, tanh, logistic, relu and "
+                                    "lower/upper bounded relu are supported");
 
-    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 128)));
-    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 &&
+                                (f_act == ActivationLayerInfo::ActivationFunction::TANH) &&
+                                (oq_info != QuantizationInfo(1.f / 128.f, 128)));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 &&
+                                (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) &&
+                                (oq_info != QuantizationInfo(1.f / 256.f, 0)));
 
-    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
-    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) &&
+                                (f_act == ActivationLayerInfo::ActivationFunction::TANH) &&
+                                (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) &&
+                                (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) &&
+                                (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
 
-    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 0)));
-    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, -128)));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED &&
+                                (f_act == ActivationLayerInfo::ActivationFunction::TANH) &&
+                                (oq_info != QuantizationInfo(1.f / 128.f, 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED &&
+                                (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) &&
+                                (oq_info != QuantizationInfo(1.f / 256.f, -128)));
 
     // Checks performed when destination is configured
-    if((dst != nullptr) && (dst->total_size() != 0))
+    if ((dst != nullptr) && (dst->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
@@ -95,15 +106,18 @@ ClActivationKernel::ClActivationKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClActivationKernel::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo act_info)
+void ClActivationKernel::configure(const ClCompileContext &compile_context,
+                                   ITensorInfo            *src,
+                                   ITensorInfo            *dst,
+                                   ActivationLayerInfo     act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     _run_in_place = (dst == nullptr) || (dst == src);
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         // Destination auto inizialitation if not yet initialized
         auto_init_if_empty(*dst, *src->clone());
@@ -119,11 +133,10 @@ void ClActivationKernel::configure(const ClCompileContext &compile_context, ITen
 
     const ActivationLayerInfo::ActivationFunction f_act        = act_info.activation();
     const bool                                    is_quantized = is_data_type_quantized(dt);
-    const bool                                    perform_activation_in_float =
-        (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
-        || (f_act == ActivationLayerInfo::ActivationFunction::TANH)
-        || (f_act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
-        || (f_act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU);
+    const bool perform_activation_in_float = (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) ||
+                                             (f_act == ActivationLayerInfo::ActivationFunction::TANH) ||
+                                             (f_act == ActivationLayerInfo::ActivationFunction::HARD_SWISH) ||
+                                             (f_act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU);
 
     // Set build options
     CLBuildOptions build_opts;
@@ -132,22 +145,23 @@ void ClActivationKernel::configure(const ClCompileContext &compile_context, ITen
     build_opts.add_option("-DACT=" + lower_string(string_from_activation_func(f_act)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
+                          support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
 
     std::string kernel_name = std::string("activation_layer");
 
     // Set quantization info build options
-    if(is_quantized)
+    if (is_quantized)
     {
         const UniformQuantizationInfo iq_info = src->quantization_info().uniform();
 
-        if(!perform_activation_in_float)
+        if (!perform_activation_in_float)
         {
             int a_const_int = 0;
             int b_const_int = 0;
 
             // Create quantized version of constants a, b if needed
-            switch(dt)
+            switch (dt)
             {
                 case DataType::QASYMM8:
                 {
@@ -180,22 +194,25 @@ void ClActivationKernel::configure(const ClCompileContext &compile_context, ITen
         }
 
         // Quantized value of 0 corresponds to the offset o1
-        build_opts.add_option(("-DCONST_0=" + (is_data_type_quantized_asymmetric(dt) ? support::cpp11::to_string(iq_info.offset) : "0")));
+        build_opts.add_option(
+            ("-DCONST_0=" + (is_data_type_quantized_asymmetric(dt) ? support::cpp11::to_string(iq_info.offset) : "0")));
         build_opts.add_option(("-DS1_VAL=" + float_to_string_with_full_precision(iq_info.scale)));
-        build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DO1_VAL=" + support::cpp11::to_string(iq_info.offset));
+        build_opts.add_option_if(is_data_type_quantized_asymmetric(dt),
+                                 "-DO1_VAL=" + support::cpp11::to_string(iq_info.offset));
 
         // Set correct kernel name
         kernel_name += perform_activation_in_float ? std::string("_quant_f32") : std::string("_quant");
 
         // Set scale and offset of the source and destination if they have different quantization info
-        if(dst != nullptr)
+        if (dst != nullptr)
         {
             const UniformQuantizationInfo oq_info = dst->quantization_info().uniform();
 
-            if(iq_info != oq_info)
+            if (iq_info != oq_info)
             {
                 build_opts.add_option(("-DS2_VAL=" + float_to_string_with_full_precision(oq_info.scale)));
-                build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DO2_VAL=" + support::cpp11::to_string(oq_info.offset));
+                build_opts.add_option_if(is_data_type_quantized_asymmetric(dt),
+                                         "-DO2_VAL=" + support::cpp11::to_string(oq_info.offset));
             }
         }
     }
@@ -235,8 +252,9 @@ void ClActivationKernel::run_op(ITensorPack &tensors, const Window &window, ::cl
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
     ARM_COMPUTE_ERROR_ON(_run_in_place && src != dst);
 
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
@@ -246,13 +264,12 @@ void ClActivationKernel::run_op(ITensorPack &tensors, const Window &window, ::cl
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, src, slice);
-        if(!_run_in_place)
+        if (!_run_in_place)
         {
             add_3D_tensor_argument(idx, dst, slice);
         }
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

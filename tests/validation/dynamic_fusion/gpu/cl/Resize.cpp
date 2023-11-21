@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuResize.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -518,5 +517,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

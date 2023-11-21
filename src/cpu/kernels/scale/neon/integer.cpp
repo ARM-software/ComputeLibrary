@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Helpers.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/ScaleHelpers.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
 
@@ -33,8 +34,12 @@ namespace arm_compute
 {
 namespace
 {
-void u8_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offsets,
-                           float sampling_offset, bool align_corners, const Window &window)
+void u8_neon_scale_nearest(const ITensor *src,
+                           ITensor       *dst,
+                           const ITensor *offsets,
+                           float          sampling_offset,
+                           bool           align_corners,
+                           const Window  &window)
 {
     const size_t in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
     const size_t in_stride_w  = src->info()->dimension(1) + src->info()->padding().top + src->info()->padding().bottom;
@@ -54,43 +59,58 @@ void u8_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offs
     const uint8_t     *in_ptr_start        = src->buffer() + src->info()->offset_first_element_in_bytes();
     const unsigned int in_stride_bytes_hwc = src->info()->strides_in_bytes()[3];
 
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        const int32_t  offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
-        const auto     in_hi      = static_cast<int>(align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr) : std::floor((id.z() + sampling_offset) * hr));
-        const int      offset_row = in_hi * in_stride_wc;
-        int32_t        x          = window_start_x;
-        const uint8_t *in_ptr     = reinterpret_cast<const uint8_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
+        {
+            const int32_t offset =
+                *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
+            const auto in_hi = static_cast<int>(
+                align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr)
+                              : std::floor((id.z() + sampling_offset) * hr));
+            const int      offset_row = in_hi * in_stride_wc;
+            int32_t        x          = window_start_x;
+            const uint8_t *in_ptr     = reinterpret_cast<const uint8_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
 
-        for(; x <= window_end_x - window_step_x; x += window_step_x)
-        {
-            wrapper::vstore(reinterpret_cast<uint8_t *>(out.ptr()) + x,
-                            wrapper::vloadq(in_ptr + offset + offset_row + x));
-        }
-        for(; x < window_end_x; ++x)
-        {
-            *(reinterpret_cast<uint8_t *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
-        }
-    },
-    out);
+            for (; x <= window_end_x - window_step_x; x += window_step_x)
+            {
+                wrapper::vstore(reinterpret_cast<uint8_t *>(out.ptr()) + x,
+                                wrapper::vloadq(in_ptr + offset + offset_row + x));
+            }
+            for (; x < window_end_x; ++x)
+            {
+                *(reinterpret_cast<uint8_t *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
+            }
+        },
+        out);
 }
 
-void u8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                            BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                            bool align_corners, const Window &window)
+void u8_neon_scale_bilinear(const ITensor *src,
+                            ITensor       *dst,
+                            const ITensor *offsets,
+                            const ITensor *dx,
+                            const ITensor *dy,
+                            BorderMode     border_mode,
+                            PixelValue     constant_border_value,
+                            float          sampling_offset,
+                            bool           align_corners,
+                            const Window  &window)
 {
     // Compute the ratio between source and destination dimensions
-    const float scale_x = scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
-    const float scale_y = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
+    const float scale_x =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+    const float scale_y =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
 
     const int input_width  = src->info()->dimension(1);
     const int input_height = src->info()->dimension(2);
 
-    if(border_mode == BorderMode::CONSTANT)
+    if (border_mode == BorderMode::CONSTANT)
     {
         Iterator  out(dst, window);
-        const int in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
-        const int in_stride_wc = in_stride_c * (input_width + src->info()->padding().top + src->info()->padding().bottom);
+        const int in_stride_c = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
+        const int in_stride_wc =
+            in_stride_c * (input_width + src->info()->padding().top + src->info()->padding().bottom);
 
         // Don't increment in Y and Z direction for the input tensor
         // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -100,24 +120,37 @@ void u8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
         Iterator in(src, win_in);
 
         const uint8_t const_border_value = static_cast<uint8_t>(constant_border_value.get<uint8_t>());
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto     offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto     dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto     dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int32_t  in_hi  = std::floor((id.z() + sampling_offset) * scale_y - sampling_offset);
-            const uint8_t *in_ptr = reinterpret_cast<const uint8_t *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const auto offset =
+                    *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
+                const auto dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
+                const auto dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
+                const int32_t  in_hi = std::floor((id.z() + sampling_offset) * scale_y - sampling_offset);
+                const uint8_t *in_ptr =
+                    reinterpret_cast<const uint8_t *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
 
-            const auto a00 = (0 <= offset && offset < input_width && 0 <= in_hi && in_hi < input_height) ? *in_ptr : const_border_value;
-            const auto a01 = (-1 <= offset && offset < input_width - 1 && 0 <= in_hi && in_hi < input_height) ? *(in_ptr + in_stride_c) : const_border_value;
-            const auto a10 = (0 <= offset && offset < input_width && -1 <= in_hi && in_hi < input_height - 1) ? *(in_ptr + in_stride_wc) : const_border_value;
-            const auto a11 = (-1 <= offset && offset < input_width - 1 && -1 <= in_hi && in_hi < input_height - 1) ? *(in_ptr + in_stride_c + in_stride_wc) : const_border_value;
+                const auto a00 = (0 <= offset && offset < input_width && 0 <= in_hi && in_hi < input_height)
+                                     ? *in_ptr
+                                     : const_border_value;
+                const auto a01 = (-1 <= offset && offset < input_width - 1 && 0 <= in_hi && in_hi < input_height)
+                                     ? *(in_ptr + in_stride_c)
+                                     : const_border_value;
+                const auto a10 = (0 <= offset && offset < input_width && -1 <= in_hi && in_hi < input_height - 1)
+                                     ? *(in_ptr + in_stride_wc)
+                                     : const_border_value;
+                const auto a11 = (-1 <= offset && offset < input_width - 1 && -1 <= in_hi && in_hi < input_height - 1)
+                                     ? *(in_ptr + in_stride_c + in_stride_wc)
+                                     : const_border_value;
 
-            *reinterpret_cast<uint8_t *>(out.ptr()) = static_cast<uint8_t>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
+                *reinterpret_cast<uint8_t *>(out.ptr()) =
+                    static_cast<uint8_t>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            },
+            in, out);
     }
-    else if(border_mode == BorderMode::REPLICATE)
+    else if (border_mode == BorderMode::REPLICATE)
     {
         using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<float, wrapper::traits::BitWidth::W128>;
 
@@ -152,12 +185,12 @@ void u8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
         const float fp_coord_offset_y = sampling_offset * (scale_y - 1);
         const float fp_coord_offset_x = sampling_offset * (scale_x - 1);
 
-        for(int bo = bo_start; bo < bo_end; bo += bo_step)
+        for (int bo = bo_start; bo < bo_end; bo += bo_step)
         {
             const uint8_t *in_ptr  = in.ptr() + bo * in_stride_b;
             uint8_t       *out_ptr = out.ptr() + bo * out_stride_b;
 
-            for(int yo = yo_start; yo < yo_end; yo += yo_step)
+            for (int yo = yo_start; yo < yo_end; yo += yo_step)
             {
                 // Floating-point coordinate
                 const float yi_f = yo * scale_y + fp_coord_offset_y;
@@ -174,7 +207,7 @@ void u8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
                 const uint8_t *in_ptr_yi1 = in_ptr + yi1 * in_stride_y;
 
                 uint8_t *out_ptr_yo = out_ptr + yo * out_stride_y;
-                for(int xo = xo_start; xo < xo_end; xo += xo_step)
+                for (int xo = xo_start; xo < xo_end; xo += xo_step)
                 {
                     // Floating-point coordinate
                     const float xi_f = xo * scale_x + fp_coord_offset_x;
@@ -205,7 +238,7 @@ void u8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
                     uint8_t *out_ptr_xo_yo = out_ptr_yo + xo * out_stride_x;
 
                     int cout = 0;
-                    for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                    for (; cout <= (out_dim_ch - step_cout); cout += step_cout)
                     {
                         const auto in00 = wrapper::vloadq(in_ptr_xi0_yi0 + cout * sizeof(uint8_t));
                         const auto in01 = wrapper::vloadq(in_ptr_xi1_yi0 + cout * sizeof(uint8_t));
@@ -270,19 +303,21 @@ void u8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
                         const auto out_2_int = wrapper::vcvta<uint32_t>(out_2);
                         const auto out_3_int = wrapper::vcvta<uint32_t>(out_3);
 #else  // defined(__aarch64__) && !defined(BARE_METAL)
-                        const auto out_0_int = wrapper::vcvt<uint32_t>(out_0);
-                        const auto out_1_int = wrapper::vcvt<uint32_t>(out_1);
-                        const auto out_2_int = wrapper::vcvt<uint32_t>(out_2);
-                        const auto out_3_int = wrapper::vcvt<uint32_t>(out_3);
+                        const auto out_0_int                      = wrapper::vcvt<uint32_t>(out_0);
+                        const auto out_1_int                      = wrapper::vcvt<uint32_t>(out_1);
+                        const auto out_2_int                      = wrapper::vcvt<uint32_t>(out_2);
+                        const auto out_3_int                      = wrapper::vcvt<uint32_t>(out_3);
 #endif // defined(__aarch64__) && !defined(BARE_METAL)
-                        const auto low_part  = wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_0_int), wrapper::vqmovn(out_1_int)));
-                        const auto high_part = wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_2_int), wrapper::vqmovn(out_3_int)));
-                        const auto out       = wrapper::vcombine(low_part, high_part);
+                        const auto low_part =
+                            wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_0_int), wrapper::vqmovn(out_1_int)));
+                        const auto high_part =
+                            wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_2_int), wrapper::vqmovn(out_3_int)));
+                        const auto out = wrapper::vcombine(low_part, high_part);
 
                         wrapper::vstore(out_ptr_xo_yo + cout * sizeof(uint8_t), out);
                     }
 
-                    for(; cout < out_dim_ch; ++cout)
+                    for (; cout < out_dim_ch; ++cout)
                     {
                         const uint8_t in00 = *(in_ptr_xi0_yi0 + cout * sizeof(uint8_t));
                         const uint8_t in01 = *(in_ptr_xi1_yi0 + cout * sizeof(uint8_t));
@@ -311,18 +346,27 @@ void u8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
     }
 }
 
-void s8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                            BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                            bool align_corners, const Window &window)
+void s8_neon_scale_bilinear(const ITensor *src,
+                            ITensor       *dst,
+                            const ITensor *offsets,
+                            const ITensor *dx,
+                            const ITensor *dy,
+                            BorderMode     border_mode,
+                            PixelValue     constant_border_value,
+                            float          sampling_offset,
+                            bool           align_corners,
+                            const Window  &window)
 {
     ARM_COMPUTE_UNUSED(dx, dy, offsets, constant_border_value);
-    if(border_mode == BorderMode::REPLICATE)
+    if (border_mode == BorderMode::REPLICATE)
     {
         using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<float, wrapper::traits::BitWidth::W128>;
 
         // Compute the ratio between source and destination dimensions
-        const float scale_x = scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
-        const float scale_y = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
+        const float scale_x =
+            scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+        const float scale_y =
+            scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
 
         const int     in_stride_x  = src->info()->strides_in_bytes()[1];
         const int     in_stride_y  = src->info()->strides_in_bytes()[2];
@@ -356,12 +400,12 @@ void s8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
         const float fp_coord_offset_y = sampling_offset * (scale_y - 1);
         const float fp_coord_offset_x = sampling_offset * (scale_x - 1);
 
-        for(int bo = bo_start; bo < bo_end; bo += bo_step)
+        for (int bo = bo_start; bo < bo_end; bo += bo_step)
         {
             const int8_t *in_ptr  = reinterpret_cast<int8_t *>(in.ptr() + bo * in_stride_b);
             int8_t       *out_ptr = reinterpret_cast<int8_t *>(out.ptr() + bo * out_stride_b);
 
-            for(int yo = yo_start; yo < yo_end; yo += yo_step)
+            for (int yo = yo_start; yo < yo_end; yo += yo_step)
             {
                 // Floating-point coordinate
                 const float yi_f = yo * scale_y + fp_coord_offset_y;
@@ -378,7 +422,7 @@ void s8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
                 const int8_t *in_ptr_yi1 = in_ptr + yi1 * in_stride_y;
 
                 int8_t *out_ptr_yo = out_ptr + yo * out_stride_y;
-                for(int xo = xo_start; xo < xo_end; xo += xo_step)
+                for (int xo = xo_start; xo < xo_end; xo += xo_step)
                 {
                     // Floating-point coordinate
                     const float xi_f = xo * scale_x + fp_coord_offset_x;
@@ -409,7 +453,7 @@ void s8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
                     int8_t *out_ptr_xo_yo = out_ptr_yo + xo * out_stride_x;
 
                     int cout = 0;
-                    for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                    for (; cout <= (out_dim_ch - step_cout); cout += step_cout)
                     {
                         const auto in00 = wrapper::vloadq(in_ptr_xi0_yi0 + cout * sizeof(int8_t));
                         const auto in01 = wrapper::vloadq(in_ptr_xi1_yi0 + cout * sizeof(int8_t));
@@ -479,14 +523,16 @@ void s8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
                         const auto out_2_int                      = wrapper::vcvt<int32_t>(out_2);
                         const auto out_3_int                      = wrapper::vcvt<int32_t>(out_3);
 #endif // defined(__aarch64__) && !defined(BARE_METAL)
-                        const auto low_part  = wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_0_int), wrapper::vqmovn(out_1_int)));
-                        const auto high_part = wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_2_int), wrapper::vqmovn(out_3_int)));
-                        const auto out       = wrapper::vcombine(low_part, high_part);
+                        const auto low_part =
+                            wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_0_int), wrapper::vqmovn(out_1_int)));
+                        const auto high_part =
+                            wrapper::vqmovn(wrapper::vcombine(wrapper::vqmovn(out_2_int), wrapper::vqmovn(out_3_int)));
+                        const auto out = wrapper::vcombine(low_part, high_part);
 
                         wrapper::vstore(out_ptr_xo_yo + cout * sizeof(int8_t), out);
                     }
 
-                    for(; cout < out_dim_ch; ++cout)
+                    for (; cout < out_dim_ch; ++cout)
                     {
                         const int8_t in00 = *(in_ptr_xi0_yi0 + cout * sizeof(int8_t));
                         const int8_t in01 = *(in_ptr_xi1_yi0 + cout * sizeof(int8_t));
@@ -515,8 +561,12 @@ void s8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *off
     }
 }
 
-void s16_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offsets,
-                            float sampling_offset, bool align_corners, const Window &window)
+void s16_neon_scale_nearest(const ITensor *src,
+                            ITensor       *dst,
+                            const ITensor *offsets,
+                            float          sampling_offset,
+                            bool           align_corners,
+                            const Window  &window)
 {
     const size_t in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
     const size_t in_stride_w  = src->info()->dimension(1) + src->info()->padding().top + src->info()->padding().bottom;
@@ -536,33 +586,46 @@ void s16_neon_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *off
     const uint8_t     *in_ptr_start        = src->buffer() + src->info()->offset_first_element_in_bytes();
     const unsigned int in_stride_bytes_hwc = src->info()->strides_in_bytes()[3];
 
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        const int32_t  offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
-        const auto     in_hi      = static_cast<int>(align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr) : std::floor((id.z() + sampling_offset) * hr));
-        const int      offset_row = in_hi * in_stride_wc;
-        int32_t        x          = window_start_x;
-        const int16_t *in_ptr     = reinterpret_cast<const int16_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
+        {
+            const int32_t offset =
+                *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
+            const auto in_hi = static_cast<int>(
+                align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr)
+                              : std::floor((id.z() + sampling_offset) * hr));
+            const int      offset_row = in_hi * in_stride_wc;
+            int32_t        x          = window_start_x;
+            const int16_t *in_ptr     = reinterpret_cast<const int16_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
 
-        for(; x <= window_end_x - window_step_x; x += window_step_x)
-        {
-            wrapper::vstore(reinterpret_cast<int16_t *>(out.ptr()) + x,
-                            wrapper::vloadq(in_ptr + offset + offset_row + x));
-        }
-        for(; x < window_end_x; ++x)
-        {
-            *(reinterpret_cast<int16_t *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
-        }
-    },
-    out);
+            for (; x <= window_end_x - window_step_x; x += window_step_x)
+            {
+                wrapper::vstore(reinterpret_cast<int16_t *>(out.ptr()) + x,
+                                wrapper::vloadq(in_ptr + offset + offset_row + x));
+            }
+            for (; x < window_end_x; ++x)
+            {
+                *(reinterpret_cast<int16_t *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
+            }
+        },
+        out);
 }
 
-void s16_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                             BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                             bool align_corners, const Window &window)
+void s16_neon_scale_bilinear(const ITensor *src,
+                             ITensor       *dst,
+                             const ITensor *offsets,
+                             const ITensor *dx,
+                             const ITensor *dy,
+                             BorderMode     border_mode,
+                             PixelValue     constant_border_value,
+                             float          sampling_offset,
+                             bool           align_corners,
+                             const Window  &window)
 {
     // Compute the ratio between source height and destination height
-    const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
+    const auto hr =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
 
     Iterator  out(dst, window);
     const int in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
@@ -577,64 +640,93 @@ void s16_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *of
     win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
     Iterator in(src, win_in);
 
-    if(border_mode == BorderMode::CONSTANT)
+    if (border_mode == BorderMode::CONSTANT)
     {
         const int16_t const_border_value = static_cast<int16_t>(constant_border_value.get<int16_t>());
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto     offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto     dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto     dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int32_t  in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
-            const int16_t *in_ptr = reinterpret_cast<const int16_t *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const auto offset =
+                    *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
+                const auto dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
+                const auto dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
+                const int32_t  in_hi = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
+                const int16_t *in_ptr =
+                    reinterpret_cast<const int16_t *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
 
-            const auto a00 = (0 <= offset && offset < in_dim_w && 0 <= in_hi && in_hi < in_dim_h) ? *in_ptr : const_border_value;
-            const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h) ? *(in_ptr + in_stride_c) : const_border_value;
-            const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_wc) : const_border_value;
-            const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_c + in_stride_wc) : const_border_value;
+                const auto a00 =
+                    (0 <= offset && offset < in_dim_w && 0 <= in_hi && in_hi < in_dim_h) ? *in_ptr : const_border_value;
+                const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h)
+                                     ? *(in_ptr + in_stride_c)
+                                     : const_border_value;
+                const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1)
+                                     ? *(in_ptr + in_stride_wc)
+                                     : const_border_value;
+                const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1)
+                                     ? *(in_ptr + in_stride_c + in_stride_wc)
+                                     : const_border_value;
 
-            *reinterpret_cast<int16_t *>(out.ptr()) = static_cast<int16_t>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
+                *reinterpret_cast<int16_t *>(out.ptr()) =
+                    static_cast<int16_t>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            },
+            in, out);
     }
-    else if(border_mode == BorderMode::REPLICATE)
+    else if (border_mode == BorderMode::REPLICATE)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int  in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const auto offset =
+                    *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
+                const auto dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
+                const auto dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
+                const int  in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
 
-            const auto clamped_w  = utility::clamp<int>(offset, 0, in_dim_w - 1);
-            const auto clamped_w1 = utility::clamp<int>(offset + 1, 0, in_dim_w - 1);
-            const auto clamped_h  = utility::clamp<int>(in_hi, 0, in_dim_h - 1);
-            const auto clamped_h1 = utility::clamp<int>(in_hi + 1, 0, in_dim_h - 1);
+                const auto clamped_w  = utility::clamp<int>(offset, 0, in_dim_w - 1);
+                const auto clamped_w1 = utility::clamp<int>(offset + 1, 0, in_dim_w - 1);
+                const auto clamped_h  = utility::clamp<int>(in_hi, 0, in_dim_h - 1);
+                const auto clamped_h1 = utility::clamp<int>(in_hi + 1, 0, in_dim_h - 1);
 
-            const auto a00 = *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
-            const auto a01 = *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h * in_stride_wc);
-            const auto a10 = *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w * in_stride_c + clamped_h1 * in_stride_wc);
-            const auto a11 = *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h1 * in_stride_wc);
+                const auto a00 =
+                    *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
+                const auto a01 = *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w1 * in_stride_c +
+                                   clamped_h * in_stride_wc);
+                const auto a10 = *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w * in_stride_c +
+                                   clamped_h1 * in_stride_wc);
+                const auto a11 = *(reinterpret_cast<const int16_t *>(in.ptr()) + clamped_w1 * in_stride_c +
+                                   clamped_h1 * in_stride_wc);
 
-            *reinterpret_cast<int16_t *>(out.ptr()) = static_cast<int16_t>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
+                *reinterpret_cast<int16_t *>(out.ptr()) =
+                    static_cast<int16_t>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            },
+            in, out);
     }
     else
     {
         ARM_COMPUTE_ERROR("Not implemented");
     }
 }
-}
+} // namespace
 namespace cpu
 {
-void s8_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                   bool align_corners, const Window &window)
+void s8_neon_scale(const ITensor      *src,
+                   ITensor            *dst,
+                   const ITensor      *offsets,
+                   const ITensor      *dx,
+                   const ITensor      *dy,
+                   InterpolationPolicy policy,
+                   BorderMode          border_mode,
+                   PixelValue          constant_border_value,
+                   float               sampling_offset,
+                   bool                align_corners,
+                   const Window       &window)
 {
-    if(policy == InterpolationPolicy::BILINEAR)
+    if (policy == InterpolationPolicy::BILINEAR)
     {
-        s8_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset, align_corners, window);
+        s8_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset,
+                               align_corners, window);
     }
     else
     {
@@ -642,29 +734,47 @@ void s8_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, con
     }
 }
 
-void u8_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                   bool align_corners, const Window &window)
+void u8_neon_scale(const ITensor      *src,
+                   ITensor            *dst,
+                   const ITensor      *offsets,
+                   const ITensor      *dx,
+                   const ITensor      *dy,
+                   InterpolationPolicy policy,
+                   BorderMode          border_mode,
+                   PixelValue          constant_border_value,
+                   float               sampling_offset,
+                   bool                align_corners,
+                   const Window       &window)
 {
-    if(policy == InterpolationPolicy::BILINEAR)
+    if (policy == InterpolationPolicy::BILINEAR)
     {
-        u8_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset, align_corners, window);
+        u8_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset,
+                               align_corners, window);
     }
-    else if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    else if (policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
         u8_neon_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
     }
 }
 
-void s16_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                    InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                    bool align_corners, const Window &window)
+void s16_neon_scale(const ITensor      *src,
+                    ITensor            *dst,
+                    const ITensor      *offsets,
+                    const ITensor      *dx,
+                    const ITensor      *dy,
+                    InterpolationPolicy policy,
+                    BorderMode          border_mode,
+                    PixelValue          constant_border_value,
+                    float               sampling_offset,
+                    bool                align_corners,
+                    const Window       &window)
 {
-    if(policy == InterpolationPolicy::BILINEAR)
+    if (policy == InterpolationPolicy::BILINEAR)
     {
-        s16_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset, align_corners, window);
+        s16_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset,
+                                align_corners, window);
     }
-    else if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    else if (policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
         s16_neon_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
     }

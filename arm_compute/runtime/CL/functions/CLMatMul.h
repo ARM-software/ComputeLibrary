@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -88,14 +89,23 @@ public:
      * @param[in]  settings        Contains flags for function level settings
      * @param[in]  act_info        (Optional) Contains activation function and lower and upper bound values for bounded activation functions.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *rhs, ICLTensor *lhs, ICLTensor *dst, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings = GpuMatMulSettings{}, const
-                   ActivationLayerInfo &act_info = ActivationLayerInfo{});
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *rhs,
+                   ICLTensor                 *lhs,
+                   ICLTensor                 *dst,
+                   const MatMulInfo          &matmul_info,
+                   const GpuMatMulSettings   &settings = GpuMatMulSettings{},
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo{});
     /** Initialise the kernel's inputs and output
      *
      * Similar to @ref CLMatMul::configure()
      */
-    void configure(ICLTensor *lhs, ICLTensor *rhs, ICLTensor *dst, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings = GpuMatMulSettings{}, const ActivationLayerInfo &act_info =
-                       ActivationLayerInfo{});
+    void configure(ICLTensor                 *lhs,
+                   ICLTensor                 *rhs,
+                   ICLTensor                 *dst,
+                   const MatMulInfo          &matmul_info,
+                   const GpuMatMulSettings   &settings = GpuMatMulSettings{},
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo{});
     /** Static function to check if given info will lead to a valid configuration of @ref CLMatMul.
      *
      *
@@ -107,7 +117,11 @@ public:
      * @param[in]  matmul_info Contains MatMul operation information described in @ref MatMulInfo.
      * @param[in]  act_info    (Optional) Contains activation function and lower and upper bound values for bounded activation functions.
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulInfo &matmul_info, const ActivationLayerInfo &act_info = ActivationLayerInfo{});
+    static Status validate(const ITensorInfo         *lhs,
+                           const ITensorInfo         *rhs,
+                           const ITensorInfo         *output,
+                           const MatMulInfo          &matmul_info,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo{});
     // Inherited methods overridden:
     void run() override;
 

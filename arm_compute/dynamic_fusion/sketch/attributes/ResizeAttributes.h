@@ -27,6 +27,7 @@
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
+
 #include <cstdint>
 
 namespace arm_compute
@@ -75,9 +76,9 @@ public:
 private:
     int32_t             _output_width{};
     int32_t             _output_height{};
-    InterpolationPolicy _interpolation_policy{ InterpolationPolicy::BILINEAR };
-    SamplingPolicy      _sampling_policy{ SamplingPolicy::CENTER };
-    bool                _align_corners{ false };
+    InterpolationPolicy _interpolation_policy{InterpolationPolicy::BILINEAR};
+    SamplingPolicy      _sampling_policy{SamplingPolicy::CENTER};
+    bool                _align_corners{false};
 };
 
 } // namespace dynamic_fusion

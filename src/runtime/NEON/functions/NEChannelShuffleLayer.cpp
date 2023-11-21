@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEChannelShuffleLayer.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEChannelShuffleLayerKernel.h"
 

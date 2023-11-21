@@ -59,7 +59,11 @@ public:
      * @param[out] output          Destination tensor. Data types supported: U8.
      * @param[in]  op              Bitwise operation to perform. Supported: AND, OR, NOT, XOR.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, BitwiseOperation op);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input1,
+                   const ICLTensor        *input2,
+                   ICLTensor              *output,
+                   BitwiseOperation        op);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

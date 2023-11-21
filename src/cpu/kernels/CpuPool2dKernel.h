@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_POOL2D_KERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -38,7 +39,8 @@ namespace kernels
 class CpuPool2dKernel : public ICpuKernel<CpuPool2dKernel>
 {
 private:
-    using PoolingKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, ITensor *, PoolingLayerInfo &, const Window &, const Window &)>::type;
+    using PoolingKernelPtr = std::add_pointer<void(
+        const ITensor *, ITensor *, ITensor *, PoolingLayerInfo &, const Window &, const Window &)>::type;
 
 public:
     CpuPool2dKernel() = default;
@@ -52,17 +54,21 @@ public:
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      * @param[out] indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr);
+    void
+    configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuPool2dKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *dst,
+                           const PoolingLayerInfo &pool_info,
+                           const ITensorInfo      *indices = nullptr);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct PoolingKernel
@@ -76,11 +82,11 @@ public:
 
 private:
     PoolingLayerInfo _pool_info{};
-    DataLayout       _data_layout{ DataLayout::UNKNOWN };
-    unsigned int     _num_elems_processed_per_iteration{ 0 };
+    DataLayout       _data_layout{DataLayout::UNKNOWN};
+    unsigned int     _num_elems_processed_per_iteration{0};
     Size2D           _pool_size{};
     int              _pool_stride_x{};
-    PoolingKernelPtr _run_method{ nullptr };
+    PoolingKernelPtr _run_method{nullptr};
     std::string      _name{};
 };
 } // namespace kernels

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NESTACKLAYER_H
-#define ARM_COMPUTE_NESTACKLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESTACKLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESTACKLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -91,9 +91,8 @@ public:
     void run() override;
 
 private:
-    std::vector<ITensor *>                           _input;
-    std::vector<std::unique_ptr<NEStackLayerKernel>> _stack_kernels;
-    unsigned int                                     _num_inputs;
+    std::unique_ptr<NEStackLayerKernel> _stack_kernel;
+    bool                                _is_prepared;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NESTACKLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESTACKLAYER_H

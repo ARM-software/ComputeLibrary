@@ -26,8 +26,8 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/runtime/Types.h"
 #include "arm_compute/runtime/experimental/Types.h"
+#include "arm_compute/runtime/Types.h"
 
 #include <cstdint>
 

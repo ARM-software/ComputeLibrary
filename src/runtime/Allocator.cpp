@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/Allocator.h"
-#include "arm_compute/runtime/MemoryRegion.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/MemoryRegion.h"
 
 #include <cstddef>
 

@@ -63,15 +63,13 @@ struct CLDeviceOptions
 struct CLQuantization
 {
     /** Default Constructor */
-    CLQuantization()
-        : scale(nullptr), offset(nullptr) {};
+    CLQuantization() : scale(nullptr), offset(nullptr){};
     /** Constructor
      *
      * @param[in] scale  OpenCL scale array
      * @param[in] offset OpenCL offset array
      */
-    CLQuantization(const ICLFloatArray *scale, const ICLInt32Array *offset)
-        : scale(scale), offset(offset) {};
+    CLQuantization(const ICLFloatArray *scale, const ICLInt32Array *offset) : scale(scale), offset(offset){};
 
     const ICLFloatArray *scale;  /**< Quantization scale array */
     const ICLInt32Array *offset; /**< Quantization offset array */

@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_CLFFTSCALEKERNEL_H
 #define ARM_COMPUTE_CLFFTSCALEKERNEL_H
 
-#include "src/core/CL/ICLKernel.h"
-
 #include "arm_compute/core/KernelDescriptors.h"
+
+#include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
@@ -63,7 +63,10 @@ public:
      * @param[out]    output          Destination tensor. Data type supported: same as @p input
      * @param[in]     config          Kernel configuration
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config);
+    void configure(const CLCompileContext   &compile_context,
+                   ICLTensor                *input,
+                   ICLTensor                *output,
+                   const FFTScaleKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTScaleKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F16/F32.

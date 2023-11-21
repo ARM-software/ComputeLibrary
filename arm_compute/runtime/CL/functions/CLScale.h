@@ -83,7 +83,10 @@ public:
      *                                All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]     info            @ref ScaleKernelInfo descriptor to be used to configure
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   const ScaleKernelInfo  &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLScale
      *

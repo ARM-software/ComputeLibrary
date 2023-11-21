@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,27 +24,34 @@
 #include "arm_compute/runtime/CL/functions/CLReverse.h"
 
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/kernels/CLReverseKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLReverseKernel.h"
 
 namespace arm_compute
 {
-void CLReverse::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
+void CLReverse::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *axis, bool use_inverted_axis)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, use_inverted_axis);
 }
 
-void CLReverse::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
+void CLReverse::configure(const CLCompileContext &compile_context,
+                          const ICLTensor        *input,
+                          ICLTensor              *output,
+                          const ICLTensor        *axis,
+                          bool                    use_inverted_axis)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, axis);
     auto k = std::make_unique<CLReverseKernel>();
-    k->configure(compile_context, input, output, axis);
+    k->configure(compile_context, input, output, axis, use_inverted_axis);
     _kernel = std::move(k);
 }
 
-Status CLReverse::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
+Status CLReverse::validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const ITensorInfo *axis,
+                           bool               use_inverted_axis)
 {
-    return CLReverseKernel::validate(input, output, axis);
+    return CLReverseKernel::validate(input, output, axis, use_inverted_axis);
 }
 } // namespace arm_compute

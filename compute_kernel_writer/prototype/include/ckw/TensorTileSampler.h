@@ -26,6 +26,7 @@
 #define CKW_PROTOTYPE_INCLUDE_CKW_TENSORTILESAMPLER_H
 
 #include "ckw/types/TensorSamplerTypes.h"
+
 #include <functional>
 
 namespace ckw
@@ -55,12 +56,14 @@ public:
      * @param[in] address_mode_y The address mode of the y dimension.
      * @param[in] address_mode_z The address mode of the z dimension.
      */
-    TensorTileSampler(
-        TileOperand &x, TileOperand &y, TileOperand &z, TileOperand &b,
-        TensorSamplerFormat       format,
-        TensorSamplerAddressModeX address_mode_x,
-        TensorSamplerAddressModeY address_mode_y,
-        TensorSamplerAddressModeZ address_mode_z);
+    TensorTileSampler(TileOperand              &x,
+                      TileOperand              &y,
+                      TileOperand              &z,
+                      TileOperand              &b,
+                      TensorSamplerFormat       format,
+                      TensorSamplerAddressModeX address_mode_x,
+                      TensorSamplerAddressModeY address_mode_y,
+                      TensorSamplerAddressModeZ address_mode_z);
 
     /** Initialize a new instance of @ref TensorSampler class.
      *
@@ -75,13 +78,16 @@ public:
      * @param[in] address_mode_y The address mode of the y dimension.
      * @param[in] address_mode_z The address mode of the z dimension.
      */
-    TensorTileSampler(
-        TileOperand &x, TileOperand &y, TileOperand &z, TileOperand &b,
-        int32_t height, int32_t width,
-        TensorSamplerFormat       format,
-        TensorSamplerAddressModeX address_mode_x,
-        TensorSamplerAddressModeY address_mode_y,
-        TensorSamplerAddressModeZ address_mode_z);
+    TensorTileSampler(TileOperand              &x,
+                      TileOperand              &y,
+                      TileOperand              &z,
+                      TileOperand              &b,
+                      int32_t                   height,
+                      int32_t                   width,
+                      TensorSamplerFormat       format,
+                      TensorSamplerAddressModeX address_mode_x,
+                      TensorSamplerAddressModeY address_mode_y,
+                      TensorSamplerAddressModeZ address_mode_z);
 
     /** Get the coordinate in the x dimension. */
     const TileOperand &x() const;
@@ -144,18 +150,18 @@ public:
     TensorTileSampler &address_mode_z(TensorSamplerAddressModeZ address_mode_z);
 
 private:
-    TileOperand *_x{ nullptr };
-    TileOperand *_y{ nullptr };
-    TileOperand *_z{ nullptr };
-    TileOperand *_b{ nullptr };
+    TileOperand *_x{nullptr};
+    TileOperand *_y{nullptr};
+    TileOperand *_z{nullptr};
+    TileOperand *_b{nullptr};
 
-    int32_t _height{ 0 };
-    int32_t _width{ 0 };
+    int32_t _height{0};
+    int32_t _width{0};
 
-    TensorSamplerFormat       _format{ TensorSamplerFormat::Unknown };
-    TensorSamplerAddressModeX _address_mode_x{ TensorSamplerAddressModeX::Unknown };
-    TensorSamplerAddressModeY _address_mode_y{ TensorSamplerAddressModeY::Unknown };
-    TensorSamplerAddressModeZ _address_mode_z{ TensorSamplerAddressModeZ::Unknown };
+    TensorSamplerFormat       _format{TensorSamplerFormat::Unknown};
+    TensorSamplerAddressModeX _address_mode_x{TensorSamplerAddressModeX::Unknown};
+    TensorSamplerAddressModeY _address_mode_y{TensorSamplerAddressModeY::Unknown};
+    TensorSamplerAddressModeZ _address_mode_z{TensorSamplerAddressModeZ::Unknown};
 };
 
 } // namespace ckw

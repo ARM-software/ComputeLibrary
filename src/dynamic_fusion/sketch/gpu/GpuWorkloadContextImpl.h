@@ -27,8 +27,8 @@
 
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadContext.h"
+#include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
 
 namespace arm_compute
 {
@@ -93,8 +93,8 @@ private:
     GpuLanguage       _gpu_language;
     CLCompileContext *_cl_compile_ctx;
 
-    ITensorInfo::Id     _next_tensor_id;
-    MemoryDescriptorMap _mem_map;
+    ITensorInfo::Id                                        _next_tensor_id;
+    MemoryDescriptorMap                                    _mem_map;
     std::map<ITensorInfo::Id, std::unique_ptr<TensorInfo>> _managed_tensor_info;
 };
 

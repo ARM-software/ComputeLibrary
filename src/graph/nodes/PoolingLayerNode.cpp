@@ -32,8 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-PoolingLayerNode::PoolingLayerNode(PoolingLayerInfo pool_info)
-    : _info(std::move(pool_info))
+PoolingLayerNode::PoolingLayerNode(PoolingLayerInfo pool_info) : _info(std::move(pool_info))
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -55,7 +54,8 @@ TensorDescriptor PoolingLayerNode::compute_output_descriptor(const TensorDescrip
     const unsigned int pool_size_x  = info.is_global_pooling ? input_width : info.pool_size.width;
     const unsigned int pool_size_y  = info.is_global_pooling ? input_height : info.pool_size.height;
 
-    std::tie(pooled_width, pooled_height) = scaled_dimensions(input_width, input_height, pool_size_x, pool_size_y, info.pad_stride_info);
+    std::tie(pooled_width, pooled_height) =
+        scaled_dimensions(input_width, input_height, pool_size_x, pool_size_y, info.pad_stride_info);
 
     const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
@@ -67,7 +67,7 @@ TensorDescriptor PoolingLayerNode::compute_output_descriptor(const TensorDescrip
 
 bool PoolingLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

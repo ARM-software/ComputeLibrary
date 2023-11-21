@@ -58,10 +58,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, LogicalOperation op);
+    static Status
+    validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, LogicalOperation op);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:

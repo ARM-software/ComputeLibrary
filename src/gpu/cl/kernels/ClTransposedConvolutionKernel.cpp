@@ -26,13 +26,13 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
-
-#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
@@ -42,11 +42,15 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+Status validate_arguments(const ITensorInfo   *input,
+                          const ITensorInfo   *weights,
+                          const ITensorInfo   *biases,
+                          const ITensorInfo   *output,
                           const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QASYMM8_SIGNED, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32,
+                                                         DataType::QASYMM8_SIGNED, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(weights, DataLayout::NHWC);
@@ -56,12 +60,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     constexpr unsigned int height_idx  = 2;
     constexpr unsigned int batch_idx   = 3;
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != input->dimension(channel_idx), "Weights feature map dimension should match the respective src's one");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != input->dimension(channel_idx),
+                                    "Weights feature map dimension should match the respective src's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4, "Weights can be at most 4 dimensional");
 
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
-        if(is_data_type_quantized_asymmetric(input->data_type()))
+        if (is_data_type_quantized_asymmetric(input->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
@@ -77,15 +82,17 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     }
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         const size_t input_width    = input->dimension(width_idx);
         const size_t input_height   = input->dimension(height_idx);
         const size_t weights_width  = weights->dimension(width_idx);
         const size_t weights_height = weights->dimension(height_idx);
 
-        auto        out_dims     = deconvolution_output_dimensions(input_width, input_height, weights_width, weights_height, deconv_info);
-        TensorShape output_shape = misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input, *weights);
+        auto out_dims =
+            deconvolution_output_dimensions(input_width, input_height, weights_width, weights_height, deconv_info);
+        TensorShape output_shape =
+            misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input, *weights);
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -96,8 +103,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 }
 } // namespace
 
-void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, const ITensorInfo *weights,
-                                              const ITensorInfo *biases, ITensorInfo *output, const PadStrideInfo &deconv_info)
+void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_context,
+                                              const ITensorInfo      *input,
+                                              const ITensorInfo      *weights,
+                                              const ITensorInfo      *biases,
+                                              ITensorInfo            *output,
+                                              const PadStrideInfo    &deconv_info)
 {
     ARM_COMPUTE_UNUSED(biases, deconv_info);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
@@ -119,7 +130,8 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
     const size_t output_channels = output->dimension(channel_idx);
 
     // Calculate output shape
-    auto        out_dims     = deconvolution_output_dimensions(input_width, input_height, weights_width, weights_height, deconv_info);
+    auto out_dims =
+        deconvolution_output_dimensions(input_width, input_height, weights_width, weights_height, deconv_info);
     TensorShape output_shape = misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input, *weights);
     auto_init_if_empty(*output, output_shape, 1, input->data_type(), input->quantization_info());
 
@@ -147,7 +159,7 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
     const DataType    input_data_type = input->data_type();
     const PaddingInfo strides         = deconv_info.stride();
 
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         build_options.add_option(std::string("-DHAS_BIAS"));
         build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(biases->data_type())));
@@ -180,7 +192,7 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
     build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
     build_options.add_option_if((input_channels % k0) != 0, "-DLEFTOVER_LOOP");
 
-    if(is_data_type_quantized(output_data_type))
+    if (is_data_type_quantized(output_data_type))
     {
         const UniformQuantizationInfo iqinfo = input->quantization_info().uniform();
         const UniformQuantizationInfo wqinfo = weights->quantization_info().uniform();
@@ -210,7 +222,7 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
         build_options.add_option("-DZERO_VALUE=" + support::cpp11::to_string(0));
     }
 
-    if(compile_context.get_ddk_version() >= 30)
+    if (compile_context.get_ddk_version() >= 30)
     {
         build_options.add_option("-fregister-allocation=64");
     }
@@ -235,8 +247,11 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
     _config_id += support::cpp11::to_string(n0);
 }
 
-Status ClTransposedConvolutionKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases,
-                                               const ITensorInfo *dst, const PadStrideInfo &deconv_info)
+Status ClTransposedConvolutionKernel::validate(const ITensorInfo   *src,
+                                               const ITensorInfo   *weights,
+                                               const ITensorInfo   *biases,
+                                               const ITensorInfo   *dst,
+                                               const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, deconv_info));
     return Status{};
@@ -250,17 +265,20 @@ void ClTransposedConvolutionKernel::run_op(ITensorPack &tensors, const Window &w
     // Get initial windows
     Window slice = window.first_slice_window_3D();
 
-    const auto src     = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const auto weights = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
-    const auto biases  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
-    auto       dst     = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto weights =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const auto biases =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     unsigned int idx = 0;
     add_4d_tensor_nhwc_argument(idx, src);
     add_4d_tensor_nhwc_argument(idx, dst);
 
     add_4d_tensor_nhwc_argument(idx, weights);
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         add_1D_tensor_argument(idx, biases, slice);
     }

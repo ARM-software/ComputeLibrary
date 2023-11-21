@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClWinogradConv2d.h"
@@ -35,15 +36,15 @@ namespace arm_compute
 {
 struct CLWinogradConvolutionLayer::Impl
 {
-    const ICLTensor                          *src{ nullptr };
-    const ICLTensor                          *weights{ nullptr };
-    const ICLTensor                          *biases{ nullptr };
-    ICLTensor                                *dst{ nullptr };
-    std::unique_ptr<opencl::ClWinogradConv2d> op{ nullptr };
+    const ICLTensor                          *src{nullptr};
+    const ICLTensor                          *weights{nullptr};
+    const ICLTensor                          *biases{nullptr};
+    ICLTensor                                *dst{nullptr};
+    std::unique_ptr<opencl::ClWinogradConv2d> op{nullptr};
     ITensorPack                               run_pack{};
     MemoryGroup                               memory_group{};
     WorkspaceData<CLTensor>                   workspace_tensors{};
-    bool                                      is_prepared{ false };
+    bool                                      is_prepared{false};
 };
 
 CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
@@ -54,15 +55,26 @@ CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryMa
 
 CLWinogradConvolutionLayer::~CLWinogradConvolutionLayer() = default;
 
-void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info,
-                                           bool enable_fast_math)
+void CLWinogradConvolutionLayer::configure(ICLTensor                 *input,
+                                           const ICLTensor           *weights,
+                                           const ICLTensor           *biases,
+                                           ICLTensor                 *output,
+                                           const PadStrideInfo       &conv_info,
+                                           const ActivationLayerInfo &act_info,
+                                           bool                       enable_fast_math)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info, enable_fast_math);
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info,
+              enable_fast_math);
 }
 
-void CLWinogradConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+void CLWinogradConvolutionLayer::configure(const CLCompileContext    &compile_context,
+                                           ICLTensor                 *input,
+                                           const ICLTensor           *weights,
+                                           const ICLTensor           *biases,
+                                           ICLTensor                 *output,
                                            const PadStrideInfo       &conv_info,
-                                           const ActivationLayerInfo &act_info, bool enable_fast_math)
+                                           const ActivationLayerInfo &act_info,
+                                           bool                       enable_fast_math)
 {
     _impl->src     = input;
     _impl->weights = weights;
@@ -70,20 +82,25 @@ void CLWinogradConvolutionLayer::configure(const CLCompileContext &compile_conte
     _impl->dst     = output;
 
     _impl->op = std::make_unique<opencl::ClWinogradConv2d>();
-    _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(), conv_info, act_info, enable_fast_math);
+    _impl->op->configure(compile_context, input->info(), weights->info(),
+                         (biases != nullptr ? biases->info() : nullptr), output->info(), conv_info, act_info,
+                         enable_fast_math);
 
-    _impl->run_pack =
-    {
-        { TensorType::ACL_SRC_0, _impl->src },
-        { TensorType::ACL_SRC_1, _impl->weights },
-        { TensorType::ACL_SRC_2, _impl->biases },
-        { TensorType::ACL_DST, _impl->dst }
-    };
-    _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->run_pack);
+    _impl->run_pack = {{TensorType::ACL_SRC_0, _impl->src},
+                       {TensorType::ACL_SRC_1, _impl->weights},
+                       {TensorType::ACL_SRC_2, _impl->biases},
+                       {TensorType::ACL_DST, _impl->dst}};
+    _impl->workspace_tensors =
+        manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->run_pack);
 }
 
-Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                            const ActivationLayerInfo &act_info, bool enable_fast_math)
+Status CLWinogradConvolutionLayer::validate(const ITensorInfo         *input,
+                                            const ITensorInfo         *weights,
+                                            const ITensorInfo         *biases,
+                                            const ITensorInfo         *output,
+                                            const PadStrideInfo       &conv_info,
+                                            const ActivationLayerInfo &act_info,
+                                            bool                       enable_fast_math)
 {
     return opencl::ClWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math);
 }
@@ -97,7 +114,7 @@ void CLWinogradConvolutionLayer::run()
 
 void CLWinogradConvolutionLayer::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->run_pack);
 

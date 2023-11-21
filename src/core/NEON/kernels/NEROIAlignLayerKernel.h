@@ -83,7 +83,10 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *rois,
+                           ITensorInfo               *output,
+                           const ROIPoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

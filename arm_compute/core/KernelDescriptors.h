@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS
-#define ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS
+#ifndef ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS_H
+#define ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS_H
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
@@ -34,24 +33,24 @@ namespace arm_compute
 /** Descriptor for FFT scale kernels */
 struct FFTScaleKernelInfo
 {
-    float scale{ 0.f };      /**< Axis to perform the kernel on. */
-    bool  conjugate{ true }; /**< Flag to conjugate the output/ */
+    float scale{0.f};      /**< Axis to perform the kernel on. */
+    bool  conjugate{true}; /**< Flag to conjugate the output/ */
 };
 
 /** Descriptor for FFT digit reverse kernels */
 struct FFTDigitReverseKernelInfo
 {
-    unsigned int axis{ 0 };          /**< Axis to perform the kernel on. */
-    bool         conjugate{ false }; /**< Flag to conjugate the output/ */
+    unsigned int axis{0};          /**< Axis to perform the kernel on. */
+    bool         conjugate{false}; /**< Flag to conjugate the output/ */
 };
 
 /** Descriptor used by the FFT core kernels */
 struct FFTRadixStageKernelInfo
 {
-    unsigned int axis{ 0 };               /**< Axis to run the kernel on. */
-    unsigned int radix{ 0 };              /**< Radix to use. */
-    unsigned int Nx{ 0 };                 /**< Nx coefficient. */
-    bool         is_first_stage{ false }; /**< Flags if the FFT kernels is the first stage of a decomposed FFT. */
+    unsigned int axis{0};               /**< Axis to run the kernel on. */
+    unsigned int radix{0};              /**< Radix to use. */
+    unsigned int Nx{0};                 /**< Nx coefficient. */
+    bool         is_first_stage{false}; /**< Flags if the FFT kernels is the first stage of a decomposed FFT. */
 };
 
 class ITensorInfo;
@@ -59,92 +58,102 @@ class ITensorInfo;
 struct GEMMKernelInfo
 {
     GEMMKernelInfo() = default;
-    GEMMKernelInfo(
-        unsigned int                                   im,
-        unsigned int                                   in,
-        unsigned int                                   ik,
-        unsigned int                                   idepth_output_gemm3d,
-        bool                                           ireinterpret_input_as_3d,
-        bool                                           ibroadcast_bias,
-        bool                                           ifp_mixed_precision,
-        bool                                           ihas_pad_y,
-        ActivationLayerInfo                            iactivation_info,
-        int                                            inmult_transpose1xW_width,
-        int                                            imult_interleave4x4_height,
-        GEMMLHSMatrixInfo                              ilhs_info,
-        GEMMRHSMatrixInfo                              irhs_info,
-        int32_t                                        ina_offset,
-        int32_t                                        inb_offset,
-        const experimental::PostOpList<ITensorInfo *> &ipost_ops = experimental::PostOpList<ITensorInfo *> {})
-        : m(im), n(in), k(ik), depth_output_gemm3d(idepth_output_gemm3d), reinterpret_input_as_3d(ireinterpret_input_as_3d), broadcast_bias(ibroadcast_bias), fp_mixed_precision(ifp_mixed_precision),
-          has_pad_y(ihas_pad_y), activation_info(iactivation_info), mult_transpose1xW_width(inmult_transpose1xW_width), mult_interleave4x4_height(imult_interleave4x4_height), lhs_info(ilhs_info),
-          rhs_info(irhs_info), a_offset(ina_offset), b_offset(inb_offset), post_ops(ipost_ops)
+    GEMMKernelInfo(unsigned int        im,
+                   unsigned int        in,
+                   unsigned int        ik,
+                   unsigned int        idepth_output_gemm3d,
+                   bool                ireinterpret_input_as_3d,
+                   bool                ibroadcast_bias,
+                   bool                ifp_mixed_precision,
+                   bool                ihas_pad_y,
+                   ActivationLayerInfo iactivation_info,
+                   int                 inmult_transpose1xW_width,
+                   int                 imult_interleave4x4_height,
+                   GEMMLHSMatrixInfo   ilhs_info,
+                   GEMMRHSMatrixInfo   irhs_info,
+                   int32_t             ina_offset,
+                   int32_t             inb_offset)
+        : m(im),
+          n(in),
+          k(ik),
+          depth_output_gemm3d(idepth_output_gemm3d),
+          reinterpret_input_as_3d(ireinterpret_input_as_3d),
+          broadcast_bias(ibroadcast_bias),
+          fp_mixed_precision(ifp_mixed_precision),
+          has_pad_y(ihas_pad_y),
+          activation_info(iactivation_info),
+          mult_transpose1xW_width(inmult_transpose1xW_width),
+          mult_interleave4x4_height(imult_interleave4x4_height),
+          lhs_info(ilhs_info),
+          rhs_info(irhs_info),
+          a_offset(ina_offset),
+          b_offset(inb_offset)
     {
     }
 
-    unsigned int                            m{ 0 };                           /**< Number of LHS rows*/
-    unsigned int                            n{ 0 };                           /**< Number of RHS columns*/
-    unsigned int                            k{ 0 };                           /**< Number of LHS columns or RHS rows */
-    unsigned int                            depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
-    bool                                    reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
-    bool                                    broadcast_bias{ false };          /**< Flag used to broadcast the bias addition */
-    bool                                    fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
-    bool                                    has_pad_y{ false };               /**< Flag used to indicate if the input/output tensors have internal pad on the y direction */
-    ActivationLayerInfo                     activation_info{};                /**< Activation function to perform after the matrix multiplication */
-    int                                     mult_transpose1xW_width{ 1 };     /**< Multiplication factor for the width of the 1xW transposed block */
-    int                                     mult_interleave4x4_height{ 1 };   /**< Multiplication factor for the height of the 4x4 interleaved block */
-    GEMMLHSMatrixInfo                       lhs_info{};                       /**< LHS matrix information used to retrieve the number of rows processed by each thread */
-    GEMMRHSMatrixInfo                       rhs_info{};                       /**< RHS matrix information used for reshaping the RHS matrix */
-    int32_t                                 a_offset{ 0 };                    /**< Offset to be added to each element of the matrix A */
-    int32_t                                 b_offset{ 0 };                    /**< Offset to be added to each element of the matrix B */
-    GEMMLowpOutputStageInfo                 output_stage{};                   /**< GEMMLowp output stage information */
-    experimental::PostOpList<ITensorInfo *> post_ops{};                       /**< (EXPERIMENTAL_POST_OPS) Specifies a list of post ops to be fused after the main op. Note unsupported post ops would not be executed.
-                                                          *   If specified, automatically disable the @ref activation_info */
+    unsigned int m{0};                           /**< Number of LHS rows*/
+    unsigned int n{0};                           /**< Number of RHS columns*/
+    unsigned int k{0};                           /**< Number of LHS columns or RHS rows */
+    unsigned int depth_output_gemm3d{0};         /**< Depth of the output tensor in case is reinterpreted as 3D */
+    bool         reinterpret_input_as_3d{false}; /**< Flag used to reinterpret the input as 3D */
+    bool         broadcast_bias{false};          /**< Flag used to broadcast the bias addition */
+    bool fp_mixed_precision{false}; /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
+    bool has_pad_y{
+        false}; /**< Flag used to indicate if the input/output tensors have internal pad on the y direction */
+    ActivationLayerInfo activation_info{}; /**< Activation function to perform after the matrix multiplication */
+    int mult_transpose1xW_width{1};        /**< Multiplication factor for the width of the 1xW transposed block */
+    int mult_interleave4x4_height{1};      /**< Multiplication factor for the height of the 4x4 interleaved block */
+    GEMMLHSMatrixInfo
+        lhs_info{}; /**< LHS matrix information used to retrieve the number of rows processed by each thread */
+    GEMMRHSMatrixInfo       rhs_info{};     /**< RHS matrix information used for reshaping the RHS matrix */
+    int32_t                 a_offset{0};    /**< Offset to be added to each element of the matrix A */
+    int32_t                 b_offset{0};    /**< Offset to be added to each element of the matrix B */
+    GEMMLowpOutputStageInfo output_stage{}; /**< GEMMLowp output stage information */
 };
 
 /** Compute descriptor used by the depthwise convolution native kernel */
 struct DWCComputeKernelInfo
 {
-    unsigned int n0{ 1 };                             /**< Number of columns processed by each thread */
-    unsigned int m0{ 1 };                             /**< Number of rows processed by each thread */
-    bool         export_input_to_cl_image{ false };   /**< Export input to cl_image */
-    bool         export_weights_to_cl_image{ false }; /**< Export the weights to cl_image */
+    unsigned int n0{1};                             /**< Number of columns processed by each thread */
+    unsigned int m0{1};                             /**< Number of rows processed by each thread */
+    bool         export_input_to_cl_image{false};   /**< Export input to cl_image */
+    bool         export_weights_to_cl_image{false}; /**< Export the weights to cl_image */
 };
 
 /** Compute descriptor used by the direct convolution kernel */
 struct DirectConvComputeKernelInfo
 {
-    int32_t m0{ 1 };                             /**< Number of rows to be processed by the kernel */
-    int32_t n0{ 1 };                             /**< Number of columns to be processed by the kernel */
-    int32_t k0{ 1 };                             /**< Number of partial accumulations to be processed in a single iteration by the kernel */
-    bool    export_weights_to_cl_image{ false }; /**< Flag to export the weights to cl_image */
-    bool    export_output_to_cl_image{ false };  /**< Flag to export the output to cl_image */
-    bool    export_input_to_cl_image{ false };   /**< Flag to export the input to cl_image */
+    int32_t m0{1}; /**< Number of rows to be processed by the kernel */
+    int32_t n0{1}; /**< Number of columns to be processed by the kernel */
+    int32_t k0{1}; /**< Number of partial accumulations to be processed in a single iteration by the kernel */
+    bool    export_weights_to_cl_image{false}; /**< Flag to export the weights to cl_image */
+    bool    export_output_to_cl_image{false};  /**< Flag to export the output to cl_image */
+    bool    export_input_to_cl_image{false};   /**< Flag to export the input to cl_image */
 };
 
 /** Descriptor used by the softmax kernels */
 struct SoftmaxKernelInfo
 {
-    float    beta{ 1.f };                          /**< A scaling factor for the exponent with default value 1.0 */
-    bool     is_log{ false };                      /**< Flag used to perform Log Softmax operation */
-    DataType input_data_type{ DataType::UNKNOWN }; /**< Input tensor data type */
-    int32_t  axis{ 0 };                            /**< The dimension in which to apply softmax. */
+    float    beta{1.f};                          /**< A scaling factor for the exponent with default value 1.0 */
+    bool     is_log{false};                      /**< Flag used to perform Log Softmax operation */
+    DataType input_data_type{DataType::UNKNOWN}; /**< Input tensor data type */
+    int32_t  axis{0};                            /**< The dimension in which to apply softmax. */
 };
 
 /** Descriptor used by the direct convolution layer output stage kernels */
 struct DirectConvolutionLayerOutputStageKernelInfo
 {
-    int32_t  result_fixedpoint_multiplier{ 0 };     /**< Result output stage multiplier used for quantizing */
-    int32_t  result_shift{ 0 };                     /**< Result output stage shift used for quantizing */
-    int32_t  result_offset_after_shift{ 0 };        /**< Result offset used for quantizing */
-    DataType output_data_type{ DataType::UNKNOWN }; /**< Output tensor data type to use if the output is not initialized */
+    int32_t  result_fixedpoint_multiplier{0}; /**< Result output stage multiplier used for quantizing */
+    int32_t  result_shift{0};                 /**< Result output stage shift used for quantizing */
+    int32_t  result_offset_after_shift{0};    /**< Result offset used for quantizing */
+    DataType output_data_type{
+        DataType::UNKNOWN}; /**< Output tensor data type to use if the output is not initialized */
 };
 
 struct InstanceNormalizationLayerKernelInfo
 {
     /** Default constructor */
-    InstanceNormalizationLayerKernelInfo()
-        : InstanceNormalizationLayerKernelInfo(1.f, 0.f, 1e-12, true)
+    InstanceNormalizationLayerKernelInfo() : InstanceNormalizationLayerKernelInfo(1.f, 0.f, 1e-12, true)
     {
     }
     /** Constructor
@@ -181,10 +190,10 @@ struct GEMMLowpReductionKernelInfo
     {
     }
 
-    int32_t k{ 0 };                 /**< Number of matrix columns/rows */
-    bool    is_reshaped{ false };   /**< True if the input tensor has been reshaped */
-    int32_t scalar{ 0 };            /**< Scalar value to multiply each reduced column/row by */
-    bool    mul_by_scalar{ false }; /**< True if each column/row reduction has to be multiplied by a scalar value */
+    int32_t k{0};                 /**< Number of matrix columns/rows */
+    bool    is_reshaped{false};   /**< True if the input tensor has been reshaped */
+    int32_t scalar{0};            /**< Scalar value to multiply each reduced column/row by */
+    bool    mul_by_scalar{false}; /**< True if each column/row reduction has to be multiplied by a scalar value */
 };
 
 struct ScaleKernelInfo
@@ -206,13 +215,13 @@ struct ScaleKernelInfo
                     bool                use_padding           = true,
                     bool                align_corners         = false,
                     DataLayout          data_layout           = DataLayout::UNKNOWN) noexcept
-        : interpolation_policy{ interpolation_policy },
-    border_mode{ border_mode },
-    constant_border_value{ constant_border_value },
-    sampling_policy{ sampling_policy },
-    use_padding{ use_padding },
-    align_corners{ align_corners },
-    data_layout{ data_layout }
+        : interpolation_policy{interpolation_policy},
+          border_mode{border_mode},
+          constant_border_value{constant_border_value},
+          sampling_policy{sampling_policy},
+          use_padding{use_padding},
+          align_corners{align_corners},
+          data_layout{data_layout}
     {
     }
 
@@ -228,16 +237,17 @@ struct ScaleKernelInfo
 struct MatMulKernelInfo
 {
     MatMulKernelInfo() = default;
-    MatMulKernelInfo(bool adj_lhs, bool adj_rhs, int m0 = 1, int n0 = 1, int k0 = 1, bool export_rhs_to_cl_image = false)
-        : adj_lhs{ adj_lhs }, adj_rhs{ adj_rhs }, m0{ m0 }, n0{ n0 }, k0{ k0 }, export_rhs_to_cl_image{ export_rhs_to_cl_image }
+    MatMulKernelInfo(
+        bool adj_lhs, bool adj_rhs, int m0 = 1, int n0 = 1, int k0 = 1, bool export_rhs_to_cl_image = false)
+        : adj_lhs{adj_lhs}, adj_rhs{adj_rhs}, m0{m0}, n0{n0}, k0{k0}, export_rhs_to_cl_image{export_rhs_to_cl_image}
     {
     }
-    bool adj_lhs{ false };                /**< Get Adjoint LHS flag value */
-    bool adj_rhs{ false };                /**< Get Adjoint RHS flag value */
-    int  m0{ 1 };                         /**< Number of output rows processed by each work-item*/
-    int  n0{ 1 };                         /**< Number of output columns processed by each work-item*/
-    int  k0{ 1 };                         /**< Number of inner accumulations */
-    bool export_rhs_to_cl_image{ false }; /**< Flag to know whether the RHS tensor should be exported to cl_image*/
+    bool adj_lhs{false};                /**< Get Adjoint LHS flag value */
+    bool adj_rhs{false};                /**< Get Adjoint RHS flag value */
+    int  m0{1};                         /**< Number of output rows processed by each work-item*/
+    int  n0{1};                         /**< Number of output columns processed by each work-item*/
+    int  k0{1};                         /**< Number of inner accumulations */
+    bool export_rhs_to_cl_image{false}; /**< Flag to know whether the RHS tensor should be exported to cl_image*/
 };
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS */
+#endif // ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS_H

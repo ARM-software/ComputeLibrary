@@ -29,7 +29,10 @@ namespace graph
 {
 namespace backends
 {
-NESubTensorHandle::NESubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent)
+NESubTensorHandle::NESubTensorHandle(ITensorHandle     *parent_handle,
+                                     const TensorShape &shape,
+                                     const Coordinates &coords,
+                                     bool               extend_parent)
     : _sub_tensor(), _parent_handle(nullptr)
 {
     ARM_COMPUTE_ERROR_ON(!parent_handle);

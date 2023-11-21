@@ -23,21 +23,20 @@
  */
 #include "src/cpu/operators/CpuConcatenate.h"
 
-#include "src/cpu/kernels/CpuConcatenateBatchKernel.h"
-#include "src/cpu/kernels/CpuConcatenateDepthKernel.h"
-#include "src/cpu/kernels/CpuConcatenateHeightKernel.h"
-#include "src/cpu/kernels/CpuConcatenateWidthKernel.h"
-
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "src/cpu/kernels/CpuConcatenateBatchKernel.h"
+#include "src/cpu/kernels/CpuConcatenateDepthKernel.h"
+#include "src/cpu/kernels/CpuConcatenateHeightKernel.h"
+#include "src/cpu/kernels/CpuConcatenateWidthKernel.h"
 
 namespace arm_compute
 {
@@ -59,9 +58,9 @@ void CpuConcatenate::configure(const std::vector<const ITensorInfo *> &srcs_vect
 
     unsigned int offset = 0;
 
-    for(unsigned int i = 0; i < _num_srcs; ++i)
+    for (unsigned int i = 0; i < _num_srcs; ++i)
     {
-        switch(axis)
+        switch (axis)
         {
             case Window::DimX:
             {
@@ -98,16 +97,17 @@ void CpuConcatenate::configure(const std::vector<const ITensorInfo *> &srcs_vect
     }
 }
 
-Status CpuConcatenate::validate(const std::vector<const ITensorInfo *> &srcs_vector, const ITensorInfo *dst, size_t axis)
+Status
+CpuConcatenate::validate(const std::vector<const ITensorInfo *> &srcs_vector, const ITensorInfo *dst, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(dst);
     ARM_COMPUTE_RETURN_ERROR_ON(srcs_vector.size() < 2);
 
     unsigned int offset = 0;
-    for(const auto &src : srcs_vector)
+    for (const auto &src : srcs_vector)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
-        switch(axis)
+        switch (axis)
         {
             case Window::DimX:
             {
@@ -135,7 +135,7 @@ Status CpuConcatenate::validate(const std::vector<const ITensorInfo *> &srcs_vec
         offset += src->dimension(axis);
     }
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         TensorShape dst_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(srcs_vector, axis);
         ARM_COMPUTE_RETURN_ERROR_ON(dst_shape.total_size() != dst->tensor_shape().total_size());
@@ -146,18 +146,18 @@ Status CpuConcatenate::validate(const std::vector<const ITensorInfo *> &srcs_vec
 
 void CpuConcatenate::run(ITensorPack &tensors)
 {
-    if(tensors.empty())
+    if (tensors.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");
     }
 
-    if(static_cast<int>(tensors.size() - 1) != static_cast<int>(_num_srcs))
+    if (static_cast<int>(tensors.size() - 1) != static_cast<int>(_num_srcs))
     {
         ARM_COMPUTE_ERROR("Configured with different number of inputs");
     }
 
     int i = 0;
-    for(auto &k : _concat_kernels)
+    for (auto &k : _concat_kernels)
     {
         ITensorPack pack;
         pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(ACL_SRC_VEC + i));

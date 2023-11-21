@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_GEMM_CONV2D_H
-#define ARM_COMPUTE_CL_GEMM_CONV2D_H
+#ifndef ACL_SRC_GPU_CL_OPERATORS_CLGEMMCONV2D_H
+#define ACL_SRC_GPU_CL_OPERATORS_CLGEMMCONV2D_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
 
@@ -101,20 +101,29 @@ public:
      * @param[in]  weights_info    Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                             tensor has also been transposed with CLGEMMReshapeRHSMatrixKernel. Data type supported: Same as @p input.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst, const Conv2dInfo &conv2d_info,
-                   const WeightsInfo &weights_info = WeightsInfo());
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *weights,
+                   ITensorInfo            *biases,
+                   ITensorInfo            *dst,
+                   const Conv2dInfo       &conv2d_info,
+                   const WeightsInfo      &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClGemmConvolution::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const Conv2dInfo &conv2d_info,
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *weights,
+                           const ITensorInfo *biases,
+                           const ITensorInfo *output,
+                           const Conv2dInfo  &conv2d_info,
                            const WeightsInfo &weights_info = WeightsInfo());
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -131,9 +140,14 @@ private:
      * @param[in]      gemm_3d_depth         Depth of GEMM 3D
      * @param[in]      act_info              Activation to apply after the matrix multiplication
      */
-    void configure_mm(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
+    void configure_mm(const CLCompileContext        &compile_context,
+                      const ITensorInfo             *src,
+                      ITensorInfo                   *weights,
+                      ITensorInfo                   *biases,
+                      ITensorInfo                   *dst,
                       const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                      int gemm_3d_depth, const ActivationLayerInfo &act_info, const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *> {});
+                      int                            gemm_3d_depth,
+                      const ActivationLayerInfo     &act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
      *
      * @param[in] src                   Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -149,8 +163,14 @@ private:
      *
      * @return a status
      */
-    static Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                              int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info, const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *> {});
+    static Status validate_mm(const ITensorInfo             *src,
+                              const ITensorInfo             *weights,
+                              const ITensorInfo             *biases,
+                              const ITensorInfo             *dst,
+                              const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
+                              int                            gemm_3d_depth,
+                              bool                           skip_im2col,
+                              const ActivationLayerInfo     &act_info);
 
     enum AuxTensorIdx
     {
@@ -178,10 +198,9 @@ private:
     bool _fuse_activation;
     bool _append_bias;
     bool _is_prepared;
-    bool _use_post_ops;
 
     experimental::MemoryRequirements _aux_mem;
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_GEMM_CONV2D_H */
+#endif // ACL_SRC_GPU_CL_OPERATORS_CLGEMMCONV2D_H

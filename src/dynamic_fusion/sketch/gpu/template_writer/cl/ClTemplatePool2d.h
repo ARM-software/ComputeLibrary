@@ -27,6 +27,7 @@
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentPool2d.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"

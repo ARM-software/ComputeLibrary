@@ -33,7 +33,7 @@ namespace
 {
 DataType convert_to_legacy_data_type(AclDataType data_type)
 {
-    switch(data_type)
+    switch (data_type)
     {
         case AclDataType::AclFloat32:
             return DataType::F32;
@@ -48,7 +48,7 @@ DataType convert_to_legacy_data_type(AclDataType data_type)
 
 AclDataType convert_to_c_data_type(DataType data_type)
 {
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::F32:
             return AclDataType::AclFloat32;
@@ -64,7 +64,7 @@ AclDataType convert_to_c_data_type(DataType data_type)
 TensorShape create_legacy_tensor_shape(int32_t ndims, int32_t *shape)
 {
     TensorShape legacy_shape{};
-    for(int32_t d = 0; d < ndims; ++d)
+    for (int32_t d = 0; d < ndims; ++d)
     {
         legacy_shape.set(d, shape[d], false);
     }
@@ -73,14 +73,14 @@ TensorShape create_legacy_tensor_shape(int32_t ndims, int32_t *shape)
 int32_t *create_tensor_shape_array(const TensorInfo &info)
 {
     const auto num_dims = info.num_dimensions();
-    if(num_dims <= 0)
+    if (num_dims <= 0)
     {
         return nullptr;
     }
 
     int32_t *shape_array = new int32_t[num_dims];
 
-    for(size_t d = 0; d < num_dims; ++d)
+    for (size_t d = 0; d < num_dims; ++d)
     {
         shape_array[d] = info.tensor_shape()[d];
     }
@@ -92,28 +92,23 @@ int32_t *create_tensor_shape_array(const TensorInfo &info)
 TensorInfo convert_to_legacy_tensor_info(const AclTensorDescriptor &desc)
 {
     TensorInfo legacy_desc;
-    legacy_desc.init(create_legacy_tensor_shape(desc.ndims, desc.shape), 1, convert_to_legacy_data_type(desc.data_type));
+    legacy_desc.init(create_legacy_tensor_shape(desc.ndims, desc.shape), 1,
+                     convert_to_legacy_data_type(desc.data_type));
     return legacy_desc;
 }
 
 AclTensorDescriptor convert_to_descriptor(const TensorInfo &info)
 {
     const auto          num_dims = info.num_dimensions();
-    AclTensorDescriptor desc
-    {
-        static_cast<int32_t>(num_dims),
-        create_tensor_shape_array(info),
-        convert_to_c_data_type(info.data_type()),
-        nullptr,
-        0
-    };
+    AclTensorDescriptor desc{static_cast<int32_t>(num_dims), create_tensor_shape_array(info),
+                             convert_to_c_data_type(info.data_type()), nullptr, 0};
     return desc;
 }
 
 ActivationLayerInfo convert_to_activation_info(const AclActivationDescriptor &desc)
 {
     ActivationLayerInfo::ActivationFunction act;
-    switch(desc.type)
+    switch (desc.type)
     {
         case AclActivationType::AclIdentity:
             act = ActivationLayerInfo::ActivationFunction::IDENTITY;

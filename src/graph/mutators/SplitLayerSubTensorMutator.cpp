@@ -23,12 +23,12 @@
  */
 #include "arm_compute/graph/mutators/SplitLayerSubTensorMutator.h"
 
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Logger.h"
-#include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/algorithms/TopologicalSort.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
+#include "arm_compute/graph/Utils.h"
 
 #include "support/Cast.h"
 #include "support/Iterable.h"
@@ -50,7 +50,7 @@ IGraphMutator::MutationType SplitLayerSubTensorMutator::type() const
 void SplitLayerSubTensorMutator::mutate(Graph &g)
 {
     // Early exit if no Split layers exist in graph
-    if(g.nodes(NodeType::SplitLayer).empty())
+    if (g.nodes(NodeType::SplitLayer).empty())
     {
         return;
     }
@@ -59,23 +59,23 @@ void SplitLayerSubTensorMutator::mutate(Graph &g)
     std::vector<NodeID> topological_sorted_node_ids = dfs(g);
 
     // Should be in reverse order of execution
-    for(auto &node_id : arm_compute::utils::iterable::reverse_iterate(topological_sorted_node_ids))
+    for (auto &node_id : arm_compute::utils::iterable::reverse_iterate(topological_sorted_node_ids))
     {
         INode *node = g.node(node_id);
-        if(node != nullptr && node->type() == NodeType::SplitLayer && node->input(0) != nullptr)
+        if (node != nullptr && node->type() == NodeType::SplitLayer && node->input(0) != nullptr)
         {
             // Get output tensor
             Tensor *input_tensor = node->input(0);
 
             // Check that all tensor have the same target and are valid
             bool is_valid = std::all_of(node->outputs().cbegin(), node->outputs().cend(),
-                                        [&](const TensorID & tid)
-            {
-                return (g.tensor(tid) != nullptr) && (g.tensor(tid)->desc().target == input_tensor->desc().target);
-            });
+                                        [&](const TensorID &tid) {
+                                            return (g.tensor(tid) != nullptr) &&
+                                                   (g.tensor(tid)->desc().target == input_tensor->desc().target);
+                                        });
 
             // Create subtensors
-            if(is_valid && is_target_supported(input_tensor->desc().target))
+            if (is_valid && is_target_supported(input_tensor->desc().target))
             {
                 ARM_COMPUTE_LOG_GRAPH_VERBOSE("Using sub-tensors for the node with ID : "
                                               << node->id() << " and name : " << node->name() << std::endl);
@@ -87,15 +87,18 @@ void SplitLayerSubTensorMutator::mutate(Graph &g)
                 const bool         extend_parent = (axis < 2);
 
                 // Create sub-tensor handles
-                for(unsigned int i = 0; i < node->outputs().size(); ++i)
+                for (unsigned int i = 0; i < node->outputs().size(); ++i)
                 {
                     Tensor           *output_tensor = node->output(i);
                     const TensorShape output_shape  = output_tensor->desc().shape;
                     Coordinates       coords;
-                    std::tie(std::ignore, coords) = split_node->compute_output_descriptor(input_tensor->desc(), num_splits, axis, i);
+                    std::tie(std::ignore, coords) =
+                        split_node->compute_output_descriptor(input_tensor->desc(), num_splits, axis, i);
 
-                    backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(output_tensor->desc().target);
-                    std::unique_ptr<ITensorHandle> handle  = backend.create_subtensor(input_tensor->handle(), output_shape, coords, extend_parent);
+                    backends::IDeviceBackend &backend =
+                        backends::BackendRegistry::get().get_backend(output_tensor->desc().target);
+                    std::unique_ptr<ITensorHandle> handle =
+                        backend.create_subtensor(input_tensor->handle(), output_shape, coords, extend_parent);
                     output_tensor->set_handle(std::move(handle));
                 }
             }

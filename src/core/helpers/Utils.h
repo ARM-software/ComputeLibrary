@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020-2021 Arm Limited.
+* Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_HELPERS_UTILS_H
-#define SRC_CORE_HELPERS_UTILS_H
+#ifndef ACL_SRC_CORE_HELPERS_UTILS_H
+#define ACL_SRC_CORE_HELPERS_UTILS_H
 
 #include "arm_compute/core/ITensorInfo.h"
 
@@ -38,14 +38,14 @@ namespace arm_compute
  *         calculated based on the tensor shape and the strides of lower dimensions.
  */
 template <typename T, typename... Ts>
-inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&... fixed_strides)
+inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&...fixed_strides)
 {
     const TensorShape &shape = info.tensor_shape();
 
     // Create strides object
     Strides strides(stride_x, fixed_strides...);
 
-    for(size_t i = 1 + sizeof...(Ts); i < info.num_dimensions(); ++i)
+    for (size_t i = 1 + sizeof...(Ts); i < info.num_dimensions(); ++i)
     {
         strides.set(i, shape[i - 1] * strides[i - 1]);
     }
@@ -92,6 +92,29 @@ inline unsigned int get_next_power_two(unsigned int x)
 
     return x;
 }
+
+/** Check if the tensor has any holes.
+ *
+ * A hole is defined as any gap in the tensor between two consecutive values. This can be a result of extending
+ * the paddings or manipulating the strides of the tensor
+ *
+ * @param[in] info Tensor info object defining the shape of the input tensor.
+ *
+ * @note This function checks for holes in all dimensions.
+ *
+ */
+bool has_holes(const ITensorInfo &info);
+
+/** Check if the tensor has any holes.
+ *
+ * @param[in] info      Tensor info object defining the shape of the input tensor.
+ * @param[in] dimension Highest dimension to check.
+ *
+ * @note This function checks for holes in all the dimensions upto and including the highest dimension.
+ *
+ */
+bool has_holes(const ITensorInfo &info, size_t dimension);
+
 } // namespace arm_compute
 
-#endif /* SRC_CORE_HELPERS_UTILS_H */
+#endif // ACL_SRC_CORE_HELPERS_UTILS_H

@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
+
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
 #include "src/cpu/kernels/CpuSoftmaxKernel.h"
@@ -35,10 +37,10 @@ namespace arm_compute
 template <bool IS_LOG>
 struct NESoftmaxLayerGeneric<IS_LOG>::Impl
 {
-    const ITensor                                  *src{ nullptr };
-    ITensor                                        *dst{ nullptr };
-    Tensor                                          max{ nullptr };
-    std::unique_ptr<cpu::CpuSoftmaxGeneric<IS_LOG>> op{ nullptr };
+    const ITensor                                  *src{nullptr};
+    ITensor                                        *dst{nullptr};
+    Tensor                                          max{nullptr};
+    std::unique_ptr<cpu::CpuSoftmaxGeneric<IS_LOG>> op{nullptr};
     MemoryGroup                                     memory_group{};
     ITensorPack                                     run_pack{};
     WorkspaceData<Tensor>                           workspace_tensors{};
@@ -53,9 +55,9 @@ NESoftmaxLayerGeneric<IS_LOG>::NESoftmaxLayerGeneric(std::shared_ptr<IMemoryMana
 
 template <bool IS_LOG>
 NESoftmaxLayerGeneric<IS_LOG>::NESoftmaxLayerGeneric(NESoftmaxLayerGeneric &&) = default;
-template <bool                 IS_LOG>
+template <bool IS_LOG>
 NESoftmaxLayerGeneric<IS_LOG> &NESoftmaxLayerGeneric<IS_LOG>::operator=(NESoftmaxLayerGeneric &&) = default;
-template <bool                 IS_LOG>
+template <bool IS_LOG>
 NESoftmaxLayerGeneric<IS_LOG>::~NESoftmaxLayerGeneric() = default;
 
 template <bool IS_LOG>
@@ -68,12 +70,13 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
     _impl->op  = std::make_unique<cpu::CpuSoftmaxGeneric<IS_LOG>>();
     _impl->op->configure(input->info(), output->info(), beta, axis);
 
-    _impl->run_pack          = { { TensorType::ACL_SRC, _impl->src }, { TensorType::ACL_DST, _impl->dst } };
+    _impl->run_pack          = {{TensorType::ACL_SRC, _impl->src}, {TensorType::ACL_DST, _impl->dst}};
     _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
 template <bool IS_LOG>
-Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
+Status
+NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuSoftmaxGeneric<IS_LOG>::validate(input, output, beta, axis));
@@ -81,7 +84,7 @@ Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
 }
 
 template <bool IS_LOG>
-void           NESoftmaxLayerGeneric<IS_LOG>::run()
+void NESoftmaxLayerGeneric<IS_LOG>::run()
 {
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_impl->memory_group);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -162,13 +162,18 @@ template <typename T>
 using NEGEMMDilatedConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Quantized)
+/// @note: Every asymmetric quantized test where there's no fused activation will have its quantization info ignored
+/// This is because instead of using the same quantization information for all the tensors, the fixture generates
+/// separate quantization info for each input and the output tensor.
+/// When we can also support dynamic quantization with the presence of activation, we can remove the explicit
+/// quantization info.
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
                                                                framework::dataset::make("ReshapeWeights", { true })),
                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                       framework::dataset::make("IgnoredQuantizationInfo", { QuantizationInfo() })),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
@@ -179,7 +184,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerQuantizedFixture<u
                                                                framework::dataset::make("ReshapeWeights", { true })),
                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                       framework::dataset::make("IgnoredQuantizationInfo", { QuantizationInfo() })),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output

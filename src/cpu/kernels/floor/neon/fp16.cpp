@@ -45,14 +45,14 @@ void fp16_neon_floor(const void *src, void *dst, int len)
     auto psrc = static_cast<const __fp16 *>(src);
     auto pdst = static_cast<__fp16 *>(dst);
 
-    for(; len >= step; len -= step)
+    for (; len >= step; len -= step)
     {
         vst1q_f16(pdst, vfloorq_f16(vld1q_f16(psrc)));
         psrc += step;
         pdst += step;
     }
 
-    for(; len > 0; --len)
+    for (; len > 0; --len)
     {
         *pdst = std::floor(*psrc);
         ++psrc;

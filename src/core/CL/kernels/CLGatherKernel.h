@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLGATHERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -63,7 +64,11 @@ public:
      * @param[out] output          Destination tensor. Data type supported: Same as @p input
      * @param[in]  axis            (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis = 0);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const ICLTensor        *indices,
+                   ICLTensor              *output,
+                   int                     axis = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLGatherKernel
      *
@@ -74,7 +79,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis = 0);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis = 0);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

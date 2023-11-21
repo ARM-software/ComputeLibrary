@@ -63,7 +63,8 @@ public:
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the BoundingBoxTransformInfo struct.
      *
      */
-    void configure(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, const BoundingBoxTransformInfo &info);
+    void
+    configure(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, const BoundingBoxTransformInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLBoundingBoxTransform
      *
@@ -77,7 +78,10 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info);
+    static Status validate(const ITensorInfo              *boxes,
+                           const ITensorInfo              *pred_boxes,
+                           const ITensorInfo              *deltas,
+                           const BoundingBoxTransformInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

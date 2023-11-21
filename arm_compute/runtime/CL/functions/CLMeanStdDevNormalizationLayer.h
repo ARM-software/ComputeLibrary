@@ -65,7 +65,10 @@ public:
      * @param[out]     output          (Optional) Destination tensor. It can be nullptr in case of in-place computation. Data type supported: same as @p input
      * @param[in]      epsilon         (Optional) Small float to avoid division by zero in case of zero standard deviation. Defaults to 1e-8.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output = nullptr, float epsilon = 1e-8f);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output  = nullptr,
+                   float                   epsilon = 1e-8f);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMeanStdDevNormalizationKernel
      *
      * @param[in] input   Source tensor info with 2 dimensions. In case of @p output tensor info = nullptr,

@@ -30,10 +30,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLNormalizationLayerKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/CL/kernels/CLNormalizationLayerKernel.h"
 
 namespace arm_compute
 {
@@ -50,7 +50,10 @@ void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const 
     configure(CLKernelLibrary::get().get_compile_context(), input, output, norm_info);
 }
 
-void CLNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info)
+void CLNormalizationLayer::configure(const CLCompileContext       &compile_context,
+                                     ICLTensor                    *input,
+                                     ICLTensor                    *output,
+                                     const NormalizationLayerInfo &norm_info)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_LOG_PARAMS(input, output, norm_info);
@@ -58,21 +61,24 @@ void CLNormalizationLayer::configure(const CLCompileContext &compile_context, IC
     // Configure normalization kernel
     _norm_kernel->configure(compile_context, input, output, norm_info);
 
-    if(!_norm_kernel->border_size().empty())
+    if (!_norm_kernel->border_size().empty())
     {
         // Fill the border by 3 elements since we need vload4 in the IN_MAP normalization kernel
-        _border_handler->configure(compile_context, input, _norm_kernel->border_size(), BorderMode::CONSTANT, PixelValue());
+        _border_handler->configure(compile_context, input, _norm_kernel->border_size(), BorderMode::CONSTANT,
+                                   PixelValue());
     }
 }
 
-Status CLNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
+Status CLNormalizationLayer::validate(const ITensorInfo            *input,
+                                      const ITensorInfo            *output,
+                                      const NormalizationLayerInfo &norm_info)
 {
     return CLNormalizationLayerKernel::validate(input, output, norm_info);
 }
 
 void CLNormalizationLayer::run()
 {
-    if(!_norm_kernel->border_size().empty())
+    if (!_norm_kernel->border_size().empty())
     {
         // Run border handler
         CLScheduler::get().enqueue(*_border_handler, false);

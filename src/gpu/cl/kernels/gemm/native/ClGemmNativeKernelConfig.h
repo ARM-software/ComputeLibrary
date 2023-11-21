@@ -51,7 +51,7 @@ public:
      */
     static std::unique_ptr<IClGemmKernelConfig> create(GPUTarget gpu)
     {
-        switch(get_arch_from_target(gpu))
+        switch (get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
                 return std::make_unique<ClGemmDefaultConfigNativeMidgard>(gpu);

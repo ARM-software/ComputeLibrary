@@ -24,26 +24,36 @@
 #include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
 
 #include "arm_compute/core/CL/ICLArray.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
 #include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 
-#include "src/common/utils/Log.h"
-
 namespace arm_compute
 {
-Status CLROIAlignLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status CLROIAlignLayer::validate(const ITensorInfo         *input,
+                                 const ITensorInfo         *rois,
+                                 ITensorInfo               *output,
+                                 const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(CLROIAlignLayerKernel::validate(input, rois, output, pool_info));
 
     return Status{};
 }
 
-void CLROIAlignLayer::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIAlignLayer::configure(const ICLTensor           *input,
+                                const ICLTensor           *rois,
+                                ICLTensor                 *output,
+                                const ROIPoolingLayerInfo &pool_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
 }
 
-void CLROIAlignLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIAlignLayer::configure(const CLCompileContext    &compile_context,
+                                const ICLTensor           *input,
+                                const ICLTensor           *rois,
+                                ICLTensor                 *output,
+                                const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, rois, output, pool_info);
 

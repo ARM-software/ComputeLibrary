@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,9 @@ input_info, output_info, expected)
 template <typename T>
 using NEReshapeLayerFixture = ReshapeLayerValidationFixture<Tensor, Accessor, NEReshapeLayer, T>;
 
+template <typename T>
+using NEReshapeLayerPaddedFixture = ReshapeLayerPaddedValidationFixture<Tensor, Accessor, NEReshapeLayer, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::F32)))
@@ -84,8 +87,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<float>, framework::Datase
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() //F32
+TEST_SUITE_END() //Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
@@ -94,7 +97,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int8_t>, framework::Datas
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() //S8
 
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S16)))
@@ -102,11 +105,41 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int16_t>, framework::Data
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() //S16
+TEST_SUITE_END() //Integer
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE(Padded)
+TEST_SUITE(Float)
+TEST_SUITE(F32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() //S32
+TEST_SUITE_END() //Float
+
+TEST_SUITE(Integer)
+TEST_SUITE(S8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S8)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() //S8
+
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S16)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() //S16
+TEST_SUITE_END() //Integer
+TEST_SUITE_END() //Padded
+
+TEST_SUITE_END() //ReshapeLayer
+TEST_SUITE_END() //NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -23,13 +23,15 @@
  */
 
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/kernels/lut/list.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void sve2_q8_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
+void sve2_q8_elementwise_unary(
+    const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 {
     ARM_COMPUTE_UNUSED(op);
 
@@ -40,14 +42,16 @@ void sve2_q8_elementwise_unary(const ITensor *in, ITensor *out, const Window &wi
     Iterator src_it(in, win);
     Iterator dst_it(out, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto src_ptr = src_it.ptr();
-        auto       dst_ptr = dst_it.ptr();
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto src_ptr = src_it.ptr();
+            auto       dst_ptr = dst_it.ptr();
 
-        lut_u8_sve2(lut, 1, window_end_x, &src_ptr, &dst_ptr);
-    },
-    src_it, dst_it);
+            lut_u8_sve2(lut, 1, window_end_x, &src_ptr, &dst_ptr);
+        },
+        src_it, dst_it);
 }
 
 } // namespace cpu

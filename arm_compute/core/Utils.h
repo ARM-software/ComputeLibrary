@@ -69,7 +69,7 @@ template <typename T>
 inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &perm)
 {
     const auto old_dim = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
-    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
+    for (unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
         T dimension_val = old_dim[i];
         dimensions.set(perm[i], dimension_val);
@@ -87,7 +87,11 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
  *
  * @return PadStrideInfo for SAME padding
  */
-PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW, const Size2D &dilation = Size2D(1u, 1u),
+PadStrideInfo calculate_same_pad(TensorShape                  input_shape,
+                                 TensorShape                  weights_shape,
+                                 PadStrideInfo                conv_info,
+                                 DataLayout                   data_layout   = DataLayout::NCHW,
+                                 const Size2D                &dilation      = Size2D(1u, 1u),
                                  const DimensionRoundingType &rounding_type = DimensionRoundingType::FLOOR);
 
 /** Returns expected width and height of the deconvolution's output tensor.
@@ -100,8 +104,10 @@ PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_sh
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
-                                                                      unsigned int kernel_width, unsigned int kernel_height,
+std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int         in_width,
+                                                                      unsigned int         in_height,
+                                                                      unsigned int         kernel_width,
+                                                                      unsigned int         kernel_height,
                                                                       const PadStrideInfo &pad_stride_info);
 
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
@@ -115,8 +121,10 @@ std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned i
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
-                                                        int kernel_width, int kernel_height,
+std::pair<unsigned int, unsigned int> scaled_dimensions(int                  width,
+                                                        int                  height,
+                                                        int                  kernel_width,
+                                                        int                  kernel_height,
                                                         const PadStrideInfo &pad_stride_info,
                                                         const Size2D        &dilation = Size2D(1U, 1U));
 
@@ -130,9 +138,8 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
  *
  * @return A pair with the new width in the first position and the new height in the second, returned values can be < 1
  */
-std::pair<int, int> scaled_dimensions_signed(int width, int height,
-                                             int kernel_width, int kernel_height,
-                                             const PadStrideInfo &pad_stride_info);
+std::pair<int, int> scaled_dimensions_signed(
+    int width, int height, int kernel_width, int kernel_height, const PadStrideInfo &pad_stride_info);
 
 /** Returns calculated width, height and depth of output scaled tensor depending on dimensions rounding mode.
  *
@@ -147,8 +154,12 @@ std::pair<int, int> scaled_dimensions_signed(int width, int height,
  * @return A tuple with the new width in the first position, the new height in the second, and the new depth in the third.
  *         Returned values can be < 1
  */
-std::tuple<int, int, int> scaled_3d_dimensions_signed(int width, int height, int depth,
-                                                      int kernel_width, int kernel_height, int kernel_depth,
+std::tuple<int, int, int> scaled_3d_dimensions_signed(int                       width,
+                                                      int                       height,
+                                                      int                       depth,
+                                                      int                       kernel_width,
+                                                      int                       kernel_height,
+                                                      int                       kernel_depth,
                                                       const Pooling3dLayerInfo &pool3d_info);
 
 /** Check if the given reduction operation should be handled in a serial way.
@@ -178,7 +189,9 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
  *
  * @return The pair with minimum and maximum values
  */
-std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo &act_info, DataType data_type, UniformQuantizationInfo oq_info);
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo &act_info,
+                                                             DataType                   data_type,
+                                                             UniformQuantizationInfo    oq_info);
 
 /** Convert a channel identity into a string.
  *
@@ -295,26 +308,27 @@ inline size_t num_of_elements_in_range(const float start, const float end, const
  * @param[in]  element_delim (Optional) Delimeter among the consecutive elements. Defaults to space delimeter
  */
 template <typename T>
-void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int n, int stream_width = 0, const std::string &element_delim = " ")
+void print_consecutive_elements_impl(
+    std::ostream &s, const T *ptr, unsigned int n, int stream_width = 0, const std::string &element_delim = " ")
 {
     using print_type = typename std::conditional<std::is_floating_point<T>::value, T, int>::type;
     std::ios stream_status(nullptr);
     stream_status.copyfmt(s);
 
-    for(unsigned int i = 0; i < n; ++i)
+    for (unsigned int i = 0; i < n; ++i)
     {
         // Set stream width as it is not a "sticky" stream manipulator
-        if(stream_width != 0)
+        if (stream_width != 0)
         {
             s.width(stream_width);
         }
 
-        if(std::is_same<typename std::decay<T>::type, half>::value)
+        if (std::is_same<typename std::decay<T>::type, half>::value)
         {
             // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
             s << std::right << static_cast<T>(ptr[i]) << element_delim;
         }
-        else if(std::is_same<typename std::decay<T>::type, bfloat16>::value)
+        else if (std::is_same<typename std::decay<T>::type, bfloat16>::value)
         {
             // We use T instead of print_type here is because the std::is_floating_point<bfloat16> returns false and then the print_type becomes int.
             s << std::right << float(ptr[i]) << element_delim;
@@ -343,17 +357,17 @@ int max_consecutive_elements_display_width_impl(std::ostream &s, const T *ptr, u
     using print_type = typename std::conditional<std::is_floating_point<T>::value, T, int>::type;
 
     int max_width = -1;
-    for(unsigned int i = 0; i < n; ++i)
+    for (unsigned int i = 0; i < n; ++i)
     {
         std::stringstream ss;
         ss.copyfmt(s);
 
-        if(std::is_same<typename std::decay<T>::type, half>::value)
+        if (std::is_same<typename std::decay<T>::type, half>::value)
         {
             // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
             ss << static_cast<T>(ptr[i]);
         }
-        else if(std::is_same<typename std::decay<T>::type, bfloat16>::value)
+        else if (std::is_same<typename std::decay<T>::type, bfloat16>::value)
         {
             // We use T instead of print_type here is because the std::is_floating_point<bfloat> returns false and then the print_type becomes int.
             ss << float(ptr[i]);
@@ -377,7 +391,12 @@ int max_consecutive_elements_display_width_impl(std::ostream &s, const T *ptr, u
  * @param[in]  stream_width  (Optional) Width of the stream. If set to 0 the element's width is used. Defaults to 0.
  * @param[in]  element_delim (Optional) Delimeter among the consecutive elements. Defaults to space delimeter
  */
-void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim = " ");
+void print_consecutive_elements(std::ostream      &s,
+                                DataType           dt,
+                                const uint8_t     *ptr,
+                                unsigned int       n,
+                                int                stream_width,
+                                const std::string &element_delim = " ");
 
 /** Identify the maximum width of n consecutive elements.
  *
@@ -390,5 +409,5 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
  */
 int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n);
 #endif /* ARM_COMPUTE_ASSERTS_ENABLED */
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_UTILS_H */

@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CLDEPTHCONVERT_H
 #define ARM_COMPUTE_CLDEPTHCONVERT_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -96,7 +95,11 @@ public:
      * @param[in]  policy          Conversion policy.
      * @param[in]  shift           Value for down/up conversions. Must be 0 <= shift < 8.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   ConvertPolicy           policy,
+                   uint32_t                shift);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConvertLayer
      *
      * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.

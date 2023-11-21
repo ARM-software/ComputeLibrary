@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -80,8 +81,14 @@ public:
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+    void configure(ITensor                   *input,
+                   const ITensor             *weights,
+                   const ITensor             *biases,
+                   ITensor                   *output,
+                   const PadStrideInfo       &conv_info,
+                   unsigned int               depth_multiplier = 1,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   const Size2D              &dilation         = Size2D(1U, 1U));
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer
      *
@@ -98,8 +105,14 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           unsigned int               depth_multiplier = 1,
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           const Size2D              &dilation         = Size2D(1U, 1U));
 
     // Inherited methods overriden:
     void run() override;
@@ -127,9 +140,11 @@ private:
         /** Default move constructor */
         NEDepthwiseConvolutionLayerOptimizedInternal(NEDepthwiseConvolutionLayerOptimizedInternal &&) = default;
         /** Prevent instances of this class from being copied (As this class contains pointers) */
-        NEDepthwiseConvolutionLayerOptimizedInternal &operator=(const NEDepthwiseConvolutionLayerOptimizedInternal &) = delete;
+        NEDepthwiseConvolutionLayerOptimizedInternal &
+        operator=(const NEDepthwiseConvolutionLayerOptimizedInternal &) = delete;
         /** Default move assignment operator */
-        NEDepthwiseConvolutionLayerOptimizedInternal &operator=(NEDepthwiseConvolutionLayerOptimizedInternal &&) = default;
+        NEDepthwiseConvolutionLayerOptimizedInternal &
+        operator=(NEDepthwiseConvolutionLayerOptimizedInternal &&) = default;
         /** Default destructor */
         ~NEDepthwiseConvolutionLayerOptimizedInternal() = default;
         /** Initialize the function's source, destination, kernels and border_size.
@@ -144,8 +159,14 @@ private:
          * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
          * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
          */
-        void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                       unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+        void configure(ITensor                   *input,
+                       const ITensor             *weights,
+                       const ITensor             *biases,
+                       ITensor                   *output,
+                       const PadStrideInfo       &conv_info,
+                       unsigned int               depth_multiplier = 1,
+                       const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                       const Size2D              &dilation         = Size2D(1U, 1U));
 
         /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer3x3
          *
@@ -161,8 +182,14 @@ private:
          *
          * @return a status
          */
-        static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                               unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+        static Status validate(const ITensorInfo         *input,
+                               const ITensorInfo         *weights,
+                               const ITensorInfo         *biases,
+                               const ITensorInfo         *output,
+                               const PadStrideInfo       &conv_info,
+                               unsigned int               depth_multiplier = 1,
+                               const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                               const Size2D              &dilation         = Size2D(1U, 1U));
 
         // Inherited methods overriden:
         void run() override;
@@ -207,8 +234,14 @@ private:
          * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
          * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
          */
-        void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                       unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+        void configure(ITensor                   *input,
+                       const ITensor             *weights,
+                       const ITensor             *biases,
+                       ITensor                   *output,
+                       const PadStrideInfo       &conv_info,
+                       unsigned int               depth_multiplier = 1,
+                       const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                       const Size2D              &dilation         = Size2D(1U, 1U));
 
         /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayerGeneric
          *
@@ -225,8 +258,14 @@ private:
          *
          * @return a status
          */
-        static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                               unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+        static Status validate(const ITensorInfo         *input,
+                               const ITensorInfo         *weights,
+                               const ITensorInfo         *biases,
+                               const ITensorInfo         *output,
+                               const PadStrideInfo       &conv_info,
+                               unsigned int               depth_multiplier = 1,
+                               const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                               const Size2D              &dilation         = Size2D(1U, 1U));
 
         // Inherited methods overriden:
         void run() override;

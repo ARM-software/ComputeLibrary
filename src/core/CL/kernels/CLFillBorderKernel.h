@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -57,7 +58,11 @@ public:
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *tensor,
+                   BorderSize              border_size,
+                   BorderMode              border_mode,
+                   const PixelValue       &constant_border_value = PixelValue());
     /** Initialise the kernel's input, output and border mode.
      *
      * @param[in,out] tensor                Tensor to process Data types supported: U8/QASYMM8/S8/QASYMM8_SIGNED/U16/S16/U32/S32/F16/F32.
@@ -65,7 +70,10 @@ public:
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    void configure(ICLTensor        *tensor,
+                   BorderSize        border_size,
+                   BorderMode        border_mode,
+                   const PixelValue &constant_border_value = PixelValue());
     /** Initialise the kernel's input, output and border mode.
      *
      * @param[in]     compile_context       The compile context to be used.
@@ -74,7 +82,11 @@ public:
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    void configure(const CLCompileContext &compile_context,
+                   ITensorInfo            *tensor,
+                   BorderSize              border_size,
+                   BorderMode              border_mode,
+                   const PixelValue       &constant_border_value = PixelValue());
 
     /** Function to set the constant value on fill border kernel depending on type.
      *

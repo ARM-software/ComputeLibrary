@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_WRAPPER_H
-#define ARM_COMPUTE_WRAPPER_H
+#ifndef ACL_SRC_CORE_NEON_WRAPPER_WRAPPER_H
+#define ACL_SRC_CORE_NEON_WRAPPER_WRAPPER_H
+
+#include "arm_compute/core/Error.h"
 
 // Traits
 #include "src/core/NEON/wrapper/traits.h"
@@ -31,4 +33,4 @@
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/core/NEON/wrapper/scalar/scalar.h"
 
-#endif /* ARM_COMPUTE_WRAPPER_H */
+#endif // ACL_SRC_CORE_NEON_WRAPPER_WRAPPER_H

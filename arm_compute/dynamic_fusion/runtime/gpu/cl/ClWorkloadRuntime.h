@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
+
 #include <map>
 #include <memory>
 

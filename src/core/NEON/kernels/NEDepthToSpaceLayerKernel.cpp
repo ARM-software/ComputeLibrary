@@ -26,11 +26,12 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 #include <cstdint>
@@ -52,12 +53,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
     const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] % (block_shape * block_shape) != 0);
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
         const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_width] != (block_shape * input->tensor_shape()[idx_width]));
-        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_height] != (block_shape * input->tensor_shape()[idx_height]));
+        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_width] !=
+                                    (block_shape * input->tensor_shape()[idx_width]));
+        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_height] !=
+                                    (block_shape * input->tensor_shape()[idx_height]));
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -74,7 +77,8 @@ NEDepthToSpaceLayerKernel::NEDepthToSpaceLayerKernel()
 void NEDepthToSpaceLayerKernel::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    TensorShape output_shape = compute_depth_to_space_shape(input->info()->tensor_shape(), input->info()->data_layout(), block_shape);
+    TensorShape output_shape =
+        compute_depth_to_space_shape(input->info()->tensor_shape(), input->info()->data_layout(), block_shape);
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
@@ -117,26 +121,27 @@ void NEDepthToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info
     slice_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Main loop for NCHW and NHWC
-    if(_data_layout == DataLayout::NCHW)
+    if (_data_layout == DataLayout::NCHW)
     {
         Window slice_in = window.first_slice_window_2D();
         do
         {
             Iterator in(_input, slice_in);
-            execute_window_loop(slice_in, [&](const Coordinates & id)
-            {
-                const int x = id.x();
-                const int y = id.y();
+            execute_window_loop(
+                slice_in,
+                [&](const Coordinates &id)
+                {
+                    const int x = id.x();
+                    const int y = id.y();
 
-                const int   z     = id.z() % r;
-                const int   out_x = x * _block_shape + (id.z() / r) % _block_shape;
-                const int   out_y = y * _block_shape + (id.z() / r) / _block_shape;
-                Coordinates output_coords{ out_x, out_y, z, id[3] };
-                memcpy(_output->ptr_to_element(output_coords), in.ptr(), element_size);
-            },
-            in);
-        }
-        while(window.slide_window_slice_2D(slice_in));
+                    const int   z     = id.z() % r;
+                    const int   out_x = x * _block_shape + (id.z() / r) % _block_shape;
+                    const int   out_y = y * _block_shape + (id.z() / r) / _block_shape;
+                    Coordinates output_coords{out_x, out_y, z, id[3]};
+                    memcpy(_output->ptr_to_element(output_coords), in.ptr(), element_size);
+                },
+                in);
+        } while (window.slide_window_slice_2D(slice_in));
     }
     else
     {
@@ -144,20 +149,21 @@ void NEDepthToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info
         do
         {
             Iterator in(_input, slice_in);
-            execute_window_loop(slice_in, [&](const Coordinates & id)
-            {
-                const int x = id.y();
-                const int y = id.z();
+            execute_window_loop(
+                slice_in,
+                [&](const Coordinates &id)
+                {
+                    const int x = id.y();
+                    const int y = id.z();
 
-                const int   z     = id.x() % r;
-                const int   out_x = x * _block_shape + (id.x() / r) % _block_shape;
-                const int   out_y = y * _block_shape + (id.x() / r) / _block_shape;
-                Coordinates output_coords{ z, out_x, out_y, id[3] };
-                memcpy(_output->ptr_to_element(output_coords), in.ptr(), element_size);
-            },
-            in);
-        }
-        while(window.slide_window_slice_3D(slice_in));
+                    const int   z     = id.x() % r;
+                    const int   out_x = x * _block_shape + (id.x() / r) % _block_shape;
+                    const int   out_y = y * _block_shape + (id.x() / r) / _block_shape;
+                    Coordinates output_coords{z, out_x, out_y, id[3]};
+                    memcpy(_output->ptr_to_element(output_coords), in.ptr(), element_size);
+                },
+                in);
+        } while (window.slide_window_slice_3D(slice_in));
     }
 }
 } // namespace arm_compute

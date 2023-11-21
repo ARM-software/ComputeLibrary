@@ -23,10 +23,11 @@
  */
 
 #include "src/core/utils/ScaleUtils.h"
-#include "src/common/cpuinfo/CpuIsaInfo.h"
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/TensorInfo.h"
+
+#include "src/common/cpuinfo/CpuIsaInfo.h"
 
 float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners)
 {
@@ -40,13 +41,15 @@ float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t
     return static_cast<float>(in) / static_cast<float>(out);
 }
 
-bool arm_compute::scale_utils::is_precomputation_required(DataLayout data_layout, DataType data_type,
-                                                          InterpolationPolicy policy, BorderMode border_mode)
+bool arm_compute::scale_utils::is_precomputation_required(DataLayout          data_layout,
+                                                          DataType            data_type,
+                                                          InterpolationPolicy policy,
+                                                          BorderMode          border_mode)
 {
     // Do not calculate precomputed weights and indices if kernel code doesn't use them
-    if(data_layout == DataLayout::NHWC)
+    if (data_layout == DataLayout::NHWC)
     {
-        switch(data_type)
+        switch (data_type)
         {
             case DataType::F32:
             case DataType::F16:

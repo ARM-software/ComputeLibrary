@@ -25,6 +25,7 @@
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/NEON/SVEMath.h"
 
 #include <cmath>
@@ -37,8 +38,15 @@ namespace arm_compute
 {
 namespace cpu
 {
-void fp16_sve_batch_normalization(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma,
-                                  float epsilon, ActivationLayerInfo &act_info, const Window &window)
+void fp16_sve_batch_normalization(ITensor             *src,
+                                  ITensor             *dst,
+                                  const ITensor       *mean,
+                                  const ITensor       *var,
+                                  const ITensor       *beta,
+                                  const ITensor       *gamma,
+                                  float                epsilon,
+                                  ActivationLayerInfo &act_info,
+                                  const Window        &window)
 {
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
@@ -49,69 +57,74 @@ void fp16_sve_batch_normalization(ITensor *src, ITensor *dst, const ITensor *mea
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
 
-    const auto input_mean  = reinterpret_cast<const float16_t *>(mean->ptr_to_element(Coordinates(0, 0)));
-    const auto input_var   = reinterpret_cast<const float16_t *>(var->ptr_to_element(Coordinates(0, 0)));
-    const auto input_gamma = (gamma != nullptr) ? reinterpret_cast<const float16_t *>(gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
-    const auto input_beta  = (beta != nullptr) ? reinterpret_cast<const float16_t *>(beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_mean = reinterpret_cast<const float16_t *>(mean->ptr_to_element(Coordinates(0, 0)));
+    const auto input_var  = reinterpret_cast<const float16_t *>(var->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma =
+        (gamma != nullptr) ? reinterpret_cast<const float16_t *>(gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta =
+        (beta != nullptr) ? reinterpret_cast<const float16_t *>(beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
 
     const auto epsilon_vec = svdup_n_f16(epsilon);
     const auto const_1     = svdup_n_f16(1.f);
     const auto const_0     = svdup_n_f16(0.f);
     const auto va          = svdup_n_f16(act_info.a());
     const auto vb          = svdup_n_f16(act_info.b());
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
-
-        // Compute S elements per iteration
-        int      x  = window_start_x;
-        svbool_t pg = svwhilelt_b16(x, window_end_x);
-        do
+    execute_window_loop(
+        win_collapsed,
+        [&](const Coordinates &)
         {
-            // Conctruct vectors
-            const auto mean_vec  = svld1_f16(pg, input_mean + x);
-            const auto var_vec   = svld1_f16(pg, input_var + x);
-            const auto gamma_vec = (input_gamma != nullptr) ? svld1_f16(pg, input_gamma + x) : const_1;
-            const auto beta_vec  = (input_beta != nullptr) ? svld1_f16(pg, input_beta + x) : const_0;
+            const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+            const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
 
-            // Calculate denominator
-            const auto tmp         = svadd_f16_z(pg, var_vec, epsilon_vec);
-            auto       denominator = svrsqrte_f16(tmp);
-            denominator            = svmul_f16_z(pg, svrsqrts_f16(svmul_f16_z(pg, tmp, denominator), denominator), denominator);
-            denominator            = svmul_f16_z(pg, svrsqrts_f16(svmul_f16_z(pg, tmp, denominator), denominator), denominator);
-
-            // Calculate x bar
-            const auto numerator = svsub_f16_z(pg, svld1_f16(pg, input_ptr + x), mean_vec);
-            const auto x_bar     = svmul_f16_z(pg, numerator, denominator);
-            auto       res       = svmla_f16_z(pg, beta_vec, x_bar, gamma_vec);
-
-            // Perform fused activation
-            if(act_info.enabled())
+            // Compute S elements per iteration
+            int      x  = window_start_x;
+            svbool_t pg = svwhilelt_b16(x, window_end_x);
+            do
             {
-                if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
-                {
-                    res = svmax_f16_z(pg, const_0, res);
-                }
-                else if(act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                {
-                    res = svmin_f16_z(pg, va, svmax_f16_z(pg, const_0, res));
-                }
-                else if(act_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-                {
-                    res = svmin_f16_z(pg, va, svmax_f16_z(pg, vb, res));
-                }
-            }
+                // Conctruct vectors
+                const auto mean_vec  = svld1_f16(pg, input_mean + x);
+                const auto var_vec   = svld1_f16(pg, input_var + x);
+                const auto gamma_vec = (input_gamma != nullptr) ? svld1_f16(pg, input_gamma + x) : const_1;
+                const auto beta_vec  = (input_beta != nullptr) ? svld1_f16(pg, input_beta + x) : const_0;
 
-            // Store results
-            svst1_f16(pg, output_ptr + x, res);
+                // Calculate denominator
+                const auto tmp         = svadd_f16_z(pg, var_vec, epsilon_vec);
+                auto       denominator = svrsqrte_f16(tmp);
+                denominator =
+                    svmul_f16_z(pg, svrsqrts_f16(svmul_f16_z(pg, tmp, denominator), denominator), denominator);
+                denominator =
+                    svmul_f16_z(pg, svrsqrts_f16(svmul_f16_z(pg, tmp, denominator), denominator), denominator);
 
-            x += svcntw();
-            pg = svwhilelt_b16(x, window_end_x);
-        }
-        while(svptest_any(svptrue_b16(), pg));
-    },
-    input, output);
+                // Calculate x bar
+                const auto numerator = svsub_f16_z(pg, svld1_f16(pg, input_ptr + x), mean_vec);
+                const auto x_bar     = svmul_f16_z(pg, numerator, denominator);
+                auto       res       = svmla_f16_z(pg, beta_vec, x_bar, gamma_vec);
+
+                // Perform fused activation
+                if (act_info.enabled())
+                {
+                    if (act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
+                    {
+                        res = svmax_f16_z(pg, const_0, res);
+                    }
+                    else if (act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                    {
+                        res = svmin_f16_z(pg, va, svmax_f16_z(pg, const_0, res));
+                    }
+                    else if (act_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                    {
+                        res = svmin_f16_z(pg, va, svmax_f16_z(pg, vb, res));
+                    }
+                }
+
+                // Store results
+                svst1_f16(pg, output_ptr + x, res);
+
+                x += svcntw();
+                pg = svwhilelt_b16(x, window_end_x);
+            } while (svptest_any(svptrue_b16(), pg));
+        },
+        input, output);
 }
 } // namespace cpu
 } // namespace arm_compute

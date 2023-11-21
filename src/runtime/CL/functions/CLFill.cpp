@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClFill.h"
 
@@ -36,16 +37,15 @@ namespace arm_compute
 {
 struct CLFill::Impl
 {
-    const ICLTensor                *src{ nullptr };
-    ICLTensor                      *dst{ nullptr };
-    std::unique_ptr<opencl::ClFill> op{ nullptr };
+    const ICLTensor                *src{nullptr};
+    ICLTensor                      *dst{nullptr};
+    std::unique_ptr<opencl::ClFill> op{nullptr};
 };
 
-CLFill::CLFill()
-    : _impl(std::make_unique<Impl>())
+CLFill::CLFill() : _impl(std::make_unique<Impl>())
 {
 }
-CLFill::CLFill(CLFill &&) = default;
+CLFill::CLFill(CLFill &&)            = default;
 CLFill &CLFill::operator=(CLFill &&) = default;
 CLFill::~CLFill()                    = default;
 
@@ -54,7 +54,10 @@ void CLFill::configure(ICLTensor *tensor, const PixelValue &constant_value, Wind
     configure(CLKernelLibrary::get().get_compile_context(), tensor, constant_value, dst_window);
 }
 
-void CLFill::configure(const CLCompileContext &compile_context, ICLTensor *tensor, const PixelValue &constant_value, Window *dst_window)
+void CLFill::configure(const CLCompileContext &compile_context,
+                       ICLTensor              *tensor,
+                       const PixelValue       &constant_value,
+                       Window                 *dst_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
 

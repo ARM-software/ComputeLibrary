@@ -21,13 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H
-#define ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H
-
-#include "arm_compute/runtime/IFunction.h"
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEWINOGRADCONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEWINOGRADCONVOLUTIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -78,7 +77,8 @@ public:
      *                              while every optional dimension from 4 and above represent a batch of inputs.
      *                              Data types supported: F16/F32.
      * @param[in]  weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
-     *                              Currently only 3x3 and 5x5 kernels are supported.
+     *                              Supported kernel sizes: (height, width) -> 3x3, 1x3, 3x1, 5x5, 1x5, 5x1 for Fp32
+     *                              -> 3x3 for Fp16
      * @param[in]  biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                              Data types supported: Same as @p input.
@@ -87,8 +87,13 @@ public:
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                   bool enable_fast_math = false);
+    void configure(const ITensor             *input,
+                   const ITensor             *weights,
+                   const ITensor             *biases,
+                   ITensor                   *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false);
 
     // Inherited methods overridden:
     void run() override;
@@ -100,12 +105,17 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false);
 
 private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEWINOGRADCONVOLUTIONLAYER_H

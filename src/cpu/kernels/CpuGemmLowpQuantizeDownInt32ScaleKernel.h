@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32_SCALE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -71,10 +72,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const GEMMLowpOutputStageInfo *output_stage);
+    static Status validate(const ITensorInfo             *src,
+                           const ITensorInfo             *bias,
+                           const ITensorInfo             *dst,
+                           const GEMMLowpOutputStageInfo *output_stage);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
@@ -95,11 +99,14 @@ private:
      * @param[out] dst    Output tensor info
      * @param[in]  window Region on which to execute the kernel.
      */
-    using QuantizeDownFunctionPtr = void (CpuGemmLowpQuantizeDownInt32ScaleKernel::*)(const ITensor *src, const ITensor *bias, ITensor *dst, const Window &window);
+    using QuantizeDownFunctionPtr = void (CpuGemmLowpQuantizeDownInt32ScaleKernel::*)(const ITensor *src,
+                                                                                      const ITensor *bias,
+                                                                                      ITensor       *dst,
+                                                                                      const Window  &window);
 
-    QuantizeDownFunctionPtr        _func{ nullptr };
-    const GEMMLowpOutputStageInfo *_output_stage{ nullptr };
-    bool                           _is_bounded_relu{ false };
+    QuantizeDownFunctionPtr        _func{nullptr};
+    const GEMMLowpOutputStageInfo *_output_stage{nullptr};
+    bool                           _is_bounded_relu{false};
 };
 } // namespace kernels
 } // namespace cpu

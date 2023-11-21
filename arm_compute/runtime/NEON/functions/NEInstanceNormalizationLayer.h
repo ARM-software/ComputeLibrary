@@ -89,7 +89,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float gamma = 1.0f, float beta = 0.0f, float epsilon = 1e-12f);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           float              gamma   = 1.0f,
+                           float              beta    = 0.0f,
+                           float              epsilon = 1e-12f);
 
     // Inherited methods overridden:
     void run() override;
@@ -103,5 +107,5 @@ private:
     Tensor                                              _permuted_input;
     Tensor                                              _permuted_output;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H */

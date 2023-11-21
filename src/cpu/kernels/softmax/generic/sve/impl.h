@@ -33,8 +33,13 @@ template <typename ScalarType>
 void sve_logits_1d_max(const ITensor *in, ITensor *out, const Window &window);
 
 template <typename ScalarType>
-void sve_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *const tmp,
-                                 ITensor *out, const float beta, bool is_log, const Window &window);
+void sve_softmax_logits_1d_float(const ITensor *in,
+                                 const ITensor *max,
+                                 void *const    tmp,
+                                 ITensor       *out,
+                                 const float    beta,
+                                 bool           is_log,
+                                 const Window  &window);
 } // namespace cpu
 } // namespace arm_compute
 

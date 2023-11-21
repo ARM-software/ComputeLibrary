@@ -46,10 +46,11 @@ DetectionPostProcessLayerInfo DetectionPostProcessLayerNode::detection_post_proc
 
 bool DetectionPostProcessLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (input_id(2) != NullTensorID) && (output_id(0) != NullTensorID) && (output_id(1) != NullTensorID)
-       && (output_id(2) != NullTensorID) && (output_id(3) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (input_id(2) != NullTensorID) &&
+        (output_id(0) != NullTensorID) && (output_id(1) != NullTensorID) && (output_id(2) != NullTensorID) &&
+        (output_id(3) != NullTensorID))
     {
-        for(unsigned int i = 0; i < 4; ++i)
+        for (unsigned int i = 0; i < 4; ++i)
         {
             Tensor *dst = output(i);
             ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -68,7 +69,7 @@ TensorDescriptor DetectionPostProcessLayerNode::configure_output(size_t idx) con
     TensorDescriptor   output_desc;
     const unsigned int num_detected_box = _info.max_detections() * _info.max_classes_per_detection();
 
-    switch(idx)
+    switch (idx)
     {
         case 0:
             // Configure boxes output

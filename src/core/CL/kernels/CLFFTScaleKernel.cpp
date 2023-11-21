@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -43,7 +44,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F16, DataType::F32);
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_channels() != 1 && output->num_channels() != 2);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
@@ -54,8 +55,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 }
 } // namespace
 
-CLFFTScaleKernel::CLFFTScaleKernel()
-    : _input(nullptr), _output(nullptr), _run_in_place(false)
+CLFFTScaleKernel::CLFFTScaleKernel() : _input(nullptr), _output(nullptr), _run_in_place(false)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
@@ -65,11 +65,14 @@ void CLFFTScaleKernel::configure(ICLTensor *input, ICLTensor *output, const FFTS
     configure(CLKernelLibrary::get().get_compile_context(), input, output, config);
 }
 
-void CLFFTScaleKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config)
+void CLFFTScaleKernel::configure(const CLCompileContext   &compile_context,
+                                 ICLTensor                *input,
+                                 ICLTensor                *output,
+                                 const FFTScaleKernelInfo &config)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     _input        = input;
     _output       = output;
@@ -78,20 +81,22 @@ void CLFFTScaleKernel::configure(const CLCompileContext &compile_context, ICLTen
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
-    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(output != nullptr ? output->info()->num_channels() : input->info()->num_channels()));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(output != nullptr ? output->info()->num_channels()
+                                                                                      : input->info()->num_channels()));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option_if(config.conjugate, "-DCONJ");
     std::string kernel_name = "fft_scale_conj";
     _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set static arguments
-    unsigned int idx = (1 + (_run_in_place ? 0 : 1)) * num_arguments_per_3D_tensor(); // Skip the input and output parameters
+    unsigned int idx =
+        (1 + (_run_in_place ? 0 : 1)) * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     _kernel.setArg<cl_float>(idx, config.scale);
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
 
-    if(output != nullptr)
+    if (output != nullptr)
     {
         // Output auto inizialitation if not yet initialized
         auto_init_if_empty(*output->info(), *input->info()->clone());
@@ -130,12 +135,11 @@ void CLFFTScaleKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
-        if(!_run_in_place)
+        if (!_run_in_place)
         {
             add_3D_tensor_argument(idx, _output, slice);
         }
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

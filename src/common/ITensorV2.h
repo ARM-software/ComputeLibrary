@@ -29,7 +29,7 @@
 
 struct AclTensor_
 {
-    arm_compute::detail::Header header{ arm_compute::detail::ObjectType::Tensor, nullptr };
+    arm_compute::detail::Header header{arm_compute::detail::ObjectType::Tensor, nullptr};
 
 protected:
     AclTensor_()  = default;
@@ -49,8 +49,7 @@ public:
      *
      * @param[in] ctx Context to be used by the operator
      */
-    explicit ITensorV2(IContext *ctx)
-        : AclTensor_()
+    explicit ITensorV2(IContext *ctx) : AclTensor_()
     {
         ARM_COMPUTE_ASSERT_NOT_NULLPTR(ctx);
         this->header.ctx = ctx;
@@ -128,7 +127,7 @@ namespace detail
  */
 inline StatusCode validate_internal_tensor(const ITensorV2 *tensor)
 {
-    if(tensor == nullptr || !tensor->is_valid())
+    if (tensor == nullptr || !tensor->is_valid())
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[ITensorV2]: Invalid tensor object");
         return StatusCode::InvalidArgument;

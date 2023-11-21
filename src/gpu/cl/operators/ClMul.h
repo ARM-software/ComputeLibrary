@@ -66,16 +66,27 @@ public:
      * @param[in]      rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
-                   ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   float                      scale,
+                   ConvertPolicy              overflow_policy,
+                   RoundingPolicy             rounding_policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClMul::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
-                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           float                      scale,
+                           ConvertPolicy              overflow_policy,
+                           RoundingPolicy             rounding_policy,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref opencl::kernels::ClComplexMulKernel */
@@ -92,14 +103,21 @@ public:
      * @param[out]     dst             The dst tensor info, Data types supported: same as @p src1. Number of channels supported: same as @p src1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClComplexMul::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 } // namespace opencl
 } // namespace arm_compute

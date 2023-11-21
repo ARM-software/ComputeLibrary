@@ -100,7 +100,12 @@ public:
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the @ref GenerateProposalsInfo struct.
      * @note Proposals contains all the proposals. Of those, only the first num_valid_proposals are valid.
      */
-    void configure(const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals, ICLTensor *scores_out, ICLTensor *num_valid_proposals,
+    void configure(const ICLTensor             *scores,
+                   const ICLTensor             *deltas,
+                   const ICLTensor             *anchors,
+                   ICLTensor                   *proposals,
+                   ICLTensor                   *scores_out,
+                   ICLTensor                   *num_valid_proposals,
                    const GenerateProposalsInfo &info);
     /** Set the input and output tensors.
      *
@@ -118,8 +123,14 @@ public:
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the @ref GenerateProposalsInfo struct.
      * @note Proposals contains all the proposals. Of those, only the first num_valid_proposals are valid.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals, ICLTensor *scores_out,
-                   ICLTensor *num_valid_proposals, const GenerateProposalsInfo &info);
+    void configure(const CLCompileContext      &compile_context,
+                   const ICLTensor             *scores,
+                   const ICLTensor             *deltas,
+                   const ICLTensor             *anchors,
+                   ICLTensor                   *proposals,
+                   ICLTensor                   *scores_out,
+                   ICLTensor                   *num_valid_proposals,
+                   const GenerateProposalsInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLGenerateProposalsLayer
      *
@@ -135,7 +146,11 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *scores, const ITensorInfo *deltas, const ITensorInfo *anchors, const ITensorInfo *proposals, const ITensorInfo *scores_out,
+    static Status validate(const ITensorInfo           *scores,
+                           const ITensorInfo           *deltas,
+                           const ITensorInfo           *anchors,
+                           const ITensorInfo           *proposals,
+                           const ITensorInfo           *scores_out,
                            const ITensorInfo           *num_valid_proposals,
                            const GenerateProposalsInfo &info);
 

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_CORE_TYPES
-#define ACL_ARM_COMPUTE_CORE_TYPES
+#ifndef ACL_ARM_COMPUTE_CORE_TYPES_H
+#define ACL_ARM_COMPUTE_CORE_TYPES_H
 
 /** The following symbols have been moved to:
  * half
@@ -59,14 +59,13 @@
 /** The following symbols have been moved to:
  * MatMulInfo
  */
-#include "arm_compute/function_info/MatMulInfo.h"
-
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Size3D.h"
 #include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/utils/misc/Macros.h"
+#include "arm_compute/function_info/MatMulInfo.h"
+
 #include "support/Bfloat16.h"
 
 #include <cmath>
@@ -144,8 +143,7 @@ enum class ComparisonOperation
 struct ValidRegion
 {
     /** Default constructor */
-    ValidRegion()
-        : anchor{}, shape{}
+    ValidRegion() : anchor{}, shape{}
     {
     }
 
@@ -166,8 +164,7 @@ struct ValidRegion
      * @param[in] a_shape   Shape of the valid region.
      *
      */
-    ValidRegion(const Coordinates &an_anchor, const TensorShape &a_shape)
-        : anchor{ an_anchor }, shape{ a_shape }
+    ValidRegion(const Coordinates &an_anchor, const TensorShape &a_shape) : anchor{an_anchor}, shape{a_shape}
     {
         anchor.set_num_dimensions(std::max(anchor.num_dimensions(), shape.num_dimensions()));
     }
@@ -180,7 +177,7 @@ struct ValidRegion
      *
      */
     ValidRegion(const Coordinates &an_anchor, const TensorShape &a_shape, size_t num_dimensions)
-        : anchor{ an_anchor }, shape{ a_shape }
+        : anchor{an_anchor}, shape{a_shape}
     {
         ARM_COMPUTE_ERROR_ON(num_dimensions < std::max(anchor.num_dimensions(), shape.num_dimensions()));
         anchor.set_num_dimensions(num_dimensions);
@@ -242,32 +239,24 @@ enum class BorderMode
 struct BorderSize
 {
     /** Empty border, i.e. no border */
-    constexpr BorderSize() noexcept
-        : top{ 0 },
-    right{ 0 },
-    bottom{ 0 },
-    left{ 0 }
+    constexpr BorderSize() noexcept : top{0}, right{0}, bottom{0}, left{0}
     {
     }
 
     /** Border with equal size around the 2D plane */
-    explicit constexpr BorderSize(unsigned int size) noexcept
-        : top{ size },
-    right{ size },
-    bottom{ size },
-    left{ size }
+    explicit constexpr BorderSize(unsigned int size) noexcept : top{size}, right{size}, bottom{size}, left{size}
     {
     }
 
     /** Border with same size for top/bottom and left/right */
     constexpr BorderSize(unsigned int top_bottom, unsigned int left_right)
-        : top{ top_bottom }, right{ left_right }, bottom{ top_bottom }, left{ left_right }
+        : top{top_bottom}, right{left_right}, bottom{top_bottom}, left{left_right}
     {
     }
 
     /** Border with different sizes */
     constexpr BorderSize(unsigned int top, unsigned int right, unsigned int bottom, unsigned int left)
-        : top{ top }, right{ right }, bottom{ bottom }, left{ left }
+        : top{top}, right{right}, bottom{bottom}, left{left}
     {
     }
 
@@ -372,7 +361,7 @@ enum class InterpolationPolicy
 {
     NEAREST_NEIGHBOR, /**< Output values are defined to match the source pixel whose center is nearest to the sample position */
     BILINEAR,         /**< Output values are defined by bilinear interpolation between the pixels */
-    AREA,             /**< Output values are determined by averaging the source pixels whose areas fall under the area of the destination pixel, projected onto the source image */
+    AREA, /**< Output values are determined by averaging the source pixels whose areas fall under the area of the destination pixel, projected onto the source image */
 };
 
 /** Bilinear Interpolation method used by LKTracker */
@@ -479,12 +468,12 @@ enum class NormType
  */
 struct DetectionWindow
 {
-    uint16_t x{ 0 };         /**< Top-left x coordinate */
-    uint16_t y{ 0 };         /**< Top-left y coordinate */
-    uint16_t width{ 0 };     /**< Width of the detection window */
-    uint16_t height{ 0 };    /**< Height of the detection window */
-    uint16_t idx_class{ 0 }; /**< Index of the class */
-    float    score{ 0.f };   /**< Confidence value for the detection window */
+    uint16_t x{0};         /**< Top-left x coordinate */
+    uint16_t y{0};         /**< Top-left y coordinate */
+    uint16_t width{0};     /**< Width of the detection window */
+    uint16_t height{0};    /**< Height of the detection window */
+    uint16_t idx_class{0}; /**< Index of the class */
+    float    score{0.f};   /**< Confidence value for the detection window */
 };
 
 /** Available pooling types */
@@ -521,12 +510,28 @@ public:
      * @param[in] im_width                 (Optional) Boxes whose centers (on the x axis) is beyond im_width will be filtered. Defaults to 1
      * @param[in] im_height                (Optional) Boxes whose centers (on the y axis) is beyond im_height will be filtered. Defaults to 1
      */
-    BoxNMSLimitInfo(float score_thresh = 0.05f, float nms = 0.3f,
-                    int detections = 100, bool soft_nms_enabled = false,
-                    NMSType soft_nms_method = NMSType::LINEAR,
-                    float soft_nms_sigma = 0.5f, float soft_nms_min_score_thres = 0.001f, bool suppress_size = false, float min_size = 1.0f, float im_width = 1.0f, float im_height = 1.0f)
-        : _score_thresh(score_thresh), _nms(nms), _detections_per_im(detections), _soft_nms_enabled(soft_nms_enabled), _soft_nms_method(soft_nms_method), _soft_nms_sigma(soft_nms_sigma),
-          _soft_nms_min_score_thres(soft_nms_min_score_thres), _suppress_size(suppress_size), _min_size(min_size), _im_width(im_width), _im_height(im_height)
+    BoxNMSLimitInfo(float   score_thresh             = 0.05f,
+                    float   nms                      = 0.3f,
+                    int     detections               = 100,
+                    bool    soft_nms_enabled         = false,
+                    NMSType soft_nms_method          = NMSType::LINEAR,
+                    float   soft_nms_sigma           = 0.5f,
+                    float   soft_nms_min_score_thres = 0.001f,
+                    bool    suppress_size            = false,
+                    float   min_size                 = 1.0f,
+                    float   im_width                 = 1.0f,
+                    float   im_height                = 1.0f)
+        : _score_thresh(score_thresh),
+          _nms(nms),
+          _detections_per_im(detections),
+          _soft_nms_enabled(soft_nms_enabled),
+          _soft_nms_method(soft_nms_method),
+          _soft_nms_sigma(soft_nms_sigma),
+          _soft_nms_min_score_thres(soft_nms_min_score_thres),
+          _suppress_size(suppress_size),
+          _min_size(min_size),
+          _im_width(im_width),
+          _im_height(im_height)
     {
     }
     /** Get the score threshold */
@@ -604,14 +609,13 @@ private:
 struct Padding2D
 {
     Padding2D() = default;
-    Padding2D(size_t left, size_t right, size_t top, size_t bottom)
-        : left(left), right(right), top(top), bottom(bottom)
+    Padding2D(size_t left, size_t right, size_t top, size_t bottom) : left(left), right(right), top(top), bottom(bottom)
     {
     }
-    size_t left   = { 0 }; /**<  Padding across the width dimension on the left, in elements. */
-    size_t right  = { 0 }; /**<  Padding across the width dimension on the right, in elements. */
-    size_t top    = { 0 }; /**<  Padding across the height dimension on the top, in elements. */
-    size_t bottom = { 0 }; /**<  Padding across the height dimension on the bottom, in elements. */
+    size_t left   = {0}; /**<  Padding across the width dimension on the left, in elements. */
+    size_t right  = {0}; /**<  Padding across the width dimension on the right, in elements. */
+    size_t top    = {0}; /**<  Padding across the height dimension on the top, in elements. */
+    size_t bottom = {0}; /**<  Padding across the height dimension on the bottom, in elements. */
 };
 
 /** Padding information for 3D operations like Conv3d */
@@ -631,12 +635,12 @@ struct Padding3D
     {
     }
 
-    size_t left   = { 0 }; /**<  Padding across the width dimenstion on the left, in elements. */
-    size_t right  = { 0 }; /**<  Padding across the width dimenstion on the right, in elements. */
-    size_t top    = { 0 }; /**<  Padding across the height dimenstion  on the top, in elements. */
-    size_t bottom = { 0 }; /**<  Padding across the height dimenstion on the bottom, in elements. */
-    size_t front  = { 0 }; /**<  Padding across the depth dimenstion on the front, in elements. */
-    size_t back   = { 0 }; /**<  Padding across the depth dimenstion on the back, in elements. */
+    size_t left   = {0}; /**<  Padding across the width dimenstion on the left, in elements. */
+    size_t right  = {0}; /**<  Padding across the width dimenstion on the right, in elements. */
+    size_t top    = {0}; /**<  Padding across the height dimenstion  on the top, in elements. */
+    size_t bottom = {0}; /**<  Padding across the height dimenstion on the bottom, in elements. */
+    size_t front  = {0}; /**<  Padding across the depth dimenstion on the front, in elements. */
+    size_t back   = {0}; /**<  Padding across the depth dimenstion on the back, in elements. */
 };
 
 /** PriorBox layer info */
@@ -668,9 +672,15 @@ public:
      * @param[in] img_size      (Optional) Image size.
      * @param[in] steps         (Optional) Step values.
      */
-    PriorBoxLayerInfo(const std::vector<float> &min_sizes, const std::vector<float> &variances, float offset, bool flip = true, bool clip = false,
-                      const std::vector<float> &max_sizes = {}, const std::vector<float> &aspect_ratios = {},
-    const Coordinates2D &img_size = Coordinates2D{ 0, 0 }, const std::array<float, 2> &steps = { { 0.f, 0.f } })
+    PriorBoxLayerInfo(const std::vector<float>   &min_sizes,
+                      const std::vector<float>   &variances,
+                      float                       offset,
+                      bool                        flip          = true,
+                      bool                        clip          = false,
+                      const std::vector<float>   &max_sizes     = {},
+                      const std::vector<float>   &aspect_ratios = {},
+                      const Coordinates2D        &img_size      = Coordinates2D{0, 0},
+                      const std::array<float, 2> &steps         = {{0.f, 0.f}})
         : _min_sizes(min_sizes),
           _variances(variances),
           _offset(offset),
@@ -682,22 +692,22 @@ public:
           _steps(steps)
     {
         _aspect_ratios.push_back(1.);
-        for(unsigned int i = 0; i < aspect_ratios.size(); ++i)
+        for (unsigned int i = 0; i < aspect_ratios.size(); ++i)
         {
             float ar            = aspect_ratios[i];
             bool  already_exist = false;
-            for(auto ar_new : _aspect_ratios)
+            for (auto ar_new : _aspect_ratios)
             {
-                if(fabs(ar - ar_new) < 1e-6)
+                if (fabs(ar - ar_new) < 1e-6)
                 {
                     already_exist = true;
                     break;
                 }
             }
-            if(!already_exist)
+            if (!already_exist)
             {
                 _aspect_ratios.push_back(ar);
-                if(flip)
+                if (flip)
                 {
                     _aspect_ratios.push_back(1.f / ar);
                 }
@@ -751,14 +761,14 @@ public:
     }
 
 private:
-    std::vector<float> _min_sizes;
-    std::vector<float> _variances;
-    float              _offset;
-    bool               _flip;
-    bool               _clip;
-    std::vector<float> _max_sizes;
-    std::vector<float> _aspect_ratios;
-    Coordinates2D      _img_size;
+    std::vector<float>   _min_sizes;
+    std::vector<float>   _variances;
+    float                _offset;
+    bool                 _flip;
+    bool                 _clip;
+    std::vector<float>   _max_sizes;
+    std::vector<float>   _aspect_ratios;
+    Coordinates2D        _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -809,8 +819,16 @@ public:
      * @param[in] variance_encoded_in_target (Optional) If true, variance is encoded in target. Otherwise we need to adjust the predicted offset accordingly.Default set to false.
      * @param[in] eta                        (Optional) Eta.
      */
-    DetectionOutputLayerInfo(int num_classes, bool share_location, DetectionOutputLayerCodeType code_type, int keep_top_k, float nms_threshold, int top_k = -1, int background_label_id = -1,
-                             float confidence_threshold = std::numeric_limits<float>::lowest(), bool variance_encoded_in_target = false, float eta = 1)
+    DetectionOutputLayerInfo(int                          num_classes,
+                             bool                         share_location,
+                             DetectionOutputLayerCodeType code_type,
+                             int                          keep_top_k,
+                             float                        nms_threshold,
+                             int                          top_k                = -1,
+                             int                          background_label_id  = -1,
+                             float                        confidence_threshold = std::numeric_limits<float>::lowest(),
+                             bool                         variance_encoded_in_target = false,
+                             float                        eta                        = 1)
         : _num_classes(num_classes),
           _share_location(share_location),
           _code_type(code_type),
@@ -924,8 +942,15 @@ public:
      * @param[in] detection_per_class       (Optional) Number of detection per class. Used in the Regular Non-Max-Suppression. Defaults to 100.
      * @param[in] dequantize_scores         (Optional) If the scores need to be dequantized. Defaults to true.
      */
-    DetectionPostProcessLayerInfo(unsigned int max_detections, unsigned int max_classes_per_detection, float nms_score_threshold, float iou_threshold, unsigned int num_classes,
-                                  std::array<float, 4> scales_values, bool use_regular_nms = false, unsigned int detection_per_class = 100, bool dequantize_scores = true)
+    DetectionPostProcessLayerInfo(unsigned int         max_detections,
+                                  unsigned int         max_classes_per_detection,
+                                  float                nms_score_threshold,
+                                  float                iou_threshold,
+                                  unsigned int         num_classes,
+                                  std::array<float, 4> scales_values,
+                                  bool                 use_regular_nms     = false,
+                                  unsigned int         detection_per_class = 100,
+                                  bool                 dequantize_scores   = true)
         : _max_detections(max_detections),
           _max_classes_per_detection(max_classes_per_detection),
           _nms_score_threshold(nms_score_threshold),
@@ -1003,15 +1028,15 @@ public:
     }
 
 private:
-    unsigned int _max_detections;
-    unsigned int _max_classes_per_detection;
-    float        _nms_score_threshold;
-    float        _iou_threshold;
-    unsigned int _num_classes;
+    unsigned int         _max_detections;
+    unsigned int         _max_classes_per_detection;
+    float                _nms_score_threshold;
+    float                _iou_threshold;
+    unsigned int         _num_classes;
     std::array<float, 4> _scales_values;
-    bool         _use_regular_nms;
-    unsigned int _detection_per_class;
-    bool         _dequantize_scores;
+    bool                 _use_regular_nms;
+    unsigned int         _detection_per_class;
+    bool                 _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1241,8 +1266,14 @@ public:
      * @param[in] spatial_scale  Spatial scale to be applied to the ROI coordinates and dimensions.
      * @param[in] sampling_ratio Number of samples to include in each pooling region (if set to zero, a ceil(roi_dims/pooling_dims))
      */
-    ROIPoolingLayerInfo(unsigned int pooled_width, unsigned int pooled_height, float spatial_scale, unsigned int sampling_ratio = 0)
-        : _pooled_width(pooled_width), _pooled_height(pooled_height), _spatial_scale(spatial_scale), _sampling_ratio(sampling_ratio)
+    ROIPoolingLayerInfo(unsigned int pooled_width,
+                        unsigned int pooled_height,
+                        float        spatial_scale,
+                        unsigned int sampling_ratio = 0)
+        : _pooled_width(pooled_width),
+          _pooled_height(pooled_height),
+          _spatial_scale(spatial_scale),
+          _sampling_ratio(sampling_ratio)
     {
     }
     /** Get the pooled width of the layer */
@@ -1289,10 +1320,24 @@ public:
      * @param[in] min_size       (Optional)Size used to validate the anchors produced. Defaults to 16.
      * @param[in] values_per_roi (Optional)Values used to represent a ROI(Region of interest). Defaults to 4.
      */
-    GenerateProposalsInfo(float im_width, float im_height, float im_scale, float spatial_scale = 1.0, int pre_nms_topN = 6000, int post_nms_topN = 300, float nms_thres = 0.7, float min_size = 16.0,
+    GenerateProposalsInfo(float  im_width,
+                          float  im_height,
+                          float  im_scale,
+                          float  spatial_scale  = 1.0,
+                          int    pre_nms_topN   = 6000,
+                          int    post_nms_topN  = 300,
+                          float  nms_thres      = 0.7,
+                          float  min_size       = 16.0,
                           size_t values_per_roi = 4)
-        : _im_height(im_height), _im_width(im_width), _im_scale(im_scale), _spatial_scale(spatial_scale), _pre_nms_topN(pre_nms_topN), _post_nms_topN(post_nms_topN), _nms_thres(nms_thres),
-          _min_size(min_size), _values_per_roi(values_per_roi)
+        : _im_height(im_height),
+          _im_width(im_width),
+          _im_scale(im_scale),
+          _spatial_scale(spatial_scale),
+          _pre_nms_topN(pre_nms_topN),
+          _post_nms_topN(post_nms_topN),
+          _nms_thres(nms_thres),
+          _min_size(min_size),
+          _values_per_roi(values_per_roi)
     {
     }
 
@@ -1418,11 +1463,20 @@ public:
      * @param[in] correct_transform_coords (Optional)Correct bounding box transform coordinates. Defaults to false
      * @param[in] bbox_xform_clip          (Optional)Minimum bounding box width and height after bounding box transformation in log-space. Defaults to log(1000/16)
      */
-    BoundingBoxTransformInfo(float img_width, float img_height, float scale, bool apply_scale = false, const std::array<float, 4> weights = { { 1.f, 1.f, 1.f, 1.f } }, bool correct_transform_coords =
-    false,
-    float bbox_xform_clip =
-        4.135166556742356f)
-        : _img_width(img_width), _img_height(img_height), _scale(scale), _apply_scale(apply_scale), _correct_transform_coords(correct_transform_coords), _weights(weights), _bbox_xform_clip(bbox_xform_clip)
+    BoundingBoxTransformInfo(float                      img_width,
+                             float                      img_height,
+                             float                      scale,
+                             bool                       apply_scale              = false,
+                             const std::array<float, 4> weights                  = {{1.f, 1.f, 1.f, 1.f}},
+                             bool                       correct_transform_coords = false,
+                             float                      bbox_xform_clip          = 4.135166556742356f)
+        : _img_width(img_width),
+          _img_height(img_height),
+          _scale(scale),
+          _apply_scale(apply_scale),
+          _correct_transform_coords(correct_transform_coords),
+          _weights(weights),
+          _bbox_xform_clip(bbox_xform_clip)
     {
     }
 
@@ -1462,13 +1516,13 @@ public:
     }
 
 private:
-    float _img_width;
-    float _img_height;
-    float _scale;
-    bool  _apply_scale;
-    bool  _correct_transform_coords;
+    float                _img_width;
+    float                _img_height;
+    float                _scale;
+    bool                 _apply_scale;
+    bool                 _correct_transform_coords;
     std::array<float, 4> _weights;
-    float _bbox_xform_clip;
+    float                _bbox_xform_clip;
 };
 
 /** Normalization Layer Information class */
@@ -1485,7 +1539,12 @@ public:
      * @param[in] is_scaled (Optional) Boolean that specifies if alpha will be scaled by the normalization size or not.
      *                      Should be false to follow [Krichevksy 2012].
      */
-    NormalizationLayerInfo(NormType type, uint32_t norm_size = 5, float alpha = 0.0001f, float beta = 0.5f, float kappa = 1.f, bool is_scaled = true)
+    NormalizationLayerInfo(NormType type,
+                           uint32_t norm_size = 5,
+                           float    alpha     = 0.0001f,
+                           float    beta      = 0.5f,
+                           float    kappa     = 1.f,
+                           bool     is_scaled = true)
         : _type(type), _norm_size(norm_size), _alpha(alpha), _beta(beta), _kappa(kappa), _is_scaled(is_scaled)
     {
     }
@@ -1613,7 +1672,12 @@ class WeightsInfo
 public:
     /** Default constructor */
     WeightsInfo()
-        : _are_reshaped(false), _kernel_width(0), _kernel_height(0), _num_kernels(0), _retain_internal_weights(false), _weight_format(arm_compute::WeightFormat::UNSPECIFIED)
+        : _are_reshaped(false),
+          _kernel_width(0),
+          _kernel_height(0),
+          _num_kernels(0),
+          _retain_internal_weights(false),
+          _weight_format(arm_compute::WeightFormat::UNSPECIFIED)
     {
     }
     /** Constructor
@@ -1625,9 +1689,18 @@ public:
      * @param[in] retain_internal_weights (Optional) True if internal reshaped weights must be retained. Used for reconfiguration purposes. Default is false.
      * @param[in] weight_format           (Optional) arm_gemm:WeightFormat enumeration requested by the user. Default is arm_compute::WeightFormat::UNSPECIFIED.
      */
-    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height, unsigned int num_kernels, bool retain_internal_weights = false,
-                arm_compute::WeightFormat weight_format = arm_compute::WeightFormat::UNSPECIFIED)
-        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(num_kernels), _retain_internal_weights(retain_internal_weights), _weight_format(weight_format)
+    WeightsInfo(bool                      are_reshaped,
+                unsigned int              kernel_width,
+                unsigned int              kernel_height,
+                unsigned int              num_kernels,
+                bool                      retain_internal_weights = false,
+                arm_compute::WeightFormat weight_format           = arm_compute::WeightFormat::UNSPECIFIED)
+        : _are_reshaped(are_reshaped),
+          _kernel_width(kernel_width),
+          _kernel_height(kernel_height),
+          _num_kernels(num_kernels),
+          _retain_internal_weights(retain_internal_weights),
+          _weight_format(weight_format)
     {
     }
     /** Flag which specifies if the weights tensor has been reshaped.
@@ -1699,7 +1772,14 @@ class GEMMReshapeInfo final
 public:
     /** Default constructor */
     GEMMReshapeInfo()
-        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _broadcast_bias(false)
+        : _m(1),
+          _n(1),
+          _k(1),
+          _mult_transpose1xW_width(1),
+          _mult_interleave4x4_height(1),
+          _depth_output_gemm3d(0),
+          _reinterpret_input_as_3d(false),
+          _broadcast_bias(false)
     {
     }
     /** Constructor
@@ -1715,9 +1795,22 @@ public:
      *                                      to perform 1x1 convolutions with the NHWC data layout)
      * @param[in] broadcast_bias            (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      */
-    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool broadcast_bias = false)
-        : _m(m), _n(n), _k(k), _mult_transpose1xW_width(mult_transpose1xW_width), _mult_interleave4x4_height(mult_interleave4x4_height), _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d), _broadcast_bias(broadcast_bias)
+    GEMMReshapeInfo(int  m,
+                    int  n,
+                    int  k,
+                    int  mult_transpose1xW_width   = 1,
+                    int  mult_interleave4x4_height = 1,
+                    int  depth_output_gemm3d       = 0,
+                    bool reinterpret_input_as_3d   = false,
+                    bool broadcast_bias            = false)
+        : _m(m),
+          _n(n),
+          _k(k),
+          _mult_transpose1xW_width(mult_transpose1xW_width),
+          _mult_interleave4x4_height(mult_interleave4x4_height),
+          _depth_output_gemm3d(depth_output_gemm3d),
+          _reinterpret_input_as_3d(reinterpret_input_as_3d),
+          _broadcast_bias(broadcast_bias)
     {
     }
     /** Number of matrix A rows
@@ -1807,11 +1900,11 @@ struct GEMMLHSMatrixInfo
         : m0(m), k0(k), v0(v), transpose(trans), interleave(inter)
     {
     }
-    unsigned int m0{ 1 };            /**< Number of rows processed by the matrix multiplication */
-    unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
-    unsigned int v0{ 1 };            /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
-    bool         transpose{ true };  /**< True if the (m0xk0) block has to be transposed before been stored */
-    bool         interleave{ true }; /**< True if the v0 (m0xk0) blocks have to be interleaved in the output row */
+    unsigned int m0{1};            /**< Number of rows processed by the matrix multiplication */
+    unsigned int k0{1};            /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int v0{1};            /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
+    bool         transpose{true};  /**< True if the (m0xk0) block has to be transposed before been stored */
+    bool         interleave{true}; /**< True if the v0 (m0xk0) blocks have to be interleaved in the output row */
 };
 
 /** GEMM RHS (Right Hand Side) matrix information */
@@ -1822,12 +1915,13 @@ struct GEMMRHSMatrixInfo
         : n0(n), k0(k), h0(h), transpose(trans), interleave(inter), export_to_cl_image(export_to_cl_img)
     {
     }
-    unsigned int n0{ 1 };                     /**< Number of columns processed by the matrix multiplication */
-    unsigned int k0{ 1 };                     /**< Number of partial accumulations performed by the matrix multiplication */
-    unsigned int h0{ 1 };                     /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
-    bool         transpose{ true };           /**< True if the (k0xn0) block has to be transposed before been stored */
-    bool         interleave{ true };          /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
-    bool         export_to_cl_image{ false }; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
+    unsigned int n0{1};            /**< Number of columns processed by the matrix multiplication */
+    unsigned int k0{1};            /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int h0{1};            /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool         transpose{true};  /**< True if the (k0xn0) block has to be transposed before been stored */
+    bool         interleave{true}; /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
+    bool         export_to_cl_image{
+        false}; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
 };
 
 class ITensorInfo;
@@ -1843,16 +1937,23 @@ struct WinogradInfo
      * @param[in] conv_info      Convolution info (Pads, strides)
      * @param[in] data_layout    Data layout to use for the output tensor once the convolution has been applied
      */
-    WinogradInfo(Size2D output_tile_sz, Size2D kernel_sz, Size2D input_dims, PadStrideInfo conv_info, DataLayout data_layout)
-        : output_tile_size(output_tile_sz), kernel_size(kernel_sz), input_dimensions(input_dims), convolution_info(conv_info), output_data_layout(data_layout)
+    WinogradInfo(
+        Size2D output_tile_sz, Size2D kernel_sz, Size2D input_dims, PadStrideInfo conv_info, DataLayout data_layout)
+        : output_tile_size(output_tile_sz),
+          kernel_size(kernel_sz),
+          input_dimensions(input_dims),
+          convolution_info(conv_info),
+          output_data_layout(data_layout)
     {
     }
 
-    Size2D        output_tile_size{};                     /**< Width and height of the output tile */
-    Size2D        kernel_size{};                          /**< Width and height of the kernel*/
-    Size2D        input_dimensions{};                     /**< Width and height of the input tensor before the convolution is applied */
-    PadStrideInfo convolution_info{};                     /**< Convolution info (Pads, strides,...) */
-    DataLayout    output_data_layout{ DataLayout::NCHW }; /**< Data layout to use for the output tensor once the convolution has been applied (NCHW or NHWC) */
+    Size2D        output_tile_size{}; /**< Width and height of the output tile */
+    Size2D        kernel_size{};      /**< Width and height of the kernel*/
+    Size2D        input_dimensions{}; /**< Width and height of the input tensor before the convolution is applied */
+    PadStrideInfo convolution_info{}; /**< Convolution info (Pads, strides,...) */
+    DataLayout    output_data_layout{
+        DataLayout::
+            NCHW}; /**< Data layout to use for the output tensor once the convolution has been applied (NCHW or NHWC) */
 };
 
 /** IO formatting information class*/
@@ -1915,4 +2016,4 @@ struct IOFormatInfo
 /** Class for holding information related to cropping */
 using CropInfo = Padding2D;
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_CORE_TYPES */
+#endif // ACL_ARM_COMPUTE_CORE_TYPES_H

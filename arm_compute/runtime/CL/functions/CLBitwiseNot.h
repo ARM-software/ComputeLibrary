@@ -60,5 +60,5 @@ public:
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLBITWISENOT_H */

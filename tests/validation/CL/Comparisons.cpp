@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,7 @@ TEST_SUITE(Comparison)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
         framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching input types
-                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
+                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
@@ -75,7 +75,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
         })),
-        framework::dataset::make("Expected", { false, false, false, false, true})),
+        framework::dataset::make("Expected", { false, false, true, false, true})),
         input1_info, input2_info, output_info, expected)
 {
     Status s = CLComparison::validate(&input1_info.clone()->set_is_resizable(false),

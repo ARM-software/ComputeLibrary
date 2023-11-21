@@ -27,6 +27,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -42,7 +43,8 @@ class Coordinates;
 
 namespace
 {
-inline void bitwise_xor_U8_U8_U8(const uint8_t *__restrict input1, const uint8_t *__restrict input2, uint8_t *__restrict output)
+inline void
+bitwise_xor_U8_U8_U8(const uint8_t *__restrict input1, const uint8_t *__restrict input2, uint8_t *__restrict output)
 {
     const uint8x16_t val1 = vld1q_u8(input1);
     const uint8x16_t val2 = vld1q_u8(input2);
@@ -51,8 +53,7 @@ inline void bitwise_xor_U8_U8_U8(const uint8_t *__restrict input1, const uint8_t
 }
 } // namespace
 
-NEBitwiseXorKernel::NEBitwiseXorKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr)
+NEBitwiseXorKernel::NEBitwiseXorKernel() : _input1(nullptr), _input2(nullptr), _output(nullptr)
 {
 }
 
@@ -82,7 +83,8 @@ void NEBitwiseXorKernel::configure(const ITensor *input1, const ITensor *input2,
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration),
-                              AccessWindowHorizontal(input2->info(), 0, num_elems_processed_per_iteration), output_access);
+                              AccessWindowHorizontal(input2->info(), 0, num_elems_processed_per_iteration),
+                              output_access);
 
     INEKernel::configure(win);
 }
@@ -96,9 +98,7 @@ void NEBitwiseXorKernel::run(const Window &window, const ThreadInfo &info)
     Iterator input2(_input2, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        bitwise_xor_U8_U8_U8(input1.ptr(), input2.ptr(), output.ptr());
-    },
-    input1, input2, output);
+    execute_window_loop(
+        window, [&](const Coordinates &) { bitwise_xor_U8_U8_U8(input1.ptr(), input2.ptr(), output.ptr()); }, input1,
+        input2, output);
 }

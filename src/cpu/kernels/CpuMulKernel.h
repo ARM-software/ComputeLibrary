@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_MUL_KERNEL_H
 
 #include "arm_compute/core/Rounding.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -68,17 +69,27 @@ public:
      * @param[in]  overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if any of the inputs is of quantized datatype
      * @param[in]  rounding_policy Rounding policy.
      */
-    void configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+    void configure(ITensorInfo   *src1,
+                   ITensorInfo   *src2,
+                   ITensorInfo   *dst,
+                   float          scale,
+                   ConvertPolicy  overflow_policy,
+                   RoundingPolicy rounding_policy);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuMulKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+    static Status validate(const ITensorInfo *src1,
+                           const ITensorInfo *src2,
+                           const ITensorInfo *dst,
+                           float              scale,
+                           ConvertPolicy      overflow_policy,
+                           RoundingPolicy     rounding_policy);
 
     // Inherited methods overridden
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     /** Return minimum workload size of the relevant kernel
@@ -108,7 +119,8 @@ private:
      * @param[in]  window Region on which to execute the kernel
      * @param[in]  scale  Integer scale factor.
      */
-    using MulFunctionInt = void(const ITensor *src1, const ITensor *src2, ITensor *dst, const Window &window, int scale);
+    using MulFunctionInt =
+        void(const ITensor *src1, const ITensor *src2, ITensor *dst, const Window &window, int scale);
     /** Common signature for all the specialised multiplication functions with float scaling factor
      *
      * @param[in]  src1   Src1 tensor object.
@@ -117,7 +129,8 @@ private:
      * @param[in]  window Region on which to execute the kernel
      * @param[in]  scale  Float scale factor.
      */
-    using MulFunctionFloat = void(const ITensor *src1, const ITensor *src2, ITensor *dst, const Window &window, float scale);
+    using MulFunctionFloat =
+        void(const ITensor *src1, const ITensor *src2, ITensor *dst, const Window &window, float scale);
     /** Common signature for all the specialised QASYMM8 multiplication functions with float scaling factor
      *
      * @param[in]  src1   Src1 tensor object.
@@ -127,14 +140,15 @@ private:
      * @param[in]  scale  Float scale factor.
      *
      */
-    using MulFunctionQuantized = void(const ITensor *src1, const ITensor *src2, ITensor *dst, const Window &window, float scale);
+    using MulFunctionQuantized =
+        void(const ITensor *src1, const ITensor *src2, ITensor *dst, const Window &window, float scale);
 
-    MulFunctionFloat     *_func_float{ nullptr };
-    MulFunctionInt       *_func_int{ nullptr };
-    MulFunctionQuantized *_func_quantized{ nullptr };
-    float                 _scale{ 0 };
-    int                   _scale_exponent{ 0 };
-    size_t                _split_dimension{ Window::DimY };
+    MulFunctionFloat     *_func_float{nullptr};
+    MulFunctionInt       *_func_int{nullptr};
+    MulFunctionQuantized *_func_quantized{nullptr};
+    float                 _scale{0};
+    int                   _scale_exponent{0};
+    size_t                _split_dimension{Window::DimY};
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
@@ -159,7 +173,7 @@ public:
     static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 };
 } // namespace kernels

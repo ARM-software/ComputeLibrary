@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEBatchToSpaceLayerKernel.h"
 
@@ -41,19 +42,25 @@ void NEBatchToSpaceLayer::configure(const ITensor *input, const ITensor *block_s
     _kernel = std::move(k);
 }
 
-void NEBatchToSpaceLayer::configure(const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info)
+void NEBatchToSpaceLayer::configure(
+    const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info)
 {
     auto k = std::make_unique<NEBatchToSpaceLayerKernel>();
     k->configure(input, block_shape_x, block_shape_y, output, crop_info);
     _kernel = std::move(k);
 }
 
-Status NEBatchToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output)
+Status
+NEBatchToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output)
 {
     return NEBatchToSpaceLayerKernel::validate(input, block_shape, output);
 }
 
-Status NEBatchToSpaceLayer::validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info)
+Status NEBatchToSpaceLayer::validate(const ITensorInfo *input,
+                                     int32_t            block_shape_x,
+                                     int32_t            block_shape_y,
+                                     const ITensorInfo *output,
+                                     const CropInfo    &crop_info)
 {
     return NEBatchToSpaceLayerKernel::validate(input, block_shape_x, block_shape_y, output, crop_info);
 }

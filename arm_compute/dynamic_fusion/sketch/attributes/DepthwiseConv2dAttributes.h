@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Types.h"
+
 #include <cstdint>
 
 namespace arm_compute
@@ -63,11 +64,11 @@ public:
     DimensionRoundingType dimension_rounding_type() const;
 
 private:
-    Padding2D             _pad{};                                                   /**< Padding */
-    Size2D                _stride{ 1U, 1U };                                        /**< Stride */
-    Size2D                _dilation{ 1U, 1U };                                      /**< Dilation */
-    uint32_t              _depth_multiplier{ 1U };                                  /**< Depth multiplier */
-    DimensionRoundingType _dimension_rounding_type{ DimensionRoundingType::FLOOR }; /**< Dimension rounding type */
+    Padding2D             _pad{};                                                 /**< Padding */
+    Size2D                _stride{1U, 1U};                                        /**< Stride */
+    Size2D                _dilation{1U, 1U};                                      /**< Dilation */
+    uint32_t              _depth_multiplier{1U};                                  /**< Depth multiplier */
+    DimensionRoundingType _dimension_rounding_type{DimensionRoundingType::FLOOR}; /**< Dimension rounding type */
 };
 } // namespace dynamic_fusion
 } // namespace experimental

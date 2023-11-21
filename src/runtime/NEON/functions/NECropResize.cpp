@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
+
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
 
@@ -35,18 +36,32 @@ namespace arm_compute
 NECropResize::~NECropResize() = default;
 
 NECropResize::NECropResize()
-    : _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _crop(), _scale(), _crop_results(), _scaled_results()
+    : _output(nullptr),
+      _num_boxes(0),
+      _method(),
+      _extrapolation_value(0),
+      _crop(),
+      _scale(),
+      _crop_results(),
+      _scaled_results()
 {
 }
 
-Status NECropResize::validate(const ITensorInfo *input, const ITensorInfo *boxes, const ITensorInfo *box_ind, const ITensorInfo *output,
-                              Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value)
+Status NECropResize::validate(const ITensorInfo  *input,
+                              const ITensorInfo  *boxes,
+                              const ITensorInfo  *box_ind,
+                              const ITensorInfo  *output,
+                              Coordinates2D       crop_size,
+                              InterpolationPolicy method,
+                              float               extrapolation_value)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(crop_size.x <= 0 || crop_size.y <= 0);
     ARM_COMPUTE_RETURN_ERROR_ON(method == InterpolationPolicy::AREA);
     TensorInfo temp_info;
-    ARM_COMPUTE_RETURN_ON_ERROR(NECropKernel::validate(input->clone().get(), boxes->clone().get(), box_ind->clone().get(), &temp_info, boxes->tensor_shape()[1] - 1, extrapolation_value));
-    if(output->total_size() > 0)
+    ARM_COMPUTE_RETURN_ON_ERROR(NECropKernel::validate(input->clone().get(), boxes->clone().get(),
+                                                       box_ind->clone().get(), &temp_info, boxes->tensor_shape()[1] - 1,
+                                                       extrapolation_value));
+    if (output->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(output, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
@@ -56,11 +71,17 @@ Status NECropResize::validate(const ITensorInfo *input, const ITensorInfo *boxes
     return Status{};
 }
 
-void NECropResize::configure(const ITensor *input, const ITensor *boxes, const ITensor *box_ind, ITensor *output, Coordinates2D crop_size,
-                             InterpolationPolicy method, float extrapolation_value)
+void NECropResize::configure(const ITensor      *input,
+                             const ITensor      *boxes,
+                             const ITensor      *box_ind,
+                             ITensor            *output,
+                             Coordinates2D       crop_size,
+                             InterpolationPolicy method,
+                             float               extrapolation_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NECropResize::validate(input->info(), boxes->info(), box_ind->info(), output->info(), crop_size, method, extrapolation_value));
+    ARM_COMPUTE_ERROR_THROW_ON(NECropResize::validate(input->info(), boxes->info(), box_ind->info(), output->info(),
+                                                      crop_size, method, extrapolation_value));
     ARM_COMPUTE_LOG_PARAMS(input, boxes, box_ind, output, crop_size, method, extrapolation_value);
 
     _num_boxes = boxes->info()->tensor_shape()[1];
@@ -81,7 +102,7 @@ void NECropResize::configure(const ITensor *input, const ITensor *boxes, const I
     _scaled_results.reserve(_num_boxes);
     _scale.reserve(_num_boxes);
 
-    for(unsigned int i = 0; i < _num_boxes; ++i)
+    for (unsigned int i = 0; i < _num_boxes; ++i)
     {
         auto       crop_tensor = std::make_unique<Tensor>();
         TensorInfo crop_result_info(1, DataType::F32);
@@ -108,7 +129,7 @@ void NECropResize::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_output == nullptr, "Unconfigured function");
 
-    for(unsigned int i = 0; i < _num_boxes; ++i)
+    for (unsigned int i = 0; i < _num_boxes; ++i)
     {
         // Size of the crop box in _boxes and thus the shape of _crop_results[i]
         // may not be known until run-time and so the kernels cannot be configured until then.
@@ -117,12 +138,15 @@ void NECropResize::run()
         NEScheduler::get().schedule(_crop[i].get(), Window::DimZ);
 
         // Scale the cropped image.
-        _scale[i]->configure(_crop_results[i].get(), _scaled_results[i].get(), ScaleKernelInfo{ _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT, false });
+        _scale[i]->configure(_crop_results[i].get(), _scaled_results[i].get(),
+                             ScaleKernelInfo{_method, BorderMode::CONSTANT, PixelValue(_extrapolation_value),
+                                             SamplingPolicy::TOP_LEFT, false});
         _scaled_results[i]->allocator()->allocate();
         _scale[i]->run();
 
         // Copy scaled image into output.
-        std::copy_n(_scaled_results[i]->buffer(), _scaled_results[i]->info()->total_size(), _output->ptr_to_element(Coordinates(0, 0, 0, i)));
+        std::copy_n(_scaled_results[i]->buffer(), _scaled_results[i]->info()->total_size(),
+                    _output->ptr_to_element(Coordinates(0, 0, 0, i)));
     }
 }
 } // namespace arm_compute

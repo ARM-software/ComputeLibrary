@@ -27,21 +27,22 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
-#include "utils/TypePrinter.h"
+
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
+#include "utils/TypePrinter.h"
 
 namespace gemm_tuner
 {
 /** Structure holding all the common gemm example parameters */
 struct CommonGemmExampleParams
 {
-    size_t                   M{ 100 };                                      /**< Number of lhs matrix rows */
-    size_t                   N{ 100 };                                      /**< Number of rhs matrix columns */
-    size_t                   K{ 50 };                                       /**< Number of lhs matrix columns/rhs matrix rows */
-    size_t                   B{ 1 };                                        /**< Batch size */
-    arm_compute::DataType    data_type{ arm_compute::DataType::F32 };       /**< Data type */
-    arm_compute::CLTunerMode tuner_mode{ arm_compute::CLTunerMode::RAPID }; /**< OpenCL tuner mode */
+    size_t                   M{100};                                /**< Number of lhs matrix rows */
+    size_t                   N{100};                                /**< Number of rhs matrix columns */
+    size_t                   K{50};                                 /**< Number of lhs matrix columns/rhs matrix rows */
+    size_t                   B{1};                                  /**< Batch size */
+    arm_compute::DataType    data_type{arm_compute::DataType::F32}; /**< Data type */
+    arm_compute::CLTunerMode tuner_mode{arm_compute::CLTunerMode::RAPID}; /**< OpenCL tuner mode */
 };
 
 /** Formatted output of the CommonGemmExampleParams type
@@ -70,7 +71,8 @@ public:
      * @param[in,out] parser            A parser on which "parse()" hasn't been called yet.
      * @param[in]     default_data_type Default data type if unspecified.
      */
-    CommonGemmExampleOptions(arm_compute::utils::CommandLineParser &parser, arm_compute::DataType default_data_type = arm_compute::DataType::F32);
+    CommonGemmExampleOptions(arm_compute::utils::CommandLineParser &parser,
+                             arm_compute::DataType                  default_data_type = arm_compute::DataType::F32);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CommonGemmExampleOptions(const CommonGemmExampleOptions &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -82,11 +84,11 @@ public:
     /** Default destructor */
     ~CommonGemmExampleOptions() = default;
 
-    arm_compute::utils::ToggleOption                         *help;       /**< Show help option */
-    arm_compute::utils::SimpleOption<size_t>                 *M;          /**< Number of lhs matrix rows option */
-    arm_compute::utils::SimpleOption<size_t>                 *N;          /**< Number of rhs matrix columns option */
-    arm_compute::utils::SimpleOption<size_t>                 *K;          /**< Number of lhs matrix columns/rhs matrix rows option */
-    arm_compute::utils::SimpleOption<size_t>                 *B;          /**< Batch size option */
+    arm_compute::utils::ToggleOption         *help; /**< Show help option */
+    arm_compute::utils::SimpleOption<size_t> *M;    /**< Number of lhs matrix rows option */
+    arm_compute::utils::SimpleOption<size_t> *N;    /**< Number of rhs matrix columns option */
+    arm_compute::utils::SimpleOption<size_t> *K;    /**< Number of lhs matrix columns/rhs matrix rows option */
+    arm_compute::utils::SimpleOption<size_t> *B;    /**< Batch size option */
     arm_compute::utils::EnumOption<arm_compute::DataType>    *data_type;  /**< Data type */
     arm_compute::utils::EnumOption<arm_compute::CLTunerMode> *tuner_mode; /**< OpenCL tuner mode */
 };

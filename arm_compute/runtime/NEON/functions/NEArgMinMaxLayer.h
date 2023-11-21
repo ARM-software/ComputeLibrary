@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_NEARGMINMAXLAYER_H
 #define ARM_COMPUTE_NEARGMINMAXLAYER_H
 
-#include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -33,7 +31,6 @@
 namespace arm_compute
 {
 class ITensor;
-
 /** Function to calculate the index of the minimum or maximum values in a
  *  tensor based on an axis.
  *
@@ -68,13 +65,13 @@ public:
      * - All
      *
      * Valid data type configurations:
-     * |src            |dst        |
-     * |:--------------|:----------|
-     * |QASYMM8        |U32, S32   |
-     * |QASYMM8_SIGNED |U32, S32   |
-     * |S32            |U32, S32   |
-     * |F16            |U32, S32   |
-     * |F32            |U32, S32   |
+     * |src            |dst           |
+     * |:--------------|:-------------|
+     * |QASYMM8        |U32, S32      |
+     * |QASYMM8_SIGNED |U32, S32      |
+     * |S32            |U32, S32, S64 |
+     * |F16            |U32, S32      |
+     * |F32            |U32, S32      |
      *
      * @param[in]  input  Input source tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/S32/F16/F32.
      * @param[in]  axis   Axis to find max/min index.
@@ -86,7 +83,7 @@ public:
      *
      * @param[in] input  Input source tensor info. Data types supported: QASYMM8_SIGNED/QASYMM8/S32/F16/F32.
      * @param[in] axis   Axis to find max/min index.
-     * @param[in] output Output source tensor info. Data types supported: U32/S32.
+     * @param[in] output Output source tensor info. Data types supported: U32/S32/S64.
      * @param[in] op     Operation to perform: min or max
      *
      * @return a status
@@ -97,7 +94,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEReductionOperation> _reduction_function;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEARGMINMAXLAYER_H */

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NELSTMLAYER_H
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/common/LSTMParams.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
@@ -35,7 +36,6 @@
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
-#include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
 {
@@ -104,13 +104,26 @@ public:
      * @param[in]  projection_threshold        The clipping threshold for the output from the projection layer, such that values are bound within [-proj_clip, proj_clip].
      *                                         If set to 0.0 then clipping is disabled.
      */
-    void configure(const ITensor *input,
-                   const ITensor *input_to_forget_weights, const ITensor *input_to_cell_weights, const ITensor *input_to_output_weights,
-                   const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
-                   const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
-                   const ITensor *output_state_in, const ITensor *cell_state_in,
-                   ITensor *scratch_buffer, ITensor *output_state_out, ITensor *cell_state_out, ITensor *output,
-                   const LSTMParams<ITensor> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold = 0.f, float projection_threshold = 0.f);
+    void configure(const ITensor             *input,
+                   const ITensor             *input_to_forget_weights,
+                   const ITensor             *input_to_cell_weights,
+                   const ITensor             *input_to_output_weights,
+                   const ITensor             *recurrent_to_forget_weights,
+                   const ITensor             *recurrent_to_cell_weights,
+                   const ITensor             *recurrent_to_output_weights,
+                   const ITensor             *forget_gate_bias,
+                   const ITensor             *cell_bias,
+                   const ITensor             *output_gate_bias,
+                   const ITensor             *output_state_in,
+                   const ITensor             *cell_state_in,
+                   ITensor                   *scratch_buffer,
+                   ITensor                   *output_state_out,
+                   ITensor                   *cell_state_out,
+                   ITensor                   *output,
+                   const LSTMParams<ITensor> &lstm_params,
+                   const ActivationLayerInfo &activation_info,
+                   float                      cell_threshold       = 0.f,
+                   float                      projection_threshold = 0.f);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NELSTMLayer
      *
@@ -151,13 +164,26 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input,
-                           const ITensorInfo *input_to_forget_weights, const ITensorInfo *input_to_cell_weights, const ITensorInfo *input_to_output_weights,
-                           const ITensorInfo *recurrent_to_forget_weights, const ITensorInfo *recurrent_to_cell_weights, const ITensorInfo *recurrent_to_output_weights,
-                           const ITensorInfo *forget_gate_bias, const ITensorInfo *cell_bias, const ITensorInfo *output_gate_bias,
-                           const ITensorInfo *output_state_in, const ITensorInfo *cell_state_in,
-                           const ITensorInfo *scratch_buffer, const ITensorInfo *output_state_out, const ITensorInfo *cell_state_out, const ITensorInfo *output,
-                           const LSTMParams<ITensorInfo> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold = 0.f, float projection_threshold = 0.f);
+    static Status validate(const ITensorInfo             *input,
+                           const ITensorInfo             *input_to_forget_weights,
+                           const ITensorInfo             *input_to_cell_weights,
+                           const ITensorInfo             *input_to_output_weights,
+                           const ITensorInfo             *recurrent_to_forget_weights,
+                           const ITensorInfo             *recurrent_to_cell_weights,
+                           const ITensorInfo             *recurrent_to_output_weights,
+                           const ITensorInfo             *forget_gate_bias,
+                           const ITensorInfo             *cell_bias,
+                           const ITensorInfo             *output_gate_bias,
+                           const ITensorInfo             *output_state_in,
+                           const ITensorInfo             *cell_state_in,
+                           const ITensorInfo             *scratch_buffer,
+                           const ITensorInfo             *output_state_out,
+                           const ITensorInfo             *cell_state_out,
+                           const ITensorInfo             *output,
+                           const LSTMParams<ITensorInfo> &lstm_params,
+                           const ActivationLayerInfo     &activation_info,
+                           float                          cell_threshold       = 0.f,
+                           float                          projection_threshold = 0.f);
 
     // Inherited methods overridden:
     void run() override;

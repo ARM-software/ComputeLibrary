@@ -28,8 +28,8 @@
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
@@ -63,7 +63,9 @@ public:
      * @param[in] gemm_h          (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
      * @param[in] cl_backend_type (Optional) Type of backend to use (default = CLBackendType::Native)
      */
-    void default_init(ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr, CLBackendType cl_backend_type = CLBackendType::Native);
+    void default_init(ICLTuner               *cl_tuner        = nullptr,
+                      CLGEMMHeuristicsHandle *gemm_h          = nullptr,
+                      CLBackendType           cl_backend_type = CLBackendType::Native);
     /** Initialises the scheduler with context and device provided by the user
      *
      * @param[in] device   OpenCL device to be used
@@ -71,7 +73,10 @@ public:
      * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
      * @param[in] gemm_h   (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
      */
-    void default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
+    void default_init_with_context(cl::Device             &device,
+                                   cl::Context            &ctx,
+                                   ICLTuner               *cl_tuner = nullptr,
+                                   CLGEMMHeuristicsHandle *gemm_h   = nullptr);
 
     /** Re-initializes the context and command queue used by the scheduler to default values
      *  and sets a default device and kernel path for the @ref CLKernelLibrary.
@@ -80,7 +85,9 @@ public:
      * @param[in] gemm_h          (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
      * @param[in] cl_backend_type (Optional) Type of backend to use (default = CLBackendType::Native)
      */
-    void default_reinit(ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr, CLBackendType cl_backend_type = CLBackendType::Native);
+    void default_reinit(ICLTuner               *cl_tuner        = nullptr,
+                        CLGEMMHeuristicsHandle *gemm_h          = nullptr,
+                        CLBackendType           cl_backend_type = CLBackendType::Native);
 
     /** Schedule the execution of the passed kernel if possible.
      *
@@ -105,8 +112,12 @@ public:
      * @param[in] gemm_h          (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
      * @param[in] cl_backend_type (Optional) Type of backend to use (default = CLBackendType::Native)
      */
-    void init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr,
-              CLBackendType cl_backend_type = CLBackendType::Native);
+    void init(cl::Context             context,
+              cl::CommandQueue        queue,
+              const cl::Device       &device,
+              ICLTuner               *cl_tuner        = nullptr,
+              CLGEMMHeuristicsHandle *gemm_h          = nullptr,
+              CLBackendType           cl_backend_type = CLBackendType::Native);
 
     /** Accessor for the associated CL context.
      *

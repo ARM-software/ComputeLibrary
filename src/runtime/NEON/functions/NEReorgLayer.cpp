@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEReorgLayer.h"
 
-#include "src/core/NEON/kernels/NEReorgLayerKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NEReorgLayerKernel.h"
 
 namespace arm_compute
 {

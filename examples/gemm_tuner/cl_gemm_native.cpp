@@ -25,19 +25,20 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
-#include "CommonGemmExampleOptions.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.h"
 #include "tests/CL/Helper.h"
-#include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
+#include "utils/Utils.h"
 
+#include "CommonGemmExampleOptions.h"
 #include <cstdlib>
 
 using namespace arm_compute;
@@ -51,9 +52,9 @@ namespace
 /** Structure holding all tunable gemm configs specific to this example/strategy */
 struct GemmConfigs
 {
-    size_t m0{ 4 }; /**< Number of rows processed by the matrix multiplication */
-    size_t n0{ 4 }; /**< Number of columns processed by the matrix multiplication */
-    size_t k0{ 4 }; /**< Number of partial accumulations performed by the matrix multiplication */
+    size_t m0{4}; /**< Number of rows processed by the matrix multiplication */
+    size_t n0{4}; /**< Number of columns processed by the matrix multiplication */
+    size_t k0{4}; /**< Number of partial accumulations performed by the matrix multiplication */
 };
 
 /** Formatted output of the GemmConfigs type
@@ -145,13 +146,13 @@ public:
 
         // Parse command line options
         parser.parse(argc, argv);
-        if(param_options.help->is_set() && param_options.help->value())
+        if (param_options.help->is_set() && param_options.help->value())
         {
             // Print help message
             parser.print_help(argv[0]);
             return false;
         }
-        if(!parser.validate())
+        if (!parser.validate())
         {
             // Invalid arguments. Use default parameters and configs
             std::cerr << "Invalid arguments." << std::endl;
@@ -198,8 +199,9 @@ public:
 
         // Validate argments
         Status status{};
-        status = gemm.validate(lhs.info(), rhs.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
-        if(!status)
+        status = gemm.validate(lhs.info(), rhs.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info,
+                               kernel_info);
+        if (!status)
         {
             // Unsupported arguments
             std::cerr << "Unsupported arguments." << std::endl;
@@ -221,11 +223,7 @@ public:
     void do_run() override
     {
         // Execute the function
-        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs },
-            { ACL_SRC_1, &rhs },
-            { ACL_SRC_2, &bias },
-            { ACL_DST, &dst }
-        });
+        ITensorPack gemm_pack({{ACL_SRC_0, &lhs}, {ACL_SRC_1, &rhs}, {ACL_SRC_2, &bias}, {ACL_DST, &dst}});
         gemm.run(gemm_pack);
 
         // Make sure all the OpenCL jobs are done executing:

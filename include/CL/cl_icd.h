@@ -1099,7 +1099,7 @@ typedef void *cl_api_clGetHostTimer;
 
 #endif
 
-/* Vendor dispatch table struture */
+/* Vendor dispatch table structure */
 
 typedef struct _cl_icd_dispatch {
   /* OpenCL 1.0 */

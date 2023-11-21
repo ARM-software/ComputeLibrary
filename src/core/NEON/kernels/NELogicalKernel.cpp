@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -50,7 +51,7 @@ void neon_logical_and(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, ui
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src1);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
 
-    for(; len >= step; len -= step)
+    for (; len >= step; len -= step)
     {
         vst1q_u8(dst, vandq_u8(vminq_u8(vld1q_u8(src0), c1_x16), vminq_u8(vld1q_u8(src1), c1_x16)));
         src0 += step;
@@ -58,7 +59,7 @@ void neon_logical_and(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, ui
         dst += step;
     }
 
-    for(; len >= half_step; len -= half_step)
+    for (; len >= half_step; len -= half_step)
     {
         vst1_u8(dst, vand_u8(vmin_u8(vld1_u8(src0), c1_x8), vmin_u8(vld1_u8(src1), c1_x8)));
         src0 += half_step;
@@ -66,7 +67,7 @@ void neon_logical_and(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, ui
         dst += half_step;
     }
 
-    for(; len > 0; --len)
+    for (; len > 0; --len)
     {
         *dst = (*src0) && (*src1);
         ++src0;
@@ -84,21 +85,21 @@ void neon_logical_and_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8
     const auto broadcast_val_clamped_x16 = vdupq_n_u8(broadcast_val_clamped_s);
     const auto broadcast_val_clamped_x8  = vdup_n_u8(broadcast_val_clamped_s);
 
-    for(; len >= step; len -= step)
+    for (; len >= step; len -= step)
     {
         vst1q_u8(dst, vandq_u8(vminq_u8(vld1q_u8(src), c1_x16), broadcast_val_clamped_x16));
         src += step;
         dst += step;
     }
 
-    for(; len >= half_step; len -= half_step)
+    for (; len >= half_step; len -= half_step)
     {
         vst1_u8(dst, vand_u8(vmin_u8(vld1_u8(src), c1_x8), broadcast_val_clamped_x8));
         src += half_step;
         dst += half_step;
     }
 
-    for(; len > 0; --len)
+    for (; len > 0; --len)
     {
         *dst = (*src) && broadcast_val_clamped_s;
         ++src;
@@ -112,7 +113,7 @@ void neon_logical_or(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, uin
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src1);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
 
-    for(; len >= step; len -= step)
+    for (; len >= step; len -= step)
     {
         vst1q_u8(dst, vorrq_u8(vminq_u8(vld1q_u8(src0), c1_x16), vminq_u8(vld1q_u8(src1), c1_x16)));
         src0 += step;
@@ -120,7 +121,7 @@ void neon_logical_or(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, uin
         dst += step;
     }
 
-    for(; len >= half_step; len -= half_step)
+    for (; len >= half_step; len -= half_step)
     {
         vst1_u8(dst, vorr_u8(vmin_u8(vld1_u8(src0), c1_x8), vmin_u8(vld1_u8(src1), c1_x8)));
         src0 += half_step;
@@ -128,7 +129,7 @@ void neon_logical_or(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, uin
         dst += half_step;
     }
 
-    for(; len > 0; --len)
+    for (; len > 0; --len)
     {
         *dst = (*src0) || (*src1);
         ++src0;
@@ -146,21 +147,21 @@ void neon_logical_or_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8_
     const auto broadcast_val_clamped_x16 = vdupq_n_u8(broadcast_val_clamped_s);
     const auto broadcast_val_clamped_x8  = vdup_n_u8(broadcast_val_clamped_s);
 
-    for(; len >= step; len -= step)
+    for (; len >= step; len -= step)
     {
         vst1q_u8(dst, vorrq_u8(vminq_u8(vld1q_u8(src), c1_x16), broadcast_val_clamped_x16));
         src += step;
         dst += step;
     }
 
-    for(; len >= half_step; len -= half_step)
+    for (; len >= half_step; len -= half_step)
     {
         vst1_u8(dst, vorr_u8(vmin_u8(vld1_u8(src), c1_x8), broadcast_val_clamped_x8));
         src += half_step;
         dst += half_step;
     }
 
-    for(; len > 0; --len)
+    for (; len > 0; --len)
     {
         *dst = (*src) || broadcast_val_clamped_s;
         ++src;
@@ -173,21 +174,21 @@ void neon_logical_not(const uint8_t *src, uint8_t *dst, uint32_t len)
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
 
-    for(; len >= step; len -= step)
+    for (; len >= step; len -= step)
     {
         vst1q_u8(dst, vbslq_u8(vceqq_u8(vld1q_u8(src), c0_x16), c1_x16, c0_x16));
         src += step;
         dst += step;
     }
 
-    for(; len >= half_step; len -= half_step)
+    for (; len >= half_step; len -= half_step)
     {
         vst1_u8(dst, vbsl_u8(vceq_u8(vld1_u8(src), c0_x8), c1_x8, c0_x8));
         src += half_step;
         dst += half_step;
     }
 
-    for(; len > 0; --len)
+    for (; len > 0; --len)
     {
         *dst = !(*src);
         ++src;
@@ -197,18 +198,15 @@ void neon_logical_not(const uint8_t *src, uint8_t *dst, uint32_t len)
 
 void run_unary(const Window &window, const ITensor *src, ITensor *dst)
 {
-    Window win{ window };
+    Window win{window};
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     const auto len = window.x().end() - window.x().start();
 
     Iterator in(src, win);
     Iterator out(dst, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        neon_logical_not(in.ptr(), out.ptr(), len);
-    },
-    in, out);
+    execute_window_loop(
+        win, [&](const Coordinates &) { neon_logical_not(in.ptr(), out.ptr(), len); }, in, out);
 }
 
 void run_binary(const Window &window, const ITensor *src0, const ITensor *src1, ITensor *dst, LogicalOperation op)
@@ -216,16 +214,17 @@ void run_binary(const Window &window, const ITensor *src0, const ITensor *src1, 
     Window src0_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
     Window src1_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
-    Window win{ window };
+    Window win{window};
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     const bool is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
     const auto len                   = window.x().end() - window.x().start();
 
-    if(is_broadcast_across_x)
+    if (is_broadcast_across_x)
     {
-        using LogicalBroadcastUKernelPtr        = std::add_pointer<void(const uint8_t *, uint8_t, uint8_t *, uint32_t)>::type;
-        LogicalBroadcastUKernelPtr logical_func = op == LogicalOperation::Or ? &neon_logical_or_broadcast : &neon_logical_and_broadcast;
+        using LogicalBroadcastUKernelPtr = std::add_pointer<void(const uint8_t *, uint8_t, uint8_t *, uint32_t)>::type;
+        LogicalBroadcastUKernelPtr logical_func =
+            op == LogicalOperation::Or ? &neon_logical_or_broadcast : &neon_logical_and_broadcast;
 
         const bool     is_broadcast_input_1 = src1_win.x().step() == 0;
         Window         broadcast_win        = is_broadcast_input_1 ? src1_win : src0_win;
@@ -238,17 +237,18 @@ void run_binary(const Window &window, const ITensor *src0, const ITensor *src1, 
         Iterator non_broadcast_in(non_broadcast_tensor, non_broadcast_win);
         Iterator out(dst, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const uint8_t broadcast_value = *broadcast_in.ptr();
-            logical_func(non_broadcast_in.ptr(), broadcast_value, out.ptr(), len);
-
-        },
-        broadcast_in, non_broadcast_in, out);
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
+            {
+                const uint8_t broadcast_value = *broadcast_in.ptr();
+                logical_func(non_broadcast_in.ptr(), broadcast_value, out.ptr(), len);
+            },
+            broadcast_in, non_broadcast_in, out);
     }
     else
     {
-        using LogicalUKernelPtr        = std::add_pointer<void(const uint8_t *, const uint8_t *, uint8_t *, uint32_t)>::type;
+        using LogicalUKernelPtr = std::add_pointer<void(const uint8_t *, const uint8_t *, uint8_t *, uint32_t)>::type;
         LogicalUKernelPtr logical_func = op == LogicalOperation::Or ? &neon_logical_or : &neon_logical_and;
 
         src0_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -257,11 +257,8 @@ void run_binary(const Window &window, const ITensor *src0, const ITensor *src1, 
         Iterator in0(src0, src0_win);
         Iterator in1(src1, src1_win);
         Iterator out(dst, win);
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            logical_func(in0.ptr(), in1.ptr(), out.ptr(), len);
-        },
-        in0, in1, out);
+        execute_window_loop(
+            win, [&](const Coordinates &) { logical_func(in0.ptr(), in1.ptr(), out.ptr(), len); }, in0, in1, out);
     }
 }
 } // namespace
@@ -270,7 +267,10 @@ const char *NELogicalKernel::name() const
     return "NELogicalKernel";
 }
 
-void NELogicalKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, LogicalOperation op)
+void NELogicalKernel::configure(const ITensorInfo *input1,
+                                const ITensorInfo *input2,
+                                ITensorInfo       *output,
+                                LogicalOperation   op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate(input1, input2, output, op));
@@ -279,7 +279,7 @@ void NELogicalKernel::configure(const ITensorInfo *input1, const ITensorInfo *in
 
     Window      win       = calculate_max_window(*input1, Steps());
     TensorShape out_shape = input1->tensor_shape();
-    if(op != LogicalOperation::Not)
+    if (op != LogicalOperation::Not)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(input2);
         out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
@@ -292,13 +292,16 @@ void NELogicalKernel::configure(const ITensorInfo *input1, const ITensorInfo *in
     set_data_type_if_unknown(*output, input1->data_type());
 }
 
-Status NELogicalKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, LogicalOperation op)
+Status NELogicalKernel::validate(const ITensorInfo *input1,
+                                 const ITensorInfo *input2,
+                                 const ITensorInfo *output,
+                                 LogicalOperation   op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
     ARM_COMPUTE_RETURN_ERROR_ON(op == LogicalOperation::Unknown);
 
     TensorShape out_shape = input1->tensor_shape();
-    if(op != LogicalOperation::Not)
+    if (op != LogicalOperation::Not)
     {
         out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
@@ -306,7 +309,7 @@ Status NELogicalKernel::validate(const ITensorInfo *input1, const ITensorInfo *i
     }
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON(detail::have_different_dimensions(out_shape, output->tensor_shape(), 0));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
@@ -326,7 +329,7 @@ void NELogicalKernel::run_op(ITensorPack &tensors, const Window &window, const T
     const ITensor *src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
-    if(_op == LogicalOperation::Not)
+    if (_op == LogicalOperation::Not)
     {
         run_unary(window, src0, dst);
     }

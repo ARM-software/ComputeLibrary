@@ -27,9 +27,9 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLRangeKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLRangeKernel.h"
 
 using namespace arm_compute;
 
@@ -38,7 +38,8 @@ void CLRange::configure(ICLTensor *output, const float start, const float end, c
     configure(CLKernelLibrary::get().get_compile_context(), output, start, end, step);
 }
 
-void CLRange::configure(const CLCompileContext &compile_context, ICLTensor *output, const float start, const float end, const float step)
+void CLRange::configure(
+    const CLCompileContext &compile_context, ICLTensor *output, const float start, const float end, const float step)
 {
     ARM_COMPUTE_LOG_PARAMS(output, start, end, step);
     auto k = std::make_unique<CLRangeKernel>();

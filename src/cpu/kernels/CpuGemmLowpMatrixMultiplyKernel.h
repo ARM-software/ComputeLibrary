@@ -68,11 +68,11 @@ public:
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
-    bool _slide_matrix_b{ true };
+    bool _slide_matrix_b{true};
 };
 } // namespace kernels
 } // namespace cpu

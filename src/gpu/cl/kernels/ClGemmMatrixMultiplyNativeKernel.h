@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_GEMM_MATRIXMULTIPLY_NATIVE_KERNEL_H
-#define ARM_COMPUTE_CL_GEMM_MATRIXMULTIPLY_NATIVE_KERNEL_H
+#ifndef ACL_SRC_GPU_CL_KERNELS_CLGEMMMATRIXMULTIPLYNATIVEKERNEL_H
+#define ACL_SRC_GPU_CL_KERNELS_CLGEMMMATRIXMULTIPLYNATIVEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -58,7 +59,13 @@ public:
      *                             rhs_info.k0: same of lhs_info.k0
      * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float alpha, float beta,
+    void configure(const ClCompileContext  &compile_context,
+                   ITensorInfo             *src0,
+                   ITensorInfo             *src1,
+                   ITensorInfo             *src2,
+                   ITensorInfo             *dst,
+                   float                    alpha,
+                   float                    beta,
                    const GEMMLHSMatrixInfo &lhs_info,
                    const GEMMRHSMatrixInfo &rhs_info,
                    const GEMMKernelInfo    &gemm_info);
@@ -68,7 +75,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
+    static Status validate(const ITensorInfo       *src0,
+                           const ITensorInfo       *src1,
+                           const ITensorInfo       *src2,
+                           const ITensorInfo       *dst,
+                           float                    alpha,
+                           float                    beta,
+                           const GEMMLHSMatrixInfo &lhs_info,
                            const GEMMRHSMatrixInfo &rhs_info,
                            const GEMMKernelInfo    &gemm_info);
 
@@ -76,17 +89,16 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    bool         _slide_matrix_b{ true };
-    bool         _reinterpret_input_as_3d{ false };
-    bool         _reinterpret_output_as_3d{ false };
-    bool         _use_dummy_work_items{ false };
-    bool         _add_bias{ false };
-    signed int   _m{ 1 };
-    signed int   _n{ 1 };
-    signed int   _k{ 1 };
-    unsigned int _num_post_op_args{ 0 }; // (EXPERIMENTAL_POST_OPS) total number of post op arguments
+    bool       _slide_matrix_b{true};
+    bool       _reinterpret_input_as_3d{false};
+    bool       _reinterpret_output_as_3d{false};
+    bool       _use_dummy_work_items{false};
+    bool       _add_bias{false};
+    signed int _m{1};
+    signed int _n{1};
+    signed int _k{1};
 };
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_GEMM_MATRIXMULTIPLY_NATIVE_KERNEL_H */
+#endif // ACL_SRC_GPU_CL_KERNELS_CLGEMMMATRIXMULTIPLYNATIVEKERNEL_H

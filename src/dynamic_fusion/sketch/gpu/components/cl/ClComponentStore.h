@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE
 
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -70,9 +71,7 @@ public:
      * |:--------------|:--------------|
      * |All            |All            |
      */
-    static Status validate(
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors);
+    static Status validate(const Properties &properties, const ArgumentPack<ITensorInfo> &tensors);
     /** Constructor
      *
      * Similar to @ref ClComponentStore::validate()

@@ -25,8 +25,9 @@
 #define ARM_COMPUTE_CPU_POOL2D_ASSEMBLY_WRAPPER_KERNEL_H
 
 #include "arm_compute/core/Types.h"
-#include "src/core/NEON/kernels/assembly/pooling.hpp"
+
 #include "src/core/common/Macros.h"
+#include "src/core/NEON/kernels/assembly/pooling.hpp"
 #include "src/cpu/ICpuKernel.h"
 #include "src/cpu/kernels/CpuKernelSelectionTypes.h"
 
@@ -101,7 +102,8 @@ private:
      * @param[in] info Pooling layer meta-data.
      */
     template <typename Typesrc, typename Typedst>
-    void create_arm_pooling(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info);
+    void
+    create_arm_pooling(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info);
 
     /** Helper function to create the assembly kernel with requantization support
      *
@@ -110,9 +112,12 @@ private:
      * @param[in] info Pooling layer meta-data.
      */
     template <typename Typesrc, typename Typedst>
-    void create_arm_pooling_requant(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info);
+    void create_arm_pooling_requant(const ITensorInfo      *src,
+                                    ITensorInfo            *dst,
+                                    const PoolingLayerInfo &info,
+                                    const CPUInfo          &cpu_info);
 
-    std::unique_ptr<arm_conv::pooling::IPoolingCommon> _kernel_asm{ nullptr };
+    std::unique_ptr<arm_conv::pooling::IPoolingCommon> _kernel_asm{nullptr};
 
     /** Return minimum workload size of the relevant kernel
      *

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
@@ -38,16 +39,12 @@ namespace dynamic_fusion
 {
 namespace
 {
-    constexpr unsigned int serial_vector_size = 8;
+constexpr unsigned int serial_vector_size = 8;
 } // namespace
 ClTemplateLogits1DMaxShiftExpSum::ClTemplateLogits1DMaxShiftExpSum(ComponentId                      id,
                                                                    const ArgumentPack<ITensorInfo> &tensors,
                                                                    const Attributes                &attributes)
-    : IGpuTemplateComponentWriter{ id, tensors },
-      _src{},
-      _sum{},
-      _dst{},
-      _attributes{ attributes }
+    : IGpuTemplateComponentWriter{id, tensors}, _src{}, _sum{}, _dst{}, _attributes{attributes}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _sum = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
@@ -79,7 +76,7 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_component_code(const Component
 
     const bool beta_defined = (_attributes.beta() != 1.f);
 
-    if(beta_defined)
+    if (beta_defined)
     {
         code += R"_(
     VEC_TYPE beta = (VEC_TYPE){{BETA}};
@@ -91,7 +88,7 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_component_code(const Component
     const unsigned int     vector_size         = adjust_vec_size(_serial_vector_size, reduction_dim_size);
     const bool             non_multiple_of_n0  = ((reduction_dim_size % vector_size) != 0);
 
-    if(non_multiple_of_n0)
+    if (non_multiple_of_n0)
     {
         code += R"_(
     VEC_TYPE data    = VLOAD(N0)(0, (__global {{DATA_TYPE}} *)src_addr);
@@ -111,19 +108,19 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_component_code(const Component
     VEC_TYPE sum1D = 0;
 )_";
 
-    if(non_multiple_of_n0)
+    if (non_multiple_of_n0)
     {
         code += R"_(
     data -= max_val;
 )_";
-        if(beta_defined)
+        if (beta_defined)
         {
             code += R"_(
     data *= beta;
 )_";
         }
 
-        if(_attributes.is_log_softmax())
+        if (_attributes.is_log_softmax())
         {
             code += R"_(
     VSTORE_PARTIAL(N0, PARTIAL_N0)
@@ -153,14 +150,14 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_component_code(const Component
         data -= max_val;
 )_";
 
-    if(beta_defined)
+    if (beta_defined)
     {
         code += R"_(
     data *= beta;
 )_";
     }
 
-    if(_attributes.is_log_softmax())
+    if (_attributes.is_log_softmax())
     {
         code += R"_(
     VSTORE(N0)
@@ -191,28 +188,18 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_component_code(const Component
     return code;
 }
 
-void ClTemplateLogits1DMaxShiftExpSum::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
+void ClTemplateLogits1DMaxShiftExpSum::declare_variables(GpuKernelVariableTable &vtable,
+                                                         const ComponentGroup   &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
-        "src");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D), "src");
 
-    vtable.declare_variable(
-        comp_group,
-        _sum,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
-        "sum");
+    vtable.declare_variable(comp_group, _sum, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D), "sum");
 
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D), "dst");
 }
 
-TagLUT ClTemplateLogits1DMaxShiftExpSum::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
+TagLUT ClTemplateLogits1DMaxShiftExpSum::get_tag_lut(const GpuKernelVariableTable &vtable,
+                                                     const ComponentGroup         &comp_group) const
 {
     ARM_COMPUTE_UNUSED(comp_group);
 
@@ -241,8 +228,8 @@ CLBuildOptions ClTemplateLogits1DMaxShiftExpSum::get_build_options(const Compone
     ARM_COMPUTE_UNUSED(comp_group);
     CLBuildOptions build_opts{};
 
-    const unsigned int     reduction_dim_size = _src->dimension(0);
-    const unsigned int     vector_size        = adjust_vec_size(serial_vector_size, reduction_dim_size);
+    const unsigned int reduction_dim_size = _src->dimension(0);
+    const unsigned int vector_size        = adjust_vec_size(serial_vector_size, reduction_dim_size);
 
     build_opts.add_option("-DN0=" + support::cpp11::to_string(vector_size));
     build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string((reduction_dim_size % vector_size)));
@@ -264,7 +251,7 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_config_id() const
 
 std::set<std::string> ClTemplateLogits1DMaxShiftExpSum::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h"};
 }
 
 Window ClTemplateLogits1DMaxShiftExpSum::get_window() const

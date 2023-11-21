@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_WINOGRAD_OUTPUT_TRANSFORM_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -61,7 +62,11 @@ public:
      * @param[in]  winograd_info   Contains Winograd's information described in @ref WinogradInfo
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *bias, ITensorInfo *dst, const WinogradInfo &winograd_info,
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src,
+                   ITensorInfo               *bias,
+                   ITensorInfo               *dst,
+                   const WinogradInfo        &winograd_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -69,7 +74,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src,
+                           const ITensorInfo         *bias,
+                           const ITensorInfo         *dst,
+                           const WinogradInfo        &winograd_info,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
@@ -77,11 +86,11 @@ public:
 private:
     using WinogradKey = std::pair<std::pair<int, int>, std::pair<int, int>>;
 
-    bool    _is_nhwc{ false };
-    int32_t _src_height{ 0 };
-    int32_t _dst_width{ 0 };
-    int32_t _dst_height{ 0 };
-    int32_t _num_tiles_x{ 0 };
+    bool    _is_nhwc{false};
+    int32_t _src_height{0};
+    int32_t _dst_width{0};
+    int32_t _dst_height{0};
+    int32_t _num_tiles_x{0};
 };
 } // namespace kernels
 } // namespace opencl

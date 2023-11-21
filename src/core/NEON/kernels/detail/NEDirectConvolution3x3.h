@@ -33,56 +33,32 @@ namespace detail
 {
 inline float32x4x3_t load_matrix_row(const float *ptr)
 {
-    const float32x4x3_t r =
-    {
-        {
-            vld1q_dup_f32(ptr),
-            vld1q_dup_f32(1 + ptr),
-            vld1q_dup_f32(2 + ptr)
-        }
-    };
+    const float32x4x3_t r = {{vld1q_dup_f32(ptr), vld1q_dup_f32(1 + ptr), vld1q_dup_f32(2 + ptr)}};
     return r;
 }
 
 template <unsigned int stridex>
-float32x4x2_t convolve_3x3(const float *in_top, const float *in_mid, const float *in_low, const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2);
+float32x4x2_t convolve_3x3(const float         *in_top,
+                           const float         *in_mid,
+                           const float         *in_low,
+                           const float32x4x3_t &m0,
+                           const float32x4x3_t &m1,
+                           const float32x4x3_t &m2);
 
 template <>
-inline float32x4x2_t convolve_3x3<1>(const float *in_top, const float *in_mid, const float *in_low, const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2)
+inline float32x4x2_t convolve_3x3<1>(const float         *in_top,
+                                     const float         *in_mid,
+                                     const float         *in_low,
+                                     const float32x4x3_t &m0,
+                                     const float32x4x3_t &m1,
+                                     const float32x4x3_t &m2)
 {
-    const float32x4x3_t vtop =
-    {
-        {
-            vld1q_f32(in_top),
-            vld1q_f32(in_top + 4),
-            vld1q_f32(in_top + 8)
-        }
-    };
-    const float32x4x3_t vmid =
-    {
-        {
-            vld1q_f32(in_mid),
-            vld1q_f32(in_mid + 4),
-            vld1q_f32(in_mid + 8)
-        }
-    };
-    const float32x4x3_t vlow =
-    {
-        {
-            vld1q_f32(in_low),
-            vld1q_f32(in_low + 4),
-            vld1q_f32(in_low + 8)
-        }
-    };
-    float32x4x2_t out =
-    {
-        {
-            vmulq_f32(vtop.val[0], m0.val[0]),
-            vmulq_f32(vtop.val[1], m0.val[0])
-        }
-    };
-    out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop.val[1], 1), m0.val[1]);
-    out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop.val[1], 2), m0.val[2]);
+    const float32x4x3_t vtop = {{vld1q_f32(in_top), vld1q_f32(in_top + 4), vld1q_f32(in_top + 8)}};
+    const float32x4x3_t vmid = {{vld1q_f32(in_mid), vld1q_f32(in_mid + 4), vld1q_f32(in_mid + 8)}};
+    const float32x4x3_t vlow = {{vld1q_f32(in_low), vld1q_f32(in_low + 4), vld1q_f32(in_low + 8)}};
+    float32x4x2_t       out  = {{vmulq_f32(vtop.val[0], m0.val[0]), vmulq_f32(vtop.val[1], m0.val[0])}};
+    out.val[0]               = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop.val[1], 1), m0.val[1]);
+    out.val[0]               = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop.val[1], 2), m0.val[2]);
 
     out.val[0] = vmlaq_f32(out.val[0], vmid.val[0], m1.val[0]);
     out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vmid.val[0], vmid.val[1], 1), m1.val[1]);
@@ -106,7 +82,12 @@ inline float32x4x2_t convolve_3x3<1>(const float *in_top, const float *in_mid, c
 }
 
 template <>
-inline float32x4x2_t convolve_3x3<2>(const float *in_top, const float *in_mid, const float *in_low, const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2)
+inline float32x4x2_t convolve_3x3<2>(const float         *in_top,
+                                     const float         *in_mid,
+                                     const float         *in_low,
+                                     const float32x4x3_t &m0,
+                                     const float32x4x3_t &m1,
+                                     const float32x4x3_t &m2)
 {
     float32x4x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2);
     out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 2), out.val[0], 1);
@@ -116,7 +97,12 @@ inline float32x4x2_t convolve_3x3<2>(const float *in_top, const float *in_mid, c
 }
 
 template <>
-inline float32x4x2_t convolve_3x3<3>(const float *in_top, const float *in_mid, const float *in_low, const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2)
+inline float32x4x2_t convolve_3x3<3>(const float         *in_top,
+                                     const float         *in_mid,
+                                     const float         *in_low,
+                                     const float32x4x3_t &m0,
+                                     const float32x4x3_t &m1,
+                                     const float32x4x3_t &m2)
 {
     float32x4x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2);
     out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 3), out.val[0], 1);
@@ -165,6 +151,6 @@ int get_input_num_elems_processed<3>(unsigned int num_elems_written_per_iteratio
 {
     return num_elems_written_per_iteration * 3;
 }
-}
+} // namespace detail
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NECONVOLUTIONKERNEL3x3_H */

@@ -26,6 +26,7 @@
 #define CKW_SRC_ITENSORCOMPONENT_H
 
 #include "ckw/types/TensorComponentType.h"
+
 #include "src/ITile.h"
 
 namespace ckw

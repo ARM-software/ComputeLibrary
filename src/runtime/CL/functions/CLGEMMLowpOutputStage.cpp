@@ -40,27 +40,33 @@ namespace arm_compute
 {
 struct CLGEMMLowpOutputStage::Impl
 {
-    const ICLTensor                               *src{ nullptr };
-    const ICLTensor                               *bias{ nullptr };
-    ICLTensor                                     *dst{ nullptr };
-    std::unique_ptr<opencl::ClGemmLowpOutputStage> op{ nullptr };
+    const ICLTensor                               *src{nullptr};
+    const ICLTensor                               *bias{nullptr};
+    ICLTensor                                     *dst{nullptr};
+    std::unique_ptr<opencl::ClGemmLowpOutputStage> op{nullptr};
     ITensorPack                                    run_pack{};
 };
 
-CLGEMMLowpOutputStage::CLGEMMLowpOutputStage()
-    : _impl(std::make_unique<Impl>())
+CLGEMMLowpOutputStage::CLGEMMLowpOutputStage() : _impl(std::make_unique<Impl>())
 {
 }
-CLGEMMLowpOutputStage::CLGEMMLowpOutputStage(CLGEMMLowpOutputStage &&) = default;
+CLGEMMLowpOutputStage::CLGEMMLowpOutputStage(CLGEMMLowpOutputStage &&)            = default;
 CLGEMMLowpOutputStage &CLGEMMLowpOutputStage::operator=(CLGEMMLowpOutputStage &&) = default;
 CLGEMMLowpOutputStage::~CLGEMMLowpOutputStage()                                   = default;
 
-void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info)
+void CLGEMMLowpOutputStage::configure(const ICLTensor               *input,
+                                      const ICLTensor               *bias,
+                                      ICLTensor                     *output,
+                                      const GEMMLowpOutputStageInfo &info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, info);
 }
 
-void CLGEMMLowpOutputStage::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info)
+void CLGEMMLowpOutputStage::configure(const CLCompileContext        &compile_context,
+                                      const ICLTensor               *input,
+                                      const ICLTensor               *bias,
+                                      ICLTensor                     *output,
+                                      const GEMMLowpOutputStageInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -69,11 +75,15 @@ void CLGEMMLowpOutputStage::configure(const CLCompileContext &compile_context, c
     _impl->dst  = output;
 
     _impl->op = std::make_unique<opencl::ClGemmLowpOutputStage>();
-    _impl->op->configure(compile_context, input->info(), bias != nullptr ? bias->info() : nullptr, output->info(), info);
-    _impl->run_pack = { { ACL_SRC, _impl->src }, { ACL_BIAS, _impl->bias }, { ACL_DST, _impl->dst } };
+    _impl->op->configure(compile_context, input->info(), bias != nullptr ? bias->info() : nullptr, output->info(),
+                         info);
+    _impl->run_pack = {{ACL_SRC, _impl->src}, {ACL_BIAS, _impl->bias}, {ACL_DST, _impl->dst}};
 }
 
-Status CLGEMMLowpOutputStage::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info)
+Status CLGEMMLowpOutputStage::validate(const ITensorInfo             *input,
+                                       const ITensorInfo             *bias,
+                                       const ITensorInfo             *output,
+                                       const GEMMLowpOutputStageInfo &info)
 {
     return opencl::ClGemmLowpOutputStage::validate(input, bias, output, info);
 }

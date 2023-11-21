@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2022 Arm Limited.
+# Copyright (c) 2017-2023 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -59,7 +59,7 @@ load_whole_archive = '-Wl,--whole-archive'
 noload_whole_archive = '-Wl,--no-whole-archive'
 if 'macos' in examples_env['os']:
     load_whole_archive = '-Wl,-force_load'
-    noload_whole_archive = '-Wl,-noall_load'
+    noload_whole_archive = ''
 
 # Build graph examples
 graph_utils = examples_env.Object("../utils/GraphUtils.cpp")

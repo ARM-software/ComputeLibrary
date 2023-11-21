@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -48,7 +49,7 @@ public:
     };
 
 private:
-    bool _fast_math{ false };
+    bool _fast_math{false};
 };
 
 // Forward declarations
@@ -96,7 +97,12 @@ public:
      * @param[in]  settings Contains flags for function level settings i.e fast math
      * @param[in]  act_info (Optional) Contains activation function and lower and upper bound values for bounded activation functions.
      */
-    void configure(ITensor *lhs, ITensor *rhs, ITensor *dst, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *lhs,
+                   ITensor                   *rhs,
+                   ITensor                   *dst,
+                   const MatMulInfo          &info,
+                   const CpuMatMulSettings   &settings,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEMatMul
      *
      * @param[in]  lhs      Left-hand side tensor info. Data types supported: F16/F32/QASYMM8_SIGNED/QASYMM8.
@@ -108,7 +114,11 @@ public:
      *
      * @return Status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings,
+    static Status validate(const ITensorInfo         *lhs,
+                           const ITensorInfo         *rhs,
+                           const ITensorInfo         *dst,
+                           const MatMulInfo          &info,
+                           const CpuMatMulSettings   &settings,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden
@@ -118,5 +128,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-}
+} // namespace arm_compute
 #endif /* ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL */

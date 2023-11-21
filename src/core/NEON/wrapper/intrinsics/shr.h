@@ -75,7 +75,7 @@ VQRSHRN_SCALAR_IMPL(uint32_t, uint64_t, vqrshrnd_n, u64)
     {                                                                                                            \
         return prefix_signed##_##postfix(a, b);                                                                  \
     }                                                                                                            \
-    \
+                                                                                                                 \
     template <int b, typename T>                                                                                 \
     inline typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, u##half_vtype>::type \
     vqrshrn_ex(const vtype &a)                                                                                   \
@@ -128,7 +128,7 @@ VSHRQ_SCALAR_IMPL(int32_t, vshrd_n, s64)
     {                                                                                                            \
         return prefix_signed##_##postfix(a, b);                                                                  \
     }                                                                                                            \
-    \
+                                                                                                                 \
     template <int b, typename T>                                                                                 \
     inline typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, u##half_vtype>::type \
     vqrshrn_ex(const vtype &a)                                                                                   \

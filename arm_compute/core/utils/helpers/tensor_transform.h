@@ -52,7 +52,8 @@ int calculate_stride_on_index(int index, Coordinates strides);
  *
  * @return Absolute start position of a given index
  */
-int calculate_start_on_index(TensorShape input_shape, int index, Coordinates starts, Coordinates strides, int32_t begin_mask);
+int calculate_start_on_index(
+    TensorShape input_shape, int index, Coordinates starts, Coordinates strides, int32_t begin_mask);
 
 /** Returns the absolute end position of a given index for a strided slice operation
  *
@@ -68,8 +69,13 @@ int calculate_start_on_index(TensorShape input_shape, int index, Coordinates sta
  *
  * @return Absolute end position of a given index
  */
-int calculate_end_on_index(TensorShape input_shape, int index, int start_on_index, Coordinates ends, Coordinates strides,
-                           int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
+int calculate_end_on_index(TensorShape input_shape,
+                           int         index,
+                           int         start_on_index,
+                           Coordinates ends,
+                           Coordinates strides,
+                           int32_t     end_mask         = 0,
+                           int32_t     shrink_axis_mask = 0);
 
 /** Calculate start, end and stride coordinates for a strided slice
  *
@@ -87,8 +93,12 @@ int calculate_end_on_index(TensorShape input_shape, int index, int start_on_inde
  * @return A tuple with <Start,End,Strides>
  */
 std::tuple<Coordinates, Coordinates, Coordinates> calculate_strided_slice_coords(TensorShape input_shape,
-                                                                                 Coordinates starts, Coordinates ends, Coordinates strides,
-                                                                                 int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
+                                                                                 Coordinates starts,
+                                                                                 Coordinates ends,
+                                                                                 Coordinates strides,
+                                                                                 int32_t     begin_mask       = 0,
+                                                                                 int32_t     end_mask         = 0,
+                                                                                 int32_t     shrink_axis_mask = 0);
 
 /** Computes output shape of strided slice
  *
@@ -109,9 +119,14 @@ std::tuple<Coordinates, Coordinates, Coordinates> calculate_strided_slice_coords
  *
  * @return The output tensor shape
  */
-TensorShape compute_strided_slice_output_shape(TensorShape input_shape, Coordinates starts, Coordinates ends, Coordinates strides,
-                                               int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0,
-                                               bool return_unshrinked = false);
+TensorShape compute_strided_slice_output_shape(TensorShape input_shape,
+                                               Coordinates starts,
+                                               Coordinates ends,
+                                               Coordinates strides,
+                                               int32_t     begin_mask        = 0,
+                                               int32_t     end_mask          = 0,
+                                               int32_t     shrink_axis_mask  = 0,
+                                               bool        return_unshrinked = false);
 
 /** Constructs end mask in case we want to perform a slice operation using the strided slice interface
  *
@@ -122,7 +137,7 @@ TensorShape compute_strided_slice_output_shape(TensorShape input_shape, Coordina
  * @return End mask
  */
 int32_t construct_slice_end_mask(Coordinates ends);
-} // namespace tensor_tranform
+} // namespace tensor_transform
 } // namespace helpers
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_UTILS_HELPERS_TENSOR_TRANSFORM_H */

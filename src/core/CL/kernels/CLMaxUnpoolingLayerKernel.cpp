@@ -31,6 +31,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -42,26 +43,31 @@ using namespace misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status validate_arguments(const ITensorInfo      *input,
+                          const ITensorInfo      *output,
+                          const PoolingLayerInfo &pool_info,
+                          const ITensorInfo      *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, indices);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, indices);
 
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    PoolingType         pool_type       = pool_info.pool_type;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+    int                 pool_stride_x      = 0;
+    int                 pool_stride_y      = 0;
+    PoolingType         pool_type          = pool_info.pool_type;
+    const PadStrideInfo pad_stride_info    = pool_info.pad_stride_info;
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
-    const int    pool_size_x = pool_info.pool_size.width;
-    const int    pool_size_y = pool_info.pool_size.height;
+    const int    pool_size_x               = pool_info.pool_size.width;
+    const int    pool_size_y               = pool_info.pool_size.height;
     const Size2D pool_size(pool_size_x, pool_size_y);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX, "Pooling indices only supported for MAX pooling method");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX,
+                                    "Pooling indices only supported for MAX pooling method");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
@@ -71,17 +77,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 }
 } // namespace
 
-CLMaxUnpoolingLayerKernel::CLMaxUnpoolingLayerKernel()
-    : _input(nullptr), _output(nullptr), _indices(nullptr)
+CLMaxUnpoolingLayerKernel::CLMaxUnpoolingLayerKernel() : _input(nullptr), _output(nullptr), _indices(nullptr)
 {
     _type = CLKernelType::POOL;
 }
 
-void CLMaxUnpoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, const PoolingLayerInfo &pool_info)
+void CLMaxUnpoolingLayerKernel::configure(const CLCompileContext &compile_context,
+                                          const ICLTensor        *input,
+                                          const ICLTensor        *indices,
+                                          ICLTensor              *output,
+                                          const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, indices->info()));
-    auto padding_info = get_padding_info({ input, indices, output });
+    auto padding_info = get_padding_info({input, indices, output});
 
     _input   = input;
     _output  = output;
@@ -119,7 +128,10 @@ void CLMaxUnpoolingLayerKernel::configure(const CLCompileContext &compile_contex
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLMaxUnpoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status CLMaxUnpoolingLayerKernel::validate(const ITensorInfo      *input,
+                                           const ITensorInfo      *indices,
+                                           const ITensorInfo      *output,
+                                           const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, indices, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, indices));
@@ -140,7 +152,6 @@ void CLMaxUnpoolingLayerKernel::run(const Window &window, cl::CommandQueue &queu
         add_3D_tensor_argument(idx, _output, slice);
         add_3D_tensor_argument(idx, _indices, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_3D(slice));
+    } while (window.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

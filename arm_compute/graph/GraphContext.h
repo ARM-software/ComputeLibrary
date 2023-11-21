@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_GRAPH_GRAPH_CONTEXT_H
 
 #include "arm_compute/graph/Types.h"
-
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 
@@ -39,18 +38,18 @@ namespace graph
 /** Contains structs required for memory management */
 struct MemoryManagerContext
 {
-    Target                                       target      = { Target::UNSPECIFIED }; /**< Target */
-    std::shared_ptr<arm_compute::IMemoryManager> intra_mm    = { nullptr };             /**< Intra-function memory manager */
-    std::shared_ptr<arm_compute::IMemoryManager> cross_mm    = { nullptr };             /**< Cross-function memory manager */
-    std::shared_ptr<arm_compute::IMemoryGroup>   cross_group = { nullptr };             /**< Cross-function memory group */
-    IAllocator                                  *allocator   = { nullptr };             /**< Backend allocator to use */
+    Target                                       target      = {Target::UNSPECIFIED}; /**< Target */
+    std::shared_ptr<arm_compute::IMemoryManager> intra_mm    = {nullptr}; /**< Intra-function memory manager */
+    std::shared_ptr<arm_compute::IMemoryManager> cross_mm    = {nullptr}; /**< Cross-function memory manager */
+    std::shared_ptr<arm_compute::IMemoryGroup>   cross_group = {nullptr}; /**< Cross-function memory group */
+    IAllocator                                  *allocator   = {nullptr}; /**< Backend allocator to use */
 };
 
 /** Contains structs required for weights management */
 struct WeightsManagerContext
 {
-    Target                                        target = { Target::UNSPECIFIED }; /**< Target */
-    std::shared_ptr<arm_compute::IWeightsManager> wm     = { nullptr };             /**< Weights manager */
+    Target                                        target = {Target::UNSPECIFIED}; /**< Target */
+    std::shared_ptr<arm_compute::IWeightsManager> wm     = {nullptr};             /**< Weights manager */
 };
 
 /** Graph context **/
@@ -125,7 +124,7 @@ public:
     void finalize();
 
 private:
-    GraphConfig _config;                                       /**< Graph configuration */
+    GraphConfig                             _config;           /**< Graph configuration */
     std::map<Target, MemoryManagerContext>  _memory_managers;  /**< Memory managers for each target */
     std::map<Target, WeightsManagerContext> _weights_managers; /**< Weights managers for each target */
 };

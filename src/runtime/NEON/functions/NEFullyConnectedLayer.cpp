@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuFullyConnected.h"
@@ -38,80 +39,90 @@ using namespace arm_compute::experimental;
 struct NEFullyConnectedLayer::Impl
 {
     MemoryGroup      memory_group{};
-    IWeightsManager *weights_manager{ nullptr };
+    IWeightsManager *weights_manager{nullptr};
 
-    std::unique_ptr<cpu::CpuFullyConnected> op{ nullptr };
+    std::unique_ptr<cpu::CpuFullyConnected> op{nullptr};
 
-    const ITensor *original_weights{ nullptr };
+    const ITensor *original_weights{nullptr};
 
     ITensorPack                      run_pack{};
     WorkspaceData<Tensor>            workspace{};
     experimental::MemoryRequirements aux_mem_req{};
 
-    bool is_prepared{ false };
-    bool dynamic_weights{ false };
+    bool is_prepared{false};
+    bool dynamic_weights{false};
 };
 
 NEFullyConnectedLayer::~NEFullyConnectedLayer() = default;
 
-NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager,
+                                             IWeightsManager                *weights_manager)
     : _impl(std::make_unique<Impl>())
 {
     _impl->memory_group    = MemoryGroup(std::move(memory_manager));
     _impl->weights_manager = weights_manager;
 }
 
-void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
-                                      FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
+void NEFullyConnectedLayer::configure(const ITensor          *input,
+                                      const ITensor          *weights,
+                                      const ITensor          *biases,
+                                      ITensor                *output,
+                                      FullyConnectedLayerInfo fc_info,
+                                      const WeightsInfo      &weights_info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEFullyConnectedLayer::validate(input->info(),
-                                                               weights->info(),
+    ARM_COMPUTE_ERROR_THROW_ON(NEFullyConnectedLayer::validate(input->info(), weights->info(),
                                                                biases != nullptr ? biases->info() : nullptr,
-                                                               output->info(),
-                                                               fc_info,
-                                                               weights_info));
+                                                               output->info(), fc_info, weights_info));
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, fc_info);
 
     _impl->op               = std::make_unique<cpu::CpuFullyConnected>();
     _impl->original_weights = weights;
     _impl->is_prepared      = false;
 
-    _impl->op->configure(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), fc_info, weights_info);
+    _impl->op->configure(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(),
+                         fc_info, weights_info);
 
-    if(_impl->weights_manager != nullptr)
+    if (_impl->weights_manager != nullptr)
     {
         _impl->weights_manager->manage(_impl->original_weights);
     }
 
     _impl->aux_mem_req = _impl->op->workspace();
-    _impl->run_pack    = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
-    _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+    _impl->run_pack    = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
+    _impl->workspace =
+        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
 
-    _impl->dynamic_weights =
-        !weights->info()->are_values_constant() &&
-        fc_info.transpose_weights &&
-        !fc_info.are_weights_reshaped &&
-        !fc_info.retain_internal_weights;
+    _impl->dynamic_weights = !weights->info()->are_values_constant() && fc_info.transpose_weights &&
+                             !fc_info.are_weights_reshaped && !fc_info.retain_internal_weights;
 }
 
-Status NEFullyConnectedLayer::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *input, const ITensorInfo *weights,
-                                           const ITensorInfo *biases, const ITensorInfo *output, const FullyConnectedLayerInfo &fc_info,
-                                           const WeightsInfo &weights_info)
+Status NEFullyConnectedLayer::has_opt_impl(arm_compute::WeightFormat     &expected_weight_format,
+                                           const ITensorInfo             *input,
+                                           const ITensorInfo             *weights,
+                                           const ITensorInfo             *biases,
+                                           const ITensorInfo             *output,
+                                           const FullyConnectedLayerInfo &fc_info,
+                                           const WeightsInfo             &weights_info)
 {
-    return cpu::CpuFullyConnected::has_opt_impl(expected_weight_format, input, weights, biases, output, fc_info, weights_info);
+    return cpu::CpuFullyConnected::has_opt_impl(expected_weight_format, input, weights, biases, output, fc_info,
+                                                weights_info);
 }
 
-Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                       FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
+Status NEFullyConnectedLayer::validate(const ITensorInfo      *input,
+                                       const ITensorInfo      *weights,
+                                       const ITensorInfo      *biases,
+                                       const ITensorInfo      *output,
+                                       FullyConnectedLayerInfo fc_info,
+                                       const WeightsInfo      &weights_info)
 {
     return cpu::CpuFullyConnected::validate(input, weights, biases, output, fc_info, weights_info);
 }
 
 void NEFullyConnectedLayer::run()
 {
-    if(!_impl->dynamic_weights)
+    if (!_impl->dynamic_weights)
     {
         prepare();
     }
@@ -122,7 +133,7 @@ void NEFullyConnectedLayer::run()
 
 void NEFullyConnectedLayer::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->run_pack);
 
@@ -131,13 +142,13 @@ void NEFullyConnectedLayer::prepare()
         _impl->is_prepared = true;
 
         // Handle weights managed infrastructure
-        if(_impl->weights_manager != nullptr && _impl->weights_manager->are_weights_managed(_impl->original_weights))
+        if (_impl->weights_manager != nullptr && _impl->weights_manager->are_weights_managed(_impl->original_weights))
         {
             // Ensure that b gets marked as unused (memory released) only after the last function which uses b also finishes its prepare
             // This is for cases where multiple functions share the same b (weights)
             // Therefore when a function marks original b as unused, we pre-mark it in weights manager, and mark it back to used so that it doesn't get released before its last reference
             const ITensor *original_b = _impl->original_weights;
-            if(!original_b->is_used())
+            if (!original_b->is_used())
             {
                 _impl->weights_manager->pre_mark_as_unused(original_b);
             }

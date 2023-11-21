@@ -44,14 +44,18 @@ public:
      * @param[out] dst       Destination tensor. Data types supported: Same as @p src
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *indices, ITensorInfo *dst, const PoolingLayerInfo &pool_info);
+    void
+    configure(const ITensorInfo *src, const ITensorInfo *indices, ITensorInfo *dst, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuMaxUnpooling::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *indices, const ITensorInfo *dst, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *indices,
+                           const ITensorInfo      *dst,
+                           const PoolingLayerInfo &pool_info);
 };
 } // namespace cpu
 } // namespace arm_compute

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_GEMMLOWP_REDUCTION_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -52,7 +53,10 @@ public:
      *                             - scalar       Scalar value to multiply each reduced column/row by.
      *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
-    virtual void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const GEMMLowpReductionKernelInfo &info) = 0;
+    virtual void configure(const CLCompileContext            &compile_context,
+                           const ITensorInfo                 *input,
+                           ITensorInfo                       *output,
+                           const GEMMLowpReductionKernelInfo &info) = 0;
 };
 
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
@@ -74,14 +78,18 @@ public:
      *                             - scalar       Scalar value to multiply each reduced column/row by.
      *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *mtx_a, ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
+    void configure(const CLCompileContext            &compile_context,
+                   const ITensorInfo                 *mtx_a,
+                   ITensorInfo                       *vector_sum_row,
+                   const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info);
+    static Status
+    validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
@@ -106,14 +114,18 @@ public:
      *                             - scalar       Scalar value to multiply each reduced column/row by.
      *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *mtx_b, ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
+    void configure(const CLCompileContext            &compile_context,
+                   const ITensorInfo                 *mtx_b,
+                   ITensorInfo                       *vector_sum_col,
+                   const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info);
+    static Status
+    validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

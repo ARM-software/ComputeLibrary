@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute
@@ -61,7 +62,12 @@ public:
      * @param[in]      rounding_policy Rounding policy.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+    void configure(ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   float                      scale,
+                   ConvertPolicy              overflow_policy,
+                   RoundingPolicy             rounding_policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -69,7 +75,12 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           float                      scale,
+                           ConvertPolicy              overflow_policy,
+                           RoundingPolicy             rounding_policy,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
@@ -89,14 +100,20 @@ public:
      * @param[out]     dst      The dst tensor. Data types supported: same as @p src1. Number of channels: same as @p src1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuComplexMul::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;

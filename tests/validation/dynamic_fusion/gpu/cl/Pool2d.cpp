@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
+#ifdef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -65,40 +64,22 @@ using DFPoolMixedPrecisionFixture = DynamicFusionGpuPool2dMixedPrecisionValidati
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-            framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),     // Mismatching data type
-                                                    TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),     // Invalid pad/size combination
-                                                    TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),     // Invalid pad/size combination
-                                                    TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::QASYMM8, DataLayout::NHWC), // Invalid parameters, unsupported pooling
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+            framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::QASYMM8, DataLayout::NHWC), // Invalid parameters, unsupported pooling
                                                     TensorInfo(TensorShape(5U, 15U, 13U), 1, DataType::F32, DataLayout::NHWC),     // Valid Non-rectangular Global Pooling
-                                                    TensorInfo(TensorShape(5U, 13U, 13U), 1, DataType::F32, DataLayout::NHWC),     // Invalid output Global Pooling
                                                     TensorInfo(TensorShape(5U, 13U, 13U), 1, DataType::QASYMM8, DataLayout::NHWC), // Invalid - Quantized not supported.
                                                     TensorInfo(TensorShape(5U, 13U, 13U), 1, DataType::F32, DataLayout::NHWC),     // Valid global pooling
                                                     TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, DataLayout::NCHW),     // Unsupported data layout
                                                 }),
-            framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(2U, 25U, 11U), 1, DataType::F16, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(2U, 30U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(2U, 25U, 16U), 1, DataType::F32, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::QASYMM8, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(5U, 1U, 1U), 1, DataType::F32, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(5U, 2U, 2U), 1, DataType::F32, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(5U, 12U, 12U), 1, DataType::QASYMM8, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(5U, 1U, 1U), 1, DataType::F32, DataLayout::NHWC),
-                                                    TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, DataLayout::NHWC),
-                                                })),
             framework::dataset::make("Pool2dAttributes", {
-                                                    Pool2dAttributes().pool_type(PoolingType::AVG).pool_size(Size2D(3,3)).pad(Padding2D(0,0,0,0)).stride(Size2D(1,1)),
-                                                    Pool2dAttributes().pool_type(PoolingType::AVG).pool_size(Size2D(2,2)).pad(Padding2D(2,2,0,0)).stride(Size2D(1,1)),
-                                                    Pool2dAttributes().pool_type(PoolingType::AVG).pool_size(Size2D(2,2)).pad(Padding2D(0,0,2,2)).stride(Size2D(1,1)),
                                                     Pool2dAttributes().pool_type(PoolingType::L2).pool_size(Size2D(3,3)).pad(Padding2D(0,0,0,0)).stride(Size2D(1,1)),
                                                     Pool2dAttributes().pool_type(PoolingType::AVG).pool_size(Size2D(15U, 13U)),
-                                                    Pool2dAttributes().pool_type(PoolingType::MAX).pool_size(Size2D(13U, 13U)),
                                                     Pool2dAttributes().pool_type(PoolingType::AVG).pool_size(Size2D(2,2)).pad(Padding2D()).stride(Size2D(1,1)),
                                                     Pool2dAttributes().pool_type(PoolingType::AVG).pool_size(Size2D(13U,13U)),
                                                     Pool2dAttributes().pool_type(PoolingType::AVG).pool_size(Size2D(13U,13U)),
                                                 })),
-            framework::dataset::make("Expected", { false, false, false, false, true, false, false, true, false })),
-            input_info, output_info, pool2d_attr, expected)
+            framework::dataset::make("Expected", { false, true, false, true, false })),
+            input_info, pool2d_attr, expected)
 {
     // Create a new workload sketch
     auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
@@ -110,8 +91,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
     // Validate Pool2d Configuration
     auto                   src_info    = context.create_tensor_info(input_info);
-    auto                   dst_info    = context.create_tensor_info(output_info);
-    bool                   res         = bool(GpuPool2d::validate_op(sketch, &src_info, &dst_info, pool2d_attr, settings));
+    bool                   res         = bool(GpuPool2d::validate_op(sketch, &src_info, pool2d_attr, settings));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 
@@ -232,5 +212,4 @@ TEST_SUITE_END() // CL
 }
 }
 }
-
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF

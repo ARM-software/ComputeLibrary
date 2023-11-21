@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CPPPERMUTE_H
 #define ARM_COMPUTE_CPPPERMUTE_H
 
-#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
 namespace arm_compute
 {
@@ -53,5 +52,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CPPPERMUTE_H */

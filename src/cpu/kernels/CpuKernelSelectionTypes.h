@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_KERNEL_SELECTION_TYPES_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 
 namespace arm_compute
@@ -78,10 +79,10 @@ struct DepthwiseConv2dNativeDataTypeISASelectorData
 
 struct ActivationDataTypeISASelectorData
 {
-    DataType                                dt;
-    const CPUModel                         &cpumodel;
-    const cpuinfo::CpuIsaInfo              &isa;
-    const ActivationFunction f;
+    DataType                   dt;
+    const CPUModel            &cpumodel;
+    const cpuinfo::CpuIsaInfo &isa;
+    const ActivationFunction   f;
 };
 
 struct CpuAddKernelDataTypeISASelectorData
@@ -99,15 +100,19 @@ struct ScaleKernelDataTypeISASelectorData
 };
 
 // Selector pointer types
-using DataTypeISASelectorPtr                      = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
-using DataTypeDataLayoutSelectorPtr               = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
-using PoolDataTypeISASelectorPtr                  = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
-using ElementwiseDataTypeISASelectorPtr           = std::add_pointer<bool(const ElementwiseDataTypeISASelectorData &data)>::type;
-using DepthwiseConv2dNativeDataTypeISASelectorPtr = std::add_pointer<bool(const DepthwiseConv2dNativeDataTypeISASelectorData &data)>::type;
-using CastDataTypeISASelectorDataPtr              = std::add_pointer<bool(const CastDataTypeISASelectorData &data)>::type;
-using ActivationDataTypeISASelectorDataPtr        = std::add_pointer<bool(const ActivationDataTypeISASelectorData &data)>::type;
-using CpuAddKernelDataTypeISASelectorDataPtr      = std::add_pointer<bool(const CpuAddKernelDataTypeISASelectorData &data)>::type;
-using ScaleKernelDataTypeISASelectorDataPtr       = std::add_pointer<bool(const ScaleKernelDataTypeISASelectorData &data)>::type;
+using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
+using DataTypeDataLayoutSelectorPtr     = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
+using PoolDataTypeISASelectorPtr        = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
+using ElementwiseDataTypeISASelectorPtr = std::add_pointer<bool(const ElementwiseDataTypeISASelectorData &data)>::type;
+using DepthwiseConv2dNativeDataTypeISASelectorPtr =
+    std::add_pointer<bool(const DepthwiseConv2dNativeDataTypeISASelectorData &data)>::type;
+using CastDataTypeISASelectorDataPtr = std::add_pointer<bool(const CastDataTypeISASelectorData &data)>::type;
+using ActivationDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const ActivationDataTypeISASelectorData &data)>::type;
+using CpuAddKernelDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const CpuAddKernelDataTypeISASelectorData &data)>::type;
+using ScaleKernelDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const ScaleKernelDataTypeISASelectorData &data)>::type;
 
 } // namespace kernels
 } // namespace cpu

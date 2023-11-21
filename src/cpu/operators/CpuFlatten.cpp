@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,25 +23,34 @@
  */
 #include "src/cpu/operators/CpuFlatten.h"
 
-#include "src/cpu/kernels/CpuReshapeKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/operators/CpuReshape.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
+CpuFlatten::CpuFlatten() : _reshape(nullptr)
+{
+}
+
+CpuFlatten::~CpuFlatten() = default;
+
 void CpuFlatten::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_LOG_PARAMS(src, dst);
-    auto k = std::make_unique<kernels::CpuReshapeKernel>();
-    k->configure(src, dst);
-    _kernel = std::move(k);
+    _reshape = std::make_unique<CpuReshape>();
+    _reshape->configure(src, dst);
 }
 
 Status CpuFlatten::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
-    return kernels::CpuReshapeKernel::validate(src, dst);
+    return CpuReshape::validate(src, dst);
+}
+
+void CpuFlatten::run(ITensorPack &tensors)
+{
+    _reshape->run(tensors);
 }
 } // namespace cpu
 } // namespace arm_compute

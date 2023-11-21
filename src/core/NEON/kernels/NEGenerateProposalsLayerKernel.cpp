@@ -27,11 +27,13 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/CPP/Validate.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/genproposals/list.h"
+
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -44,7 +46,8 @@ struct ComputeAllAnchorsData
 };
 
 using ComputeAllAnchorsSelectorPtr = std::add_pointer<bool(const ComputeAllAnchorsData &data)>::type;
-using ComputeAllAnchorsUKernelPtr  = std::add_pointer<void(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)>::type;
+using ComputeAllAnchorsUKernelPtr  = std::add_pointer<void(
+    const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)>::type;
 
 struct ComputeAllAnchorsKernel
 {
@@ -53,27 +56,17 @@ struct ComputeAllAnchorsKernel
     ComputeAllAnchorsUKernelPtr        ukernel;
 };
 
-static const ComputeAllAnchorsKernel available_kernels[] =
-{
+static const ComputeAllAnchorsKernel available_kernels[] = {
 #if defined(ARM_COMPUTE_ENABLE_NEON)
-    {
-        "neon_qu16_computeallanchors",
-        [](const ComputeAllAnchorsData & data) { return data.dt == DataType::QSYMM16; },
-        REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qu16_computeallanchors)
-    },
+    {"neon_qu16_computeallanchors", [](const ComputeAllAnchorsData &data) { return data.dt == DataType::QSYMM16; },
+     REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qu16_computeallanchors)},
 #endif //defined(ARM_COMPUTE_ENABLE_NEON)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    {
-        "neon_fp16_computeallanchors",
-        [](const ComputeAllAnchorsData & data) { return data.dt == DataType::F16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_computeallanchors)
-    },
+    {"neon_fp16_computeallanchors", [](const ComputeAllAnchorsData &data) { return data.dt == DataType::F16; },
+     REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_computeallanchors)},
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    {
-        "neon_fp32_computeallanchors",
-        [](const ComputeAllAnchorsData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_computeallanchors)
-    },
+    {"neon_fp32_computeallanchors", [](const ComputeAllAnchorsData &data) { return data.dt == DataType::F32; },
+     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_computeallanchors)},
 };
 
 /** Micro-kernel selector
@@ -84,9 +77,9 @@ static const ComputeAllAnchorsKernel available_kernels[] =
  */
 const ComputeAllAnchorsKernel *get_implementation(const ComputeAllAnchorsData &data)
 {
-    for(const auto &uk : available_kernels)
+    for (const auto &uk : available_kernels)
     {
-        if(uk.is_selected(data))
+        if (uk.is_selected(data))
         {
             return &uk;
         }
@@ -101,7 +94,7 @@ Status validate_arguments(const ITensorInfo *anchors, const ITensorInfo *all_anc
     ARM_COMPUTE_RETURN_ERROR_ON(anchors->dimension(0) != info.values_per_roi());
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(anchors, DataType::QSYMM16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(anchors->num_dimensions() > 2);
-    if(all_anchors->total_size() > 0)
+    if (all_anchors->total_size() > 0)
     {
         const size_t feature_height = info.feat_height();
         const size_t feature_width  = info.feat_width();
@@ -111,7 +104,7 @@ Status validate_arguments(const ITensorInfo *anchors, const ITensorInfo *all_anc
         ARM_COMPUTE_RETURN_ERROR_ON(all_anchors->dimension(0) != info.values_per_roi());
         ARM_COMPUTE_RETURN_ERROR_ON(all_anchors->dimension(1) != feature_height * feature_width * num_anchors);
 
-        if(is_data_type_quantized(anchors->data_type()))
+        if (is_data_type_quantized(anchors->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(anchors, all_anchors);
         }
@@ -139,7 +132,8 @@ void NEComputeAllAnchorsKernel::configure(const ITensor *anchors, ITensor *all_a
 
     // Initialize the output if empty
     const TensorShape output_shape(info.values_per_roi(), width * height * num_anchors);
-    auto_init_if_empty(*all_anchors->info(), TensorInfo(output_shape, 1, data_type, anchors->info()->quantization_info()));
+    auto_init_if_empty(*all_anchors->info(),
+                       TensorInfo(output_shape, 1, data_type, anchors->info()->quantization_info()));
 
     // Set instance variables
     _anchors      = anchors;
@@ -151,7 +145,9 @@ void NEComputeAllAnchorsKernel::configure(const ITensor *anchors, ITensor *all_a
     INEKernel::configure(win);
 }
 
-Status NEComputeAllAnchorsKernel::validate(const ITensorInfo *anchors, const ITensorInfo *all_anchors, const ComputeAnchorsInfo &info)
+Status NEComputeAllAnchorsKernel::validate(const ITensorInfo        *anchors,
+                                           const ITensorInfo        *all_anchors,
+                                           const ComputeAnchorsInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(anchors, all_anchors, info));
     return Status{};
@@ -163,7 +159,7 @@ void NEComputeAllAnchorsKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const auto *uk = get_implementation(ComputeAllAnchorsData{ _anchors->info()->data_type() });
+    const auto *uk = get_implementation(ComputeAllAnchorsData{_anchors->info()->data_type()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     uk->ukernel(_anchors, _all_anchors, _anchors_info, window);

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_TYPES_H
-#define ARM_COMPUTE_GRAPH_TYPES_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_TYPES_H
+#define ACL_ARM_COMPUTE_GRAPH_TYPES_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
@@ -41,32 +41,31 @@ namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::CLTunerMode;
 using arm_compute::CLBackendType;
+using arm_compute::CLTunerMode;
 using arm_compute::Status;
 
 using arm_compute::Coordinates;
-using arm_compute::DataType;
 using arm_compute::DataLayout;
 using arm_compute::DataLayoutDimension;
-using arm_compute::TensorShape;
-using arm_compute::Size2D;
+using arm_compute::DataType;
 using arm_compute::PermutationVector;
 using arm_compute::PixelValue;
+using arm_compute::Size2D;
+using arm_compute::TensorShape;
 
 using arm_compute::ActivationLayerInfo;
 using arm_compute::DetectionOutputLayerInfo;
 using arm_compute::DetectionPostProcessLayerInfo;
-using arm_compute::NormType;
-using arm_compute::NormalizationLayerInfo;
+using arm_compute::DimensionRoundingType;
 using arm_compute::FullyConnectedLayerInfo;
+using arm_compute::InterpolationPolicy;
+using arm_compute::NormalizationLayerInfo;
+using arm_compute::NormType;
 using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
 using arm_compute::PriorBoxLayerInfo;
-using arm_compute::DimensionRoundingType;
-using arm_compute::InterpolationPolicy;
-using arm_compute::experimental::PostOpType;
 
 using GraphID    = unsigned int;
 using TensorID   = unsigned int;
@@ -87,17 +86,18 @@ struct TensorDescriptor;
 /** Graph configuration structure */
 struct GraphConfig
 {
-    bool          use_function_memory_manager{ true };   /**< Use a memory manager to manage per-function auxilary memory */
-    bool          use_function_weights_manager{ true };  /**< Use a weights manager to manage transformed weights */
-    bool          use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
-    bool          use_tuner{ false };                    /**< Use a tuner in tunable backends */
-    bool          use_synthetic_type{ false };           /**< Convert graph to a synthetic graph for a data type */
-    DataType      synthetic_type{ DataType::QASYMM8 };   /**< The data type of the synthetic graph  */
-    CLTunerMode   tuner_mode{ CLTunerMode::EXHAUSTIVE }; /**< Tuner mode to be used by the CL tuner */
-    int           num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
-    std::string   tuner_file{ "acl_tuner.csv" };         /**< File to load/store tuning values from */
-    std::string   mlgo_file{ "heuristics.mlgo" };        /**< Filename to load MLGO heuristics from */
-    CLBackendType backend_type{ CLBackendType::Native }; /**< CL backend type to use */
+    bool        use_function_memory_manager{true};   /**< Use a memory manager to manage per-function auxilary memory */
+    bool        use_function_weights_manager{true};  /**< Use a weights manager to manage transformed weights */
+    bool        use_transition_memory_manager{true}; /**< Use a memory manager to manager transition buffer memory */
+    bool        use_tuner{false};                    /**< Use a tuner in tunable backends */
+    bool        use_synthetic_type{false};           /**< Convert graph to a synthetic graph for a data type */
+    DataType    synthetic_type{DataType::QASYMM8};   /**< The data type of the synthetic graph  */
+    CLTunerMode tuner_mode{CLTunerMode::EXHAUSTIVE}; /**< Tuner mode to be used by the CL tuner */
+    int         num_threads{
+        -1}; /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
+    std::string   tuner_file{"acl_tuner.csv"};         /**< File to load/store tuning values from */
+    std::string   mlgo_file{"heuristics.mlgo"};        /**< Filename to load MLGO heuristics from */
+    CLBackendType backend_type{CLBackendType::Native}; /**< CL backend type to use */
 };
 
 /**< Device target types */
@@ -150,55 +150,6 @@ enum class FastMathHint
     Disabled, /**< Fast math disabled for Convolution layer */
 };
 
-/** Convolution post operator info */
-class ConvPostOpInfo
-{
-public:
-    /** Returns post op type
-     *
-     * @return Post op type
-     */
-    virtual PostOpType type() const = 0;
-    virtual ~ConvPostOpInfo()
-    {
-    }
-};
-
-class ConvPostOpInfoActivation : public ConvPostOpInfo
-{
-public:
-    ConvPostOpInfoActivation(const ActivationLayerInfo &act)
-        : _act(act)
-    {
-    }
-    ~ConvPostOpInfoActivation() override
-    {
-    }
-    PostOpType type() const override
-    {
-        return PostOpType::Activation;
-    }
-    ActivationLayerInfo _act;
-};
-
-class ConvPostOpInfoEltwiseAdd : public ConvPostOpInfo
-{
-public:
-    ConvPostOpInfoEltwiseAdd(int arg_pos, const ConvertPolicy &policy)
-        : _prev_op_dst_pos(arg_pos), _policy(policy)
-    {
-    }
-    PostOpType type() const override
-    {
-        return PostOpType::Eltwise_Add;
-    }
-    ~ConvPostOpInfoEltwiseAdd() override
-    {
-    }
-    int           _prev_op_dst_pos;
-    ConvertPolicy _policy;
-};
-
 /** Supported nodes */
 enum class NodeType
 {
@@ -219,8 +170,6 @@ enum class NodeType
     FlattenLayer,
     FullyConnectedLayer,
     FusedConvolutionBatchNormalizationLayer,
-    FusedConvolutionWithPostOp,
-    FusedConvolutionBatchNormalizationLayerWithPostOpsLayer,
     FusedDepthwiseConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
     L2NormalizeLayer,
@@ -278,4 +227,4 @@ struct NodeParams
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_TYPES_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_TYPES_H

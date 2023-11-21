@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,23 +124,28 @@
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
  * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: same as src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination matrix in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_gx_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
  */
-__kernel void transpose(IMAGE_DECLARATION(src),
-                        IMAGE_DECLARATION(dst))
+__kernel void transpose(TENSOR3D_DECLARATION(src),
+                        TENSOR3D_DECLARATION(dst))
 {
     uint x_offs = max((int)(get_global_id(0) * VEC_SIZE_X - (VEC_SIZE_X - VEC_SIZE_LEFTOVER_X) % VEC_SIZE_X), 0);
     uint y_offs = max((int)(get_global_id(1) * VEC_SIZE_Y - (VEC_SIZE_Y - VEC_SIZE_LEFTOVER_Y) % VEC_SIZE_Y), 0);
+    uint z_offs = get_global_id(2);
 
     // Compute addresses
-    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offs * DATA_TYPE_IN_BYTES + y_offs * src_stride_y;
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + y_offs * DATA_TYPE_IN_BYTES + x_offs * dst_stride_y;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x_offs * DATA_TYPE_IN_BYTES + y_offs * src_stride_y + z_offs * src_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + y_offs * DATA_TYPE_IN_BYTES + x_offs * dst_stride_y + z_offs * dst_stride_z;
 
     // Load the NxM block at (x, y)
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE_X)

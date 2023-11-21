@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/INEOperator.h"
+
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -32,14 +34,13 @@ namespace experimental
 {
 INEOperator::~INEOperator() = default;
 
-INEOperator::INEOperator(IRuntimeContext *ctx)
-    : _kernel(), _ctx(ctx), _workspace()
+INEOperator::INEOperator(IRuntimeContext *ctx) : _kernel(), _ctx(ctx), _workspace()
 {
 }
 
 void INEOperator::run(ITensorPack &tensors)
 {
-    if(tensors.empty())
+    if (tensors.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");
     }

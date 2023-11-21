@@ -25,9 +25,10 @@
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DMaxShiftExpSum.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DMaxShiftExpSum.h"
 
@@ -37,10 +38,9 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status ClComponentLogits1DMaxShiftExpSum::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes)
+Status ClComponentLogits1DMaxShiftExpSum::validate(const Properties                &properties,
+                                                   const ArgumentPack<ITensorInfo> &tensors,
+                                                   const Attributes                &attributes)
 {
     ARM_COMPUTE_UNUSED(properties, attributes);
 
@@ -75,8 +75,8 @@ ClComponentLogits1DMaxShiftExpSum::ClComponentLogits1DMaxShiftExpSum(ComponentId
                                                                      const Properties                &properties,
                                                                      const ArgumentPack<ITensorInfo> &tensors,
                                                                      const Attributes                &attributes)
-    : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateLogits1DMaxShiftExpSum>(id, tensors, attributes) }
+    : IGpuKernelComponent{id, properties, tensors},
+      _component_writer{std::make_unique<ClTemplateLogits1DMaxShiftExpSum>(id, tensors, attributes)}
 {
 }
 

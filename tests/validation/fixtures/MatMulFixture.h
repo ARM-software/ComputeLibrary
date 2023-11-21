@@ -21,14 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE
-#define ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/utils/quantization/AsymmHelpers.h"
+#include "tests/framework/Asserts.h" // Required for ARM_COMPUTE_ASSERT
 #include "tests/framework/Fixture.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/GEMM.h"
 #include "tests/validation/reference/GEMMLowp.h"
@@ -338,4 +340,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE_H

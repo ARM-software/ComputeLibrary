@@ -23,14 +23,15 @@
  */
 
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuTanh.h"
+
 #include "arm_compute/core/experimental/Types.h"
 
-#include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
-#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentActivation.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.h"
-#include "src/core/helpers/AutoConfiguration.h"
 #include "src/common/utils/Log.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/dynamic_fusion/sketch/ArgumentPack.h"
+#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentActivation.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
+#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.h"
 
 namespace arm_compute
 {
@@ -40,9 +41,7 @@ namespace dynamic_fusion
 {
 namespace
 {
-Status is_supported_op_helper(const GpuWorkloadContext &context,
-                              const ITensorInfo        *src,
-                              const ITensorInfo        *dst)
+Status is_supported_op_helper(const GpuWorkloadContext &context, const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
@@ -50,20 +49,21 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
     }
 
     auto_init_if_empty(dst_info_to_validate, *src->clone());
 
-    const ClComponentActivation::Attributes act_info{ ActivationLayerInfo::ActivationFunction::TANH };
+    const ClComponentActivation::Attributes act_info{ActivationLayerInfo::ActivationFunction::TANH};
 
     // Check components
-    if(context.gpu_language() == GpuLanguage::OpenCL)
+    if (context.gpu_language() == GpuLanguage::OpenCL)
     {
         // Validate Activation Component
-        const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+        const auto properties =
+            IGpuKernelComponent::Properties().stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
         ArgumentPack<ITensorInfo> arguments;
         arguments.add_const_tensor(ACL_SRC, src);
@@ -80,14 +80,12 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
 } // namespace
 
-Status GpuTanh::is_supported_op(const GpuWorkloadContext &context,
-                                const ITensorInfo        *src)
+Status GpuTanh::is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *src)
 {
     return is_supported_op_helper(context, src, nullptr);
 }
 
-Status GpuTanh::validate_op(const GpuWorkloadSketch &sketch,
-                            const ITensorInfo       *src)
+Status GpuTanh::validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *src)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
@@ -112,8 +110,7 @@ Status GpuTanh::validate_op(const GpuWorkloadSketch &sketch,
     return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate);
 }
 
-ITensorInfo *GpuTanh::create_op(GpuWorkloadSketch     &sketch,
-                                ITensorInfo           *src)
+ITensorInfo *GpuTanh::create_op(GpuWorkloadSketch &sketch, ITensorInfo *src)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src);
@@ -128,15 +125,15 @@ ITensorInfo *GpuTanh::create_op(GpuWorkloadSketch     &sketch,
     // Translate into components and add to component graph
     GpuKernelComponentGraph &comp_graph = sketch.implementation().component_graph();
 
-    const ClComponentActivation::Attributes act_info{ ActivationLayerInfo::ActivationFunction::TANH };
+    const ClComponentActivation::Attributes act_info{ActivationLayerInfo::ActivationFunction::TANH};
 
     const auto *const sketch_ctx = sketch.implementation().context();
 
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         // Add Activation Component
         auto properties = IGpuKernelComponent::Properties();
-        properties.stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+        properties.stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
         ArgumentPack<ITensorInfo> arguments;
         arguments.add_const_tensor(ACL_SRC, src);

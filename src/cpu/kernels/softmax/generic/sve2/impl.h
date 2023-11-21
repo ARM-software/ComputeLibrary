@@ -31,8 +31,13 @@ namespace arm_compute
 namespace cpu
 {
 template <typename ScalarType>
-void sve2_softmax_logits_1d_quantized(const ITensor *in, const ITensor *max, void *const tmp,
-                                      ITensor *out, float beta, bool is_log, const Window &window);
+void sve2_softmax_logits_1d_quantized(const ITensor *in,
+                                      const ITensor *max,
+                                      void *const    tmp,
+                                      ITensor       *out,
+                                      float          beta,
+                                      bool           is_log,
+                                      const Window  &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif /* SRC_CORE_SVE2_KERNELS_SOFTMAX_IMPL_H */

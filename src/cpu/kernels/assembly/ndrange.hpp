@@ -45,8 +45,7 @@ private:
         unsigned int   m_end = 0;
 
     public:
-        NDRangeIterator(const NDRange &p, unsigned int s, unsigned int e)
-            : m_parent(p), m_pos(s), m_end(e)
+        NDRangeIterator(const NDRange &p, unsigned int s, unsigned int e) : m_parent(p), m_pos(s), m_end(e)
         {
         }
 
@@ -59,12 +58,12 @@ private:
         {
             unsigned int r = m_pos;
 
-            if(d < (D - 1))
+            if (d < (D - 1))
             {
                 r %= m_parent.m_totalsizes[d];
             }
 
-            if(d > 0)
+            if (d > 0)
             {
                 r /= m_parent.m_totalsizes[d - 1];
             }
@@ -98,9 +97,9 @@ private:
     {
         unsigned int t = 1;
 
-        for(unsigned int i = 0; i < D; i++)
+        for (unsigned int i = 0; i < D; i++)
         {
-            if(m_sizes[i] == 0)
+            if (m_sizes[i] == 0)
             {
                 m_sizes[i] = 1;
             }
@@ -116,14 +115,12 @@ public:
     NDRange(const NDRange &rhs)            = default;
 
     template <typename... T>
-    NDRange(T... ts)
-        : m_sizes{ ts... }
+    NDRange(T... ts) : m_sizes{ts...}
     {
         set_totalsizes();
     }
 
-    NDRange(const std::array<unsigned int, D> &n)
-        : m_sizes(n)
+    NDRange(const std::array<unsigned int, D> &n) : m_sizes(n)
     {
         set_totalsizes();
     }
@@ -163,7 +160,7 @@ public:
         std::array<int_t, N> sizes{};
 
         std::size_t i = 0;
-        for(auto &p : list)
+        for (auto &p : list)
         {
             m_positions[i] = p.first;
             sizes[i++]     = p.second;

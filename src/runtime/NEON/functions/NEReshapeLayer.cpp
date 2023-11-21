@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuReshape.h"
 
 #include <utility>
@@ -32,16 +33,15 @@ namespace arm_compute
 {
 struct NEReshapeLayer::Impl
 {
-    const ITensor                   *src{ nullptr };
-    ITensor                         *dst{ nullptr };
-    std::unique_ptr<cpu::CpuReshape> op{ nullptr };
+    const ITensor                   *src{nullptr};
+    ITensor                         *dst{nullptr};
+    std::unique_ptr<cpu::CpuReshape> op{nullptr};
 };
 
-NEReshapeLayer::NEReshapeLayer()
-    : _impl(std::make_unique<Impl>())
+NEReshapeLayer::NEReshapeLayer() : _impl(std::make_unique<Impl>())
 {
 }
-NEReshapeLayer::NEReshapeLayer(NEReshapeLayer &&) = default;
+NEReshapeLayer::NEReshapeLayer(NEReshapeLayer &&)            = default;
 NEReshapeLayer &NEReshapeLayer::operator=(NEReshapeLayer &&) = default;
 NEReshapeLayer::~NEReshapeLayer()                            = default;
 

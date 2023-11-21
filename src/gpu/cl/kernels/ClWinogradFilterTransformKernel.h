@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_WINOGRAD_FILTER_TRANSFORM_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -59,7 +60,10 @@ public:
      * @param[out] dst             The output tensor info. The shape for this tensor can be calculated using the utility function @p compute_winograd_filter_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info   Contains Winograd's information described in @ref WinogradInfo
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const WinogradInfo &winograd_info);
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   const WinogradInfo     &winograd_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClWinogradFilterTransformKernel::configure()
@@ -72,7 +76,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    int32_t _src_dim_z{ 0 };
+    int32_t _src_dim_z{0};
 };
 } // namespace kernels
 } // namespace opencl

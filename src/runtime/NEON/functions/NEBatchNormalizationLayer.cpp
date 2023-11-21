@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
 
@@ -36,12 +37,17 @@ namespace arm_compute
 {
 NEBatchNormalizationLayer::~NEBatchNormalizationLayer() = default;
 
-NEBatchNormalizationLayer::NEBatchNormalizationLayer()
-    : _norm_kernel()
+NEBatchNormalizationLayer::NEBatchNormalizationLayer() : _norm_kernel()
 {
 }
 
-void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon,
+void NEBatchNormalizationLayer::configure(ITensor            *input,
+                                          ITensor            *output,
+                                          const ITensor      *mean,
+                                          const ITensor      *var,
+                                          const ITensor      *beta,
+                                          const ITensor      *gamma,
+                                          float               epsilon,
                                           ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, mean, var, beta, gamma, epsilon, act_info);
@@ -50,10 +56,17 @@ void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const
     _norm_kernel->configure(input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
-Status NEBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma,
-                                           float epsilon, ActivationLayerInfo act_info)
+Status NEBatchNormalizationLayer::validate(const ITensorInfo  *input,
+                                           const ITensorInfo  *output,
+                                           const ITensorInfo  *mean,
+                                           const ITensorInfo  *var,
+                                           const ITensorInfo  *beta,
+                                           const ITensorInfo  *gamma,
+                                           float               epsilon,
+                                           ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon, act_info));
     return Status{};
 }
 

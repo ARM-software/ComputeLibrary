@@ -24,24 +24,26 @@
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuConvertFullyConnectedWeights.h"
 
 namespace arm_compute
 {
 struct NEConvertFullyConnectedWeights::Impl
 {
-    const ITensor                                        *src{ nullptr };
-    ITensor                                              *dst{ nullptr };
-    std::unique_ptr<cpu::CpuConvertFullyConnectedWeights> op{ nullptr };
+    const ITensor                                        *src{nullptr};
+    ITensor                                              *dst{nullptr};
+    std::unique_ptr<cpu::CpuConvertFullyConnectedWeights> op{nullptr};
 };
-NEConvertFullyConnectedWeights::NEConvertFullyConnectedWeights()
-    : _impl(std::make_unique<Impl>())
+NEConvertFullyConnectedWeights::NEConvertFullyConnectedWeights() : _impl(std::make_unique<Impl>())
 {
 }
 NEConvertFullyConnectedWeights::~NEConvertFullyConnectedWeights() = default;
 
-void NEConvertFullyConnectedWeights::configure(const ITensor *input, ITensor *output, const TensorShape &original_input_shape,
-                                               DataLayout data_layout)
+void NEConvertFullyConnectedWeights::configure(const ITensor     *input,
+                                               ITensor           *output,
+                                               const TensorShape &original_input_shape,
+                                               DataLayout         data_layout)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -51,8 +53,10 @@ void NEConvertFullyConnectedWeights::configure(const ITensor *input, ITensor *ou
     _impl->op->configure(_impl->src->info(), _impl->dst->info(), original_input_shape, data_layout);
 }
 
-Status NEConvertFullyConnectedWeights::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,
-                                                DataLayout data_layout)
+Status NEConvertFullyConnectedWeights::validate(const ITensorInfo *input,
+                                                const ITensorInfo *output,
+                                                const TensorShape &original_input_shape,
+                                                DataLayout         data_layout)
 {
     return cpu::CpuConvertFullyConnectedWeights::validate(input, output, original_input_shape, data_layout);
 }

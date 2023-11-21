@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 #include "src/common/ITensorV2.h"
+
 #include "arm_compute/core/TensorInfo.h"
+
 #include "src/common/utils/LegacySupport.h"
 
 namespace arm_compute

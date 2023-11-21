@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_NEACTIVATIONLAYER_H
 #define ARM_COMPUTE_NEACTIVATIONLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 
 #include <memory>
@@ -102,5 +101,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-} // namespace arm_computes
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEACTIVATIONLAYER_H */

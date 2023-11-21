@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H
 #define ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H
 
-#include "src/core/CL/ICLKernel.h"
-
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/function_info/ConvolutionInfo.h"
+
+#include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
@@ -74,15 +74,28 @@ public:
      *          * no padding
      *          * no change of data layout after configure
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const DWCComputeKernelInfo &dwc_info,
-                   const ConvolutionInfo &conv_info, const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
+    void configure(const CLCompileContext     &compile_context,
+                   ICLTensor                  *input,
+                   const ICLTensor            *weights,
+                   const ICLTensor            *biases,
+                   ICLTensor                  *output,
+                   const DWCComputeKernelInfo &dwc_info,
+                   const ConvolutionInfo      &conv_info,
+                   const ICLTensor            *output_multipliers = nullptr,
+                   const ICLTensor            *output_shifts      = nullptr);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayerNativeKernel
      *
      * Similar to @ref CLDepthwiseConvolutionLayerNativeKernel::configure()
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const DWCComputeKernelInfo &dwc_info,
-                   const ConvolutionInfo &conv_info, const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
+    void configure(ICLTensor                  *input,
+                   const ICLTensor            *weights,
+                   const ICLTensor            *biases,
+                   ICLTensor                  *output,
+                   const DWCComputeKernelInfo &dwc_info,
+                   const ConvolutionInfo      &conv_info,
+                   const ICLTensor            *output_multipliers = nullptr,
+                   const ICLTensor            *output_shifts      = nullptr);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayerNativeKernel
      *
@@ -90,23 +103,29 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const DWCComputeKernelInfo &dwc_info,
-                           const ConvolutionInfo &conv_info, const ITensorInfo *output_multipliers = nullptr, const ITensorInfo *output_shifts = nullptr);
+    static Status validate(const ITensorInfo          *input,
+                           const ITensorInfo          *weights,
+                           const ITensorInfo          *biases,
+                           const ITensorInfo          *output,
+                           const DWCComputeKernelInfo &dwc_info,
+                           const ConvolutionInfo      &conv_info,
+                           const ITensorInfo          *output_multipliers = nullptr,
+                           const ITensorInfo          *output_shifts      = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const ICLTensor *_input {};
+    const ICLTensor *_input{};
     const ICLTensor *_weights{};
     const ICLTensor *_biases{};
     ICLTensor       *_output{};
-    unsigned int     _depth_multiplier{ 0 };
+    unsigned int     _depth_multiplier{0};
     const ICLTensor *_output_multipliers{};
     const ICLTensor *_output_shifts{};
-    bool             _export_input_to_cl_image{ false };
-    bool             _export_weights_to_cl_image{ true };
-    bool             _is_quantized{ false };
+    bool             _export_input_to_cl_image{false};
+    bool             _export_weights_to_cl_image{true};
+    bool             _is_quantized{false};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H */

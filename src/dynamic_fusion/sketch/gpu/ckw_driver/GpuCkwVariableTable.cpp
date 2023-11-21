@@ -23,11 +23,12 @@
  */
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
+
 #include <sstream>
 
 namespace arm_compute
@@ -36,19 +37,22 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-GpuCkwComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelComponentGroup &comp_group, GpuCkwScopedKernelWriter &writer, const ITensorInfo *tensor, TensorStorageType storage,
-                                                               const std::string &alias)
+GpuCkwComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelComponentGroup &comp_group,
+                                                               GpuCkwScopedKernelWriter      &writer,
+                                                               const ITensorInfo             *tensor,
+                                                               TensorStorageType              storage,
+                                                               const std::string             &alias)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!tensor->has_valid_id(), "Tensor info with valid id expected");
 
     // Do not re-declare if the variable associated with the tensor has already been declared
     auto it = _vars.find(tensor->id());
 
-    if(it != _vars.end())
+    if (it != _vars.end())
     {
         return &it->second;
     }
-    if(comp_group.is_intermediate_tensor(tensor))
+    if (comp_group.is_intermediate_tensor(tensor))
     {
         // Create a virtual tensor variable
         GpuCkwComponentArgument var;
@@ -61,7 +65,7 @@ GpuCkwComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelCo
         std::stringstream ss;
         ss << alias << "_t" << abs(tensor->id());
         const auto              uniq_name = ss.str();
-        GpuCkwComponentArgument var{ writer->declare_tensor_argument(uniq_name, to_ckw(*tensor), to_ckw(storage)) };
+        GpuCkwComponentArgument var{writer->declare_tensor_argument(uniq_name, to_ckw(*tensor), to_ckw(storage))};
         auto                  &&inserted = _vars.emplace(tensor->id(), var);
         return &(inserted.first->second);
     }

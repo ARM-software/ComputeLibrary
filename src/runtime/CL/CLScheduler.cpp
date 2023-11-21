@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -81,7 +82,7 @@ cl::Event CLScheduler::enqueue_sync_event()
 
 void CLScheduler::tune_kernel_static(ICLKernel &kernel)
 {
-    if(_cl_tuner != nullptr)
+    if (_cl_tuner != nullptr)
     {
         _cl_tuner->tune_kernel_static(kernel);
     }
@@ -95,8 +96,16 @@ bool CLScheduler::is_initialised() const
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _gemm_heuristics(nullptr), _backend_type(CLBackendType::Native), _job_chaining_enabled(false),
-      _job_chaining_size(), _job_chaining_count(0)
+    : _context(),
+      _queue(),
+      _target(GPUTarget::MIDGARD),
+      _is_initialised(false),
+      _cl_tuner(nullptr),
+      _gemm_heuristics(nullptr),
+      _backend_type(CLBackendType::Native),
+      _job_chaining_enabled(true),
+      _job_chaining_size(1),
+      _job_chaining_count(0)
 {
 }
 
@@ -107,9 +116,12 @@ CLScheduler &CLScheduler::get()
     return scheduler;
 }
 
-void CLScheduler::default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h)
+void CLScheduler::default_init_with_context(cl::Device             &device,
+                                            cl::Context            &ctx,
+                                            ICLTuner               *cl_tuner,
+                                            CLGEMMHeuristicsHandle *gemm_h)
 {
-    if(!_is_initialised)
+    if (!_is_initialised)
     {
         const std::string cl_kernels_folder("./cl_kernels/");
         cl::CommandQueue  queue = cl::CommandQueue(ctx, device);
@@ -121,7 +133,7 @@ void CLScheduler::default_init_with_context(cl::Device &device, cl::Context &ctx
 
 void CLScheduler::default_init(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h, CLBackendType cl_backend_type)
 {
-    if(!_is_initialised)
+    if (!_is_initialised)
     {
         cl::Context ctx;
         cl::Device  dev;
@@ -151,7 +163,12 @@ void CLScheduler::set_context(cl::Context context)
     CLKernelLibrary::get().set_context(_context);
 }
 
-void CLScheduler::init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h, CLBackendType cl_backend_type)
+void CLScheduler::init(cl::Context             context,
+                       cl::CommandQueue        queue,
+                       const cl::Device       &device,
+                       ICLTuner               *cl_tuner,
+                       CLGEMMHeuristicsHandle *gemm_h,
+                       CLBackendType           cl_backend_type)
 {
     set_context(std::move(context));
     _queue           = std::move(queue);
@@ -164,21 +181,21 @@ void CLScheduler::init(cl::Context context, cl::CommandQueue queue, const cl::De
 
 void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
-                             "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
+    ARM_COMPUTE_ERROR_ON_MSG(
+        !_is_initialised, "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
                              or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
 
     const bool inject_memory = !tensors.empty();
 
     // Tune the kernel if the CLTuner has been provided
-    if(_cl_tuner != nullptr)
+    if (_cl_tuner != nullptr)
     {
         inject_memory ? _cl_tuner->tune_kernel_dynamic(kernel, tensors) : _cl_tuner->tune_kernel_dynamic(kernel);
     }
 
     // Run kernel
     inject_memory ? kernel.run_op(tensors, kernel.window(), _queue) : kernel.run(kernel.window(), _queue);
-    if(_job_chaining_enabled)
+    if (_job_chaining_enabled)
     {
         ++_job_chaining_count;
     }
@@ -188,15 +205,25 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
 
 void CLScheduler::flush_queue(bool flush)
 {
-    if(_job_chaining_enabled)
+    if (_job_chaining_enabled)
     {
-        if(_job_chaining_count >= _job_chaining_size)
+        if (_job_chaining_count >= _job_chaining_size)
         {
             _job_chaining_count = 0;
+            /*
+                Optimisation note: Flush the queue at the first enqueue to start the GPU
+                execution and then incrementally saturate the clFlush calls to minimize
+                the CPU activity for job-scheduling.
+                For eg. job-chain size goes from 1, 2, 4, 8 and 16
+            */
+            if (_job_chaining_size < 16)
+            {
+                _job_chaining_size <<= 1;
+            }
             _queue.flush();
         }
     }
-    else if(flush)
+    else if (flush)
     {
         _queue.flush();
     }

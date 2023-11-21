@@ -33,7 +33,8 @@ namespace arm_compute
 namespace cpu
 {
 template <typename ScalarType>
-void add_same_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
+void add_same_sve(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif // SRC_CORE_SVE_KERNELS_ADD_IMPL_H

@@ -51,7 +51,8 @@ public:
      * @return  Output descriptor
      */
     static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                      const Coordinates &starts, const Coordinates &ends);
+                                                      const Coordinates      &starts,
+                                                      const Coordinates      &ends);
     /** Start coordinates accessor
      *
      * @return Start coordinates of the dimensions
@@ -67,7 +68,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
 private:
     Coordinates _starts;

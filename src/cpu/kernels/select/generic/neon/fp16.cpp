@@ -23,20 +23,22 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
-#include "src/cpu/kernels/select/generic/neon/impl.h"
-
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/select/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void neon_f16_select_same_rank(const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
+void neon_f16_select_same_rank(
+    const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
     return select_op_16<float16_t, uint16x8_t>(c, x, y, output, window);
 }
-void neon_f16_select_not_same_rank(const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
+void neon_f16_select_not_same_rank(
+    const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
     return select_op_not_same_rank<float16_t>(c, x, y, output, window);
 }

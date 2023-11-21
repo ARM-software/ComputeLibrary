@@ -79,7 +79,10 @@ public:
      *
      * @return Reference to this LSTMParams object
      */
-    LSTMParams &set_cifg_params(const T *input_to_input_weights, const T *recurrent_to_input_weights, T *cell_to_input_weights, const T *input_gate_bias)
+    LSTMParams &set_cifg_params(const T *input_to_input_weights,
+                                const T *recurrent_to_input_weights,
+                                T       *cell_to_input_weights,
+                                const T *input_gate_bias)
     {
         _input_to_input_weights     = input_to_input_weights;
         _recurrent_to_input_weights = recurrent_to_input_weights;
@@ -125,8 +128,10 @@ public:
      *
      * @return Reference to this LSTMParams object
      */
-    LSTMParams &set_layer_normalization_params(T *input_layer_norm_weights, T *forget_layer_norm_weights,
-                                               T *cell_layer_norm_weights, T *output_layer_norm_weights)
+    LSTMParams &set_layer_normalization_params(T *input_layer_norm_weights,
+                                               T *forget_layer_norm_weights,
+                                               T *cell_layer_norm_weights,
+                                               T *output_layer_norm_weights)
     {
         _input_layer_norm_weights  = input_layer_norm_weights;
         _forget_layer_norm_weights = forget_layer_norm_weights;
@@ -169,7 +174,10 @@ public:
      *
      * @return Reference to this LSTMParams object
      */
-    LSTMParams &set_matmul_scale_params(float input_intermediate_scale, float forget_intermediate_scale, float cell_intermediate_scale, float output_intermediate_scale)
+    LSTMParams &set_matmul_scale_params(float input_intermediate_scale,
+                                        float forget_intermediate_scale,
+                                        float cell_intermediate_scale,
+                                        float output_intermediate_scale)
     {
         _input_intermediate_scale  = input_intermediate_scale;
         _forget_intermediate_scale = forget_intermediate_scale;
@@ -338,5 +346,5 @@ private:
     bool     _has_cifg_opt;
     bool     _use_layer_norm;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_LSTMPARAMS_H */

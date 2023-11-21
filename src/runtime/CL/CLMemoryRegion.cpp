@@ -29,10 +29,7 @@
 namespace arm_compute
 {
 ICLMemoryRegion::ICLMemoryRegion(size_t size)
-    : IMemoryRegion(size),
-      _ctx(CLScheduler::get().context()),
-      _mapping(nullptr),
-      _mem()
+    : IMemoryRegion(size), _ctx(CLScheduler::get().context()), _mapping(nullptr), _mem()
 {
 }
 
@@ -57,17 +54,15 @@ std::unique_ptr<IMemoryRegion> ICLMemoryRegion::extract_subregion(size_t offset,
     return nullptr;
 }
 
-CLBufferMemoryRegion::CLBufferMemoryRegion(cl_mem_flags flags, size_t size)
-    : ICLMemoryRegion(size)
+CLBufferMemoryRegion::CLBufferMemoryRegion(cl_mem_flags flags, size_t size) : ICLMemoryRegion(size)
 {
-    if(_size != 0)
+    if (_size != 0)
     {
         _mem = cl::Buffer(CLScheduler::get().context(), flags, _size);
     }
 }
 
-CLBufferMemoryRegion::CLBufferMemoryRegion(const cl::Buffer &buffer)
-    : ICLMemoryRegion(buffer.getInfo<CL_MEM_SIZE>())
+CLBufferMemoryRegion::CLBufferMemoryRegion(const cl::Buffer &buffer) : ICLMemoryRegion(buffer.getInfo<CL_MEM_SIZE>())
 {
     _mem = buffer;
 }
@@ -102,10 +97,10 @@ void CLBufferMemoryRegion::unmap(cl::CommandQueue &q)
 ICLSVMMemoryRegion::ICLSVMMemoryRegion(cl_mem_flags flags, size_t size, size_t alignment)
     : ICLMemoryRegion(size), _ptr(nullptr)
 {
-    if(size != 0)
+    if (size != 0)
     {
         _ptr = clSVMAlloc(CLScheduler::get().context().get(), flags, size, alignment);
-        if(_ptr != nullptr)
+        if (_ptr != nullptr)
         {
             _mem = cl::Buffer(CLScheduler::get().context(), CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, _size, _ptr);
         }
@@ -114,7 +109,7 @@ ICLSVMMemoryRegion::ICLSVMMemoryRegion(cl_mem_flags flags, size_t size, size_t a
 
 ICLSVMMemoryRegion::~ICLSVMMemoryRegion()
 {
-    if(_ptr != nullptr)
+    if (_ptr != nullptr)
     {
         try
         {
@@ -125,7 +120,7 @@ ICLSVMMemoryRegion::~ICLSVMMemoryRegion()
             _mem = cl::Buffer();
             clSVMFree(_ctx.get(), _ptr);
         }
-        catch(...)
+        catch (...)
         {
         }
     }
@@ -144,7 +139,8 @@ CLCoarseSVMMemoryRegion::CLCoarseSVMMemoryRegion(cl_mem_flags flags, size_t size
 void *CLCoarseSVMMemoryRegion::map(cl::CommandQueue &q, bool blocking)
 {
     ARM_COMPUTE_ERROR_ON(_ptr == nullptr);
-    clEnqueueSVMMap(q.get(), blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, _ptr, _size, 0, nullptr, nullptr);
+    clEnqueueSVMMap(q.get(), blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, _ptr, _size, 0, nullptr,
+                    nullptr);
     _mapping = _ptr;
     return _mapping;
 }
@@ -163,7 +159,7 @@ CLFineSVMMemoryRegion::CLFineSVMMemoryRegion(cl_mem_flags flags, size_t size, si
 
 void *CLFineSVMMemoryRegion::map(cl::CommandQueue &q, bool blocking)
 {
-    if(blocking)
+    if (blocking)
     {
         clFinish(q.get());
     }

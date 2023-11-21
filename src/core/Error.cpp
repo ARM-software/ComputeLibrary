@@ -36,9 +36,10 @@ Status arm_compute::create_error(ErrorCode error_code, std::string msg)
     return Status(error_code, msg);
 }
 
-Status arm_compute::create_error_msg(ErrorCode error_code, const char *func, const char *file, int line, const char *msg)
+Status
+arm_compute::create_error_msg(ErrorCode error_code, const char *func, const char *file, int line, const char *msg)
 {
-    std::array<char, 512> out{ 0 };
+    std::array<char, 512> out{0};
     snprintf(out.data(), out.size(), "in %s %s:%d: %s", func, file, line, msg);
     return Status(error_code, std::string(out.data()));
 }

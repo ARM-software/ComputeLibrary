@@ -21,7 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DIRECTCONVOLUTION3DFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DIRECTCONVOLUTION3DFIXTURE_H
+
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "tests/framework/Asserts.h" // Required for ARM_COMPUTE_ASSERT
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/Conv3D.h"
@@ -180,3 +185,5 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DIRECTCONVOLUTION3DFIXTURE_H

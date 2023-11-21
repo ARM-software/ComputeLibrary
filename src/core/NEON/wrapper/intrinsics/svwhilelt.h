@@ -32,7 +32,7 @@ namespace wrapper
 #define SVWHILELT_IMPL(type)                           \
     template <size_t element_size>                     \
     inline svbool_t svwhilelt_size(type a, type b);    \
-    \
+                                                       \
     template <>                                        \
     inline svbool_t svwhilelt_size<64>(type a, type b) \
     {                                                  \

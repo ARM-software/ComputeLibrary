@@ -27,8 +27,7 @@
 
 namespace arm_compute
 {
-CLGEMMHeuristicsHandle::CLGEMMHeuristicsHandle()
-    : _heuristics(std::make_unique<mlgo::MLGOHeuristics>())
+CLGEMMHeuristicsHandle::CLGEMMHeuristicsHandle() : _heuristics(std::make_unique<mlgo::MLGOHeuristics>())
 {
 }
 CLGEMMHeuristicsHandle::~CLGEMMHeuristicsHandle() = default;

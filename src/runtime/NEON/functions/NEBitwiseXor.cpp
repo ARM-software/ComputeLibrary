@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEBitwiseXor.h"
 
-#include "src/core/NEON/kernels/NEBitwiseXorKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NEBitwiseXorKernel.h"
 
 #include <utility>
 

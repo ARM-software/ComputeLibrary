@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,10 +25,16 @@
 #include "ClComponentResize.h"
 
 #include "arm_compute/core/Error.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
+
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateResize.h"
+#else // ACL_INTERNAL_TEST_CKW_IN_DF
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwResize.h"
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 namespace arm_compute
 {
@@ -36,6 +42,13 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
+/** Forward declaration */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
+class ClTemplateResize;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+class GpuCkwResize;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
+
 Status ClComponentResize::validate(const IGpuKernelComponent::Properties &properties,
                                    const ArgumentPack<ITensorInfo>       &tensors,
                                    const ClComponentResize::Attributes   &attributes)
@@ -53,7 +66,9 @@ Status ClComponentResize::validate(const IGpuKernelComponent::Properties &proper
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
 
     // Align corners and sampling policy conformance
-    ARM_COMPUTE_RETURN_ERROR_ON(attributes.align_corners() && !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(attributes.sampling_policy()));
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        attributes.align_corners() &&
+        !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(attributes.sampling_policy()));
 
     // All tensor infos are initialized
     ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() == 0);
@@ -66,8 +81,12 @@ ClComponentResize::ClComponentResize(ComponentId                            id,
                                      const IGpuKernelComponent::Properties &properties,
                                      const ArgumentPack<ITensorInfo>       &tensors,
                                      const ClComponentResize::Attributes   &attributes)
-    : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateResize>(id, tensors, attributes) }
+    : IGpuKernelComponent{id, properties, tensors},
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer{std::make_unique<ClTemplateResize>(id, tensors, attributes)}
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer{std::make_unique<GpuCkwResize>(id, tensors, attributes)}
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }
 
@@ -75,7 +94,11 @@ ClComponentResize::~ClComponentResize()
 {
 }
 
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuTemplateComponentWriter *ClComponentResize::template_writer() const
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+const IGpuCkwComponentDriver *ClComponentResize::ckw_component_driver() const
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 {
     return _component_writer.get();
 }

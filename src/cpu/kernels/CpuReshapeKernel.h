@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,8 +55,15 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+
+    /** Prepare the reshape kernel for execution (Only executed once) by calculating max or squashed window and selecting the _reshape_tensor_fn based on the presence of holes
+     *
+     * @param[in] tensors Pack of input and output tensors
+     *
+     */
+    void prepare(ITensorPack &tensors);
 
     /** Return minimum workload size of the relevant kernel
      *
@@ -66,6 +73,20 @@ public:
      * @return[out] small_network_mws          Minimum workload size for requsted configuration.
      */
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
+
+    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
+      *
+      * @return The split dimension.
+      */
+    size_t get_split_dimension() const
+    {
+        return _split_dimension;
+    }
+
+private:
+    size_t _split_dimension{Window::DimY};
+
+    std::function<void(const Window &window, const ITensor *src, ITensor *dst)> _reshape_tensor_fn{};
 };
 } // namespace kernels
 } // namespace cpu

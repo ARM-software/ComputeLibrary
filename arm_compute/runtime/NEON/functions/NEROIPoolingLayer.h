@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -73,7 +74,8 @@ public:
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      */
-    void configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info);
+    void
+    configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run() override;
@@ -91,7 +93,10 @@ public:
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      * @return a Status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *rois,
+                           const ITensorInfo         *output,
+                           const ROIPoolingLayerInfo &pool_info);
 
 private:
     std::unique_ptr<NEROIPoolingLayerKernel> _roi_kernel;

@@ -64,11 +64,8 @@ public:
      *
      * @return Pointer for the destination tensor info
      */
-    static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
-                                  ITensorInfo       *src,
-                                  ITensorInfo       *wei,
-                                  ITensorInfo       *bia,
-                                  const Attributes &attributes);
+    static ITensorInfo *create_op(
+        GpuWorkloadSketch &sketch, ITensorInfo *src, ITensorInfo *wei, ITensorInfo *bia, const Attributes &attributes);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context    Workload context within which the operator is running

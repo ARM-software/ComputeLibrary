@@ -70,14 +70,23 @@ public:
      * @param[out] dst             Destination tensor. 4 lower dimensions represent a single dst [OFM, width, height, depth], while the rest represent batch of dsts.
      * @param[in]  conv3d_info     Contains strides, padding, rounding, activation, dilation and fast math information. Activation and fast math are currently unused.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo &conv3d_info);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *src0,
+                   const ITensorInfo      *src1,
+                   const ITensorInfo      *src2,
+                   ITensorInfo            *dst,
+                   const Conv3dInfo       &conv3d_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClDirectConv3dKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info);
+    static Status validate(const ITensorInfo *src0,
+                           const ITensorInfo *src1,
+                           const ITensorInfo *src2,
+                           const ITensorInfo *dst,
+                           const Conv3dInfo  &conv3d_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

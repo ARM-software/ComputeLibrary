@@ -51,7 +51,10 @@ public:
      * @param[out] dst             Destination tensor info.
      * @param[in]  info            3d Pooling layer parameters.
      */
-    void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const Pooling3dLayerInfo &info);
+    void configure(const ClCompileContext   &compile_context,
+                   const ITensorInfo        *src,
+                   ITensorInfo              *dst,
+                   const Pooling3dLayerInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClPool3d::configure()

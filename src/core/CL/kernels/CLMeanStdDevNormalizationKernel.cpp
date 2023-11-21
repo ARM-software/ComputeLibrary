@@ -31,6 +31,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -49,7 +50,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, f
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -69,15 +70,19 @@ void CLMeanStdDevNormalizationKernel::configure(ICLTensor *input, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input, output, epsilon);
 }
 
-void CLMeanStdDevNormalizationKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float epsilon)
+void CLMeanStdDevNormalizationKernel::configure(const CLCompileContext &compile_context,
+                                                ICLTensor              *input,
+                                                ICLTensor              *output,
+                                                float                   epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     _run_in_place = (output == nullptr) || (output == input);
 
-    ARM_COMPUTE_ERROR_THROW_ON(CLMeanStdDevNormalizationKernel::validate(input->info(), (output != nullptr) ? output->info() : nullptr, epsilon));
+    ARM_COMPUTE_ERROR_THROW_ON(CLMeanStdDevNormalizationKernel::validate(
+        input->info(), (output != nullptr) ? output->info() : nullptr, epsilon));
 
-    if(output != nullptr)
+    if (output != nullptr)
     {
         auto_init_if_empty(*output->info(), *input->info());
     }
@@ -85,7 +90,8 @@ void CLMeanStdDevNormalizationKernel::configure(const CLCompileContext &compile_
     _input  = input;
     _output = output;
 
-    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / input->info()->element_size(), input->info()->dimension(0));
+    const unsigned int num_elems_processed_per_iteration =
+        adjust_vec_size(16 / input->info()->element_size(), input->info()->dimension(0));
 
     // Set build options
     CLBuildOptions build_opts;
@@ -134,7 +140,6 @@ void CLMeanStdDevNormalizationKernel::run(const Window &window, cl::CommandQueue
         add_2D_tensor_argument_if((!_run_in_place), idx, _output, slice);
 
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_2D(slice));
+    } while (window.slide_window_slice_2D(slice));
 }
 } // namespace arm_compute

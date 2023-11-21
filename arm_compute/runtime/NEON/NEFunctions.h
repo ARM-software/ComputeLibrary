@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEFUNCTIONS_H
-#define ARM_COMPUTE_NEFUNCTIONS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_NEFUNCTIONS_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_NEFUNCTIONS_H
 
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEAddMulAdd.h"
@@ -62,34 +62,31 @@
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFuseBatchNormalization.h"
+#include "arm_compute/runtime/NEON/functions/NEGather.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConv2d.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
-#include "arm_compute/runtime/NEON/functions/NEGather.h"
 #include "arm_compute/runtime/NEON/functions/NEGenerateProposalsLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEL2NormalizeLayer.h"
+#include "arm_compute/runtime/NEON/functions/NELogical.h"
 #include "arm_compute/runtime/NEON/functions/NELSTMLayer.h"
 #include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
-#include "arm_compute/runtime/NEON/functions/NELogical.h"
 #include "arm_compute/runtime/NEON/functions/NEMatMul.h"
 #include "arm_compute/runtime/NEON/functions/NEMaxUnpoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/NEON/functions/NEPooling3dLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPriorBoxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQLSTMLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NERNNLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
@@ -97,6 +94,9 @@
 #include "arm_compute/runtime/NEON/functions/NEReorgLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReverse.h"
+#include "arm_compute/runtime/NEON/functions/NERNNLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
 #include "arm_compute/runtime/NEON/functions/NESlice.h"
@@ -111,4 +111,4 @@
 #include "arm_compute/runtime/NEON/functions/NEUnstack.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
-#endif /* ARM_COMPUTE_NEFUNCTIONS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_NEFUNCTIONS_H

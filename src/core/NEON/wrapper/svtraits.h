@@ -25,6 +25,7 @@
 #define SRC_CORE_NEON_WRAPPER_SVTRAITS_H
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "src/core/NEON/SVEMath.h"
+
 #include <arm_sve.h>
 
 namespace arm_compute

@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
-
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
 #include "arm_compute/runtime/CPP/functions/CPPSplit.h"
 #include "arm_compute/runtime/IFunction.h"

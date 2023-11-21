@@ -26,8 +26,9 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/crop/generic/neon/impl.h"
 
 namespace arm_compute
@@ -36,7 +37,8 @@ namespace cpu
 {
 #define DECLARE_CROP_KERNEL(func_name)                                                                       \
     void func_name(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset, \
-                   int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+                   int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit,            \
+                   bool input_has_single_channel, bool is_width_flipped)
 
 DECLARE_CROP_KERNEL(fp16_in_bounds_crop_window);
 DECLARE_CROP_KERNEL(fp32_in_bounds_crop_window);

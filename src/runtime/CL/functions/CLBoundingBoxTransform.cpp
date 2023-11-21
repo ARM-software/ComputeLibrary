@@ -23,18 +23,24 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBoundingBoxTransform.h"
 
-#include "src/core/CL/kernels/CLBoundingBoxTransformKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLBoundingBoxTransformKernel.h"
 
 namespace arm_compute
 {
-void CLBoundingBoxTransform::configure(const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
+void CLBoundingBoxTransform::configure(const ICLTensor                *boxes,
+                                       ICLTensor                      *pred_boxes,
+                                       const ICLTensor                *deltas,
+                                       const BoundingBoxTransformInfo &info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), boxes, pred_boxes, deltas, info);
 }
 
-void CLBoundingBoxTransform::configure(const CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
+void CLBoundingBoxTransform::configure(const CLCompileContext         &compile_context,
+                                       const ICLTensor                *boxes,
+                                       ICLTensor                      *pred_boxes,
+                                       const ICLTensor                *deltas,
+                                       const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_LOG_PARAMS(boxes, pred_boxes, deltas, info);
 
@@ -44,7 +50,10 @@ void CLBoundingBoxTransform::configure(const CLCompileContext &compile_context, 
     _kernel = std::move(k);
 }
 
-Status CLBoundingBoxTransform::validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info)
+Status CLBoundingBoxTransform::validate(const ITensorInfo              *boxes,
+                                        const ITensorInfo              *pred_boxes,
+                                        const ITensorInfo              *deltas,
+                                        const BoundingBoxTransformInfo &info)
 {
     return CLBoundingBoxTransformKernel::validate(boxes, pred_boxes, deltas, info);
 }

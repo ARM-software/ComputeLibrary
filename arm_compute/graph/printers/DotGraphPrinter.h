@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019,2021 Arm Limited.
+ * Copyright (c) 2018-2019,2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_DOTGRAPHPRINTER_H
-#define ARM_COMPUTE_GRAPH_DOTGRAPHPRINTER_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_PRINTERS_DOTGRAPHPRINTER_H
+#define ACL_ARM_COMPUTE_GRAPH_PRINTERS_DOTGRAPHPRINTER_H
 
 #include "arm_compute/graph/IGraphPrinter.h"
-
 #include "arm_compute/graph/INodeVisitor.h"
 
 #include <string>
@@ -57,8 +56,6 @@ public:
     void visit(DepthwiseConvolutionLayerNode &n) override;
     void visit(EltwiseLayerNode &n) override;
     void visit(FusedConvolutionBatchNormalizationNode &n) override;
-    void visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n) override;
-    void visit(FusedConvolutionWithPostOpNode &n) override;
     void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override;
     void visit(NormalizationLayerNode &n) override;
     void visit(PoolingLayerNode &n) override;
@@ -106,4 +103,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_DOTGRAPHPRINTER_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_PRINTERS_DOTGRAPHPRINTER_H

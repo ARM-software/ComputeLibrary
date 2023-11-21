@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CLPOOLINGLAYER_H
 #define ARM_COMPUTE_CLPOOLINGLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -74,7 +73,8 @@ public:
      * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      * @param[out]    indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices = nullptr);
+    void
+    configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]     compile_context The compile context to be used.
@@ -83,7 +83,11 @@ public:
      * @param[in]     pool_info       Contains pooling operation information described in @ref PoolingLayerInfo.
      * @param[out]    indices         (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   const PoolingLayerInfo &pool_info,
+                   ICLTensor              *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayer
      *
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -93,7 +97,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
+    static Status validate(const ITensorInfo      *input,
+                           const ITensorInfo      *output,
+                           const PoolingLayerInfo &pool_info,
+                           const ITensorInfo      *indices = nullptr);
 
     // Inherited methods overridden:
     void run() override;

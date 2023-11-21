@@ -74,9 +74,14 @@ public:
      * @param[in]  shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    void configure(const ICLTensor *input, ICLTensor *output,
-                   const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                   int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
+    void configure(const ICLTensor   *input,
+                   ICLTensor         *output,
+                   const Coordinates &starts,
+                   const Coordinates &ends,
+                   const BiStrides   &strides,
+                   int32_t            begin_mask       = 0,
+                   int32_t            end_mask         = 0,
+                   int32_t            shrink_axis_mask = 0);
     /** Configure kernel
      *
      * @note Supported tensor rank: up to 4
@@ -92,9 +97,15 @@ public:
      * @param[in]  shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
-                   const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                   int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const Coordinates      &starts,
+                   const Coordinates      &ends,
+                   const BiStrides        &strides,
+                   int32_t                 begin_mask       = 0,
+                   int32_t                 end_mask         = 0,
+                   int32_t                 shrink_axis_mask = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSlice
      *
@@ -110,9 +121,14 @@ public:
      * @param[in] shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                             A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output,
-                           const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                           int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const Coordinates &starts,
+                           const Coordinates &ends,
+                           const BiStrides   &strides,
+                           int32_t            begin_mask       = 0,
+                           int32_t            end_mask         = 0,
+                           int32_t            shrink_axis_mask = 0);
 
     // Inherited methods overridden:
     void run() override;
@@ -143,9 +159,15 @@ public:
      * @param[in]  shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output,
-                   const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                   int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *input,
+                   ITensorInfo            *output,
+                   const Coordinates      &starts,
+                   const Coordinates      &ends,
+                   const BiStrides        &strides,
+                   int32_t                 begin_mask       = 0,
+                   int32_t                 end_mask         = 0,
+                   int32_t                 shrink_axis_mask = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSlice
      *
@@ -161,9 +183,14 @@ public:
      * @param[in] shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                             A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output,
-                           const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                           int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const Coordinates &starts,
+                           const Coordinates &ends,
+                           const BiStrides   &strides,
+                           int32_t            begin_mask       = 0,
+                           int32_t            end_mask         = 0,
+                           int32_t            shrink_axis_mask = 0);
 };
 } // namespace experimental
 } // namespace arm_compute

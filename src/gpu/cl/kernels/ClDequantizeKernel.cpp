@@ -34,7 +34,6 @@
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/Cast.h"
 #include "support/StringSupport.h"
 
@@ -49,9 +48,11 @@ namespace
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8, DataType::QSYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8,
+                                                         DataType::QSYMM16);
 
-    if(dst->tensor_shape().total_size() > 0)
+    if (dst->tensor_shape().total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::F16, DataType::F32);
@@ -74,7 +75,7 @@ void ClDequantizeKernel::configure(const CLCompileContext &compile_context, ITen
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*dst, src->tensor_shape(), 1, DataType::F32);
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
 
@@ -87,7 +88,7 @@ void ClDequantizeKernel::configure(const CLCompileContext &compile_context, ITen
 
     // Create kernel
     CLBuildOptions build_opts;
-    if(!is_quantized_per_channel)
+    if (!is_quantized_per_channel)
     {
         const UniformQuantizationInfo qinfo   = src->quantization_info().uniform();
         const int                     qoffset = is_data_type_quantized_asymmetric(src->data_type()) ? qinfo.offset : 0;
@@ -103,16 +104,18 @@ void ClDequantizeKernel::configure(const CLCompileContext &compile_context, ITen
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
     build_opts.add_option("-DDATA_TYPE_SRC=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option("-DDATA_TYPE_DST=" + get_cl_type_from_data_type(dst->data_type()));
-    build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(output_width_x - vec_size_x, 0)));
+    build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(
+                                                                        std::max<int>(output_width_x - vec_size_x, 0)));
 
     // Create kernel name
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*dst);
-    if(multi_access_x)
+    if (multi_access_x)
     {
-        win.set(Window::DimX, Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
+        win.set(Window::DimX,
+                Window::Dimension(win.x().start(), ceil_to_multiple(win.x().end(), vec_size_x), vec_size_x));
     }
     ICLKernel::configure_internal(win);
 
@@ -136,10 +139,11 @@ void ClDequantizeKernel::run_op(ITensorPack &tensors, const Window &window, cl::
     const bool is_quantized_per_channel = is_data_type_quantized_per_channel(src->info()->data_type());
 
     // Collapse windo
-    Window new_window = is_quantized_per_channel ? window.collapse_if_possible(ICLKernel::window(), 4) : window.collapse_if_possible(ICLKernel::window(), 3);
+    Window new_window = is_quantized_per_channel ? window.collapse_if_possible(ICLKernel::window(), 4)
+                                                 : window.collapse_if_possible(ICLKernel::window(), 3);
     Window slice      = new_window.first_slice_window_3D();
 
-    if(is_quantized_per_channel)
+    if (is_quantized_per_channel)
     {
         unsigned int idx = num_arguments_per_3D_tensor() * 2; //Skip the input and output parameters
         _kernel.setArg(idx++, src->quantization().scale->cl_buffer());
@@ -151,8 +155,7 @@ void ClDequantizeKernel::run_op(ITensorPack &tensors, const Window &window, cl::
         add_3D_tensor_argument(idx, src, slice);
         add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(new_window.slide_window_slice_3D(slice));
+    } while (new_window.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

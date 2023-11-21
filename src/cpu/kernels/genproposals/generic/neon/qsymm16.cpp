@@ -26,9 +26,12 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_qu16_computeallanchors(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)
+void neon_qu16_computeallanchors(const ITensor     *anchors,
+                                 ITensor           *all_anchors,
+                                 ComputeAnchorsInfo anchors_info,
+                                 const Window      &window)
 {
     return compute_all_anchors_qasymm16(anchors, all_anchors, anchors_info, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

@@ -33,7 +33,7 @@ namespace wrapper
 #define VGETLANE_IMPL_8(stype, vtype, postfix)                         \
     inline stype vgetlane(const vtype vector, const unsigned int lane) \
     {                                                                  \
-        switch(lane)                                                   \
+        switch (lane)                                                  \
         {                                                              \
             case 0:                                                    \
                 return vget_lane_##postfix(vector, 0);                 \
@@ -59,7 +59,7 @@ namespace wrapper
 #define VGETLANE_IMPL_4(stype, vtype, postfix)                         \
     inline stype vgetlane(const vtype vector, const unsigned int lane) \
     {                                                                  \
-        switch(lane)                                                   \
+        switch (lane)                                                  \
         {                                                              \
             case 0:                                                    \
                 return vget_lane_##postfix(vector, 0);                 \
@@ -77,7 +77,7 @@ namespace wrapper
 #define VGETLANE_IMPL_2(stype, vtype, postfix)                         \
     inline stype vgetlane(const vtype vector, const unsigned int lane) \
     {                                                                  \
-        switch(lane)                                                   \
+        switch (lane)                                                  \
         {                                                              \
             case 0:                                                    \
                 return vget_lane_##postfix(vector, 0);                 \
@@ -102,7 +102,7 @@ VGETLANE_IMPL_4(float16_t, float16x4_t, f16)
 #define VGETQLANE_IMPL_16(stype, vtype, postfix)                       \
     inline stype vgetlane(const vtype vector, const unsigned int lane) \
     {                                                                  \
-        switch(lane)                                                   \
+        switch (lane)                                                  \
         {                                                              \
             case 0:                                                    \
                 return vgetq_lane_##postfix(vector, 0);                \
@@ -144,7 +144,7 @@ VGETLANE_IMPL_4(float16_t, float16x4_t, f16)
 #define VGETQLANE_IMPL_8(stype, vtype, postfix)                        \
     inline stype vgetlane(const vtype vector, const unsigned int lane) \
     {                                                                  \
-        switch(lane)                                                   \
+        switch (lane)                                                  \
         {                                                              \
             case 0:                                                    \
                 return vgetq_lane_##postfix(vector, 0);                \
@@ -170,7 +170,7 @@ VGETLANE_IMPL_4(float16_t, float16x4_t, f16)
 #define VGETQLANE_IMPL_4(stype, vtype, postfix)                        \
     inline stype vgetlane(const vtype vector, const unsigned int lane) \
     {                                                                  \
-        switch(lane)                                                   \
+        switch (lane)                                                  \
         {                                                              \
             case 0:                                                    \
                 return vgetq_lane_##postfix(vector, 0);                \
@@ -188,7 +188,7 @@ VGETLANE_IMPL_4(float16_t, float16x4_t, f16)
 #define VGETQLANE_IMPL_2(stype, vtype, postfix)                        \
     inline stype vgetlane(const vtype vector, const unsigned int lane) \
     {                                                                  \
-        switch(lane)                                                   \
+        switch (lane)                                                  \
         {                                                              \
             case 0:                                                    \
                 return vgetq_lane_##postfix(vector, 0);                \

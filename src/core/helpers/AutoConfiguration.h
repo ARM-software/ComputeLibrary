@@ -24,9 +24,9 @@
 #ifndef SRC_CORE_HELPERS_AUTOCONFIGURATION_H
 #define SRC_CORE_HELPERS_AUTOCONFIGURATION_H
 
-#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 
 namespace arm_compute
 {
@@ -42,10 +42,11 @@ namespace arm_compute
  */
 inline bool auto_init_if_empty(ITensorInfo       &info,
                                const TensorShape &shape,
-                               int num_channels, DataType data_type,
-                               QuantizationInfo quantization_info = QuantizationInfo())
+                               int                num_channels,
+                               DataType           data_type,
+                               QuantizationInfo   quantization_info = QuantizationInfo())
 {
-    if(info.tensor_shape().total_size() == 0)
+    if (info.tensor_shape().total_size() == 0)
     {
         info.set_data_type(data_type);
         info.set_num_channels(num_channels);
@@ -70,7 +71,7 @@ inline bool auto_init_if_empty(ITensorInfo       &info,
  */
 inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source)
 {
-    if(info_sink.tensor_shape().total_size() == 0)
+    if (info_sink.tensor_shape().total_size() == 0)
     {
         info_sink.set_data_type(info_source.data_type());
         info_sink.set_num_channels(info_source.num_channels());
@@ -93,7 +94,7 @@ inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_s
  */
 inline bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape)
 {
-    if(info.tensor_shape().total_size() == 0)
+    if (info.tensor_shape().total_size() == 0)
     {
         info.set_tensor_shape(shape);
         return true;
@@ -112,7 +113,7 @@ inline bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape)
  */
 inline bool set_format_if_unknown(ITensorInfo &info, Format format)
 {
-    if(info.data_type() == DataType::UNKNOWN)
+    if (info.data_type() == DataType::UNKNOWN)
     {
         info.set_format(format);
         return true;
@@ -131,7 +132,7 @@ inline bool set_format_if_unknown(ITensorInfo &info, Format format)
  */
 inline bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type)
 {
-    if(info.data_type() == DataType::UNKNOWN)
+    if (info.data_type() == DataType::UNKNOWN)
     {
         info.set_data_type(data_type);
         return true;
@@ -150,7 +151,7 @@ inline bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type)
  */
 inline bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout)
 {
-    if(info.data_layout() == DataLayout::UNKNOWN)
+    if (info.data_layout() == DataLayout::UNKNOWN)
     {
         info.set_data_layout(data_layout);
         return true;
@@ -169,7 +170,7 @@ inline bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout
  */
 inline bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo quantization_info)
 {
-    if(info.quantization_info().empty() && (is_data_type_quantized_asymmetric(info.data_type())))
+    if (info.quantization_info().empty() && (is_data_type_quantized_asymmetric(info.data_type())))
     {
         info.set_quantization_info(quantization_info);
         return true;

@@ -34,6 +34,7 @@ enum class UnaryOp : int32_t
 {
     LogicalNot = 0x0000, // !
     BitwiseNot = 0x0001, // ~
+    Negate     = 0x0002, // -
 };
 
 /* Binary operations
@@ -68,8 +69,8 @@ enum class BinaryOp : int32_t
 enum class AssignmentOp : int32_t
 {
     // Unary
-    Increment  = 0x0000, // +=
-    Decrement  = 0x0001, // -=
+    Increment = 0x0000, // +=
+    Decrement = 0x0001, // -=
 };
 
 } // namespace ckw

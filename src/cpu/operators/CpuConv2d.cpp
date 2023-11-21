@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "src/cpu/operators/CpuConv2d.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/operators/CpuDirectConv2d.h"
 #include "src/cpu/operators/CpuGemm.h"
@@ -35,26 +37,35 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuConv2d::CpuConv2d()
-    : _function()
+CpuConv2d::CpuConv2d() : _function()
 {
 }
 
 CpuConv2d::~CpuConv2d() = default;
 
-void CpuConv2d::configure(ITensorInfo *input, ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                          const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+void CpuConv2d::configure(ITensorInfo               *input,
+                          ITensorInfo               *weights,
+                          const ITensorInfo         *biases,
+                          ITensorInfo               *output,
+                          const PadStrideInfo       &conv_info,
+                          const WeightsInfo         &weights_info,
+                          const Size2D              &dilation,
+                          const ActivationLayerInfo &act_info,
+                          bool                       enable_fast_math,
+                          unsigned int               num_groups)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_UNUSED(num_groups);
-    ARM_COMPUTE_ERROR_THROW_ON(CpuConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info,
-                                                   enable_fast_math, num_groups));
+    ARM_COMPUTE_ERROR_THROW_ON(CpuConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation,
+                                                   act_info, enable_fast_math, num_groups));
 
-    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info,
+                           enable_fast_math, num_groups);
 
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
-    switch(CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math))
+    switch (CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info,
+                                              enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
         {
@@ -92,19 +103,30 @@ void CpuConv2d::configure(ITensorInfo *input, ITensorInfo *weights, const ITenso
     _aux_mem = _function->workspace();
 }
 
-Status CpuConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+Status CpuConv2d::validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const WeightsInfo         &weights_info,
+                           const Size2D              &dilation,
+                           const ActivationLayerInfo &act_info,
+                           bool                       enable_fast_math,
+                           unsigned int               num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1), "Grouping (num_groups != 1) is not supported on Neon");
 
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
-    switch(CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math))
+    switch (CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info,
+                                              enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
-            ARM_COMPUTE_RETURN_ON_ERROR(CpuWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math));
+            ARM_COMPUTE_RETURN_ON_ERROR(
+                CpuWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math));
             break;
         case ConvolutionMethod::GEMM:
-            ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math));
+            ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmConv2d::validate(input, weights, biases, output, conv_info, weights_info,
+                                                                dilation, act_info, enable_fast_math));
             break;
         case ConvolutionMethod::GEMM_CONV2D:
             ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmDirectConv2d::validate(input, weights, biases, output, info));
@@ -120,9 +142,14 @@ Status CpuConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights,
     return Status{};
 }
 
-ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights,
-                                                    const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math)
+ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo         *input,
+                                                    const ITensorInfo         *weights,
+                                                    const ITensorInfo         *output,
+                                                    const PadStrideInfo       &conv_info,
+                                                    const WeightsInfo         &weights_info,
+                                                    const Size2D              &dilation,
+                                                    const ActivationLayerInfo &act_info,
+                                                    bool                       enable_fast_math)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, weights);
     ARM_COMPUTE_UNUSED(weights_info);
@@ -137,35 +164,46 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo *input, co
     using ConvolutionConfiguration = std::tuple<Size2D, Size2D, Size2D, PadStrideInfo>;
     using ConfigurationMethod      = std::pair<ConvolutionConfiguration, ConvolutionMethod>;
 
-    const std::vector<ConfigurationMethod> known_configs =
-    {
+    const std::vector<ConfigurationMethod> known_configs = {
         // Alexnet
-        ConfigurationMethod(ConvolutionConfiguration(Size2D(27U, 27U), Size2D(5U, 5U), Size2D(48U, 128U), PadStrideInfo(1U, 1U, 2U, 2U)), ConvolutionMethod::GEMM),
+        ConfigurationMethod(ConvolutionConfiguration(Size2D(27U, 27U), Size2D(5U, 5U), Size2D(48U, 128U),
+                                                     PadStrideInfo(1U, 1U, 2U, 2U)),
+                            ConvolutionMethod::GEMM),
         // VGG16 / VGG19
-        ConfigurationMethod(ConvolutionConfiguration(Size2D(224U, 224U), Size2D(3U, 3U), Size2D(3U, 64U), PadStrideInfo(1U, 1U, 1U, 1U)), ConvolutionMethod::GEMM),
+        ConfigurationMethod(ConvolutionConfiguration(Size2D(224U, 224U), Size2D(3U, 3U), Size2D(3U, 64U),
+                                                     PadStrideInfo(1U, 1U, 1U, 1U)),
+                            ConvolutionMethod::GEMM),
         // Mobilenet 224
-        ConfigurationMethod(ConvolutionConfiguration(Size2D(224U, 224U), Size2D(3U, 3U), Size2D(3U, 32U), PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR)), ConvolutionMethod::GEMM),
+        ConfigurationMethod(
+            ConvolutionConfiguration(Size2D(224U, 224U), Size2D(3U, 3U), Size2D(3U, 32U),
+                                     PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR)),
+            ConvolutionMethod::GEMM),
         // Mobilenet 160
-        ConfigurationMethod(ConvolutionConfiguration(Size2D(160U, 160U), Size2D(3U, 3U), Size2D(3U, 24U), PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR)), ConvolutionMethod::GEMM)
-    };
+        ConfigurationMethod(
+            ConvolutionConfiguration(Size2D(160U, 160U), Size2D(3U, 3U), Size2D(3U, 24U),
+                                     PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR)),
+            ConvolutionMethod::GEMM)};
 
     const auto find_config = [&](ConfigurationMethod c)
     {
         const ConvolutionConfiguration config = c.first;
         const PadStrideInfo            info   = std::get<3>(config);
 
-        return std::get<0>(config) == Size2D(input->dimension(idx_w), input->dimension(idx_h)) && std::get<1>(config) == Size2D(weights->dimension(idx_w), weights->dimension(idx_h))
-               && std::get<2>(config) == Size2D(weights->dimension(idx_c), weights->dimension(3)) && info.pad_top() == conv_info.pad_top() && info.pad_right() == conv_info.pad_right()
-               && info.pad_bottom() == conv_info.pad_bottom() && info.pad_left() == conv_info.pad_left() && info.stride() == conv_info.stride();
+        return std::get<0>(config) == Size2D(input->dimension(idx_w), input->dimension(idx_h)) &&
+               std::get<1>(config) == Size2D(weights->dimension(idx_w), weights->dimension(idx_h)) &&
+               std::get<2>(config) == Size2D(weights->dimension(idx_c), weights->dimension(3)) &&
+               info.pad_top() == conv_info.pad_top() && info.pad_right() == conv_info.pad_right() &&
+               info.pad_bottom() == conv_info.pad_bottom() && info.pad_left() == conv_info.pad_left() &&
+               info.stride() == conv_info.stride();
     };
 
     std::vector<ConfigurationMethod>::const_iterator found;
-    if((found = std::find_if(known_configs.begin(), known_configs.end(), find_config)) != known_configs.end())
+    if ((found = std::find_if(known_configs.begin(), known_configs.end(), find_config)) != known_configs.end())
     {
         return (*found).second;
     }
 
-    if(dilation != Size2D(1U, 1U))
+    if (dilation != Size2D(1U, 1U))
     {
         return ConvolutionMethod::GEMM;
     }
@@ -173,59 +211,66 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo *input, co
     {
         // SRGAN
         // Output might not be initialized when it is an internal tensor of the layer using the convolution
-        if(input->total_size() > 1e7 && (weights->dimension(idx_h) > 7)
-           && (CpuDirectConv2d::validate(input, weights, nullptr, output, conv_info, act_info)))
+        if (input->total_size() > 1e7 && (weights->dimension(idx_h) > 7) &&
+            (CpuDirectConv2d::validate(input, weights, nullptr, output, conv_info, act_info)))
         {
             return ConvolutionMethod::DIRECT;
         }
-        if(input->dimension(idx_c) < 16)
+        if (input->dimension(idx_c) < 16)
         {
             return ConvolutionMethod::GEMM;
         }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         // This heuristics only applies to F16 data type on A55r1
-        if(NEScheduler::get().cpu_info().get_cpu_model() == CPUModel::A55r1 && enable_fast_math && input->data_type() == DataType::F16)
+        if (NEScheduler::get().cpu_info().get_cpu_model() == CPUModel::A55r1 && enable_fast_math &&
+            input->data_type() == DataType::F16)
         {
             // Exclude known bad winograd configs (and defaults to GEMM)
-            const std::vector<ConvolutionConfiguration> known_bad_winograd_f16_with_fastmath_configs =
-            {
+            const std::vector<ConvolutionConfiguration> known_bad_winograd_f16_with_fastmath_configs = {
                 // Squeezenet_V1_1 fire2 and fire3
-                ConvolutionConfiguration(Size2D(56U, 56U), Size2D(3U, 3U), Size2D(16U, 64U), PadStrideInfo(1U, 1U, 1U, 1U)),
+                ConvolutionConfiguration(Size2D(56U, 56U), Size2D(3U, 3U), Size2D(16U, 64U),
+                                         PadStrideInfo(1U, 1U, 1U, 1U)),
                 // Squeezenet_V1_1 fire6 and fire7
-                ConvolutionConfiguration(Size2D(14U, 14U), Size2D(3U, 3U), Size2D(48U, 192U), PadStrideInfo(1U, 1U, 1U, 1U)),
+                ConvolutionConfiguration(Size2D(14U, 14U), Size2D(3U, 3U), Size2D(48U, 192U),
+                                         PadStrideInfo(1U, 1U, 1U, 1U)),
                 // Squeezenet_V1_1 fire8 and fire9
-                ConvolutionConfiguration(Size2D(14U, 14U), Size2D(3U, 3U), Size2D(64U, 256U), PadStrideInfo(1U, 1U, 1U, 1U)),
+                ConvolutionConfiguration(Size2D(14U, 14U), Size2D(3U, 3U), Size2D(64U, 256U),
+                                         PadStrideInfo(1U, 1U, 1U, 1U)),
             };
             const auto find_conv_config = [&](ConvolutionConfiguration c)
             {
                 const PadStrideInfo info = std::get<3>(c);
 
-                return std::get<0>(c) == Size2D(input->dimension(idx_w), input->dimension(idx_h)) && std::get<1>(c) == Size2D(weights->dimension(idx_w), weights->dimension(idx_h))
-                       && std::get<2>(c) == Size2D(weights->dimension(idx_c), weights->dimension(3)) && info.pad_top() == conv_info.pad_top() && info.pad_right() == conv_info.pad_right()
-                       && info.pad_bottom() == conv_info.pad_bottom() && info.pad_left() == conv_info.pad_left() && info.stride() == conv_info.stride();
+                return std::get<0>(c) == Size2D(input->dimension(idx_w), input->dimension(idx_h)) &&
+                       std::get<1>(c) == Size2D(weights->dimension(idx_w), weights->dimension(idx_h)) &&
+                       std::get<2>(c) == Size2D(weights->dimension(idx_c), weights->dimension(3)) &&
+                       info.pad_top() == conv_info.pad_top() && info.pad_right() == conv_info.pad_right() &&
+                       info.pad_bottom() == conv_info.pad_bottom() && info.pad_left() == conv_info.pad_left() &&
+                       info.stride() == conv_info.stride();
             };
 
-            bool found_bad = std::find_if(known_bad_winograd_f16_with_fastmath_configs.begin(), known_bad_winograd_f16_with_fastmath_configs.end(),
-                                          find_conv_config)
-                             != known_bad_winograd_f16_with_fastmath_configs.end();
-            if(found_bad)
+            bool found_bad = std::find_if(known_bad_winograd_f16_with_fastmath_configs.begin(),
+                                          known_bad_winograd_f16_with_fastmath_configs.end(),
+                                          find_conv_config) != known_bad_winograd_f16_with_fastmath_configs.end();
+            if (found_bad)
             {
                 return ConvolutionMethod::GEMM;
             }
         }
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
         // For 1x1 convolutions run the default GEMM
-        if(weights->dimension(idx_w) == 1 && weights->dimension(idx_h) == 1)
+        if (weights->dimension(idx_w) == 1 && weights->dimension(idx_h) == 1)
         {
             return ConvolutionMethod::GEMM;
         }
 
-        if(bool(CpuWinogradConv2d::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)))
+        if (bool(CpuWinogradConv2d::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)))
         {
             return ConvolutionMethod::WINOGRAD;
         }
-        if(bool(CpuGemmDirectConv2d::validate(input, weights, nullptr, output, info)))
+        if (bool(CpuGemmDirectConv2d::validate(input, weights, nullptr, output, info)))
         {
             return ConvolutionMethod::GEMM_CONV2D;
         }

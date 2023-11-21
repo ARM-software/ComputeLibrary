@@ -52,7 +52,11 @@ struct TensorDescriptor final : public misc::ICloneable<TensorDescriptor>
                      QuantizationInfo tensor_quant_info  = QuantizationInfo(),
                      DataLayout       tensor_data_layout = DataLayout::NCHW,
                      Target           tensor_target      = Target::UNSPECIFIED)
-        : shape(tensor_shape), data_type(tensor_data_type), layout(tensor_data_layout), quant_info(tensor_quant_info), target(tensor_target)
+        : shape(tensor_shape),
+          data_type(tensor_data_type),
+          layout(tensor_data_layout),
+          quant_info(tensor_quant_info),
+          target(tensor_target)
     {
     }
     /** Sets tensor descriptor shape
@@ -106,11 +110,11 @@ struct TensorDescriptor final : public misc::ICloneable<TensorDescriptor>
         return std::make_unique<TensorDescriptor>(*this);
     }
 
-    TensorShape      shape{};                        /**< Tensor shape */
-    DataType         data_type{ DataType::UNKNOWN }; /**< Data type */
-    DataLayout       layout{ DataLayout::NCHW };     /**< Data layout */
-    QuantizationInfo quant_info{};                   /**< Quantization info */
-    Target           target{ Target::UNSPECIFIED };  /**< Target */
+    TensorShape      shape{};                      /**< Tensor shape */
+    DataType         data_type{DataType::UNKNOWN}; /**< Data type */
+    DataLayout       layout{DataLayout::NCHW};     /**< Data layout */
+    QuantizationInfo quant_info{};                 /**< Quantization info */
+    Target           target{Target::UNSPECIFIED};  /**< Target */
 };
 } // namespace graph
 } // namespace arm_compute

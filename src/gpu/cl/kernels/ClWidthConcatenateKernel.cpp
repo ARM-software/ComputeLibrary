@@ -30,10 +30,10 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -53,7 +53,7 @@ Status validate_arguments(const ITensorInfo *src, unsigned int width_offset, con
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) + width_offset > dst->dimension(0));
 
-    for(size_t i = 1; i < Coordinates::num_max_dimensions; ++i)
+    for (size_t i = 1; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(i) != dst->dimension(i));
     }
@@ -74,12 +74,15 @@ Status ClWidthConcatenateKernel::validate(const ITensorInfo *src, unsigned int w
     return Status{};
 }
 
-void ClWidthConcatenateKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int width_offset, ITensorInfo *dst)
+void ClWidthConcatenateKernel::configure(const CLCompileContext &compile_context,
+                                         ITensorInfo            *src,
+                                         unsigned int            width_offset,
+                                         ITensorInfo            *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, width_offset, dst));
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16, src->dimension(0));
 
@@ -87,10 +90,11 @@ void ClWidthConcatenateKernel::configure(const CLCompileContext &compile_context
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
+                          support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DWIDTH_OFFSET=" + support::cpp11::to_string(width_offset));
 
-    if(is_data_type_quantized_asymmetric(src->data_type()) && src->quantization_info() != dst->quantization_info())
+    if (is_data_type_quantized_asymmetric(src->data_type()) && src->quantization_info() != dst->quantization_info())
     {
         const UniformQuantizationInfo iqinfo = src->quantization_info().uniform();
         const UniformQuantizationInfo oqinfo = dst->quantization_info().uniform();
@@ -121,8 +125,9 @@ void ClWidthConcatenateKernel::run_op(ITensorPack &tensors, const Window &window
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, src, window);

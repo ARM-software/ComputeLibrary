@@ -57,5 +57,5 @@ protected:
     std::unique_ptr<INEKernel>          _kernel;         /**< Kernel to run */
     std::unique_ptr<NEFillBorderKernel> _border_handler; /**< Kernel to handle image borders */
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_INESIMPLEFUNCTION_H */

@@ -24,13 +24,14 @@
 #ifndef ARM_COMPUTE_CPU_DIRECTCONV2D_H
 #define ARM_COMPUTE_CPU_DIRECTCONV2D_H
 
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/cpu/ICpuKernel.h"
 #include "src/cpu/ICpuOperator.h"
@@ -75,14 +76,23 @@ public:
      * @param[in]      conv_info Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]      act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ITensorInfo *src, ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *dst, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensorInfo               *src,
+                   ITensorInfo               *weights,
+                   const ITensorInfo         *bias,
+                   ITensorInfo               *dst,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuDirectConv2d::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo         *src,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *bias,
+                           const ITensorInfo         *dst,
+                           const PadStrideInfo       &conv_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
@@ -95,10 +105,10 @@ private:
     std::unique_ptr<NEFillBorderKernel>                        _input_border_handler;
     std::unique_ptr<CpuActivation>                             _activationlayer_function;
     Tensor                                                     _accumulator;
-    bool                                                       _has_bias{ false };
-    bool                                                       _is_activationlayer_enabled{ false };
-    unsigned int                                               _dim_split{ 0 };
-    bool                                                       _is_padding_required{ false };
+    bool                                                       _has_bias{false};
+    bool                                                       _is_activationlayer_enabled{false};
+    unsigned int                                               _dim_split{0};
+    bool                                                       _is_padding_required{false};
 };
 } // namespace cpu
 } // namespace arm_compute

@@ -24,8 +24,9 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL
 
-#include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
+#include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuComponentServices.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGraph.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuOperatorGroup.h"
@@ -45,12 +46,8 @@ public:
      *
      * @param[in] context global workload creation context
      */
-    explicit Implementation(
-        Context *context)
-        : _context{ context },
-          _comp_services{},
-          _component_graph{ _context, &_comp_services },
-          _operator_group{}
+    explicit Implementation(Context *context)
+        : _context{context}, _comp_services{}, _component_graph{_context, &_comp_services}, _operator_group{}
     {
     }
     /** Prevent instances of this class from being copy constructed */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,9 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/nodes/Nodes.h"
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/TypePrinter.h"
-#include "arm_compute/graph/nodes/Nodes.h"
 
 namespace arm_compute
 {
@@ -82,22 +82,6 @@ void DotGraphVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
     ARM_COMPUTE_UNUSED(n);
     std::stringstream ss;
     ss << "FusedConvolutionBatchNormalizationNode";
-    _info = ss.str();
-}
-
-void DotGraphVisitor::visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n)
-{
-    ARM_COMPUTE_UNUSED(n);
-    std::stringstream ss;
-    ss << "FusedConvolutionBatchNormalizationWithPostOpsNode";
-    _info = ss.str();
-}
-
-void DotGraphVisitor::visit(FusedConvolutionWithPostOpNode &n)
-{
-    ARM_COMPUTE_UNUSED(n);
-    std::stringstream ss;
-    ss << "FusedConvolutionWithPostOpNode";
     _info = ss.str();
 }
 
@@ -168,9 +152,9 @@ void DotGraphPrinter::print_footer(const Graph &g, std::ostream &os)
 
 void DotGraphPrinter::print_nodes(const Graph &g, std::ostream &os)
 {
-    for(const auto &n : g.nodes())
+    for (const auto &n : g.nodes())
     {
-        if(n)
+        if (n)
         {
             // Output node id
             std::string node_id = std::string("n") + support::cpp11::to_string(n->id());
@@ -182,7 +166,8 @@ void DotGraphPrinter::print_nodes(const Graph &g, std::ostream &os)
             std::string name             = n->name().empty() ? node_id : n->name();
             auto        node_description = _dot_node_visitor.info();
 
-            os << R"([label = ")" << name << R"( \n )" << n->assigned_target() << R"( \n )" << node_description << R"("])";
+            os << R"([label = ")" << name << R"( \n )" << n->assigned_target() << R"( \n )" << node_description
+               << R"("])";
             os << ";\n";
         }
     }
@@ -190,16 +175,17 @@ void DotGraphPrinter::print_nodes(const Graph &g, std::ostream &os)
 
 void DotGraphPrinter::print_edges(const Graph &g, std::ostream &os)
 {
-    for(const auto &e : g.edges())
+    for (const auto &e : g.edges())
     {
-        if(e)
+        if (e)
         {
             std::string source_node_id = std::string("n") + support::cpp11::to_string(e->producer_id());
             std::string sink_node_id   = std::string("n") + support::cpp11::to_string(e->consumer_id());
             os << source_node_id << " -> " << sink_node_id << " ";
             const Tensor *t = e->tensor();
             ARM_COMPUTE_ERROR_ON(t == nullptr);
-            os << R"([label = ")" << t->desc().shape << R"( \n )" << t->desc().data_type << R"( \n )" << t->desc().layout << R"("])";
+            os << R"([label = ")" << t->desc().shape << R"( \n )" << t->desc().data_type << R"( \n )"
+               << t->desc().layout << R"("])";
             os << ";\n";
         }
     }

@@ -30,7 +30,7 @@ namespace arm_compute
 namespace wrapper
 {
 template <size_t element_size>
-inline uint64_t  svcnt_size();
+inline uint64_t svcnt_size();
 
 template <>
 inline uint64_t svcnt_size<64>()

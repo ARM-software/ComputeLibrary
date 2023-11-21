@@ -35,15 +35,22 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *output_indices, unsigned int max_output_size,
-                          const float score_threshold, const float iou_threshold)
+Status validate_arguments(const ITensorInfo *bboxes,
+                          const ITensorInfo *scores,
+                          const ITensorInfo *output_indices,
+                          unsigned int       max_output_size,
+                          const float        score_threshold,
+                          const float        iou_threshold)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(bboxes, scores, output_indices);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bboxes, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_indices, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bboxes->num_dimensions() > 2, "The bboxes tensor must be a 2-D float tensor of shape [4, num_boxes].");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(scores->num_dimensions() > 1, "The scores tensor must be a 1-D float tensor of shape [num_boxes].");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_indices->num_dimensions() > 1, "The indices must be 1-D integer tensor of shape [M], where max_output_size <= M");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bboxes->num_dimensions() > 2,
+                                    "The bboxes tensor must be a 2-D float tensor of shape [4, num_boxes].");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(scores->num_dimensions() > 1,
+                                    "The scores tensor must be a 1-D float tensor of shape [num_boxes].");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_indices->num_dimensions() > 1,
+                                    "The indices must be 1-D integer tensor of shape [M], where max_output_size <= M");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(bboxes, scores);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_indices->dimension(0) == 0, "Indices tensor must be bigger than 0");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(max_output_size == 0, "Max size cannot be 0");
@@ -55,15 +62,26 @@ Status validate_arguments(const ITensorInfo *bboxes, const ITensorInfo *scores, 
 } // namespace
 
 CPPNonMaximumSuppressionKernel::CPPNonMaximumSuppressionKernel()
-    : _input_bboxes(nullptr), _input_scores(nullptr), _output_indices(nullptr), _max_output_size(0), _score_threshold(0.f), _iou_threshold(0.f), _num_boxes(0)
+    : _input_bboxes(nullptr),
+      _input_scores(nullptr),
+      _output_indices(nullptr),
+      _max_output_size(0),
+      _score_threshold(0.f),
+      _iou_threshold(0.f),
+      _num_boxes(0)
 {
 }
 
-void CPPNonMaximumSuppressionKernel::configure(const ITensor *input_bboxes, const ITensor *input_scores, ITensor *output_indices,
-                                               unsigned int max_output_size, const float score_threshold, const float iou_threshold)
+void CPPNonMaximumSuppressionKernel::configure(const ITensor *input_bboxes,
+                                               const ITensor *input_scores,
+                                               ITensor       *output_indices,
+                                               unsigned int   max_output_size,
+                                               const float    score_threshold,
+                                               const float    iou_threshold)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_bboxes, input_scores, output_indices);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input_bboxes->info(), input_scores->info(), output_indices->info(), max_output_size, score_threshold, iou_threshold));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input_bboxes->info(), input_scores->info(), output_indices->info(),
+                                                  max_output_size, score_threshold, iou_threshold));
 
     auto_init_if_empty(*output_indices->info(), TensorShape(max_output_size), 1, DataType::U8, QuantizationInfo());
 
@@ -82,10 +100,15 @@ void CPPNonMaximumSuppressionKernel::configure(const ITensor *input_bboxes, cons
     ICPPKernel::configure(win);
 }
 
-Status CPPNonMaximumSuppressionKernel::validate(const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *output_indices,
-                                                unsigned int max_output_size, const float score_threshold, const float iou_threshold)
+Status CPPNonMaximumSuppressionKernel::validate(const ITensorInfo *bboxes,
+                                                const ITensorInfo *scores,
+                                                const ITensorInfo *output_indices,
+                                                unsigned int       max_output_size,
+                                                const float        score_threshold,
+                                                const float        iou_threshold)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(bboxes, scores, output_indices, max_output_size, score_threshold, iou_threshold));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_arguments(bboxes, scores, output_indices, max_output_size, score_threshold, iou_threshold));
     return Status{};
 }
 
@@ -99,10 +122,10 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
     // Auxiliary tensors
     std::vector<int>   indices_above_thd;
     std::vector<float> scores_above_thd;
-    for(unsigned int i = 0; i < _num_boxes; ++i)
+    for (unsigned int i = 0; i < _num_boxes; ++i)
     {
         const float score_i = *(reinterpret_cast<float *>(_input_scores->ptr_to_element(Coordinates(i))));
-        if(score_i >= _score_threshold)
+        if (score_i >= _score_threshold)
         {
             scores_above_thd.emplace_back(score_i);
             indices_above_thd.emplace_back(i);
@@ -114,12 +137,9 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
     std::vector<unsigned int> sorted_indices;
     sorted_indices.resize(num_above_thd);
     std::iota(sorted_indices.data(), sorted_indices.data() + num_above_thd, 0);
-    std::sort(std::begin(sorted_indices),
-              std::end(sorted_indices),
+    std::sort(std::begin(sorted_indices), std::end(sorted_indices),
               [&](unsigned int first, unsigned int second)
-    {
-        return scores_above_thd[first] > scores_above_thd[second];
-    });
+              { return scores_above_thd[first] > scores_above_thd[second]; });
 
     // Number of output is the minimum between max_detection and the scores above the threshold
     const unsigned int num_output = std::min(_max_output_size, num_above_thd);
@@ -127,19 +147,20 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
     std::vector<bool>  visited(num_above_thd, false);
 
     // Keep only boxes with small IoU
-    for(unsigned int i = 0; i < num_above_thd; ++i)
+    for (unsigned int i = 0; i < num_above_thd; ++i)
     {
         // Check if the output is full
-        if(output_idx >= num_output)
+        if (output_idx >= num_output)
         {
             break;
         }
 
         // Check if it was already visited, if not add it to the output and update the indices counter
-        if(!visited[sorted_indices[i]])
+        if (!visited[sorted_indices[i]])
         {
-            *(reinterpret_cast<int *>(_output_indices->ptr_to_element(Coordinates(output_idx)))) = indices_above_thd[sorted_indices[i]];
-            visited[sorted_indices[i]]                                                           = true;
+            *(reinterpret_cast<int *>(_output_indices->ptr_to_element(Coordinates(output_idx)))) =
+                indices_above_thd[sorted_indices[i]];
+            visited[sorted_indices[i]] = true;
             ++output_idx;
         }
         else
@@ -148,28 +169,36 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
         }
 
         // Once added one element at the output check if the next ones overlap and can be skipped
-        for(unsigned int j = i + 1; j < num_above_thd; ++j)
+        for (unsigned int j = i + 1; j < num_above_thd; ++j)
         {
-            if(!visited[sorted_indices[j]])
+            if (!visited[sorted_indices[j]])
             {
                 // Calculate IoU
                 const unsigned int i_index = indices_above_thd[sorted_indices[i]];
                 const unsigned int j_index = indices_above_thd[sorted_indices[j]];
                 // Box-corner format: xmin, ymin, xmax, ymax
-                const auto box_i_xmin = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(0, i_index))));
-                const auto box_i_ymin = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(1, i_index))));
-                const auto box_i_xmax = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(2, i_index))));
-                const auto box_i_ymax = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(3, i_index))));
+                const auto box_i_xmin =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(0, i_index))));
+                const auto box_i_ymin =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(1, i_index))));
+                const auto box_i_xmax =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(2, i_index))));
+                const auto box_i_ymax =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(3, i_index))));
 
-                const auto box_j_xmin = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(0, j_index))));
-                const auto box_j_ymin = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(1, j_index))));
-                const auto box_j_xmax = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(2, j_index))));
-                const auto box_j_ymax = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(3, j_index))));
+                const auto box_j_xmin =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(0, j_index))));
+                const auto box_j_ymin =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(1, j_index))));
+                const auto box_j_xmax =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(2, j_index))));
+                const auto box_j_ymax =
+                    *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(3, j_index))));
 
                 const float area_i = (box_i_xmax - box_i_xmin) * (box_i_ymax - box_i_ymin);
                 const float area_j = (box_j_xmax - box_j_xmin) * (box_j_ymax - box_j_ymin);
                 float       overlap;
-                if(area_i <= 0 || area_j <= 0)
+                if (area_i <= 0 || area_j <= 0)
                 {
                     overlap = 0.0f;
                 }
@@ -179,11 +208,12 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
                     const auto x_min_intersection = std::max<float>(box_i_xmin, box_j_xmin);
                     const auto y_max_intersection = std::min<float>(box_i_ymax, box_j_ymax);
                     const auto x_max_intersection = std::min<float>(box_i_xmax, box_j_xmax);
-                    const auto area_intersection  = std::max<float>(y_max_intersection - y_min_intersection, 0.0f) * std::max<float>(x_max_intersection - x_min_intersection, 0.0f);
-                    overlap                       = area_intersection / (area_i + area_j - area_intersection);
+                    const auto area_intersection  = std::max<float>(y_max_intersection - y_min_intersection, 0.0f) *
+                                                   std::max<float>(x_max_intersection - x_min_intersection, 0.0f);
+                    overlap = area_intersection / (area_i + area_j - area_intersection);
                 }
 
-                if(overlap > _iou_threshold)
+                if (overlap > _iou_threshold)
                 {
                     visited[sorted_indices[j]] = true;
                 }
@@ -192,7 +222,7 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
     }
     // The output could be full but not the output indices tensor
     // Instead return values not valid we put -1
-    for(; output_idx < _max_output_size; ++output_idx)
+    for (; output_idx < _max_output_size; ++output_idx)
     {
         *(reinterpret_cast<int *>(_output_indices->ptr_to_element(Coordinates(output_idx)))) = -1;
     }

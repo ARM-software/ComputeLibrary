@@ -30,10 +30,10 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -48,7 +48,8 @@ Status validate_arguments(const ITensorInfo *src, unsigned int depth_offset, con
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
 
     ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(Window::DimX) != dst->dimension(Window::DimX));
@@ -60,18 +61,20 @@ Status validate_arguments(const ITensorInfo *src, unsigned int depth_offset, con
 }
 } // namespace
 
-ClDepthConcatenateKernel::ClDepthConcatenateKernel()
-    : _depth_offset(0)
+ClDepthConcatenateKernel::ClDepthConcatenateKernel() : _depth_offset(0)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClDepthConcatenateKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst)
+void ClDepthConcatenateKernel::configure(const CLCompileContext &compile_context,
+                                         ITensorInfo            *src,
+                                         unsigned int            depth_offset,
+                                         ITensorInfo            *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, depth_offset, dst));
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     _depth_offset = depth_offset;
 
@@ -81,8 +84,9 @@ void ClDepthConcatenateKernel::configure(const CLCompileContext &compile_context
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
-    if(is_data_type_quantized_asymmetric(src->data_type()) && src->quantization_info() != dst->quantization_info())
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
+                          support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
+    if (is_data_type_quantized_asymmetric(src->data_type()) && src->quantization_info() != dst->quantization_info())
     {
         const UniformQuantizationInfo iq_info = src->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = dst->quantization_info().uniform();
@@ -122,8 +126,9 @@ void ClDepthConcatenateKernel::run_op(ITensorPack &tensors, const Window &window
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window slice = window.first_slice_window_3D();
 
@@ -138,8 +143,7 @@ void ClDepthConcatenateKernel::run_op(ITensorPack &tensors, const Window &window
         add_3D_tensor_argument(idx, src, slice);
         add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_3D(slice));
+    } while (window.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

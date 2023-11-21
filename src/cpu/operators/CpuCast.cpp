@@ -23,9 +23,8 @@
  */
 #include "src/cpu/operators/CpuCast.h"
 
-#include "src/cpu/kernels/CpuCastKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuCastKernel.h"
 
 namespace arm_compute
 {

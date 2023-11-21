@@ -42,7 +42,7 @@ target_compile_options(ckw_prototype
     ${CKW_CXX_FLAGS}
     "$<$<CXX_COMPILER_ID:GNU>:${GNU_WARNINGS}>"
     "$<$<CONFIG:Debug>:${CKW_ASSERTS_OPTS}>"
-    "$<$<BOOL:${CKW_ASSERTS}>:${CKW_ASSERTS_OPTS}>"
+    "$<$<BOOL:${CKW_ENABLE_ASSERTS}>:${CKW_ASSERTS_OPTS}>"
     ${CMAKE_CXX_FLAGS}
     PRIVATE
     $<$<CONFIG:Release>:-Os>
@@ -51,7 +51,7 @@ target_compile_options(ckw_prototype
 target_compile_definitions(ckw_prototype PUBLIC
     $<$<CONFIG:Debug>:COMPUTE_KERNEL_WRITER_DEBUG_ENABLED>
     $<$<CONFIG:Debug>:COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED>
-    $<$<BOOL:${CKW_ASSERTS}>:COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED>
+    $<$<BOOL:${CKW_ENABLE_ASSERTS}>:COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED>
     $<$<BOOL:${CKW_ENABLE_OPENCL}>:COMPUTE_KERNEL_WRITER_OPENCL_ENABLED>
 )
 

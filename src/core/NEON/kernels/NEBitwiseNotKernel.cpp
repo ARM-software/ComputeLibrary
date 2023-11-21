@@ -27,6 +27,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -50,8 +51,7 @@ inline void bitwise_not_U8_U8(const uint8_t *__restrict input, uint8_t *__restri
 }
 } // namespace
 
-NEBitwiseNotKernel::NEBitwiseNotKernel()
-    : _input(nullptr), _output(nullptr)
+NEBitwiseNotKernel::NEBitwiseNotKernel() : _input(nullptr), _output(nullptr)
 {
 }
 
@@ -77,7 +77,8 @@ void NEBitwiseNotKernel::configure(const ITensor *input, ITensor *output)
     // Configure kernel window
     Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration), output_access);
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
+                              output_access);
 
     INEKernel::configure(win);
 }
@@ -90,9 +91,6 @@ void NEBitwiseNotKernel::run(const Window &window, const ThreadInfo &info)
     Iterator input(_input, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        bitwise_not_U8_U8(input.ptr(), output.ptr());
-    },
-    input, output);
+    execute_window_loop(
+        window, [&](const Coordinates &) { bitwise_not_U8_U8(input.ptr(), output.ptr()); }, input, output);
 }

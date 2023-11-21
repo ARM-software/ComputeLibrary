@@ -50,8 +50,7 @@ struct CommonQuery
 /** Result of querying about GEMM type ( @ref CLGEMMKernelType) */
 struct GEMMTypeResult
 {
-    GEMMTypeResult(bool valid, CLGEMMKernelType gemm_type)
-        : valid{ valid }, gemm_type{ gemm_type }
+    GEMMTypeResult(bool valid, CLGEMMKernelType gemm_type) : valid{valid}, gemm_type{gemm_type}
     {
     }
     /** Test if the result is valid */
@@ -67,7 +66,7 @@ struct GEMMTypeResult
 struct GEMMConfigResult
 {
     GEMMConfigResult(bool valid, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info)
-        : valid{ valid }, lhs_info{ lhs_info }, rhs_info{ rhs_info }
+        : valid{valid}, lhs_info{lhs_info}, rhs_info{rhs_info}
     {
     }
     /** Test if the result is valid */

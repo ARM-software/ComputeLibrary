@@ -23,17 +23,15 @@
  */
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
-
-#include "arm_compute/core/Helpers.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-PermuteLayerNode::PermuteLayerNode(PermutationVector perm, DataLayout layout)
-    : _perm(perm), _layout(layout)
+PermuteLayerNode::PermuteLayerNode(PermutationVector perm, DataLayout layout) : _perm(perm), _layout(layout)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -46,7 +44,7 @@ const PermutationVector &PermuteLayerNode::permutation_vector() const
 
 bool PermuteLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -66,7 +64,7 @@ TensorDescriptor PermuteLayerNode::configure_output(size_t idx) const
 
     TensorDescriptor output_desc = src->desc();
     permute(output_desc.shape, _perm);
-    if(_layout != DataLayout::UNKNOWN)
+    if (_layout != DataLayout::UNKNOWN)
     {
         output_desc.layout = _layout;
     }

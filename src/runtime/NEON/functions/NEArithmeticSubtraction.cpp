@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 
 #include "arm_compute/core/ITensor.h"
+
 #include "src/cpu/operators/CpuSub.h"
 
 #include <utility>
@@ -32,26 +33,33 @@ namespace arm_compute
 {
 struct NEArithmeticSubtraction::Impl
 {
-    const ITensor               *src_0{ nullptr };
-    const ITensor               *src_1{ nullptr };
-    ITensor                     *dst{ nullptr };
-    std::unique_ptr<cpu::CpuSub> op{ nullptr };
+    const ITensor               *src_0{nullptr};
+    const ITensor               *src_1{nullptr};
+    ITensor                     *dst{nullptr};
+    std::unique_ptr<cpu::CpuSub> op{nullptr};
 };
 
-NEArithmeticSubtraction::NEArithmeticSubtraction()
-    : _impl(std::make_unique<Impl>())
+NEArithmeticSubtraction::NEArithmeticSubtraction() : _impl(std::make_unique<Impl>())
 {
 }
-NEArithmeticSubtraction::NEArithmeticSubtraction(NEArithmeticSubtraction &&) = default;
+NEArithmeticSubtraction::NEArithmeticSubtraction(NEArithmeticSubtraction &&)            = default;
 NEArithmeticSubtraction &NEArithmeticSubtraction::operator=(NEArithmeticSubtraction &&) = default;
 NEArithmeticSubtraction::~NEArithmeticSubtraction()                                     = default;
 
-Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+Status NEArithmeticSubtraction::validate(const ITensorInfo         *input1,
+                                         const ITensorInfo         *input2,
+                                         const ITensorInfo         *output,
+                                         ConvertPolicy              policy,
+                                         const ActivationLayerInfo &act_info)
 {
     return cpu::CpuSub::validate(input1, input2, output, policy, act_info);
 }
 
-void NEArithmeticSubtraction::configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+void NEArithmeticSubtraction::configure(const ITensor             *input1,
+                                        const ITensor             *input2,
+                                        ITensor                   *output,
+                                        ConvertPolicy              policy,
+                                        const ActivationLayerInfo &act_info)
 {
     _impl->src_0 = input1;
     _impl->src_1 = input2;

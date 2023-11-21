@@ -24,15 +24,14 @@
 #ifndef ARM_COMPUTE_TENSORINFO_H
 #define ARM_COMPUTE_TENSORINFO_H
 
-#include "arm_compute/core/ITensorInfo.h"
-
-#include "ITensorInfo.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 
+#include "ITensorInfo.h"
 #include <cstddef>
 #include <memory>
 
@@ -112,7 +111,10 @@ public:
      * @param[in] data_type         Data type to use for each tensor element
      * @param[in] quantization_info The quantization settings for the tensor data.
      */
-    TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, QuantizationInfo quantization_info);
+    TensorInfo(const TensorShape &tensor_shape,
+               size_t             num_channels,
+               DataType           data_type,
+               QuantizationInfo   quantization_info);
 
     /** Initialize the tensor info with just a format.
      *
@@ -136,7 +138,11 @@ public:
      * @param[in] offset_first_element_in_bytes Offset in bytes from the beginning of memory allocation to access the first element.
      * @param[in] total_size_in_bytes           Size in bytes of the memory allocation (including the offset to the first element).
      */
-    void init(const TensorShape &tensor_shape, Format format, const Strides &strides_in_bytes, size_t offset_first_element_in_bytes, size_t total_size_in_bytes);
+    void init(const TensorShape &tensor_shape,
+              Format             format,
+              const Strides     &strides_in_bytes,
+              size_t             offset_first_element_in_bytes,
+              size_t             total_size_in_bytes);
 
     /** Initialize the tensor info with just a format.
      *
@@ -164,8 +170,12 @@ public:
      * @param[in] offset_first_element_in_bytes Offset in bytes from the beginning of memory allocation to access the first element.
      * @param[in] total_size_in_bytes           Size in bytes of the memory allocation (including the offset to the first element).
      */
-    void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, const Strides &strides_in_bytes, size_t offset_first_element_in_bytes,
-              size_t total_size_in_bytes);
+    void init(const TensorShape &tensor_shape,
+              size_t             num_channels,
+              DataType           data_type,
+              const Strides     &strides_in_bytes,
+              size_t             offset_first_element_in_bytes,
+              size_t             total_size_in_bytes);
     /** Initialize the metadata structure for the given tensor shape and single-plane format, (Padding is automatically calculated)
      *
      * @note The padding used by this method is really conservative so that the tensor can be used for most functions.
@@ -191,19 +201,19 @@ public:
 
     // Inherited methods overridden:
     std::unique_ptr<ITensorInfo> clone() const override;
-    ITensorInfo &set_data_type(DataType data_type) override;
-    ITensorInfo &set_num_channels(int num_channels) override;
-    ITensorInfo &set_format(Format format) override;
-    ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
-    ITensorInfo &set_tensor_dims_state(const TensorDimsState &state) override;
-    ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override;
-    ITensorInfo &set_data_layout(const DataLayout &data_layout) override;
-    ITensorInfo &reset_padding() override;
-    bool         auto_padding() override;
-    ITensorInfo &set_lock_paddings(bool flag) override;
-    bool lock_paddings() const override;
-    bool extend_padding(const PaddingSize &padding) override;
-    size_t dimension(size_t index) const override
+    ITensorInfo                 &set_data_type(DataType data_type) override;
+    ITensorInfo                 &set_num_channels(int num_channels) override;
+    ITensorInfo                 &set_format(Format format) override;
+    ITensorInfo                 &set_tensor_shape(const TensorShape &shape) override;
+    ITensorInfo                 &set_tensor_dims_state(const TensorDimsState &state) override;
+    ITensorInfo                 &set_quantization_info(const QuantizationInfo &quantization_info) override;
+    ITensorInfo                 &set_data_layout(const DataLayout &data_layout) override;
+    ITensorInfo                 &reset_padding() override;
+    bool                         auto_padding() override;
+    ITensorInfo                 &set_lock_paddings(bool flag) override;
+    bool                         lock_paddings() const override;
+    bool                         extend_padding(const PaddingSize &padding) override;
+    size_t                       dimension(size_t index) const override
     {
         return _tensor_shape[index];
     }
@@ -220,7 +230,7 @@ public:
         return _offset_first_element_in_bytes;
     }
     int32_t offset_element_in_bytes(const Coordinates &pos) const override;
-    size_t element_size() const override
+    size_t  element_size() const override
     {
         return data_size_from_type(_data_type) * _num_channels;
     }
@@ -266,7 +276,8 @@ public:
     }
     bool is_dynamic() const override
     {
-        return std::find(std::cbegin(_dims_state), std::cend(_dims_state), get_dynamic_state_value()) != std::cend(_dims_state);
+        return std::find(std::cbegin(_dims_state), std::cend(_dims_state), get_dynamic_state_value()) !=
+               std::cend(_dims_state);
     }
     bool are_values_constant() const override
     {
@@ -343,11 +354,15 @@ private:
  */
 inline bool operator==(const TensorInfo &lhs, const TensorInfo &rhs)
 {
-    return (lhs._total_size == rhs._total_size) && (lhs._offset_first_element_in_bytes == rhs._offset_first_element_in_bytes) && (lhs._strides_in_bytes == rhs._strides_in_bytes)
-           && (lhs._num_channels == rhs._num_channels) && (lhs._tensor_shape == rhs._tensor_shape) && (lhs._dims_state == rhs._dims_state) && (lhs._data_type == rhs._data_type) && (lhs._format == rhs._format)
-           && (lhs._is_resizable == rhs._is_resizable) && (lhs._valid_region == rhs._valid_region) && (lhs._padding == rhs._padding) && (lhs._quantization_info == rhs._quantization_info)
-           && (lhs._data_layout == rhs._data_layout) && (lhs._are_values_constant == rhs._are_values_constant)
-           && (lhs._id == rhs._id);
+    return (lhs._total_size == rhs._total_size) &&
+           (lhs._offset_first_element_in_bytes == rhs._offset_first_element_in_bytes) &&
+           (lhs._strides_in_bytes == rhs._strides_in_bytes) && (lhs._num_channels == rhs._num_channels) &&
+           (lhs._tensor_shape == rhs._tensor_shape) && (lhs._dims_state == rhs._dims_state) &&
+           (lhs._data_type == rhs._data_type) && (lhs._format == rhs._format) &&
+           (lhs._is_resizable == rhs._is_resizable) && (lhs._valid_region == rhs._valid_region) &&
+           (lhs._padding == rhs._padding) && (lhs._quantization_info == rhs._quantization_info) &&
+           (lhs._data_layout == rhs._data_layout) && (lhs._are_values_constant == rhs._are_values_constant) &&
+           (lhs._id == rhs._id);
 }
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_TENSORINFO_H */

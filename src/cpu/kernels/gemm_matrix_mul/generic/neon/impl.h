@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,22 +24,18 @@
 #ifndef SRC_CORE_KERNELS_GEMMMATRIXMUL_IMPL_H
 #define SRC_CORE_KERNELS_GEMMMATRIXMUL_IMPL_H
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/CPP/Validate.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-void vector_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha);
+void vector_matrix_multiply_f32(
+    const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha);
 
-void matrix_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha);
-
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
-void vector_matrix_multiply_f32(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha);
-
-void matrix_matrix_multiply_f32(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha);
+void matrix_matrix_multiply_f32(
+    const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha);
 
 } // namespace cpu
 } // namespace arm_compute

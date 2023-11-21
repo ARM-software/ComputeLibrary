@@ -31,6 +31,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -40,7 +41,10 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info)
+Status validate_arguments(const ITensorInfo              *boxes,
+                          const ITensorInfo              *pred_boxes,
+                          const ITensorInfo              *deltas,
+                          const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(boxes);
@@ -53,7 +57,7 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
     ARM_COMPUTE_RETURN_ERROR_ON(boxes->num_dimensions() > 2);
 
     const bool is_qasymm16 = boxes->data_type() == DataType::QASYMM16;
-    if(is_qasymm16)
+    if (is_qasymm16)
     {
         const UniformQuantizationInfo boxes_qinfo = boxes->quantization_info().uniform();
         ARM_COMPUTE_RETURN_ERROR_ON(boxes_qinfo.scale != 0.125f);
@@ -65,12 +69,12 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(boxes, deltas);
     }
 
-    if(pred_boxes->total_size() > 0)
+    if (pred_boxes->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(pred_boxes->tensor_shape(), deltas->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(pred_boxes, boxes);
         ARM_COMPUTE_RETURN_ERROR_ON(pred_boxes->num_dimensions() > 2);
-        if(is_qasymm16)
+        if (is_qasymm16)
         {
             const UniformQuantizationInfo pred_boxes_qinfo = pred_boxes->quantization_info().uniform();
             ARM_COMPUTE_RETURN_ERROR_ON(pred_boxes_qinfo.scale != 0.125f);
@@ -83,22 +87,31 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
 }
 } // namespace
 
-CLBoundingBoxTransformKernel::CLBoundingBoxTransformKernel()
-    : _boxes(nullptr), _pred_boxes(nullptr), _deltas(nullptr)
+CLBoundingBoxTransformKernel::CLBoundingBoxTransformKernel() : _boxes(nullptr), _pred_boxes(nullptr), _deltas(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLBoundingBoxTransformKernel::configure(const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
+void CLBoundingBoxTransformKernel::configure(const ICLTensor                *boxes,
+                                             ICLTensor                      *pred_boxes,
+                                             const ICLTensor                *deltas,
+                                             const BoundingBoxTransformInfo &info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), boxes, pred_boxes, deltas, info);
 }
 
-void CLBoundingBoxTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
+void CLBoundingBoxTransformKernel::configure(const CLCompileContext         &compile_context,
+                                             const ICLTensor                *boxes,
+                                             ICLTensor                      *pred_boxes,
+                                             const ICLTensor                *deltas,
+                                             const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
-    auto padding_info = get_padding_info({ boxes, pred_boxes, deltas });
-    auto_init_if_empty(*pred_boxes->info(), deltas->info()->clone()->set_data_type(boxes->info()->data_type()).set_quantization_info(boxes->info()->quantization_info()));
+    auto padding_info = get_padding_info({boxes, pred_boxes, deltas});
+    auto_init_if_empty(*pred_boxes->info(), deltas->info()
+                                                ->clone()
+                                                ->set_data_type(boxes->info()->data_type())
+                                                .set_quantization_info(boxes->info()->quantization_info()));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(boxes->info(), pred_boxes->info(), deltas->info(), info));
 
@@ -128,7 +141,7 @@ void CLBoundingBoxTransformKernel::configure(const CLCompileContext &compile_con
     build_opts.add_option_if(info.apply_scale(), "-DSCALE_AFTER=" + float_to_string_with_full_precision(info.scale()));
     build_opts.add_option_if(info.correct_transform_coords(), "-DOFFSET=1");
 
-    if(is_quantized)
+    if (is_quantized)
     {
         build_opts.add_option("-DDATA_TYPE_DELTAS=" + get_cl_type_from_data_type(deltas->info()->data_type()));
         const UniformQuantizationInfo boxes_qinfo      = boxes->info()->quantization_info().uniform();
@@ -148,12 +161,15 @@ void CLBoundingBoxTransformKernel::configure(const CLCompileContext &compile_con
 
     // Since the number of columns is a multiple of 4 by definition, we don't need to pad the tensor
     const unsigned int num_elems_processed_per_iteration = 4;
-    Window             win                               = calculate_max_window(*deltas->info(), Steps(num_elems_processed_per_iteration));
+    Window             win = calculate_max_window(*deltas->info(), Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win);
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLBoundingBoxTransformKernel::validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info)
+Status CLBoundingBoxTransformKernel::validate(const ITensorInfo              *boxes,
+                                              const ITensorInfo              *pred_boxes,
+                                              const ITensorInfo              *deltas,
+                                              const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(boxes, pred_boxes, deltas, info));
     return Status{};

@@ -26,9 +26,12 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp32_computeallanchors(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)
+void neon_fp32_computeallanchors(const ITensor     *anchors,
+                                 ITensor           *all_anchors,
+                                 ComputeAnchorsInfo anchors_info,
+                                 const Window      &window)
 {
     return compute_all_anchors<float>(anchors, all_anchors, anchors_info, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

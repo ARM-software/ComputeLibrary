@@ -29,14 +29,13 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLSpaceToDepthLayerKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLSpaceToDepthLayerKernel.h"
 
 namespace arm_compute
 {
-CLSpaceToDepthLayer::CLSpaceToDepthLayer()
-    : _space_to_depth_kernel(std::make_unique<CLSpaceToDepthLayerKernel>())
+CLSpaceToDepthLayer::CLSpaceToDepthLayer() : _space_to_depth_kernel(std::make_unique<CLSpaceToDepthLayerKernel>())
 {
 }
 
@@ -47,7 +46,10 @@ void CLSpaceToDepthLayer::configure(const ICLTensor *input, ICLTensor *output, i
     configure(CLKernelLibrary::get().get_compile_context(), input, output, block_shape);
 }
 
-void CLSpaceToDepthLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
+void CLSpaceToDepthLayer::configure(const CLCompileContext &compile_context,
+                                    const ICLTensor        *input,
+                                    ICLTensor              *output,
+                                    int32_t                 block_shape)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
     _space_to_depth_kernel->configure(compile_context, input, output, block_shape);

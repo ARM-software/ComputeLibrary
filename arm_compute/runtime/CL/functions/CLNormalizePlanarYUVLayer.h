@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H
-#define ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLNORMALIZEPLANARYUVLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLNORMALIZEPLANARYUVLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -44,6 +44,18 @@ class CLNormalizePlanarYUVLayer : public ICLSimpleFunction
 public:
     /** Set the input and output tensors.
      *
+     * Valid data layouts:
+     * - NHWC
+     * - NCHW
+     *
+     * Valid data type configurations:
+     * |src            |dst            |
+     * |:--------------|:--------------|
+     * |F32            |F32            |
+     * |F16            |F16            |
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
+     *
      * @param[in]  input  Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, channels].
      *                    Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output Destinationfeature tensor. Data type supported: same as @p input
@@ -62,7 +74,11 @@ public:
      * @param[in]  std             Standard deviation values tensor. 1 dimension with size equal to the number of input channels.
      *                    Data types supported: Same as @p input
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const ICLTensor        *mean,
+                   const ICLTensor        *std);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizePlanarYUVLayer
      *
      * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].
@@ -74,7 +90,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLNORMALIZEPLANARYUVLAYER_H

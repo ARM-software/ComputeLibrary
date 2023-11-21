@@ -67,5 +67,5 @@ inline auto floor_to_multiple(S value, T divisor) -> decltype((value / divisor) 
     return (value / divisor) * divisor;
 }
 
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_UTILS_MATH_H */

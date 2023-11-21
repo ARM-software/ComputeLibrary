@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTCONFIGVALHALL
-#define SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTCONFIGVALHALL
+#ifndef ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTCONFIGVALHALL_H
+#define ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTCONFIGVALHALL_H
 
 #include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelConfig.h"
 
@@ -44,10 +44,19 @@ public:
     MatMulKernelInfo configure(const ITensorInfo *lhs, const ITensorInfo *rhs, const MatMulInfo &info) override;
 
 private:
-    MatMulKernelInfo configure_G710_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
-    MatMulKernelInfo configure_G710_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
-    MatMulKernelInfo configure_G710_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
+    MatMulKernelInfo configure_G710_f32(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
+    MatMulKernelInfo configure_G710_f16(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
+    MatMulKernelInfo configure_G710_u8(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
+    MatMulKernelInfo configure_G715_f32(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
+    MatMulKernelInfo configure_G715_f16(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
+    MatMulKernelInfo configure_G715_u8(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info);
 };
-} // namespace opencl
+} // namespace cl_matmul
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTCONFIGVALHALL */
+#endif // ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTCONFIGVALHALL_H

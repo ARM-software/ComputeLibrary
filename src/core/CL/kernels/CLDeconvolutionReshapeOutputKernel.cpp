@@ -27,9 +27,10 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -38,7 +39,11 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,
+Status validate_arguments(const ITensorInfo   *input,
+                          const ITensorInfo   *bias,
+                          const ITensorInfo   *output,
+                          const ITensorInfo   *input_info,
+                          const ITensorInfo   *weights_info,
                           const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, input_info, weights_info);
@@ -53,19 +58,21 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     ARM_COMPUTE_RETURN_ERROR_ON(weights_info->dimension(idx_w) != deconv_info.stride().first);
     ARM_COMPUTE_RETURN_ERROR_ON(weights_info->dimension(idx_h) != deconv_info.stride().second);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S32);
-    if(!is_qasymm)
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::S32);
+    if (!is_qasymm)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, input_info, weights_info);
     }
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != weights_info->dimension(idx_w) * weights_info->dimension(idx_h) * weights_info->dimension(idx_b));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != weights_info->dimension(idx_w) * weights_info->dimension(idx_h) *
+                                                           weights_info->dimension(idx_b));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != input_info->dimension(idx_w));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != input_info->dimension(idx_h));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(3) != input_info->dimension(idx_b));
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
-        if(is_qasymm)
+        if (is_qasymm)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         }
@@ -76,19 +83,26 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
         ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != weights_info->dimension(idx_b));
     }
 
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         const PadStrideInfo stride_info(deconv_info.stride().first, deconv_info.stride().second);
-        auto                out_dims = deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h), weights_info->dimension(idx_w), weights_info->dimension(idx_h), stride_info);
+        auto out_dims = deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h),
+                                                        weights_info->dimension(idx_w), weights_info->dimension(idx_h),
+                                                        stride_info);
 
-        const TensorShape output_shape = misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input_info, *weights_info);
+        const TensorShape output_shape =
+            misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input_info, *weights_info);
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
     }
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input, ITensorInfo *output, const ITensorInfo *input_info, const ITensorInfo *weights_info, const PadStrideInfo &deconv_info)
+std::pair<Status, Window> validate_and_configure_window(const ITensorInfo   *input,
+                                                        ITensorInfo         *output,
+                                                        const ITensorInfo   *input_info,
+                                                        const ITensorInfo   *weights_info,
+                                                        const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -97,11 +111,17 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
     const size_t        idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const PadStrideInfo stride_info(deconv_info.stride().first, deconv_info.stride().second);
 
-    auto out_dims = deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h), weights_info->dimension(idx_w), weights_info->dimension(idx_h), stride_info);
+    auto out_dims =
+        deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h),
+                                        weights_info->dimension(idx_w), weights_info->dimension(idx_h), stride_info);
 
-    const TensorShape output_shape = misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input_info, *weights_info);
+    const TensorShape output_shape =
+        misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input_info, *weights_info);
 
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_data_layout(data_layout).set_quantization_info(input->quantization_info()));
+    auto_init_if_empty(*output, input->clone()
+                                    ->set_tensor_shape(output_shape)
+                                    .set_data_layout(data_layout)
+                                    .set_quantization_info(input->quantization_info()));
 
     Window win = calculate_max_window(*input);
 
@@ -109,29 +129,37 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
 }
 } // namespace
 
-CLDeconvolutionReshapeOutputKernel::CLDeconvolutionReshapeOutputKernel()
-    : _add_bias(false),
-      _bias(nullptr)
+CLDeconvolutionReshapeOutputKernel::CLDeconvolutionReshapeOutputKernel() : _add_bias(false), _bias(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLDeconvolutionReshapeOutputKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,
+void CLDeconvolutionReshapeOutputKernel::configure(const ICLTensor     *input,
+                                                   const ICLTensor     *bias,
+                                                   ICLTensor           *output,
+                                                   const ITensorInfo   *input_info,
+                                                   const ITensorInfo   *weights_info,
                                                    const PadStrideInfo &deconv_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, input_info, weights_info, deconv_info);
 }
 
-void CLDeconvolutionReshapeOutputKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info,
-                                                   const ITensorInfo   *weights_info,
-                                                   const PadStrideInfo &deconv_info)
+void CLDeconvolutionReshapeOutputKernel::configure(const CLCompileContext &compile_context,
+                                                   const ICLTensor        *input,
+                                                   const ICLTensor        *bias,
+                                                   ICLTensor              *output,
+                                                   const ITensorInfo      *input_info,
+                                                   const ITensorInfo      *weights_info,
+                                                   const PadStrideInfo    &deconv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, input_info, weights_info);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), input_info, weights_info, deconv_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr),
+                                                  output->info(), input_info, weights_info, deconv_info));
 
-    auto padding_info = get_padding_info({ input, bias, output });
+    auto padding_info = get_padding_info({input, bias, output});
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), input_info, weights_info, deconv_info);
+    auto win_config =
+        validate_and_configure_window(input->info(), output->info(), input_info, weights_info, deconv_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     const DataLayout data_layout = input_info->data_layout();
@@ -178,7 +206,11 @@ void CLDeconvolutionReshapeOutputKernel::configure(const CLCompileContext &compi
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLDeconvolutionReshapeOutputKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,
+Status CLDeconvolutionReshapeOutputKernel::validate(const ITensorInfo   *input,
+                                                    const ITensorInfo   *bias,
+                                                    const ITensorInfo   *output,
+                                                    const ITensorInfo   *input_info,
+                                                    const ITensorInfo   *weights_info,
                                                     const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, input_info, weights_info, deconv_info));
@@ -194,7 +226,7 @@ void CLDeconvolutionReshapeOutputKernel::run(const Window &window, cl::CommandQu
     unsigned int idx = 0;
     add_3D_tensor_argument(idx, _input, collapsed);
     add_3D_tensor_argument(idx, _output, collapsed);
-    if(_add_bias)
+    if (_add_bias)
     {
         add_1D_tensor_argument(idx, _bias, collapsed);
     }

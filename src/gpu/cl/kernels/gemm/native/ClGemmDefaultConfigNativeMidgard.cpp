@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/GPUTarget.h"
+
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 
 #include <utility>
@@ -38,18 +39,17 @@ namespace kernels
 {
 namespace gemm
 {
-ClGemmDefaultConfigNativeMidgard::ClGemmDefaultConfigNativeMidgard(GPUTarget gpu)
-    : IClGemmKernelConfig(gpu)
+ClGemmDefaultConfigNativeMidgard::ClGemmDefaultConfigNativeMidgard(GPUTarget gpu) : IClGemmKernelConfig(gpu)
 {
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeMidgard::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeMidgard::configure(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (ClGemmDefaultConfigNativeMidgard::*)(unsigned int m, unsigned int n, unsigned int k,
-                                             unsigned int b);
+    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (
+        ClGemmDefaultConfigNativeMidgard::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 
-    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_default(nullptr,
-                                                                        nullptr,
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_default(nullptr, nullptr,
                                                                         &ClGemmDefaultConfigNativeMidgard::default_q8);
 
     auto func = configs_default.get_function(data_type);
@@ -57,7 +57,8 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeMidgard
     return (this->*func)(m, n, k, b);
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+ClGemmDefaultConfigNativeMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);

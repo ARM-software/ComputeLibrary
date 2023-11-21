@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
+
 #include "src/cpu/operators/CpuElementwiseUnary.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -32,21 +34,20 @@ using OperatorType = cpu::CpuElementwiseUnary;
 template <ElementWiseUnary op>
 struct NEElementwiseUnaryLayer<op>::Impl
 {
-    const ITensor                *src{ nullptr };
-    ITensor                      *dst{ nullptr };
-    std::unique_ptr<OperatorType> cpu_op{ nullptr };
+    const ITensor                *src{nullptr};
+    ITensor                      *dst{nullptr};
+    std::unique_ptr<OperatorType> cpu_op{nullptr};
 };
 
 template <ElementWiseUnary op>
-NEElementwiseUnaryLayer<op>::NEElementwiseUnaryLayer()
-    : _impl(std::make_unique<Impl>())
+NEElementwiseUnaryLayer<op>::NEElementwiseUnaryLayer() : _impl(std::make_unique<Impl>())
 {
 }
 template <ElementWiseUnary op>
 NEElementwiseUnaryLayer<op>::~NEElementwiseUnaryLayer() = default;
 template <ElementWiseUnary op>
 NEElementwiseUnaryLayer<op>::NEElementwiseUnaryLayer(NEElementwiseUnaryLayer &&) = default;
-template <ElementWiseUnary   op>
+template <ElementWiseUnary op>
 NEElementwiseUnaryLayer<op> &NEElementwiseUnaryLayer<op>::operator=(NEElementwiseUnaryLayer &&) = default;
 
 template <ElementWiseUnary op>
@@ -65,7 +66,7 @@ Status NEElementwiseUnaryLayer<op>::validate(const ITensorInfo *input, const ITe
 }
 
 template <ElementWiseUnary op>
-void                       NEElementwiseUnaryLayer<op>::run()
+void NEElementwiseUnaryLayer<op>::run()
 {
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);

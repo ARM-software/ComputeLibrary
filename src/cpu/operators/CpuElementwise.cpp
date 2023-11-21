@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "src/cpu/operators/CpuElementwise.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuElementwiseKernel.h"
@@ -33,7 +34,7 @@ namespace cpu
 void CpuElementwiseBase::run(ITensorPack &tensors)
 {
     // If the kernel has been configured, use the window from the kernel.
-    if(_kernel->is_window_configured())
+    if (_kernel->is_window_configured())
     {
         ICpuOperator::run(tensors);
         return;
@@ -101,12 +102,16 @@ void CpuElementwiseComparisonStatic<COP>::configure(const ITensorInfo *src0, con
 }
 
 template <ComparisonOperation COP>
-Status CpuElementwiseComparisonStatic<COP>::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
+Status
+CpuElementwiseComparisonStatic<COP>::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
     return kernels::CpuComparisonKernel::validate(COP, src0, src1, dst);
 }
 
-void CpuElementwiseComparison::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ComparisonOperation op)
+void CpuElementwiseComparison::configure(const ITensorInfo  *src0,
+                                         const ITensorInfo  *src1,
+                                         ITensorInfo        *dst,
+                                         ComparisonOperation op)
 {
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuComparisonKernel>();
@@ -114,7 +119,10 @@ void CpuElementwiseComparison::configure(const ITensorInfo *src0, const ITensorI
     _kernel = std::move(k);
 }
 
-Status CpuElementwiseComparison::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ComparisonOperation op)
+Status CpuElementwiseComparison::validate(const ITensorInfo  *src0,
+                                          const ITensorInfo  *src1,
+                                          const ITensorInfo  *dst,
+                                          ComparisonOperation op)
 {
     return kernels::CpuComparisonKernel::validate(op, src0, src1, dst);
 }

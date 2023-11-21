@@ -31,8 +31,7 @@
 
 using namespace arm_compute;
 
-PoolManager::PoolManager()
-    : _free_pools(), _occupied_pools(), _sem(), _mtx()
+PoolManager::PoolManager() : _free_pools(), _occupied_pools(), _sem(), _mtx()
 {
 }
 
@@ -52,10 +51,8 @@ void PoolManager::unlock_pool(IMemoryPool *pool)
     ARM_COMPUTE_ERROR_ON_MSG(_free_pools.empty() && _occupied_pools.empty(), "Haven't setup any pools!");
 
     arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
-    auto it = std::find_if(std::begin(_occupied_pools), std::end(_occupied_pools), [pool](const std::unique_ptr<IMemoryPool> &pool_it)
-    {
-        return pool_it.get() == pool;
-    });
+    auto it = std::find_if(std::begin(_occupied_pools), std::end(_occupied_pools),
+                           [pool](const std::unique_ptr<IMemoryPool> &pool_it) { return pool_it.get() == pool; });
     ARM_COMPUTE_ERROR_ON_MSG(it == std::end(_occupied_pools), "Pool to be unlocked couldn't be found!");
     _free_pools.splice(std::begin(_free_pools), _occupied_pools, it);
     _sem->signal();
@@ -78,7 +75,7 @@ std::unique_ptr<IMemoryPool> PoolManager::release_pool()
     arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
     ARM_COMPUTE_ERROR_ON_MSG(!_occupied_pools.empty(), "All pools should be free in order to release one!");
 
-    if(!_free_pools.empty())
+    if (!_free_pools.empty())
     {
         std::unique_ptr<IMemoryPool> pool = std::move(_free_pools.front());
         ARM_COMPUTE_ERROR_ON(_free_pools.front() != nullptr);

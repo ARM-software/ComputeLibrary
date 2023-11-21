@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE
-#define ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Utils.h"
@@ -30,8 +30,10 @@
 
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
+#include "tests/framework/Asserts.h" // Required for ARM_COMPUTE_ASSERT
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/reference/GEMM.h"
 #include "tests/validation/reference/GEMMLowp.h"
 #include "tests/validation/reference/Permute.h"
@@ -54,6 +56,12 @@ public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type,
                bool enable_bias)
     {
+        // This hash is used by random generators. There may be hash collisions but
+        // this is intentional as it's a very easy way to make the the current
+        // random generation process almost different for many test configurations,
+        // which were using the same set of values before.
+        _hash = M0 + N0 + K0 + shape_a[0] + shape_a[1] + shape_b[0] + shape_b[1] + enable_bias + export_rhs_to_cl_image;
+
         // Flag to create a bias
         _enable_bias = enable_bias;
 
@@ -67,7 +75,7 @@ public:
             const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
             const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
 
-            std::mt19937                           generator(library->seed());
+            std::mt19937                           generator(library->seed() + _hash);
             std::uniform_real_distribution<float>  distribution_float(-5.0f, 3.0f);
             std::uniform_int_distribution<int32_t> distribution_t(t_min, t_max);
 
@@ -84,7 +92,12 @@ public:
             const int n = shape_b.x();
             const int k = shape_a.x();
 
-            dst_q_info = calculate_mat_mul_dst_q_info(lhs_q_info, rhs_q_info, m, n, k, data_type);
+            const float bias_fraction = enable_bias ? 0.5f : 0.f;
+
+            QuantizationHint q_hint = suggest_matmul_dst_q_info_and_bias(lhs_q_info, rhs_q_info, m, n, k, data_type, bias_fraction);
+            dst_q_info              = q_hint.q_info;
+            _min_bias               = q_hint.bias_min;
+            _max_bias               = q_hint.bias_max;
         }
 
         if(pretranspose_a)
@@ -142,12 +155,9 @@ protected:
     }
 
     template <typename U>
-    void fill_bias_s32(U &&tensor, int i, const UniformQuantizationInfo &q_info)
+    void fill_bias_s32(U &&tensor, int i, int32_t min, int32_t max)
     {
-        // For quantized cases, fill the S32 bias according to the following to avoid saturation of test cases.
-        // The following code limits size of bias values to within expected range of output quantization.
-        const unsigned int                     bound = std::abs(q_info.scale * 256); // 256 is size of 8 bit datatype
-        std::uniform_int_distribution<int32_t> distribution(-(bound / 10), (bound / 10));
+        std::uniform_int_distribution<int32_t> distribution(min, max);
         library->fill(tensor, distribution, i);
     }
 
@@ -192,8 +202,8 @@ protected:
         ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
-        fill(CLAccessor(a), 0);
-        fill(CLAccessor(b), 1);
+        fill(CLAccessor(a), _hash + 1);
+        fill(CLAccessor(b), _hash + 2);
 
         // Compute matMul kernel
         ITensorPack tensors_pack({ { ACL_SRC_0, &a },
@@ -207,11 +217,11 @@ protected:
             bias.allocator()->allocate();
             if(is_quantized)
             {
-                fill_bias_s32(CLAccessor(bias), 2, dst_q_info.uniform());
+                fill_bias_s32(CLAccessor(bias), _hash + 3, _min_bias, _max_bias);
             }
             else
             {
-                fill(CLAccessor(bias), 2);
+                fill(CLAccessor(bias), _hash + 3);
             }
             tensors_pack.add_tensor(ACL_SRC_2, &bias);
         }
@@ -236,8 +246,8 @@ protected:
         SimpleTensor<T> c{ output_shape_collapsed, data_type, 1, dst_q_info };
 
         // Fill reference
-        fill(a, 0);
-        fill(b, 1);
+        fill(a, _hash + 1);
+        fill(b, _hash + 2);
 
         /* Note: Assuming the usual batch matmul dimensions A = (B x M x K), B = (B x K x N), if pretranspose_A is set to true, then A is assumed to be (B x K x M),
            therefore, A must be pre-transposed before passing it to the fixture. And, we transpose A again in the fixture to make it (B x M x K)
@@ -288,7 +298,7 @@ protected:
         // of bias tensor from shape [dst.dimension(0)] to [dst.tensor_shape()] in target kernel
         if(_enable_bias)
         {
-            fill(c, 2);
+            fill(c, _hash + 3);
             const int n          = c.shape().x();
             const int other_dims = c.shape().collapsed_from(1)[1];
             for(int i = 1; i < other_dims; ++i) // For all data, copy first n elements into remaining batches
@@ -323,7 +333,7 @@ protected:
         if(_enable_bias)
         {
             // Identical to float implementation, fill and copy values of bias first dimension
-            fill_bias_s32(bias, 2, cq);
+            fill_bias_s32(bias, _hash + 3, _min_bias, _max_bias);
             const int          n          = bias.shape().x();
             const int          other_dims = bias.shape().collapsed_from(1)[1];
             const unsigned int dt_size    = sizeof(int32_t);
@@ -348,6 +358,9 @@ protected:
     bool            _enable_bias{ false };
     bool            _device_supports_export_to_cl_image{ true };
     bool            _device_supports_mmul{ true };
+    int32_t         _min_bias{ 0 };
+    int32_t         _max_bias{ 0 };
+    int32_t         _hash{ 0 };
 };
 
 template <typename T, typename KernelType, bool use_mmul = false>
@@ -374,4 +387,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE_H

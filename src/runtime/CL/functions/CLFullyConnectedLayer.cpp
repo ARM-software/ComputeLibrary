@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClFullyConnected.h"
 
@@ -35,21 +36,22 @@ using namespace arm_compute::experimental;
 struct CLFullyConnectedLayer::Impl
 {
     MemoryGroup      memory_group{};
-    IWeightsManager *weights_manager{ nullptr };
+    IWeightsManager *weights_manager{nullptr};
 
-    std::unique_ptr<opencl::ClFullyConnected> op{ nullptr };
+    std::unique_ptr<opencl::ClFullyConnected> op{nullptr};
 
-    const ITensor *original_weights{ nullptr };
+    const ITensor *original_weights{nullptr};
 
     ITensorPack                      run_pack{};
     WorkspaceData<CLTensor>          workspace{};
     experimental::MemoryRequirements aux_mem_req{};
 
-    bool is_prepared{ false };
-    bool dynamic_weights{ false };
+    bool is_prepared{false};
+    bool dynamic_weights{false};
 };
 
-CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager,
+                                             IWeightsManager                *weights_manager)
     : _impl(std::make_unique<Impl>())
 {
     _impl->memory_group    = MemoryGroup(std::move(memory_manager));
@@ -58,39 +60,45 @@ CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> mem
 
 CLFullyConnectedLayer::~CLFullyConnectedLayer() = default;
 
-void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+void CLFullyConnectedLayer::configure(const ICLTensor        *input,
+                                      const ICLTensor        *weights,
+                                      const ICLTensor        *biases,
+                                      ICLTensor              *output,
                                       FullyConnectedLayerInfo fc_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, fc_info);
 }
 
-void CLFullyConnectedLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+void CLFullyConnectedLayer::configure(const CLCompileContext &compile_context,
+                                      const ICLTensor        *input,
+                                      const ICLTensor        *weights,
+                                      const ICLTensor        *biases,
+                                      ICLTensor              *output,
                                       FullyConnectedLayerInfo fc_info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLFullyConnectedLayer::validate(input->info(),
-                                                               weights->info(),
-                                                               biases != nullptr ? biases->info() : nullptr,
-                                                               output->info(),
-                                                               fc_info));
+    ARM_COMPUTE_ERROR_THROW_ON(CLFullyConnectedLayer::validate(
+        input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), fc_info));
 
     _impl->op               = std::make_unique<opencl::ClFullyConnected>();
     _impl->original_weights = weights;
     _impl->is_prepared      = fc_info.retain_internal_weights;
 
-    _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), fc_info);
+    _impl->op->configure(compile_context, input->info(), weights->info(),
+                         (biases != nullptr) ? biases->info() : nullptr, output->info(), fc_info);
 
-    if(_impl->weights_manager != nullptr)
+    if (_impl->weights_manager != nullptr)
     {
         _impl->weights_manager->manage(_impl->original_weights);
     }
 
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->aux_mem_req = _impl->op->workspace();
-        _impl->run_pack    = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
-        _impl->workspace   = manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+        _impl->run_pack    = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
+        _impl->workspace =
+            manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
     }
     else
     {
@@ -98,14 +106,14 @@ void CLFullyConnectedLayer::configure(const CLCompileContext &compile_context, c
         _impl->run_pack.add_tensor(ACL_DST, output);
     }
 
-    _impl->dynamic_weights =
-        !weights->info()->are_values_constant() &&
-        fc_info.transpose_weights &&
-        !fc_info.are_weights_reshaped &&
-        !fc_info.retain_internal_weights;
+    _impl->dynamic_weights = !weights->info()->are_values_constant() && fc_info.transpose_weights &&
+                             !fc_info.are_weights_reshaped && !fc_info.retain_internal_weights;
 }
 
-Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+Status CLFullyConnectedLayer::validate(const ITensorInfo      *input,
+                                       const ITensorInfo      *weights,
+                                       const ITensorInfo      *biases,
+                                       const ITensorInfo      *output,
                                        FullyConnectedLayerInfo fc_info)
 {
     return opencl::ClFullyConnected::validate(input, weights, biases, output, fc_info);
@@ -113,7 +121,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 
 void CLFullyConnectedLayer::run()
 {
-    if(!_impl->dynamic_weights)
+    if (!_impl->dynamic_weights)
     {
         prepare();
     }
@@ -124,7 +132,7 @@ void CLFullyConnectedLayer::run()
 
 void CLFullyConnectedLayer::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->run_pack);
 
@@ -133,13 +141,13 @@ void CLFullyConnectedLayer::prepare()
         _impl->is_prepared = true;
 
         // Handle weights managed infrastructure
-        if(_impl->weights_manager != nullptr && _impl->weights_manager->are_weights_managed(_impl->original_weights))
+        if (_impl->weights_manager != nullptr && _impl->weights_manager->are_weights_managed(_impl->original_weights))
         {
             // Ensure that b gets marked as unused (memory released) only after the last function which uses b also finishes its prepare
             // This is for cases where multiple functions share the same b (weights)
             // Therefore when a function marks original b as unused, we pre-mark it in weights manager, and mark it back to used so that it doesn't get released before its last reference
             const ITensor *original_b = _impl->original_weights;
-            if(!original_b->is_used())
+            if (!original_b->is_used())
             {
                 _impl->weights_manager->pre_mark_as_unused(original_b);
             }

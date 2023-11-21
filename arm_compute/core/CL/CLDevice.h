@@ -44,8 +44,7 @@ class CLDevice : public IDevice
 {
 public:
     /** Default Constructor */
-    CLDevice()
-        : _device(cl::Device()), _options()
+    CLDevice() : _device(cl::Device()), _options()
     {
     }
 
@@ -53,8 +52,7 @@ public:
      *
      * @param[in] cl_device OpenCL device
      */
-    CLDevice(const cl::Device &cl_device)
-        : _device(), _options()
+    CLDevice(const cl::Device &cl_device) : _device(), _options()
     {
         _device = cl_device;
 
@@ -66,13 +64,13 @@ public:
         std::string extensions = _device.getInfo<CL_DEVICE_EXTENSIONS>();
 
         std::istringstream iss(extensions);
-        for(std::string s; iss >> s;)
+        for (std::string s; iss >> s;)
         {
             _options.extensions.insert(s);
         }
 
         // SW workaround for G76
-        if(_options.gpu_target == GPUTarget::G76)
+        if (_options.gpu_target == GPUTarget::G76)
         {
             _options.extensions.insert("cl_arm_integer_dot_product_int8");
         }
@@ -153,15 +151,15 @@ public:
      */
     std::tuple<bool, std::string> is_non_uniform_workgroup_supported() const
     {
-        if(version() == CLVersion::CL30 && get_cl_non_uniform_work_group_supported(_device))
+        if (version() == CLVersion::CL30 && get_cl_non_uniform_work_group_supported(_device))
         {
             return {true, " -cl-std=CL3.0 "};
         }
-        else if(version() == CLVersion::CL20)
+        else if (version() == CLVersion::CL20)
         {
             return {true, " -cl-std=CL2.0 "};
         }
-        else if(supported("cl_arm_non_uniform_work_group_size"))
+        else if (supported("cl_arm_non_uniform_work_group_size"))
         {
             return {true, " -cl-arm-non-uniform-work-group-size "};
         }

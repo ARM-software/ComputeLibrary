@@ -35,8 +35,7 @@
 
 namespace arm_compute
 {
-BlobLifetimeManager::BlobLifetimeManager()
-    : _blobs()
+BlobLifetimeManager::BlobLifetimeManager() : _blobs()
 {
 }
 
@@ -62,33 +61,32 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     ARM_COMPUTE_ERROR_ON(_active_group == nullptr);
 
     // Sort free blobs requirements in descending order.
-    _free_blobs.sort([](const Blob & ba, const Blob & bb)
-    {
-        return ba.max_size > bb.max_size;
-    });
+    _free_blobs.sort([](const Blob &ba, const Blob &bb) { return ba.max_size > bb.max_size; });
 
     // Create group sizes vector
     std::vector<BlobInfo> group_sizes;
-    std::transform(std::begin(_free_blobs), std::end(_free_blobs), std::back_inserter(group_sizes), [](const Blob & b)
-    {
-        return BlobInfo{ b.max_size, b.max_alignment, b.bound_elements.size() };
-    });
+    std::transform(std::begin(_free_blobs), std::end(_free_blobs), std::back_inserter(group_sizes),
+                   [](const Blob &b) {
+                       return BlobInfo{b.max_size, b.max_alignment, b.bound_elements.size()};
+                   });
 
     // Update blob sizes
     size_t max_size = std::max(_blobs.size(), group_sizes.size());
     _blobs.resize(max_size);
     group_sizes.resize(max_size);
-    std::transform(std::begin(_blobs), std::end(_blobs), std::begin(group_sizes), std::begin(_blobs), [](BlobInfo lhs, BlobInfo rhs)
-    {
-        return BlobInfo{ std::max(lhs.size, rhs.size), std::max(lhs.alignment, rhs.alignment), std::max(lhs.owners, rhs.owners) };
-    });
+    std::transform(std::begin(_blobs), std::end(_blobs), std::begin(group_sizes), std::begin(_blobs),
+                   [](BlobInfo lhs, BlobInfo rhs)
+                   {
+                       return BlobInfo{std::max(lhs.size, rhs.size), std::max(lhs.alignment, rhs.alignment),
+                                       std::max(lhs.owners, rhs.owners)};
+                   });
 
     // Calculate group mappings
     auto &group_mappings = _active_group->mappings();
     int   blob_idx       = 0;
-    for(auto &free_blob : _free_blobs)
+    for (auto &free_blob : _free_blobs)
     {
-        for(auto &bound_element_id : free_blob.bound_elements)
+        for (auto &bound_element_id : free_blob.bound_elements)
         {
             ARM_COMPUTE_ERROR_ON(_active_elements.find(bound_element_id) == std::end(_active_elements));
             Element &bound_element               = _active_elements[bound_element_id];

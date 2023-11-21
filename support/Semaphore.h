@@ -24,8 +24,9 @@
 #ifndef __ARM_COMPUTE_UTILS_SEMAMPHORE_H__
 #define __ARM_COMPUTE_UTILS_SEMAMPHORE_H__
 
-#include "Mutex.h"
 #include "support/Mutex.h"
+
+#include "Mutex.h"
 #include <condition_variable>
 
 namespace arm_compute
@@ -39,8 +40,7 @@ public:
      *
      * @param[in] value Semaphore initial value
      */
-    Semaphore(int value = 0)
-        : _value(value), _m(), _cv()
+    Semaphore(int value = 0) : _value(value), _m(), _cv()
     {
     }
     /** Signals a semaphore */
@@ -56,10 +56,7 @@ public:
     inline void wait()
     {
         std::unique_lock<std::mutex> lock(_m);
-        _cv.wait(lock, [this]()
-        {
-            return _value > 0;
-        });
+        _cv.wait(lock, [this]() { return _value > 0; });
         --_value;
     }
 
@@ -73,8 +70,7 @@ private:
 class Semaphore
 {
 public:
-    Semaphore(int value = 0)
-        : _value(value)
+    Semaphore(int value = 0) : _value(value)
     {
         (void)_value;
     }
@@ -93,5 +89,5 @@ private:
     int _value;
 };
 #endif /* NO_MULTI_THREADING */
-} // arm_compute
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_UTILS_SEMAMPHORE_H__ */

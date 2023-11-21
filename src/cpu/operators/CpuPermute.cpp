@@ -23,9 +23,8 @@
  */
 #include "src/cpu/operators/CpuPermute.h"
 
-#include "src/cpu/kernels/CpuPermuteKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuPermuteKernel.h"
 
 namespace arm_compute
 {
@@ -43,5 +42,5 @@ Status CpuPermute::validate(const ITensorInfo *src, const ITensorInfo *dst, cons
 {
     return kernels::CpuPermuteKernel::validate(src, dst, perm);
 }
-} // namesapce cpu
+} // namespace cpu
 } // namespace arm_compute

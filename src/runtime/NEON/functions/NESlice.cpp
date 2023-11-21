@@ -25,8 +25,9 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
@@ -34,7 +35,10 @@ namespace arm_compute
 {
 namespace experimental
 {
-void NESlice::configure(const ITensorInfo *input, ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+void NESlice::configure(const ITensorInfo *input,
+                        ITensorInfo       *output,
+                        const Coordinates &starts,
+                        const Coordinates &ends)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends);
@@ -47,15 +51,16 @@ void NESlice::configure(const ITensorInfo *input, ITensorInfo *output, const Coo
     _kernel = std::move(k);
 }
 
-Status NESlice::validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+Status NESlice::validate(const ITensorInfo *input,
+                         const ITensorInfo *output,
+                         const Coordinates &starts,
+                         const Coordinates &ends)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
 
     // Check start dimensions for being non-negative
-    ARM_COMPUTE_RETURN_ERROR_ON(std::any_of(starts.cbegin(), starts.cbegin() + starts.num_dimensions(), [](int i)
-    {
-        return i < 0;
-    }));
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        std::any_of(starts.cbegin(), starts.cbegin() + starts.num_dimensions(), [](int i) { return i < 0; }));
 
     // Get absolute end coordinates
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
@@ -66,20 +71,22 @@ Status NESlice::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
 struct NESlice::Impl
 {
-    const ITensor                         *src{ nullptr };
-    ITensor                               *dst{ nullptr };
-    std::unique_ptr<experimental::NESlice> op{ nullptr };
+    const ITensor                         *src{nullptr};
+    ITensor                               *dst{nullptr};
+    std::unique_ptr<experimental::NESlice> op{nullptr};
 };
 
-NESlice::NESlice()
-    : _impl(std::make_unique<Impl>())
+NESlice::NESlice() : _impl(std::make_unique<Impl>())
 {
 }
-NESlice::NESlice(NESlice &&) = default;
+NESlice::NESlice(NESlice &&)            = default;
 NESlice &NESlice::operator=(NESlice &&) = default;
 NESlice::~NESlice()                     = default;
 
-Status NESlice::validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+Status NESlice::validate(const ITensorInfo *input,
+                         const ITensorInfo *output,
+                         const Coordinates &starts,
+                         const Coordinates &ends)
 {
     return experimental::NESlice::validate(input, output, starts, ends);
 }

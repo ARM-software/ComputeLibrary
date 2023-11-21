@@ -50,8 +50,12 @@ namespace scale_helpers
  *
  * @return The bilinear interpolated pixel value
  */
-inline uint8_t delta_bilinear_c1_quantized(const uint8_t *pixel_ptr, size_t stride, float dx, float dy,
-                                           UniformQuantizationInfo iq_info, UniformQuantizationInfo oq_info)
+inline uint8_t delta_bilinear_c1_quantized(const uint8_t          *pixel_ptr,
+                                           size_t                  stride,
+                                           float                   dx,
+                                           float                   dy,
+                                           UniformQuantizationInfo iq_info,
+                                           UniformQuantizationInfo oq_info)
 {
     ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
 
@@ -85,8 +89,12 @@ inline uint8_t delta_bilinear_c1_quantized(const uint8_t *pixel_ptr, size_t stri
  *
  * @return The bilinear interpolated pixel value
  */
-inline int8_t delta_bilinear_c1_quantized(const int8_t *pixel_ptr, size_t stride, float dx, float dy,
-                                          UniformQuantizationInfo iq_info, UniformQuantizationInfo oq_info)
+inline int8_t delta_bilinear_c1_quantized(const int8_t           *pixel_ptr,
+                                          size_t                  stride,
+                                          float                   dx,
+                                          float                   dy,
+                                          UniformQuantizationInfo iq_info,
+                                          UniformQuantizationInfo oq_info)
 {
     ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
 
@@ -122,9 +130,8 @@ inline int8_t delta_bilinear_c1_quantized(const int8_t *pixel_ptr, size_t stride
  *
  * @return The pixel at (x, y) using area interpolation.
  */
-inline uint8_t
-pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr,
-                      float hr, int x, int y)
+inline uint8_t pixel_area_c1u8_clamp(
+    const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr, float hr, int x, int y)
 {
     ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
 
@@ -159,7 +166,7 @@ pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t widt
 
     // Sum pixels in area
     int sum = 0;
-    for(int j = yi + y_from, je = yi + y_to; j <= je; ++j)
+    for (int j = yi + y_from, je = yi + y_to; j <= je; ++j)
     {
         const uint8_t *ptr = first_pixel_ptr + j * stride + xi + x_from;
         sum                = std::accumulate(ptr, ptr + x_elements, sum);

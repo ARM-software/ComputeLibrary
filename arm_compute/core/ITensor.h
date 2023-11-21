@@ -94,9 +94,9 @@ public:
     void mark_as_used() const;
 
 private:
-    mutable bool _is_used = { true }; /**< Flag that marks if the tensor is used or not */
+    mutable bool _is_used = {true}; /**< Flag that marks if the tensor is used or not */
 };
 
 using IImage = ITensor;
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_ITENSOR_H */

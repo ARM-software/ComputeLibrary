@@ -25,6 +25,7 @@
 #define UTILS_CORE_ASSEMBLY_UTILS_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/kernels/assembly/common.hpp"
 #include "src/cpu/kernels/assembly/arm_gemm.hpp"
 
@@ -65,6 +66,6 @@ arm_gemm::WeightFormat map_to_arm_gemm_weight_format(const arm_compute::WeightFo
  * @return Compute Library WeightFormat
  */
 arm_compute::WeightFormat map_to_arm_compute_weight_format(const arm_gemm::WeightFormat &weight_format);
-} // namespace assembly
+} // namespace assembly_utils
 } // namespace arm_compute
 #endif /* UTILS_CORE_ASSEMBLY_UTILS_H */

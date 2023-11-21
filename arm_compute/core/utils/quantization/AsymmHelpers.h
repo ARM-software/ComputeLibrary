@@ -41,7 +41,10 @@ namespace quantization
  *
  * @return a status
  */
-Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift, bool ignore_epsilon = false);
+Status calculate_quantized_multiplier(float    multiplier,
+                                      int32_t *quant_multiplier,
+                                      int32_t *shift,
+                                      bool     ignore_epsilon = false);
 /** Calculate quantized representation of multiplier with value less than one.
  *
  * @param[in]  multiplier       Real multiplier.
@@ -51,7 +54,10 @@ Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplie
  *
  * @return a status
  */
-Status calculate_quantized_multiplier_less_than_one(float multiplier, int32_t *quant_multiplier, int32_t *right_shift, bool ignore_epsilon = false);
+Status calculate_quantized_multiplier_less_than_one(float    multiplier,
+                                                    int32_t *quant_multiplier,
+                                                    int32_t *right_shift,
+                                                    bool     ignore_epsilon = false);
 /** Calculate quantized representation of multiplier having value greater than one.
  *
  * @param[in]  multiplier           Real multiplier.
@@ -60,7 +66,8 @@ Status calculate_quantized_multiplier_less_than_one(float multiplier, int32_t *q
  *
  * @return a status
  */
-Status calculate_quantized_multiplier_greater_than_one(float multiplier, int32_t *quantized_multiplier, int32_t *left_shift);
+Status
+calculate_quantized_multiplier_greater_than_one(float multiplier, int32_t *quantized_multiplier, int32_t *left_shift);
 
 /** Calculate quantized representation of per-channel multipliers
  *
@@ -71,9 +78,9 @@ Status calculate_quantized_multiplier_greater_than_one(float multiplier, int32_t
  *
  * @return a status
  */
-Status calculate_quantized_multipliers(const QuantizationInfo &iq_info,
-                                       const QuantizationInfo &wq_info,
-                                       const QuantizationInfo &oq_info,
+Status calculate_quantized_multipliers(const QuantizationInfo  &iq_info,
+                                       const QuantizationInfo  &wq_info,
+                                       const QuantizationInfo  &oq_info,
                                        GEMMLowpOutputStageInfo &stage_info);
 
 /** Get minimum and maximum values for the input quantized data type
@@ -147,7 +154,10 @@ int32_t saturating_rounding_multiply_by_pow2(int32_t exponent, int32_t v);
  * @param[out] output_shift    Shift for inverse square root
  *
  */
-void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, int32_t &output_inv_sqrt, int32_t &output_shift);
+void get_invsqrt_quantized_multiplier_exp(int32_t  input,
+                                          int32_t  reverse_shift,
+                                          int32_t &output_inv_sqrt,
+                                          int32_t &output_shift);
 
 } // namespace quantization
 } // namespace arm_compute

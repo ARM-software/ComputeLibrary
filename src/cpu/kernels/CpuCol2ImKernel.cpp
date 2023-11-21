@@ -29,8 +29,9 @@
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -49,9 +50,10 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
     // Validate configured output
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), compute_col2im_shape(*src, convolved_dims, false));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(),
+                                                           compute_col2im_shape(*src, convolved_dims, false));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
     }
@@ -106,13 +108,16 @@ void CpuCol2ImKernel::run_op(ITensorPack &tensors, const Window &window, const T
     Iterator in(src, window);
     Iterator out(dst, window_out);
 
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const int hidx = id.y();
-        const int idx  = id.x() * output_stride_z + (hidx / _convolved_dims.width) * output_stride_y + (hidx % _convolved_dims.width) * output_stride_x;
-        std::memcpy(out.ptr() + idx, in.ptr(), el_size);
-    },
-    in, out);
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            const int hidx = id.y();
+            const int idx  = id.x() * output_stride_z + (hidx / _convolved_dims.width) * output_stride_y +
+                            (hidx % _convolved_dims.width) * output_stride_x;
+            std::memcpy(out.ptr() + idx, in.ptr(), el_size);
+        },
+        in, out);
 }
 
 const char *CpuCol2ImKernel::name() const

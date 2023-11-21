@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FULLY_CONNECTED_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_FULLY_CONNECTED_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_FULLYCONNECTEDLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_FULLYCONNECTEDLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -34,6 +34,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/FullyConnectedLayer.h"
 #include "tests/validation/reference/Utils.h"
@@ -54,6 +55,40 @@ public:
     using TBias  = typename std::conditional < (std::is_same<TDecay, uint8_t>::value || std::is_same<TDecay, int8_t>::value), int32_t, T >::type;
 
 public:
+    void setup_quantization(TensorShape weights_shape, TensorShape output_shape, QuantizationInfo &input_q_info, QuantizationInfo &weights_q_info, DataType data_type)
+    {
+        _hash = weights_shape[0] + weights_shape[1] + output_shape[0] + output_shape[1];
+        const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
+        const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
+
+        std::mt19937                           generator(library->seed() + _hash);
+        std::uniform_real_distribution<float>  distribution_float(-5.0f, 3.0f);
+        std::uniform_int_distribution<int32_t> distribution_t(t_min, t_max);
+
+        const float scale_lhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        const float scale_rhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        const int32_t offset_lhs = distribution_t(generator);
+        const int32_t offset_rhs = distribution_t(generator);
+
+        input_q_info = QuantizationInfo(scale_lhs, offset_lhs);
+        weights_q_info = QuantizationInfo(scale_rhs, offset_rhs);
+
+
+        const int k = weights_shape.x();
+        QuantizationHint q_hint = suggest_mac_dst_q_info_and_bias(input_q_info, weights_q_info, k, data_type, 0.1f /* bias_fraction */, 4 /* number of standard deviations*/);
+
+        _dst_q_info = q_hint.q_info;
+        _min_bias = q_hint.bias_min;
+        _max_bias = q_hint.bias_max;
+
+        // Do not change here as these limits are the natural limits of the associated data types and
+        // are embedded in the computation of the dst quantization info.
+        _min_u8 = 0;
+        _max_u8 = 255;
+        _min_s8 = -128;
+        _max_s8 = 127;
+    }
+
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo activation_info, bool mixed_layout = false)
     {
@@ -63,7 +98,20 @@ public:
         _mixed_layout      = mixed_layout;
         _data_type         = data_type;
         _bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
-        _quantization_info = quantization_info;
+
+        // Note : Quantization Info parameter from setup function is only used when quant datatype and activation function is not enabled or is identity.
+        if(is_data_type_quantized(data_type) && (!activation_info.enabled() || activation_info.activation() == ActivationFunction::IDENTITY))
+        {
+            // Initialises quantization info with appropriate scale and offset for given input shapes.
+            setup_quantization(weights_shape, output_shape,_input_q_info, _weight_q_info, data_type);
+        }
+        else
+        {
+            _input_q_info = quantization_info;
+            _weight_q_info = quantization_info;
+            _dst_q_info = quantization_info;
+        }
+
         _activation_info   = activation_info;
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, transpose_weights, reshape_weights);
@@ -91,17 +139,17 @@ protected:
     {
         if(_data_type == DataType::QASYMM8)
         {
-            std::uniform_int_distribution<uint32_t> distribution(0, 30);
+            std::uniform_int_distribution<uint32_t> distribution(_min_u8, _max_u8);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::QASYMM8_SIGNED)
         {
-            std::uniform_int_distribution<int32_t> distribution(-15, 15);
+            std::uniform_int_distribution<int32_t> distribution(_min_s8, _max_s8);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::S32)
         {
-            std::uniform_int_distribution<int32_t> distribution(-50, 50);
+            std::uniform_int_distribution<int32_t> distribution(_min_bias, _max_bias);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::F16)
@@ -143,10 +191,10 @@ protected:
         }
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _quantization_info);
-        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _quantization_info);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _quantization_info);
-        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _quantization_info);
+        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _input_q_info);
+        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _weight_q_info);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1);
+        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _dst_q_info);
 
         // Create Fully Connected layer info
         FullyConnectedLayerInfo fc_info;
@@ -177,8 +225,8 @@ protected:
         ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
-        fill(AccessorType(src), 0);
-        fill(AccessorType(bias), 2);
+        fill(AccessorType(src), 0 + _hash);
+        fill(AccessorType(bias), 2 + _hash);
 
         if(!reshape_weights || !transpose_weights)
         {
@@ -186,7 +234,7 @@ protected:
             RawTensor   tmp(tmp_shape, _data_type, 1);
 
             // Fill with original shape
-            fill(tmp, 1);
+            fill(tmp, 1 + _hash);
 
             // Transpose elementwise
             tmp = transpose(tmp);
@@ -203,7 +251,7 @@ protected:
         }
         else
         {
-            fill(AccessorType(weights), 1);
+            fill(AccessorType(weights), 1 + _hash);
         }
 
         if(_mixed_layout)
@@ -222,16 +270,16 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape)
     {
         // Create reference
-        SimpleTensor<T>     src{ input_shape, _data_type, 1, _quantization_info };
-        SimpleTensor<T>     weights{ weights_shape, _data_type, 1, _quantization_info };
-        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, _quantization_info };
+        SimpleTensor<T>     src{ input_shape, _data_type, 1, _input_q_info };
+        SimpleTensor<T>     weights{ weights_shape, _data_type, 1, _weight_q_info };
+        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, QuantizationInfo() };
 
         // Fill reference
-        fill(src, 0);
-        fill(weights, 1);
-        fill(bias, 2);
+        fill(src, 0 + _hash);
+        fill(weights, 1 + _hash);
+        fill(bias, 2 + _hash);
 
-        return reference::activation_layer(reference::fully_connected_layer<T>(src, weights, bias, output_shape, _quantization_info), _activation_info, _quantization_info);
+        return reference::activation_layer(reference::fully_connected_layer<T>(src, weights, bias, output_shape, _dst_q_info), _activation_info, _dst_q_info);
     }
 
     TensorType          _target{};
@@ -239,8 +287,22 @@ protected:
     DataType            _data_type{};
     DataType            _bias_data_type{};
     bool                _mixed_layout{ false };
-    QuantizationInfo    _quantization_info{};
+    QuantizationInfo    _input_q_info{};
+    QuantizationInfo    _weight_q_info{};
+    QuantizationInfo    _dst_q_info{};
     ActivationLayerInfo _activation_info{};
+
+    // Random initialization limits
+    // Default values are previously handcrafted limits
+    // that sould be used when we don't use dynamic quantization
+    int32_t _min_bias{-50};
+    int32_t _max_bias{50};
+
+    int32_t _min_u8{0};
+    int32_t _max_u8{30};
+    int32_t _min_s8{-15};
+    int32_t _max_s8{15};
+    int    _hash{0};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
@@ -288,12 +350,17 @@ private:
         }
         else if(_data_type == DataType::QASYMM8)
         {
-            std::uniform_int_distribution<uint32_t> distribution(0, 30);
+            std::uniform_int_distribution<uint32_t> distribution(_min_u8, _max_u8);
+            library->fill(tensor, distribution, i);
+        }
+        else if(_data_type == DataType::QASYMM8_SIGNED)
+        {
+            std::uniform_int_distribution<int32_t> distribution(_min_s8, _max_s8);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::S32)
         {
-            std::uniform_int_distribution<int32_t> distribution(-50, 50);
+            std::uniform_int_distribution<int32_t> distribution(_min_bias, _max_bias);
             library->fill(tensor, distribution, i);
         }
         else
@@ -351,6 +418,40 @@ private:
         validate(AccessorType(target), ref, tolerance_qasymm8_signed);
     }
 
+    void setup_quantization(TensorShape weights_shape, TensorShape output_shape, QuantizationInfo &input_q_info, QuantizationInfo &weights_q_info, DataType data_type)
+    {
+        _hash = weights_shape[0] + weights_shape[1] + output_shape[0] + output_shape[1];
+
+        const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
+        const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
+
+        std::mt19937                           generator(library->seed() + _hash);
+        std::uniform_real_distribution<float>  distribution_float(-5.0f, 3.0f);
+        std::uniform_int_distribution<int32_t> distribution_t(t_min, t_max);
+
+        const float scale_lhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        const float scale_rhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        const int32_t offset_lhs = distribution_t(generator);
+        const int32_t offset_rhs = distribution_t(generator);
+
+        input_q_info = QuantizationInfo(scale_lhs, offset_lhs);
+        weights_q_info = QuantizationInfo(scale_rhs, offset_rhs);
+
+        const int k = weights_shape.x();
+        QuantizationHint q_hint = suggest_mac_dst_q_info_and_bias(input_q_info, weights_q_info, k, data_type, 0.1f /* bias_fraction */, 4 /* number of standard deviations*/);
+
+        _dst_q_info = q_hint.q_info;
+        _min_bias = q_hint.bias_min;
+        _max_bias = q_hint.bias_max;
+
+        // Do not change here as these limits are the natural limits of the associated data types and
+        // are embedded in the computation of the dst quantization info.
+        _min_u8 = 0;
+        _max_u8 = 255;
+        _min_s8 = -128;
+        _max_s8 = 127;
+    }
+
 public:
     using TDecay = typename std::decay<T>::type;
     using TBias  = typename std::conditional < (std::is_same<TDecay, uint8_t>::value || std::is_same<TDecay, int8_t>::value), int32_t, T >::type;
@@ -363,15 +464,22 @@ public:
         const bool     is_quantized   = is_data_type_quantized(data_type);
         const DataType bias_data_type = (is_quantized) ? DataType::S32 : data_type;
 
-        const QuantizationInfo src_qinfo     = is_quantized ? QuantizationInfo(0.1f, 10) : QuantizationInfo();
-        const QuantizationInfo weights_qinfo = is_quantized ? QuantizationInfo(0.3f, 20) : QuantizationInfo();
-        const QuantizationInfo dst_qinfo     = is_quantized ? QuantizationInfo(0.2f, 5) : QuantizationInfo();
+        if (is_quantized && (!activation_info.enabled() || activation_info.activation() == ActivationFunction::IDENTITY))
+        {
+            setup_quantization(weights_shape, dst_shape, _src_q_info, _weights_q_info, data_type);
+        }
+        else
+        {
+            _src_q_info = QuantizationInfo(0.1f, 10);
+            _dst_q_info = QuantizationInfo(0.3f, 20);
+            _weights_q_info = QuantizationInfo(0.2f, 5);
+        }
 
         // Configure TensorInfo Objects
-        const TensorInfo src_info(src_shape, 1, data_type, src_qinfo);
-        const TensorInfo dst_info(dst_shape, 1, data_type, dst_qinfo);
+        const TensorInfo src_info(src_shape, 1, data_type, _src_q_info);
+        const TensorInfo dst_info(dst_shape, 1, data_type, _dst_q_info);
         TensorInfo       bias_info(bias_shape, 1, bias_data_type);
-        TensorInfo       wei_info(weights_shape, 1, data_type, weights_qinfo);
+        TensorInfo       wei_info(weights_shape, 1, data_type, _weights_q_info);
 
         if(!constant_weights && weights_reshaped)
         {
@@ -411,20 +519,20 @@ public:
         int           randomizer_offset = 0;
 
         // Create reference tensors
-        SimpleTensor<T>     src{ src_shape, data_type, 1, src_qinfo };
-        SimpleTensor<T>     weights{ weights_shape, data_type, 1, weights_qinfo };
+        SimpleTensor<T>     src{ src_shape, data_type, 1, _src_q_info };
+        SimpleTensor<T>     weights{ weights_shape, data_type, 1, _weights_q_info };
         SimpleTensor<TBias> bias{ bias_shape, bias_data_type };
 
         // Fill weights and/or bias if they remain constant
         if(constant_weights)
         {
-            fill(AccessorType(_weights), 1);
-            fill(weights, 1);
+            fill(AccessorType(_weights), 1 + _hash);
+            fill(weights, 1 + _hash);
         }
         if(constant_bias && !remove_bias)
         {
-            fill(AccessorType(_bias), 2);
-            fill(bias, 2);
+            fill(AccessorType(_bias), 2 + _hash);
+            fill(bias, 2 + _hash);
         }
         // To remove bias, fill with 0
         if(remove_bias && is_quantized)
@@ -445,16 +553,16 @@ public:
                 {
                     if(weights_reshaped)
                     {
-                        fill_transposed_weights(_weights, weights_shape, randomizer_offset + 1);
+                        fill_transposed_weights(_weights, weights_shape, randomizer_offset + 1 + _hash);
                     }
                     else
                     {
-                        fill(AccessorType(_weights), randomizer_offset + 1);
+                        fill(AccessorType(_weights), randomizer_offset + 1 +_hash);
                     }
                 }
                 if(!constant_bias && !remove_bias)
                 {
-                    fill(AccessorType(_bias), randomizer_offset + 2);
+                    fill(AccessorType(_bias), randomizer_offset + 2 + _hash);
                 }
 
                 fc.run();
@@ -466,14 +574,14 @@ public:
                 fill(src, randomizer_offset);
                 if(!constant_weights)
                 {
-                    fill(weights, randomizer_offset + 1);
+                    fill(weights, randomizer_offset + 1 + _hash);
                 }
                 if(!constant_bias && !remove_bias)
                 {
-                    fill(bias, randomizer_offset + 2);
+                    fill(bias, randomizer_offset + 2 + _hash);
                 }
 
-                auto dst = reference::activation_layer(reference::fully_connected_layer<T>(src, weights, bias, dst_shape, dst_qinfo), activation_info, dst_qinfo);
+                auto dst = reference::activation_layer(reference::fully_connected_layer<T>(src, weights, bias, dst_shape, _dst_q_info), activation_info, _dst_q_info);
 
                 // Validate
                 validate_with_tolerance(_dst, dst);
@@ -486,6 +594,22 @@ public:
 private:
     TensorType _src{}, _weights{}, _bias{}, _dst{};
     DataType   _data_type{ DataType::UNKNOWN };
+
+    QuantizationInfo _src_q_info{};
+    QuantizationInfo _weights_q_info{};
+    QuantizationInfo _dst_q_info{};
+
+    // Random initialization limits
+    // Default values are previously handcrafted limits
+    // that sould be used when we don't use dynamic quantization
+    int32_t _min_bias{-50};
+    int32_t _max_bias{50};
+
+    int32_t _min_u8{0};
+    int32_t _max_u8{30};
+    int32_t _min_s8{-15};
+    int32_t _max_s8{15};
+    int     _hash{0};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
@@ -520,10 +644,10 @@ public:
                DataType data_type, ActivationLayerInfo activation_info)
     {
         FullyConnectedWithDynamicTensorsFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, weights_shape, bias_shape,
-                                                                                                  dst_shape, data_type, activation_info, true, false, false, false /* weights_reshaped (not used) */);
+                                                                                                  dst_shape, data_type, activation_info, true, false, false, false);
     }
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FULLY_CONNECTED_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_FULLYCONNECTEDLAYERFIXTURE_H

@@ -24,8 +24,11 @@
 #ifndef CKW_SRC_CL_CLHELPERS_H
 #define CKW_SRC_CL_CLHELPERS_H
 
+#include "ckw/types/Operators.h"
+
 #include <cstdint>
 #include <string>
+#include <tuple>
 #include <vector>
 
 /** OpenCL specific helper functions */
@@ -51,6 +54,51 @@ bool cl_validate_vector_length(int32_t len);
  * @return the OpenCL datatype as a string
  */
 std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len);
+
+/** Return the assignment operator in OpenCL language.
+ *
+ * @param[in] op The assignment operator.
+ *
+ * @return The operator in OpenCL language as a string.
+ */
+std::string cl_get_assignment_op_as_string(AssignmentOp op);
+
+/** Return the information about the unary operation.
+ *
+ * The result contains:
+ *   - is_func: true if it's a function and false if it's an unary operator in OpenCL language.
+ *   - str: the function name or the operator in OpenCL language.
+ *
+ * @param[in] op The unary operator.
+ *
+ * @return The information about the unary operation.
+ */
+std::tuple<bool, std::string> cl_get_unary_op(UnaryOp op);
+
+/** Return the information about the binary operation.
+ *
+ * The result contains:
+ *   - is_func: true if it's a function and false if it's an binary operator in OpenCL language.
+ *   - str: the function name or the operator in OpenCL language.
+ *
+ * @param[in] op        The binary operator.
+ * @param[in] data_type The input data type.
+ *
+ * @return The information about the binary operation.
+ */
+std::tuple<bool, std::string> cl_get_binary_op(BinaryOp op, DataType data_type);
+
+/** Return the information about the ternary operation.
+ *
+ * The result contains:
+ *   - is_func: true if it's a function and false if it's a ternary operator in OpenCL language.
+ *   - str: the function name or the operator in OpenCL language.
+ *
+ * @param[in] op The ternary operator.
+ *
+ * @return The information about the ternary operation.
+ */
+std::tuple<bool, std::string> cl_get_ternary_op(TernaryOp op);
 
 /** Helper function to return the OpenCL vector size that accommodate the the desired width
  *

@@ -68,22 +68,29 @@ public:
      * @param[in]  deconv_info     Contains padding and stride information described in @ref PadStrideInfo.
      *
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, const ITensorInfo *weights,
-                   const ITensorInfo *biases, ITensorInfo *output, const PadStrideInfo &deconv_info);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *input,
+                   const ITensorInfo      *weights,
+                   const ITensorInfo      *biases,
+                   ITensorInfo            *output,
+                   const PadStrideInfo    &deconv_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClTransposedConvolution::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases,
-                           const ITensorInfo *output, const PadStrideInfo &deconv_info);
+    static Status validate(const ITensorInfo   *input,
+                           const ITensorInfo   *weights,
+                           const ITensorInfo   *biases,
+                           const ITensorInfo   *output,
+                           const PadStrideInfo &deconv_info);
 
     // Inherited method overridden
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<IClKernel> _transposed_conv_kernel{ nullptr };
+    std::unique_ptr<IClKernel> _transposed_conv_kernel{nullptr};
 };
 } // namespace opencl
 } // namespace arm_compute

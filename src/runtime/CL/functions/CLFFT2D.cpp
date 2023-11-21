@@ -26,16 +26,19 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/CL/kernels/CLFFTDigitReverseKernel.h"
 #include "src/core/CL/kernels/CLFFTRadixStageKernel.h"
 #include "src/core/CL/kernels/CLFFTScaleKernel.h"
 
-#include "src/common/utils/Log.h"
-
 namespace arm_compute
 {
 CLFFT2D::CLFFT2D(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _first_pass_func(memory_manager), _second_pass_func(memory_manager), _first_pass_tensor()
+    : _memory_group(memory_manager),
+      _first_pass_func(memory_manager),
+      _second_pass_func(memory_manager),
+      _first_pass_tensor()
 {
 }
 
@@ -46,7 +49,10 @@ void CLFFT2D::configure(const ICLTensor *input, ICLTensor *output, const FFT2DIn
     configure(CLKernelLibrary::get().get_compile_context(), input, output, config);
 }
 
-void CLFFT2D::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const FFT2DInfo &config)
+void CLFFT2D::configure(const CLCompileContext &compile_context,
+                        const ICLTensor        *input,
+                        ICLTensor              *output,
+                        const FFT2DInfo        &config)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLFFT2D::validate(input->info(), output->info(), config));
@@ -88,7 +94,7 @@ Status CLFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, co
     ARM_COMPUTE_RETURN_ON_ERROR(CLFFT1D::validate(&first_pass_tensor, output, second_pass_config));
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);

@@ -23,14 +23,14 @@
  */
 
 #include "ckw/KernelArgument.h"
+
 #include "ckw/Error.h"
 #include "ckw/TensorOperand.h"
 
 namespace ckw
 {
 
-KernelArgument::KernelArgument(TensorOperand &tensor)
-    : _type(Type::TensorStorage), _id(tensor.info().id())
+KernelArgument::KernelArgument(TensorOperand &tensor) : _type(Type::TensorStorage), _id(tensor.info().id())
 {
     _sub_id.tensor_storage_type = tensor.storage_type();
 }

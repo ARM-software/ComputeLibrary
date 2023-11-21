@@ -24,8 +24,9 @@
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/cpu/operators/CpuFlatten.h"
 
@@ -33,16 +34,15 @@ namespace arm_compute
 {
 struct NEFlattenLayer::Impl
 {
-    const ITensor                   *src{ nullptr };
-    ITensor                         *dst{ nullptr };
-    std::unique_ptr<cpu::CpuFlatten> op{ nullptr };
+    const ITensor                   *src{nullptr};
+    ITensor                         *dst{nullptr};
+    std::unique_ptr<cpu::CpuFlatten> op{nullptr};
 };
 
-NEFlattenLayer::NEFlattenLayer()
-    : _impl(std::make_unique<Impl>())
+NEFlattenLayer::NEFlattenLayer() : _impl(std::make_unique<Impl>())
 {
 }
-NEFlattenLayer::NEFlattenLayer(NEFlattenLayer &&) = default;
+NEFlattenLayer::NEFlattenLayer(NEFlattenLayer &&)            = default;
 NEFlattenLayer &NEFlattenLayer::operator=(NEFlattenLayer &&) = default;
 NEFlattenLayer::~NEFlattenLayer()                            = default;
 
@@ -51,7 +51,8 @@ void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     _impl->src = input;
     _impl->dst = output;
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input->info())));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(
+                                            misc::shape_calculator::compute_flatten_shape(input->info())));
 
     _impl->op = std::make_unique<cpu::CpuFlatten>();
     _impl->op->configure(_impl->src->info(), _impl->dst->info());
@@ -60,9 +61,10 @@ void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
 Status NEFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input));
+        const TensorInfo tensor_info_output =
+            input->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
     }
     return cpu::CpuFlatten::validate(input, output);

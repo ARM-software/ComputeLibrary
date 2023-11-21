@@ -89,7 +89,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info);
+    static Status validate(const ITensorInfo             *input,
+                           const ITensorInfo             *bias,
+                           const ITensorInfo             *output,
+                           const GEMMLowpOutputStageInfo &info);
 
     // Inherited methods overridden:
     void run() override;

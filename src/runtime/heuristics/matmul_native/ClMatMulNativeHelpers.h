@@ -52,7 +52,12 @@ using MatMulNativeConfigsMatrix = std::vector<std::vector<int32_t>>;
  */
 MatMulKernelInfo select_info(const MatMulKernelInfo &info0,
                              const MatMulKernelInfo &info1,
-                             unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type, bool rhs_lock_padding);
+                             unsigned int            m,
+                             unsigned int            n,
+                             unsigned int            k,
+                             unsigned int            b,
+                             DataType                data_type,
+                             bool                    rhs_lock_padding);
 
 /** Find the preferred configurations for the MatMul Native kernel using the MatMulNativeConfigsMatrix provided by the user
  *
@@ -66,7 +71,13 @@ MatMulKernelInfo select_info(const MatMulKernelInfo &info0,
  *
  * @return @ref MatMulKernelInfo
  */
-MatMulKernelInfo find_info(const MatMulNativeConfigsMatrix &configs, bool adj_lhs, bool adj_rhs, unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+MatMulKernelInfo find_info(const MatMulNativeConfigsMatrix &configs,
+                           bool                             adj_lhs,
+                           bool                             adj_rhs,
+                           unsigned int                     m,
+                           unsigned int                     n,
+                           unsigned int                     k,
+                           unsigned int                     b);
 } // namespace cl_matmul
 } // namespace arm_compute
 #endif /* SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEHELPERS */

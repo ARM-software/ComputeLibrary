@@ -23,14 +23,14 @@
 */
 
 #include "ckw/KernelWriter.h"
-#include "../include/ckw/KernelWriterHelper.h"
 #include "ckw/TensorTileSampler.h"
 
+#include "../include/ckw/KernelWriterHelper.h"
 #include <iostream>
 
 using namespace ckw;
 
-TensorTileSampler create_simple_sampler(KernelWriter& writer)
+TensorTileSampler create_simple_sampler(KernelWriter &writer)
 {
     TensorTileSampler sampler;
 
@@ -65,11 +65,11 @@ TensorTileSampler create_simple_sampler(KernelWriter& writer)
 
 int main()
 {
-    Kernel kernel("test", GpuTargetLanguage::OpenCL);
+    Kernel                           kernel("test", GpuTargetLanguage::OpenCL);
     KernelWriterHelper<KernelWriter> writer(kernel);
 
-    const TensorInfo src_info(DataType::Fp32, TensorShape({ 1, 1, 1, 1, 1 }), TensorDataLayout::Nhwc, 0);
-    const TensorInfo dst_info(DataType::Fp32, TensorShape({ 1, 1, 1, 1, 1 }), TensorDataLayout::Nhwc, 1);
+    const TensorInfo src_info(DataType::Fp32, TensorShape({1, 1, 1, 1, 1}), TensorDataLayout::Nhwc, 0);
+    const TensorInfo dst_info(DataType::Fp32, TensorShape({1, 1, 1, 1, 1}), TensorDataLayout::Nhwc, 1);
 
     auto &src_tensor = writer.declare_tensor_argument("src", src_info);
     auto &dst_tensor = writer.declare_tensor_argument("dst", dst_info);
@@ -77,27 +77,24 @@ int main()
     const auto sampler = create_simple_sampler(writer);
 
     auto &src = writer.declare_tile("src_tile", TileInfo(src_tensor.data_type(), sampler.height(), sampler.width()));
-    auto &other = writer.declare_tile("other_tile", TileInfo(src_tensor.data_type(), sampler.height(), sampler.width()));
+    auto &other =
+        writer.declare_tile("other_tile", TileInfo(src_tensor.data_type(), sampler.height(), sampler.width()));
     auto &dst = writer.declare_tile("dst_tile", TileInfo(src_tensor.data_type(), sampler.height(), sampler.width()));
 
     writer.op_load(src, src_tensor, sampler);
     writer.op_load(other, src_tensor, sampler);
     writer.op_load(dst, dst_tensor, sampler);
 
-    auto test = dst ^ src ^ other;
+    auto test       = dst ^ src ^ other;
     auto other_test = logical_and(dst, src, other);
     writer.op_assign(dst, logical_and(dst, src, other));
     writer.op_assign(dst, test);
     writer.op_assign(dst, other_test);
     writer.op_assign(dst, operator^(operator^(dst, src), other));
 
-    writer.op_if(exp(src) == dst, [&]{
-        writer.op_binary_expression(dst, src, BinaryOp::Add, src);
-    }).op_else_if(exp(src) > dst, [&]{
-        writer.op_binary_expression(dst, src, BinaryOp::Add, src);
-    }).op_else([&] {
-        writer.op_assign(dst, src);
-    });
+    writer.op_if(exp(src) == dst, [&] { writer.op_binary_expression(dst, src, BinaryOp::Add, src); })
+        .op_else_if(exp(src) > dst, [&] { writer.op_binary_expression(dst, src, BinaryOp::Add, src); })
+        .op_else([&] { writer.op_assign(dst, src); });
 
     writer.op_assign(dst, src + src * src);
     writer.op_assign(dst, src * max(src, dst) + src);
@@ -106,9 +103,7 @@ int main()
     writer.op_assign(dst, src ^ dst);
     writer.op_assign(dst, ~src);
 
-    writer.op_for_loop(dst < src, dst += src, [&]{
-        writer.op_assign(dst, src + dst);
-    });
+    writer.op_for_loop(dst < src, dst += src, [&] { writer.op_assign(dst, src + dst); });
 
     writer.op_assign(dst += src);
     writer.op_assign(dst += exp(src));

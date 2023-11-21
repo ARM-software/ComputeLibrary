@@ -43,13 +43,13 @@ bool validate_subtensor_shape(const TensorInfo &parent_info, const TensorInfo &c
     const size_t       parent_dims  = parent_info.num_dimensions();
     const size_t       child_dims   = child_info.num_dimensions();
 
-    if(child_dims <= parent_dims)
+    if (child_dims <= parent_dims)
     {
-        for(size_t num_dimensions = child_dims; num_dimensions > 0; --num_dimensions)
+        for (size_t num_dimensions = child_dims; num_dimensions > 0; --num_dimensions)
         {
             const size_t child_dim_size = coords[num_dimensions - 1] + child_shape[num_dimensions - 1];
 
-            if((coords[num_dimensions - 1] < 0) || (child_dim_size > parent_shape[num_dimensions - 1]))
+            if ((coords[num_dimensions - 1] < 0) || (child_dim_size > parent_shape[num_dimensions - 1]))
             {
                 is_valid = false;
                 break;
@@ -65,8 +65,7 @@ bool validate_subtensor_shape(const TensorInfo &parent_info, const TensorInfo &c
 }
 } // namespace
 
-TensorAllocator::TensorAllocator(IMemoryManageable *owner)
-    : _owner(owner), _associated_memory_group(nullptr), _memory()
+TensorAllocator::TensorAllocator(IMemoryManageable *owner) : _owner(owner), _associated_memory_group(nullptr), _memory()
 {
 }
 
@@ -88,7 +87,7 @@ TensorAllocator::TensorAllocator(TensorAllocator &&o) noexcept
 
 TensorAllocator &TensorAllocator::operator=(TensorAllocator &&o) noexcept
 {
-    if(&o != this)
+    if (&o != this)
     {
         _owner   = o._owner;
         o._owner = nullptr;
@@ -117,8 +116,10 @@ void TensorAllocator::init(const TensorAllocator &allocator, const Coordinates &
     _memory = Memory(allocator._memory.region());
 
     // Init tensor info with new dimensions
-    size_t total_size = parent_info.offset_element_in_bytes(coords) + sub_info.total_size() - sub_info.offset_first_element_in_bytes();
-    sub_info.init(sub_info.tensor_shape(), sub_info.format(), parent_info.strides_in_bytes(), parent_info.offset_element_in_bytes(coords), total_size);
+    size_t total_size =
+        parent_info.offset_element_in_bytes(coords) + sub_info.total_size() - sub_info.offset_first_element_in_bytes();
+    sub_info.init(sub_info.tensor_shape(), sub_info.format(), parent_info.strides_in_bytes(),
+                  parent_info.offset_element_in_bytes(coords), total_size);
 
     // Set TensorInfo
     init(sub_info);
@@ -133,7 +134,7 @@ void TensorAllocator::allocate()
 {
     // Align to 64-byte boundaries by default if alignment is not specified
     const size_t alignment_to_use = (alignment() != 0) ? alignment() : 64;
-    if(_associated_memory_group == nullptr)
+    if (_associated_memory_group == nullptr)
     {
         _memory.set_owned_region(std::make_unique<MemoryRegion>(info().total_size(), alignment_to_use));
     }

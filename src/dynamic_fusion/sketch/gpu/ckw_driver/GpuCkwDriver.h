@@ -24,11 +24,11 @@
 #ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWDRIVER
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWDRIVER
 
+#include "ckw/Kernel.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "src/dynamic_fusion/sketch/gpu/IGpuKernelWriter.h"
-
-#include "ckw/Kernel.h"
 
 #include <map>
 #include <string>

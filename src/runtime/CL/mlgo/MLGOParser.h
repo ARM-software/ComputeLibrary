@@ -98,15 +98,14 @@ struct CharPosition
         return ln == other.ln && col == other.col;
     }
 
-    size_t ln{ 0 };
-    size_t col{ 0 };
+    size_t ln{0};
+    size_t col{0};
 };
 
 /** Token */
 struct Token
 {
-    Token(TokenType t, std::string v, CharPosition pos)
-        : type{ t }, value{ v }, pos{ pos }
+    Token(TokenType t, std::string v, CharPosition pos) : type{t}, value{v}, pos{pos}
     {
     }
 

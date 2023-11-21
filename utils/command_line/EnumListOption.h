@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_UTILS_ENUMLISTOPTION
 
 #include "Option.h"
-
 #include <initializer_list>
 #include <set>
 #include <sstream>
@@ -57,7 +56,7 @@ public:
      */
     EnumListOption(std::string name, std::set<T> allowed_values, std::initializer_list<T> &&default_values);
 
-    bool parse(std::string value) override;
+    bool        parse(std::string value) override;
     std::string help() const override;
 
     /** Get the values of the option.
@@ -73,13 +72,17 @@ private:
 
 template <typename T>
 inline EnumListOption<T>::EnumListOption(std::string name, std::set<T> allowed_values)
-    : Option{ std::move(name) }, _allowed_values{ std::move(allowed_values) }
+    : Option{std::move(name)}, _allowed_values{std::move(allowed_values)}
 {
 }
 
 template <typename T>
-inline EnumListOption<T>::EnumListOption(std::string name, std::set<T> allowed_values, std::initializer_list<T> &&default_values)
-    : Option{ std::move(name), false, true }, _values{ std::forward<std::initializer_list<T>>(default_values) }, _allowed_values{ std::move(allowed_values) }
+inline EnumListOption<T>::EnumListOption(std::string                name,
+                                         std::set<T>                allowed_values,
+                                         std::initializer_list<T> &&default_values)
+    : Option{std::move(name), false, true},
+      _values{std::forward<std::initializer_list<T>>(default_values)},
+      _allowed_values{std::move(allowed_values)}
 {
 }
 
@@ -90,10 +93,10 @@ bool EnumListOption<T>::parse(std::string value)
     _values.clear();
     _is_set = true;
 
-    std::stringstream stream{ value };
+    std::stringstream stream{value};
     std::string       item;
 
-    while(!std::getline(stream, item, ',').fail())
+    while (!std::getline(stream, item, ',').fail())
     {
         try
         {
@@ -102,9 +105,9 @@ bool EnumListOption<T>::parse(std::string value)
 
             item_stream >> typed_value;
 
-            if(!item_stream.fail())
+            if (!item_stream.fail())
             {
-                if(_allowed_values.count(typed_value) == 0)
+                if (_allowed_values.count(typed_value) == 0)
                 {
                     _is_set = false;
                     continue;
@@ -115,7 +118,7 @@ bool EnumListOption<T>::parse(std::string value)
 
             _is_set = _is_set && !item_stream.fail();
         }
-        catch(const std::invalid_argument &)
+        catch (const std::invalid_argument &)
         {
             _is_set = false;
         }
@@ -130,7 +133,7 @@ std::string EnumListOption<T>::help() const
     std::stringstream msg;
     msg << "--" + name() + "={";
 
-    for(const auto &value : _allowed_values)
+    for (const auto &value : _allowed_values)
     {
         msg << value << ",";
     }

@@ -25,6 +25,7 @@
 #define SRC_CLGEMMKERNELSELECTION_H
 
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
+
 #include "src/runtime/CL/gemm/CLGEMMDefaultTypeBifrost.h"
 #include "src/runtime/CL/gemm/CLGEMMDefaultTypeMidgard.h"
 #include "src/runtime/CL/gemm/CLGEMMDefaultTypeValhall.h"
@@ -45,7 +46,7 @@ public:
      */
     static std::unique_ptr<ICLGEMMKernelSelection> create(GPUTarget gpu)
     {
-        switch(get_arch_from_target(gpu))
+        switch (get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
                 return std::make_unique<CLGEMMDefaultTypeMidgard>(gpu);

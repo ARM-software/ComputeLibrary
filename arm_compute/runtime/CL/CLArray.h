@@ -38,8 +38,7 @@ class CLArray : public ICLArray<T>
 {
 public:
     /** Default constructor: empty array */
-    CLArray()
-        : ICLArray<T>(0), _buffer()
+    CLArray() : ICLArray<T>(0), _buffer()
     {
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -55,7 +54,8 @@ public:
      * @param[in] max_num_values Maximum number of values the array will be able to stored
      */
     CLArray(size_t max_num_values)
-        : ICLArray<T>(max_num_values), _buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, max_num_values * sizeof(T))
+        : ICLArray<T>(max_num_values),
+          _buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, max_num_values * sizeof(T))
     {
     }
     /** Enqueue a map operation of the allocated buffer.
@@ -91,7 +91,8 @@ protected:
     uint8_t *do_map(cl::CommandQueue &q, bool blocking) override
     {
         ARM_COMPUTE_ERROR_ON(nullptr == _buffer.get());
-        return static_cast<uint8_t *>(q.enqueueMapBuffer(_buffer, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, this->max_num_values() * sizeof(T)));
+        return static_cast<uint8_t *>(q.enqueueMapBuffer(
+            _buffer, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, this->max_num_values() * sizeof(T)));
     }
     void do_unmap(cl::CommandQueue &q, uint8_t *mapping) override
     {
@@ -114,5 +115,5 @@ using CLInt16Array = CLArray<cl_short>;
 using CLInt32Array = CLArray<cl_int>;
 /** OpenCL Array of floats. */
 using CLFloatArray = CLArray<cl_float>;
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLARRAY_H */

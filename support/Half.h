@@ -24,12 +24,12 @@
 #ifndef __ARM_COMPUTE_HALF_H__
 #define __ARM_COMPUTE_HALF_H__
 
-#if(BARE_METAL)
+#if (BARE_METAL)
 #define HALF_ENABLE_CPP11_CMATH 0
 #endif /* BARE_METAL */
 
 // Set style to round to nearest
-#define HALF_ROUND_STYLE 1
+#define HALF_ROUND_STYLE        1
 #define HALF_ROUND_TIES_TO_EVEN 1
 
 #include "half/half.hpp"

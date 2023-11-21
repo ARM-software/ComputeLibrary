@@ -51,7 +51,7 @@ public:
     int axis() const;
 
 private:
-    float _beta{ 1.f };      /**< Scaling factor for the exponent */
+    float _beta{1.f};        /**< Scaling factor for the exponent */
     bool  _is_log_softmax{}; /**< True if operation is log-softmax */
     int   _axis{};           /**< Axis/Dimension to perform the operation */
 };

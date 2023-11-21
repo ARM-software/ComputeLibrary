@@ -23,14 +23,13 @@
  */
 #include "ClTemplatePool2d.h"
 
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
-#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
-
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
-#include "src/core/helpers/WindowHelpers.h"
 
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -50,11 +49,7 @@ ClTemplatePool2d::ClTemplatePool2d(ComponentId                      id,
                                    const ArgumentPack<ITensorInfo> &tensors,
                                    const Attributes                &attributes,
                                    const Settings                  &settings)
-    : IGpuTemplateComponentWriter{ id, tensors },
-      _src{},
-      _dst{},
-      _attributes{ attributes },
-      _settings{ settings }
+    : IGpuTemplateComponentWriter{id, tensors}, _src{}, _dst{}, _attributes{attributes}, _settings{settings}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
@@ -71,7 +66,7 @@ std::string ClTemplatePool2d::get_component_code(const ComponentGroup &comp_grou
     ARM_COMPUTE_UNUSED(comp_group);
 
     // Condition to use 2x2 optimized kernel
-    if(_attributes.pool_size() == Size2D(2, 2))
+    if (_attributes.pool_size() == Size2D(2, 2))
     {
         return get_2x2_kernel_code();
     }
@@ -83,11 +78,13 @@ std::string ClTemplatePool2d::get_component_code(const ComponentGroup &comp_grou
 
 std::string ClTemplatePool2d::get_MxN_kernel_code() const
 {
-    const auto pool_type          = _attributes.pool_type();
-    const bool fp_mixed_precision = (_src->data_type() == DataType::F16) && _settings.mixed_precision() && pool_type != PoolingType::MAX;
+    const auto pool_type = _attributes.pool_type();
+    const bool fp_mixed_precision =
+        (_src->data_type() == DataType::F16) && _settings.mixed_precision() && pool_type != PoolingType::MAX;
 
     // Define pool op macro.
-    std::string pool_op = (pool_type == PoolingType::AVG) ? R"_(#define POOL_OP(x,y) ((x) + (y)))_" : R"_(#define POOL_OP(x,y) (fmax((x), (y))) )_";
+    std::string pool_op = (pool_type == PoolingType::AVG) ? R"_(#define POOL_OP(x,y) ((x) + (y)))_"
+                                                          : R"_(#define POOL_OP(x,y) (fmax((x), (y))) )_";
 
     // Kernel start
     // Note: If C is not multiple of N0, we shift back of PARTIAL_N0 elements to compute the leftover elements for get_global_id(0) == 0
@@ -129,7 +126,7 @@ std::string ClTemplatePool2d::get_MxN_kernel_code() const
 )_";
 
     // Determine filter size depending on if padding is excluded or not
-    if(_attributes.exclude_padding())
+    if (_attributes.exclude_padding())
     {
         code += R"_(
     const int filter_size = (pool_y_e - pool_y_s) * (pool_x_e - pool_x_s);
@@ -144,7 +141,8 @@ std::string ClTemplatePool2d::get_MxN_kernel_code() const
 
     // Loop through pool size
     // if global pooling
-    if(_attributes.pool_size().x() == _src->dimension(width_idx) && _attributes.pool_size().y() == _src->dimension(height_idx))
+    if (_attributes.pool_size().x() == _src->dimension(width_idx) &&
+        _attributes.pool_size().y() == _src->dimension(height_idx))
     {
         // Begin loop
         code += R"_(
@@ -173,7 +171,7 @@ std::string ClTemplatePool2d::get_MxN_kernel_code() const
 
     // if condition inside loop - use 32bit acc if mixed_precision.
     // End loop through pooling section.
-    if(fp_mixed_precision)
+    if (fp_mixed_precision)
     {
         // In case of FP_MIXED_PRECISION, ACC_DATA_TYPE is != DATA_TYPE
         code += R"_(
@@ -194,7 +192,7 @@ std::string ClTemplatePool2d::get_MxN_kernel_code() const
     }
 
     // For Pool AVG ONLY, divide pool output by filter size
-    if(pool_type == PoolingType::AVG)
+    if (pool_type == PoolingType::AVG)
     {
         code += R"_(
     res0 /= (VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0))filter_size;
@@ -202,7 +200,7 @@ std::string ClTemplatePool2d::get_MxN_kernel_code() const
     }
 
     // If mixed precision convert datatype before storing. Then end kernel.
-    if(fp_mixed_precision)
+    if (fp_mixed_precision)
     {
         code += R"_(
     VEC_DATA_TYPE({{DATA_TYPE}}, N0)
@@ -228,9 +226,11 @@ std::string ClTemplatePool2d::get_MxN_kernel_code() const
 
 std::string ClTemplatePool2d::get_2x2_kernel_code() const
 {
-    const auto  pool_type          = _attributes.pool_type();
-    const bool  fp_mixed_precision = (_src->data_type() == DataType::F16) && _settings.mixed_precision() && pool_type != PoolingType::MAX;
-    std::string pool_op            = (pool_type == PoolingType::AVG) ? R"_(#define POOL_OP(x,y) ((x) + (y)))_" : R"_(#define POOL_OP(x,y) (fmax((x), (y))) )_";
+    const auto pool_type = _attributes.pool_type();
+    const bool fp_mixed_precision =
+        (_src->data_type() == DataType::F16) && _settings.mixed_precision() && pool_type != PoolingType::MAX;
+    std::string pool_op = (pool_type == PoolingType::AVG) ? R"_(#define POOL_OP(x,y) ((x) + (y)))_"
+                                                          : R"_(#define POOL_OP(x,y) (fmax((x), (y))) )_";
 
     std::string code = R"_(
 //------------------ START KERNEL {{meta_kernel_id}} ---------------------
@@ -274,7 +274,7 @@ std::string ClTemplatePool2d::get_2x2_kernel_code() const
     REPEAT_VAR_INIT_TO_CONST(4, VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0), data, 0);
 )_";
 
-    if(fp_mixed_precision)
+    if (fp_mixed_precision)
     {
         // In case of FP_MIXED_PRECISION, ACC_DATA_TYPE is != DATA_TYPE
         code += R"_(
@@ -294,7 +294,7 @@ std::string ClTemplatePool2d::get_2x2_kernel_code() const
 )_";
     }
 
-    if(pool_type != PoolingType::MAX)
+    if (pool_type != PoolingType::MAX)
     {
         // Make invalid the values loaded if the x or y coordinate was clamped (out-of-bound)
         code += R"_(
@@ -321,10 +321,10 @@ std::string ClTemplatePool2d::get_2x2_kernel_code() const
     res0 = POOL_OP(res0, data3);
 )_";
 
-    if(pool_type == PoolingType::AVG)
+    if (pool_type == PoolingType::AVG)
     {
         // If avg pooling divide result accordingly.
-        if(_attributes.exclude_padding())
+        if (_attributes.exclude_padding())
         {
             code += R"_(
     res0 /= (VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0))filter_size;
@@ -339,7 +339,7 @@ std::string ClTemplatePool2d::get_2x2_kernel_code() const
     }
 
     // Store result
-    if(fp_mixed_precision)
+    if (fp_mixed_precision)
     {
         code += R"_(
     VEC_DATA_TYPE({{DATA_TYPE}}, N0)
@@ -365,17 +365,11 @@ std::string ClTemplatePool2d::get_2x2_kernel_code() const
 
 void ClTemplatePool2d::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "src");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "src");
 
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "dst");
 }
 
 TagLUT ClTemplatePool2d::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
@@ -391,12 +385,15 @@ TagLUT ClTemplatePool2d::get_tag_lut(const GpuKernelVariableTable &vtable, const
     lut["meta_kernel_id"] = id();
 
     // Retrieve relevant data
-    const auto        padding                = _attributes.pad();
-    const auto        stride                 = _attributes.stride();
-    const auto        pool_size              = _attributes.pool_size();
-    const auto        data_type              = _src->data_type();
-    const auto        use_fp_mixed_precision = (_src->data_type() == DataType::F16) && _settings.mixed_precision() && _attributes.pool_type() != PoolingType::MAX;
-    const std::string max_initial_value      = _settings.use_inf_as_limit() ? "(-INFINITY)" : float_to_string_with_full_precision(std::numeric_limits<float>::lowest());
+    const auto padding                = _attributes.pad();
+    const auto stride                 = _attributes.stride();
+    const auto pool_size              = _attributes.pool_size();
+    const auto data_type              = _src->data_type();
+    const auto use_fp_mixed_precision = (_src->data_type() == DataType::F16) && _settings.mixed_precision() &&
+                                        _attributes.pool_type() != PoolingType::MAX;
+    const std::string max_initial_value =
+        _settings.use_inf_as_limit() ? "(-INFINITY)"
+                                     : float_to_string_with_full_precision(std::numeric_limits<float>::lowest());
 
     // pool specific
     lut["STRIDE_X"]    = stride.x();
@@ -407,7 +404,8 @@ TagLUT ClTemplatePool2d::get_tag_lut(const GpuKernelVariableTable &vtable, const
     lut["POOL_SIZE_Y"] = pool_size.height;
 
     // Datatypes and variables
-    lut["ACC_DATA_TYPE"] = get_cl_type_from_data_type((use_fp_mixed_precision) ? (DataType::F32) : (data_type)); // Type of accumulators to use.
+    lut["ACC_DATA_TYPE"] = get_cl_type_from_data_type(
+        (use_fp_mixed_precision) ? (DataType::F32) : (data_type)); // Type of accumulators to use.
     lut["DATA_TYPE"]     = get_cl_type_from_data_type(data_type);
     lut["SRC_WIDTH"]     = _src->dimension(width_idx);
     lut["SRC_HEIGHT"]    = _src->dimension(height_idx);
@@ -454,14 +452,14 @@ std::string ClTemplatePool2d::get_config_id() const
 
 std::set<std::string> ClTemplatePool2d::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h", "repeat.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h", "repeat.h"};
 }
 
 Window ClTemplatePool2d::get_window() const
 {
     ARM_COMPUTE_ERROR_ON_MSG(_dst->tensor_shape().total_size() == 0U, "Destination tensor is not initialized");
     const auto         output_shape = _dst->tensor_shape();
-    const unsigned int vec_size     = adjust_vec_size(((_dst->data_type() == DataType::F32) ? 2 : 4), _dst->dimension(0));
+    const unsigned int vec_size = adjust_vec_size(((_dst->data_type() == DataType::F32) ? 2 : 4), _dst->dimension(0));
 
     // Create and configure kernel window
     auto win = calculate_max_window(output_shape, Steps(vec_size));

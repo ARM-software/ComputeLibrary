@@ -30,15 +30,18 @@ namespace cpu
 {
 #define DECLARE_FUSE_BATCH_NORMALIZE_CONV_KERNEL(func_name)                                                            \
     void func_name(const ITensor *conv_weights, const ITensor *conv_bias, ITensor *fused_weights, ITensor *fused_bias, \
-                   const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma, float epsilon, const Window &window)
+                   const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma,     \
+                   float epsilon, const Window &window)
 
 #define DECLARE_FUSE_BATCH_NORMALIZE_DWC_NCHW_CONV_KERNEL(func_name)                                                 \
     void func_name(const ITensor *dwc_weights, const ITensor *dwc_bias, ITensor *fused_weights, ITensor *fused_bias, \
-                   const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma, float epsilon, const Window &window)
+                   const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma,   \
+                   float epsilon, const Window &window)
 
 #define DECLARE_FUSE_BATCH_NORMALIZE_DWC_NHWC_CONV_KERNEL(func_name)                                                 \
     void func_name(const ITensor *dwc_weights, const ITensor *dwc_bias, ITensor *fused_weights, ITensor *fused_bias, \
-                   const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma, float epsilon, const Window &window)
+                   const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma,   \
+                   float epsilon, const Window &window)
 
 DECLARE_FUSE_BATCH_NORMALIZE_CONV_KERNEL(fused_batch_normalization_conv_f16);
 DECLARE_FUSE_BATCH_NORMALIZE_CONV_KERNEL(fused_batch_normalization_conv_f32);
@@ -50,7 +53,7 @@ DECLARE_FUSE_BATCH_NORMALIZE_DWC_NCHW_CONV_KERNEL(fused_batch_normalization_dwc_
 #undef DECLARE_FUSE_BATCH_NORMALIZE_CONV_KERNEL
 #undef DECLARE_FUSE_BATCH_NORMALIZE_DWC_NCHW_CONV_KERNEL
 #undef DECLARE_FUSE_BATCH_NORMALIZE_DWC_NHWC_CONV_KERNEL
-}
-}
+} // namespace cpu
+} // namespace arm_compute
 
 #endif //

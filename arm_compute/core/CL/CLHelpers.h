@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -179,7 +179,9 @@ bool dot8_acc_supported(const cl::Device &device);
  *
  * @return True if the configuration is supported
  */
-bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Size2D &kernel_size, DataLayout data_layout);
+bool cl_winograd_convolution_layer_supported(const Size2D &output_tile,
+                                             const Size2D &kernel_size,
+                                             DataLayout    data_layout);
 
 /** Helper function to get the preferred native vector width size for built-in scalar types that can be put into vectors
  *
@@ -215,7 +217,9 @@ bool image2d_from_buffer_supported(const cl::Device &device);
  *
  * @return An opencl kernel
  */
-cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts = std::set<std::string>());
+cl::Kernel create_kernel(const CLCompileContext      &ctx,
+                         const std::string           &kernel_name,
+                         const std::set<std::string> &build_opts = std::set<std::string>());
 
 /** Creates a suitable LWS hint object for parallel implementations. Sets the number of WG based on the input size.
  *  If input width is smaller than 128 we can use fewer threads than 8.
@@ -267,5 +271,22 @@ void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<in
  * @return True if the extension is supported
  */
 bool arm_matrix_multiply_supported(const cl::Device &device);
+
+/** Check whether cl_khr_command_buffer extension is supported by the specified CL device.
+ *
+ * @param[in] device The CL device
+ *
+ * @return True if the extension is supported by the CL device.
+ */
+bool command_buffer_supported(const cl::Device &device);
+
+/** Check whether cl_khr_command_buffer_mutable_dispatch extension is supported by the specified CL device.
+ *
+ * @param[in] device The CL device
+ *
+ * @return True if the extension is supported by the CL device.
+ */
+bool command_buffer_mutable_dispatch_supported(const cl::Device &device);
+
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHELPERS_H */

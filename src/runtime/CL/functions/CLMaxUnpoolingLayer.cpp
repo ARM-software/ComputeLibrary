@@ -27,26 +27,32 @@
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 
 namespace arm_compute
 {
 CLMaxUnpoolingLayer::CLMaxUnpoolingLayer()
-    : _fill(),
-      _unpooling_layer_kernel(std::make_unique<CLMaxUnpoolingLayerKernel>())
+    : _fill(), _unpooling_layer_kernel(std::make_unique<CLMaxUnpoolingLayerKernel>())
 {
 }
 
 CLMaxUnpoolingLayer::~CLMaxUnpoolingLayer() = default;
 
-void CLMaxUnpoolingLayer::configure(ICLTensor *input, ICLTensor *indices, ICLTensor *output, const PoolingLayerInfo &pool_info)
+void CLMaxUnpoolingLayer::configure(ICLTensor              *input,
+                                    ICLTensor              *indices,
+                                    ICLTensor              *output,
+                                    const PoolingLayerInfo &pool_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, indices, output, pool_info);
 }
 
-void CLMaxUnpoolingLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *indices, ICLTensor *output, const PoolingLayerInfo &pool_info)
+void CLMaxUnpoolingLayer::configure(const CLCompileContext &compile_context,
+                                    ICLTensor              *input,
+                                    ICLTensor              *indices,
+                                    ICLTensor              *output,
+                                    const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, indices, output, pool_info);
     const PixelValue zero_value(0.f);
@@ -55,7 +61,10 @@ void CLMaxUnpoolingLayer::configure(const CLCompileContext &compile_context, ICL
     _unpooling_layer_kernel->configure(compile_context, input, indices, output, pool_info);
 }
 
-Status CLMaxUnpoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status CLMaxUnpoolingLayer::validate(const ITensorInfo      *input,
+                                     const ITensorInfo      *indices,
+                                     const ITensorInfo      *output,
+                                     const PoolingLayerInfo &pool_info)
 {
     return CLMaxUnpoolingLayerKernel::validate(input, indices, output, pool_info);
 }

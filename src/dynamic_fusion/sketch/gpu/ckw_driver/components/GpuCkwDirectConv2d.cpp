@@ -25,21 +25,20 @@
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwDirectConv2d.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
-
+#include "arm_compute/core/Validate.h"
 #include "ckw/TensorTileSampler.h"
 #include "ckw/TileInfo.h"
 
 #include "src/core/helpers/WindowHelpers.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 
 namespace arm_compute
 {
@@ -54,13 +53,7 @@ GpuCkwDirectConv2d::GpuCkwDirectConv2d(ComponentId                      id,
                                        const ArgumentPack<ITensorInfo> &tensors,
                                        const Attributes                &attributes,
                                        const Settings                  &settings)
-    : IGpuCkwComponentDriver{ id, tensors },
-      _src{},
-      _wei{},
-      _bia{},
-      _dst{},
-      _attributes{ attributes },
-      _settings{ settings }
+    : IGpuCkwComponentDriver{id, tensors}, _src{}, _wei{}, _bia{}, _dst{}, _attributes{attributes}, _settings{settings}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _wei = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
@@ -69,7 +62,9 @@ GpuCkwDirectConv2d::GpuCkwDirectConv2d(ComponentId                      id,
     ARM_COMPUTE_ERROR_ON_NULLPTR(_src, _wei, _dst); // Bias can be null
 }
 
-void GpuCkwDirectConv2d::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
+void GpuCkwDirectConv2d::write_component_code(const ComponentGroup    &comp_group,
+                                              GpuCkwVariableTable     &vtable,
+                                              GpuCkwScopedKernelWriter writer) const
 {
     const auto desc = _settings.direct_conv_descriptor();
     ARM_COMPUTE_ERROR_ON_MSG(desc.export_input_to_cl_image || desc.export_output_to_cl_image,
@@ -99,15 +94,18 @@ void GpuCkwDirectConv2d::write_component_code(const ComponentGroup &comp_group, 
     // extra loop to compute the left-over elements.
     const bool use_cl_image_for_weights = desc.export_weights_to_cl_image && (k0 == 4) && (K % 4 == 0);
 
-    GpuCkwComponentArgument *src = vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
+    GpuCkwComponentArgument *src =
+        vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
     GpuCkwComponentArgument *wei = vtable.declare_variable(
-        comp_group, writer, _wei, use_cl_image_for_weights ? TensorStorageType::ClImage2dReadOnly : TensorStorageType::ClBufferUint8Ptr, "wei");
-    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
+        comp_group, writer, _wei,
+        use_cl_image_for_weights ? TensorStorageType::ClImage2dReadOnly : TensorStorageType::ClBufferUint8Ptr, "wei");
+    GpuCkwComponentArgument *dst =
+        vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
     GpuCkwComponentArgument *bia = nullptr;
 
     const bool using_bias = _bia != nullptr;
 
-    if(using_bias)
+    if (using_bias)
     {
         bia = vtable.declare_variable(comp_group, writer, _bia, TensorStorageType::ClBufferUint8Ptr, "bia");
     }
@@ -154,7 +152,8 @@ void GpuCkwDirectConv2d::write_component_code(const ComponentGroup &comp_group, 
     src_sampler.address_mode_x(TensorSamplerAddressModeX::None);
     // We cannot have out-of-bounds reads when the kernel height is equal to 1. Otherwise, we need to ensure the
     // indirection buffer mi does not contain negative values representing out-of-bounds reads.
-    src_sampler.address_mode_y(kernel_height == 1 ? TensorSamplerAddressModeY::None : TensorSamplerAddressModeY::SkipMinEdgeOnly);
+    src_sampler.address_mode_y(kernel_height == 1 ? TensorSamplerAddressModeY::None
+                                                  : TensorSamplerAddressModeY::SkipMinEdgeOnly);
     src_sampler.address_mode_z(TensorSamplerAddressModeZ::None);
 
     TensorTileSampler wei_sampler;
@@ -178,7 +177,7 @@ void GpuCkwDirectConv2d::write_component_code(const ComponentGroup &comp_group, 
     dst_sampler.z(tile_0);
     dst_sampler.b(tile_bout);
 
-    if(!dst->has_tile())
+    if (!dst->has_tile())
     {
         auto &tile = writer->declare_tile("dst", TileInfo(to_ckw(_dst->data_type()), m0, n0));
         dst->init_virtual_tensor(tile, dst_sampler);
@@ -189,10 +188,10 @@ void GpuCkwDirectConv2d::write_component_code(const ComponentGroup &comp_group, 
 
     // We create a 2d container of size (M0, 1) to store the indices for iteration
     TileContainer it;
-    for(int m = 0; m < m0; ++m)
+    for (int m = 0; m < m0; ++m)
     {
-        std::vector<std::string> idx { std::to_string(m) };
-        it.push_back({ idx });
+        std::vector<std::string> idx{std::to_string(m)};
+        it.push_back({idx});
     }
     const auto &tile_it = writer->declare_tile("it", it, ckw::DataType::Int32);
 
@@ -289,9 +288,9 @@ void GpuCkwDirectConv2d::write_component_code(const ComponentGroup &comp_group, 
     // Bias addition
     // NOTE: This operation will be removed from this kernel as the interface is standardized. The intended way of
     // performing bias addition is to fuse this convolution kernel with a following elementwise addition kernel.
-    if(using_bias)
+    if (using_bias)
     {
-        if(!bia->has_tile())
+        if (!bia->has_tile())
         {
             // Reuse the destination sampler for the bias
             writer->op_load_once(bia, dst_sampler);

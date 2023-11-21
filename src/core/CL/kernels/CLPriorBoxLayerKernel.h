@@ -57,7 +57,13 @@ public:
      * @param[in]  max           Maximum prior box values
      * @param[in]  aspect_ratios Aspect ratio values
      */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min, cl::Buffer *max, cl::Buffer *aspect_ratios);
+    void configure(const ICLTensor         *input1,
+                   const ICLTensor         *input2,
+                   ICLTensor               *output,
+                   const PriorBoxLayerInfo &info,
+                   cl::Buffer              *min,
+                   cl::Buffer              *max,
+                   cl::Buffer              *aspect_ratios);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -69,8 +75,14 @@ public:
      * @param[in]  max             Maximum prior box values
      * @param[in]  aspect_ratios   Aspect ratio values
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min, cl::Buffer *max,
-                   cl::Buffer *aspect_ratios);
+    void configure(const CLCompileContext  &compile_context,
+                   const ICLTensor         *input1,
+                   const ICLTensor         *input2,
+                   ICLTensor               *output,
+                   const PriorBoxLayerInfo &info,
+                   cl::Buffer              *min,
+                   cl::Buffer              *max,
+                   cl::Buffer              *aspect_ratios);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPriorBoxLayerKernel
      *
      * @param[in] input1 First source tensor info. Data types supported: F32. Data layouts supported: NCHW/NHWC.
@@ -80,14 +92,17 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const PriorBoxLayerInfo &info);
+    static Status validate(const ITensorInfo       *input1,
+                           const ITensorInfo       *input2,
+                           const ITensorInfo       *output,
+                           const PriorBoxLayerInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const ICLTensor *_input1;
-    const ICLTensor *_input2;
+    const ICLTensor  *_input1;
+    const ICLTensor  *_input2;
     ICLTensor        *_output;
     PriorBoxLayerInfo _info;
     int               _num_priors;

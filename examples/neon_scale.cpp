@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
-#include "arm_compute/core/Types.h"
 #include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 
@@ -37,7 +37,7 @@ public:
     {
         PPMLoader ppm;
 
-        if(argc < 2)
+        if (argc < 2)
         {
             // Print help
             std::cout << "Usage: ./build/neon_scale[input_image.ppm]\n\n";
@@ -60,20 +60,16 @@ public:
         dst.allocator()->init(dst_tensor_info);
 
         // Configure Scale function object:
-        scale.configure(&src, &dst, ScaleKernelInfo{
-                    InterpolationPolicy::NEAREST_NEIGHBOR,
-                    BorderMode::UNDEFINED,
-                    PixelValue(),
-                    SamplingPolicy::CENTER,
-                    false
-        });
+        scale.configure(&src, &dst,
+                        ScaleKernelInfo{InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, PixelValue(),
+                                        SamplingPolicy::CENTER, false});
 
         // Allocate all the images
         src.allocator()->allocate();
         dst.allocator()->allocate();
 
         // Fill the input image with the content of the PPM image if a filename was provided:
-        if(ppm.is_open())
+        if (ppm.is_open())
         {
             ppm.fill_image(src);
             output_filename = std::string(argv[1]) + "_out.ppm";
@@ -89,7 +85,7 @@ public:
     void do_teardown() override
     {
         // Save the result to file:
-        if(!output_filename.empty())
+        if (!output_filename.empty())
         {
             save_to_ppm(dst, output_filename); // save_to_ppm maps and unmaps the image to store as PPM
         }

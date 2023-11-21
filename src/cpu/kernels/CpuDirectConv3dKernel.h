@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_DIRECT_CONV3D_KERNEL_H
 
 #include "arm_compute/runtime/FunctionDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -39,7 +40,8 @@ class CpuDirectConv3dKernel : public ICpuKernel<CpuDirectConv3dKernel>
 {
 private:
     /* Template function for convolution 3d NDHWC */
-    using DirectConv3dKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, const ITensor *, ITensor *, const Conv3dInfo &, const Window &)>::type;
+    using DirectConv3dKernelPtr = std::add_pointer<void(
+        const ITensor *, const ITensor *, const ITensor *, ITensor *, const Conv3dInfo &, const Window &)>::type;
 
 public:
     CpuDirectConv3dKernel() = default;
@@ -63,17 +65,25 @@ public:
      * @param[in]      conv_info Contains padding, stride, acitvation information.
      *
      */
-    void configure(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo &conv_info);
+    void configure(const ITensorInfo *src0,
+                   const ITensorInfo *src1,
+                   const ITensorInfo *src2,
+                   ITensorInfo       *dst,
+                   const Conv3dInfo  &conv_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuDirectConv3dKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv_info);
+    static Status validate(const ITensorInfo *src0,
+                           const ITensorInfo *src1,
+                           const ITensorInfo *src2,
+                           const ITensorInfo *dst,
+                           const Conv3dInfo  &conv_info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct DirectConv3dKernel
@@ -87,7 +97,7 @@ public:
 
 private:
     Conv3dInfo            _conv_info{};
-    DirectConv3dKernelPtr _run_method{ nullptr };
+    DirectConv3dKernelPtr _run_method{nullptr};
     std::string           _name{};
 };
 

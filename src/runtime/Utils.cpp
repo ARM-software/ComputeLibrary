@@ -41,20 +41,17 @@ static const std::string information =
 
 const std::string &string_from_scheduler_type(Scheduler::Type t)
 {
-    static std::map<Scheduler::Type, const std::string> scheduler_type_map =
-    {
-        { Scheduler::Type::ST, "Single Thread" },
-        { Scheduler::Type::CPP, "C++11 Threads" },
-        { Scheduler::Type::OMP, "OpenMP Threads" },
-        { Scheduler::Type::CUSTOM, "Custom" }
-    };
+    static std::map<Scheduler::Type, const std::string> scheduler_type_map = {{Scheduler::Type::ST, "Single Thread"},
+                                                                              {Scheduler::Type::CPP, "C++11 Threads"},
+                                                                              {Scheduler::Type::OMP, "OpenMP Threads"},
+                                                                              {Scheduler::Type::CUSTOM, "Custom"}};
 
     return scheduler_type_map[t];
 }
 
 void schedule_kernel_on_ctx(IRuntimeContext *ctx, ICPPKernel *kernel, const IScheduler::Hints &hints)
 {
-    if(ctx)
+    if (ctx)
     {
         ARM_COMPUTE_ERROR_ON(ctx->scheduler() == nullptr);
         ctx->scheduler()->schedule(kernel, hints);
@@ -68,7 +65,7 @@ void schedule_kernel_on_ctx(IRuntimeContext *ctx, ICPPKernel *kernel, const ISch
 unsigned int calculate_number_of_stages_only_x_axis(size_t input_x_dimension, unsigned int axis)
 {
     // We need only 1 stage for all axis except x-axis
-    if(axis != 0)
+    if (axis != 0)
     {
         return 1;
     }

@@ -42,7 +42,10 @@ namespace dynamic_fusion
  * @param[in]     tensor    Tensor from which to access the tensor component.
  * @param[in]     component Tensor component to select such as tensor dimensions, strides, etc.
  */
-void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, const ICLTensor *tensor, TensorComponentType component);
+void cl_add_tensor_component_argument(cl::Kernel         &kernel,
+                                      unsigned int       &idx,
+                                      const ICLTensor    *tensor,
+                                      TensorComponentType component);
 
 /** Add an OpenCL buffer object to the kernel's arguments at the specified index @p idx.
  *

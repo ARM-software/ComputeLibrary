@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_UTILS_TRAITS_TRAITS_H
 
 #include "arm_compute/core/Types.h"
+
 #include <type_traits>
 
 namespace arm_compute

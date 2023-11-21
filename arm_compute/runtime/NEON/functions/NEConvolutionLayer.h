@@ -21,14 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NECONVOLUTIONLAYER_H
-#define ARM_COMPUTE_NECONVOLUTIONLAYER_H
-
-#include "arm_compute/runtime/IFunction.h"
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
@@ -39,7 +38,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls one of the following functions:
- * -# @ref cpu::CpuGemm     (executed only in case GEMM is required for the operation)
+ * -# @ref cpu::CpuGemmConv2d     (executed only in case GEMM is required for the operation)
  * -# @ref cpu::CpuWinogradConv2d (executed only in case Winograd is required for the operation)
  * -# @ref cpu::CpuDirectConv2d   (executed only in case Direct Convolution is required for the operation)
  * -# @ref NEFFTConvolutionLayer      (executed only in case FFT is required for the operation)
@@ -119,8 +118,16 @@ public:
      *                              available which may introduce a drop of accuracy as well. Default is false
      * @param[in]  num_groups       (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false, unsigned int num_groups = 1);
+    void configure(ITensor                   *input,
+                   const ITensor             *weights,
+                   const ITensor             *biases,
+                   ITensor                   *output,
+                   const PadStrideInfo       &conv_info,
+                   const WeightsInfo         &weights_info     = WeightsInfo(),
+                   const Size2D              &dilation         = Size2D(1U, 1U),
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false,
+                   unsigned int               num_groups       = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayer
      *
      * @param[in] input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -143,9 +150,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false,
-                           unsigned int num_groups = 1);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const WeightsInfo         &weights_info     = WeightsInfo(),
+                           const Size2D              &dilation         = Size2D(1U, 1U),
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false,
+                           unsigned int               num_groups       = 1);
     /** Static function to check if given info will return the convolution called by @ref NEConvolutionLayer
      *
      * @param[in] input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -165,8 +179,14 @@ public:
      *
      * @return the Convolution Method Hint
      */
-    static ConvolutionMethod get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                    const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    static ConvolutionMethod get_convolution_method(const ITensorInfo         *input,
+                                                    const ITensorInfo         *weights,
+                                                    const ITensorInfo         *output,
+                                                    const PadStrideInfo       &conv_info,
+                                                    const WeightsInfo         &weights_info     = WeightsInfo(),
+                                                    const Size2D              &dilation         = Size2D(1U, 1U),
+                                                    const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                                                    bool                       enable_fast_math = false);
     // Inherited methods overridden:
     void run() override;
     void prepare() override;
@@ -176,4 +196,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NECONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H

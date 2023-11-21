@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/kernels/elementwise_binary/generic/neon/impl.h"
 
 namespace arm_compute
@@ -35,14 +36,38 @@ void neon_fp16_elementwise_binary(const ITensor *in1, const ITensor *in2, ITenso
     return elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>(in1, in2, out, window);
 }
 
-template void neon_fp16_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_elementwise_binary<ArithmeticOperation::SUB>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_elementwise_binary<ArithmeticOperation::DIV>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_elementwise_binary<ArithmeticOperation::MIN>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_elementwise_binary<ArithmeticOperation::MAX>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_elementwise_binary<ArithmeticOperation::SQUARED_DIFF>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_elementwise_binary<ArithmeticOperation::POWER>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_elementwise_binary<ArithmeticOperation::PRELU>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1,
+                                                                     const ITensor *in2,
+                                                                     ITensor       *out,
+                                                                     const Window  &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::SUB>(const ITensor *in1,
+                                                                     const ITensor *in2,
+                                                                     ITensor       *out,
+                                                                     const Window  &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::DIV>(const ITensor *in1,
+                                                                     const ITensor *in2,
+                                                                     ITensor       *out,
+                                                                     const Window  &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::MIN>(const ITensor *in1,
+                                                                     const ITensor *in2,
+                                                                     ITensor       *out,
+                                                                     const Window  &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::MAX>(const ITensor *in1,
+                                                                     const ITensor *in2,
+                                                                     ITensor       *out,
+                                                                     const Window  &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::SQUARED_DIFF>(const ITensor *in1,
+                                                                              const ITensor *in2,
+                                                                              ITensor       *out,
+                                                                              const Window  &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::POWER>(const ITensor *in1,
+                                                                       const ITensor *in2,
+                                                                       ITensor       *out,
+                                                                       const Window  &window);
+template void neon_fp16_elementwise_binary<ArithmeticOperation::PRELU>(const ITensor *in1,
+                                                                       const ITensor *in2,
+                                                                       ITensor       *out,
+                                                                       const Window  &window);
 
 template <ComparisonOperation op>
 void neon_fp16_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
@@ -50,12 +75,30 @@ void neon_fp16_comparison_elementwise_binary(const ITensor *in1, const ITensor *
     return elementwise_comp_op_16<op, float16_t, float16x8_t>(in1, in2, out, window);
 }
 
-template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::NotEqual>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::Greater>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::GreaterEqual>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::Less>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::LessEqual>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-}
+template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1,
+                                                                                  const ITensor *in2,
+                                                                                  ITensor       *out,
+                                                                                  const Window  &window);
+template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::NotEqual>(const ITensor *in1,
+                                                                                     const ITensor *in2,
+                                                                                     ITensor       *out,
+                                                                                     const Window  &window);
+template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::Greater>(const ITensor *in1,
+                                                                                    const ITensor *in2,
+                                                                                    ITensor       *out,
+                                                                                    const Window  &window);
+template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::GreaterEqual>(const ITensor *in1,
+                                                                                         const ITensor *in2,
+                                                                                         ITensor       *out,
+                                                                                         const Window  &window);
+template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::Less>(const ITensor *in1,
+                                                                                 const ITensor *in2,
+                                                                                 ITensor       *out,
+                                                                                 const Window  &window);
+template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::LessEqual>(const ITensor *in1,
+                                                                                      const ITensor *in2,
+                                                                                      ITensor       *out,
+                                                                                      const Window  &window);
+} // namespace cpu
 } // namespace arm_compute
 #endif //defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)

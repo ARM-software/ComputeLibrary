@@ -28,26 +28,24 @@
 
 namespace arm_compute
 {
-const std::string &string_from_activation_func(const ActivationFunction& act)
+const std::string &string_from_activation_func(const ActivationFunction &act)
 {
-    static std::map<ActivationFunction, const std::string> act_map =
-    {
-        { ActivationFunction::ABS, "ABS" },
-        { ActivationFunction::LINEAR, "LINEAR" },
-        { ActivationFunction::LOGISTIC, "LOGISTIC" },
-        { ActivationFunction::RELU, "RELU" },
-        { ActivationFunction::BOUNDED_RELU, "BRELU" },
-        { ActivationFunction::LU_BOUNDED_RELU, "LU_BRELU" },
-        { ActivationFunction::LEAKY_RELU, "LRELU" },
-        { ActivationFunction::SOFT_RELU, "SRELU" },
-        { ActivationFunction::ELU, "ELU" },
-        { ActivationFunction::SQRT, "SQRT" },
-        { ActivationFunction::SQUARE, "SQUARE" },
-        { ActivationFunction::TANH, "TANH" },
-        { ActivationFunction::IDENTITY, "IDENTITY" },
-        { ActivationFunction::HARD_SWISH, "HARD_SWISH" },
-        { ActivationFunction::SWISH, "SWISH" },
-        { ActivationFunction::GELU, "GELU" }
+    static std::map<ActivationFunction, const std::string> act_map = {{ActivationFunction::ABS, "ABS"},
+                                                                      {ActivationFunction::LINEAR, "LINEAR"},
+                                                                      {ActivationFunction::LOGISTIC, "LOGISTIC"},
+                                                                      {ActivationFunction::RELU, "RELU"},
+                                                                      {ActivationFunction::BOUNDED_RELU, "BRELU"},
+                                                                      {ActivationFunction::LU_BOUNDED_RELU, "LU_BRELU"},
+                                                                      {ActivationFunction::LEAKY_RELU, "LRELU"},
+                                                                      {ActivationFunction::SOFT_RELU, "SRELU"},
+                                                                      {ActivationFunction::ELU, "ELU"},
+                                                                      {ActivationFunction::SQRT, "SQRT"},
+                                                                      {ActivationFunction::SQUARE, "SQUARE"},
+                                                                      {ActivationFunction::TANH, "TANH"},
+                                                                      {ActivationFunction::IDENTITY, "IDENTITY"},
+                                                                      {ActivationFunction::HARD_SWISH, "HARD_SWISH"},
+                                                                      {ActivationFunction::SWISH, "SWISH"},
+                                                                      {ActivationFunction::GELU, "GELU"}
 
     };
 

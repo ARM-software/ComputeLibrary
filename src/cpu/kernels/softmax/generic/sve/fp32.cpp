@@ -23,14 +23,20 @@
  */
 
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/kernels/softmax/generic/sve/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void sve_fp32_softmax(const ITensor *in, const ITensor *max, void *const tmp,
-                      ITensor *out, const float beta, bool is_log, const Window &window)
+void sve_fp32_softmax(const ITensor *in,
+                      const ITensor *max,
+                      void *const    tmp,
+                      ITensor       *out,
+                      const float    beta,
+                      bool           is_log,
+                      const Window  &window)
 {
     return sve_softmax_logits_1d_float<float>(in, max, tmp, out, beta, is_log, window);
 }
@@ -39,5 +45,5 @@ void sve_fp32_logits(const ITensor *in, ITensor *out, const Window &window)
 {
     return sve_logits_1d_max<float>(in, out, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

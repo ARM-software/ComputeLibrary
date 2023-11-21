@@ -25,8 +25,9 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEFill.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
 #include "src/cpu/operators/CpuMaxUnpooling.h"
@@ -35,20 +36,22 @@ namespace arm_compute
 {
 struct NEMaxUnpoolingLayer::Impl
 {
-    const ITensor                        *src{ nullptr };
-    const ITensor                        *indices{ nullptr };
-    ITensor                              *dst{ nullptr };
-    std::unique_ptr<cpu::CpuMaxUnpooling> op{ nullptr };
+    const ITensor                        *src{nullptr};
+    const ITensor                        *indices{nullptr};
+    ITensor                              *dst{nullptr};
+    std::unique_ptr<cpu::CpuMaxUnpooling> op{nullptr};
 };
 
 NEMaxUnpoolingLayer::~NEMaxUnpoolingLayer() = default;
 
-NEMaxUnpoolingLayer::NEMaxUnpoolingLayer()
-    : _fill_func(), _impl()
+NEMaxUnpoolingLayer::NEMaxUnpoolingLayer() : _fill_func(), _impl()
 {
 }
 
-void NEMaxUnpoolingLayer::configure(ITensor *input, ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info)
+void NEMaxUnpoolingLayer::configure(ITensor                *input,
+                                    ITensor                *indices,
+                                    ITensor                *output,
+                                    const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, indices, output, pool_info);
 
@@ -64,7 +67,10 @@ void NEMaxUnpoolingLayer::configure(ITensor *input, ITensor *indices, ITensor *o
     _impl->op->configure(input->info(), indices->info(), output->info(), pool_info);
 }
 
-Status NEMaxUnpoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status NEMaxUnpoolingLayer::validate(const ITensorInfo      *input,
+                                     const ITensorInfo      *indices,
+                                     const ITensorInfo      *output,
+                                     const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, indices);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuMaxUnpooling::validate(input, indices, output, pool_info));

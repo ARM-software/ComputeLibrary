@@ -25,9 +25,9 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLSelectKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLSelectKernel.h"
 
 using namespace arm_compute;
 
@@ -38,7 +38,11 @@ void CLSelect::configure(const ICLTensor *c, const ICLTensor *x, const ICLTensor
     configure(CLKernelLibrary::get().get_compile_context(), c, x, y, output);
 }
 
-void CLSelect::configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
+void CLSelect::configure(const CLCompileContext &compile_context,
+                         const ICLTensor        *c,
+                         const ICLTensor        *x,
+                         const ICLTensor        *y,
+                         ICLTensor              *output)
 {
     ARM_COMPUTE_LOG_PARAMS(c, x, y, output);
     auto k = std::make_unique<CLSelectKernel>();

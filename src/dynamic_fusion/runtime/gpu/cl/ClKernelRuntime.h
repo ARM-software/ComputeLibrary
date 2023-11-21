@@ -68,7 +68,11 @@ private:
      * @param[in]     arg_slice Window the kernel will be run on
      * @param[out]    cl_images Extra cl images created from the tensor (will need to be retained until the kernel is enqueued)
      */
-    inline void add_tensor_argument(unsigned int &idx, const GpuKernelArgumentInfo &arg, const ICLTensor *tensor, const Window &arg_slice, std::vector<cl::Image2D> &cl_images);
+    inline void add_tensor_argument(unsigned int                &idx,
+                                    const GpuKernelArgumentInfo &arg,
+                                    const ICLTensor             *tensor,
+                                    const Window                &arg_slice,
+                                    std::vector<cl::Image2D>    &cl_images);
 #else  // ACL_INTERNAL_TEST_CKW_IN_DF
     /** Set a kernel argument as part of a tensor
      *
@@ -77,7 +81,10 @@ private:
      * @param[in]     tensor    Tensor of which the kernel argument @p arg is a part of
      * @param[out]    cl_images Extra cl images created from the tensor (will need to be retained until the kernel is enqueued)
      */
-    inline void add_kernel_argument(unsigned int &idx, const GpuKernelArgumentBinding &arg, const ICLTensor *tensor, std::vector<cl::Image2D> &cl_images);
+    inline void add_kernel_argument(unsigned int                   &idx,
+                                    const GpuKernelArgumentBinding &arg,
+                                    const ICLTensor                *tensor,
+                                    std::vector<cl::Image2D>       &cl_images);
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 private:

@@ -33,8 +33,20 @@ namespace cpu
 namespace
 {
 
-inline float calculate_avg_scale_pool3d(bool exclude_padding, const Coordinates &id, const int pool_size_x, const int pool_size_y, const int pool_size_z, const int upper_bound_w,
-                                 const int upper_bound_h, const int upper_bound_d, const int pad_x, const int pad_y, const int pad_z, const int stride_x, const int stride_y, const int stride_z)
+inline float calculate_avg_scale_pool3d(bool               exclude_padding,
+                                        const Coordinates &id,
+                                        const int          pool_size_x,
+                                        const int          pool_size_y,
+                                        const int          pool_size_z,
+                                        const int          upper_bound_w,
+                                        const int          upper_bound_h,
+                                        const int          upper_bound_d,
+                                        const int          pad_x,
+                                        const int          pad_y,
+                                        const int          pad_z,
+                                        const int          stride_x,
+                                        const int          stride_y,
+                                        const int          stride_z)
 {
     // Based on NDHWC
     int start_x = id[1] * stride_x - pad_x;
@@ -44,7 +56,7 @@ inline float calculate_avg_scale_pool3d(bool exclude_padding, const Coordinates 
     const int end_x = std::min(start_x + pool_size_x, upper_bound_w);
     const int end_y = std::min(start_y + pool_size_y, upper_bound_h);
     const int end_z = std::min(start_z + pool_size_z, upper_bound_d);
-    if(exclude_padding)
+    if (exclude_padding)
     {
         start_x = std::max(0, start_x);
         start_y = std::max(0, start_y);
@@ -53,8 +65,17 @@ inline float calculate_avg_scale_pool3d(bool exclude_padding, const Coordinates 
     return 1.f / ((end_y - start_y) * (end_x - start_x) * (end_z - start_z));
 }
 
-inline float calculate_avg_scale_pool2d(bool exclude_padding, DataLayout data_layout, const Coordinates &id, const int pool_size_x, const int pool_size_y, const int upper_bound_w, const int upper_bound_h,
-                                 const int pad_x, const int pad_y, const int stride_x, const int stride_y)
+inline float calculate_avg_scale_pool2d(bool               exclude_padding,
+                                        DataLayout         data_layout,
+                                        const Coordinates &id,
+                                        const int          pool_size_x,
+                                        const int          pool_size_y,
+                                        const int          upper_bound_w,
+                                        const int          upper_bound_h,
+                                        const int          pad_x,
+                                        const int          pad_y,
+                                        const int          stride_x,
+                                        const int          stride_y)
 {
     const unsigned int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const unsigned int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -64,7 +85,7 @@ inline float calculate_avg_scale_pool2d(bool exclude_padding, DataLayout data_la
 
     const int end_x = std::min(start_x + pool_size_x, upper_bound_w);
     const int end_y = std::min(start_y + pool_size_y, upper_bound_h);
-    if(exclude_padding)
+    if (exclude_padding)
     {
         start_x = std::max(0, start_x);
         start_y = std::max(0, start_y);
@@ -117,17 +138,26 @@ inline float32x4_t vcvtq_f32_q32(int32x4_t values)
 }
 
 template <typename Tout>
-inline Tout vrequantize_pooling_with_scale(const float32x4x4_t &acc, const float quant_rescale, const float scale_pooling, const int32_t new_offset);
+inline Tout vrequantize_pooling_with_scale(const float32x4x4_t &acc,
+                                           const float          quant_rescale,
+                                           const float          scale_pooling,
+                                           const int32_t        new_offset);
 
 template <>
-inline uint8x16_t vrequantize_pooling_with_scale(const float32x4x4_t &acc, const float quant_rescale, const float scale_pooling, const int32_t new_offset)
+inline uint8x16_t vrequantize_pooling_with_scale(const float32x4x4_t &acc,
+                                                 const float          quant_rescale,
+                                                 const float          scale_pooling,
+                                                 const int32_t        new_offset)
 {
     const float new_scale = quant_rescale / scale_pooling;
     return vquantize(acc, UniformQuantizationInfo(new_scale, new_offset));
 }
 
 template <>
-inline int8x16_t vrequantize_pooling_with_scale(const float32x4x4_t &acc, const float quant_rescale, const float scale_pooling, const int32_t new_offset)
+inline int8x16_t vrequantize_pooling_with_scale(const float32x4x4_t &acc,
+                                                const float          quant_rescale,
+                                                const float          scale_pooling,
+                                                const int32_t        new_offset)
 {
     const float new_scale = quant_rescale / scale_pooling;
     return vquantize_signed(acc, UniformQuantizationInfo(new_scale, new_offset));
@@ -139,30 +169,24 @@ inline Tout vrequantize_pooling(Tin vec1, Tin vec2, const UniformQuantizationInf
 template <>
 inline uint8x16_t vrequantize_pooling(uint8x8_t vec1, uint8x8_t vec2, const UniformQuantizationInfo &requant_qinfo)
 {
-    const float32x4x4_t acc =
-    {
-        {
-            vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec1))))),
-            vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec1))))),
-            vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec2))))),
-            vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec2))))),
-        }
-    };
+    const float32x4x4_t acc = {{
+        vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec1))))),
+        vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec1))))),
+        vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec2))))),
+        vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec2))))),
+    }};
     return vquantize(acc, requant_qinfo);
 }
 
 template <>
 inline int8x16_t vrequantize_pooling(int8x8_t vec1, int8x8_t vec2, const UniformQuantizationInfo &requant_qinfo)
 {
-    const float32x4x4_t acc =
-    {
-        {
-            vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec1))))),
-            vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec1))))),
-            vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec2))))),
-            vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec2))))),
-        }
-    };
+    const float32x4x4_t acc = {{
+        vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec1))))),
+        vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec1))))),
+        vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec2))))),
+        vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec2))))),
+    }};
     return vquantize_signed(acc, requant_qinfo);
 }
 
@@ -172,26 +196,20 @@ inline T vrequantize_pooling(T &vec, const UniformQuantizationInfo &requant_qinf
 template <>
 inline uint8x8_t vrequantize_pooling(uint8x8_t &vec, const UniformQuantizationInfo &requant_qinfo)
 {
-    const float32x4x2_t acc =
-    {
-        {
-            vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec))))),
-            vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec))))),
-        }
-    };
+    const float32x4x2_t acc = {{
+        vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec))))),
+        vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec))))),
+    }};
     return vquantize(acc, requant_qinfo);
 }
 
 template <>
 inline int8x8_t vrequantize_pooling(int8x8_t &vec, const UniformQuantizationInfo &requant_qinfo)
 {
-    const float32x4x2_t acc =
-    {
-        {
-            vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec))))),
-            vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec))))),
-        }
-    };
+    const float32x4x2_t acc = {{
+        vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec))))),
+        vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec))))),
+    }};
     return vquantize_signed(acc, requant_qinfo);
 }
 
@@ -199,4 +217,3 @@ inline int8x8_t vrequantize_pooling(int8x8_t &vec, const UniformQuantizationInfo
 } // namespace cpu
 } // namespace arm_compute
 #endif /* SRC_CORE_HELPERS_POOLINGHELPERS_H */
-

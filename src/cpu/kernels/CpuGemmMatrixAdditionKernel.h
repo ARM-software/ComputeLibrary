@@ -75,7 +75,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, float beta);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     static const std::vector<GemmMatrixAddKernel> &get_available_kernels();
@@ -89,8 +89,8 @@ private:
      * @param[in]  beta   Weight of matrix C
      */
     /** Matrix addition function to use for the particular tensor types passed to configure() */
-    GemmMatrixAddKernelPtr _func{ nullptr };
-    float                  _beta{ 0.f };
+    GemmMatrixAddKernelPtr _func{nullptr};
+    float                  _beta{0.f};
 };
 } // namespace kernels
 } // namespace cpu

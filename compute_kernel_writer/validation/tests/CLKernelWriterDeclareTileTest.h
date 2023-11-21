@@ -73,7 +73,7 @@ public:
             std::string expected_code = "";
             for(int32_t row = 0; row < height; ++row)
             {
-                expected_code += prefix + std::to_string(row) + ";\n";
+                expected_code += prefix + ((height > 1) ? std::string("__") + std::to_string(row) : "") + ";\n";
             }
 
             TileInfo tile_info(data_type, height, width);

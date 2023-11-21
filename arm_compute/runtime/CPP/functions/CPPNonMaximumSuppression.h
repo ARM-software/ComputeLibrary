@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H
 #define ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H
 
-#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
 namespace arm_compute
 {
@@ -48,7 +47,12 @@ public:
      * @param[in]  nms_threshold   The threshold used in non maximum suppression.
      *
      */
-    void configure(const ITensor *bboxes, const ITensor *scores, ITensor *indices, unsigned int max_output_size, const float score_threshold, const float nms_threshold);
+    void configure(const ITensor *bboxes,
+                   const ITensor *scores,
+                   ITensor       *indices,
+                   unsigned int   max_output_size,
+                   const float    score_threshold,
+                   const float    nms_threshold);
 
     /** Static function to check if given arguments will lead to a valid configuration of @ref CPPNonMaximumSuppression
      *
@@ -60,8 +64,12 @@ public:
      * @param[in]  nms_threshold   The threshold used in non maximum suppression.
      *
      */
-    static Status validate(const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *indices, unsigned int max_output_size,
-                           const float score_threshold, const float nms_threshold);
+    static Status validate(const ITensorInfo *bboxes,
+                           const ITensorInfo *scores,
+                           const ITensorInfo *indices,
+                           unsigned int       max_output_size,
+                           const float        score_threshold,
+                           const float        nms_threshold);
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H */

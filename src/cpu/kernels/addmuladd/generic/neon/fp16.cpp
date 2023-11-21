@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/cpu/CpuTypes.h"
 
 #include <cstddef>
@@ -38,16 +39,20 @@ namespace
 {
 using arm_compute::float16_t;
 
-void a64_add_bn_clamp_direct_fp16_2x32(
-    float16_t *out, size_t out_stride,
-    float16_t *out_direct, size_t out_direct_stride,
-    const float16_t *in0, size_t in0_stride,
-    const float16_t *in1, size_t in1_stride,
-    const float16_t *bn_mul,
-    const float16_t *bn_add,
-    const float16_t  minval,
-    const float16_t  maxval,
-    size_t width, size_t height)
+void a64_add_bn_clamp_direct_fp16_2x32(float16_t       *out,
+                                       size_t           out_stride,
+                                       float16_t       *out_direct,
+                                       size_t           out_direct_stride,
+                                       const float16_t *in0,
+                                       size_t           in0_stride,
+                                       const float16_t *in1,
+                                       size_t           in1_stride,
+                                       const float16_t *bn_mul,
+                                       const float16_t *bn_add,
+                                       const float16_t  minval,
+                                       const float16_t  maxval,
+                                       size_t           width,
+                                       size_t           height)
 {
     struct KernelArgs
     {
@@ -858,9 +863,14 @@ void a64_add_bn_clamp_direct_fp16_2x32(
         "subs x20, x20, #0x2\n"
         "bgt 8b\n"
         "58:" // odd columns skip
-        : [bn_add] "+&r"(bn_add), [bn_mul] "+&r"(bn_mul), [in0] "+&r"(in0), [in1] "+&r"(in1), [out] "+&r"(out), [out_direct] "+&r"(out_direct), [width] "+&r"(width)
-        : [args_ptr] "r"(&ka), [height] "r"(height), [in0_stride] "r"(in0_stride), [in1_stride] "r"(in1_stride), [offsetof_maxval] "I"(offsetof(KernelArgs, maxval)), [offsetof_minval] "I"(offsetof(KernelArgs, minval)), [out_direct_stride] "r"(out_direct_stride), [out_stride] "r"(out_stride)
-        : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x10", "x11", "x12", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28");
+        : [bn_add] "+&r"(bn_add), [bn_mul] "+&r"(bn_mul), [in0] "+&r"(in0), [in1] "+&r"(in1), [out] "+&r"(out),
+          [out_direct] "+&r"(out_direct), [width] "+&r"(width)
+        : [args_ptr] "r"(&ka), [height] "r"(height), [in0_stride] "r"(in0_stride), [in1_stride] "r"(in1_stride),
+          [offsetof_maxval] "I"(offsetof(KernelArgs, maxval)), [offsetof_minval] "I"(offsetof(KernelArgs, minval)),
+          [out_direct_stride] "r"(out_direct_stride), [out_stride] "r"(out_stride)
+        : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v16",
+          "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9",
+          "x10", "x11", "x12", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28");
 }
 
 } // namespace
@@ -869,8 +879,15 @@ namespace arm_compute
 {
 namespace cpu
 {
-void add_mul_add_fp16_neon(const ITensor *input1, const ITensor *input2, const ITensor *bn_mul, const ITensor *bn_add,
-                           ITensor *add_output, ITensor *final_output, ConvertPolicy policy, const ActivationLayerInfo &act_info, const Window &window)
+void add_mul_add_fp16_neon(const ITensor             *input1,
+                           const ITensor             *input2,
+                           const ITensor             *bn_mul,
+                           const ITensor             *bn_add,
+                           ITensor                   *add_output,
+                           ITensor                   *final_output,
+                           ConvertPolicy              policy,
+                           const ActivationLayerInfo &act_info,
+                           const Window              &window)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -882,16 +899,16 @@ void add_mul_add_fp16_neon(const ITensor *input1, const ITensor *input2, const I
     float16_t minval = std::numeric_limits<half>::lowest();
     float16_t maxval = std::numeric_limits<half>::max();
 
-    if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
+    if (act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
     {
         minval = static_cast<float16_t>(0.f);
     }
-    else if(act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+    else if (act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
     {
         minval = static_cast<float16_t>(0.f);
         maxval = static_cast<float16_t>(act_info.a());
     }
-    else if(act_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+    else if (act_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
     {
         minval = static_cast<float16_t>(act_info.b());
         maxval = static_cast<float16_t>(act_info.a());
@@ -909,42 +926,37 @@ void add_mul_add_fp16_neon(const ITensor *input1, const ITensor *input2, const I
     const size_t width  = window.num_iterations(0);
     const size_t height = window.num_iterations(1);
 
-    if(add_output != nullptr)
+    if (add_output != nullptr)
     {
         Iterator add_out_it(add_output, window);
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            a64_add_bn_clamp_direct_fp16_2x32(
-                reinterpret_cast<float16_t *>(out_it.ptr()), out_stride,
-                reinterpret_cast<float16_t *>(add_out_it.ptr()), out_direct_stride,
-                reinterpret_cast<float16_t *>(in1_it.ptr()), in0_stride,
-                reinterpret_cast<float16_t *>(in2_it.ptr()), in1_stride,
-                reinterpret_cast<float16_t *>(bn_mul->buffer()),
-                reinterpret_cast<float16_t *>(bn_add->buffer()),
-                minval,
-                maxval,
-                width, height);
-        },
-        in1_it, in2_it, add_out_it, out_it);
+            win,
+            [&](const Coordinates &)
+            {
+                a64_add_bn_clamp_direct_fp16_2x32(reinterpret_cast<float16_t *>(out_it.ptr()), out_stride,
+                                                  reinterpret_cast<float16_t *>(add_out_it.ptr()), out_direct_stride,
+                                                  reinterpret_cast<float16_t *>(in1_it.ptr()), in0_stride,
+                                                  reinterpret_cast<float16_t *>(in2_it.ptr()), in1_stride,
+                                                  reinterpret_cast<float16_t *>(bn_mul->buffer()),
+                                                  reinterpret_cast<float16_t *>(bn_add->buffer()), minval, maxval,
+                                                  width, height);
+            },
+            in1_it, in2_it, add_out_it, out_it);
     }
     else
     {
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            a64_add_bn_clamp_direct_fp16_2x32(
-                reinterpret_cast<float16_t *>(out_it.ptr()), out_stride,
-                nullptr, out_direct_stride,
-                reinterpret_cast<float16_t *>(in1_it.ptr()), in0_stride,
-                reinterpret_cast<float16_t *>(in2_it.ptr()), in1_stride,
-                reinterpret_cast<float16_t *>(bn_mul->buffer()),
-                reinterpret_cast<float16_t *>(bn_add->buffer()),
-                minval,
-                maxval,
-                width, height);
-        },
-        in1_it, in2_it, out_it);
+            win,
+            [&](const Coordinates &)
+            {
+                a64_add_bn_clamp_direct_fp16_2x32(reinterpret_cast<float16_t *>(out_it.ptr()), out_stride, nullptr,
+                                                  out_direct_stride, reinterpret_cast<float16_t *>(in1_it.ptr()),
+                                                  in0_stride, reinterpret_cast<float16_t *>(in2_it.ptr()), in1_stride,
+                                                  reinterpret_cast<float16_t *>(bn_mul->buffer()),
+                                                  reinterpret_cast<float16_t *>(bn_add->buffer()), minval, maxval,
+                                                  width, height);
+            },
+            in1_it, in2_it, out_it);
     }
 }
 } // namespace cpu

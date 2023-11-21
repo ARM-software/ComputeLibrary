@@ -27,7 +27,6 @@
 #include "arm_compute/graph/frontend/IStream.h"
 #include "arm_compute/graph/frontend/IStreamOperators.h"
 #include "arm_compute/graph/frontend/Types.h"
-
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/GraphManager.h"
@@ -65,7 +64,7 @@ public:
     void run();
 
     // Inherited overridden methods
-    void add_layer(ILayer &layer) override;
+    void         add_layer(ILayer &layer) override;
     Graph       &graph() override;
     const Graph &graph() const override;
 

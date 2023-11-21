@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_GEMMLOWP_OUTPUT_STAGE_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/cpu/ICpuOperator.h"
 
 /** This file contains all available output stages for GEMMLowp.
@@ -76,7 +77,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const GEMMLowpOutputStageInfo &info);
+    static Status validate(const ITensorInfo             *src,
+                           const ITensorInfo             *bias,
+                           const ITensorInfo             *dst,
+                           const GEMMLowpOutputStageInfo &info);
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;

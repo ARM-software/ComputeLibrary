@@ -37,7 +37,7 @@ std::vector<unsigned int> decompose_stages(unsigned int N, const std::set<unsign
     unsigned int              res = N;
 
     // Early exit if no supported factors are provided
-    if(supported_factors.empty())
+    if (supported_factors.empty())
     {
         return stages;
     }
@@ -46,10 +46,10 @@ std::vector<unsigned int> decompose_stages(unsigned int N, const std::set<unsign
     auto rfactor_it = supported_factors.rbegin();
 
     // Decomposition step
-    while(res != 0)
+    while (res != 0)
     {
         const unsigned int factor = *rfactor_it;
-        if(0 == (res % factor) && res >= factor)
+        if (0 == (res % factor) && res >= factor)
         {
             stages.push_back(factor);
             res /= factor;
@@ -57,9 +57,9 @@ std::vector<unsigned int> decompose_stages(unsigned int N, const std::set<unsign
         else
         {
             ++rfactor_it;
-            if(rfactor_it == supported_factors.rend())
+            if (rfactor_it == supported_factors.rend())
             {
-                if(res > 1)
+                if (res > 1)
                 {
                     // Couldn't decompose with given factors
                     stages.clear();
@@ -81,8 +81,9 @@ std::vector<unsigned int> digit_reverse_indices(unsigned int N, const std::vecto
     std::vector<unsigned int> idx_digit_reverse;
 
     // Early exit in case N and fft stages do not match
-    const float stages_prod = std::accumulate(std::begin(fft_stages), std::end(fft_stages), 1, std::multiplies<unsigned int>());
-    if(stages_prod != N)
+    const float stages_prod =
+        std::accumulate(std::begin(fft_stages), std::end(fft_stages), 1, std::multiplies<unsigned int>());
+    if (stages_prod != N)
     {
         return idx_digit_reverse;
     }
@@ -94,13 +95,13 @@ std::vector<unsigned int> digit_reverse_indices(unsigned int N, const std::vecto
     unsigned int n_stages = fft_stages.size();
 
     // Scan elements
-    for(unsigned int n = 0; n < N; ++n)
+    for (unsigned int n = 0; n < N; ++n)
     {
         unsigned int k  = n;
         unsigned int Nx = fft_stages[0];
 
         // Scan stages
-        for(unsigned int s = 1; s < n_stages; ++s)
+        for (unsigned int s = 1; s < n_stages; ++s)
         {
             // radix of stage i-th
             unsigned int Ny = fft_stages[s];

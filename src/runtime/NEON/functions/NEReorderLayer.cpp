@@ -23,20 +23,24 @@
  */
 #if defined(__aarch64__)
 
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
+
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/core/NEON/kernels/NEReorderKernel.h"
 
 namespace arm_compute
 {
 NEReorderLayer::~NEReorderLayer() = default;
 
-NEReorderLayer::NEReorderLayer()
-    : _reorder_kernel(std::make_unique<NEReorderKernel>())
+NEReorderLayer::NEReorderLayer() : _reorder_kernel(std::make_unique<NEReorderKernel>())
 {
 }
 
-void NEReorderLayer::configure(const ITensor *input, ITensor *output, arm_compute::WeightFormat input_wf, arm_compute::WeightFormat output_wf)
+void NEReorderLayer::configure(const ITensor            *input,
+                               ITensor                  *output,
+                               arm_compute::WeightFormat input_wf,
+                               arm_compute::WeightFormat output_wf)
 {
     auto k = std::make_unique<NEReorderKernel>();
     k->configure(input, output, input_wf, output_wf);
@@ -49,11 +53,14 @@ void NEReorderLayer::run()
     NEScheduler::get().schedule(_reorder_kernel.get(), Window::DimX);
 }
 
-Status NEReorderLayer::validate(const ITensorInfo *input, const ITensorInfo *output, arm_compute::WeightFormat input_wf, arm_compute::WeightFormat output_wf)
+Status NEReorderLayer::validate(const ITensorInfo        *input,
+                                const ITensorInfo        *output,
+                                arm_compute::WeightFormat input_wf,
+                                arm_compute::WeightFormat output_wf)
 {
     return NEReorderKernel::validate(input, output, input_wf, output_wf);
 }
 
 } // namespace arm_compute
 
-#endif  // defined(__aarch64__)
+#endif // defined(__aarch64__)

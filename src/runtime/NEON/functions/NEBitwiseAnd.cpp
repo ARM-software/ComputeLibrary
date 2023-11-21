@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEBitwiseAnd.h"
 
-#include "src/core/NEON/kernels/NEBitwiseAndKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NEBitwiseAndKernel.h"
 
 #include <utility>
 

@@ -73,8 +73,6 @@ target_sources(
 	graph/nodes/FlattenLayerNode.cpp
 	graph/nodes/FullyConnectedLayer.cpp
 	graph/nodes/FusedConvolutionBatchNormalizationNode.cpp
-	graph/nodes/FusedConvolutionBatchNormalizationWithPostOpsNode.cpp
-	graph/nodes/FusedConvolutionWithPostOpNode.cpp
 	graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.cpp
 	graph/nodes/GenerateProposalsLayerNode.cpp
 	graph/nodes/InputNode.cpp
@@ -223,6 +221,7 @@ target_sources(
 	core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_max_generic_depthfirst/generic.cpp
 	core/NEON/kernels/arm_gemm/interleave_indirect-sve.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_bf16fp32_dot_16VL/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_fp16fp32fp16_dot_16VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_fp32_mla_16VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_fp32bf16fp32_dot_16VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_s8qa_dot_16VL/generic.cpp
@@ -636,6 +635,7 @@ target_sources(
 	core/Validate.cpp
 	core/Version.cpp
 	core/helpers/SoftmaxHelpers.cpp
+	core/helpers/Utils.cpp
 	core/helpers/WindowHelpers.cpp
 	core/utils/ActivationFunctionUtils.cpp
 	core/utils/AssemblyUtils.cpp
@@ -643,6 +643,7 @@ target_sources(
 	core/utils/DataTypeUtils.cpp
 	core/utils/FormatUtils.cpp
 	core/utils/InterpolationPolicyUtils.cpp
+	core/utils/Math.cpp
 	core/utils/ScaleUtils.cpp
 	core/utils/StringUtils.cpp
 	core/utils/helpers/fft.cpp
@@ -725,11 +726,9 @@ target_sources(
 	cpu/kernels/boundingboxtransform/generic/neon/fp32.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/impl.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/qsymm16.cpp
-	cpu/kernels/cast/generic/neon/bfloat16.cpp
 	cpu/kernels/cast/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp32.cpp
-	cpu/kernels/crop/generic/neon/impl.cpp
 	cpu/kernels/crop/generic/neon/integer.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/fp16.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/fp32.cpp
@@ -737,8 +736,11 @@ target_sources(
 	cpu/kernels/depthwiseconv2d/generic/neon/qasymm8.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/directconv2d/nchw/all.cpp
+	cpu/kernels/directconv2d/nchw/fp16.cpp
+	cpu/kernels/directconv2d/nhwc/neon/fp16.cpp
 	cpu/kernels/directconv2d/nhwc/neon/fp32.cpp
 	cpu/kernels/directconv2d/nhwc/neon/impl.cpp
+	cpu/kernels/directconv2d/nhwc/neon/qasymm8.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp16.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp32.cpp
 	cpu/kernels/elementwise_binary/generic/neon/integer.cpp
@@ -746,7 +748,6 @@ target_sources(
 	cpu/kernels/elementwise_binary/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/elementwise_unary/generic/neon/fp16.cpp
 	cpu/kernels/elementwise_unary/generic/neon/fp32.cpp
-	cpu/kernels/elementwise_unary/generic/neon/impl.cpp
 	cpu/kernels/elementwise_unary/generic/neon/integer.cpp
 	cpu/kernels/elementwise_unary/generic/neon/q8.cpp
 	cpu/kernels/elementwise_unary/generic/neon/qasymm8.cpp
@@ -755,11 +756,9 @@ target_sources(
 	cpu/kernels/floor/neon/fp32.cpp
 	cpu/kernels/fuse_batch_normalization/generic/fp16.cpp
 	cpu/kernels/fuse_batch_normalization/generic/fp32.cpp
-	cpu/kernels/fuse_batch_normalization/generic/impl.cpp
 	cpu/kernels/fuse_batch_normalization/nchw/all.cpp
 	cpu/kernels/fuse_batch_normalization/nhwc/neon/fp16.cpp
 	cpu/kernels/fuse_batch_normalization/nhwc/neon/fp32.cpp
-	cpu/kernels/fuse_batch_normalization/nhwc/neon/impl.cpp
 	cpu/kernels/gemm_matrix_add/generic/neon/fp16.cpp
 	cpu/kernels/gemm_matrix_add/generic/neon/fp32.cpp
 	cpu/kernels/gemm_matrix_add/generic/neon/impl.cpp
@@ -777,11 +776,9 @@ target_sources(
 	cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp16.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp32.cpp
-	cpu/kernels/l2normlayer/generic/neon/impl.cpp
 	cpu/kernels/lut/generic/neon/u8.cpp
 	cpu/kernels/maxunpool/generic/neon/fp16.cpp
 	cpu/kernels/maxunpool/generic/neon/fp32.cpp
-	cpu/kernels/maxunpool/generic/neon/impl.cpp
 	cpu/kernels/maxunpool/generic/neon/qasymm8.cpp
 	cpu/kernels/maxunpool/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/meanstddevnorm/generic/neon/fp16.cpp
@@ -795,16 +792,13 @@ target_sources(
 	cpu/kernels/pool2d/neon/qasymm8_signed.cpp
 	cpu/kernels/pool3d/neon/fp16.cpp
 	cpu/kernels/pool3d/neon/fp32.cpp
-	cpu/kernels/pool3d/neon/impl.cpp
 	cpu/kernels/pool3d/neon/qasymm8.cpp
 	cpu/kernels/pool3d/neon/qasymm8_signed.cpp
 	cpu/kernels/range/generic/neon/fp16.cpp
 	cpu/kernels/range/generic/neon/fp32.cpp
-	cpu/kernels/range/generic/neon/impl.cpp
 	cpu/kernels/range/generic/neon/integer.cpp
 	cpu/kernels/roialign/generic/neon/fp16.cpp
 	cpu/kernels/roialign/generic/neon/fp32.cpp
-	cpu/kernels/roialign/generic/neon/impl.cpp
 	cpu/kernels/roialign/generic/neon/qasymm8.cpp
 	cpu/kernels/roialign/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/scale/neon/fp16.cpp
@@ -813,13 +807,13 @@ target_sources(
 	cpu/kernels/scale/neon/qasymm8_signed.cpp
 	cpu/kernels/select/generic/neon/fp16.cpp
 	cpu/kernels/select/generic/neon/fp32.cpp
-	cpu/kernels/select/generic/neon/impl.cpp
 	cpu/kernels/select/generic/neon/integer.cpp
 	cpu/kernels/softmax/generic/neon/fp16.cpp
 	cpu/kernels/softmax/generic/neon/fp32.cpp
 	cpu/kernels/softmax/generic/neon/impl.cpp
 	cpu/kernels/softmax/generic/neon/qasymm8.cpp
 	cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp
+	cpu/kernels/sub/neon/fp16.cpp
 	cpu/kernels/sub/neon/qasymm8.cpp
 	cpu/kernels/sub/neon/qasymm8_signed.cpp
 	cpu/kernels/sub/neon/qsymm16.cpp

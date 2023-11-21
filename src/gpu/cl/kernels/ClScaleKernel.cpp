@@ -27,8 +27,9 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
-#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/utils/InterpolationPolicyUtils.h"
+#include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -43,7 +44,8 @@ namespace kernels
 {
 namespace
 {
-inline std::tuple<float, float> calculate_scale_factors(const ITensorInfo *src, const ITensorInfo *dst, DataLayout data_layout, bool align_corners)
+inline std::tuple<float, float>
+calculate_scale_factors(const ITensorInfo *src, const ITensorInfo *dst, DataLayout data_layout, bool align_corners)
 {
     const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -64,20 +66,25 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::U8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(dst == src);
-    ARM_COMPUTE_RETURN_ERROR_ON(src->num_channels()!=1);
-    ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));
-    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(src->data_type()) && !is_data_type_quantized_asymmetric(src->data_type()));
+    ARM_COMPUTE_RETURN_ERROR_ON(src->num_channels() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        info.align_corners &&
+        !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(src->data_type()) &&
+                                !is_data_type_quantized_asymmetric(src->data_type()));
 
     float            scale_x     = 0.f;
     float            scale_y     = 0.f;
     const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : info.data_layout;
-    std::tie(scale_x, scale_y) = calculate_scale_factors(src, dst, data_layout, info.align_corners);
+    std::tie(scale_x, scale_y)   = calculate_scale_factors(src, dst, data_layout, info.align_corners);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(info.interpolation_policy == InterpolationPolicy::AREA && (scale_x > 1.f || scale_y > 1.f));
+    ARM_COMPUTE_RETURN_ERROR_ON(info.interpolation_policy == InterpolationPolicy::AREA &&
+                                (scale_x > 1.f || scale_y > 1.f));
 
     return Status{};
 }
@@ -94,23 +101,26 @@ ClScaleKernel::ClScaleKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info)
+void ClScaleKernel::configure(const CLCompileContext &compile_context,
+                              ITensorInfo            *src,
+                              ITensorInfo            *dst,
+                              const ScaleKernelInfo  &info)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, info));
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     // Info required for the static tuning
     _data_layout = info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : info.data_layout;
 
     const bool is_nhwc = _data_layout == DataLayout::NHWC;
 
-    float scale_x = 0.f;
-    float scale_y = 0.f;
+    float scale_x              = 0.f;
+    float scale_y              = 0.f;
     std::tie(scale_x, scale_y) = calculate_scale_factors(src, dst, _data_layout, info.align_corners);
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     auto interpolation_policy_to_use = info.interpolation_policy;
-    if(info.interpolation_policy == InterpolationPolicy::AREA && scale_x <= 1.f && scale_y <= 1.f)
+    if (info.interpolation_policy == InterpolationPolicy::AREA && scale_x <= 1.f && scale_y <= 1.f)
     {
         interpolation_policy_to_use = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
@@ -127,7 +137,7 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     unsigned int       vec_size_leftover = 0;
 
     CLBuildOptions build_opts;
-    if(_data_layout == DataLayout::NHWC)
+    if (_data_layout == DataLayout::NHWC)
     {
         vec_size          = adjust_vec_size(src->data_type() == DataType::F32 ? 4 : 8, dst_channels);
         vec_size_leftover = dst_channels % vec_size;
@@ -135,7 +145,8 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
         build_opts.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_opts.add_option("-DDST_TENSOR_TYPE=BUFFER");
         build_opts.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
-        build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, src->data_type()));
+        build_opts.add_option("-DCONSTANT_VALUE=" +
+                              string_from_pixel_value(info.constant_border_value, src->data_type()));
         build_opts.add_option("-DN0=" + support::cpp11::to_string(vec_size));
         build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(vec_size_leftover));
         build_opts.add_option("-DSCALE_" + string_from_interpolation_policy(interpolation_policy_to_use));
@@ -144,27 +155,33 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
         build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
         build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
         build_opts.add_option_if(is_data_type_float(src->data_type()), "-DIS_FLOATING_POINT");
-        build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+        build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER",
+                                      "-DSAMPLING_POLICY_TOP_LEFT");
     }
-    else if(_data_layout == DataLayout::NCHW)
+    else if (_data_layout == DataLayout::NCHW)
     {
         vec_size          = adjust_vec_size(4, dst_width);
         vec_size_leftover = dst_width % vec_size;
         build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
-        build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, src->data_type()));
+        build_opts.add_option("-DCONSTANT_VALUE=" +
+                              string_from_pixel_value(info.constant_border_value, src->data_type()));
         build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_width));
         build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_height));
         build_opts.add_option("-DSCALE_X=" + float_to_string_with_full_precision(scale_x));
         build_opts.add_option("-DSCALE_Y=" + float_to_string_with_full_precision(scale_y));
         build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size));
-        build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + ((vec_size_leftover == 0) ? support::cpp11::to_string(vec_size) : support::cpp11::to_string(vec_size_leftover)));
+        build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + ((vec_size_leftover == 0)
+                                                            ? support::cpp11::to_string(vec_size)
+                                                            : support::cpp11::to_string(vec_size_leftover)));
         build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
         build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
         build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
-        build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+        build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER",
+                                      "-DSAMPLING_POLICY_TOP_LEFT");
 
-        const bool is_qasymm_bilinear = is_data_type_quantized_asymmetric(src->data_type()) && info.interpolation_policy == InterpolationPolicy::BILINEAR;
-        if(is_qasymm_bilinear)
+        const bool is_qasymm_bilinear = is_data_type_quantized_asymmetric(src->data_type()) &&
+                                        info.interpolation_policy == InterpolationPolicy::BILINEAR;
+        if (is_qasymm_bilinear)
         {
             const UniformQuantizationInfo qinfo = src->quantization_info().uniform();
             build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
@@ -190,7 +207,7 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 
     // Pass scale kernel arguments
-    if(is_nhwc)
+    if (is_nhwc)
     {
         unsigned int idx = 2 * num_arguments_per_4d_tensor_nhwc();
         _kernel.setArg<cl_float>(idx++, scale_x);
@@ -219,7 +236,7 @@ void ClScaleKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comma
     auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
     auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
-    switch(_data_layout)
+    switch (_data_layout)
     {
         case DataLayout::NCHW:
         {
@@ -231,8 +248,7 @@ void ClScaleKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comma
                 add_2D_tensor_argument(idx, src, slice);
                 add_2D_tensor_argument(idx, dst, slice);
                 enqueue(queue, *this, slice, lws_hint());
-            }
-            while(window.slide_window_slice_2D(slice));
+            } while (window.slide_window_slice_2D(slice));
             break;
         }
         case DataLayout::NHWC:

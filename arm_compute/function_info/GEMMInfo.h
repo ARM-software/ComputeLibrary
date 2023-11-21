@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO
-#define ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H
 
 #include "arm_compute/core/CoreTypes.h"
-#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include <vector>
 
 namespace arm_compute
@@ -44,17 +44,22 @@ enum class GEMMLowpOutputStageType
 /** GEMMLowp output stage info */
 struct GEMMLowpOutputStageInfo
 {
-    GEMMLowpOutputStageType type{ GEMMLowpOutputStageType::NONE };                        /**< GEMMLowp output stage type */
-    int32_t                 gemmlowp_offset{ 0 };                                         /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
-    int32_t                 gemmlowp_multiplier{ 0 };                                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    int32_t                 gemmlowp_shift{ 0 };                                          /**< GEMMLowp output stage shift used for quantizing to uint8 */
-    int32_t                 gemmlowp_min_bound{ std::numeric_limits<int32_t>::lowest() }; /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
-    int32_t                 gemmlowp_max_bound{ std::numeric_limits<int32_t>::max() };    /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
-    std::vector<int32_t>    gemmlowp_multipliers{};                                       /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    std::vector<int32_t>    gemmlowp_shifts{};                                            /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    float                   gemmlowp_real_multiplier{ 0 };                                /**< GEMMLowp output stage real multiplier used for quantizing to QASYMM8 */
-    bool                    is_quantized_per_channel{ false };                            /**< GEMMLowp quantized per-channel flag */
-    DataType                output_data_type{ DataType::UNKNOWN };                        /**< Output tensor data type to use if the output is not initialized */
+    GEMMLowpOutputStageType type{GEMMLowpOutputStageType::NONE}; /**< GEMMLowp output stage type */
+    int32_t                 gemmlowp_offset{0}; /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
+    int32_t gemmlowp_multiplier{0};             /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    int32_t gemmlowp_shift{0};                  /**< GEMMLowp output stage shift used for quantizing to uint8 */
+    int32_t gemmlowp_min_bound{
+        std::numeric_limits<int32_t>::
+            lowest()}; /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
+    int32_t gemmlowp_max_bound{
+        std::numeric_limits<int32_t>::
+            max()}; /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+    std::vector<int32_t> gemmlowp_multipliers{}; /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    std::vector<int32_t> gemmlowp_shifts{};      /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    float    gemmlowp_real_multiplier{0}; /**< GEMMLowp output stage real multiplier used for quantizing to QASYMM8 */
+    bool     is_quantized_per_channel{false}; /**< GEMMLowp quantized per-channel flag */
+    DataType output_data_type{
+        DataType::UNKNOWN}; /**< Output tensor data type to use if the output is not initialized */
 };
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
@@ -79,7 +84,6 @@ public:
           _pretranspose_A(false),
           _pretranspose_B(false),
           _activation_info(),
-          _post_ops(),
           _fixed_format(false),
           _weight_format(arm_compute::WeightFormat::UNSPECIFIED)
     {
@@ -99,14 +103,24 @@ public:
      * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
-     * @param[in] post_ops                    (Optional) A sequence of post operations that are performed after the main operation.
      * @param[in] fixed_format                (Optional) Specify the selection of fixed format kernels for variable weights support in GEMM. These kernels expect the weights tensor to be in amemory format that is fixed by the kernel itself. For more information, see arm_compute::WeightFormat.
      * @param[in] weight_format               (Optional) arm_gemm:WeightFormat enumeration requested by the user. Default is arm_compute::WeightFormat::UNSPECIFIED.
+     * @param[in] pretranspose_B              (Optional) Pretranspose matrix B (transposition of its lowest 2 dimensions), in addition to and before, any further transformations of B
      */
-    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>(),
-             bool fixed_format = false, arm_compute::WeightFormat weight_format = arm_compute::WeightFormat::UNSPECIFIED) noexcept
+    GEMMInfo(bool                       is_a_reshaped,
+             bool                       is_b_reshaped,
+             bool                       reshape_b_only_on_first_run,
+             int                        depth_output_gemm3d     = 0,
+             bool                       reinterpret_input_as_3d = false,
+             bool                       retain_internal_weights = false,
+             GEMMLowpOutputStageInfo    gemmlowp_output_stage   = GEMMLowpOutputStageInfo(),
+             bool                       fp_mixed_precision      = false,
+             bool                       fast_math               = false,
+             bool                       broadcast_bias          = false,
+             const ActivationLayerInfo &activation_info         = ActivationLayerInfo(),
+             bool                       fixed_format            = false,
+             arm_compute::WeightFormat  weight_format           = arm_compute::WeightFormat::UNSPECIFIED,
+             bool                       pretranspose_B          = false) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -118,9 +132,8 @@ public:
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
           _pretranspose_A(false),
-          _pretranspose_B(false),
+          _pretranspose_B(pretranspose_B),
           _activation_info(activation_info),
-          _post_ops(post_ops),
           _fixed_format(fixed_format),
           _weight_format(weight_format)
     {
@@ -240,6 +253,8 @@ public:
         _pretranspose_A = flag;
     }
     /** Flag which specifies whether b should be pre-transposed if supported.
+     * More concretely, the "pre-transpose" is the transposition of the b tensor's lowest 2 dimensions
+     * If specified true, this pre-transpose will occur in addition to and before, any further transformations of the b matrix
      *
      * @return True if b should be pre-transposed else false.
      */
@@ -270,22 +285,6 @@ public:
     void set_activation_info(const ActivationLayerInfo &activation_info)
     {
         _activation_info = activation_info;
-    }
-    /** Post operations to apply after the matrix multiplication
-     *
-     * @return experimental::PostOpList object
-     */
-    const experimental::PostOpList<ITensorInfo *> &post_ops() const
-    {
-        return _post_ops;
-    }
-    /** Set post ops
-     *
-     * @param[in] post_ops experimental::PostOpList object to set
-     */
-    void set_post_ops(const experimental::PostOpList<ITensorInfo *> &post_ops)
-    {
-        _post_ops = post_ops;
     }
     /** Flag which specifies if the GEMM operation is running fixed-format kernels.
      *
@@ -320,22 +319,21 @@ public:
     }
 
 private:
-    bool                                    _is_a_reshaped;
-    bool                                    _is_b_reshaped;
-    bool                                    _reshape_b_only_on_first_run;
-    int                                     _depth_output_gemm3d;
-    bool                                    _reinterpret_input_as_3d;
-    bool                                    _retain_internal_weights;
-    GEMMLowpOutputStageInfo                 _gemmlowp_output_stage;
-    bool                                    _fast_math;
-    bool                                    _fp_mixed_precision;
-    bool                                    _broadcast_bias;
-    bool                                    _pretranspose_A;
-    bool                                    _pretranspose_B;
-    ActivationLayerInfo                     _activation_info;
-    experimental::PostOpList<ITensorInfo *> _post_ops;
-    bool                                    _fixed_format;
-    arm_compute::WeightFormat               _weight_format;
+    bool                      _is_a_reshaped;
+    bool                      _is_b_reshaped;
+    bool                      _reshape_b_only_on_first_run;
+    int                       _depth_output_gemm3d;
+    bool                      _reinterpret_input_as_3d;
+    bool                      _retain_internal_weights;
+    GEMMLowpOutputStageInfo   _gemmlowp_output_stage;
+    bool                      _fast_math;
+    bool                      _fp_mixed_precision;
+    bool                      _broadcast_bias;
+    bool                      _pretranspose_A;
+    bool                      _pretranspose_B;
+    ActivationLayerInfo       _activation_info;
+    bool                      _fixed_format;
+    arm_compute::WeightFormat _weight_format;
 };
 } //namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO */
+#endif // ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H

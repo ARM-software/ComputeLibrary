@@ -25,10 +25,10 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/gpu/cl/ClCompileContext.h"
-#include "src/gpu/cl/kernels/ClDequantizeKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/ClCompileContext.h"
+#include "src/gpu/cl/kernels/ClDequantizeKernel.h"
 
 namespace arm_compute
 {

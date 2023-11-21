@@ -40,8 +40,7 @@ public:
      * @param[in] max_num_values Maximum size of the array.
      *
      */
-    explicit ICLArray(size_t max_num_values)
-        : IArray<T>(max_num_values), _mapping(nullptr)
+    explicit ICLArray(size_t max_num_values) : IArray<T>(max_num_values), _mapping(nullptr)
     {
     }
 
@@ -125,5 +124,5 @@ using ICLInt16Array = ICLArray<cl_short>;
 using ICLInt32Array = ICLArray<cl_int>;
 /** Interface for OpenCL Array of floats. */
 using ICLFloatArray = ICLArray<cl_float>;
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_ICLARRAY_H*/

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Size2D.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -77,28 +78,38 @@ public:
      * @param[in]  dilation        (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias,
-                   const Size2D &dilation   = Size2D(1U, 1U),
-                   unsigned int  num_groups = 1);
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   const Size2D           &kernel_dims,
+                   const PadStrideInfo    &conv_info,
+                   bool                    has_bias,
+                   const Size2D           &dilation   = Size2D(1U, 1U),
+                   unsigned int            num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClIm2ColKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U),
-                           unsigned int num_groups = 1);
+    static Status validate(const ITensorInfo   *input,
+                           const ITensorInfo   *output,
+                           const Size2D        &kernel_dims,
+                           const PadStrideInfo &conv_info,
+                           bool                 has_bias,
+                           const Size2D        &dilation   = Size2D(1U, 1U),
+                           unsigned int         num_groups = 1);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 public:
-    DataLayout _data_layout;
+    DataLayout                            _data_layout;
     std::pair<unsigned int, unsigned int> _convolved_dims;
-    unsigned int  _num_elems_processed_per_iteration;
-    Size2D        _kernel_dims;
-    PadStrideInfo _conv_info;
-    unsigned int  _num_groups;
+    unsigned int                          _num_elems_processed_per_iteration;
+    Size2D                                _kernel_dims;
+    PadStrideInfo                         _conv_info;
+    unsigned int                          _num_groups;
 };
 } // namespace kernels
 } // namespace opencl

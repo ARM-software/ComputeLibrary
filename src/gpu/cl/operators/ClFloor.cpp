@@ -23,10 +23,9 @@
  */
 #include "src/gpu/cl/operators/ClFloor.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClFloorKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {

@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLMatMul.h"
+
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
+
 #include "src/gpu/cl/operators/ClMatMul.h"
 
 namespace arm_compute
@@ -32,23 +34,32 @@ using OperatorType = opencl::ClMatMul;
 
 struct CLMatMul::Impl
 {
-    std::unique_ptr<OperatorType> op{ nullptr };
+    std::unique_ptr<OperatorType> op{nullptr};
     ITensorPack                   run_pack{};
 };
-CLMatMul::CLMatMul()
-    : _impl(std::make_unique<Impl>())
+CLMatMul::CLMatMul() : _impl(std::make_unique<Impl>())
 {
 }
 
 CLMatMul::~CLMatMul() = default;
 
-void CLMatMul::configure(ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings, const ActivationLayerInfo &act_info)
+void CLMatMul::configure(ICLTensor                 *lhs,
+                         ICLTensor                 *rhs,
+                         ICLTensor                 *output,
+                         const MatMulInfo          &matmul_info,
+                         const GpuMatMulSettings   &settings,
+                         const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(settings);
     configure(CLKernelLibrary::get().get_compile_context(), lhs, rhs, output, matmul_info, settings, act_info);
 }
 
-void CLMatMul::configure(const CLCompileContext &compile_context, ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings,
+void CLMatMul::configure(const CLCompileContext    &compile_context,
+                         ICLTensor                 *lhs,
+                         ICLTensor                 *rhs,
+                         ICLTensor                 *output,
+                         const MatMulInfo          &matmul_info,
+                         const GpuMatMulSettings   &settings,
                          const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, output);
@@ -56,10 +67,14 @@ void CLMatMul::configure(const CLCompileContext &compile_context, ICLTensor *lhs
 
     _impl->op = std::make_unique<OperatorType>();
     _impl->op->configure(compile_context, lhs->info(), rhs->info(), output->info(), matmul_info, act_info);
-    _impl->run_pack = { { ACL_SRC_0, lhs }, { ACL_SRC_1, rhs }, { ACL_DST, output } };
+    _impl->run_pack = {{ACL_SRC_0, lhs}, {ACL_SRC_1, rhs}, {ACL_DST, output}};
 }
 
-Status CLMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulInfo &matmul_info, const ActivationLayerInfo &act_info)
+Status CLMatMul::validate(const ITensorInfo         *lhs,
+                          const ITensorInfo         *rhs,
+                          const ITensorInfo         *output,
+                          const MatMulInfo          &matmul_info,
+                          const ActivationLayerInfo &act_info)
 {
     return OperatorType::validate(lhs, rhs, output, matmul_info, act_info);
 }

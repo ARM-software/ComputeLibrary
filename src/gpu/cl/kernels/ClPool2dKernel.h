@@ -50,22 +50,29 @@ public:
      * @param[in]  pool_info       Contains pooling operation information described in @ref PoolingLayerInfo.
      * @param[out] indices         (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr);
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   const PoolingLayerInfo &pool_info,
+                   ITensorInfo            *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClPool2dKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *dst,
+                           const PoolingLayerInfo &pool_info,
+                           const ITensorInfo      *indices = nullptr);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 public:
     PoolingLayerInfo _pool_info{};
-    DataLayout       _data_layout{ DataLayout::UNKNOWN };
-    unsigned int     _num_elems_processed_per_iteration{ 1 };
+    DataLayout       _data_layout{DataLayout::UNKNOWN};
+    unsigned int     _num_elems_processed_per_iteration{1};
 };
 } // namespace kernels
 } // namespace opencl

@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_IM2COL_KERNEL_H
-#define ARM_COMPUTE_CPU_IM2COL_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUIM2COLKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUIM2COLKERNEL_H
 
 #include "arm_compute/core/Size2D.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -78,16 +79,28 @@ public:
      * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      * @param[in]  input_pad_right (Optional) When fast-math is selected, per element padding for the im2col matrix may be necessary
      */
-    void configure(const ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                   bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, unsigned int input_pad_right = 0);
+    void configure(const ITensorInfo   *src,
+                   ITensorInfo         *dst,
+                   const Size2D        &kernel_dims,
+                   const PadStrideInfo &conv_info,
+                   bool                 has_bias,
+                   const Size2D        &dilation        = Size2D(1U, 1U),
+                   unsigned int         num_groups      = 1,
+                   unsigned int         input_pad_right = 0);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuIm2ColKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                           bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, unsigned int input_pad_right = 0);
+    static Status validate(const ITensorInfo   *src,
+                           const ITensorInfo   *dst,
+                           const Size2D        &kernel_dims,
+                           const PadStrideInfo &conv_info,
+                           bool                 has_bias,
+                           const Size2D        &dilation        = Size2D(1U, 1U),
+                           unsigned int         num_groups      = 1,
+                           unsigned int         input_pad_right = 0);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -102,32 +115,32 @@ public:
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
 private:
-    /** Template function to run im2col
-     *
-     * @param[in]  src    The input tensor info
-     * @param[out] dst    The output tensor info
-     * @param[in]  window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T, bool has_pads, bool is_nchw>
-    void run_im2col(const ITensor *src, ITensor *dst, const Window &window);
-
     /** Common signature for all the specialised im2col functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using Im2ColFunctionPtr = void (CpuIm2ColKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
+    using Im2ColFunctionPtr = void (*)(const ITensor                        *src,
+                                       ITensor                              *dst,
+                                       const Window                         &window,
+                                       DataLayout                            data_layout,
+                                       const PadStrideInfo                  &conv_info,
+                                       std::pair<unsigned int, unsigned int> convolved_dims,
+                                       const Size2D                         &kernel_dims,
+                                       const Size2D                         &dilation,
+                                       uint32_t                              input_pad_right,
+                                       bool                                  has_bias);
 
-    Im2ColFunctionPtr                     _func{ nullptr };
+    Im2ColFunctionPtr                     _func{nullptr};
     std::pair<unsigned int, unsigned int> _convolved_dims{};
     PadStrideInfo                         _conv_info{};
-    unsigned int                          _kernel_width{ 0 };
-    unsigned int                          _kernel_height{ 0 };
-    unsigned int                          _input_pad_right{ 0 };
-    bool                                  _has_bias{ false };
-    Size2D                                _dilation{ 1U, 1U };
-    DataLayout                            _data_layout{ DataLayout::UNKNOWN };
+    unsigned int                          _kernel_width{0};
+    unsigned int                          _kernel_height{0};
+    unsigned int                          _input_pad_right{0};
+    bool                                  _has_bias{false};
+    Size2D                                _dilation{1U, 1U};
+    DataLayout                            _data_layout{DataLayout::UNKNOWN};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_IM2COL_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUIM2COLKERNEL_H

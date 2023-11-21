@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_VALIDATION_TESTS_CLKERNELTEST_H
-#define CKW_VALIDATION_TESTS_CLKERNELTEST_H
+#ifndef CKW_VALIDATION_TESTS_CLKERNELWRITERCOMMENTTEST_H
+#define CKW_VALIDATION_TESTS_CLKERNELWRITERCOMMENTTEST_H
 
 #include "src/cl/CLKernelWriter.h"
 #include "validation/tests/common/Common.h"
@@ -45,14 +45,18 @@ public:
 
         KernelWriterInterceptor<CLKernelWriter> writer;
 
-        writer.comment("previous code");
+        writer.op_comment("previous code");
 
         writer.start_capture_code();
 
-        writer.comment("code under test 0");
-        writer.comment("code under test 1");
+        writer.op_comment("code under test 0");
+        writer.op_comment("code under test 1");
 
+#ifdef COMPUTE_KERNEL_WRITER_DEBUG_ENABLED
         constexpr auto expected_code = "// code under test 0\n// code under test 1\n";
+#else  // COMPUTE_KERNEL_WRITER_DEBUG_ENABLED
+        constexpr auto expected_code = "";
+#endif // COMPUTE_KERNEL_WRITER_DEBUG_ENABLED
 
         VALIDATE_TEST(writer.check_added_code(expected_code), all_tests_passed, 0);
 
@@ -67,4 +71,4 @@ public:
 
 } // namespace ckw
 
-#endif // CKW_VALIDATION_TESTS_CLKERNELTEST_H
+#endif // CKW_VALIDATION_TESTS_CLKERNELWRITERCOMMENTTEST_H

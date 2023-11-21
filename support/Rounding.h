@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+
 #include "support/AclRequires.h"
 #include "support/ToolchainSupport.h"
 
@@ -153,10 +154,10 @@ inline T round_half_even(T value, T epsilon = std::numeric_limits<T>::epsilon())
     T ipart          = 0;
     std::modf(positive_value, &ipart);
     // If 'value' is exactly halfway between two integers
-    if(std::abs(positive_value - (ipart + 0.5f)) < epsilon)
+    if (std::abs(positive_value - (ipart + 0.5f)) < epsilon)
     {
         // If 'ipart' is even then return 'ipart'
-        if(std::fmod(ipart, 2.f) < epsilon)
+        if (std::fmod(ipart, 2.f) < epsilon)
         {
             return support::cpp11::copysign(ipart, value);
         }
@@ -179,7 +180,7 @@ inline T round_half_even(T value, T epsilon = std::numeric_limits<T>::epsilon())
 template <typename T, ARM_COMPUTE_REQUIRES_TA(traits::is_floating_point<T>::value)>
 inline T round(T value, RoundingMode rounding_mode)
 {
-    switch(rounding_mode)
+    switch (rounding_mode)
     {
         case RoundingMode::TO_ZERO:
             return round_to_zero(value);

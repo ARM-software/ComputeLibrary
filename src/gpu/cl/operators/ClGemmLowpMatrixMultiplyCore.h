@@ -93,18 +93,27 @@ public:
      * @param[in]  gemm_info       (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const CLCompileContext &compile_context,
+                   ITensorInfo            *a,
+                   ITensorInfo            *b,
+                   ITensorInfo            *c,
+                   ITensorInfo            *output,
+                   const GEMMInfo         &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClGemmLowpMatrixMultiplyCore::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a,
+                           const ITensorInfo *b,
+                           const ITensorInfo *c,
+                           const ITensorInfo *output,
+                           const GEMMInfo    &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -130,7 +139,7 @@ private:
     std::unique_ptr<kernels::ClGemmLowpMatrixAReductionKernel>                  _mtx_a_reduction_kernel;
     std::unique_ptr<kernels::ClGemmLowpMatrixBReductionKernel>                  _mtx_b_reduction_kernel;
     std::unique_ptr<kernels::ClGemmLowpOffsetContributionKernel>                _offset_contribution_kernel;
-    std::unique_ptr<kernels::ClGemmLowpOffsetContributionOutputStageKernel>     _offset_contribution_output_stage_kernel;
+    std::unique_ptr<kernels::ClGemmLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
 
     // Temporary tensors
     TensorInfo _qasymm8_weights{};
@@ -141,13 +150,13 @@ private:
     TensorInfo _gemm_output_stage_multipliers{};
     TensorInfo _gemm_output_stage_shifts{};
 
-    int32_t          _a_offset{ 0 };
-    int32_t          _b_offset{ 0 };
-    bool             _reshape_b_only_on_first_run{ false };
-    bool             _run_output_stage{ false };
-    bool             _convert_to_qasymm8{ false };
-    bool             _run_offset_contribution{ false };
-    bool             _is_prepared{ false };
+    int32_t          _a_offset{0};
+    int32_t          _b_offset{0};
+    bool             _reshape_b_only_on_first_run{false};
+    bool             _run_output_stage{false};
+    bool             _convert_to_qasymm8{false};
+    bool             _run_offset_contribution{false};
+    bool             _is_prepared{false};
     GEMMInfo         _gemm_info{};
     CLGEMMKernelType _gemm_kernel_type{};
 

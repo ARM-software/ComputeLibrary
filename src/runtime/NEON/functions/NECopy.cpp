@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NECopy.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuCopy.h"
 
 #include <utility>
@@ -32,16 +33,15 @@ namespace arm_compute
 {
 struct NECopy::Impl
 {
-    const ITensor                *src{ nullptr };
-    ITensor                      *dst{ nullptr };
-    std::unique_ptr<cpu::CpuCopy> op{ nullptr };
+    const ITensor                *src{nullptr};
+    ITensor                      *dst{nullptr};
+    std::unique_ptr<cpu::CpuCopy> op{nullptr};
 };
 
-NECopy::NECopy()
-    : _impl(std::make_unique<Impl>())
+NECopy::NECopy() : _impl(std::make_unique<Impl>())
 {
 }
-NECopy::NECopy(NECopy &&) = default;
+NECopy::NECopy(NECopy &&)            = default;
 NECopy &NECopy::operator=(NECopy &&) = default;
 NECopy::~NECopy()                    = default;
 

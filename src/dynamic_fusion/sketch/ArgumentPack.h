@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK
-#define SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK_H
 
 #include "arm_compute/core/experimental/Types.h"
+
 #include <unordered_map>
 #include <vector>
 
@@ -45,33 +46,28 @@ template <typename T>
 class ArgumentPack
 {
 public:
-    /** @ref TensorType encodes the position of a tensor argument within the pack */
+    /** @ref arm_compute::TensorType encodes the position of a tensor argument within the pack */
     using Id = TensorType;
     /** A single argument element within the pack
      * It contains either a const pointer or a non-const pointer to the Tensor-related type T, but never at the same time
      */
     struct PackElement
     {
-        PackElement()                        = default;
-        PackElement(const PackElement &elem) = default;
+        PackElement()                                   = default;
+        PackElement(const PackElement &elem)            = default;
         PackElement &operator=(const PackElement &elem) = default;
         PackElement(PackElement &&elem)                 = default;
-        PackElement &operator=(PackElement &&elem) = default;
-        PackElement(Id id, T *tensor)
-            : id(id), tensor(tensor), ctensor(nullptr)
+        PackElement &operator=(PackElement &&elem)      = default;
+        PackElement(Id id, T *tensor) : id(id), tensor(tensor), ctensor(nullptr)
         {
         }
-        PackElement(Id id, const T *ctensor)
-            : id(id), tensor(nullptr), ctensor(ctensor)
+        PackElement(Id id, const T *ctensor) : id(id), tensor(nullptr), ctensor(ctensor)
         {
         }
 
-        Id       id{ ACL_UNKNOWN }; /**< Argument id within the pack */
-        T       *tensor{ nullptr }; /**< Non-const pointer to tensor-related object */
-        const T *ctensor
-        {
-            nullptr
-        }; /**< Const pointer to tensor-related object */
+        Id       id{ACL_UNKNOWN};  /**< Argument id within the pack */
+        T       *tensor{nullptr};  /**< Non-const pointer to tensor-related object */
+        const T *ctensor{nullptr}; /**< Const pointer to tensor-related object */
     };
 
 public:
@@ -88,10 +84,9 @@ public:
     /** Allow instances of this class to be moved */
     ArgumentPack<T> &operator=(ArgumentPack<T> &&other) = default;
     /** Initializer list Constructor */
-    ArgumentPack(const std::initializer_list<PackElement> &l)
-        : _pack{}
+    ArgumentPack(const std::initializer_list<PackElement> &l) : _pack{}
     {
-        for(const auto &e : l)
+        for (const auto &e : l)
         {
             _pack[e.id] = e;
         }
@@ -134,7 +129,7 @@ public:
     const T *get_const_tensor(Id id) const
     {
         auto it = _pack.find(id);
-        if(it != _pack.end())
+        if (it != _pack.end())
         {
             return it->second.ctensor != nullptr ? it->second.ctensor : it->second.tensor;
         }
@@ -171,10 +166,10 @@ public:
     std::vector<T *> get_src_tensors()
     {
         std::vector<T *> src_tensors{};
-        for(int id = static_cast<int>(TensorType::ACL_SRC); id <= static_cast<int>(TensorType::ACL_SRC_END); ++id)
+        for (int id = static_cast<int>(TensorType::ACL_SRC); id <= static_cast<int>(TensorType::ACL_SRC_END); ++id)
         {
             auto tensor = get_tensor(static_cast<TensorType>(id));
-            if(tensor != nullptr)
+            if (tensor != nullptr)
             {
                 src_tensors.push_back(tensor);
             }
@@ -188,10 +183,10 @@ public:
     std::vector<const T *> get_const_src_tensors() const
     {
         std::vector<const T *> src_tensors{};
-        for(int id = static_cast<int>(TensorType::ACL_SRC); id <= static_cast<int>(TensorType::ACL_SRC_END); ++id)
+        for (int id = static_cast<int>(TensorType::ACL_SRC); id <= static_cast<int>(TensorType::ACL_SRC_END); ++id)
         {
             auto tensor = get_const_tensor(static_cast<TensorType>(id));
-            if(tensor != nullptr)
+            if (tensor != nullptr)
             {
                 src_tensors.push_back(tensor);
             }
@@ -205,10 +200,10 @@ public:
     std::vector<T *> get_dst_tensors()
     {
         std::vector<T *> dst_tensors{};
-        for(int id = static_cast<int>(TensorType::ACL_DST); id <= static_cast<int>(TensorType::ACL_DST_END); ++id)
+        for (int id = static_cast<int>(TensorType::ACL_DST); id <= static_cast<int>(TensorType::ACL_DST_END); ++id)
         {
             auto tensor = get_tensor(static_cast<TensorType>(id));
-            if(tensor != nullptr)
+            if (tensor != nullptr)
             {
                 dst_tensors.push_back(tensor);
             }
@@ -222,10 +217,10 @@ public:
     std::vector<const T *> get_const_dst_tensors() const
     {
         std::vector<const T *> dst_tensors{};
-        for(int id = static_cast<int>(TensorType::ACL_DST); id <= static_cast<int>(TensorType::ACL_DST_END); ++id)
+        for (int id = static_cast<int>(TensorType::ACL_DST); id <= static_cast<int>(TensorType::ACL_DST_END); ++id)
         {
             auto tensor = get_const_tensor(static_cast<TensorType>(id));
-            if(tensor != nullptr)
+            if (tensor != nullptr)
             {
                 dst_tensors.push_back(tensor);
             }
@@ -239,4 +234,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_ARGUMENTPACK_H

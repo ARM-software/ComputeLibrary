@@ -104,8 +104,8 @@ public:
     const ckw::TensorTileSampler &tile_sampler() const;
 
 private:
-    ckw::TensorOperand    *_tensor{ nullptr };
-    ckw::TileOperand      *_tile{ nullptr };
+    ckw::TensorOperand    *_tensor{nullptr};
+    ckw::TileOperand      *_tile{nullptr};
     ckw::TensorTileSampler _tile_sampler{};
 };
 

@@ -22,7 +22,15 @@
 
 cc_library(
     name = "utils",
-    srcs = glob(["**/*.cpp"]),
+    srcs = glob(
+        [
+            "**/*.cpp"
+        ],
+	exclude = glob(
+        [
+            "CommonGraphOptions.cpp",
+        ]),
+    ),
     hdrs = glob(["**/*.h"]),
     visibility = ["//visibility:public"],
     deps = [
@@ -32,4 +40,9 @@ cc_library(
         "//include",
         "//support",
     ],
+)
+
+exports_files(
+    ["CommonGraphOptions.cpp"],
+    visibility = ["//visibility:public"]
 )

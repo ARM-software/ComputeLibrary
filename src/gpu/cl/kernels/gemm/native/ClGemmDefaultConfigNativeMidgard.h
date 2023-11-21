@@ -45,10 +45,12 @@ public:
     ClGemmDefaultConfigNativeMidgard(GPUTarget gpu);
 
     // Inherited overridden method
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
 
 private:
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace gemm
 } // namespace kernels

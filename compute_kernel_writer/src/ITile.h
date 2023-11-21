@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_SRC_ITILE
-#define COMPUTE_KERNEL_WRITER_SRC_ITILE
+#ifndef CKW_SRC_ITILE_H
+#define CKW_SRC_ITILE_H
 
 #include "ckw/TileInfo.h"
 
@@ -37,49 +37,15 @@ using TileContainer = std::vector<std::vector<std::string>>;
 /** Tile descriptor which reports the underlying datatype and vector length */
 struct TileVariableDescriptor
 {
-    DataType dt{ DataType::Unknown }; /** Data type  */
-    int32_t  len{ 1 };                /** Number of elements in a single variable. For example, 1 for scalar  */
+    DataType dt{DataType::Unknown}; /** Data type  */
+    int32_t  len{1};                /** Number of elements in a single variable. For example, 1 for scalar  */
 };
 
 /** Tile variable */
 struct TileVariable
 {
-    std::string            str{ "" }; /** Tile variable as a string */
-    TileVariableDescriptor desc{};    /** Tile value descriptor which reports the datatype and vector length */
-};
-
-/** Tile base class.
- *  A Tile is a collection of variables (either program variables or constants) used to express a 2D data.
- */
-class ITile
-{
-public:
-    virtual ~ITile() = default;
-
-    /** Method to get all TileVariable objects
-     *
-     * @return a vector containing all @ref TileVariable objects
-     */
-    virtual std::vector<TileVariable> all() const = 0;
-
-    /** Method to get the name of the tile.
-     *
-     * @return the name of the tile
-     */
-    virtual const std::string &name() const = 0;
-
-    /** Method to get the tile info
-     *
-     * @return the @ref TileInfo
-     */
-    virtual const TileInfo &info() const = 0;
-
-    /** Method to know whether the tile is assignable or not.
-     *  For example, a constant tile is not assignable.
-     *
-     * @return true if the tile is assignable
-     */
-    virtual bool is_assignable() const = 0;
+    std::string            str{""}; /** Tile variable as a string */
+    TileVariableDescriptor desc{};  /** Tile value descriptor which reports the datatype and vector length */
 };
 
 /** Interface to provide support for scalar access for a Tile.
@@ -130,6 +96,46 @@ public:
      */
     virtual std::vector<int32_t> supported_vector_lengths() const = 0;
 };
+
+/** Tile base class.
+ *  A Tile is a collection of variables (either program variables or constants) used to express a 2D data.
+ */
+class ITile : public IScalarAccess
+{
+public:
+    virtual ~ITile() = default;
+
+    /** Method to get all TileVariable objects
+     *
+     * @return a vector containing all @ref TileVariable objects
+     */
+    virtual std::vector<TileVariable> all() const = 0;
+
+    /** Method to get the name of the tile.
+     *
+     * @return the name of the tile
+     */
+    virtual const std::string &name() const = 0;
+
+    /** Method to get the tile info
+     *
+     * @return the @ref TileInfo
+     */
+    virtual const TileInfo &info() const = 0;
+
+    /** Method to know whether the tile is assignable or not.
+     *  For example, a constant tile is not assignable.
+     *
+     * @return true if the tile is assignable
+     */
+    virtual bool is_assignable() const = 0;
+
+    /** Get whether the tile is scalar, i.e. the width and height are both 1.
+     *
+     * @return true if the tile is scalar.
+     */
+    bool is_scalar() const;
+};
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_SRC_ITILE */
+#endif // CKW_SRC_ITILE_H

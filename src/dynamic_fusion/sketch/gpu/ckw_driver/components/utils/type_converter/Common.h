@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "ckw/TensorInfo.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 
 namespace arm_compute
@@ -38,7 +39,7 @@ namespace dynamic_fusion
 {
 inline ckw::DataType to_ckw(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::F32:
             return ckw::DataType::Fp32;
@@ -65,21 +66,16 @@ inline ckw::DataType to_ckw(DataType dt)
 
 inline ckw::TensorShape to_ckw(const TensorShape &shape)
 {
-    ARM_COMPUTE_ERROR_ON(shape.num_max_dimensions < std::tuple_size<ckw::TensorShape> {});
-    ARM_COMPUTE_ERROR_ON(std::tuple_size<ckw::TensorShape> {} != 5);
+    ARM_COMPUTE_ERROR_ON(shape.num_max_dimensions < std::tuple_size<ckw::TensorShape>{});
+    ARM_COMPUTE_ERROR_ON(std::tuple_size<ckw::TensorShape>{} != 5);
     /// NOTE: Overflow danger. Use size_t?
-    return ckw::TensorShape
-    {
-        static_cast<int32_t>(shape[0]),
-        static_cast<int32_t>(shape[1]),
-        static_cast<int32_t>(shape[2]),
-        static_cast<int32_t>(shape[3]),
-        static_cast<int32_t>(shape[4])
-    };
+    return ckw::TensorShape{static_cast<int32_t>(shape[0]), static_cast<int32_t>(shape[1]),
+                            static_cast<int32_t>(shape[2]), static_cast<int32_t>(shape[3]),
+                            static_cast<int32_t>(shape[4])};
 }
 inline ckw::TensorDataLayout to_ckw(DataLayout dl)
 {
-    switch(dl)
+    switch (dl)
     {
         case DataLayout::NHWC:
             return ckw::TensorDataLayout::Nhwc;
@@ -91,18 +87,13 @@ inline ckw::TensorDataLayout to_ckw(DataLayout dl)
 }
 inline ckw::TensorInfo to_ckw(const ITensorInfo &tensor_info)
 {
-    return ckw::TensorInfo
-    {
-        to_ckw(tensor_info.data_type()),
-        to_ckw(tensor_info.tensor_shape()),
-        to_ckw(tensor_info.data_layout()),
-        tensor_info.id()
-    };
+    return ckw::TensorInfo{to_ckw(tensor_info.data_type()), to_ckw(tensor_info.tensor_shape()),
+                           to_ckw(tensor_info.data_layout()), tensor_info.id()};
 }
 
 inline TensorComponentType from_ckw(const ckw::TensorComponentType &component)
 {
-    switch(component)
+    switch (component)
     {
         case ckw::TensorComponentType::OffsetFirstElement:
             return TensorComponentType::OffsetFirstElement;
@@ -142,7 +133,7 @@ inline TensorComponentType from_ckw(const ckw::TensorComponentType &component)
 
 inline ckw::TensorStorageType to_ckw(const TensorStorageType &storage)
 {
-    switch(storage)
+    switch (storage)
     {
         case TensorStorageType::ClBufferUint8Ptr:
             return ckw::TensorStorageType::BufferUint8Ptr;
@@ -159,7 +150,7 @@ inline ckw::TensorStorageType to_ckw(const TensorStorageType &storage)
 }
 inline TensorStorageType from_ckw(const ckw::TensorStorageType &storage)
 {
-    switch(storage)
+    switch (storage)
     {
         case ckw::TensorStorageType::BufferUint8Ptr:
             return TensorStorageType::ClBufferUint8Ptr;

@@ -28,6 +28,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuGemm.h"
@@ -39,12 +40,12 @@ namespace arm_compute
 struct NEGEMM::Impl
 {
     MemoryGroup      memory_group{};
-    IWeightsManager *weights_manager{ nullptr };
+    IWeightsManager *weights_manager{nullptr};
 
-    std::unique_ptr<cpu::CpuGemm> op{ nullptr };
+    std::unique_ptr<cpu::CpuGemm> op{nullptr};
 
-    const ITensor *original_b{ nullptr };
-    bool           is_prepared{ false };
+    const ITensor *original_b{nullptr};
+    bool           is_prepared{false};
 
     ITensorPack                      run_pack{};
     ITensorPack                      prep_pack{};
@@ -61,10 +62,17 @@ NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *
 
 NEGEMM::~NEGEMM() = default;
 
-void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info)
+void NEGEMM::configure(const ITensor  *a,
+                       const ITensor  *b,
+                       const ITensor  *c,
+                       ITensor        *d,
+                       float           alpha,
+                       float           beta,
+                       const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
-    ARM_COMPUTE_ERROR_THROW_ON(cpu::CpuGemm::validate(a->info(), b->info(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta, gemm_info));
+    ARM_COMPUTE_ERROR_THROW_ON(cpu::CpuGemm::validate(a->info(), b->info(), (c != nullptr) ? c->info() : nullptr,
+                                                      d->info(), alpha, beta, gemm_info));
 
     // Check if we need to reshape the matrix B only on the first run
     _impl->is_prepared = false;
@@ -73,24 +81,32 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
     // Make the B matrix dynamic values.
     auto b_info_to_use = b->info()->clone();
-    if(!gemm_info.reshape_b_only_on_first_run())
+    if (!gemm_info.reshape_b_only_on_first_run())
     {
         b_info_to_use->set_are_values_constant(false);
     }
 
-    _impl->op->configure(a->info(), b_info_to_use.get(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta, gemm_info);
+    _impl->op->configure(a->info(), b_info_to_use.get(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta,
+                         gemm_info);
 
     _impl->aux_mem_req = _impl->op->workspace();
-    _impl->run_pack    = { { ACL_SRC_0, a }, { ACL_SRC_1, b }, { ACL_SRC_2, c }, { ACL_DST, d } };
-    _impl->prep_pack   = { { ACL_SRC_1, b }, { ACL_SRC_2, c } };
-    _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->run_pack    = {{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_SRC_2, c}, {ACL_DST, d}};
+    _impl->prep_pack   = {{ACL_SRC_1, b}, {ACL_SRC_2, c}};
+    _impl->workspace =
+        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
 }
 
-Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
+Status NEGEMM::validate(const ITensorInfo *a,
+                        const ITensorInfo *b,
+                        const ITensorInfo *c,
+                        const ITensorInfo *output,
+                        float              alpha,
+                        float              beta,
+                        const GEMMInfo    &gemm_info)
 {
     // Make the B matrix dynamic values.
     auto b_to_use = b->clone();
-    if(!gemm_info.reshape_b_only_on_first_run())
+    if (!gemm_info.reshape_b_only_on_first_run())
     {
         b_to_use->set_are_values_constant(false);
     }
@@ -98,8 +114,14 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     return cpu::CpuGemm::validate(a, b_to_use.get(), c, output, alpha, beta, gemm_info);
 }
 
-Status NEGEMM::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output,
-                            float alpha, float beta, const GEMMInfo &gemm_info)
+Status NEGEMM::has_opt_impl(arm_compute::WeightFormat &expected_weight_format,
+                            const ITensorInfo         *a,
+                            const ITensorInfo         *b,
+                            const ITensorInfo         *c,
+                            const ITensorInfo         *output,
+                            float                      alpha,
+                            float                      beta,
+                            const GEMMInfo            &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha, beta);
     return cpu::CpuGemm::has_opt_impl(expected_weight_format, a, b, c, output, gemm_info);
@@ -115,15 +137,15 @@ void NEGEMM::run()
 
 void NEGEMM::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->prep_pack);
 
-        auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
-                                        _impl->aux_mem_req.end(),
-                                        [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
+        auto has_reshape =
+            std::find_if(_impl->aux_mem_req.begin(), _impl->aux_mem_req.end(),
+                         [](const MemoryInfo &m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
 
-        if(has_reshape != std::end(_impl->aux_mem_req))
+        if (has_reshape != std::end(_impl->aux_mem_req))
         {
             _impl->original_b->mark_as_unused();
         }

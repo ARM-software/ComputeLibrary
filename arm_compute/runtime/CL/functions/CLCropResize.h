@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_CL_CROP_RESIZE_H
 
 #include "arm_compute/core/CL/ICLTensor.h"
-
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLCopy.h"
 #include "arm_compute/runtime/CL/functions/CLCrop.h"
@@ -82,8 +81,13 @@ public:
      * @param[in]  method              The policy to be used when resizing image. Default is bilinear.
      * @param[in]  extrapolation_value Value to be used for values outside of the image for cropping and resizing. Default is 0.
      */
-    void configure(const ICLTensor *input, ICLTensor *boxes, ICLTensor *box_ind, ICLTensor *output, Coordinates2D crop_size,
-                   InterpolationPolicy method = InterpolationPolicy::BILINEAR, float extrapolation_value = 0);
+    void configure(const ICLTensor    *input,
+                   ICLTensor          *boxes,
+                   ICLTensor          *box_ind,
+                   ICLTensor          *output,
+                   Coordinates2D       crop_size,
+                   InterpolationPolicy method              = InterpolationPolicy::BILINEAR,
+                   float               extrapolation_value = 0);
     /** Configure kernel
      *
      * @note Supported tensor rank: up to 4
@@ -100,8 +104,14 @@ public:
      * @param[in]  method              The policy to be used when resizing image. Default is bilinear.
      * @param[in]  extrapolation_value Value to be used for values outside of the image for cropping and resizing. Default is 0.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *boxes, ICLTensor *box_ind, ICLTensor *output, Coordinates2D crop_size,
-                   InterpolationPolicy method = InterpolationPolicy::BILINEAR, float extrapolation_value = 0);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *boxes,
+                   ICLTensor              *box_ind,
+                   ICLTensor              *output,
+                   Coordinates2D           crop_size,
+                   InterpolationPolicy     method              = InterpolationPolicy::BILINEAR,
+                   float                   extrapolation_value = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NESlice
      *
@@ -121,8 +131,13 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, ITensorInfo *boxes, ITensorInfo *box_ind, const ITensorInfo *output,
-                           Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value);
+    static Status validate(const ITensorInfo  *input,
+                           ITensorInfo        *boxes,
+                           ITensorInfo        *box_ind,
+                           const ITensorInfo  *output,
+                           Coordinates2D       crop_size,
+                           InterpolationPolicy method,
+                           float               extrapolation_value);
 
     void run() override;
 

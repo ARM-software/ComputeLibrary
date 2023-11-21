@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph.h"
+
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
@@ -35,8 +36,7 @@ using namespace arm_compute::graph_utils;
 class ShuffleNetExample : public Example
 {
 public:
-    ShuffleNetExample()
-        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "ShuffleNet")
+    ShuffleNetExample() : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "ShuffleNet")
     {
     }
     bool do_setup(int argc, char **argv) override
@@ -49,20 +49,21 @@ public:
         common_params = consume_common_graph_parameters(common_opts);
 
         // Return when help menu is requested
-        if(common_params.help)
+        if (common_params.help)
         {
             cmd_parser.print_help(argv[0]);
             return false;
         }
 
         // Set default layout if needed (Single kernel grouped convolution not yet supported int NHWC)
-        if(!common_opts.data_layout->is_set())
+        if (!common_opts.data_layout->is_set())
         {
             common_params.data_layout = DataLayout::NHWC;
         }
 
         // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
+        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type),
+                                "QASYMM8 not supported for this graph");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -75,15 +76,17 @@ public:
         std::string data_path = common_params.data_path;
 
         // Add model path to data path
-        if(!data_path.empty())
+        if (!data_path.empty())
         {
             data_path += model_path;
         }
 
         // Create input descriptor
         const auto        operation_layout = common_params.data_layout;
-        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, common_params.batches), DataLayout::NCHW, operation_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
+        const TensorShape tensor_shape =
+            permute_shape(TensorShape(224U, 224U, 3U, common_params.batches), DataLayout::NCHW, operation_layout);
+        TensorDescriptor input_descriptor =
+            TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
@@ -91,24 +94,22 @@ public:
         // Create preprocessor
         std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>(0);
 
-        graph << common_params.target
-              << common_params.fast_math_hint
-              << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor), false /* Do not convert to BGR */))
-              << ConvolutionLayer(
-                  3U, 3U, 24U,
-                  get_weights_accessor(data_path, "conv3_0_w_0.npy", weights_layout),
-                  get_weights_accessor(data_path, "conv3_0_b_0.npy", weights_layout),
-                  PadStrideInfo(2, 2, 1, 1))
-              .set_name("Conv1/convolution")
-              << BatchNormalizationLayer(
-                  get_weights_accessor(data_path, "conv3_0_bn_rm_0.npy"),
-                  get_weights_accessor(data_path, "conv3_0_bn_riv_0.npy"),
-                  get_weights_accessor(data_path, "conv3_0_bn_s_0.npy"),
-                  get_weights_accessor(data_path, "conv3_0_bn_b_0.npy"),
-                  1e-5f)
-              .set_name("Conv1/BatchNorm")
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Conv1/Relu")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 1, 1))).set_name("pool1/MaxPool");
+        graph << common_params.target << common_params.fast_math_hint
+              << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor),
+                                                                 false /* Do not convert to BGR */))
+              << ConvolutionLayer(3U, 3U, 24U, get_weights_accessor(data_path, "conv3_0_w_0.npy", weights_layout),
+                                  get_weights_accessor(data_path, "conv3_0_b_0.npy", weights_layout),
+                                  PadStrideInfo(2, 2, 1, 1))
+                     .set_name("Conv1/convolution")
+              << BatchNormalizationLayer(get_weights_accessor(data_path, "conv3_0_bn_rm_0.npy"),
+                                         get_weights_accessor(data_path, "conv3_0_bn_riv_0.npy"),
+                                         get_weights_accessor(data_path, "conv3_0_bn_s_0.npy"),
+                                         get_weights_accessor(data_path, "conv3_0_bn_b_0.npy"), 1e-5f)
+                     .set_name("Conv1/BatchNorm")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                     .set_name("Conv1/Relu")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 1, 1)))
+                     .set_name("pool1/MaxPool");
 
         // Stage 2
         add_residual_block(data_path, DataLayout::NCHW, 0U /* unit */, 112U /* depth */, 2U /* stride */);
@@ -134,13 +135,10 @@ public:
 
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, operation_layout)).set_name("predictions/AvgPool")
               << FlattenLayer().set_name("predictions/Reshape")
-              << FullyConnectedLayer(
-                  1000U,
-                  get_weights_accessor(data_path, "pred_w_0.npy", weights_layout),
-                  get_weights_accessor(data_path, "pred_b_0.npy"))
-              .set_name("predictions/FC")
-              << SoftmaxLayer().set_name("predictions/Softmax")
-              << OutputLayer(get_output_accessor(common_params, 5));
+              << FullyConnectedLayer(1000U, get_weights_accessor(data_path, "pred_w_0.npy", weights_layout),
+                                     get_weights_accessor(data_path, "pred_b_0.npy"))
+                     .set_name("predictions/FC")
+              << SoftmaxLayer().set_name("predictions/Softmax") << OutputLayer(get_output_accessor(common_params, 5));
 
         // Finalize graph
         GraphConfig config;
@@ -167,8 +165,11 @@ private:
     CommonGraphParams  common_params;
     Stream             graph;
 
-    void add_residual_block(const std::string &data_path, DataLayout weights_layout,
-                            unsigned int unit, unsigned int depth, unsigned int stride)
+    void add_residual_block(const std::string &data_path,
+                            DataLayout         weights_layout,
+                            unsigned int       unit,
+                            unsigned int       depth,
+                            unsigned int       stride)
     {
         PadStrideInfo      dwc_info        = PadStrideInfo(1, 1, 1, 1);
         const unsigned int gconv_id        = unit * 2;
@@ -181,63 +182,61 @@ private:
         SubStream left_ss(graph);
         SubStream right_ss(graph);
 
-        if(stride == 2)
+        if (stride == 2)
         {
-            right_ss << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, common_params.data_layout, PadStrideInfo(2, 2, 1, 1))).set_name(unit_name + "/pool_1/AveragePool");
+            right_ss << PoolingLayer(
+                            PoolingLayerInfo(PoolingType::AVG, 3, common_params.data_layout, PadStrideInfo(2, 2, 1, 1)))
+                            .set_name(unit_name + "/pool_1/AveragePool");
             dwc_info = PadStrideInfo(2, 2, 1, 1);
         }
 
-        left_ss << ConvolutionLayer(
-                    1U, 1U, depth,
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_w_0.npy", weights_layout),
-                    std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-                    PadStrideInfo(1, 1, 0, 0), num_groups)
-                .set_name(unit_name + "/gconv1_" + gconv_id_name + "/convolution")
-                << BatchNormalizationLayer(
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_rm_0.npy"),
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_riv_0.npy"),
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_s_0.npy"),
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_b_0.npy"),
-                    1e-5f)
-                .set_name(unit_name + "/gconv1_" + gconv_id_name + "/BatchNorm")
-                << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "/gconv1_" + gconv_id_name + "/Relu")
-                << ChannelShuffleLayer(num_groups).set_name(unit_name + "/shuffle_0/ChannelShufle")
-                << DepthwiseConvolutionLayer(
-                    3U, 3U,
-                    get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_w_0.npy", weights_layout),
-                    std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-                    dwc_info)
-                .set_name(unit_name + "/gconv3_" + unit_id_name + "/depthwise")
-                << BatchNormalizationLayer(
-                    get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_rm_0.npy"),
-                    get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_riv_0.npy"),
-                    get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_s_0.npy"),
-                    get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_b_0.npy"),
-                    1e-5f)
-                .set_name(unit_name + "/gconv3_" + unit_id_name + "/BatchNorm")
-                << ConvolutionLayer(
-                    1U, 1U, depth,
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_w_0.npy", weights_layout),
-                    std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-                    PadStrideInfo(1, 1, 0, 0), num_groups)
-                .set_name(unit_name + "/gconv1_" + gconv_id_1_name + "/convolution")
-                << BatchNormalizationLayer(
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_rm_0.npy"),
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_riv_0.npy"),
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_s_0.npy"),
-                    get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_b_0.npy"),
-                    1e-5f)
-                .set_name(unit_name + "/gconv1_" + gconv_id_1_name + "/BatchNorm");
+        left_ss
+            << ConvolutionLayer(1U, 1U, depth,
+                                get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_w_0.npy", weights_layout),
+                                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+                                PadStrideInfo(1, 1, 0, 0), num_groups)
+                   .set_name(unit_name + "/gconv1_" + gconv_id_name + "/convolution")
+            << BatchNormalizationLayer(get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_rm_0.npy"),
+                                       get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_riv_0.npy"),
+                                       get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_s_0.npy"),
+                                       get_weights_accessor(data_path, "gconv1_" + gconv_id_name + "_bn_b_0.npy"),
+                                       1e-5f)
+                   .set_name(unit_name + "/gconv1_" + gconv_id_name + "/BatchNorm")
+            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                   .set_name(unit_name + "/gconv1_" + gconv_id_name + "/Relu")
+            << ChannelShuffleLayer(num_groups).set_name(unit_name + "/shuffle_0/ChannelShufle")
+            << DepthwiseConvolutionLayer(
+                   3U, 3U, get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_w_0.npy", weights_layout),
+                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr), dwc_info)
+                   .set_name(unit_name + "/gconv3_" + unit_id_name + "/depthwise")
+            << BatchNormalizationLayer(get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_rm_0.npy"),
+                                       get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_riv_0.npy"),
+                                       get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_s_0.npy"),
+                                       get_weights_accessor(data_path, "gconv3_" + unit_id_name + "_bn_b_0.npy"), 1e-5f)
+                   .set_name(unit_name + "/gconv3_" + unit_id_name + "/BatchNorm")
+            << ConvolutionLayer(
+                   1U, 1U, depth,
+                   get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_w_0.npy", weights_layout),
+                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr), PadStrideInfo(1, 1, 0, 0), num_groups)
+                   .set_name(unit_name + "/gconv1_" + gconv_id_1_name + "/convolution")
+            << BatchNormalizationLayer(get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_rm_0.npy"),
+                                       get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_riv_0.npy"),
+                                       get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_s_0.npy"),
+                                       get_weights_accessor(data_path, "gconv1_" + gconv_id_1_name + "_bn_b_0.npy"),
+                                       1e-5f)
+                   .set_name(unit_name + "/gconv1_" + gconv_id_1_name + "/BatchNorm");
 
-        if(stride == 2)
+        if (stride == 2)
         {
             graph << ConcatLayer(std::move(left_ss), std::move(right_ss)).set_name(unit_name + "/Concat");
         }
         else
         {
-            graph << EltwiseLayer(std::move(left_ss), std::move(right_ss), EltwiseOperation::Add).set_name(unit_name + "/Add");
+            graph << EltwiseLayer(std::move(left_ss), std::move(right_ss), EltwiseOperation::Add)
+                         .set_name(unit_name + "/Add");
         }
-        graph << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "/Relu");
+        graph << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                     .set_name(unit_name + "/Relu");
     }
 };
 

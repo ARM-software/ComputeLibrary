@@ -36,22 +36,30 @@
 #ifdef __aarch64__
 namespace
 {
-void a64_add_bn_clamp_direct_s8_fp32_2x16(
-    int8_t *out, size_t out_stride,
-    int8_t *out_direct, size_t out_direct_stride,
-    const int8_t *in0, size_t in0_stride,
-    const int8_t *in1, size_t in1_stride,
-    const float *bn_mul,
-    const float *bn_add,
-    const int8_t minval,
-    const int8_t maxval,
-    int32_t out_zeropt, float out_scale,
-    int32_t out_direct_zeropt, float out_direct_scale,
-    int32_t in0_zeropt, float in0_scale,
-    int32_t in1_zeropt, float in1_scale,
-    size_t width, size_t height)
+void a64_add_bn_clamp_direct_s8_fp32_2x16(int8_t       *out,
+                                          size_t        out_stride,
+                                          int8_t       *out_direct,
+                                          size_t        out_direct_stride,
+                                          const int8_t *in0,
+                                          size_t        in0_stride,
+                                          const int8_t *in1,
+                                          size_t        in1_stride,
+                                          const float  *bn_mul,
+                                          const float  *bn_add,
+                                          const int8_t  minval,
+                                          const int8_t  maxval,
+                                          int32_t       out_zeropt,
+                                          float         out_scale,
+                                          int32_t       out_direct_zeropt,
+                                          float         out_direct_scale,
+                                          int32_t       in0_zeropt,
+                                          float         in0_scale,
+                                          int32_t       in1_zeropt,
+                                          float         in1_scale,
+                                          size_t        width,
+                                          size_t        height)
 {
-    float scales[4] = { in0_scale, in1_scale, 1.0f / out_scale, 1.0f / out_direct_scale };
+    float scales[4] = {in0_scale, in1_scale, 1.0f / out_scale, 1.0f / out_direct_scale};
     struct KernelArgs
     {
         const float *scales;
@@ -709,9 +717,19 @@ void a64_add_bn_clamp_direct_s8_fp32_2x16(
         "subs x23, x23, #0x2\n"
         "bgt 6b\n"
         "32:" // odd columns skip
-        : [bn_add] "+&r"(bn_add), [bn_mul] "+&r"(bn_mul), [in0] "+&r"(in0), [in1] "+&r"(in1), [out] "+&r"(out), [out_direct] "+&r"(out_direct), [width] "+&r"(width)
-        : [args_ptr] "r"(&ka), [height] "r"(height), [in0_stride] "r"(in0_stride), [in1_stride] "r"(in1_stride), [offsetof_in0_zeropt] "I"(offsetof(KernelArgs, in0_zeropt)), [offsetof_in1_zeropt] "I"(offsetof(KernelArgs, in1_zeropt)), [offsetof_maxval] "I"(offsetof(KernelArgs, maxval)), [offsetof_minval] "I"(offsetof(KernelArgs, minval)), [offsetof_out_direct_zeropt] "I"(offsetof(KernelArgs, out_direct_zeropt)), [offsetof_out_zeropt] "I"(offsetof(KernelArgs, out_zeropt)), [offsetof_scales] "I"(offsetof(KernelArgs, scales)), [out_direct_stride] "r"(out_direct_stride), [out_stride] "r"(out_stride)
-        : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x10", "x11", "x12", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28");
+        : [bn_add] "+&r"(bn_add), [bn_mul] "+&r"(bn_mul), [in0] "+&r"(in0), [in1] "+&r"(in1), [out] "+&r"(out),
+          [out_direct] "+&r"(out_direct), [width] "+&r"(width)
+        : [args_ptr] "r"(&ka), [height] "r"(height), [in0_stride] "r"(in0_stride), [in1_stride] "r"(in1_stride),
+          [offsetof_in0_zeropt] "I"(offsetof(KernelArgs, in0_zeropt)),
+          [offsetof_in1_zeropt] "I"(offsetof(KernelArgs, in1_zeropt)),
+          [offsetof_maxval] "I"(offsetof(KernelArgs, maxval)), [offsetof_minval] "I"(offsetof(KernelArgs, minval)),
+          [offsetof_out_direct_zeropt] "I"(offsetof(KernelArgs, out_direct_zeropt)),
+          [offsetof_out_zeropt] "I"(offsetof(KernelArgs, out_zeropt)),
+          [offsetof_scales] "I"(offsetof(KernelArgs, scales)), [out_direct_stride] "r"(out_direct_stride),
+          [out_stride] "r"(out_stride)
+        : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v16",
+          "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9",
+          "x10", "x11", "x12", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28");
 }
 
 } // namespace
@@ -720,8 +738,15 @@ namespace arm_compute
 {
 namespace cpu
 {
-void add_mul_add_s8_neon(const ITensor *input1, const ITensor *input2, const ITensor *bn_mul, const ITensor *bn_add,
-                         ITensor *add_output, ITensor *final_output, ConvertPolicy policy, const ActivationLayerInfo &act_info, const Window &window)
+void add_mul_add_s8_neon(const ITensor             *input1,
+                         const ITensor             *input2,
+                         const ITensor             *bn_mul,
+                         const ITensor             *bn_add,
+                         ITensor                   *add_output,
+                         ITensor                   *final_output,
+                         ConvertPolicy              policy,
+                         const ActivationLayerInfo &act_info,
+                         const Window              &window)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -739,24 +764,25 @@ void add_mul_add_s8_neon(const ITensor *input1, const ITensor *input2, const ITe
     int8_t maxval = std::numeric_limits<int8_t>::max();
 
     const UniformQuantizationInfo final_output_qinfo = final_output_info->quantization_info().uniform();
-    if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
+    if (act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
     {
         minval = quantize_qasymm8_signed(0.f, final_output_qinfo);
     }
-    else if(act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+    else if (act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
     {
         minval = quantize_qasymm8_signed(0.f, final_output_qinfo);
         maxval = quantize_qasymm8_signed(act_info.a(), final_output_qinfo);
     }
-    else if(act_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+    else if (act_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
     {
         minval = quantize_qasymm8_signed(act_info.b(), final_output_qinfo);
         maxval = quantize_qasymm8_signed(act_info.a(), final_output_qinfo);
     }
 
-    const UniformQuantizationInfo in1_qinfo        = input1_info->quantization_info().uniform();
-    const UniformQuantizationInfo in2_qinfo        = input2_info->quantization_info().uniform();
-    const UniformQuantizationInfo add_output_qinfo = (add_output != nullptr) ? add_output_info->quantization_info().uniform() : UniformQuantizationInfo();
+    const UniformQuantizationInfo in1_qinfo = input1_info->quantization_info().uniform();
+    const UniformQuantizationInfo in2_qinfo = input2_info->quantization_info().uniform();
+    const UniformQuantizationInfo add_output_qinfo =
+        (add_output != nullptr) ? add_output_info->quantization_info().uniform() : UniformQuantizationInfo();
 
     const int32_t in1_offset        = in1_qinfo.offset;
     const int32_t in2_offset        = in2_qinfo.offset;
@@ -783,50 +809,35 @@ void add_mul_add_s8_neon(const ITensor *input1, const ITensor *input2, const ITe
     const size_t width  = window.num_iterations(0);
     const size_t height = window.num_iterations(1);
 
-    if(add_output != nullptr)
+    if (add_output != nullptr)
     {
         Iterator add_out_it(add_output, window);
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            a64_add_bn_clamp_direct_s8_fp32_2x16(
-                reinterpret_cast<int8_t *>(out_it.ptr()), out_stride,
-                reinterpret_cast<int8_t *>(add_out_it.ptr()), out_direct_stride,
-                reinterpret_cast<int8_t *>(in1_it.ptr()), in0_stride,
-                reinterpret_cast<int8_t *>(in2_it.ptr()), in1_stride,
-                bn_mul_buffer,
-                bn_add_buffer,
-                minval,
-                maxval,
-                out_offset, out_scale,
-                out_direct_offset, out_direct_scale,
-                in1_offset, in1_scale,
-                in2_offset, in2_scale,
-                width, height);
-        },
-        in1_it, in2_it, add_out_it, out_it);
+            win,
+            [&](const Coordinates &)
+            {
+                a64_add_bn_clamp_direct_s8_fp32_2x16(
+                    reinterpret_cast<int8_t *>(out_it.ptr()), out_stride, reinterpret_cast<int8_t *>(add_out_it.ptr()),
+                    out_direct_stride, reinterpret_cast<int8_t *>(in1_it.ptr()), in0_stride,
+                    reinterpret_cast<int8_t *>(in2_it.ptr()), in1_stride, bn_mul_buffer, bn_add_buffer, minval, maxval,
+                    out_offset, out_scale, out_direct_offset, out_direct_scale, in1_offset, in1_scale, in2_offset,
+                    in2_scale, width, height);
+            },
+            in1_it, in2_it, add_out_it, out_it);
     }
     else
     {
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            a64_add_bn_clamp_direct_s8_fp32_2x16(
-                reinterpret_cast<int8_t *>(out_it.ptr()), out_stride,
-                nullptr, out_direct_stride,
-                reinterpret_cast<int8_t *>(in1_it.ptr()), in0_stride,
-                reinterpret_cast<int8_t *>(in2_it.ptr()), in1_stride,
-                bn_mul_buffer,
-                bn_add_buffer,
-                minval,
-                maxval,
-                out_offset, out_scale,
-                out_direct_offset, out_direct_scale,
-                in1_offset, in1_scale,
-                in2_offset, in2_scale,
-                width, height);
-        },
-        in1_it, in2_it, out_it);
+            win,
+            [&](const Coordinates &)
+            {
+                a64_add_bn_clamp_direct_s8_fp32_2x16(
+                    reinterpret_cast<int8_t *>(out_it.ptr()), out_stride, nullptr, out_direct_stride,
+                    reinterpret_cast<int8_t *>(in1_it.ptr()), in0_stride, reinterpret_cast<int8_t *>(in2_it.ptr()),
+                    in1_stride, bn_mul_buffer, bn_add_buffer, minval, maxval, out_offset, out_scale, out_direct_offset,
+                    out_direct_scale, in1_offset, in1_scale, in2_offset, in2_scale, width, height);
+            },
+            in1_it, in2_it, out_it);
     }
 }
 } // namespace cpu

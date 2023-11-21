@@ -22,10 +22,12 @@
  * SOFTWARE.
  */
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -49,14 +51,19 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const uint32_t temp_num_elems_processed_per_iteration = max_cl_vector_width / input->element_size();
     /* If width is less then step, then make step same as width to avoid global size being step instead of actual width. */
     /* Or we should fix in arm_compute::enqueue() or arm_compute::calculate_max_window(). */
-    const uint32_t num_elems_processed_per_iteration = (input->dimension(0) < temp_num_elems_processed_per_iteration) ? input->dimension(0) : temp_num_elems_processed_per_iteration;
+    const uint32_t num_elems_processed_per_iteration = (input->dimension(0) < temp_num_elems_processed_per_iteration)
+                                                           ? input->dimension(0)
+                                                           : temp_num_elems_processed_per_iteration;
 
     // This kernel doesn't need padding
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     return std::make_pair(Status{}, win);
 }
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias)
+Status validate_arguments(const ITensorInfo *input,
+                          const ITensorInfo *output,
+                          const ITensorInfo *weight,
+                          const ITensorInfo *bias)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weight, bias, output);
 
@@ -72,7 +79,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(weight, bias);
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -87,10 +94,14 @@ CLQLSTMLayerNormalizationKernel::CLQLSTMLayerNormalizationKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLQLSTMLayerNormalizationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *weight, const ICLTensor *bias)
+void CLQLSTMLayerNormalizationKernel::configure(const CLCompileContext &compile_context,
+                                                const ICLTensor        *input,
+                                                ICLTensor              *output,
+                                                const ICLTensor        *weight,
+                                                const ICLTensor        *bias)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weight, bias, output);
-    auto padding_info = get_padding_info({ input, weight, bias, output });
+    auto padding_info = get_padding_info({input, weight, bias, output});
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), weight->info(), bias->info()));
 
@@ -104,7 +115,8 @@ void CLQLSTMLayerNormalizationKernel::configure(const CLCompileContext &compile_
     int32_t                       output_multiplier{};
     int32_t                       output_shift{};
     const UniformQuantizationInfo quan_info = _weight->info()->quantization_info().uniform();
-    const Status                  status    = quantization::calculate_quantized_multiplier(quan_info.scale, &output_multiplier, &output_shift);
+    const Status                  status =
+        quantization::calculate_quantized_multiplier(quan_info.scale, &output_multiplier, &output_shift);
     output_shift *= -1;
 
     // Set build options
@@ -114,8 +126,12 @@ void CLQLSTMLayerNormalizationKernel::configure(const CLCompileContext &compile_
     build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
     build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
-    build_opts.add_option("-DMIN_BOUND=" + support::cpp11::to_string(std::get<0>(quantization::get_min_max_values_from_quantized_data_type(input->info()->data_type()))));
-    build_opts.add_option("-DMAX_BOUND=" + support::cpp11::to_string(std::get<1>(quantization::get_min_max_values_from_quantized_data_type(input->info()->data_type()))));
+    build_opts.add_option("-DMIN_BOUND=" +
+                          support::cpp11::to_string(std::get<0>(
+                              quantization::get_min_max_values_from_quantized_data_type(input->info()->data_type()))));
+    build_opts.add_option("-DMAX_BOUND=" +
+                          support::cpp11::to_string(std::get<1>(
+                              quantization::get_min_max_values_from_quantized_data_type(input->info()->data_type()))));
 
     // Create kernel
     _kernel = create_kernel(compile_context, "qlstm_layer_normalization", build_opts.options());
@@ -135,12 +151,18 @@ void CLQLSTMLayerNormalizationKernel::configure(const CLCompileContext &compile_
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-void CLQLSTMLayerNormalizationKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weight, const ICLTensor *bias)
+void CLQLSTMLayerNormalizationKernel::configure(const ICLTensor *input,
+                                                ICLTensor       *output,
+                                                const ICLTensor *weight,
+                                                const ICLTensor *bias)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, weight, bias);
 }
 
-Status CLQLSTMLayerNormalizationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias)
+Status CLQLSTMLayerNormalizationKernel::validate(const ITensorInfo *input,
+                                                 const ITensorInfo *output,
+                                                 const ITensorInfo *weight,
+                                                 const ITensorInfo *bias)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, weight, bias));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
@@ -171,7 +193,6 @@ void CLQLSTMLayerNormalizationKernel::run(const Window &window, cl::CommandQueue
         add_2D_tensor_argument(idx, _output, slice);
 
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_2D(slice));
+    } while (window.slide_window_slice_2D(slice));
 }
 } // namespace arm_compute

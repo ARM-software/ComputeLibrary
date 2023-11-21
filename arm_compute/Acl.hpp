@@ -75,7 +75,7 @@ struct ObjectDeleter
 #define OBJECT_DELETER(obj, func)              \
     template <>                                \
     struct ObjectDeleter<obj>                  \
-        \
+                                               \
     {                                          \
         static inline AclStatus Destroy(obj v) \
         {                                      \
@@ -171,7 +171,7 @@ protected:
     ObjectBase() = default;
 
 protected:
-    std::shared_ptr<T> _object{ nullptr }; /**< Library object */
+    std::shared_ptr<T> _object{nullptr}; /**< Library object */
 };
 
 /** Equality operator for library object
@@ -221,8 +221,7 @@ public:
      * @param[in] status Status returned
      * @param[in] msg    Error message to be bound with the exception
      */
-    Status(StatusCode status, const std::string &msg)
-        : _status(status), _msg(msg)
+    Status(StatusCode status, const std::string &msg) : _status(status), _msg(msg)
     {
     }
     /** Returns an explanatory exception message
@@ -266,7 +265,7 @@ private:
  */
 static inline void report_status(StatusCode status, const std::string &msg)
 {
-    if(status != StatusCode::Success)
+    if (status != StatusCode::Success)
     {
         throw Status(status, msg);
     }
@@ -299,7 +298,8 @@ enum class Target
 /**< Available execution modes */
 enum class ExecutionMode
 {
-    FastRerun = AclPreferFastRerun, /**< Prefer minimum latency in consecutive runs, might introduce higher startup times */
+    FastRerun =
+        AclPreferFastRerun, /**< Prefer minimum latency in consecutive runs, might introduce higher startup times */
     FastStart = AclPreferFastStart, /**< Prefer minimizing startup time */
 };
 
@@ -372,8 +372,7 @@ public:
      * @param[in]  target Target to create context for
      * @param[out] status Status information if requested
      */
-    explicit Context(Target target, StatusCode *status = nullptr)
-        : Context(target, Options(), status)
+    explicit Context(Target target, StatusCode *status = nullptr) : Context(target, Options(), status)
     {
     }
     /** Constructor
@@ -385,10 +384,11 @@ public:
     Context(Target target, const Options &options, StatusCode *status = nullptr)
     {
         AclContext ctx;
-        const auto st = detail::as_enum<StatusCode>(AclCreateContext(&ctx, detail::as_cenum<AclTarget>(target), &options.copts));
+        const auto st =
+            detail::as_enum<StatusCode>(AclCreateContext(&ctx, detail::as_cenum<AclTarget>(target), &options.copts));
         reset(ctx);
         report_status(st, "[Compute Library] Failed to create context");
-        if(status)
+        if (status)
         {
             *status = st;
         }
@@ -424,15 +424,13 @@ public:
          * As default options, no tuning will be performed, and the number of scheduling units will
          * depends on internal device discovery functionality
          */
-        Options()
-            : opts{ AclTuningModeNone, 0 } {};
+        Options() : opts{AclTuningModeNone, 0} {};
         /** Constructor
          *
          * @param[in] mode          Tuning mode to be used
          * @param[in] compute_units Number of scheduling units to be used
          */
-        Options(TuningMode mode, int32_t compute_units)
-            : opts{ detail::as_cenum<AclTuningMode>(mode), compute_units }
+        Options(TuningMode mode, int32_t compute_units) : opts{detail::as_cenum<AclTuningMode>(mode), compute_units}
         {
         }
 
@@ -448,8 +446,7 @@ public:
      * @param[in]  ctx    Context to create queue for
      * @param[out] status Status information if requested
      */
-    explicit Queue(Context &ctx, StatusCode *status = nullptr)
-        : Queue(ctx, Options(), status)
+    explicit Queue(Context &ctx, StatusCode *status = nullptr) : Queue(ctx, Options(), status)
     {
     }
     /** Constructor
@@ -466,7 +463,7 @@ public:
         const auto st = detail::as_enum<StatusCode>(AclCreateQueue(&queue, ctx.get(), &options.opts));
         reset(queue);
         report_status(st, "[Compute Library] Failed to create queue!");
-        if(status)
+        if (status)
         {
             *status = st;
         }
@@ -508,8 +505,7 @@ public:
      * @param[in] shape Shape of the tensor
      * @param[in] data_type Data type of the tensor
      */
-    TensorDescriptor(const std::vector<int32_t> &shape, DataType data_type)
-        : _shape(shape), _data_type(data_type)
+    TensorDescriptor(const std::vector<int32_t> &shape, DataType data_type) : _shape(shape), _data_type(data_type)
     {
         _cdesc.ndims     = _shape.size();
         _cdesc.shape     = _shape.data();
@@ -526,7 +522,7 @@ public:
         _cdesc     = desc;
         _data_type = detail::as_enum<DataType>(desc.data_type);
         _shape.reserve(desc.ndims);
-        for(int32_t d = 0; d < desc.ndims; ++d)
+        for (int32_t d = 0; d < desc.ndims; ++d)
         {
             _shape.emplace_back(desc.shape[d]);
         }
@@ -552,9 +548,9 @@ public:
         is_same &= _data_type == other._data_type;
         is_same &= _shape.size() == other._shape.size();
 
-        if(is_same)
+        if (is_same)
         {
-            for(uint32_t d = 0; d < _shape.size(); ++d)
+            for (uint32_t d = 0; d < _shape.size(); ++d)
             {
                 is_same &= _shape[d] == other._shape[d];
             }
@@ -592,8 +588,7 @@ public:
      * @param[in]  desc   Tensor descriptor to be used
      * @param[out] status Status information if requested
      */
-    Tensor(Context &ctx, const TensorDescriptor &desc, StatusCode *status = nullptr)
-        : Tensor(ctx, desc, true, status)
+    Tensor(Context &ctx, const TensorDescriptor &desc, StatusCode *status = nullptr) : Tensor(ctx, desc, true, status)
     {
     }
     /** Constructor
@@ -609,7 +604,7 @@ public:
         const auto st = detail::as_enum<StatusCode>(AclCreateTensor(&tensor, ctx.get(), desc.get(), allocate));
         reset(tensor);
         report_status(st, "[Compute Library] Failed to create tensor!");
-        if(status)
+        if (status)
         {
             *status = st;
         }
@@ -646,7 +641,8 @@ public:
      */
     StatusCode import(void *handle, ImportType type)
     {
-        const auto st = detail::as_enum<StatusCode>(AclTensorImport(_object.get(), handle, detail::as_cenum<AclImportMemoryType>(type)));
+        const auto st = detail::as_enum<StatusCode>(
+            AclTensorImport(_object.get(), handle, detail::as_cenum<AclImportMemoryType>(type)));
         report_status(st, "[Compute Library] Failed to import external memory to tensor!");
         return st;
     }
@@ -658,7 +654,7 @@ public:
      */
     uint64_t get_size()
     {
-        uint64_t   size{ 0 };
+        uint64_t   size{0};
         const auto st = detail::as_enum<StatusCode>(AclGetTensorSize(_object.get(), &size));
         report_status(st, "[Compute Library] Failed to get the size of the tensor");
         return size;
@@ -692,13 +688,12 @@ public:
          * @param[in] tensor_ Tensor to pack
          * @param[in] slot_id_ Slot identification of the tensor in respect with the operator
          */
-        PackPair(Tensor *tensor_, int32_t slot_id_)
-            : tensor(tensor_), slot_id(slot_id_)
+        PackPair(Tensor *tensor_, int32_t slot_id_) : tensor(tensor_), slot_id(slot_id_)
         {
         }
 
-        Tensor *tensor{ nullptr };         /**< Tensor object */
-        int32_t slot_id{ AclSlotUnknown }; /**< Slot id in respect with the operator */
+        Tensor *tensor{nullptr};         /**< Tensor object */
+        int32_t slot_id{AclSlotUnknown}; /**< Slot id in respect with the operator */
     };
 
 public:
@@ -713,7 +708,7 @@ public:
         const auto    st = detail::as_enum<StatusCode>(AclCreateTensorPack(&pack, ctx.get()));
         reset(pack);
         report_status(st, "[Compute Library] Failure during tensor pack creation");
-        if(status)
+        if (status)
         {
             *status = st;
         }
@@ -741,7 +736,7 @@ public:
         std::vector<int32_t>   slots(size);
         std::vector<AclTensor> tensors(size);
         int                    i = 0;
-        for(auto &p : packed)
+        for (auto &p : packed)
         {
             slots[i]   = p.slot_id;
             tensors[i] = AclTensor(p.tensor);
@@ -780,13 +775,17 @@ using ActivationDesc = AclActivationDescriptor;
 class Activation : public Operator
 {
 public:
-    Activation(Context &ctx, const TensorDescriptor &src, const TensorDescriptor &dst, const ActivationDesc &desc, StatusCode *status = nullptr)
+    Activation(Context                &ctx,
+               const TensorDescriptor &src,
+               const TensorDescriptor &dst,
+               const ActivationDesc   &desc,
+               StatusCode             *status = nullptr)
     {
         AclOperator op;
         const auto  st = detail::as_enum<StatusCode>(AclActivation(&op, ctx.get(), src.get(), dst.get(), desc));
         reset(op);
         report_status(st, "[Compute Library] Failure during Activation operator creation");
-        if(status)
+        if (status)
         {
             *status = st;
         }

@@ -23,10 +23,9 @@
  */
 #include "src/gpu/cl/operators/ClReshape.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClReshapeKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {

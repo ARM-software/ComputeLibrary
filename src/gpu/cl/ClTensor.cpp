@@ -31,8 +31,7 @@ namespace gpu
 {
 namespace opencl
 {
-ClTensor::ClTensor(IContext *ctx, const AclTensorDescriptor &desc)
-    : ITensorV2(ctx), _legacy_tensor()
+ClTensor::ClTensor(IContext *ctx, const AclTensorDescriptor &desc) : ITensorV2(ctx), _legacy_tensor()
 {
     ARM_COMPUTE_ASSERT((ctx != nullptr) && (ctx->type() == Target::GpuOcl));
     _legacy_tensor = std::make_unique<CLTensor>();
@@ -43,7 +42,7 @@ void *ClTensor::map()
 {
     ARM_COMPUTE_ASSERT(_legacy_tensor.get() != nullptr);
 
-    if(_legacy_tensor == nullptr)
+    if (_legacy_tensor == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[ClTensor:map]: Backing tensor does not exist!");
         return nullptr;
@@ -57,7 +56,7 @@ StatusCode ClTensor::unmap()
 {
     ARM_COMPUTE_ASSERT(_legacy_tensor.get() != nullptr);
 
-    if(_legacy_tensor == nullptr)
+    if (_legacy_tensor == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[ClTensor:unmap]: Backing tensor does not exist!");
         return StatusCode::RuntimeError;

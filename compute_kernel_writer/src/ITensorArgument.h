@@ -28,6 +28,7 @@
 #include "ckw/TensorInfo.h"
 #include "ckw/types/TensorComponentType.h"
 #include "ckw/types/TensorStorageType.h"
+
 #include "src/ITile.h"
 
 #include <string>
@@ -41,8 +42,8 @@ class ITensorComponent;
 /** Tensor storage variable */
 struct TensorStorageVariable
 {
-    std::string       val{ "" };                          /** Tensor storage as a string */
-    TensorStorageType type{ TensorStorageType::Unknown }; /** Tensor storage type */
+    std::string       val{""};                          /** Tensor storage as a string */
+    TensorStorageType type{TensorStorageType::Unknown}; /** Tensor storage type */
 };
 
 /** Tensor argument base class.
@@ -83,8 +84,8 @@ public:
     }
 
 protected:
-    TensorInfo  _info{};         // Tensor info
-    std::string _basename{ "" }; // Tensor name
+    TensorInfo  _info{};       // Tensor info
+    std::string _basename{""}; // Tensor name
 };
 
 /** Tensor component argument base class */

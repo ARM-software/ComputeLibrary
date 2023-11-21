@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/gpu/cl/kernels/ClTransposedConvolutionKernel.h"
 
@@ -32,8 +33,12 @@ namespace arm_compute
 {
 namespace opencl
 {
-void ClTransposedConvolution::configure(const CLCompileContext &compile_context, const ITensorInfo *input, const ITensorInfo *weights,
-                                        const ITensorInfo *biases, ITensorInfo *output, const PadStrideInfo &deconv_info)
+void ClTransposedConvolution::configure(const CLCompileContext &compile_context,
+                                        const ITensorInfo      *input,
+                                        const ITensorInfo      *weights,
+                                        const ITensorInfo      *biases,
+                                        ITensorInfo            *output,
+                                        const PadStrideInfo    &deconv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, deconv_info);
@@ -43,10 +48,14 @@ void ClTransposedConvolution::configure(const CLCompileContext &compile_context,
     _transposed_conv_kernel = std::move(kernel_object);
 }
 
-Status ClTransposedConvolution::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases,
-                                         const ITensorInfo *output, const PadStrideInfo &deconv_info)
+Status ClTransposedConvolution::validate(const ITensorInfo   *input,
+                                         const ITensorInfo   *weights,
+                                         const ITensorInfo   *biases,
+                                         const ITensorInfo   *output,
+                                         const PadStrideInfo &deconv_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClTransposedConvolutionKernel::validate(input, weights, biases, output, deconv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        kernels::ClTransposedConvolutionKernel::validate(input, weights, biases, output, deconv_info));
     return Status{};
 }
 

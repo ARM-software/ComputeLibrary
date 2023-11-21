@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,8 @@
 #define sum(in0, in1, size) (in0 + SUM_REDUCE(in1, size))
 #define square_sum(in0, in1, size) (in0 + SUM_REDUCE((in1 * in1), size))
 #define product(in0, in1, size) (in0 * PROD_REDUCE(in1, size))
+#define min_(in0, in1, size) (min(in0, MIN_REDUCE(in1, size)))
+#define max_(in0, in1, size) (max(in0, MAX_REDUCE(in1, size)))
 
 /** This kernel performs parallel reduction given an operation on x-axis.
  *
@@ -79,12 +81,15 @@ __kernel void reduction_operation_x(
     __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + y * input_stride_y + z * input_stride_z;
     __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + y * output_stride_y + z * output_stride_z;
 
+#if !defined(MIN) && !defined(MAX)
 #if defined(PROD)
     DATA_TYPE res = (DATA_TYPE)1;
 #else  // defined(PROD)
     DATA_TYPE res = (DATA_TYPE)0;
 #endif // defined(PROD)
-
+#else  // #if !defined(MIN) && !defined(MAX)
+    DATA_TYPE res = *((__global DATA_TYPE *)input_addr);
+#endif // #if defined(MIN) || defined(MAX)
     int x = 0;
 
     for(; x <= (WIDTH - VEC_SIZE); x += VEC_SIZE)
@@ -181,27 +186,28 @@ __kernel void reduction_operation_non_parallel_x(
  * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
- * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
- * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
- * @param[in] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
  * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: same as @p input_ptr
- * @param[in] output_stride_x                      Stride of the output tensor in X dimension (in bytes)
- * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] output_stride_y                      Stride of the output tensor in Y dimension (in bytes)
- * @param[in] output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] output_stride_z                      Stride of the output tensor in Z dimension (in bytes)
  * @param[in] output_offset_first_element_in_bytes The offset of the first element in the source tensor
  */
 __kernel void reduction_operation_y(
-    IMAGE_DECLARATION(input),
-    IMAGE_DECLARATION(output))
+    __global uchar *input_ptr,
+    uint            input_stride_y,
+    uint            input_stride_z,
+    uint            input_offset_first_element_in_bytes,
+
+    __global uchar *output_ptr,
+    uint            output_stride_z,
+    uint            output_offset_first_element_in_bytes)
 {
     int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
-    int y = get_global_id(1);
+    int z = get_global_id(1);
 
-    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y;
-    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y;
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + z * input_stride_z;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + z * output_stride_z;
 
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
     res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
@@ -270,32 +276,33 @@ __kernel void reduction_operation_y(
  * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
- * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
- * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
- * @param[in] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
- * @param[in] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in] input_stride_w                       Stride of the source tensor in W dimension (in bytes)
  * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
  * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: same as @p input_ptr
- * @param[in] output_stride_x                      Stride of the output tensor in X dimension (in bytes)
- * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] output_stride_y                      Stride of the output tensor in Y dimension (in bytes)
- * @param[in] output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] output_stride_z                      Stride of the output tensor in Z dimension (in bytes)
- * @param[in] output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in] output_stride_w                      Stride of the output tensor in W dimension (in bytes)
  * @param[in] output_offset_first_element_in_bytes The offset of the first element in the source tensor
  */
 __kernel void reduction_operation_z(
-    TENSOR3D_DECLARATION(input),
-    TENSOR3D_DECLARATION(output))
+    __global uchar *input_ptr,
+    uint            input_stride_y,
+    uint            input_stride_z,
+    uint            input_stride_w,
+    uint            input_offset_first_element_in_bytes,
+
+    __global uchar *output_ptr,
+    uint            output_stride_y,
+    uint            output_stride_w,
+    uint            output_offset_first_element_in_bytes)
 {
     int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     int y = get_global_id(1);
-    int z = get_global_id(2);
+    int w = get_global_id(2);
 
-    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y + z * input_stride_z;
-    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y + z * output_stride_z;
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y + w * input_stride_w;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y + w * output_stride_w;
 
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
     res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));
@@ -364,39 +371,43 @@ __kernel void reduction_operation_z(
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The batch size must be passed at compile time using -DBATCH e.g. -DBATCH=128
- * @note The depth size must be passed at compile time using -DBATCH e.g. -DDEPTH=128
+ * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
- * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
- * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
- * @param[in] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
- * @param[in] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in] input_stride_w                       Stride of the source tensor in W dimension (in bytes)
- * @param[in] input_step_w                         input_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] input_stride_v                       Stride of the source tensor in V dimension (in bytes)
  * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
  * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: same as @p input_ptr
- * @param[in] output_stride_x                      Stride of the output tensor in X dimension (in bytes)
- * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] output_stride_y                      Stride of the output tensor in Y dimension (in bytes)
- * @param[in] output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] output_stride_z                      Stride of the output tensor in Z dimension (in bytes)
- * @param[in] output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in] output_stride_w                      Stride of the output tensor in W dimension (in bytes)
- * @param[in] output_step_w                        output_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] output_stride_v                      Stride of the output tensor in V dimension (in bytes)
  * @param[in] output_offset_first_element_in_bytes The offset of the first element in the source tensor
  */
 __kernel void reduction_operation_w(
-    TENSOR4D_DECLARATION(input),
-    TENSOR4D_DECLARATION(output))
+    __global uchar *input_ptr,
+    uint            input_stride_y,
+    uint            input_stride_z,
+    uint            input_stride_w,
+    uint            input_stride_v,
+    uint            input_offset_first_element_in_bytes,
+
+    __global uchar *output_ptr,
+    uint            output_stride_y,
+    uint            output_stride_z,
+    uint            output_stride_v,
+    uint            output_offset_first_element_in_bytes)
 {
     int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     int y = get_global_id(1);
-    int z = get_global_id(2);
 
-    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y + (z % DEPTH) * input_stride_z + (z / DEPTH) * input_stride_w;
-    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y + (z % DEPTH) * output_stride_z + (z / DEPTH) * output_stride_z;
+    int gid_2 = get_global_id(2);
+    int z = get_global_id(2) % DEPTH;
+    int v = get_global_id(2) / DEPTH;
+
+    __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * input_stride_y + z * input_stride_z + v * input_stride_v;
+    __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * output_stride_y + z * output_stride_z + v * output_stride_v;
 
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE)
     res = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_addr), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, VEC_SIZE));

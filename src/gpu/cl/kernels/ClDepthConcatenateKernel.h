@@ -53,7 +53,8 @@ public:
      * @note: The gaps between the two lowest dimensions of src and dst need to be divisible by 2.
      *
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst);
+    void
+    configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClDepthConcatenateKernel::configure()

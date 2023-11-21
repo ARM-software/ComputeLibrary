@@ -32,7 +32,6 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
-
 #include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
@@ -127,12 +126,21 @@ public:
      *                                         projection_threshold       (Optional) The clipping threshold for the output from the projection layer, such that values are bound within
      *                                                                               [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
      */
-    void configure(const ICLTensor *input,
-                   const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
-                   const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
-                   const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                   ICLTensor *cell_state_in, ICLTensor *output_state_in,
-                   ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
+    void configure(const ICLTensor             *input,
+                   const ICLTensor             *input_to_forget_weights,
+                   const ICLTensor             *input_to_cell_weights,
+                   const ICLTensor             *input_to_output_weights,
+                   const ICLTensor             *recurrent_to_forget_weights,
+                   const ICLTensor             *recurrent_to_cell_weights,
+                   const ICLTensor             *recurrent_to_output_weights,
+                   const ICLTensor             *forget_gate_bias,
+                   const ICLTensor             *cell_bias,
+                   const ICLTensor             *output_gate_bias,
+                   ICLTensor                   *cell_state_in,
+                   ICLTensor                   *output_state_in,
+                   ICLTensor                   *cell_state_out,
+                   ICLTensor                   *output_state_out,
+                   ICLTensor                   *output,
                    const LSTMParams<ICLTensor> &lstm_params);
 
     /** Initialize function's tensors.
@@ -177,12 +185,22 @@ public:
      *                                         projection_threshold       (Optional) The clipping threshold for the output from the projection layer, such that values are bound within
      *                                                                               [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input,
-                   const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
-                   const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
-                   const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                   ICLTensor *cell_state_in, ICLTensor *output_state_in,
-                   ICLTensor *cell_state_out, ICLTensor *output_state_out, ICLTensor *output,
+    void configure(const CLCompileContext      &compile_context,
+                   const ICLTensor             *input,
+                   const ICLTensor             *input_to_forget_weights,
+                   const ICLTensor             *input_to_cell_weights,
+                   const ICLTensor             *input_to_output_weights,
+                   const ICLTensor             *recurrent_to_forget_weights,
+                   const ICLTensor             *recurrent_to_cell_weights,
+                   const ICLTensor             *recurrent_to_output_weights,
+                   const ICLTensor             *forget_gate_bias,
+                   const ICLTensor             *cell_bias,
+                   const ICLTensor             *output_gate_bias,
+                   ICLTensor                   *cell_state_in,
+                   ICLTensor                   *output_state_in,
+                   ICLTensor                   *cell_state_out,
+                   ICLTensor                   *output_state_out,
+                   ICLTensor                   *output,
                    const LSTMParams<ICLTensor> &lstm_params);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLQLSTMLayer
@@ -227,12 +245,21 @@ public:
      *                                                                              [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
      * @return a status
      */
-    static Status validate(const ITensorInfo *input,
-                           const ITensorInfo *input_to_forget_weights, const ITensorInfo *input_to_cell_weights, const ITensorInfo *input_to_output_weights,
-                           const ITensorInfo *recurrent_to_forget_weights, const ITensorInfo *recurrent_to_cell_weights, const ITensorInfo *recurrent_to_output_weights,
-                           const ITensorInfo *forget_gate_bias, const ITensorInfo *cell_bias, const ITensorInfo *output_gate_bias,
-                           const ITensorInfo *cell_state_in, const ITensorInfo *output_state_in,
-                           const ITensorInfo *cell_state_out, const ITensorInfo *output_state_out, const ITensorInfo *output,
+    static Status validate(const ITensorInfo             *input,
+                           const ITensorInfo             *input_to_forget_weights,
+                           const ITensorInfo             *input_to_cell_weights,
+                           const ITensorInfo             *input_to_output_weights,
+                           const ITensorInfo             *recurrent_to_forget_weights,
+                           const ITensorInfo             *recurrent_to_cell_weights,
+                           const ITensorInfo             *recurrent_to_output_weights,
+                           const ITensorInfo             *forget_gate_bias,
+                           const ITensorInfo             *cell_bias,
+                           const ITensorInfo             *output_gate_bias,
+                           const ITensorInfo             *cell_state_in,
+                           const ITensorInfo             *output_state_in,
+                           const ITensorInfo             *cell_state_out,
+                           const ITensorInfo             *output_state_out,
+                           const ITensorInfo             *output,
                            const LSTMParams<ITensorInfo> &lstm_params);
 
     // Inherited methods overridden:
@@ -266,10 +293,18 @@ private:
      * @param[in] mm_res_info     Tensor info to be used to initialize output stage result tensor.
      *
      */
-    void configure_mm(const CLCompileContext &compile_context, CLGEMMLowpMatrixMultiplyCore &mm, CLGEMMLowpOutputStage &outstage, GEMMLowpOutputStageInfo &gemmlowp_info,
-                      const ICLTensor *mm_input, const ICLTensor *mm_weights, const ICLTensor *bias, CLTensor *mm_res,
-                      CLTensor *outstage_res, float gemmlowp_scale,
-                      const TensorInfo &mm_res_info, const TensorInfo &outstage_tensor_info);
+    void configure_mm(const CLCompileContext       &compile_context,
+                      CLGEMMLowpMatrixMultiplyCore &mm,
+                      CLGEMMLowpOutputStage        &outstage,
+                      GEMMLowpOutputStageInfo      &gemmlowp_info,
+                      const ICLTensor              *mm_input,
+                      const ICLTensor              *mm_weights,
+                      const ICLTensor              *bias,
+                      CLTensor                     *mm_res,
+                      CLTensor                     *outstage_res,
+                      float                         gemmlowp_scale,
+                      const TensorInfo             &mm_res_info,
+                      const TensorInfo             &outstage_tensor_info);
 
     MemoryGroup _memory_group{};
 
@@ -278,8 +313,8 @@ private:
     {
         static constexpr uint32_t max_dimension_supported = 2;
 
-        ICLTensor *_src{ nullptr };
-        ICLTensor *_dst{ nullptr };
+        ICLTensor *_src{nullptr};
+        ICLTensor *_dst{nullptr};
         size_t     _row_size{};
         Window     _window{};
 
@@ -368,7 +403,7 @@ private:
     CLArithmeticAddition                                               _accumulate_projection{};
     CLActivationLayer                                                  _projection_clip{};
     std::array<std::unique_ptr<CLQLSTMLayerNormalizationKernel>, _layer_norm_count> _layer_norms;
-    CLCopy _copy_output;
+    CLCopy                                                                          _copy_output;
 
     TensorCopyKernel _projection_bias_copy{};
     TensorCopyKernel _projection_output_to_accumulate_copy{};
@@ -376,21 +411,18 @@ private:
     TensorCopyKernel _hidden_to_output_copy{};
 
     // Tensor pointers
-    const ICLTensor *_input_to_input_weights
-    {
-        nullptr
-    };
-    const ICLTensor *_recurrent_to_input_weights{ nullptr };
-    const ICLTensor *_projection_bias{ nullptr };
-    const ICLTensor *_input_to_forget_weights{ nullptr };
-    const ICLTensor *_input_to_cell_weights{ nullptr };
-    const ICLTensor *_input_to_output_weights{ nullptr };
-    const ICLTensor *_recurrent_to_forget_weights{ nullptr };
-    const ICLTensor *_recurrent_to_cell_weights{ nullptr };
-    const ICLTensor *_recurrent_to_output_weights{ nullptr };
-    const ICLTensor *_projection_weights{ nullptr };
-    std::array<const ICLTensor *, _layer_norm_count> _layer_norm_weights{ {} };
-    std::array<const ICLTensor *, _layer_norm_count> _layer_norm_bias{ {} };
+    const ICLTensor                                 *_input_to_input_weights{nullptr};
+    const ICLTensor                                 *_recurrent_to_input_weights{nullptr};
+    const ICLTensor                                 *_projection_bias{nullptr};
+    const ICLTensor                                 *_input_to_forget_weights{nullptr};
+    const ICLTensor                                 *_input_to_cell_weights{nullptr};
+    const ICLTensor                                 *_input_to_output_weights{nullptr};
+    const ICLTensor                                 *_recurrent_to_forget_weights{nullptr};
+    const ICLTensor                                 *_recurrent_to_cell_weights{nullptr};
+    const ICLTensor                                 *_recurrent_to_output_weights{nullptr};
+    const ICLTensor                                 *_projection_weights{nullptr};
+    std::array<const ICLTensor *, _layer_norm_count> _layer_norm_weights{{}};
+    std::array<const ICLTensor *, _layer_norm_count> _layer_norm_bias{{}};
 
     using LayerNormIndexType = typename std::underlying_type<LayerNormGate>::type;
     inline LayerNormIndexType getGateIndex(LayerNormGate g)
@@ -423,78 +455,78 @@ private:
         return *_layer_norms[getGateIndex(g)];
     }
 
-    inline void configure_layer_norm(LayerNormGate g, const ICLTensor *in);
+    inline void          configure_layer_norm(LayerNormGate g, const ICLTensor *in);
     inline static Status validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias);
 
     // Temporary tensors
-    CLTensor _input_to_forget_weights_transposed{ nullptr };
-    CLTensor _input_to_cell_weights_transposed{ nullptr };
-    CLTensor _input_to_output_weights_transposed{ nullptr };
-    CLTensor _input_to_input_weights_transposed{ nullptr };
-    CLTensor _recurrent_to_forget_weights_transposed{ nullptr };
-    CLTensor _recurrent_to_cell_weights_transposed{ nullptr };
-    CLTensor _recurrent_to_output_weights_transposed{ nullptr };
-    CLTensor _recurrent_to_input_weights_transposed{ nullptr };
-    CLTensor _projection_weights_transposed{ nullptr };
-    CLTensor _input_to_input_eff_bias{ nullptr };
-    CLTensor _recurrent_to_input_eff_bias{ nullptr };
-    CLTensor _input_to_forget_eff_bias{ nullptr };
-    CLTensor _recurrent_to_forget_eff_bias{ nullptr };
-    CLTensor _input_to_cell_eff_bias{ nullptr };
-    CLTensor _recurrent_to_cell_eff_bias{ nullptr };
-    CLTensor _input_to_output_eff_bias{ nullptr };
-    CLTensor _recurrent_to_output_eff_bias{ nullptr };
-    CLTensor _projection_reduction_res{ nullptr };
-    CLTensor _projection_eff_bias{ nullptr };
-    CLTensor _mm_input_to_forget_res{ nullptr };
-    CLTensor _mm_recurrent_to_forget_res{ nullptr };
-    CLTensor _mul_cell_to_forget_res{ nullptr };
-    CLTensor _input_to_forget_outstage_res{ nullptr };
-    CLTensor _cell_to_forget_outstage_res{ nullptr };
-    CLTensor _recurrent_to_forget_outstage_res{ nullptr };
-    CLTensor _forget_gate{ nullptr };
-    CLTensor _mm_input_to_cell_res{ nullptr };
-    CLTensor _input_to_cell_outstage_res{ nullptr };
-    CLTensor _mm_recurrent_to_cell_res{ nullptr };
-    CLTensor _recurrent_to_cell_outstage_res{ nullptr };
-    CLTensor _cell_gate{ nullptr };
-    CLTensor _mul_input_cell_res{ nullptr };
-    CLTensor _mm_input_to_input_res{ nullptr };
-    CLTensor _input_to_input_outstage_res{ nullptr };
-    CLTensor _mm_recurrent_to_input_res{ nullptr };
-    CLTensor _mul_cell_to_input_res{ nullptr };
-    CLTensor _cell_to_input_outstage_res{ nullptr };
-    CLTensor _recurrent_to_input_outstage_res{ nullptr };
-    CLTensor _input_gate{ nullptr };
-    CLTensor _mm_input_to_output_res{ nullptr };
-    CLTensor _input_to_output_outstage_res{ nullptr };
-    CLTensor _mm_recurrent_to_output_res{ nullptr };
-    CLTensor _mul_cell_to_output_res{ nullptr };
-    CLTensor _cell_to_output_outstage_res{ nullptr };
-    CLTensor _recurrent_to_output_outstage_res{ nullptr };
-    CLTensor _output_gate{ nullptr };
-    CLTensor _hidden_mul_res{ nullptr };
-    CLTensor _hidden_gate{ nullptr };
-    CLTensor _mm_projection_res{ nullptr };
-    CLTensor _projection_outstage_res{ nullptr };
-    CLTensor _projection_out_res{ nullptr };
-    CLTensor _projection_accumulate_res{ nullptr };
-    CLTensor _ones{ nullptr };
-    std::array<CLTensor, _layer_norm_count> _layer_norm_output{ {} };
+    CLTensor                                _input_to_forget_weights_transposed{nullptr};
+    CLTensor                                _input_to_cell_weights_transposed{nullptr};
+    CLTensor                                _input_to_output_weights_transposed{nullptr};
+    CLTensor                                _input_to_input_weights_transposed{nullptr};
+    CLTensor                                _recurrent_to_forget_weights_transposed{nullptr};
+    CLTensor                                _recurrent_to_cell_weights_transposed{nullptr};
+    CLTensor                                _recurrent_to_output_weights_transposed{nullptr};
+    CLTensor                                _recurrent_to_input_weights_transposed{nullptr};
+    CLTensor                                _projection_weights_transposed{nullptr};
+    CLTensor                                _input_to_input_eff_bias{nullptr};
+    CLTensor                                _recurrent_to_input_eff_bias{nullptr};
+    CLTensor                                _input_to_forget_eff_bias{nullptr};
+    CLTensor                                _recurrent_to_forget_eff_bias{nullptr};
+    CLTensor                                _input_to_cell_eff_bias{nullptr};
+    CLTensor                                _recurrent_to_cell_eff_bias{nullptr};
+    CLTensor                                _input_to_output_eff_bias{nullptr};
+    CLTensor                                _recurrent_to_output_eff_bias{nullptr};
+    CLTensor                                _projection_reduction_res{nullptr};
+    CLTensor                                _projection_eff_bias{nullptr};
+    CLTensor                                _mm_input_to_forget_res{nullptr};
+    CLTensor                                _mm_recurrent_to_forget_res{nullptr};
+    CLTensor                                _mul_cell_to_forget_res{nullptr};
+    CLTensor                                _input_to_forget_outstage_res{nullptr};
+    CLTensor                                _cell_to_forget_outstage_res{nullptr};
+    CLTensor                                _recurrent_to_forget_outstage_res{nullptr};
+    CLTensor                                _forget_gate{nullptr};
+    CLTensor                                _mm_input_to_cell_res{nullptr};
+    CLTensor                                _input_to_cell_outstage_res{nullptr};
+    CLTensor                                _mm_recurrent_to_cell_res{nullptr};
+    CLTensor                                _recurrent_to_cell_outstage_res{nullptr};
+    CLTensor                                _cell_gate{nullptr};
+    CLTensor                                _mul_input_cell_res{nullptr};
+    CLTensor                                _mm_input_to_input_res{nullptr};
+    CLTensor                                _input_to_input_outstage_res{nullptr};
+    CLTensor                                _mm_recurrent_to_input_res{nullptr};
+    CLTensor                                _mul_cell_to_input_res{nullptr};
+    CLTensor                                _cell_to_input_outstage_res{nullptr};
+    CLTensor                                _recurrent_to_input_outstage_res{nullptr};
+    CLTensor                                _input_gate{nullptr};
+    CLTensor                                _mm_input_to_output_res{nullptr};
+    CLTensor                                _input_to_output_outstage_res{nullptr};
+    CLTensor                                _mm_recurrent_to_output_res{nullptr};
+    CLTensor                                _mul_cell_to_output_res{nullptr};
+    CLTensor                                _cell_to_output_outstage_res{nullptr};
+    CLTensor                                _recurrent_to_output_outstage_res{nullptr};
+    CLTensor                                _output_gate{nullptr};
+    CLTensor                                _hidden_mul_res{nullptr};
+    CLTensor                                _hidden_gate{nullptr};
+    CLTensor                                _mm_projection_res{nullptr};
+    CLTensor                                _projection_outstage_res{nullptr};
+    CLTensor                                _projection_out_res{nullptr};
+    CLTensor                                _projection_accumulate_res{nullptr};
+    CLTensor                                _ones{nullptr};
+    std::array<CLTensor, _layer_norm_count> _layer_norm_output{{}};
 
     inline CLTensor &get_layer_norm_output(LayerNormGate g)
     {
         return _layer_norm_output[getGateIndex(g)];
     }
 
-    bool _is_prepared{ false };
-    bool _has_cifg{ false };
-    bool _has_cell_clipping{ false };
-    bool _has_projection{ false };
-    bool _has_projection_clipping{ false };
-    bool _has_peephole{ false };
-    bool _has_layer_norm{ false };
-    bool _projection_tensor_copy_required{ false };
+    bool _is_prepared{false};
+    bool _has_cifg{false};
+    bool _has_cell_clipping{false};
+    bool _has_projection{false};
+    bool _has_projection_clipping{false};
+    bool _has_peephole{false};
+    bool _has_layer_norm{false};
+    bool _projection_tensor_copy_required{false};
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLQLSTMLAYER_H */

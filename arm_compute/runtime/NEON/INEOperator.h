@@ -24,11 +24,11 @@
 #ifndef ARM_COMPUTE_INEOPERATOR_H
 #define ARM_COMPUTE_INEOPERATOR_H
 
-#include "../../core/ITensor.h"
 #include "arm_compute/runtime/IOperator.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Types.h"
 
+#include "../../core/ITensor.h"
 #include <memory>
 
 namespace arm_compute
@@ -60,8 +60,8 @@ public:
     ~INEOperator();
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void               run(ITensorPack &tensors) override;
+    void               prepare(ITensorPack &constants) override;
     MemoryRequirements workspace() const override;
 
 protected:

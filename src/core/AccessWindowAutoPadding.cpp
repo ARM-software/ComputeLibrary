@@ -28,12 +28,14 @@
 
 using namespace arm_compute;
 
-AccessWindowAutoPadding::AccessWindowAutoPadding(ITensorInfo *info)
-    : _info(info)
+AccessWindowAutoPadding::AccessWindowAutoPadding(ITensorInfo *info) : _info(info)
 {
 }
 
-ValidRegion AccessWindowAutoPadding::compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const
+ValidRegion AccessWindowAutoPadding::compute_valid_region(const Window &window,
+                                                          ValidRegion   input_valid_region,
+                                                          bool          border_undefined,
+                                                          BorderSize    border_size) const
 {
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(input_valid_region);
@@ -45,17 +47,17 @@ ValidRegion AccessWindowAutoPadding::compute_valid_region(const Window &window, 
 
 ValidRegion AccessWindowAutoPadding::compute_valid_region() const
 {
-    if(_info == nullptr)
+    if (_info == nullptr)
     {
         return ValidRegion{};
     }
 
-    return ValidRegion{ Coordinates(), _info->tensor_shape() };
+    return ValidRegion{Coordinates(), _info->tensor_shape()};
 }
 
 void AccessWindowAutoPadding::set_valid_region()
 {
-    if(_info == nullptr)
+    if (_info == nullptr)
     {
         return;
     }
@@ -75,7 +77,7 @@ bool AccessWindowAutoPadding::update_padding_if_needed(const Window &window)
     ARM_COMPUTE_UNUSED(window);
 
     // Only update the padding if the tensor allows it
-    if(_info == nullptr || !_info->is_resizable())
+    if (_info == nullptr || !_info->is_resizable())
     {
         return false;
     }

@@ -27,15 +27,14 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/Cast.h"
 #include "support/StringSupport.h"
 
@@ -47,23 +46,31 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const GEMMLowpOutputStageInfo *info)
+Status validate_arguments(const ITensorInfo             *src,
+                          const ITensorInfo             *bias,
+                          const ITensorInfo             *dst,
+                          const GEMMLowpOutputStageInfo *info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON((info->output_data_type != DataType::QASYMM8) && (info->output_data_type != DataType::QASYMM8_SIGNED));
-    ARM_COMPUTE_RETURN_ERROR_ON(info->gemmlowp_max_bound > std::get<1>(quantization::get_min_max_values_from_quantized_data_type(info->output_data_type)));
-    ARM_COMPUTE_RETURN_ERROR_ON(info->gemmlowp_min_bound < std::get<0>(quantization::get_min_max_values_from_quantized_data_type(info->output_data_type))
-                                || info->gemmlowp_min_bound > info->gemmlowp_max_bound);
+    ARM_COMPUTE_RETURN_ERROR_ON((info->output_data_type != DataType::QASYMM8) &&
+                                (info->output_data_type != DataType::QASYMM8_SIGNED));
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        info->gemmlowp_max_bound >
+        std::get<1>(quantization::get_min_max_values_from_quantized_data_type(info->output_data_type)));
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        info->gemmlowp_min_bound <
+            std::get<0>(quantization::get_min_max_values_from_quantized_data_type(info->output_data_type)) ||
+        info->gemmlowp_min_bound > info->gemmlowp_max_bound);
 
     // Check biases if exist
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bias);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != bias->dimension(0));
     }
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_type() != info->output_data_type, "Mismatching output data type");
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
@@ -78,7 +85,9 @@ ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::ClGemmLowpQuantizeDownInt32ScaleB
     _type = CLKernelType::ELEMENTWISE;
 }
 
-Status ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst,
+Status ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::validate(const ITensorInfo             *src,
+                                                               const ITensorInfo             *bias,
+                                                               const ITensorInfo             *dst,
                                                                const GEMMLowpOutputStageInfo *info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
@@ -87,14 +96,17 @@ Status ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::validate(const ITensorInfo
     return Status{};
 }
 
-void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst,
+void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileContext        &compile_context,
+                                                              const ITensorInfo             *src,
+                                                              const ITensorInfo             *bias,
+                                                              ITensorInfo                   *dst,
                                                               const GEMMLowpOutputStageInfo *info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, bias, dst, info));
 
-    auto padding_info = get_padding_info({ src, bias, dst });
+    auto padding_info = get_padding_info({src, bias, dst});
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_data_type(info->output_data_type));
@@ -107,7 +119,8 @@ void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileCon
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
+                          support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DREAL_MULTIPLIER=" + float_to_string_with_full_precision(info->gemmlowp_real_multiplier));
     build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(info->gemmlowp_offset));
     build_opts.add_option("-DOUTPUT_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
@@ -130,14 +143,18 @@ void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileCon
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::run_op(ITensorPack      &tensors,
+                                                           const Window     &window,
+                                                           cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    const auto bias = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_BIAS));
-    auto       dst  = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    const auto bias =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_BIAS));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     // Create input window
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
@@ -145,7 +162,7 @@ void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::run_op(ITensorPack &tensors,
 
     // Setup bias slice
     unsigned int idx1 = num_arguments_per_3D_tensor();
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         Window biases_slice(slice);
         biases_slice.set(Window::DimY, Window::Dimension(0, 1, 1));
@@ -159,8 +176,7 @@ void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::run_op(ITensorPack &tensors,
         add_3D_tensor_argument(idx, src, slice);
         add_3D_tensor_argument(idx1, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

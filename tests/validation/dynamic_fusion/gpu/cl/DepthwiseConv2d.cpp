@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuDepthwiseConv2d.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -284,6 +283,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDepthwiseConv2dFixture<half>, f
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
 TEST_SUITE(Dilation)
 FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDepthwiseConv2dFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
                                                                                                                     depth_multipliers),
@@ -301,6 +301,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDepthwiseConv2dFixture<half>, f
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END() // Dilation
+#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(Generic)
@@ -318,7 +319,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDepthwiseConv2dFixture<half>, f
 {
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
 TEST_SUITE(Dilation)
 FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDepthwiseConv2dFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset(),
                                                                                                                     depth_multipliers),
@@ -336,6 +337,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDepthwiseConv2dFixture<half>, f
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END() // Dilation
+#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // Generic
 TEST_SUITE_END() // FP16
 
@@ -358,6 +360,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDepthwiseConv2dFixture<float>, 
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
 TEST_SUITE(Dilation)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDepthwiseConv2dFixture<float>, framework::DatasetMode::ALL,
@@ -377,6 +380,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDepthwiseConv2dFixture<float>, 
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END() // Dilation
+#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(Generic)
@@ -407,6 +411,7 @@ FIXTURE_DATA_TEST_CASE(RunLargeKernelSize, DynamicFusionGpuDepthwiseConv2dFixtur
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
 TEST_SUITE(Dilation)
 FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDepthwiseConv2dFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset(),
                                                                                                                      depth_multipliers),
@@ -424,6 +429,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDepthwiseConv2dFixture<float>, 
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END() // Dilation
+#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // Generic
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
@@ -433,5 +439,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

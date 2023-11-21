@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_DIRECT_CONV2D_KERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -68,16 +69,27 @@ public:
      * @param[in]  act_info        Contains activaton information described in @ref ActivationLayerInfo.
      * @param[in]  desc            Direct convolution descriptor used to build the NHWC direct convolution kernel. For NCHW, this parameter is ignored.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                   const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc);
+    void configure(const CLCompileContext            &compile_context,
+                   ITensorInfo                       *src,
+                   ITensorInfo                       *weights,
+                   ITensorInfo                       *biases,
+                   ITensorInfo                       *dst,
+                   const PadStrideInfo               &conv_info,
+                   const ActivationLayerInfo         &act_info,
+                   const DirectConvComputeKernelInfo &desc);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClDirectConv2dKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                           const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc);
+    static Status validate(const ITensorInfo                 *src,
+                           const ITensorInfo                 *weights,
+                           const ITensorInfo                 *biases,
+                           const ITensorInfo                 *dst,
+                           const PadStrideInfo               &conv_info,
+                           const ActivationLayerInfo         &act_info,
+                           const DirectConvComputeKernelInfo &desc);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
@@ -85,9 +97,9 @@ public:
 public:
     DataLayout    _data_layout{};
     PadStrideInfo _conv_info{};
-    bool          _export_weights_to_cl_image{ false };
-    bool          _export_output_to_cl_image{ false };
-    bool          _export_input_to_cl_image{ false };
+    bool          _export_weights_to_cl_image{false};
+    bool          _export_output_to_cl_image{false};
+    bool          _export_input_to_cl_image{false};
 };
 } // namespace kernels
 } // namespace opencl

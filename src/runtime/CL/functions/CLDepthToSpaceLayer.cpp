@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDepthToSpaceLayer.h"
 
-#include "src/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
 
 #include <utility>
 
@@ -36,7 +35,10 @@ void CLDepthToSpaceLayer::configure(const ICLTensor *input, ICLTensor *output, i
     configure(CLKernelLibrary::get().get_compile_context(), input, output, block_shape);
 }
 
-void CLDepthToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
+void CLDepthToSpaceLayer::configure(const CLCompileContext &compile_context,
+                                    const ICLTensor        *input,
+                                    ICLTensor              *output,
+                                    int32_t                 block_shape)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
     auto k = std::make_unique<CLDepthToSpaceLayerKernel>();

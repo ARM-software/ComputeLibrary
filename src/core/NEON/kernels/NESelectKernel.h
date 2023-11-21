@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NESELECTKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -82,7 +83,6 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-
     const ITensor *_c;             /**< Condition tensor */
     const ITensor *_x;             /**< Source tensor 1 */
     const ITensor *_y;             /**< Source tensor 2 */

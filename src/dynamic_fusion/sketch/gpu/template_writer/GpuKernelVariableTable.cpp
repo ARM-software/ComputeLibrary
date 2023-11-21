@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "GpuKernelVariableTable.h"
+
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/ITensorInfo.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 
 namespace arm_compute
@@ -32,14 +34,17 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-void GpuKernelVariableTable::declare_variable(const GpuKernelComponentGroup &comp_group, const ITensorInfo *tensor, GpuKernelArgumentInfo argument_info, const std::string &alias)
+void GpuKernelVariableTable::declare_variable(const GpuKernelComponentGroup &comp_group,
+                                              const ITensorInfo             *tensor,
+                                              GpuKernelArgumentInfo          argument_info,
+                                              const std::string             &alias)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!tensor->has_valid_id(), "Tensor info with valid id expected");
 
     // Do not re-declare if the variable associated with the tensor has already been declared
     auto it = _vars.find(tensor->id());
 
-    if(it != _vars.end())
+    if (it != _vars.end())
     {
         ARM_COMPUTE_ERROR_ON(!(it->second.kernel_argument_info == argument_info));
         return;
@@ -47,14 +52,12 @@ void GpuKernelVariableTable::declare_variable(const GpuKernelComponentGroup &com
 
     const auto target = comp_group.get_tile_for_tensor(tensor);
 
-    if(target != tensor)
+    if (target != tensor)
     {
         // If the tensor uses a shared tile, don't declare another variable.
         it = _vars.find(target->id());
 
-        ARM_COMPUTE_ERROR_ON_MSG(
-            it == _vars.end(),
-            "The variable used for this tensor must have been declared.");
+        ARM_COMPUTE_ERROR_ON_MSG(it == _vars.end(), "The variable used for this tensor must have been declared.");
 
         _vars[tensor->id()] = it->second;
     }
@@ -64,7 +67,7 @@ void GpuKernelVariableTable::declare_variable(const GpuKernelComponentGroup &com
         std::stringstream ss;
         ss << alias << "_t" << abs(tensor->id());
         const auto     uniq_name = ss.str();
-        TensorVariable var{ tensor->id(), uniq_name, argument_info };
+        TensorVariable var{tensor->id(), uniq_name, argument_info};
 
         _vars.emplace(tensor->id(), var);
     }
@@ -76,12 +79,13 @@ GpuKernelVariableTable::TensorVariable GpuKernelVariableTable::get_variable(cons
     return var;
 }
 
-GpuKernelVariableTable::VariableList GpuKernelVariableTable::get_variable_list(const std::vector<const ITensorInfo *> &tensors) const
+GpuKernelVariableTable::VariableList
+GpuKernelVariableTable::get_variable_list(const std::vector<const ITensorInfo *> &tensors) const
 {
     VariableList vars{};
-    for(const auto &tensor : tensors)
+    for (const auto &tensor : tensors)
     {
-        if(!tensor->has_valid_id())
+        if (!tensor->has_valid_id())
         {
             continue;
         }
@@ -90,23 +94,19 @@ GpuKernelVariableTable::VariableList GpuKernelVariableTable::get_variable_list(c
     return vars;
 }
 
-TagVal::TagVal(const GpuKernelVariableTable::TensorVariable &var)
-    : value{ var.uniq_name }
+TagVal::TagVal(const GpuKernelVariableTable::TensorVariable &var) : value{var.uniq_name}
 {
 }
 
-TagVal::TagVal(const std::string &val)
-    : value{ val }
+TagVal::TagVal(const std::string &val) : value{val}
 {
 }
 
-TagVal::TagVal(const char *val)
-    : value{ std::string(val) }
+TagVal::TagVal(const char *val) : value{std::string(val)}
 {
 }
 
-TagVal::TagVal(const DataType &data_type)
-    : value{ get_cl_type_from_data_type(data_type) }
+TagVal::TagVal(const DataType &data_type) : value{get_cl_type_from_data_type(data_type)}
 {
 }
 } // namespace dynamic_fusion

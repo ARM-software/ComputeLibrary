@@ -28,19 +28,22 @@ namespace arm_compute
 {
 namespace cpu
 {
-void add_u8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_u8_neon(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     return add_same_neon<uint8_t>(src0, src1, dst, policy, window);
 }
 
-void add_s16_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_s16_neon(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     return add_same_neon<int16_t>(src0, src1, dst, policy, window);
 }
 
-void add_s32_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_s32_neon(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     return add_same_neon<int32_t>(src0, src1, dst, policy, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

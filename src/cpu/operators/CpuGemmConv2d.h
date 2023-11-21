@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMM_CONV2D_H
-#define ARM_COMPUTE_CPU_GEMM_CONV2D_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUGEMMCONV2D_H
+#define ACL_SRC_CPU_OPERATORS_CPUGEMMCONV2D_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/cpu/ICpuOperator.h"
 
 #include <memory>
@@ -38,24 +39,15 @@ namespace cpu
 class CpuGemm;
 class CpuGemmLowpMatrixMultiplyCore;
 class CpuGemmLowpOutputStage;
+class CpuReshape;
 namespace kernels
 {
-class CpuWeightsReshapeKernel;
 class CpuIm2ColKernel;
 class CpuCol2ImKernel;
-class CpuReshapeKernel;
+class CpuWeightsReshapeKernel;
 } // namespace kernels
 
-/** Basic function to compute the convolution layer. This function calls the following kernels/functions:
- *
- * -# @ref cpu::kernels::CpuIm2ColKernel
- * -# @ref CpuGemm (if the data type is BFLOAT16/FP16/FP32)
- * -# @ref CpuGemmLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
- * -# @ref CpuGemmLowpOutputStage (if the data type is QASYMM8/QASYMM8_SIGNED)
- * -# @ref cpu::kernels::CpuCol2ImKernel (if NCHW data layout)
- * -# @ref kernels::CpuWeightsReshapeKernel
- *
- */
+/** Basic function to compute the convolution layer. @ref note_CpuGemmConv2d_weight_transformation */
 class CpuGemmConv2d : public ICpuOperator
 {
 public:
@@ -98,7 +90,7 @@ public:
      * @param[out] dst              Destination tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                              Data types supported: Same as @p input.
      * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in]  weights_info     Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
+     * @param[in]  weights_info     Specifies if the weights tensor has been reshaped with CpuWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                              tensor has also been transposed with cpu::kernels::CpuGemmTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
@@ -106,32 +98,53 @@ public:
      *                              available which may introduce a drop of accuracy as well. Default is false
      * @param[in]  num_groups       (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false, unsigned int num_groups = 1);
+    void configure(const ITensorInfo         *src,
+                   const ITensorInfo         *weights,
+                   const ITensorInfo         *biases,
+                   ITensorInfo               *dst,
+                   const PadStrideInfo       &conv_info,
+                   const WeightsInfo         &weights_info     = WeightsInfo(),
+                   const Size2D              &dilation         = Size2D(1U, 1U),
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false,
+                   unsigned int               num_groups       = 1);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuGemmConvolution::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                           bool enable_fast_math = false, unsigned int num_groups = 1);
+    static Status validate(const ITensorInfo         *src,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const WeightsInfo         &weights_info     = WeightsInfo(),
+                           const Size2D              &dilation         = Size2D(1U, 1U),
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false,
+                           unsigned int               num_groups       = 1);
 
     /** Indicates whether or not there is an optimal assembly implementation that can be used to process the given parameters.
      *
-     * The paramter list is the same as @ref NEGEMMConvolutionLayer::has_opt_impl
+     * The parameter list is the same as @ref NEGEMMConvolutionLayer::has_opt_impl
      *
      * @return a status.
      */
-    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                               const PadStrideInfo &conv_info,
-                               const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                               const bool enable_fast_math = false);
+    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format,
+                               const ITensorInfo         *src,
+                               const ITensorInfo         *weights,
+                               const ITensorInfo         *biases,
+                               const ITensorInfo         *output,
+                               const PadStrideInfo       &conv_info,
+                               const WeightsInfo         &weights_info     = WeightsInfo(),
+                               const Size2D              &dilation         = Size2D(1U, 1U),
+                               const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                               const bool                 enable_fast_math = false);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -150,8 +163,15 @@ private:
      * @param[in]  fixed_format     (Optional) Select GEMM execution with variable weights.
      * @param[in]  weight_format    (Optional) The layout to be used for the weights tensor when running GEMM with variable weights.
      */
-    void configure_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                      bool enable_fast_math = false, int gemm_3d_depth = 1, bool fixed_format = false, arm_compute::WeightFormat weight_format = arm_compute::WeightFormat::UNSPECIFIED);
+    void configure_mm(const ITensorInfo         *src,
+                      const ITensorInfo         *weights,
+                      const ITensorInfo         *biases,
+                      ITensorInfo               *output,
+                      const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                      bool                       enable_fast_math = false,
+                      int                        gemm_3d_depth    = 1,
+                      bool                       fixed_format     = false,
+                      arm_compute::WeightFormat  weight_format    = arm_compute::WeightFormat::UNSPECIFIED);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer matrix multiply routines
      *
      * @param[in] src              Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
@@ -170,8 +190,16 @@ private:
      *
      * @return a status
      */
-    static Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                              bool enable_fast_math = false, int gemm_3d_depth = 1, bool skip_im2col = false, bool fixed_format = false, arm_compute::WeightFormat weight_format = arm_compute::WeightFormat::UNSPECIFIED);
+    static Status validate_mm(const ITensorInfo         *src,
+                              const ITensorInfo         *weights,
+                              const ITensorInfo         *biases,
+                              const ITensorInfo         *dst,
+                              const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                              bool                       enable_fast_math = false,
+                              int                        gemm_3d_depth    = 1,
+                              bool                       skip_im2col      = false,
+                              bool                       fixed_format     = false,
+                              arm_compute::WeightFormat  weight_format    = arm_compute::WeightFormat::UNSPECIFIED);
     /** Static function to check if GEMM3D is supported in @ref NEGEMM or in @ref CpuGemmMLowpMatrixMultiplyCore
      *
      * @param[in] src           Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
@@ -182,7 +210,11 @@ private:
      *
      * @return a status
      */
-    static Status validate_gemm3d(const ITensorInfo *src, const ITensorInfo *weights, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col);
+    static Status validate_gemm3d(const ITensorInfo         *src,
+                                  const ITensorInfo         *weights,
+                                  const ActivationLayerInfo &act_info,
+                                  int                        gemm_3d_depth,
+                                  bool                       skip_im2col);
 
     struct SkipInfo
     {
@@ -200,8 +232,11 @@ private:
      *
      * @return a SkipInfo instance.
      */
-    static SkipInfo skip_im_col_info(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info,
-                                     const Size2D &dilation, const ActivationLayerInfo &act_info);
+    static SkipInfo skip_im_col_info(const ITensorInfo         *src,
+                                     const ITensorInfo         *weights,
+                                     const PadStrideInfo       &conv_info,
+                                     const Size2D              &dilation,
+                                     const ActivationLayerInfo &act_info);
 
     /** Indicates if the convolution executes in variable weights mode.
      *
@@ -210,19 +245,39 @@ private:
     bool isVarWeightsKernel() const;
     enum AuxTensorIdx
     {
-        // CpuGemmLowpMatrixMultiplyCore has up to 8 internal tensors
-        Im2ColOutput = 9,
+        GemmAsmPretransposedRHS  = 2, // CpuGemmAssemblyDispatch::Pretranspose
+        GemmTransposed1xWRHS     = 5, // CpuGemm::Transposed1xWRHS
+        GemmLowpTransposed1xWRHS = 6, // CpuGemmLowpMatrixMultiplyCore::TmpB
+        /* Slots 0 - 9 reserved and shared by CpuGemmLowpMatrixMultiplyCore and CpuGemm */
+        Im2ColOutput = 10,
         WeightsReshaped,
         GemmOutput,
         Count
     };
 
-    std::unique_ptr<kernels::CpuWeightsReshapeKernel> _weights_reshape_kernel;
-    std::unique_ptr<cpu::kernels::CpuIm2ColKernel>    _im2col_kernel;
+    /** Weight transformation method. See @ref note_CpuGemmConv2d_weight_transformation */
+    enum class WeightTransformMethod
+    {
+        ReinterpretThenTranspose,
+        ReshapeThenTranspose,
+        FusedReshapeAndTranspose,
+    };
+
+    /** Select weight transformation method
+     *
+     * @param[in] weights Input weights
+     *
+     * @return WeightTransformMethod
+     */
+    static WeightTransformMethod get_wt_method(const ITensorInfo &weights);
+
+    std::unique_ptr<CpuReshape>                       _weights_reshape;
+    std::unique_ptr<kernels::CpuWeightsReshapeKernel> _weights_reshape_and_transpose_kernel;
+    std::unique_ptr<kernels::CpuIm2ColKernel>         _im2col_kernel;
     std::unique_ptr<CpuGemm>                          _mm_gemm;
     std::unique_ptr<CpuGemmLowpMatrixMultiplyCore>    _mm_gemmlowp;
     std::unique_ptr<kernels::CpuCol2ImKernel>         _col2im_kernel;
-    std::unique_ptr<kernels::CpuReshapeKernel>        _reshape_kernel;
+    std::unique_ptr<CpuReshape>                       _reshape;
 
     TensorInfo _im2col_output;
     TensorInfo _weights_reshaped;
@@ -231,13 +286,15 @@ private:
 
     DataLayout _data_layout;
 
-    bool _skip_im2col;
-    bool _skip_col2im;
-    bool _is_quantized;
-    bool _is_prepared;
+    bool                  _skip_im2col;
+    bool                  _skip_col2im;
+    bool                  _is_quantized;
+    bool                  _is_prepared;
+    WeightTransformMethod _wt_method;
+    bool                  _run_wt;
 
-    experimental::MemoryRequirements _aux_mem{ Count };
+    experimental::MemoryRequirements _aux_mem{Count};
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMM_CONV2D_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUGEMMCONV2D_H

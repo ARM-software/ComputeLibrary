@@ -26,7 +26,13 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp32_instancenorm(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision, const Window &window)
+void neon_fp32_instancenorm(ITensor      *input,
+                            ITensor      *output,
+                            float         gamma,
+                            float         beta,
+                            float         epsilon,
+                            bool          use_mixed_precision,
+                            const Window &window)
 {
     ARM_COMPUTE_UNUSED(use_mixed_precision);
     return instance_normalization_nchw<float>(input, output, gamma, beta, epsilon, window);

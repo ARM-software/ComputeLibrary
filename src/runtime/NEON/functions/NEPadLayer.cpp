@@ -23,13 +23,13 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
 
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
-#include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/NEON/kernels/NEPadLayerKernel.h"
 
 namespace arm_compute
 {
@@ -38,9 +38,9 @@ namespace
 uint32_t last_padding_dimension(const PaddingList &padding)
 {
     int last_padding_dim = padding.size() - 1;
-    for(; last_padding_dim >= 0; --last_padding_dim)
+    for (; last_padding_dim >= 0; --last_padding_dim)
     {
-        if(padding[last_padding_dim].first > 0 || padding[last_padding_dim].second > 0)
+        if (padding[last_padding_dim].first > 0 || padding[last_padding_dim].second > 0)
         {
             break;
         }
@@ -52,11 +52,22 @@ uint32_t last_padding_dimension(const PaddingList &padding)
 NEPadLayer::~NEPadLayer() = default;
 
 NEPadLayer::NEPadLayer()
-    : _copy_function(), _pad_kernel(), _mode(), _padding(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results()
+    : _copy_function(),
+      _pad_kernel(),
+      _mode(),
+      _padding(),
+      _num_dimensions(0),
+      _slice_functions(),
+      _concat_functions(),
+      _slice_results(),
+      _concat_results()
 {
 }
 
-void NEPadLayer::configure_constant_mode(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value)
+void NEPadLayer::configure_constant_mode(ITensor           *input,
+                                         ITensor           *output,
+                                         const PaddingList &padding,
+                                         const PixelValue   constant_value)
 {
     _pad_kernel = std::make_unique<NEPadLayerKernel>();
     _pad_kernel->configure(input, output, padding, constant_value, PaddingMode::CONSTANT);
@@ -85,20 +96,20 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
     Coordinates ends_after{};
     Coordinates strides{};
     ITensor    *prev = input;
-    for(uint32_t i = 0; i < _num_dimensions; ++i)
+    for (uint32_t i = 0; i < _num_dimensions; ++i)
     {
         // Values in strides from the previous dimensions need to be set to 1 to avoid reversing again.
-        if(i > 0)
+        if (i > 0)
         {
             strides.set(i - 1, 1);
         }
 
-        if(_padding[i].first > 0 || _padding[i].second > 0)
+        if (_padding[i].first > 0 || _padding[i].second > 0)
         {
             // Set the starts, ends, and strides values for the current dimension.
             // Due to the bit masks passed to strided slice, the values below the current dimension in
             // starts and ends will be ignored so do not need to be modified.
-            if(_mode == PaddingMode::REFLECT)
+            if (_mode == PaddingMode::REFLECT)
             {
                 starts_before.set(i, _padding[i].first);
                 ends_before.set(i, 0);
@@ -124,11 +135,12 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
 
             // Reflect the input values for the padding before and after the input.
             std::vector<const ITensor *> concat_vector;
-            if(_padding[i].first > 0)
+            if (_padding[i].first > 0)
             {
-                if(i < prev->info()->num_dimensions())
+                if (i < prev->info()->num_dimensions())
                 {
-                    _slice_functions[2 * i].configure(prev, &_slice_results[2 * i], starts_before, ends_before, strides, begin_mask_before, end_mask_before);
+                    _slice_functions[2 * i].configure(prev, &_slice_results[2 * i], starts_before, ends_before, strides,
+                                                      begin_mask_before, end_mask_before);
                     concat_vector.emplace_back(&_slice_results[2 * i]);
                 }
                 else
@@ -138,11 +150,12 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
                 }
             }
             concat_vector.push_back(prev);
-            if(_padding[i].second > 0)
+            if (_padding[i].second > 0)
             {
-                if(i < prev->info()->num_dimensions())
+                if (i < prev->info()->num_dimensions())
                 {
-                    _slice_functions[2 * i + 1].configure(prev, &_slice_results[2 * i + 1], starts_after, ends_after, strides, begin_mask_after, end_mask_after);
+                    _slice_functions[2 * i + 1].configure(prev, &_slice_results[2 * i + 1], starts_after, ends_after,
+                                                          strides, begin_mask_after, end_mask_after);
                     concat_vector.emplace_back(&_slice_results[2 * i + 1]);
                 }
                 else
@@ -154,12 +167,12 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
             // Concatenate the padding before and after with the input.
             ITensor *out = (i == _num_dimensions - 1) ? output : &_concat_results[i];
             out->info()->set_quantization_info(output->info()->quantization_info());
-            for(auto &v : concat_vector)
+            for (auto &v : concat_vector)
             {
                 v->info()->set_quantization_info(input->info()->quantization_info());
             }
             _concat_functions[i].configure(concat_vector, out, i);
-            if(i != _num_dimensions - 1)
+            if (i != _num_dimensions - 1)
             {
                 _concat_results[i].allocator()->allocate();
             }
@@ -170,7 +183,11 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
     }
 }
 
-void NEPadLayer::configure(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value, const PaddingMode mode)
+void NEPadLayer::configure(ITensor           *input,
+                           ITensor           *output,
+                           const PaddingList &padding,
+                           const PixelValue   constant_value,
+                           const PaddingMode  mode)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
     ARM_COMPUTE_LOG_PARAMS(input, output, padding, constant_value, mode);
@@ -178,15 +195,16 @@ void NEPadLayer::configure(ITensor *input, ITensor *output, const PaddingList &p
     _padding = padding;
     _mode    = mode;
 
-    const TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(input->info()->tensor_shape(), _padding);
+    const TensorShape padded_shape =
+        misc::shape_calculator::compute_padded_shape(input->info()->tensor_shape(), _padding);
 
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(padded_shape));
 
     // Find the last dimension requiring padding so that it is known when to write to output and whether any padding is applied.
     _num_dimensions = last_padding_dimension(padding) + 1;
-    if(_num_dimensions > 0)
+    if (_num_dimensions > 0)
     {
-        switch(_mode)
+        switch (_mode)
         {
             case PaddingMode::CONSTANT:
             {
@@ -210,19 +228,23 @@ void NEPadLayer::configure(ITensor *input, ITensor *output, const PaddingList &p
     }
 }
 
-Status NEPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, const PixelValue constant_value, const PaddingMode mode)
+Status NEPadLayer::validate(const ITensorInfo *input,
+                            const ITensorInfo *output,
+                            const PaddingList &padding,
+                            const PixelValue   constant_value,
+                            const PaddingMode  mode)
 {
     ARM_COMPUTE_UNUSED(constant_value);
 
     const TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(input->tensor_shape(), padding);
 
-    if(output->total_size() > 0)
+    if (output->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), padded_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
-    switch(mode)
+    switch (mode)
     {
         case PaddingMode::CONSTANT:
         {
@@ -231,9 +253,9 @@ Status NEPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
         case PaddingMode::REFLECT:
         case PaddingMode::SYMMETRIC:
         {
-            for(uint32_t i = 0; i < padding.size(); ++i)
+            for (uint32_t i = 0; i < padding.size(); ++i)
             {
-                if(mode == PaddingMode::REFLECT)
+                if (mode == PaddingMode::REFLECT)
                 {
                     ARM_COMPUTE_RETURN_ERROR_ON(padding[i].first >= input->dimension(i));
                     ARM_COMPUTE_RETURN_ERROR_ON(padding[i].second >= input->dimension(i));
@@ -256,9 +278,9 @@ Status NEPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
 
 void NEPadLayer::run()
 {
-    if(_num_dimensions > 0)
+    if (_num_dimensions > 0)
     {
-        switch(_mode)
+        switch (_mode)
         {
             case PaddingMode::CONSTANT:
             {
@@ -268,15 +290,15 @@ void NEPadLayer::run()
             case PaddingMode::REFLECT:
             case PaddingMode::SYMMETRIC:
             {
-                for(uint32_t i = 0; i < _num_dimensions; ++i)
+                for (uint32_t i = 0; i < _num_dimensions; ++i)
                 {
-                    if(_padding[i].first > 0 || _padding[i].second > 0)
+                    if (_padding[i].first > 0 || _padding[i].second > 0)
                     {
-                        if(_padding[i].first > 0 && _slice_results[2 * i].info()->total_size() > 0)
+                        if (_padding[i].first > 0 && _slice_results[2 * i].info()->total_size() > 0)
                         {
                             _slice_functions[2 * i].run();
                         }
-                        if(_padding[i].second > 0 && _slice_results[2 * i + 1].info()->total_size() > 0)
+                        if (_padding[i].second > 0 && _slice_results[2 * i + 1].info()->total_size() > 0)
                         {
                             _slice_functions[2 * i + 1].run();
                         }

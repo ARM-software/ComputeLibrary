@@ -23,16 +23,22 @@
  */
 
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/kernels/softmax/generic/sve2/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void sve2_qasymm8_signed_softmax(const ITensor *in, const ITensor *max, void *const tmp,
-                                 ITensor *out, const float beta, bool is_log, const Window &window)
+void sve2_qasymm8_signed_softmax(const ITensor *in,
+                                 const ITensor *max,
+                                 void *const    tmp,
+                                 ITensor       *out,
+                                 const float    beta,
+                                 bool           is_log,
+                                 const Window  &window)
 {
     return sve2_softmax_logits_1d_quantized<qasymm8_signed_t>(in, max, tmp, out, beta, is_log, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

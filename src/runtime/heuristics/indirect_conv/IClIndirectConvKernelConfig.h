@@ -27,6 +27,7 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/core/common/Macros.h"
 
 namespace arm_compute
@@ -49,8 +50,7 @@ public:
      * @param[in] func_f16 Function to call for indirect convolution F16
      *
      */
-    ClIndirectConvConfigArray(T func_f32, T func_f16)
-        : _configs{ func_f32, func_f16}
+    ClIndirectConvConfigArray(T func_f32, T func_f16) : _configs{func_f32, func_f16}
     {
     }
 
@@ -62,7 +62,7 @@ public:
      */
     T get_function(DataType data_type)
     {
-        switch(data_type)
+        switch (data_type)
         {
             case DataType::F32:
                 return _configs.at(DT_F32);
@@ -85,8 +85,7 @@ public:
      *
      * @param[in] arch GPU target
      */
-    IClIndirectConvKernelConfig(GPUTarget arch)
-        : _target(arch)
+    IClIndirectConvKernelConfig(GPUTarget arch) : _target(arch)
     {
     }
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(IClIndirectConvKernelConfig);
@@ -98,7 +97,8 @@ public:
      * @param[in] wei       Weights tensor
      * @param[in] conv_info Convolution info
      */
-    virtual DirectConvComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) = 0;
+    virtual DirectConvComputeKernelInfo
+    configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) = 0;
 
 protected:
     GPUTarget _target;

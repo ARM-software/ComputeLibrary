@@ -26,10 +26,11 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/CPP/Validate.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/gemm_matrix_mul/list.h"
@@ -42,27 +43,20 @@ namespace kernels
 {
 namespace
 {
-static const std::vector<CpuGemmMatrixMultiplyKernel::GemmMatrixMulKernel> available_kernels =
-{
-    {
-        "neon_fp32_gemm_matrix_mul",
-        [](const DataTypeISASelectorData & data)
-        {
-            return (data.dt == DataType::F32);
-        },
-        REGISTER_FP32_NEON(neon_fp32_gemm_matrix_mul)
-    },
-    {
-        "neon_fp16_gemm_matrix_mul",
-        [](const DataTypeISASelectorData & data)
-        {
-            return (data.dt == DataType::F16) && data.isa.fp16;
-        },
-        REGISTER_FP16_NEON(neon_fp16_gemm_matrix_mul)
-    },
+static const std::vector<CpuGemmMatrixMultiplyKernel::GemmMatrixMulKernel> available_kernels = {
+    {"neon_fp32_gemm_matrix_mul", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
+     REGISTER_FP32_NEON(neon_fp32_gemm_matrix_mul)},
+    {"neon_fp16_gemm_matrix_mul",
+     [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F16) && data.isa.fp16; },
+     REGISTER_FP16_NEON(neon_fp16_gemm_matrix_mul)},
 };
 
-inline Status validate_arguments(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, float alpha, bool is_interleaved, const GEMMReshapeInfo &reshape_info)
+inline Status validate_arguments(const ITensorInfo     *lhs,
+                                 const ITensorInfo     *rhs,
+                                 const ITensorInfo     *dst,
+                                 float                  alpha,
+                                 bool                   is_interleaved,
+                                 const GEMMReshapeInfo &reshape_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
 
@@ -70,11 +64,11 @@ inline Status validate_arguments(const ITensorInfo *lhs, const ITensorInfo *rhs,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs, dst);
 
-    if(!is_interleaved)
+    if (!is_interleaved)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(lhs->dimension(0) != rhs->dimension(1));
 
-        if(dst->total_size() != 0)
+        if (dst->total_size() != 0)
         {
             ARM_COMPUTE_RETURN_ERROR_ON(rhs->dimension(0) != dst->dimension(0));
             ARM_COMPUTE_RETURN_ERROR_ON(lhs->dimension(1) != dst->dimension(1));
@@ -90,28 +84,31 @@ inline Status validate_arguments(const ITensorInfo *lhs, const ITensorInfo *rhs,
         const int mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
 
         /* Interleave */
-        TensorShape tensor_shape0{ lhs->tensor_shape() };
+        TensorShape tensor_shape0{lhs->tensor_shape()};
         tensor_shape0.set(0, k);
         tensor_shape0.set(1, m);
 
         const TensorInfo tensor_info0          = lhs->clone()->set_tensor_shape(tensor_shape0);
-        const TensorInfo tensor_info_reshaped0 = lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_interleaved_shape(tensor_info0, mult_interleave4x4_height));
+        const TensorInfo tensor_info_reshaped0 = lhs->clone()->set_tensor_shape(
+            misc::shape_calculator::compute_interleaved_shape(tensor_info0, mult_interleave4x4_height));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(lhs, &tensor_info_reshaped0);
 
-        if(n != 0) /* Transpose */
+        if (n != 0) /* Transpose */
         {
-            TensorShape tensor_shape1{ rhs->tensor_shape() };
+            TensorShape tensor_shape1{rhs->tensor_shape()};
             tensor_shape1.set(0, n);
             tensor_shape1.set(1, k);
 
-            const TensorInfo tensor_info1          = rhs->clone()->set_tensor_shape(tensor_shape1);
-            const TensorInfo tensor_info_reshaped1 = rhs->clone()->set_tensor_shape(misc::shape_calculator::compute_transpose1xW_with_element_size_shape(tensor_info1, mult_transpose1xW_width));
+            const TensorInfo tensor_info1 = rhs->clone()->set_tensor_shape(tensor_shape1);
+            const TensorInfo tensor_info_reshaped1 =
+                rhs->clone()->set_tensor_shape(misc::shape_calculator::compute_transpose1xW_with_element_size_shape(
+                    tensor_info1, mult_transpose1xW_width));
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(rhs, &tensor_info_reshaped1);
         }
 
-        if(dst->total_size() != 0)
+        if (dst->total_size() != 0)
         {
-            if(n != 0)
+            if (n != 0)
             {
                 ARM_COMPUTE_RETURN_ERROR_ON(dst->dimension(0) != static_cast<size_t>(n));
             }
@@ -125,12 +122,17 @@ inline Status validate_arguments(const ITensorInfo *lhs, const ITensorInfo *rhs,
 
 } // namespace
 
-void CpuGemmMatrixMultiplyKernel::configure(const ITensorInfo *lhs, const ITensorInfo *rhs, ITensorInfo *dst, float alpha, bool is_interleaved, const GEMMReshapeInfo &reshape_info)
+void CpuGemmMatrixMultiplyKernel::configure(const ITensorInfo     *lhs,
+                                            const ITensorInfo     *rhs,
+                                            ITensorInfo           *dst,
+                                            float                  alpha,
+                                            bool                   is_interleaved,
+                                            const GEMMReshapeInfo &reshape_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
 
     // dst tensor auto inizialitation if not yet initialized
-    TensorShape tensor_shape{ lhs->tensor_shape() };
+    TensorShape tensor_shape{lhs->tensor_shape()};
     tensor_shape.set(0, is_interleaved ? reshape_info.n() : rhs->dimension(0));
     tensor_shape.set(1, is_interleaved ? reshape_info.m() : lhs->dimension(1));
 
@@ -146,7 +148,7 @@ void CpuGemmMatrixMultiplyKernel::configure(const ITensorInfo *lhs, const ITenso
 
     // Check if the dst tensor is a vector. If so,the kernel runs the vector-matrix multiplication
     const bool is_dst_vector = (dst->dimension(1) == 1);
-    if(is_dst_vector)
+    if (is_dst_vector)
     {
         const unsigned int num_elems_processed_per_iteration_x = (lhs->data_type() == DataType::F32) ? 16 : 32;
 
@@ -157,17 +159,23 @@ void CpuGemmMatrixMultiplyKernel::configure(const ITensorInfo *lhs, const ITenso
         constexpr unsigned int num_elems_processed_per_iteration_x = 8;
         constexpr unsigned int num_elems_processed_per_iteration_y = 4;
 
-        win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        win =
+            calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     }
 
-    const auto uk = CpuGemmMatrixMultiplyKernel::get_implementation(DataTypeISASelectorData{ lhs->data_type(), CPUInfo::get().get_isa() });
+    const auto uk = CpuGemmMatrixMultiplyKernel::get_implementation(
+        DataTypeISASelectorData{lhs->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
     _func = uk->ukernel;
 
     ICPPKernel::configure(win);
 }
 
-Status CpuGemmMatrixMultiplyKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, float alpha, bool is_interleaved,
+Status CpuGemmMatrixMultiplyKernel::validate(const ITensorInfo     *lhs,
+                                             const ITensorInfo     *rhs,
+                                             const ITensorInfo     *dst,
+                                             float                  alpha,
+                                             bool                   is_interleaved,
                                              const GEMMReshapeInfo &reshape_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(lhs, rhs, dst, alpha, is_interleaved, reshape_info));
@@ -195,7 +203,8 @@ const char *CpuGemmMatrixMultiplyKernel::name() const
     return "CpuGemmMatrixMultiplyKernel";
 }
 
-const std::vector<CpuGemmMatrixMultiplyKernel::GemmMatrixMulKernel> &CpuGemmMatrixMultiplyKernel::get_available_kernels()
+const std::vector<CpuGemmMatrixMultiplyKernel::GemmMatrixMulKernel> &
+CpuGemmMatrixMultiplyKernel::get_available_kernels()
 {
     return available_kernels;
 }

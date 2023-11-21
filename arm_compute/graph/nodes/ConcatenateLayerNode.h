@@ -47,7 +47,8 @@ public:
      *
      * @return Expected output descriptor
      */
-    static TensorDescriptor compute_output_descriptor(const std::vector<TensorDescriptor> &input_descriptors, DataLayoutDimension axis);
+    static TensorDescriptor compute_output_descriptor(const std::vector<TensorDescriptor> &input_descriptors,
+                                                      DataLayoutDimension                  axis);
     /** Disables or not the depth concatenate node
      *
      * @warning This is used when concatenate is performed using sub-tensors, where this node is used as a placeholder.
@@ -78,7 +79,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
 private:
     unsigned int                       _total_nodes;

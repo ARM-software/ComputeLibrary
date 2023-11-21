@@ -36,9 +36,8 @@ struct PoolingConfig
     PoolingMethod method = PoolingMethod::DEFAULT;
     std::string   filter = "";
 
-    PoolingConfig(PoolingMethod method)
-        : method(method) {};
-    PoolingConfig() {};
+    PoolingConfig(PoolingMethod method) : method(method){};
+    PoolingConfig(){};
 };
 
 struct PoolingArgs
@@ -57,30 +56,40 @@ struct PoolingArgs
 
     const PoolingConfig *config;
 
-    PoolingArgs(
-        const CPUInfo       *cpu_info,
-        PoolingType          pool_type,
-        const PoolingWindow &window,
-        const PoolingStride &stride,
-        bool                 exclude_padding,
-        unsigned int         n_batches,
-        unsigned int         input_rows,
-        unsigned int         input_cols,
-        unsigned int         n_channels,
-        unsigned int         output_rows,
-        unsigned int         output_cols,
-        const PaddingValues &padding,
-        const PoolingConfig *cfg)
-        : cpu_info(cpu_info), pool_type(pool_type), pool_window(window), pool_stride(stride), exclude_padding(exclude_padding), n_batches(n_batches), input_rows(input_rows), input_cols(input_cols),
-          n_channels(n_channels), output_rows(output_rows), output_cols(output_cols), padding(padding), config(cfg)
+    PoolingArgs(const CPUInfo       *cpu_info,
+                PoolingType          pool_type,
+                const PoolingWindow &window,
+                const PoolingStride &stride,
+                bool                 exclude_padding,
+                unsigned int         n_batches,
+                unsigned int         input_rows,
+                unsigned int         input_cols,
+                unsigned int         n_channels,
+                unsigned int         output_rows,
+                unsigned int         output_cols,
+                const PaddingValues &padding,
+                const PoolingConfig *cfg)
+        : cpu_info(cpu_info),
+          pool_type(pool_type),
+          pool_window(window),
+          pool_stride(stride),
+          exclude_padding(exclude_padding),
+          n_batches(n_batches),
+          input_rows(input_rows),
+          input_cols(input_cols),
+          n_channels(n_channels),
+          output_rows(output_rows),
+          output_cols(output_cols),
+          padding(padding),
+          config(cfg)
     {
         // If either of the pooling window dimensions are set to zero, meaning
         // "pool everything", then replace with the corresponding input dimension.
-        if(pool_window.rows == 0)
+        if (pool_window.rows == 0)
         {
             pool_window.rows = input_rows;
         }
-        if(pool_window.cols == 0)
+        if (pool_window.cols == 0)
         {
             pool_window.cols = input_cols;
         }
@@ -100,10 +109,16 @@ struct Requantize32
     int32_t per_layer_right_shift = 0;
     int32_t per_layer_mul         = 0;
 
-    Requantize32(int32_t input_offset, int32_t output_offset,
-                 int32_t per_layer_left_shift, int32_t per_layer_right_shift,
+    Requantize32(int32_t input_offset,
+                 int32_t output_offset,
+                 int32_t per_layer_left_shift,
+                 int32_t per_layer_right_shift,
                  int32_t per_layer_mul)
-        : input_offset(input_offset), output_offset(output_offset), per_layer_left_shift(per_layer_left_shift), per_layer_right_shift(per_layer_right_shift), per_layer_mul(per_layer_mul)
+        : input_offset(input_offset),
+          output_offset(output_offset),
+          per_layer_left_shift(per_layer_left_shift),
+          per_layer_right_shift(per_layer_right_shift),
+          per_layer_mul(per_layer_mul)
     {
     }
 };
@@ -115,105 +130,88 @@ protected:
     const PoolingArgs m_args;
 
 public:
-    PoolingCommon(const PoolingArgs &args)
-        : m_args(args)
+    PoolingCommon(const PoolingArgs &args) : m_args(args)
     {
     }
-    PoolingCommon(PoolingCommon &) = delete;
+    PoolingCommon(PoolingCommon &)            = delete;
     PoolingCommon &operator=(PoolingCommon &) = delete;
 
     size_t get_working_size(unsigned int) const override = 0;
 
     // Execute pooling over the specified area of memory.
-    void execute(
-        const void *const input,
-        void *const       output,
-        void             *working_space,
-        unsigned int      thread_id,
-        unsigned int      num_threads) const override
+    void execute(const void *const input,
+                 void *const       output,
+                 void             *working_space,
+                 unsigned int      thread_id,
+                 unsigned int      num_threads) const override
     {
-        this->execute(
-            input,
-            m_args.n_channels,
-            m_args.n_channels * m_args.input_cols,
-            m_args.n_channels * m_args.input_cols * m_args.input_rows,
-            output,
-            m_args.n_channels,
-            m_args.n_channels * m_args.output_cols,
-            m_args.n_channels * m_args.output_cols * m_args.output_rows,
-            working_space,
-            thread_id, num_threads);
+        this->execute(input, m_args.n_channels, m_args.n_channels * m_args.input_cols,
+                      m_args.n_channels * m_args.input_cols * m_args.input_rows, output, m_args.n_channels,
+                      m_args.n_channels * m_args.output_cols,
+                      m_args.n_channels * m_args.output_cols * m_args.output_rows, working_space, thread_id,
+                      num_threads);
     }
 
-    void execute(
-        const void *const input,
-        size_t            ld_input_col,
-        size_t            ld_input_row,
-        size_t            ld_input_batch,
-        void *const       output,
-        size_t            ld_output_col,
-        size_t            ld_output_row,
-        size_t            ld_output_batch,
-        void             *working_space,
-        unsigned int      thread_id,
-        unsigned int      num_threads) const override
+    void execute(const void *const input,
+                 size_t            ld_input_col,
+                 size_t            ld_input_row,
+                 size_t            ld_input_batch,
+                 void *const       output,
+                 size_t            ld_output_col,
+                 size_t            ld_output_row,
+                 size_t            ld_output_batch,
+                 void             *working_space,
+                 unsigned int      thread_id,
+                 unsigned int      num_threads) const override
     {
-        this->execute(
-            m_args.n_batches, m_args.input_rows, m_args.input_cols, m_args.n_channels,
-            input, ld_input_col, ld_input_row, ld_input_batch,
-            m_args.padding, m_args.output_rows, m_args.output_cols,
-            output, ld_output_col, ld_output_row, ld_output_batch,
-            working_space, thread_id, num_threads);
+        this->execute(m_args.n_batches, m_args.input_rows, m_args.input_cols, m_args.n_channels, input, ld_input_col,
+                      ld_input_row, ld_input_batch, m_args.padding, m_args.output_rows, m_args.output_cols, output,
+                      ld_output_col, ld_output_row, ld_output_batch, working_space, thread_id, num_threads);
     }
 
-    void execute(
-        unsigned int         batches,
-        unsigned int         height,
-        unsigned int         width,
-        unsigned int         channels,
-        const void *const    input,
-        size_t               ld_input_col,
-        size_t               ld_input_row,
-        size_t               ld_input_batch,
-        const PaddingValues &padding,
-        unsigned int         output_height,
-        unsigned int         output_width,
-        void *const          output,
-        size_t               ld_output_col,
-        size_t               ld_output_row,
-        size_t               ld_output_batch,
-        void                *working_space,
-        unsigned int         thread_id,
-        unsigned int         num_threads) const override
+    void execute(unsigned int         batches,
+                 unsigned int         height,
+                 unsigned int         width,
+                 unsigned int         channels,
+                 const void *const    input,
+                 size_t               ld_input_col,
+                 size_t               ld_input_row,
+                 size_t               ld_input_batch,
+                 const PaddingValues &padding,
+                 unsigned int         output_height,
+                 unsigned int         output_width,
+                 void *const          output,
+                 size_t               ld_output_col,
+                 size_t               ld_output_row,
+                 size_t               ld_output_batch,
+                 void                *working_space,
+                 unsigned int         thread_id,
+                 unsigned int         num_threads) const override
     {
-        this->execute_internal(
-            batches, height, width, channels, padding,
-            input, ld_input_col, ld_input_row, ld_input_batch,
-            output_height, output_width,
-            output, ld_output_col, ld_output_row, ld_output_batch,
-            working_space, thread_id, num_threads);
+        this->execute_internal(batches, height, width, channels, padding, input, ld_input_col, ld_input_row,
+                               ld_input_batch, output_height, output_width, output, ld_output_col, ld_output_row,
+                               ld_output_batch, working_space, thread_id, num_threads);
     }
 
 protected:
-    virtual void execute_internal(
-        unsigned int batches,
-        unsigned int height,
-        unsigned int width,
-        unsigned int channels,
-        const PaddingValues &,
-        const void *const input,
-        size_t            ld_input_col,
-        size_t            ld_input_row,
-        size_t            ld_input_batch,
-        unsigned int      output_height,
-        unsigned int      output_width,
-        void *const       output,
-        size_t            ld_output_col,
-        size_t            ld_output_row,
-        size_t            ld_output_batch,
-        void             *working_space,
-        unsigned int      thread_id,
-        unsigned int      num_threads) const = 0;
+    virtual void execute_internal(unsigned int batches,
+                                  unsigned int height,
+                                  unsigned int width,
+                                  unsigned int channels,
+                                  const PaddingValues &,
+                                  const void *const input,
+                                  size_t            ld_input_col,
+                                  size_t            ld_input_row,
+                                  size_t            ld_input_batch,
+                                  unsigned int      output_height,
+                                  unsigned int      output_width,
+                                  void *const       output,
+                                  size_t            ld_output_col,
+                                  size_t            ld_output_row,
+                                  size_t            ld_output_batch,
+                                  void             *working_space,
+                                  unsigned int      thread_id,
+                                  unsigned int      num_threads) const = 0;
 };
 
 template <typename TInput, typename TOutput>

@@ -24,12 +24,12 @@
 #ifndef ARM_COMPUTE_CLRNN_LAYER_H
 #define ARM_COMPUTE_CLRNN_LAYER_H
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLCopy.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 #include <memory>
 
@@ -69,7 +69,13 @@ public:
      * @param[in,out] hidden_state      Output tensor of shape [num_units, batch_size]. Data types supported: Same as @p input
      * @param[in]     info              Activation layer parameter.
      */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias, ICLTensor *hidden_state, ICLTensor *output, ActivationLayerInfo &info);
+    void configure(const ICLTensor     *input,
+                   const ICLTensor     *weights,
+                   const ICLTensor     *recurrent_weights,
+                   const ICLTensor     *bias,
+                   ICLTensor           *hidden_state,
+                   ICLTensor           *output,
+                   ActivationLayerInfo &info);
     /** Initialize the function
      *
      * @param[in]     compile_context   The compile context to be used.
@@ -81,8 +87,14 @@ public:
      * @param[in,out] hidden_state      Output tensor of shape [num_units, batch_size]. Data types supported: Same as @p input
      * @param[in]     info              Activation layer parameter.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias, ICLTensor *hidden_state,
-                   ICLTensor *output, ActivationLayerInfo &info);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const ICLTensor        *weights,
+                   const ICLTensor        *recurrent_weights,
+                   const ICLTensor        *bias,
+                   ICLTensor              *hidden_state,
+                   ICLTensor              *output,
+                   ActivationLayerInfo    &info);
     /** Initialize the function
      *
      * @param[in] input             Input is a 2-D tensor of shape [input_size, batch_size]. Data types supported: F16/F32
@@ -95,7 +107,12 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *recurrent_weights, const ITensorInfo *bias, const ITensorInfo *hidden_state, const ITensorInfo *output,
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *recurrent_weights,
+                           const ITensorInfo         *bias,
+                           const ITensorInfo         *hidden_state,
+                           const ITensorInfo         *output,
                            const ActivationLayerInfo &info);
 
     // Inherited methods overridden:
@@ -114,5 +131,5 @@ private:
     CLTensor              _add_output;
     bool                  _is_prepared;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLRNN_LAYER_H */

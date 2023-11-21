@@ -44,7 +44,7 @@ ActivationLayerInfo ActivationLayerNode::activation_info() const
 
 bool ActivationLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -63,7 +63,7 @@ TensorDescriptor ActivationLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
     TensorDescriptor output_info = src->desc();
-    if(!_out_quant_info.empty())
+    if (!_out_quant_info.empty())
     {
         output_info.quant_info = _out_quant_info;
     }

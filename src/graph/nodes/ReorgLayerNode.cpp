@@ -31,8 +31,7 @@ namespace arm_compute
 {
 namespace graph
 {
-ReorgLayerNode::ReorgLayerNode(int stride)
-    : _stride(stride)
+ReorgLayerNode::ReorgLayerNode(int stride) : _stride(stride)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -51,20 +50,22 @@ TensorDescriptor ReorgLayerNode::compute_output_descriptor(const TensorDescripto
 
     ARM_COMPUTE_ERROR_ON(stride <= 0);
     ARM_COMPUTE_ERROR_ON_MSG((input_width % stride != 0), "The width of the input tensor must be a multiple of stride");
-    ARM_COMPUTE_ERROR_ON_MSG((input_height % stride != 0), "The height of the input tensor must be a multiple of stride");
+    ARM_COMPUTE_ERROR_ON_MSG((input_height % stride != 0),
+                             "The height of the input tensor must be a multiple of stride");
 
     const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), input_width / stride);
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), input_height / stride);
-    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL), input_channel * stride * stride);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL),
+                                input_channel * stride * stride);
 
     return output_descriptor;
 }
 
 bool ReorgLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

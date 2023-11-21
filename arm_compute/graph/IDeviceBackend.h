@@ -88,7 +88,8 @@ public:
      *
      * @return Backend sub-tensor handle
      */
-    virtual std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) = 0;
+    virtual std::unique_ptr<ITensorHandle>
+    create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) = 0;
     /** Configure a backend Node
      *
      * @note This creates an appropriate configured backend function for the given node

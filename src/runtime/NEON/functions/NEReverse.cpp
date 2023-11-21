@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,23 +23,25 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEReverse.h"
 
-#include "src/core/NEON/kernels/NEReverseKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NEReverseKernel.h"
 
 namespace arm_compute
 {
-void NEReverse::configure(const ITensor *input, ITensor *output, const ITensor *axis)
+void NEReverse::configure(const ITensor *input, ITensor *output, const ITensor *axis, bool use_inverted_axis)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, axis);
 
     auto k = std::make_unique<NEReverseKernel>();
-    k->configure(input, output, axis);
+    k->configure(input, output, axis, use_inverted_axis);
     _kernel = std::move(k);
 }
 
-Status NEReverse::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
+Status NEReverse::validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const ITensorInfo *axis,
+                           bool               use_inverted_axis)
 {
-    return NEReverseKernel::validate(input, output, axis);
+    return NEReverseKernel::validate(input, output, axis, use_inverted_axis);
 }
 } // namespace arm_compute

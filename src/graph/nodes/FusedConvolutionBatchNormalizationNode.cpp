@@ -32,12 +32,18 @@ namespace arm_compute
 {
 namespace graph
 {
-FusedConvolutionBatchNormalizationNode::FusedConvolutionBatchNormalizationNode(float epsilon, PadStrideInfo info,
-                                                                               unsigned int      num_groups,
-                                                                               ConvolutionMethod method,
-                                                                               FastMathHint      fast_math_hint,
+FusedConvolutionBatchNormalizationNode::FusedConvolutionBatchNormalizationNode(float               epsilon,
+                                                                               PadStrideInfo       info,
+                                                                               unsigned int        num_groups,
+                                                                               ConvolutionMethod   method,
+                                                                               FastMathHint        fast_math_hint,
                                                                                ActivationLayerInfo fused_activation)
-    : _epsilon(epsilon), _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _fused_activation(fused_activation)
+    : _epsilon(epsilon),
+      _info(std::move(info)),
+      _num_groups(num_groups),
+      _method(method),
+      _fast_math_hint(fast_math_hint),
+      _fused_activation(fused_activation)
 {
     _input_edges.resize(7, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -88,9 +94,8 @@ void FusedConvolutionBatchNormalizationNode::set_fused_activation(ActivationLaye
     _fused_activation = fused_activation;
 }
 
-TensorDescriptor FusedConvolutionBatchNormalizationNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                                   const TensorDescriptor &weights_descriptor,
-                                                                                   const PadStrideInfo    &info)
+TensorDescriptor FusedConvolutionBatchNormalizationNode::compute_output_descriptor(
+    const TensorDescriptor &input_descriptor, const TensorDescriptor &weights_descriptor, const PadStrideInfo &info)
 {
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
@@ -100,20 +105,22 @@ TensorDescriptor FusedConvolutionBatchNormalizationNode::compute_output_descript
     const unsigned int kernel_width  = get_dimension_size(weights_descriptor, DataLayoutDimension::WIDTH);
     const unsigned int kernel_height = get_dimension_size(weights_descriptor, DataLayoutDimension::HEIGHT);
 
-    std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
+    std::tie(output_width, output_height) =
+        scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
     const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), output_width);
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), output_height);
-    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL), weights_descriptor.shape[3]);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL),
+                                weights_descriptor.shape[3]);
 
     return output_descriptor;
 }
 
 bool FusedConvolutionBatchNormalizationNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

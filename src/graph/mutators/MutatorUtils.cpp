@@ -29,14 +29,14 @@ namespace graph
 {
 bool is_padding_in_height_or_width(const DataLayout &layout, const PaddingList &padding_list)
 {
-    if(layout == DataLayout::NCHW || layout == DataLayout::NHWC)
+    if (layout == DataLayout::NCHW || layout == DataLayout::NHWC)
     {
         const unsigned int height_index = get_dimension_idx(layout, DataLayoutDimension::HEIGHT);
         const unsigned int width_index  = get_dimension_idx(layout, DataLayoutDimension::WIDTH);
 
-        for(unsigned int i = 0; i < padding_list.size(); ++i)
+        for (unsigned int i = 0; i < padding_list.size(); ++i)
         {
-            if(i != height_index && i != width_index && padding_list[i] != PaddingInfo(0, 0))
+            if (i != height_index && i != width_index && padding_list[i] != PaddingInfo(0, 0))
             {
                 // if the index is not either height or width, don't fuse
                 return false;

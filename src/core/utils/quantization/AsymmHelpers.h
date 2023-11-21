@@ -29,7 +29,8 @@
 
 namespace arm_compute
 {
-namespace quantization {
+namespace quantization
+{
 
 /** Get minimum and maximum output of the activation function after quantization.
  *
@@ -41,7 +42,9 @@ namespace quantization {
  *
  * @return The minimum and maximum output of the activation function after quantization.
  */
-std::tuple<int32_t, int32_t> get_quantized_asymmetric_output_min_max(const QuantizationInfo &q_info, const ActivationLayerInfo &act_info, DataType data_type);
+std::tuple<int32_t, int32_t> get_quantized_asymmetric_output_min_max(const QuantizationInfo    &q_info,
+                                                                     const ActivationLayerInfo &act_info,
+                                                                     DataType                   data_type);
 
 } // namespace quantization
 } // namespace arm_compute

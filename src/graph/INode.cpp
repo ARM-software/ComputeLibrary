@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018,2021 Arm Limited.
+ * Copyright (c) 2018,2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,6 @@ namespace graph
 INode::INode()
     : _graph(nullptr), _id(EmptyNodeID), _common_params({ "", Target::UNSPECIFIED}),
       _outputs(), _input_edges(), _output_edges(), _assigned_target(Target::UNSPECIFIED)
-      ,_post_op_info_list(std::list<std::unique_ptr<ConvPostOpInfo>> {})
 {
 }
 // clang-format on
@@ -76,17 +75,17 @@ void INode::set_assigned_target(Target target)
 
 void INode::set_output_tensor(TensorID tid, size_t idx)
 {
-    if(tid != NullTensorID && (idx < _outputs.size()) && (_graph->tensor(tid) != nullptr))
+    if (tid != NullTensorID && (idx < _outputs.size()) && (_graph->tensor(tid) != nullptr))
     {
         ARM_COMPUTE_ERROR_ON(_graph == nullptr);
         Tensor *updated_tensor = _graph->tensor(tid);
         _outputs[idx]          = tid;
 
         // Set tensor to all output edges of the node
-        for(auto &output_edge_id : _output_edges)
+        for (auto &output_edge_id : _output_edges)
         {
             auto output_edge = _graph->edge(output_edge_id);
-            if(output_edge != nullptr)
+            if (output_edge != nullptr)
             {
                 // Unbind edge from current tensor
                 auto current_output_tensor = output_edge->tensor();
@@ -199,16 +198,6 @@ Target INode::requested_target() const
 Target INode::assigned_target() const
 {
     return _assigned_target;
-}
-
-const std::list<std::unique_ptr<ConvPostOpInfo>> &INode::post_op_info_list() const
-{
-    return _post_op_info_list;
-}
-
-std::list<std::unique_ptr<ConvPostOpInfo>> &INode::post_op_info_list()
-{
-    return _post_op_info_list;
 }
 } // namespace graph
 } // namespace arm_compute

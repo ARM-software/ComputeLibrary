@@ -25,9 +25,9 @@
 #define ARM_COMPUTE_NEREDUCTIONOPERATION_H
 
 #include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -88,7 +88,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, bool keep_dims = true);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           unsigned int       axis,
+                           ReductionOperation op,
+                           bool               keep_dims = true);
 
     // Inherited methods overridden:
     void run() override;

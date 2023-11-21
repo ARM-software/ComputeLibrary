@@ -139,7 +139,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ComparisonOperation op);
+    static Status
+    validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ComparisonOperation op);
 };
 
 /** Basic function to run @ref cpu::kernels::CpuComparisonKernel

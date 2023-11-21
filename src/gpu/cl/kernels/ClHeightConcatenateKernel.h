@@ -50,7 +50,8 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      *
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int height_offset, ITensorInfo *dst);
+    void
+    configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int height_offset, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClHeightConcatenateKernel::configure()
@@ -64,7 +65,7 @@ public:
 
 private:
     unsigned int _height_offset;
-    int32_t      _depth{ 0 };
+    int32_t      _depth{0};
 };
 } // namespace kernels
 } // namespace opencl

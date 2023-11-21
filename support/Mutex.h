@@ -50,10 +50,10 @@ public:
     ~Mutex() = default;
 
     /** Lock */
-    void lock() {};
+    void lock(){};
 
     /** Unlock */
-    void unlock() {};
+    void unlock(){};
 
     /** Try the lock.
      *
@@ -73,8 +73,7 @@ public:
     typedef Mutex mutex_type;
 
 public:
-    explicit lock_guard(Mutex &m_)
-        : m(m_)
+    explicit lock_guard(Mutex &m_) : m(m_)
     {
     }
     ~lock_guard()
@@ -97,15 +96,14 @@ public:
     unique_lock() noexcept : m(nullptr)
     {
     }
-    explicit unique_lock(mutex_type &m)
-        : m(&m)
+    explicit unique_lock(mutex_type &m) : m(&m)
     {
     }
-    unique_lock(const unique_lock &) = delete;
-    unique_lock(unique_lock &&)      = default;
+    unique_lock(const unique_lock &)            = delete;
+    unique_lock(unique_lock &&)                 = default;
     unique_lock &operator=(const unique_lock &) = delete;
-    unique_lock &operator=(unique_lock &&) = default;
-    ~unique_lock()                         = default;
+    unique_lock &operator=(unique_lock &&)      = default;
+    ~unique_lock()                              = default;
     void lock()
     {
     }
@@ -121,5 +119,5 @@ private:
     mutex_type *m;
 };
 #endif /* NO_MULTI_THREADING */
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_MUTEX_H__ */

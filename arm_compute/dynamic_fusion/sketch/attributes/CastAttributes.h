@@ -49,8 +49,8 @@ public:
     ConvertPolicy convert_policy() const;
 
 private:
-    DataType      _data_type{};                               /**< Data Type to be casted to */
-    ConvertPolicy _convert_policy{ ConvertPolicy::SATURATE }; /**< Convert Policy */
+    DataType      _data_type{};                             /**< Data Type to be casted to */
+    ConvertPolicy _convert_policy{ConvertPolicy::SATURATE}; /**< Convert Policy */
 };
 } // namespace dynamic_fusion
 } // namespace experimental

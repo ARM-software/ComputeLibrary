@@ -47,7 +47,10 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      * @param[in]  dst_window      (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, Window *dst_window = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *src,
+                   ITensorInfo            *dst,
+                   Window                 *dst_window = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClCopyKernel::configure()

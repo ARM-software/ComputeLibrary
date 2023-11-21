@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEPADLAYERKERNEL_H
 
 #include "arm_compute/core/PixelValue.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -62,7 +63,11 @@ public:
      * @param[in]  mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT.
      *                           Only CONSTANT padding mode is currently supported
      */
-    void configure(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value = PixelValue(), const PaddingMode mode = PaddingMode::CONSTANT);
+    void configure(ITensor           *input,
+                   ITensor           *output,
+                   const PaddingList &padding,
+                   const PixelValue   constant_value = PixelValue(),
+                   const PaddingMode  mode           = PaddingMode::CONSTANT);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEPadLayer.
      *
      * @param[in] input          Source tensor info. Data types supported: All.
@@ -75,7 +80,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, const PixelValue constant_value = PixelValue(), const PaddingMode mode = PaddingMode::CONSTANT);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const PaddingList &padding,
+                           const PixelValue   constant_value = PixelValue(),
+                           const PaddingMode  mode           = PaddingMode::CONSTANT);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

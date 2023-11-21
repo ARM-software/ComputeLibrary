@@ -28,9 +28,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_SOFTMAX_KERNEL(func_name)                                  \
-    void func_name(const ITensor *in, const ITensor *max, void *const tmp, \
-                   ITensor *out, const float beta, bool is_log, const Window &window)
+#define DECLARE_SOFTMAX_KERNEL(func_name)                                                                  \
+    void func_name(const ITensor *in, const ITensor *max, void *const tmp, ITensor *out, const float beta, \
+                   bool is_log, const Window &window)
 
 DECLARE_SOFTMAX_KERNEL(neon_fp32_softmax);
 DECLARE_SOFTMAX_KERNEL(neon_fp16_softmax);
@@ -43,8 +43,7 @@ DECLARE_SOFTMAX_KERNEL(sve2_qasymm8_softmax);
 
 #undef DECLARE_SOFTMAX_KERNEL
 
-#define DECLARE_LOGITS_KERNEL(func_name) \
-    void func_name(const ITensor *in, ITensor *out, const Window &window)
+#define DECLARE_LOGITS_KERNEL(func_name) void func_name(const ITensor *in, ITensor *out, const Window &window)
 
 DECLARE_LOGITS_KERNEL(neon_fp32_logits);
 DECLARE_LOGITS_KERNEL(neon_fp16_logits);

@@ -68,17 +68,11 @@ ClComponentActivation::ClComponentActivation(ComponentId                        
                                              const IGpuKernelComponent::Properties &properties,
                                              const ArgumentPack<ITensorInfo>       &tensors,
                                              const Attributes                      &attributes)
-    : IGpuKernelComponent{ id, properties, tensors },
+    : IGpuKernelComponent{id, properties, tensors},
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<ClTemplateActivation>(id, tensors, attributes)
-}
+      _component_writer{std::make_unique<ClTemplateActivation>(id, tensors, attributes)}
 #else  //ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<GpuCkwActivation>(id, tensors, attributes)
-}
+      _component_writer{std::make_unique<GpuCkwActivation>(id, tensors, attributes)}
 #endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }

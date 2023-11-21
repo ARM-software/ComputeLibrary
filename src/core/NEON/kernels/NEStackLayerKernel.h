@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,11 +22,15 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_NESTACKLAYERKERNEL_H
-#define ARM_COMPUTE_NESTACKLAYERKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NESTACKLAYERKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NESTACKLAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
+
+#include <cstdint>
+#include <functional>
 
 namespace arm_compute
 {
@@ -56,38 +60,48 @@ public:
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in]  input       Input tensor. Data types supported: All
-     * @param[in]  axis        The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
-     * @param[in]  idx_input   Index of the input tensor in the list of tensors to stack.
-     *                         All tensors in the list must have the same shape
-     * @param[in]  num_tensors Number of tensors to stack
-     * @param[out] output      Output tensor. Data types supported: Same as @p input.
+     * @param[in]  input  Input tensors. Data types supported: All
+     * @param[in]  axis   The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
+     * @param[out] output Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(const ITensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ITensor *output);
+    void configure(const std::vector<ITensor *> &input, uint32_t axis, ITensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in] input       Input tensor info. Data types supported: All
-     * @param[in] axis        The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
-     * @param[in] idx_input   Index of the input tensor in the list of tensors to stack
-     *                        All tensors in the list must have the same shape
-     * @param[in] num_tensors Number of tensors to stack
-     * @param[in] output      Output tensor info. Data types supported: Same as @p input.
+     * @param[in] input  Input tensor infos. Data types supported: All
+     * @param[in] axis   The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, const ITensorInfo *output);
+    static Status validate(const std::vector<ITensorInfo *> &input, uint32_t axis, const ITensorInfo *output);
+
+    /** Prepare the reshape kernel for execution (Only executed once) for
+     *  choosing the window and the algorithm.
+     */
+    void prepare();
 
     // Inherited methods overridden
     void run(const Window &window, const ThreadInfo &info) override;
 
+    /** Get the dimension to split the kernel workload
+     *
+     * @return the split dimension
+     */
+    uint32_t get_split_dimension() const
+    {
+        return _split_dimension;
+    }
+
 private:
-    const ITensor *_input;
-    ITensor       *_output;
-    unsigned int   _axis;
-    unsigned int   _idx_input;
+    std::vector<ITensor *> _input;
+    ITensor               *_output;
+    uint32_t               _axis;
+    uint32_t               _split_dimension;
+
+    std::function<void(const std::vector<ITensor *> &, ITensor *, uint32_t, const Window &)> _stack_fn{};
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NESTACKLAYERKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NESTACKLAYERKERNEL_H

@@ -25,6 +25,7 @@
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H
 
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/core/NEON/wrapper/svtraits.h"
 
@@ -51,7 +52,7 @@ svbool_t narrow_to_byte_predicate(svbool_t pg)
 {
     const auto all_false = svpfalse();
 
-    switch(bytewidth)
+    switch (bytewidth)
     {
         case 8:
             pg = svuzp1_b32(pg, all_false);
@@ -74,7 +75,7 @@ VectorType elementwise_arithmetic_op(svbool_t &pg, const VectorType &a, const Ve
     using ScalarType = typename wrapper::sve_scalar<VectorType>::type;
     VectorType res{};
 
-    switch(op)
+    switch (op)
     {
         case ArithmeticOperation::MAX:
             res = svmax_z(pg, a, b);
@@ -114,11 +115,12 @@ VectorType elementwise_arithmetic_op(svbool_t &pg, const VectorType &a, const Ve
 }
 
 template <typename InputVectorType, typename OutputVectorType>
-OutputVectorType elementwise_comparison_op(svbool_t &pg, const InputVectorType &a, const InputVectorType &b, ComparisonOperation op)
+OutputVectorType
+elementwise_comparison_op(svbool_t &pg, const InputVectorType &a, const InputVectorType &b, ComparisonOperation op)
 {
     svbool_t selection_vector{};
 
-    switch(op)
+    switch (op)
     {
         case ComparisonOperation::Equal:
             selection_vector = svcmpeq(pg, a, b);
@@ -154,10 +156,12 @@ OutputVectorType elementwise_comparison_op(svbool_t &pg, const InputVectorType &
 }
 
 template <typename ScalarType>
-void elementwise_arithmetic_op(const ITensor *in1, const ITensor *in2, ITensor *out, ArithmeticOperation op, const Window &window);
+void elementwise_arithmetic_op(
+    const ITensor *in1, const ITensor *in2, ITensor *out, ArithmeticOperation op, const Window &window);
 
 template <typename ScalarType, typename OutputScalarType = uint8_t>
-void elementwise_comparison_op(const ITensor *in1, const ITensor *in2, ITensor *out, ComparisonOperation op, const Window &window);
+void elementwise_comparison_op(
+    const ITensor *in1, const ITensor *in2, ITensor *out, ComparisonOperation op, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif /* SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H */

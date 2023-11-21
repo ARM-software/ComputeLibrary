@@ -42,7 +42,8 @@ namespace backends
  * @return  A configured backend function
  */
 template <typename FunctionType, typename FunctionNameType, typename... ParameterType>
-std::tuple<std::unique_ptr<arm_compute::IFunction>, FunctionNameType> create_named_function(FunctionNameType name, ParameterType... args)
+std::tuple<std::unique_ptr<arm_compute::IFunction>, FunctionNameType> create_named_function(FunctionNameType name,
+                                                                                            ParameterType... args)
 {
     auto f = std::make_unique<FunctionType>();
     f->configure(std::forward<ParameterType>(args)...);
@@ -58,9 +59,8 @@ std::tuple<std::unique_ptr<arm_compute::IFunction>, FunctionNameType> create_nam
  * @return  A configured backend function
  */
 template <typename FunctionType, typename FunctionNameType, typename MemoryManagerType, typename... ParameterType>
-std::tuple<std::unique_ptr<arm_compute::IFunction>, FunctionNameType> create_named_memory_managed_function(FunctionNameType name,
-                                                                                                           MemoryManagerType mm,
-                                                                                                           ParameterType... args)
+std::tuple<std::unique_ptr<arm_compute::IFunction>, FunctionNameType>
+create_named_memory_managed_function(FunctionNameType name, MemoryManagerType mm, ParameterType... args)
 {
     auto f = std::make_unique<FunctionType>(mm);
     f->configure(std::forward<ParameterType>(args)...);

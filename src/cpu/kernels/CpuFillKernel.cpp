@@ -28,6 +28,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -68,17 +69,18 @@ void CpuFillKernel::run_op(ITensorPack &tensors, const Window &window, const Thr
     collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator tensor_it(inout, collapsed);
-    execute_window_loop(collapsed, [&](const Coordinates &)
-    {
-        uint8_t *base_addr = start_valid_region + tensor_it.offset();
-        // Set memory
-        for(int i = 0; i < window_width; ++i)
+    execute_window_loop(
+        collapsed,
+        [&](const Coordinates &)
         {
-            std::memcpy(base_addr + i * element_size, &_constant_value.value, element_size);
-        }
-
-    },
-    tensor_it);
+            uint8_t *base_addr = start_valid_region + tensor_it.offset();
+            // Set memory
+            for (int i = 0; i < window_width; ++i)
+            {
+                std::memcpy(base_addr + i * element_size, &_constant_value.value, element_size);
+            }
+        },
+        tensor_it);
 }
 
 const char *CpuFillKernel::name() const

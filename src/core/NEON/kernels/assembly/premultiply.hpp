@@ -44,30 +44,27 @@ void do_premultiply(const T           *in_ptr,
                     const unsigned     input_channels,
                     const unsigned int channel_multiplier)
 {
-    if(sizeof(T) == 4 && channel_multiplier == 6)
+    if (sizeof(T) == 4 && channel_multiplier == 6)
     {
-        do_premultiply_float_6(
-            (const float *)in_ptr, ld_row, ld_col,
-            (float *)out_ptr, out_ld_row, out_ld_col,
-            tile_rows, tile_cols,
-            input_channels);
+        do_premultiply_float_6((const float *)in_ptr, ld_row, ld_col, (float *)out_ptr, out_ld_row, out_ld_col,
+                               tile_rows, tile_cols, input_channels);
     }
     else
     {
-        for(unsigned int i = 0; i < tile_rows; i++)
+        for (unsigned int i = 0; i < tile_rows; i++)
         {
             const T *ip2 = in_ptr + i * ld_row;
             T       *op2 = out_ptr + i * out_ld_row;
-            for(unsigned int j = 0; j < tile_cols; j++)
+            for (unsigned int j = 0; j < tile_cols; j++)
             {
                 const T *ip = ip2;
                 T       *op = op2;
-                for(unsigned int c = 0; c < input_channels; c++)
+                for (unsigned int c = 0; c < input_channels; c++)
                 {
                     T val = *ip;
                     ip++;
 
-                    for(unsigned int r = 0; r < channel_multiplier; r++)
+                    for (unsigned int r = 0; r < channel_multiplier; r++)
                     {
                         op[r] = val;
                     }

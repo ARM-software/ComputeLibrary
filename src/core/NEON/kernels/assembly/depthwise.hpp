@@ -38,9 +38,8 @@ struct DepthwiseConfig
     DepthwiseMethod method = DepthwiseMethod::DEFAULT;
     std::string     filter = "";
 
-    DepthwiseConfig(DepthwiseMethod method)
-        : method(method) {};
-    DepthwiseConfig() {};
+    DepthwiseConfig(DepthwiseMethod method) : method(method){};
+    DepthwiseConfig(){};
 };
 
 struct DepthwiseArgs
@@ -63,18 +62,24 @@ struct DepthwiseArgs
 
     bool fast_mode = false;
 
-    DepthwiseArgs(
-        const CPUInfo *cpu_info,
-        unsigned int kernel_rows, unsigned int kernel_cols,
-        unsigned int stride_rows, unsigned int stride_cols,
-        unsigned int dilation_rows, unsigned int dilation_cols,
-        unsigned int n_batches, unsigned int input_rows, unsigned int input_cols,
-        unsigned int input_channels,
-        unsigned int output_rows, unsigned int output_cols,
-        unsigned int  channel_multiplier,
-        PaddingValues padding, arm_gemm::Activation activation,
+    DepthwiseArgs(const CPUInfo       *cpu_info,
+                  unsigned int         kernel_rows,
+                  unsigned int         kernel_cols,
+                  unsigned int         stride_rows,
+                  unsigned int         stride_cols,
+                  unsigned int         dilation_rows,
+                  unsigned int         dilation_cols,
+                  unsigned int         n_batches,
+                  unsigned int         input_rows,
+                  unsigned int         input_cols,
+                  unsigned int         input_channels,
+                  unsigned int         output_rows,
+                  unsigned int         output_cols,
+                  unsigned int         channel_multiplier,
+                  PaddingValues        padding,
+                  arm_gemm::Activation activation,
 
-        const DepthwiseConfig *config)
+                  const DepthwiseConfig *config)
         : cpu_info(cpu_info),
           kernel_rows(kernel_rows),
           kernel_cols(kernel_cols),
@@ -95,20 +100,38 @@ struct DepthwiseArgs
     {
     }
 
-    DepthwiseArgs(
-        const CPUInfo *cpu_info,
-        unsigned int kernel_rows, unsigned int kernel_cols,
-        unsigned int stride_rows, unsigned int stride_cols,
-        unsigned int n_batches, unsigned int input_rows, unsigned int input_cols,
-        unsigned int input_channels,
-        unsigned int output_rows, unsigned int output_cols,
-        unsigned int  channel_multiplier,
-        PaddingValues padding, arm_gemm::Activation activation,
-        const DepthwiseConfig *config)
-        : DepthwiseArgs(cpu_info, kernel_rows, kernel_cols, stride_rows,
-                        stride_cols, 1, 1, n_batches, input_rows, input_cols,
-                        input_channels, output_rows, output_cols,
-                        channel_multiplier, padding, activation, config)
+    DepthwiseArgs(const CPUInfo         *cpu_info,
+                  unsigned int           kernel_rows,
+                  unsigned int           kernel_cols,
+                  unsigned int           stride_rows,
+                  unsigned int           stride_cols,
+                  unsigned int           n_batches,
+                  unsigned int           input_rows,
+                  unsigned int           input_cols,
+                  unsigned int           input_channels,
+                  unsigned int           output_rows,
+                  unsigned int           output_cols,
+                  unsigned int           channel_multiplier,
+                  PaddingValues          padding,
+                  arm_gemm::Activation   activation,
+                  const DepthwiseConfig *config)
+        : DepthwiseArgs(cpu_info,
+                        kernel_rows,
+                        kernel_cols,
+                        stride_rows,
+                        stride_cols,
+                        1,
+                        1,
+                        n_batches,
+                        input_rows,
+                        input_cols,
+                        input_channels,
+                        output_rows,
+                        output_cols,
+                        channel_multiplier,
+                        padding,
+                        activation,
+                        config)
     {
     }
 };
@@ -127,17 +150,18 @@ struct Tile
     {
     }
 
-    Tile()
-        : Tile(nullptr, 0, 0, 0)
+    Tile() : Tile(nullptr, 0, 0, 0)
     {
     }
 
-    void load_from(
-        const TInput      *input,
-        const unsigned int ld_row, const unsigned int ld_col,
-        const unsigned int n_rows, const unsigned int n_cols,
-        const int input_i, const int input_j,
-        const unsigned int channel_multiplier) const
+    void load_from(const TInput      *input,
+                   const unsigned int ld_row,
+                   const unsigned int ld_col,
+                   const unsigned int n_rows,
+                   const unsigned int n_cols,
+                   const int          input_i,
+                   const int          input_j,
+                   const unsigned int channel_multiplier) const
     {
         const auto pad_top  = input_i < 0 ? -input_i : 0;
         const auto pad_left = input_j < 0 ? -input_j : 0;
@@ -145,18 +169,15 @@ struct Tile
         const auto padded_rows = std::min(n_rows - input_i, tile_rows) - pad_top;
         const auto padded_cols = std::min(n_cols - input_j, tile_cols) - pad_left;
 
-        if(padded_rows < tile_rows || padded_cols < tile_cols)
+        if (padded_rows < tile_rows || padded_cols < tile_cols)
         {
             memset(array, 0, tile_rows * tile_cols * tile_channels * sizeof(TInput));
         }
 
-        do_premultiply<TInput>(
-            (TInput *)input + std::max(input_i, 0) * ld_row + std::max(input_j, 0) * ld_col,
-            ld_row, ld_col,
-            array + pad_top * tile_cols * tile_channels + pad_left * tile_channels,
-            tile_cols * tile_channels, tile_channels,
-            padded_rows, padded_cols, tile_channels / channel_multiplier,
-            channel_multiplier);
+        do_premultiply<TInput>((TInput *)input + std::max(input_i, 0) * ld_row + std::max(input_j, 0) * ld_col, ld_row,
+                               ld_col, array + pad_top * tile_cols * tile_channels + pad_left * tile_channels,
+                               tile_cols * tile_channels, tile_channels, padded_rows, padded_cols,
+                               tile_channels / channel_multiplier, channel_multiplier);
     }
 };
 
@@ -168,9 +189,8 @@ protected:
     std::string         m_name{};
 
 public:
-    DepthwiseCommon(const DepthwiseArgs &args)
-        : m_args(args) {};
-    DepthwiseCommon(DepthwiseCommon &) = delete;
+    DepthwiseCommon(const DepthwiseArgs &args) : m_args(args){};
+    DepthwiseCommon(DepthwiseCommon &)            = delete;
     DepthwiseCommon &operator=(DepthwiseCommon &) = delete;
 
     std::string name() const override
@@ -181,19 +201,18 @@ public:
     void set_name(std::string name)
     {
         // Only allow the name to be set once
-        if(m_name.empty())
+        if (m_name.empty())
         {
             m_name = name;
         }
     }
 
-    void execute(
-        const void *const  input,
-        const void *const  parameters,
-        void *const        output,
-        void *const        working_space,
-        const unsigned int thread_id,
-        const unsigned int n_threads) const override final
+    void execute(const void *const  input,
+                 const void *const  parameters,
+                 void *const        output,
+                 void *const        working_space,
+                 const unsigned int thread_id,
+                 const unsigned int n_threads) const override final
     {
         const size_t ld_input_col    = m_args.input_channels;
         const size_t ld_input_row    = ld_input_col * m_args.input_cols;
@@ -202,56 +221,47 @@ public:
         const size_t ld_output_row   = ld_output_col * m_args.output_cols;
         const size_t ld_output_batch = ld_output_row * m_args.output_rows;
 
-        execute(
-            input, ld_input_col, ld_input_row, ld_input_batch,
-            parameters, output, ld_output_col, ld_output_row, ld_output_batch,
-            working_space, thread_id, n_threads);
+        execute(input, ld_input_col, ld_input_row, ld_input_batch, parameters, output, ld_output_col, ld_output_row,
+                ld_output_batch, working_space, thread_id, n_threads);
     }
 
-    void execute(
-        const void *const  input,
-        size_t             ld_input_col,
-        size_t             ld_input_row,
-        size_t             ld_input_batch,
-        const void *const  parameters,
-        void *const        output,
-        size_t             ld_output_col,
-        size_t             ld_output_row,
-        size_t             ld_output_batch,
-        void *const        working_space,
-        const unsigned int thread_id,
-        const unsigned int n_threads) const override final
+    void execute(const void *const  input,
+                 size_t             ld_input_col,
+                 size_t             ld_input_row,
+                 size_t             ld_input_batch,
+                 const void *const  parameters,
+                 void *const        output,
+                 size_t             ld_output_col,
+                 size_t             ld_output_row,
+                 size_t             ld_output_batch,
+                 void *const        working_space,
+                 const unsigned int thread_id,
+                 const unsigned int n_threads) const override final
     {
-        execute(
-            m_args.n_batches, m_args.input_rows, m_args.input_cols,
-            m_args.input_channels, m_args.padding,
-            input, ld_input_col, ld_input_row, ld_input_batch,
-            parameters,
-            m_args.output_rows, m_args.output_cols,
-            output, ld_output_col, ld_output_row, ld_output_batch,
-            working_space, thread_id, n_threads);
+        execute(m_args.n_batches, m_args.input_rows, m_args.input_cols, m_args.input_channels, m_args.padding, input,
+                ld_input_col, ld_input_row, ld_input_batch, parameters, m_args.output_rows, m_args.output_cols, output,
+                ld_output_col, ld_output_row, ld_output_batch, working_space, thread_id, n_threads);
     }
 
-    void execute(
-        unsigned int         batches,
-        unsigned int         input_height,
-        unsigned int         input_width,
-        unsigned int         channels,
-        const PaddingValues &padding,
-        const void          *input,
-        size_t               ld_input_col,
-        size_t               ld_input_row,
-        size_t               ld_input_batch,
-        const void          *parameters,
-        unsigned int         output_height,
-        unsigned int         output_width,
-        void                *output,
-        size_t               ld_output_col,
-        size_t               ld_output_row,
-        size_t               ld_output_batch,
-        void                *working_space,
-        unsigned int         thread_id,
-        unsigned int         n_threads) const override final
+    void execute(unsigned int         batches,
+                 unsigned int         input_height,
+                 unsigned int         input_width,
+                 unsigned int         channels,
+                 const PaddingValues &padding,
+                 const void          *input,
+                 size_t               ld_input_col,
+                 size_t               ld_input_row,
+                 size_t               ld_input_batch,
+                 const void          *parameters,
+                 unsigned int         output_height,
+                 unsigned int         output_width,
+                 void                *output,
+                 size_t               ld_output_col,
+                 size_t               ld_output_row,
+                 size_t               ld_output_batch,
+                 void                *working_space,
+                 unsigned int         thread_id,
+                 unsigned int         n_threads) const override final
     {
         // Construct a new set of arguments to reflect that we might have been
         // passed different input/output tensors. Dilation is handled at this
@@ -271,38 +281,33 @@ public:
         auto ld_output_col_d = ld_output_col * m_args.dilation_cols;
         auto ld_output_row_d = ld_output_row * m_args.dilation_rows;
 
-        for(size_t drow = 0; drow < m_args.dilation_rows; drow++)
+        for (size_t drow = 0; drow < m_args.dilation_rows; drow++)
         {
             size_t start_i;
-            std::tie(args.output_rows, args.input_rows, start_i,
-                     args.padding.top, args.padding.bottom) =
-                         get_reduced_view_for_dilation(
-                             output_height, input_height, drow, m_args.dilation_rows,
-                             m_args.kernel_rows, m_args.stride_rows, padding.top);
+            std::tie(args.output_rows, args.input_rows, start_i, args.padding.top, args.padding.bottom) =
+                get_reduced_view_for_dilation(output_height, input_height, drow, m_args.dilation_rows,
+                                              m_args.kernel_rows, m_args.stride_rows, padding.top);
 
             auto input_row  = static_cast<const TInput *>(input) + start_i * ld_input_row;
             auto output_row = static_cast<TOutput *>(output) + drow * ld_output_row;
 
-            if(args.output_rows)
+            if (args.output_rows)
             {
-                for(size_t dcol = 0; dcol < m_args.dilation_cols; dcol++)
+                for (size_t dcol = 0; dcol < m_args.dilation_cols; dcol++)
                 {
                     size_t start_j;
-                    std::tie(args.output_cols, args.input_cols, start_j,
-                             args.padding.left, args.padding.right) =
-                                 get_reduced_view_for_dilation(
-                                     output_width, input_width, dcol, m_args.dilation_cols,
-                                     m_args.kernel_cols, m_args.stride_cols, padding.left);
+                    std::tie(args.output_cols, args.input_cols, start_j, args.padding.left, args.padding.right) =
+                        get_reduced_view_for_dilation(output_width, input_width, dcol, m_args.dilation_cols,
+                                                      m_args.kernel_cols, m_args.stride_cols, padding.left);
 
                     const TInput *input_col  = input_row + start_j * ld_input_col;
                     TOutput      *output_col = output_row + dcol * ld_output_col;
 
-                    if(args.output_cols)
+                    if (args.output_cols)
                     {
-                        this->execute_internal(
-                            args, input_col, ld_input_col_d, ld_input_row_d, ld_input_batch, parameters,
-                            output_col, ld_output_col_d, ld_output_row_d, ld_output_batch,
-                            working_space, thread_id, n_threads);
+                        this->execute_internal(args, input_col, ld_input_col_d, ld_input_row_d, ld_input_batch,
+                                               parameters, output_col, ld_output_col_d, ld_output_row_d,
+                                               ld_output_batch, working_space, thread_id, n_threads);
                     }
                 }
             }
@@ -310,20 +315,19 @@ public:
     }
 
 protected:
-    virtual void execute_internal(
-        const DepthwiseArgs &instance_args,
-        const void          *input,
-        size_t               ld_input_col,
-        size_t               ld_input_row,
-        size_t               ld_input_batch,
-        const void          *parameters,
-        void                *output,
-        size_t               ld_output_col,
-        size_t               ld_output_row,
-        size_t               ld_output_batch,
-        void                *working_space,
-        unsigned int         thread_id,
-        unsigned int         n_threads) const = 0;
+    virtual void execute_internal(const DepthwiseArgs &instance_args,
+                                  const void          *input,
+                                  size_t               ld_input_col,
+                                  size_t               ld_input_row,
+                                  size_t               ld_input_batch,
+                                  const void          *parameters,
+                                  void                *output,
+                                  size_t               ld_output_col,
+                                  size_t               ld_output_row,
+                                  size_t               ld_output_batch,
+                                  void                *working_space,
+                                  unsigned int         thread_id,
+                                  unsigned int         n_threads) const = 0;
 
     virtual bool uses_premultiply() const
     {

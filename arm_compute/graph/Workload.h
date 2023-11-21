@@ -69,8 +69,7 @@ public:
  */
 struct ExecutionTask
 {
-    ExecutionTask(std::unique_ptr<arm_compute::IFunction> &&f, INode *n)
-        : task(std::move(f)), node(n)
+    ExecutionTask(std::unique_ptr<arm_compute::IFunction> &&f, INode *n) : task(std::move(f)), node(n)
     {
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -97,11 +96,11 @@ struct ExecutionTask
 /** Execution workload */
 struct ExecutionWorkload
 {
-    std::vector<Tensor *>      inputs  = {};          /**< Input handles */
-    std::vector<Tensor *>      outputs = {};          /**< Output handles */
-    std::vector<ExecutionTask> tasks   = {};          /**< Execution workload */
-    Graph                     *graph   = { nullptr }; /**< Graph bound to the workload */
-    GraphContext              *ctx     = { nullptr }; /**< Graph execution context */
+    std::vector<Tensor *>      inputs  = {};        /**< Input handles */
+    std::vector<Tensor *>      outputs = {};        /**< Output handles */
+    std::vector<ExecutionTask> tasks   = {};        /**< Execution workload */
+    Graph                     *graph   = {nullptr}; /**< Graph bound to the workload */
+    GraphContext              *ctx     = {nullptr}; /**< Graph execution context */
 };
 } // namespace graph
 } // namespace arm_compute

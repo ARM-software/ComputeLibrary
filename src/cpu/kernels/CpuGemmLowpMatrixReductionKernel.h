@@ -66,7 +66,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
@@ -85,12 +85,14 @@ private:
      * @param[out] dst    Output tensor
      * @param[in]  window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    using CpuGemmLowpMatrixAReductionKernelPtr = void (CpuGemmLowpMatrixAReductionKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
+    using CpuGemmLowpMatrixAReductionKernelPtr = void (CpuGemmLowpMatrixAReductionKernel::*)(const ITensor *src,
+                                                                                             ITensor       *dst,
+                                                                                             const Window  &window);
 
-    CpuGemmLowpMatrixAReductionKernelPtr _func{ nullptr };
-    int32_t                              _k{ 0 };
-    int32_t                              _scalar{ 0 };
-    bool                                 _mul_by_scalar{ false };
+    CpuGemmLowpMatrixAReductionKernelPtr _func{nullptr};
+    int32_t                              _k{0};
+    int32_t                              _scalar{0};
+    bool                                 _mul_by_scalar{false};
 };
 
 /** Kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
@@ -124,7 +126,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const GEMMLowpReductionKernelInfo &info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
@@ -144,12 +146,15 @@ private:
      * @param[out] dst    Output tensor
      * @param[in]  window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    using CpuGemmLowpMatrixBReductionKernelPtr = void (CpuGemmLowpMatrixBReductionKernel::*)(const ITensor *src, ITensor *dst, const Window &window, const ThreadInfo &info);
+    using CpuGemmLowpMatrixBReductionKernelPtr = void (CpuGemmLowpMatrixBReductionKernel::*)(const ITensor    *src,
+                                                                                             ITensor          *dst,
+                                                                                             const Window     &window,
+                                                                                             const ThreadInfo &info);
 
-    CpuGemmLowpMatrixBReductionKernelPtr _func{ nullptr };
-    int32_t                              _k{ 0 };
-    int32_t                              _scalar{ 0 };
-    bool                                 _mul_by_scalar{ false };
+    CpuGemmLowpMatrixBReductionKernelPtr _func{nullptr};
+    int32_t                              _k{0};
+    int32_t                              _scalar{0};
+    bool                                 _mul_by_scalar{false};
 };
 } // namespace kernels
 } // namespace cpu

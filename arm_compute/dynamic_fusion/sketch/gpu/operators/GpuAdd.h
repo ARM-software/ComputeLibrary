@@ -65,9 +65,7 @@ public:
      *
      * @return Pointer for the destination tensor info
      */
-    static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
-                                  ITensorInfo       *lhs,
-                                  ITensorInfo       *rhs);
+    static ITensorInfo *create_op(GpuWorkloadSketch &sketch, ITensorInfo *lhs, ITensorInfo *rhs);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context Workload context within which the operator is running
@@ -76,18 +74,14 @@ public:
      *
      * @return Status
      */
-    static Status is_supported_op(const GpuWorkloadContext &context,
-                                  const ITensorInfo        *lhs,
-                                  const ITensorInfo        *rhs);
+    static Status is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *lhs, const ITensorInfo *rhs);
     /** Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
      *
      * Parameters are similar to @ref GpuAdd::create_op()
      *
      * @return Status
      */
-    static Status validate_op(const GpuWorkloadSketch &sketch,
-                              const ITensorInfo       *rhs,
-                              const ITensorInfo       *lhs);
+    static Status validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *rhs, const ITensorInfo *lhs);
 };
 } // namespace dynamic_fusion
 } // namespace experimental

@@ -77,7 +77,12 @@ public:
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      *
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info,
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *src,
+                   ITensorInfo               *weights,
+                   ITensorInfo               *biases,
+                   ITensorInfo               *dst,
+                   const PadStrideInfo       &conv_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -85,12 +90,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo         *src,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *dst,
+                           const PadStrideInfo       &conv_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -100,11 +109,11 @@ private:
         Count
     };
 
-    std::unique_ptr<IClKernel>       _indirect_conv_kernel{ nullptr };
-    std::unique_ptr<IClKernel>       _addr_precalculation_kernel{ nullptr };
+    std::unique_ptr<IClKernel>       _indirect_conv_kernel{nullptr};
+    std::unique_ptr<IClKernel>       _addr_precalculation_kernel{nullptr};
     TensorInfo                       _indirect_buffer{};
-    bool                             _is_prepared{ false };
-    experimental::MemoryRequirements _aux_mem{ Count };
+    bool                             _is_prepared{false};
+    experimental::MemoryRequirements _aux_mem{Count};
 };
 } // namespace opencl
 } // namespace arm_compute

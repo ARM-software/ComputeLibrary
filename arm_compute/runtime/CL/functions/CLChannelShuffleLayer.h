@@ -65,7 +65,10 @@ public:
      * @param[out] output          Output tensor. Data type supported: Same as @p input
      * @param[in]  num_groups      Number of groups. Must be greater than 1 and the number of channels of the tensors must be a multiple of the number of groups.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int num_groups);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   unsigned int            num_groups);
     /** Static function to check if given info will lead to a valid configuration of @ref CLChannelShuffleLayerKernel
      *
      * @param[in] input      Input tensor info. Data types supported: All.

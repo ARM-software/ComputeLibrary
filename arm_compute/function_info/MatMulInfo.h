@@ -55,8 +55,8 @@ public:
     }
 
 private:
-    bool _adj_lhs{ false };
-    bool _adj_rhs{ false };
+    bool _adj_lhs{false};
+    bool _adj_rhs{false};
 };
 } // namespace arm_compute
 #endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_MATMULINFO */

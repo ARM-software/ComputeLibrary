@@ -23,14 +23,13 @@
  */
 #include "ClTemplateDirectConv2d.h"
 
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
-#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
-
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
-#include "src/core/helpers/WindowHelpers.h"
 
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -43,17 +42,17 @@ ClTemplateDirectConv2d::ClTemplateDirectConv2d(ComponentId                      
                                                const ArgumentPack<ITensorInfo> &tensors,
                                                const Attributes                &attributes,
                                                const Settings                  &settings)
-    : IGpuTemplateComponentWriter{ id, tensors },
+    : IGpuTemplateComponentWriter{id, tensors},
       _src{},
       _weight{},
       _bias{},
       _dst{},
-      _attributes{ attributes },
-      _settings{ settings }
+      _attributes{attributes},
+      _settings{settings}
 {
     _src    = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _weight = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
-    if(this->tensors().get_const_tensor(TensorType::ACL_SRC_2))
+    if (this->tensors().get_const_tensor(TensorType::ACL_SRC_2))
     {
         _bias = this->tensors().get_const_tensor(TensorType::ACL_SRC_2);
     }
@@ -79,7 +78,7 @@ std::string ClTemplateDirectConv2d::get_component_code(const ComponentGroup &com
 // IN_0(src)            {{src}}
 // IN_1(wei)            {{weight}}
 )_";
-    if(_bias && _bias->has_valid_id())
+    if (_bias && _bias->has_valid_id())
     {
         code += R"_(
 // IN_1(bia)            {{bias}}
@@ -161,7 +160,7 @@ TILE(uint, M0, 1, g_dst_indirect_y);
         }
 )_";
 
-    if(leftover_loop)
+    if (leftover_loop)
     {
         code += R"_(
         for(; ck < _ISRC_CHANNELS; ++ck)
@@ -186,9 +185,9 @@ TILE(uint, M0, 1, g_dst_indirect_y);
             T_MMUL({{SRC_DATA_TYPE}}, {{WEI_DATA_TYPE}}, {{ACC_DATA_TYPE}}, M0, N0, 1, NT, T, a, b, {{dst}});
         }
     )_";
-}
+    }
 
-code += R"_(
+    code += R"_(
 #undef _I_WEI_WIDTH
 #undef _I_WEI_HEIGHT
 #undef _ISRC_WIDTH
@@ -202,7 +201,7 @@ code += R"_(
     }
 )_";
 
-    if(_bias && _bias->has_valid_id())
+    if (_bias && _bias->has_valid_id())
     {
         code += R"_(
         TILE({{BIA_DATA_TYPE}}, 1, N0, bias0);
@@ -211,9 +210,9 @@ code += R"_(
 
         T_ELTWISE_BROADCAST_ADD_X({{ACC_DATA_TYPE}}, M0, N0, {{dst}}, bias0, {{dst}});
     )_";
-}
+    }
 
-code += R"_(
+    code += R"_(
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
         g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{DST_WIDTH}} * {{DST_HEIGHT}}) - 1);
@@ -227,32 +226,19 @@ code += R"_(
 
 void ClTemplateDirectConv2d::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "src");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "src");
 
-    const GpuKernelArgumentInfo::Type weight_type = _settings.export_to_cl_image() ? GpuKernelArgumentInfo::Type::Tensor_4D_t_Image : GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
-    vtable.declare_variable(
-        comp_group,
-        _weight,
-        GpuKernelArgumentInfo(weight_type),
-        "weight");
+    const GpuKernelArgumentInfo::Type weight_type = _settings.export_to_cl_image()
+                                                        ? GpuKernelArgumentInfo::Type::Tensor_4D_t_Image
+                                                        : GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
+    vtable.declare_variable(comp_group, _weight, GpuKernelArgumentInfo(weight_type), "weight");
 
-    if(_bias && _bias->has_valid_id()) // optional bias
+    if (_bias && _bias->has_valid_id()) // optional bias
     {
-        vtable.declare_variable(
-            comp_group,
-            _bias,
-            GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Vector),
-            "bias");
+        vtable.declare_variable(comp_group, _bias, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Vector), "bias");
     }
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(common_tensor_type),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(common_tensor_type), "dst");
 }
 
 TagLUT ClTemplateDirectConv2d::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
@@ -262,7 +248,7 @@ TagLUT ClTemplateDirectConv2d::get_tag_lut(const GpuKernelVariableTable &vtable,
     lut["src"]    = vtable.get_variable(_src);
     lut["weight"] = vtable.get_variable(_weight);
 
-    if(_bias && _bias->has_valid_id()) // optional bias
+    if (_bias && _bias->has_valid_id()) // optional bias
     {
         lut["bias"]          = vtable.get_variable(_bias);
         lut["BIA_DATA_TYPE"] = get_cl_type_from_data_type(_bias->data_type());
@@ -279,34 +265,34 @@ TagLUT ClTemplateDirectConv2d::get_tag_lut(const GpuKernelVariableTable &vtable,
     lut["WEI_DATA_TYPE"]  = _weight->data_type();
 
     lut["SRC_TENSOR_TYPE"] = "BUFFER";
-    switch(vtable.get_variable(_weight).kernel_argument_info.type)
+    switch (vtable.get_variable(_weight).kernel_argument_info.type)
     {
         case GpuKernelArgumentInfo::Type::Image_Export_To_ClImage2D:
         case GpuKernelArgumentInfo::Type::Image_3D_Export_To_ClImage2D:
         case GpuKernelArgumentInfo::Type::Tensor_4D_t_Image:
-    {
-        lut["WEI_TENSOR_TYPE"] = "IMAGE";
-        break;
-    }
+        {
+            lut["WEI_TENSOR_TYPE"] = "IMAGE";
+            break;
+        }
         default:
-    {
-        lut["WEI_TENSOR_TYPE"] = "BUFFER";
-        break;
+        {
+            lut["WEI_TENSOR_TYPE"] = "BUFFER";
+            break;
+        }
     }
-    }
-    const auto width_idx  = 1;
-    const auto height_idx = 2;
+    const auto width_idx   = 1;
+    const auto height_idx  = 2;
     const auto channel_idx = 0;
 
-    lut["SRC_WIDTH"] = _src->dimension(width_idx);
-    lut["SRC_HEIGHT"] = _src->dimension(height_idx);
+    lut["SRC_WIDTH"]    = _src->dimension(width_idx);
+    lut["SRC_HEIGHT"]   = _src->dimension(height_idx);
     lut["SRC_CHANNELS"] = _src->dimension(channel_idx);
 
-    lut["WEI_WIDTH"]      = _weight->dimension(width_idx);
-    lut["WEI_HEIGHT"]     = _weight->dimension(height_idx);
+    lut["WEI_WIDTH"]  = _weight->dimension(width_idx);
+    lut["WEI_HEIGHT"] = _weight->dimension(height_idx);
 
-    lut["DST_WIDTH"] = _dst->dimension(width_idx);
-    lut["DST_HEIGHT"] = _dst->dimension(height_idx);
+    lut["DST_WIDTH"]    = _dst->dimension(width_idx);
+    lut["DST_HEIGHT"]   = _dst->dimension(height_idx);
     lut["DST_CHANNELS"] = _dst->dimension(channel_idx);
 
     lut["STRIDE_X"] = _attributes.stride().x();
@@ -324,14 +310,14 @@ CLBuildOptions ClTemplateDirectConv2d::get_build_options(const ComponentGroup &c
 {
     const unsigned int channel_idx = get_data_layout_dimension_index(_src->data_layout(), DataLayoutDimension::CHANNEL);
 
-    const auto         root_window      = comp_group.get_root_component()->template_writer()->get_window();
-    const unsigned int n0               = root_window.x().step();
-    const unsigned int m0               = root_window.y().step();
-    const unsigned int k0               = adjust_vec_size(_settings.direct_conv_descriptor().k0, _src->dimension(channel_idx));
+    const auto         root_window = comp_group.get_root_component()->template_writer()->get_window();
+    const unsigned int n0          = root_window.x().step();
+    const unsigned int m0          = root_window.y().step();
+    const unsigned int k0 = adjust_vec_size(_settings.direct_conv_descriptor().k0, _src->dimension(channel_idx));
     const unsigned int partial_store_n0 = _dst->dimension(0) % n0;
 
     CLBuildOptions build_opts{};
-    if(_settings.fast_relaxed_math())
+    if (_settings.fast_relaxed_math())
     {
         build_opts.add_option("-cl-fast-relaxed-math");
     }
@@ -379,7 +365,7 @@ std::string ClTemplateDirectConv2d::get_config_id() const
 
 std::set<std::string> ClTemplateDirectConv2d::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h"};
 }
 
 Window ClTemplateDirectConv2d::get_window() const

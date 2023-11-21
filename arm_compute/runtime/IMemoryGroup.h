@@ -86,8 +86,7 @@ public:
      *
      * @param[in] memory_group Memory group to handle
      */
-    explicit MemoryGroupResourceScope(IMemoryGroup &memory_group)
-        : _memory_group(memory_group)
+    explicit MemoryGroupResourceScope(IMemoryGroup &memory_group) : _memory_group(memory_group)
     {
         _memory_group.acquire();
     }
@@ -100,5 +99,5 @@ public:
 private:
     IMemoryGroup &_memory_group;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_IMEMORYGROUP_H */

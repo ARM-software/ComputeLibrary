@@ -25,17 +25,18 @@
 #define ARM_COMPUTE_ACL_VERSION_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif /* __cplusplus */
 
-/** Semantic versioning information */
-typedef struct AclVersion
-{
-    int         major;      /**< Major version, is increased on API incompatible changes */
-    int         minor;      /**< Minor version, is increased on adding back-ward compatible functionality */
-    int         patch;      /**< Patch version, is increased when doing backward compatible fixes */
-    const char *build_info; /**< Build related information */
-} AclVersion;
+    /** Semantic versioning information */
+    typedef struct AclVersion
+    {
+        int         major;      /**< Major version, is increased on API incompatible changes */
+        int         minor;      /**< Minor version, is increased on adding back-ward compatible functionality */
+        int         patch;      /**< Patch version, is increased when doing backward compatible fixes */
+        const char *build_info; /**< Build related information */
+    } AclVersion;
 
 /**< Major version, is increased on API incompatible changes */
 #define ARM_COMPUTE_LIBRARY_VERSION_MAJOR 0
@@ -44,11 +45,11 @@ typedef struct AclVersion
 /**< Patch version, is increased when doing backward compatible fixes */
 #define ARM_COMPUTE_LIBRARY_VERSION_PATCH 0
 
-/** Get library's version meta-data
+    /** Get library's version meta-data
  *
  * @return Version information
  */
-const AclVersion *AclVersionInfo();
+    const AclVersion *AclVersionInfo();
 
 #ifdef __cplusplus
 }

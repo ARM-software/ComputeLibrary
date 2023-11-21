@@ -31,12 +31,12 @@
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/IMemoryManager.h"
-#include "src/core/helpers/MemoryHelpers.h"
 
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.h"
 
 namespace arm_compute
@@ -46,13 +46,13 @@ using OperatorType = opencl::ClGemmLowpMatrixMultiplyCore;
 
 struct CLGEMMLowpMatrixMultiplyCore::Impl
 {
-    const ICLTensor              *b{ nullptr };
-    std::unique_ptr<OperatorType> op{ nullptr };
+    const ICLTensor              *b{nullptr};
+    std::unique_ptr<OperatorType> op{nullptr};
     MemoryGroup                   memory_group{};
     ITensorPack                   run_pack{};
     MemoryRequirements            aux_mem_req{};
     WorkspaceData<CLTensor>       workspace_tensors{};
-    bool                          is_prepared{ false };
+    bool                          is_prepared{false};
 };
 
 CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
@@ -63,12 +63,18 @@ CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemo
 
 CLGEMMLowpMatrixMultiplyCore::~CLGEMMLowpMatrixMultiplyCore() = default;
 
-void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info)
+void CLGEMMLowpMatrixMultiplyCore::configure(
+    const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), a, b, c, output, gemm_info);
 }
 
-void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info)
+void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_context,
+                                             const ICLTensor        *a,
+                                             const ICLTensor        *b,
+                                             const ICLTensor        *c,
+                                             ICLTensor              *output,
+                                             const GEMMInfo         &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
 
@@ -76,23 +82,29 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
     _impl->op          = std::make_unique<OperatorType>();
     _impl->is_prepared = gemm_info.retain_internal_weights();
 
-    _impl->op->configure(compile_context, a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(), gemm_info);
+    _impl->op->configure(compile_context, a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(),
+                         gemm_info);
     _impl->aux_mem_req = _impl->op->workspace();
 
     // Manage/allocate auxilairy tensors
-    if(_impl->is_prepared)
+    if (_impl->is_prepared)
     {
         _impl->run_pack.add_const_tensor(ACL_SRC_0, a);
         _impl->run_pack.add_tensor(ACL_DST, output);
     }
     else
     {
-        _impl->run_pack          = { { ACL_SRC_0, a }, { ACL_SRC_1, _impl->b }, { ACL_SRC_2, c }, { ACL_DST, output } };
-        _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->run_pack);
+        _impl->run_pack = {{ACL_SRC_0, a}, {ACL_SRC_1, _impl->b}, {ACL_SRC_2, c}, {ACL_DST, output}};
+        _impl->workspace_tensors =
+            manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->run_pack);
     }
 }
 
-Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info)
+Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
+                                              const ITensorInfo *b,
+                                              const ITensorInfo *c,
+                                              const ITensorInfo *output,
+                                              const GEMMInfo    &gemm_info)
 {
     return OperatorType::validate(a, b, c, output, gemm_info);
 }
@@ -108,7 +120,7 @@ void CLGEMMLowpMatrixMultiplyCore::run()
 
 void CLGEMMLowpMatrixMultiplyCore::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->run_pack);
 

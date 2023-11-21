@@ -79,7 +79,7 @@ load_whole_archive = '-Wl,--whole-archive'
 noload_whole_archive = '-Wl,--no-whole-archive'
 if 'macos' in test_env['os']:
     load_whole_archive = '-Wl,-force_load'
-    noload_whole_archive = '-Wl,-noall_load'
+    noload_whole_archive = ''
 
 if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")

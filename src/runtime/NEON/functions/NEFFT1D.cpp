@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
@@ -37,7 +38,15 @@ namespace arm_compute
 NEFFT1D::~NEFFT1D() = default;
 
 NEFFT1D::NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _digit_reverse_kernel(), _fft_kernels(), _scale_kernel(), _digit_reversed_input(), _digit_reverse_indices(), _num_ffts(0), _axis(0), _run_scale(false)
+    : _memory_group(std::move(memory_manager)),
+      _digit_reverse_kernel(),
+      _fft_kernels(),
+      _scale_kernel(),
+      _digit_reversed_input(),
+      _digit_reverse_indices(),
+      _num_ffts(0),
+      _axis(0),
+      _run_scale(false)
 {
 }
 
@@ -74,7 +83,7 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
     _fft_kernels.resize(_num_ffts);
     _axis = config.axis;
 
-    for(unsigned int i = 0; i < _num_ffts; ++i)
+    for (unsigned int i = 0; i < _num_ffts; ++i)
     {
         const unsigned int radix_for_stage = decomposed_vector.at(i);
 
@@ -84,19 +93,21 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
         fft_kernel_info.Nx             = Nx;
         fft_kernel_info.is_first_stage = (i == 0);
         _fft_kernels[i]                = std::make_unique<NEFFTRadixStageKernel>();
-        _fft_kernels[i]->configure(&_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr, fft_kernel_info);
+        _fft_kernels[i]->configure(&_digit_reversed_input, ((i == (_num_ffts - 1)) && !is_c2r) ? output : nullptr,
+                                   fft_kernel_info);
 
         Nx *= radix_for_stage;
     }
 
     // Configure scale kernel
-    if(_run_scale)
+    if (_run_scale)
     {
         FFTScaleKernelInfo scale_config;
         scale_config.scale     = static_cast<float>(N);
         scale_config.conjugate = config.direction == FFTDirection::Inverse;
         _scale_kernel          = std::make_unique<NEFFTScaleKernel>();
-        is_c2r ? _scale_kernel->configure(&_digit_reversed_input, output, scale_config) : _scale_kernel->configure(output, nullptr, scale_config);
+        is_c2r ? _scale_kernel->configure(&_digit_reversed_input, output, scale_config)
+                        : _scale_kernel->configure(output, nullptr, scale_config);
     }
 
     // Allocate tensors
@@ -113,7 +124,7 @@ Status NEFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, co
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() > 2);
-    ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({ 0, 1 }).count(config.axis) == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({0, 1}).count(config.axis) == 0);
 
     // Check if FFT is decomposable
     const auto         supported_radix   = NEFFTRadixStageKernel::supported_radix();
@@ -122,7 +133,7 @@ Status NEFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, co
     ARM_COMPUTE_RETURN_ERROR_ON(decomposed_vector.empty());
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         // All combinations are supported except real input with real output (i.e., both input channels set to 1)
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_channels() == 1 && input->num_channels() == 1);
@@ -140,13 +151,13 @@ void NEFFT1D::run()
 
     NEScheduler::get().schedule(_digit_reverse_kernel.get(), (_axis == 0 ? Window::DimY : Window::DimZ));
 
-    for(unsigned int i = 0; i < _num_ffts; ++i)
+    for (unsigned int i = 0; i < _num_ffts; ++i)
     {
         NEScheduler::get().schedule(_fft_kernels[i].get(), (_axis == 0 ? Window::DimY : Window::DimX));
     }
 
     // Run output scaling
-    if(_run_scale)
+    if (_run_scale)
     {
         NEScheduler::get().schedule(_scale_kernel.get(), Window::DimY);
     }

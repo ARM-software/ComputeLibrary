@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEQLSTMLAYER_H
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/common/LSTMParams.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
@@ -35,7 +36,6 @@
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
-#include "arm_compute/runtime/common/LSTMParams.h"
 
 #include <memory>
 
@@ -130,12 +130,21 @@ public:
      *                                         projection_threshold       (Optional) The clipping threshold for the output from the projection layer, such that values are bound within
      *                                                                               [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
      */
-    void configure(const ITensor *input,
-                   const ITensor *input_to_forget_weights, const ITensor *input_to_cell_weights, const ITensor *input_to_output_weights,
-                   const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
-                   const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
-                   const ITensor *cell_state_in, ITensor *output_state_in,
-                   ITensor *cell_state_out, ITensor *output_state_out, ITensor *output,
+    void configure(const ITensor             *input,
+                   const ITensor             *input_to_forget_weights,
+                   const ITensor             *input_to_cell_weights,
+                   const ITensor             *input_to_output_weights,
+                   const ITensor             *recurrent_to_forget_weights,
+                   const ITensor             *recurrent_to_cell_weights,
+                   const ITensor             *recurrent_to_output_weights,
+                   const ITensor             *forget_gate_bias,
+                   const ITensor             *cell_bias,
+                   const ITensor             *output_gate_bias,
+                   const ITensor             *cell_state_in,
+                   ITensor                   *output_state_in,
+                   ITensor                   *cell_state_out,
+                   ITensor                   *output_state_out,
+                   ITensor                   *output,
                    const LSTMParams<ITensor> &lstm_params);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEQLSTMLayer
@@ -180,12 +189,21 @@ public:
      *                                                                              [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
      * @return a status
      */
-    static Status validate(const ITensorInfo *input,
-                           const ITensorInfo *input_to_forget_weights, const ITensorInfo *input_to_cell_weights, const ITensorInfo *input_to_output_weights,
-                           const ITensorInfo *recurrent_to_forget_weights, const ITensorInfo *recurrent_to_cell_weights, const ITensorInfo *recurrent_to_output_weights,
-                           const ITensorInfo *forget_gate_bias, const ITensorInfo *cell_bias, const ITensorInfo *output_gate_bias,
-                           const ITensorInfo *cell_state_in, const ITensorInfo *output_state_in,
-                           const ITensorInfo *cell_state_out, const ITensorInfo *output_state_out, const ITensorInfo *output,
+    static Status validate(const ITensorInfo             *input,
+                           const ITensorInfo             *input_to_forget_weights,
+                           const ITensorInfo             *input_to_cell_weights,
+                           const ITensorInfo             *input_to_output_weights,
+                           const ITensorInfo             *recurrent_to_forget_weights,
+                           const ITensorInfo             *recurrent_to_cell_weights,
+                           const ITensorInfo             *recurrent_to_output_weights,
+                           const ITensorInfo             *forget_gate_bias,
+                           const ITensorInfo             *cell_bias,
+                           const ITensorInfo             *output_gate_bias,
+                           const ITensorInfo             *cell_state_in,
+                           const ITensorInfo             *output_state_in,
+                           const ITensorInfo             *cell_state_out,
+                           const ITensorInfo             *output_state_out,
+                           const ITensorInfo             *output,
                            const LSTMParams<ITensorInfo> &lstm_params);
 
     // Inherited methods overridden:
@@ -218,10 +236,17 @@ private:
      * @param[in] mm_res_info    Tensor info to be used to initialize output stage result tensor.
      *
      */
-    void configure_mm(NEGEMMLowpMatrixMultiplyCore &mm, NEGEMMLowpOutputStage &outstage, GEMMLowpOutputStageInfo &gemmlowp_info,
-                      const ITensor *mm_input, const ITensor *mm_weights, const ITensor *bias, Tensor *mm_res,
-                      Tensor *outstage_res, float gemmlowp_scale,
-                      const TensorInfo &mm_res_info, const TensorInfo &outstage_tensor_info);
+    void configure_mm(NEGEMMLowpMatrixMultiplyCore &mm,
+                      NEGEMMLowpOutputStage        &outstage,
+                      GEMMLowpOutputStageInfo      &gemmlowp_info,
+                      const ITensor                *mm_input,
+                      const ITensor                *mm_weights,
+                      const ITensor                *bias,
+                      Tensor                       *mm_res,
+                      Tensor                       *outstage_res,
+                      float                         gemmlowp_scale,
+                      const TensorInfo             &mm_res_info,
+                      const TensorInfo             &outstage_tensor_info);
 
     MemoryGroup _memory_group;
 
@@ -230,8 +255,8 @@ private:
     {
         static constexpr uint32_t max_dimension_supported = 2;
 
-        ITensor *_src{ nullptr };
-        ITensor *_dst{ nullptr };
+        ITensor *_src{nullptr};
+        ITensor *_dst{nullptr};
         size_t   _row_size{};
         Window   _window{};
 
@@ -335,19 +360,16 @@ private:
     NECopy _copy_output;
 
     // Tensor pointers
-    const ITensor *_input_to_input_weights
-    {
-        nullptr
-    };
-    const ITensor *_recurrent_to_input_weights{ nullptr };
-    const ITensor *_projection_bias{ nullptr };
-    const ITensor *_input_to_forget_weights{ nullptr };
-    const ITensor *_input_to_cell_weights{ nullptr };
-    const ITensor *_input_to_output_weights{ nullptr };
-    const ITensor *_recurrent_to_forget_weights{ nullptr };
-    const ITensor *_recurrent_to_cell_weights{ nullptr };
-    const ITensor *_recurrent_to_output_weights{ nullptr };
-    const ITensor *_projection_weights{ nullptr };
+    const ITensor                                 *_input_to_input_weights{nullptr};
+    const ITensor                                 *_recurrent_to_input_weights{nullptr};
+    const ITensor                                 *_projection_bias{nullptr};
+    const ITensor                                 *_input_to_forget_weights{nullptr};
+    const ITensor                                 *_input_to_cell_weights{nullptr};
+    const ITensor                                 *_input_to_output_weights{nullptr};
+    const ITensor                                 *_recurrent_to_forget_weights{nullptr};
+    const ITensor                                 *_recurrent_to_cell_weights{nullptr};
+    const ITensor                                 *_recurrent_to_output_weights{nullptr};
+    const ITensor                                 *_projection_weights{nullptr};
     std::array<const ITensor *, _layer_norm_count> _layer_norm_weights{};
     std::array<const ITensor *, _layer_norm_count> _layer_norm_bias{};
 
@@ -382,66 +404,66 @@ private:
         return _layer_norms[getGateIndex(g)];
     }
 
-    void configure_layer_norm(LayerNormGate g, const ITensor *in);
+    void          configure_layer_norm(LayerNormGate g, const ITensor *in);
     static Status validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias);
 
     // Temporary tensors
-    Tensor _input_to_forget_weights_f32{ nullptr };
-    Tensor _input_to_forget_weights_symm8{ nullptr };
+    Tensor _input_to_forget_weights_f32{nullptr};
+    Tensor _input_to_forget_weights_symm8{nullptr};
 
-    Tensor _input_to_forget_weights_transposed{ nullptr };
-    Tensor _input_to_cell_weights_transposed{ nullptr };
-    Tensor _input_to_output_weights_transposed{ nullptr };
-    Tensor _input_to_input_weights_transposed{ nullptr };
-    Tensor _recurrent_to_forget_weights_transposed{ nullptr };
-    Tensor _recurrent_to_cell_weights_transposed{ nullptr };
-    Tensor _recurrent_to_output_weights_transposed{ nullptr };
-    Tensor _recurrent_to_input_weights_transposed{ nullptr };
-    Tensor _projection_weights_transposed{ nullptr };
-    Tensor _input_to_input_eff_bias{ nullptr };
-    Tensor _recurrent_to_input_eff_bias{ nullptr };
-    Tensor _input_to_forget_eff_bias{ nullptr };
-    Tensor _recurrent_to_forget_eff_bias{ nullptr };
-    Tensor _input_to_cell_eff_bias{ nullptr };
-    Tensor _recurrent_to_cell_eff_bias{ nullptr };
-    Tensor _input_to_output_eff_bias{ nullptr };
-    Tensor _recurrent_to_output_eff_bias{ nullptr };
-    Tensor _projection_reduction_res{ nullptr };
-    Tensor _projection_eff_bias{ nullptr };
-    Tensor _mm_input_to_forget_res{ nullptr };
-    Tensor _mm_recurrent_to_forget_res{ nullptr };
-    Tensor _mul_cell_to_forget_res{ nullptr };
-    Tensor _input_to_forget_outstage_res{ nullptr };
-    Tensor _cell_to_forget_outstage_res{ nullptr };
-    Tensor _recurrent_to_forget_outstage_res{ nullptr };
-    Tensor _forget_gate{ nullptr };
-    Tensor _mm_input_to_cell_res{ nullptr };
-    Tensor _input_to_cell_outstage_res{ nullptr };
-    Tensor _mm_recurrent_to_cell_res{ nullptr };
-    Tensor _recurrent_to_cell_outstage_res{ nullptr };
-    Tensor _cell_gate{ nullptr };
-    Tensor _mul_input_cell_res{ nullptr };
-    Tensor _mm_input_to_input_res{ nullptr };
-    Tensor _input_to_input_outstage_res{ nullptr };
-    Tensor _mm_recurrent_to_input_res{ nullptr };
-    Tensor _mul_cell_to_input_res{ nullptr };
-    Tensor _cell_to_input_outstage_res{ nullptr };
-    Tensor _recurrent_to_input_outstage_res{ nullptr };
-    Tensor _input_gate{ nullptr };
-    Tensor _mm_input_to_output_res{ nullptr };
-    Tensor _input_to_output_outstage_res{ nullptr };
-    Tensor _mm_recurrent_to_output_res{ nullptr };
-    Tensor _mul_cell_to_output_res{ nullptr };
-    Tensor _cell_to_output_outstage_res{ nullptr };
-    Tensor _recurrent_to_output_outstage_res{ nullptr };
-    Tensor _output_gate{ nullptr };
-    Tensor _hidden_mul_res{ nullptr };
-    Tensor _hidden_gate{ nullptr };
-    Tensor _mm_projection_res{ nullptr };
-    Tensor _projection_outstage_res{ nullptr };
-    Tensor _projection_out_res{ nullptr };
-    Tensor _projection_accumulate_res{ nullptr };
-    Tensor _ones{ nullptr };
+    Tensor                                _input_to_forget_weights_transposed{nullptr};
+    Tensor                                _input_to_cell_weights_transposed{nullptr};
+    Tensor                                _input_to_output_weights_transposed{nullptr};
+    Tensor                                _input_to_input_weights_transposed{nullptr};
+    Tensor                                _recurrent_to_forget_weights_transposed{nullptr};
+    Tensor                                _recurrent_to_cell_weights_transposed{nullptr};
+    Tensor                                _recurrent_to_output_weights_transposed{nullptr};
+    Tensor                                _recurrent_to_input_weights_transposed{nullptr};
+    Tensor                                _projection_weights_transposed{nullptr};
+    Tensor                                _input_to_input_eff_bias{nullptr};
+    Tensor                                _recurrent_to_input_eff_bias{nullptr};
+    Tensor                                _input_to_forget_eff_bias{nullptr};
+    Tensor                                _recurrent_to_forget_eff_bias{nullptr};
+    Tensor                                _input_to_cell_eff_bias{nullptr};
+    Tensor                                _recurrent_to_cell_eff_bias{nullptr};
+    Tensor                                _input_to_output_eff_bias{nullptr};
+    Tensor                                _recurrent_to_output_eff_bias{nullptr};
+    Tensor                                _projection_reduction_res{nullptr};
+    Tensor                                _projection_eff_bias{nullptr};
+    Tensor                                _mm_input_to_forget_res{nullptr};
+    Tensor                                _mm_recurrent_to_forget_res{nullptr};
+    Tensor                                _mul_cell_to_forget_res{nullptr};
+    Tensor                                _input_to_forget_outstage_res{nullptr};
+    Tensor                                _cell_to_forget_outstage_res{nullptr};
+    Tensor                                _recurrent_to_forget_outstage_res{nullptr};
+    Tensor                                _forget_gate{nullptr};
+    Tensor                                _mm_input_to_cell_res{nullptr};
+    Tensor                                _input_to_cell_outstage_res{nullptr};
+    Tensor                                _mm_recurrent_to_cell_res{nullptr};
+    Tensor                                _recurrent_to_cell_outstage_res{nullptr};
+    Tensor                                _cell_gate{nullptr};
+    Tensor                                _mul_input_cell_res{nullptr};
+    Tensor                                _mm_input_to_input_res{nullptr};
+    Tensor                                _input_to_input_outstage_res{nullptr};
+    Tensor                                _mm_recurrent_to_input_res{nullptr};
+    Tensor                                _mul_cell_to_input_res{nullptr};
+    Tensor                                _cell_to_input_outstage_res{nullptr};
+    Tensor                                _recurrent_to_input_outstage_res{nullptr};
+    Tensor                                _input_gate{nullptr};
+    Tensor                                _mm_input_to_output_res{nullptr};
+    Tensor                                _input_to_output_outstage_res{nullptr};
+    Tensor                                _mm_recurrent_to_output_res{nullptr};
+    Tensor                                _mul_cell_to_output_res{nullptr};
+    Tensor                                _cell_to_output_outstage_res{nullptr};
+    Tensor                                _recurrent_to_output_outstage_res{nullptr};
+    Tensor                                _output_gate{nullptr};
+    Tensor                                _hidden_mul_res{nullptr};
+    Tensor                                _hidden_gate{nullptr};
+    Tensor                                _mm_projection_res{nullptr};
+    Tensor                                _projection_outstage_res{nullptr};
+    Tensor                                _projection_out_res{nullptr};
+    Tensor                                _projection_accumulate_res{nullptr};
+    Tensor                                _ones{nullptr};
     std::array<Tensor, _layer_norm_count> _layer_norm_output{};
 
     inline Tensor &get_layer_norm_output(LayerNormGate g)
@@ -449,15 +471,15 @@ private:
         return _layer_norm_output[getGateIndex(g)];
     }
 
-    bool _is_prepared{ false };
-    bool _has_cifg{ false };
-    bool _has_cell_clipping{ false };
-    bool _has_projection{ false };
-    bool _has_projection_clipping{ false };
-    bool _has_peephole{ false };
-    bool _has_layer_norm{ false };
-    bool _projection_tensor_copy_required{ false };
-    bool _convert_input_to_forget_weights_to_qsymm8{ false };
+    bool _is_prepared{false};
+    bool _has_cifg{false};
+    bool _has_cell_clipping{false};
+    bool _has_projection{false};
+    bool _has_projection_clipping{false};
+    bool _has_peephole{false};
+    bool _has_layer_norm{false};
+    bool _projection_tensor_copy_required{false};
+    bool _convert_input_to_forget_weights_to_qsymm8{false};
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEQLSTMLAYER_H */

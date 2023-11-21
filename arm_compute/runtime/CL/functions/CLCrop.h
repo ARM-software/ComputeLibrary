@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -71,7 +72,13 @@ public:
      * @param[in]  extrapolation_value Value to be used for values outside of the image. Default is 0.
      * @param[in]  output_window       Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0, Window *output_window = nullptr);
+    void configure(const ICLTensor *input,
+                   ICLTensor       *output,
+                   Coordinates2D    start,
+                   Coordinates2D    end,
+                   uint32_t         batch_index,
+                   float            extrapolation_value = 0,
+                   Window          *output_window       = nullptr);
     /** Configure function
      *
      * @note Supported tensor rank: up to 4
@@ -85,8 +92,14 @@ public:
      * @param[in]  extrapolation_value Value to be used for values outside of the image. Default is 0.
      * @param[in]  output_window       Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0,
-                   Window *output_window = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   Coordinates2D           start,
+                   Coordinates2D           end,
+                   uint32_t                batch_index,
+                   float                   extrapolation_value = 0,
+                   Window                 *output_window       = nullptr);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel
      *
@@ -100,8 +113,13 @@ public:
      * @param[in] extrapolation_value Value to be used for values outside of the image. Default is 0.
      * @param[in] output_window       Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0,
-                           Window *output_window = nullptr);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           Coordinates2D      start,
+                           Coordinates2D      end,
+                           uint32_t           batch_index,
+                           float              extrapolation_value = 0,
+                           Window            *output_window       = nullptr);
 
     // Inherited methods overridden:
     void run() override;

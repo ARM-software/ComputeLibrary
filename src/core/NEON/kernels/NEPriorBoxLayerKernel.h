@@ -67,7 +67,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const PriorBoxLayerInfo &info);
+    static Status validate(const ITensorInfo       *input1,
+                           const ITensorInfo       *input2,
+                           const ITensorInfo       *output,
+                           const PriorBoxLayerInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -84,7 +87,14 @@ private:
      * @param[in]  width      Input width.
      * @param[in]  height     Input height.
      */
-    void store_coordinates(float *out, const int offset, const float center_x, const float center_y, const float box_width, const float box_height, const int width, const int height);
+    void store_coordinates(float      *out,
+                           const int   offset,
+                           const float center_x,
+                           const float center_y,
+                           const float box_width,
+                           const float box_height,
+                           const int   width,
+                           const int   height);
     /** Function to calculate prior boxes.
      *
      * @param[in] window Input region on which to execute the kernel.

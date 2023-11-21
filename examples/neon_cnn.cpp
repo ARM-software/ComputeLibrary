@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/NEFunctions.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Allocator.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/NEON/NEFunctions.h"
 #include "arm_compute/runtime/PoolManager.h"
+
 #include "utils/Utils.h"
 
 using namespace arm_compute;
@@ -43,12 +43,13 @@ public:
 
         // Create memory manager components
         // We need 2 memory managers: 1 for handling the tensors within the functions (mm_layers) and 1 for handling the input and output tensors of the functions (mm_transitions))
-        auto lifetime_mgr0  = std::make_shared<BlobLifetimeManager>();                           // Create lifetime manager
-        auto lifetime_mgr1  = std::make_shared<BlobLifetimeManager>();                           // Create lifetime manager
-        auto pool_mgr0      = std::make_shared<PoolManager>();                                   // Create pool manager
-        auto pool_mgr1      = std::make_shared<PoolManager>();                                   // Create pool manager
-        auto mm_layers      = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr0, pool_mgr0); // Create the memory manager
-        auto mm_transitions = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr1, pool_mgr1); // Create the memory manager
+        auto lifetime_mgr0 = std::make_shared<BlobLifetimeManager>();                       // Create lifetime manager
+        auto lifetime_mgr1 = std::make_shared<BlobLifetimeManager>();                       // Create lifetime manager
+        auto pool_mgr0     = std::make_shared<PoolManager>();                               // Create pool manager
+        auto pool_mgr1     = std::make_shared<PoolManager>();                               // Create pool manager
+        auto mm_layers = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr0, pool_mgr0); // Create the memory manager
+        auto mm_transitions =
+            std::make_shared<MemoryManagerOnDemand>(lifetime_mgr1, pool_mgr1); // Create the memory manager
 
         // The weights and biases tensors should be initialized with the values inferred with the training
 
@@ -116,7 +117,8 @@ public:
         // Initialize tensor of fc0
         constexpr unsigned int num_labels = 128;
 
-        const TensorShape weights_shape_fc0(out_shape_pool1.x() * out_shape_pool1.y() * out_shape_pool1.z(), num_labels);
+        const TensorShape weights_shape_fc0(out_shape_pool1.x() * out_shape_pool1.y() * out_shape_pool1.z(),
+                                            num_labels);
         const TensorShape biases_shape_fc0(num_labels);
         const TensorShape out_shape_fc0(num_labels);
 
@@ -138,22 +140,28 @@ public:
         /* [Configure functions] */
 
         // in:32x32x1: 5x5 convolution, 8 output features maps (OFM)
-        conv0->configure(&src, &weights0, &biases0, &out_conv0, PadStrideInfo(1 /* stride_x */, 1 /* stride_y */, 2 /* pad_x */, 2 /* pad_y */));
+        conv0->configure(&src, &weights0, &biases0, &out_conv0,
+                         PadStrideInfo(1 /* stride_x */, 1 /* stride_y */, 2 /* pad_x */, 2 /* pad_y */));
 
         // in:32x32x8, out:32x32x8, Activation function: relu
         act0.configure(&out_conv0, &out_act0, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         // in:32x32x8, out:16x16x8 (2x2 pooling), Pool type function: Max
-        pool0.configure(&out_act0, &out_pool0, PoolingLayerInfo(PoolingType::MAX, 2, data_layout, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
+        pool0.configure(
+            &out_act0, &out_pool0,
+            PoolingLayerInfo(PoolingType::MAX, 2, data_layout, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
 
         // in:16x16x8: 3x3 convolution, 16 output features maps (OFM)
-        conv1->configure(&out_pool0, &weights1, &biases1, &out_conv1, PadStrideInfo(1 /* stride_x */, 1 /* stride_y */, 1 /* pad_x */, 1 /* pad_y */));
+        conv1->configure(&out_pool0, &weights1, &biases1, &out_conv1,
+                         PadStrideInfo(1 /* stride_x */, 1 /* stride_y */, 1 /* pad_x */, 1 /* pad_y */));
 
         // in:16x16x16, out:16x16x16, Activation function: relu
         act1.configure(&out_conv1, &out_act1, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         // in:16x16x16, out:8x8x16 (2x2 pooling), Pool type function: Average
-        pool1.configure(&out_act1, &out_pool1, PoolingLayerInfo(PoolingType::AVG, 2, data_layout, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
+        pool1.configure(
+            &out_act1, &out_pool1,
+            PoolingLayerInfo(PoolingType::AVG, 2, data_layout, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
 
         // in:8x8x16, out:128
         fc0->configure(&out_pool1, &weights2, &biases2, &out_fc0);

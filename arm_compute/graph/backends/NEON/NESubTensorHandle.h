@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_GRAPH_NESUBTENSORHANDLE_H
 
 #include "arm_compute/graph/ITensorHandle.h"
-
 #include "arm_compute/runtime/SubTensor.h"
 
 namespace arm_compute
@@ -45,7 +44,10 @@ public:
      * @param[in] coords        Starting coordinates
      * @param[in] extend_parent Extends parent shape if true
      */
-    NESubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent = false);
+    NESubTensorHandle(ITensorHandle     *parent_handle,
+                      const TensorShape &shape,
+                      const Coordinates &coords,
+                      bool               extend_parent = false);
     /** Destructor: free the tensor's memory */
     ~NESubTensorHandle() = default;
     /** Allow instances of this class to be move constructed */
@@ -58,10 +60,10 @@ public:
     NESubTensorHandle &operator=(const NESubTensorHandle &) = delete;
 
     // Inherited overridden methods
-    void allocate() override;
-    void free() override;
-    void manage(IMemoryGroup *mg) override;
-    void map(bool blocking) override;
+    void                        allocate() override;
+    void                        free() override;
+    void                        manage(IMemoryGroup *mg) override;
+    void                        map(bool blocking) override;
     void                        unmap() override;
     void                        release_if_unused() override;
     arm_compute::ITensor       &tensor() override;

@@ -27,9 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ROIALIGN_KERNEL(func_name)                                     \
-    void func_name(const ITensor *input, ITensor *output, const ITensor *rois, \
-                   ROIPoolingLayerInfo pool_info, const Window &window, const ThreadInfo &info)
+#define DECLARE_ROIALIGN_KERNEL(func_name)                                                                    \
+    void func_name(const ITensor *input, ITensor *output, const ITensor *rois, ROIPoolingLayerInfo pool_info, \
+                   const Window &window, const ThreadInfo &info)
 DECLARE_ROIALIGN_KERNEL(neon_fp32_roialign);
 DECLARE_ROIALIGN_KERNEL(neon_fp16_roialign);
 DECLARE_ROIALIGN_KERNEL(neon_qu8_roialign);

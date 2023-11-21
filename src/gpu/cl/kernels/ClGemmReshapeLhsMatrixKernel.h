@@ -57,14 +57,21 @@ public:
      *                                   lhs_info.interleave: true, false
      * @param[in]  reinterpret_src_as_3d (Optional) True if the src has to be reinterpreted as 3D tensor
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_src_as_3d = false);
+    void configure(const ClCompileContext  &compile_context,
+                   ITensorInfo             *src,
+                   ITensorInfo             *dst,
+                   const GEMMLHSMatrixInfo &lhs_info,
+                   bool                     reinterpret_src_as_3d = false);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmReshapeLhsMatrixKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_src_as_3d);
+    static Status validate(const ITensorInfo       *src,
+                           const ITensorInfo       *dst,
+                           const GEMMLHSMatrixInfo &lhs_info,
+                           bool                     reinterpret_src_as_3d);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

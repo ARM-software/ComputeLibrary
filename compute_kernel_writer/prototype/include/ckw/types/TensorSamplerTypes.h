@@ -39,34 +39,38 @@ enum class TensorSamplerFormat : int32_t
 
 enum class TensorSamplerAddressModeX : int32_t
 {
-    Unknown        = 0,
-    None           = 1, // The user guarantees that the X coordinate is always in-bound
-    OverlappingMin = 2  // (FIXED shapes only) Reduce the load/store length when x == 0 (MIN). The load length will be width % original length
-                        // Leftover elements can be handled using overlapping. This involves processing some of the elements in the array twice.
+    Unknown = 0,
+    None    = 1, // The user guarantees that the X coordinate is always in-bound
+    OverlappingMin =
+        2 // (FIXED shapes only) Reduce the load/store length when x == 0 (MIN). The load length will be width % original length
+    // Leftover elements can be handled using overlapping. This involves processing some of the elements in the array twice.
 };
 
 enum class TensorSamplerAddressModeY : int32_t
 {
-    Unknown                  = 0,
-    None                     = 1, // The user guarantees that the Y coordinate is always in-bound
-    OverlappingMin           = 2, // (FIXED shapes only) Reduce the load/store length when x == 0 (MIN). The load length will be width % original length
-    Skip                     = 3, // Skip the read/write
-    SkipMinEdgeOnly          = 4, // Skip greater than or equal to max only. The user guarantees that the Y coordinate is always >= 0
-    SkipMaxEdgeOnly          = 5, // Skip less than 0 only
-    ClampToNearest           = 6, // Clamp the coordinate to nearest edge (0 or max value allowed on Y)
-    ClampToMinEdgeOnly       = 7, // Clamp the negative coordinate to 0 only. Therefore, we expect Y to be always < MAX
-    ClampToMaxEdgeOnly       = 8, // Clamp the coordinate to the max value allowed on Y only. We expect Y to be always >= 0
-    ClampToBorder            = 9, // Clamp to border which always has 0 value
+    Unknown = 0,
+    None    = 1, // The user guarantees that the Y coordinate is always in-bound
+    OverlappingMin =
+        2, // (FIXED shapes only) Reduce the load/store length when x == 0 (MIN). The load length will be width % original length
+    Skip = 3, // Skip the read/write
+    SkipMinEdgeOnly =
+        4, // Skip greater than or equal to max only. The user guarantees that the Y coordinate is always >= 0
+    SkipMaxEdgeOnly    = 5, // Skip less than 0 only
+    ClampToNearest     = 6, // Clamp the coordinate to nearest edge (0 or max value allowed on Y)
+    ClampToMinEdgeOnly = 7, // Clamp the negative coordinate to 0 only. Therefore, we expect Y to be always < MAX
+    ClampToMaxEdgeOnly = 8, // Clamp the coordinate to the max value allowed on Y only. We expect Y to be always >= 0
+    ClampToBorder      = 9, // Clamp to border which always has 0 value
     ClampToBorderMinEdgeOnly = 10,
     ClampToBorderMaxEdgeOnly = 11
 };
 
 enum class TensorSamplerAddressModeZ : int32_t
 {
-    Unknown            = 0,
-    None               = 1, // The user guarantees that the Y coordinate is always in-bound
-    Skip               = 3, // Skip the read/write
-    SkipMinEdgeOnly    = 4, // Skip greater than or equal to max only. The user guarantees that the Y coordinate is always >= 0
+    Unknown = 0,
+    None    = 1, // The user guarantees that the Y coordinate is always in-bound
+    Skip    = 3, // Skip the read/write
+    SkipMinEdgeOnly =
+        4, // Skip greater than or equal to max only. The user guarantees that the Y coordinate is always >= 0
     SkipMaxEdgeOnly    = 5, // Skip less than 0 only
     ClampToNearest     = 6, // Clamp the coordinate to nearest edge (0 or max value allowed on Y)
     ClampToMinEdgeOnly = 7, // Clamp the negative coordinate to 0 only. Therefore, we expect Y to be always < MAX

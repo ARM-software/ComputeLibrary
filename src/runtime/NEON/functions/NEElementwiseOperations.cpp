@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
-#include "arm_compute/core/Validate.h"
-#include "src/cpu/operators/CpuElementwise.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Validate.h"
+
+#include "src/cpu/operators/CpuElementwise.h"
 
 #include <utility>
 
@@ -33,17 +34,16 @@ namespace arm_compute
 {
 struct NEElementwiseMax::Impl
 {
-    const ITensor                          *src_0{ nullptr };
-    const ITensor                          *src_1{ nullptr };
-    ITensor                                *dst{ nullptr };
-    std::unique_ptr<cpu::CpuElementwiseMax> op{ nullptr };
+    const ITensor                          *src_0{nullptr};
+    const ITensor                          *src_1{nullptr};
+    ITensor                                *dst{nullptr};
+    std::unique_ptr<cpu::CpuElementwiseMax> op{nullptr};
 };
 
-NEElementwiseMax::NEElementwiseMax()
-    : _impl(std::make_unique<Impl>())
+NEElementwiseMax::NEElementwiseMax() : _impl(std::make_unique<Impl>())
 {
 }
-NEElementwiseMax::NEElementwiseMax(NEElementwiseMax &&) = default;
+NEElementwiseMax::NEElementwiseMax(NEElementwiseMax &&)            = default;
 NEElementwiseMax &NEElementwiseMax::operator=(NEElementwiseMax &&) = default;
 NEElementwiseMax::~NEElementwiseMax()                              = default;
 
@@ -57,7 +57,10 @@ void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *outp
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
-Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseMax::validate(const ITensorInfo         *input1,
+                                  const ITensorInfo         *input2,
+                                  const ITensorInfo         *output,
+                                  const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseMax::validate(input1, input2, output);
@@ -74,17 +77,16 @@ void NEElementwiseMax::run()
 
 struct NEElementwiseMin::Impl
 {
-    const ITensor                          *src_0{ nullptr };
-    const ITensor                          *src_1{ nullptr };
-    ITensor                                *dst{ nullptr };
-    std::unique_ptr<cpu::CpuElementwiseMin> op{ nullptr };
+    const ITensor                          *src_0{nullptr};
+    const ITensor                          *src_1{nullptr};
+    ITensor                                *dst{nullptr};
+    std::unique_ptr<cpu::CpuElementwiseMin> op{nullptr};
 };
 
-NEElementwiseMin::NEElementwiseMin()
-    : _impl(std::make_unique<Impl>())
+NEElementwiseMin::NEElementwiseMin() : _impl(std::make_unique<Impl>())
 {
 }
-NEElementwiseMin::NEElementwiseMin(NEElementwiseMin &&) = default;
+NEElementwiseMin::NEElementwiseMin(NEElementwiseMin &&)            = default;
 NEElementwiseMin &NEElementwiseMin::operator=(NEElementwiseMin &&) = default;
 NEElementwiseMin::~NEElementwiseMin()                              = default;
 
@@ -98,7 +100,10 @@ void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *outp
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
-Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseMin::validate(const ITensorInfo         *input1,
+                                  const ITensorInfo         *input2,
+                                  const ITensorInfo         *output,
+                                  const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseMin::validate(input1, input2, output);
@@ -115,21 +120,23 @@ void NEElementwiseMin::run()
 
 struct NEElementwiseSquaredDiff::Impl
 {
-    const ITensor                                  *src_0{ nullptr };
-    const ITensor                                  *src_1{ nullptr };
-    ITensor                                        *dst{ nullptr };
-    std::unique_ptr<cpu::CpuElementwiseSquaredDiff> op{ nullptr };
+    const ITensor                                  *src_0{nullptr};
+    const ITensor                                  *src_1{nullptr};
+    ITensor                                        *dst{nullptr};
+    std::unique_ptr<cpu::CpuElementwiseSquaredDiff> op{nullptr};
 };
 
-NEElementwiseSquaredDiff::NEElementwiseSquaredDiff()
-    : _impl(std::make_unique<Impl>())
+NEElementwiseSquaredDiff::NEElementwiseSquaredDiff() : _impl(std::make_unique<Impl>())
 {
 }
-NEElementwiseSquaredDiff::NEElementwiseSquaredDiff(NEElementwiseSquaredDiff &&) = default;
+NEElementwiseSquaredDiff::NEElementwiseSquaredDiff(NEElementwiseSquaredDiff &&)            = default;
 NEElementwiseSquaredDiff &NEElementwiseSquaredDiff::operator=(NEElementwiseSquaredDiff &&) = default;
 NEElementwiseSquaredDiff::~NEElementwiseSquaredDiff()                                      = default;
 
-void NEElementwiseSquaredDiff::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
+void NEElementwiseSquaredDiff::configure(ITensor                   *input1,
+                                         ITensor                   *input2,
+                                         ITensor                   *output,
+                                         const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     _impl->src_0 = input1;
@@ -139,7 +146,10 @@ void NEElementwiseSquaredDiff::configure(ITensor *input1, ITensor *input2, ITens
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
-Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseSquaredDiff::validate(const ITensorInfo         *input1,
+                                          const ITensorInfo         *input2,
+                                          const ITensorInfo         *output,
+                                          const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseSquaredDiff::validate(input1, input2, output);
@@ -156,21 +166,23 @@ void NEElementwiseSquaredDiff::run()
 
 struct NEElementwiseDivision::Impl
 {
-    const ITensor                               *src_0{ nullptr };
-    const ITensor                               *src_1{ nullptr };
-    ITensor                                     *dst{ nullptr };
-    std::unique_ptr<cpu::CpuElementwiseDivision> op{ nullptr };
+    const ITensor                               *src_0{nullptr};
+    const ITensor                               *src_1{nullptr};
+    ITensor                                     *dst{nullptr};
+    std::unique_ptr<cpu::CpuElementwiseDivision> op{nullptr};
 };
 
-NEElementwiseDivision::NEElementwiseDivision()
-    : _impl(std::make_unique<Impl>())
+NEElementwiseDivision::NEElementwiseDivision() : _impl(std::make_unique<Impl>())
 {
 }
-NEElementwiseDivision::NEElementwiseDivision(NEElementwiseDivision &&) = default;
+NEElementwiseDivision::NEElementwiseDivision(NEElementwiseDivision &&)            = default;
 NEElementwiseDivision &NEElementwiseDivision::operator=(NEElementwiseDivision &&) = default;
 NEElementwiseDivision::~NEElementwiseDivision()                                   = default;
 
-void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
+void NEElementwiseDivision::configure(ITensor                   *input1,
+                                      ITensor                   *input2,
+                                      ITensor                   *output,
+                                      const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     _impl->src_0 = input1;
@@ -180,7 +192,10 @@ void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor 
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
-Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwiseDivision::validate(const ITensorInfo         *input1,
+                                       const ITensorInfo         *input2,
+                                       const ITensorInfo         *output,
+                                       const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseDivision::validate(input1, input2, output);
@@ -197,21 +212,23 @@ void NEElementwiseDivision::run()
 
 struct NEElementwisePower::Impl
 {
-    const ITensor                            *src_0{ nullptr };
-    const ITensor                            *src_1{ nullptr };
-    ITensor                                  *dst{ nullptr };
-    std::unique_ptr<cpu::CpuElementwisePower> op{ nullptr };
+    const ITensor                            *src_0{nullptr};
+    const ITensor                            *src_1{nullptr};
+    ITensor                                  *dst{nullptr};
+    std::unique_ptr<cpu::CpuElementwisePower> op{nullptr};
 };
 
-NEElementwisePower::NEElementwisePower()
-    : _impl(std::make_unique<Impl>())
+NEElementwisePower::NEElementwisePower() : _impl(std::make_unique<Impl>())
 {
 }
-NEElementwisePower::NEElementwisePower(NEElementwisePower &&) = default;
+NEElementwisePower::NEElementwisePower(NEElementwisePower &&)            = default;
 NEElementwisePower &NEElementwisePower::operator=(NEElementwisePower &&) = default;
 NEElementwisePower::~NEElementwisePower()                                = default;
 
-void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
+void NEElementwisePower::configure(ITensor                   *input1,
+                                   ITensor                   *input2,
+                                   ITensor                   *output,
+                                   const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     _impl->src_0 = input1;
@@ -221,7 +238,10 @@ void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *ou
     _impl->op->configure(input1->info(), input2->info(), output->info());
 }
 
-Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status NEElementwisePower::validate(const ITensorInfo         *input1,
+                                    const ITensorInfo         *input2,
+                                    const ITensorInfo         *output,
+                                    const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwisePower::validate(input1, input2, output);
@@ -239,22 +259,22 @@ void NEElementwisePower::run()
 template <ComparisonOperation COP>
 struct NEElementwiseComparisonStatic<COP>::Impl
 {
-    const ITensor                                            *src_0{ nullptr };
-    const ITensor                                            *src_1{ nullptr };
-    ITensor                                                  *dst{ nullptr };
-    std::unique_ptr<cpu::CpuElementwiseComparisonStatic<COP>> op{ nullptr };
+    const ITensor                                            *src_0{nullptr};
+    const ITensor                                            *src_1{nullptr};
+    ITensor                                                  *dst{nullptr};
+    std::unique_ptr<cpu::CpuElementwiseComparisonStatic<COP>> op{nullptr};
 };
 
 template <ComparisonOperation COP>
-NEElementwiseComparisonStatic<COP>::NEElementwiseComparisonStatic()
-    : _impl(std::make_unique<Impl>())
+NEElementwiseComparisonStatic<COP>::NEElementwiseComparisonStatic() : _impl(std::make_unique<Impl>())
 {
 }
 template <ComparisonOperation COP>
 NEElementwiseComparisonStatic<COP>::NEElementwiseComparisonStatic(NEElementwiseComparisonStatic &&) = default;
-template <ComparisonOperation       COP>
-NEElementwiseComparisonStatic<COP> &NEElementwiseComparisonStatic<COP>::operator=(NEElementwiseComparisonStatic &&) = default;
-template <ComparisonOperation       COP>
+template <ComparisonOperation COP>
+NEElementwiseComparisonStatic<COP> &
+NEElementwiseComparisonStatic<COP>::operator=(NEElementwiseComparisonStatic &&) = default;
+template <ComparisonOperation COP>
 NEElementwiseComparisonStatic<COP>::~NEElementwiseComparisonStatic() = default;
 
 template <ComparisonOperation COP>
@@ -268,13 +288,15 @@ void NEElementwiseComparisonStatic<COP>::configure(ITensor *input1, ITensor *inp
 }
 
 template <ComparisonOperation COP>
-Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1,
+                                                    const ITensorInfo *input2,
+                                                    const ITensorInfo *output)
 {
     return cpu::CpuElementwiseComparisonStatic<COP>::validate(input1, input2, output);
 }
 
 template <ComparisonOperation COP>
-void                          NEElementwiseComparisonStatic<COP>::run()
+void NEElementwiseComparisonStatic<COP>::run()
 {
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
@@ -285,17 +307,16 @@ void                          NEElementwiseComparisonStatic<COP>::run()
 
 struct NEElementwiseComparison::Impl
 {
-    const ITensor                                 *src_0{ nullptr };
-    const ITensor                                 *src_1{ nullptr };
-    ITensor                                       *dst{ nullptr };
-    std::unique_ptr<cpu::CpuElementwiseComparison> op{ nullptr };
+    const ITensor                                 *src_0{nullptr};
+    const ITensor                                 *src_1{nullptr};
+    ITensor                                       *dst{nullptr};
+    std::unique_ptr<cpu::CpuElementwiseComparison> op{nullptr};
 };
 
-NEElementwiseComparison::NEElementwiseComparison()
-    : _impl(std::make_unique<Impl>())
+NEElementwiseComparison::NEElementwiseComparison() : _impl(std::make_unique<Impl>())
 {
 }
-NEElementwiseComparison::NEElementwiseComparison(NEElementwiseComparison &&) = default;
+NEElementwiseComparison::NEElementwiseComparison(NEElementwiseComparison &&)            = default;
 NEElementwiseComparison &NEElementwiseComparison::operator=(NEElementwiseComparison &&) = default;
 NEElementwiseComparison::~NEElementwiseComparison()                                     = default;
 
@@ -308,7 +329,10 @@ void NEElementwiseComparison::configure(ITensor *input1, ITensor *input2, ITenso
     _impl->op->configure(input1->info(), input2->info(), output->info(), op);
 }
 
-Status NEElementwiseComparison::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op)
+Status NEElementwiseComparison::validate(const ITensorInfo  *input1,
+                                         const ITensorInfo  *input2,
+                                         const ITensorInfo  *output,
+                                         ComparisonOperation op)
 {
     return cpu::CpuElementwiseComparison::validate(input1, input2, output, op);
 }

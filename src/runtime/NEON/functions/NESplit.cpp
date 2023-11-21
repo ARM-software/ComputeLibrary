@@ -34,7 +34,7 @@ namespace arm_compute
 {
 void NESplit::run()
 {
-    for(unsigned i = 0; i < _num_outputs; ++i)
+    for (unsigned i = 0; i < _num_outputs; ++i)
     {
         _slice_functions[i].run();
     }

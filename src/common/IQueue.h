@@ -28,7 +28,7 @@
 
 struct AclQueue_
 {
-    arm_compute::detail::Header header{ arm_compute::detail::ObjectType::Queue, nullptr };
+    arm_compute::detail::Header header{arm_compute::detail::ObjectType::Queue, nullptr};
 
 protected:
     AclQueue_()  = default;
@@ -88,7 +88,7 @@ namespace detail
  */
 inline StatusCode validate_internal_queue(const IQueue *queue)
 {
-    if(queue == nullptr || !queue->is_valid())
+    if (queue == nullptr || !queue->is_valid())
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[IQueue]: Invalid queue object");
         return StatusCode::InvalidArgument;

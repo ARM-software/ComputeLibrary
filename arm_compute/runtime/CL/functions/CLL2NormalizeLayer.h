@@ -26,8 +26,8 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
@@ -89,7 +89,8 @@ public:
      * @param[in]  axis            Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]  epsilon         (Optional) Lower bound value for the normalization.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int axis, float epsilon = 1e-12f);
+    void configure(
+        const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int axis, float epsilon = 1e-12f);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayer.
      *
@@ -111,5 +112,5 @@ private:
     std::unique_ptr<CLL2NormalizeLayerKernel> _normalize_kernel;
     CLTensor                                  _sumsq;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CLL2NORMALIZELAYER_H */

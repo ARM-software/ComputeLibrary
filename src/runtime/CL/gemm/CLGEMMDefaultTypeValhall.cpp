@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 
 #include <map>
@@ -34,8 +35,7 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMDefaultTypeValhall::CLGEMMDefaultTypeValhall(GPUTarget gpu)
-    : ICLGEMMKernelSelection(gpu)
+CLGEMMDefaultTypeValhall::CLGEMMDefaultTypeValhall(GPUTarget gpu) : ICLGEMMKernelSelection(gpu)
 {
 }
 
@@ -44,135 +44,136 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::select_kernel(const CLGEMMKernelSelec
     // _target could be used in the future to have a dedicated heuristic for each GPU IP
     ARM_COMPUTE_UNUSED(_target);
 
-    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMDefaultTypeValhall::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMDefaultTypeValhall::*)(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 
     // Default configurations for Valhall architectures
-    static std::map<DataType, FunctionExecutorPtr> gemm_default_configs =
-    {
-        { DataType::F32, &CLGEMMDefaultTypeValhall::default_f32 },
-        { DataType::F16, &CLGEMMDefaultTypeValhall::default_f16 },
-        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
-    };
+    static std::map<DataType, FunctionExecutorPtr> gemm_default_configs = {
+        {DataType::F32, &CLGEMMDefaultTypeValhall::default_f32},
+        {DataType::F16, &CLGEMMDefaultTypeValhall::default_f16},
+        {DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8}};
 
     // Mali-G77 configurations
-    static std::map<DataType, FunctionExecutorPtr> gemm_g77_configs =
-    {
-        { DataType::F32, &CLGEMMDefaultTypeValhall::default_f32 },
-        { DataType::F16, &CLGEMMDefaultTypeValhall::g77_f16 },
-        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
-    };
+    static std::map<DataType, FunctionExecutorPtr> gemm_g77_configs = {
+        {DataType::F32, &CLGEMMDefaultTypeValhall::default_f32},
+        {DataType::F16, &CLGEMMDefaultTypeValhall::g77_f16},
+        {DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8}};
 
     // Mali-G78 configurations
-    static std::map<DataType, FunctionExecutorPtr> gemm_g78_configs =
-    {
-        { DataType::F32, &CLGEMMDefaultTypeValhall::g78_f32 },
-        { DataType::F16, &CLGEMMDefaultTypeValhall::g78_f16 },
-        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
-    };
+    static std::map<DataType, FunctionExecutorPtr> gemm_g78_configs = {
+        {DataType::F32, &CLGEMMDefaultTypeValhall::g78_f32},
+        {DataType::F16, &CLGEMMDefaultTypeValhall::g78_f16},
+        {DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8}};
 
     // Mali-G710 and Mali-G610 configurations
-    static std::map<DataType, FunctionExecutorPtr> gemm_g710_configs =
-    {
-        { DataType::F32, &CLGEMMDefaultTypeValhall::default_f32 },
-        { DataType::F16, &CLGEMMDefaultTypeValhall::g710_f16 },
-        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
-    };
+    static std::map<DataType, FunctionExecutorPtr> gemm_g710_configs = {
+        {DataType::F32, &CLGEMMDefaultTypeValhall::default_f32},
+        {DataType::F16, &CLGEMMDefaultTypeValhall::g710_f16},
+        {DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8}};
 
     // Mali-G715 and Mali-G615 configurations
-    static std::map<DataType, FunctionExecutorPtr> gemm_g715_configs =
-    {
-        { DataType::F32, &CLGEMMDefaultTypeValhall::g715_f32 },
-        { DataType::F16, &CLGEMMDefaultTypeValhall::g715_f16 },
-        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
-    };
+    static std::map<DataType, FunctionExecutorPtr> gemm_g715_configs = {
+        {DataType::F32, &CLGEMMDefaultTypeValhall::g715_f32},
+        {DataType::F16, &CLGEMMDefaultTypeValhall::g715_f16},
+        {DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8},
+        {DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8}};
 
     const DataType data_type = params.data_type;
 
-    switch(_target)
+    switch (_target)
     {
         case GPUTarget::G710:
         case GPUTarget::G610:
-            if(gemm_g710_configs.find(data_type) != gemm_g710_configs.end())
+            if (gemm_g710_configs.find(data_type) != gemm_g710_configs.end())
             {
-                return (this->*gemm_g710_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
+                return (this->*gemm_g710_configs[data_type])(params.m, params.n, params.k, params.b,
+                                                             params.is_rhs_constant);
             }
             ARM_COMPUTE_ERROR("Not supported data type");
         case GPUTarget::G715:
         case GPUTarget::G615:
-            if(gemm_g715_configs.find(data_type) != gemm_g715_configs.end())
+            if (gemm_g715_configs.find(data_type) != gemm_g715_configs.end())
             {
-                return (this->*gemm_g715_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
+                return (this->*gemm_g715_configs[data_type])(params.m, params.n, params.k, params.b,
+                                                             params.is_rhs_constant);
             }
             ARM_COMPUTE_ERROR("Not supported data type");
         case GPUTarget::G78:
-            if(gemm_g78_configs.find(data_type) != gemm_g78_configs.end())
+            if (gemm_g78_configs.find(data_type) != gemm_g78_configs.end())
             {
-                return (this->*gemm_g78_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
+                return (this->*gemm_g78_configs[data_type])(params.m, params.n, params.k, params.b,
+                                                            params.is_rhs_constant);
             }
             ARM_COMPUTE_ERROR("Not supported data type");
         case GPUTarget::G77:
-            if(gemm_g77_configs.find(data_type) != gemm_g77_configs.end())
+            if (gemm_g77_configs.find(data_type) != gemm_g77_configs.end())
             {
-                return (this->*gemm_g77_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
+                return (this->*gemm_g77_configs[data_type])(params.m, params.n, params.k, params.b,
+                                                            params.is_rhs_constant);
             }
             ARM_COMPUTE_ERROR("Not supported data type");
         default:
-            if(gemm_default_configs.find(data_type) != gemm_default_configs.end())
+            if (gemm_default_configs.find(data_type) != gemm_default_configs.end())
             {
-                return (this->*gemm_default_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
+                return (this->*gemm_default_configs[data_type])(params.m, params.n, params.k, params.b,
+                                                                params.is_rhs_constant);
             }
             ARM_COMPUTE_ERROR("Not supported data type");
     }
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f32(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
     return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f16(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
     return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::g77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType
+CLGEMMDefaultTypeValhall::g77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
     return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::g710_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType
+CLGEMMDefaultTypeValhall::g710_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
     return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeValhall::default_q8(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
-    if(is_rhs_constant)
+    if (is_rhs_constant)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
@@ -182,47 +183,48 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::default_q8(unsigned int m, unsigned i
     }
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType
+CLGEMMDefaultTypeValhall::g78_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(b);
 
-    if(!is_rhs_constant)
+    if (!is_rhs_constant)
     {
         return CLGEMMKernelType::NATIVE;
     }
 
-    if(m == 1)
+    if (m == 1)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
 
-    if(n <= 272.0000f)
+    if (n <= 272.0000f)
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
     else
     {
-        if(k <= 471.0000f)
+        if (k <= 471.0000f)
         {
             return CLGEMMKernelType::RESHAPED_ONLY_RHS;
         }
         else
         {
-            if(m <= 72.5000f)
+            if (m <= 72.5000f)
             {
                 return CLGEMMKernelType::RESHAPED_ONLY_RHS;
             }
             else
             {
-                if(m <= 90.5000f)
+                if (m <= 90.5000f)
                 {
                     return CLGEMMKernelType::RESHAPED;
                 }
                 else
                 {
-                    if(k <= 2448.0000f)
+                    if (k <= 2448.0000f)
                     {
-                        if(n <= 756.0000f)
+                        if (n <= 756.0000f)
                         {
                             return CLGEMMKernelType::RESHAPED_ONLY_RHS;
                         }
@@ -241,11 +243,12 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f32(unsigned int m, unsigned int 
     }
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType
+CLGEMMDefaultTypeValhall::g78_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
-    if(!is_rhs_constant)
+    if (!is_rhs_constant)
     {
         return CLGEMMKernelType::NATIVE;
     }
@@ -253,9 +256,10 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f16(unsigned int m, unsigned int 
     return CLGEMMKernelType::RESHAPED_ONLY_RHS;
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::g715_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType
+CLGEMMDefaultTypeValhall::g715_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    if(!is_rhs_constant)
+    if (!is_rhs_constant)
     {
         return default_f32(m, n, k, b, is_rhs_constant);
     }
@@ -263,7 +267,7 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g715_f32(unsigned int m, unsigned int
     unsigned int best_m0;
     unsigned int best_n0;
 
-    if(opencl::kernels::gemm::is_mmul_kernel_preferred(m, n, k, b, DataType::F32, best_m0, best_n0))
+    if (opencl::kernels::gemm::is_mmul_kernel_preferred(m, n, k, b, DataType::F32, best_m0, best_n0))
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS_MMUL;
     }
@@ -273,9 +277,10 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g715_f32(unsigned int m, unsigned int
     }
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeValhall::g715_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType
+CLGEMMDefaultTypeValhall::g715_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
-    if(!is_rhs_constant)
+    if (!is_rhs_constant)
     {
         return g78_f16(m, n, k, b, is_rhs_constant);
     }
@@ -283,7 +288,7 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g715_f16(unsigned int m, unsigned int
     unsigned int best_m0;
     unsigned int best_n0;
 
-    if(opencl::kernels::gemm::is_mmul_kernel_preferred(m, n, k, b, DataType::F16, best_m0, best_n0))
+    if (opencl::kernels::gemm::is_mmul_kernel_preferred(m, n, k, b, DataType::F16, best_m0, best_n0))
     {
         return CLGEMMKernelType::RESHAPED_ONLY_RHS_MMUL;
     }

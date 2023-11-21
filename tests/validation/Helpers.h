@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_VALIDATION_HELPERS
-#define ACL_TESTS_VALIDATION_HELPERS
+#ifndef ACL_TESTS_VALIDATION_HELPERS_H
+#define ACL_TESTS_VALIDATION_HELPERS_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
@@ -31,7 +31,8 @@
 #include "tests/Globals.h"
 #include "tests/SimpleTensor.h"
 
-#include <math.h>
+#include <cmath>
+#include <cstdint>
 #include <random>
 #include <type_traits>
 #include <utility>
@@ -50,6 +51,19 @@ struct is_floating_point : public std::is_floating_point<T>
 template <>
 struct is_floating_point<half> : public std::true_type
 {
+};
+
+/** Helper struct to store the hints for
+ *  - destination quantization info
+ *  - minimum bias value
+ *  - maximum bias value
+ * in quantized test construction.
+ */
+struct QuantizationHint
+{
+    QuantizationInfo q_info;
+    int32_t          bias_min;
+    int32_t          bias_max;
 };
 
 /** Helper function to get the testing range for each activation layer.
@@ -111,23 +125,6 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
 
     return bounds;
 }
-
-/** Calculate output tensor shape give a vector of input tensor to concatenate
- *
- * @param[in] input_shapes Shapes of the tensors to concatenate across depth.
- *
- * @return The shape of output concatenated tensor.
- */
-TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes);
-
-/** Calculate output tensor shape for the concatenate operation along a given axis
- *
- * @param[in] input_shapes Shapes of the tensors to concatenate across width.
- * @param[in] axis         Axis to use for the concatenate operation
- *
- * @return The shape of output concatenated tensor.
- */
-TensorShape calculate_concatenate_shape(const std::vector<TensorShape> &input_shapes, size_t axis);
 
 /** Convert an asymmetric quantized simple tensor into float using tensor quantization information.
  *
@@ -243,21 +240,60 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
  */
 void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC, bool only_right_pad = false);
 
-/** Add random padding along the Y axis (between 1 and 4 rows per side) to all the input tensors.
- *  This is used in our validation suite in order to simulate implicit padding addition after configuring, but before allocating.
+/** For 2d convolution, given the Lhs/Rhs matrix quantization informations and the convolution dimension,
+ *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
  *
- * @param[in] tensors     List of tensors to add padding to
- * @param[in] data_layout (Optional) Data layout of the operator
+ * @param[in] in_q_info     Input matrix quantization info
+ * @param[in] weight_q_info Weights matrix quantization info
+ * @param[in] height        Height of the weights tensor
+ * @param[in] width         Width of the weights tensors
+ * @param[in] channels      Number of input channels
+ * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
+ * @param[in] bias_fraction see @ref suggest_mac_dst_q_info_and_bias() for explanation
  *
- * @note This function adds padding to the input tensors only if data_layout == DataLayout::NHWC
+ * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
-void add_padding_y(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC);
+QuantizationHint suggest_conv_dst_q_info_and_bias(const QuantizationInfo &in_q_info,
+                                                  const QuantizationInfo &weight_q_info,
+                                                  int32_t height,
+                                                  int32_t width,
+                                                  int32_t channels,
+                                                  DataType data_type,
+                                                  float bias_fraction);
 
-/** For MatMulLowp, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
- *  calculate a suitable output quantization for obtaining non-saturated outputs with high probability.
+/** For a matrix multiplication, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
+ *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
+ *
+ * @param[in] lhs_q_info    Lhs matrix quantization info
+ * @param[in] rhs_q_info    Rhs matrix quantization info
+ * @param[in] m             Number of rows of Lhs matrix
+ * @param[in] n             Number of columns of Rhs Matrix
+ * @param[in] k             Number of rows/columns of Rhs/Lhs Matrix
+ * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
+ * @param[in] bias_fraction see @ref suggest_mac_dst_q_info_and_bias() for explanation
+ *
+ * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
-QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &lhs_q_info, const QuantizationInfo &rhs_q_info, int m, int n, int k, DataType data_type);
+QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
+                                                    const QuantizationInfo &rhs_q_info, int32_t m, int32_t n, int32_t k, DataType data_type,
+                                                    float bias_fraction);
+
+/** For a multiply-accumulate (mac), given the Lhs/Rhs vector quantization informations and the dot product dimensions,
+ *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
+ *
+ * @param[in] lhs_q_info    Lhs matrix quantization info
+ * @param[in] rhs_q_info    Rhs matrix quantization info
+ * @param[in] k             number of accumulations taking place in the sum, i.e. c_k = sum_k(a_k * b_k)
+ * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
+ * @param[in] bias_fraction the fraction of bias amplitude compared to integer accummulation.
+ * @param[in] num_sd        (Optional) number of standard deviations we allow from the mean. Default value is 2.
+ *
+ * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
+ */
+QuantizationHint suggest_mac_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
+                                                 const QuantizationInfo &rhs_q_info, int32_t k, DataType data_type, float bias_fraction,
+                                                 int num_sd = 2);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_VALIDATION_HELPERS */
+#endif // ACL_TESTS_VALIDATION_HELPERS_H

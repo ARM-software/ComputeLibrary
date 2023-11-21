@@ -25,11 +25,12 @@
 #define SRC_COMMON_ITENSORPACK_H_
 
 #include "arm_compute/core/ITensorPack.h"
+
 #include "src/common/IContext.h"
 
 struct AclTensorPack_
 {
-    arm_compute::detail::Header header{ arm_compute::detail::ObjectType::TensorPack, nullptr };
+    arm_compute::detail::Header header{arm_compute::detail::ObjectType::TensorPack, nullptr};
 
 protected:
     AclTensorPack_()  = default;
@@ -118,7 +119,7 @@ namespace detail
  */
 inline StatusCode validate_internal_pack(const TensorPack *pack)
 {
-    if(pack == nullptr || !pack->is_valid())
+    if (pack == nullptr || !pack->is_valid())
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[TensorPack]: Invalid tensor pack object");
         return StatusCode::InvalidArgument;

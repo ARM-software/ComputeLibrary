@@ -36,7 +36,7 @@ namespace
 {
 CLTunerMode map_tuner_mode(AclTuningMode mode)
 {
-    switch(mode)
+    switch (mode)
     {
         case AclRapid:
             return CLTunerMode::RAPID;
@@ -55,7 +55,7 @@ CLTunerMode map_tuner_mode(AclTuningMode mode)
 
 std::unique_ptr<CLTuner> populate_tuner(const AclQueueOptions *options)
 {
-    if(options == nullptr || options->mode == AclTuningModeNone)
+    if (options == nullptr || options->mode == AclTuningModeNone)
     {
         return nullptr;
     }
@@ -68,8 +68,7 @@ std::unique_ptr<CLTuner> populate_tuner(const AclQueueOptions *options)
 }
 } // namespace
 
-ClQueue::ClQueue(IContext *ctx, const AclQueueOptions *options)
-    : IQueue(ctx), _tuner(nullptr)
+ClQueue::ClQueue(IContext *ctx, const AclQueueOptions *options) : IQueue(ctx), _tuner(nullptr)
 {
     _tuner = populate_tuner(options);
 }

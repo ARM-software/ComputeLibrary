@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"

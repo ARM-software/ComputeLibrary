@@ -92,7 +92,11 @@ public:
      * @param[out] output          Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info       Contains pooling operation information described in @ref PoolingLayerInfo.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *indices, ICLTensor *output, const PoolingLayerInfo &pool_info);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *indices,
+                   ICLTensor              *output,
+                   const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMaxUnpoolingLayer
      *
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -105,7 +109,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo      *input,
+                           const ITensorInfo      *indices,
+                           const ITensorInfo      *output,
+                           const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run() override;
@@ -114,5 +121,5 @@ private:
     CLFill                                     _fill;
     std::unique_ptr<CLMaxUnpoolingLayerKernel> _unpooling_layer_kernel;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLMAXUNPOOLINGLAYER_H */

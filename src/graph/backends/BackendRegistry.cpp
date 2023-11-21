@@ -31,8 +31,7 @@ namespace graph
 {
 namespace backends
 {
-BackendRegistry::BackendRegistry()
-    : _registered_backends()
+BackendRegistry::BackendRegistry() : _registered_backends()
 {
 }
 

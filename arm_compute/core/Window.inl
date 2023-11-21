@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, 2022 Arm Limited.
+ * Copyright (c) 2016-2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_ARM_COMPUTE_CORE_WINDOW_INL
+#define ACL_ARM_COMPUTE_CORE_WINDOW_INL
+
 namespace arm_compute
 {
 inline Window::Window(const Window &src)
     : _dims(), _is_broadcasted(utility::generate_array<bool, Coordinates::num_max_dimensions, false>::value)
 {
-    for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
+    for (size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
         set(i, src[i]);
         _is_broadcasted[i] = src.is_broadcasted(i);
@@ -65,32 +69,34 @@ inline bool Window::is_broadcasted(size_t dimension) const
     return _is_broadcasted[dimension];
 }
 
-inline Window Window::collapse_if_possible(const Window &full_window, const size_t first,
-                                           const size_t last, bool *has_collapsed) const
+inline Window Window::collapse_if_possible(const Window &full_window,
+                                           const size_t  first,
+                                           const size_t  last,
+                                           bool         *has_collapsed) const
 {
     Window collapsed(*this);
 
     bool is_collapsable = true;
     int  collapsed_end  = _dims[first].end();
 
-    for(size_t d = first + 1; is_collapsable && (d < last); ++d)
+    for (size_t d = first + 1; is_collapsable && (d < last); ++d)
     {
         // The _dims's dimension must match the full _dims dimension to be collapsable:
-        is_collapsable = (_dims[d].start() == 0) && (full_window[d].start() == 0) && (_dims[d].step() <= 1)
-                         && (full_window[d].end() == _dims[d].end());
+        is_collapsable = (_dims[d].start() == 0) && (full_window[d].start() == 0) && (_dims[d].step() <= 1) &&
+                         (full_window[d].end() == _dims[d].end());
         collapsed_end *= _dims[d].end();
     }
 
-    if(is_collapsable)
+    if (is_collapsable)
     {
         collapsed._dims.at(first).set_end(collapsed_end);
-        for(size_t d = first + 1; is_collapsable && (d < last); ++d)
+        for (size_t d = first + 1; is_collapsable && (d < last); ++d)
         {
             collapsed.set(d, Dimension());
         }
     }
 
-    if(has_collapsed != nullptr)
+    if (has_collapsed != nullptr)
     {
         *has_collapsed = is_collapsable;
     }
@@ -98,13 +104,21 @@ inline Window Window::collapse_if_possible(const Window &full_window, const size
     return collapsed;
 }
 
-inline Window Window::shift_dimensions(unsigned int shift_value) const
+inline Window Window::shift_dimensions(unsigned int shift_value, unsigned int start_dim) const
 {
     Window shifted_window;
-    for(size_t n = 0; n < (Coordinates::num_max_dimensions - shift_value); n++)
+    size_t n = 0;
+
+    for (; n < start_dim; ++n)
+    {
+        shifted_window.set(n, _dims[n]);
+    }
+
+    for (; n < (Coordinates::num_max_dimensions - shift_value); n++)
     {
         shifted_window.set(n, _dims[n + shift_value]);
     }
+
     return shifted_window;
 }
 
@@ -120,9 +134,9 @@ inline Window Window::collapse(const Window &full_window, const size_t first, co
 inline Window Window::broadcast_if_dimension_le_one(const TensorShape &shape) const
 {
     Window broadcastWin(*this);
-    for(size_t d = 0; d < TensorShape::num_max_dimensions; ++d)
+    for (size_t d = 0; d < TensorShape::num_max_dimensions; ++d)
     {
-        if(shape[d] <= 1)
+        if (shape[d] <= 1)
         {
             broadcastWin.set_broadcasted(d);
         }
@@ -142,7 +156,7 @@ inline void Window::adjust(size_t dimension, int adjust_value, bool is_at_start)
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
     Window::Dimension &d = _dims[dimension];
 
-    if(is_at_start)
+    if (is_at_start)
     {
         d = Window::Dimension(d.start() + adjust_value, d.end(), d.step());
     }
@@ -172,7 +186,7 @@ inline void Window::set_dimension_step(size_t dimension, int step)
 
 inline void Window::validate() const
 {
-    for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
+    for (size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_ERROR_ON(_dims[i].end() < _dims[i].start());
         ARM_COMPUTE_ERROR_ON((_dims[i].step() != 0) && (((_dims[i].end() - _dims[i].start()) % _dims[i].step()) != 0));
@@ -193,9 +207,9 @@ inline Window Window::split_window(size_t dimension, size_t id, size_t total) co
 
     Window out;
 
-    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    for (size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
     {
-        if(d == dimension)
+        if (d == dimension)
         {
             int       start = _dims[d].start();
             int       end   = _dims[d].end();
@@ -207,7 +221,7 @@ inline Window Window::split_window(size_t dimension, size_t id, size_t total) co
 
             int it_start = work * id;
 
-            if(int(id) < rem)
+            if (int(id) < rem)
             {
                 ++work;
                 it_start += id;
@@ -234,18 +248,18 @@ inline Window Window::split_window(size_t dimension, size_t id, size_t total) co
 template <unsigned int window_dimension>
 inline bool Window::slide_window_slice(Window &slice) const
 {
-    for(unsigned int n = window_dimension; n < Coordinates::num_max_dimensions; ++n)
+    for (unsigned int n = window_dimension; n < Coordinates::num_max_dimensions; ++n)
     {
         // Did we reach the end of this dimension?
         const int v = slice._dims[n].start() + 1;
 
-        if(v < _dims[n].end())
+        if (v < _dims[n].end())
         {
             // No: increment
             slice._dims[n] = Dimension(v, v + 1, 1);
 
             // Reset lower dimensions:
-            for(unsigned int lower = window_dimension; lower < n; ++lower)
+            for (unsigned int lower = window_dimension; lower < n; ++lower)
             {
                 slice._dims[lower] = Dimension(_dims[lower].start(), _dims[lower].start() + 1, 1);
             }
@@ -258,14 +272,14 @@ inline bool Window::slide_window_slice(Window &slice) const
 }
 
 template <unsigned int window_dimension>
-inline Window          Window::first_slice_window() const
+inline Window Window::first_slice_window() const
 {
     Window slice;
 
     std::copy_n(_dims.begin(), window_dimension, slice._dims.begin());
 
     //Initialise higher dimensions to be the first slice.
-    for(unsigned int n = window_dimension; n < Coordinates::num_max_dimensions; ++n)
+    for (unsigned int n = window_dimension; n < Coordinates::num_max_dimensions; ++n)
     {
         slice._dims[n] = Dimension(_dims[n].start(), _dims[n].start() + 1, 1);
     }
@@ -275,7 +289,7 @@ inline Window          Window::first_slice_window() const
 
 inline void Window::use_tensor_dimensions(const TensorShape &shape, size_t first_dimension)
 {
-    for(unsigned int n = first_dimension; n < shape.num_dimensions(); ++n)
+    for (unsigned int n = first_dimension; n < shape.num_dimensions(); ++n)
     {
         set(n, Window::Dimension(0, std::max(shape[n], static_cast<size_t>(1))));
     }
@@ -284,7 +298,7 @@ inline void Window::use_tensor_dimensions(const TensorShape &shape, size_t first
 inline TensorShape Window::shape() const
 {
     TensorShape shape;
-    for(size_t d = 0; d < TensorShape::num_max_dimensions; ++d)
+    for (size_t d = 0; d < TensorShape::num_max_dimensions; ++d)
     {
         shape.set(d, (_dims[d].end() - _dims[d].start()) / _dims[d].step());
     }
@@ -294,7 +308,7 @@ inline TensorShape Window::shape() const
 inline size_t Window::num_iterations_total() const
 {
     size_t total = 1;
-    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    for (size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
     {
         total *= num_iterations(d);
     }
@@ -311,3 +325,5 @@ inline bool operator==(const Window &lhs, const Window &rhs)
     return (lhs._dims == rhs._dims) && (lhs._is_broadcasted == rhs._is_broadcasted);
 }
 } // namespace arm_compute
+
+#endif // ACL_ARM_COMPUTE_CORE_WINDOW_INL

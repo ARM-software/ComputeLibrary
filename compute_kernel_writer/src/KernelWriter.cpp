@@ -23,13 +23,18 @@
  */
 
 #include "ckw/KernelWriter.h"
+
 #include "ckw/Error.h"
 #include "ckw/TileOperand.h"
 #include "ckw/types/TargetArchitecture.h"
 #include "ckw/types/TargetLanguage.h"
+
 #include "src/cl/CLKernelWriter.h"
 #include "src/cl/CLTensorArgument.h"
 #include "src/cl/CLTile.h"
+#include "src/TileView.h"
+
+#include <tuple>
 
 namespace ckw
 {
@@ -39,7 +44,7 @@ KernelWriter::~KernelWriter() = default;
 std::unique_ptr<KernelWriter> KernelWriter::create_instance(TargetArchitecture architecture, TargetLanguage language)
 {
     CKW_UNUSED(architecture);
-    switch(language)
+    switch (language)
     {
         case TargetLanguage::OpenCL:
             // Currently this is the oldest and the only supported GPU architecture.
@@ -51,9 +56,33 @@ std::unique_ptr<KernelWriter> KernelWriter::create_instance(TargetArchitecture a
     }
 }
 
+int32_t KernelWriter::new_id_space()
+{
+    _id_space = ++_last_created_id_space;
+
+    return _id_space;
+}
+
 int32_t KernelWriter::id_space() const
 {
     return _id_space;
+}
+
+KernelWriter &KernelWriter::id_space(int32_t value)
+{
+    CKW_ASSERT(value <= _last_created_id_space);
+
+    _id_space = value;
+
+    return *this;
+}
+
+void KernelWriter::write_body(const std::function<void()> &body)
+{
+    const auto curr_id_space = id_space();
+    new_id_space();
+    body();
+    id_space(curr_id_space);
 }
 
 std::string KernelWriter::generate_full_name(const std::string &name) const
@@ -66,9 +95,9 @@ TileOperand KernelWriter::create_tile_operand(ITile &tile)
     return TileOperand(tile);
 }
 
-ITile &KernelWriter::get_tile(const TileOperand &operand)
+std::tuple<ITile &, TileArea> KernelWriter::get_tile(const TileOperand &operand)
 {
-    return operand._tile;
+    return {*operand._tile, {operand._row_start, operand._row_end, operand._col_start, operand._col_end}};
 }
 
 TensorOperand KernelWriter::create_tensor_operand(ITensor &tensor)
@@ -79,6 +108,16 @@ TensorOperand KernelWriter::create_tensor_operand(ITensor &tensor)
 ITensor &KernelWriter::get_tensor(const TensorOperand &operand)
 {
     return operand._tensor;
+}
+
+const std::vector<std::vector<std::string>> &KernelWriter::get_values(const ConstantData &data)
+{
+    return data.values();
+}
+
+DataType KernelWriter::get_data_type(const ConstantData &data)
+{
+    return data.data_type();
 }
 
 } // namespace ckw

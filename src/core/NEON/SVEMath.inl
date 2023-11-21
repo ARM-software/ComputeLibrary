@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CORE_NEON_SVEMATH_INL
+#define ACL_SRC_CORE_NEON_SVEMATH_INL
+
 #include <cmath>
 #include <limits>
 
@@ -32,8 +36,16 @@
 
 namespace arm_compute
 {
-inline svfloat32_t svtaylor_poly_f32_z(svbool_t pg, svfloat32_t x, svfloat32_t coeff_1, svfloat32_t coeff_2, svfloat32_t coeff_3,
-                                       svfloat32_t coeff_4, svfloat32_t coeff_5, svfloat32_t coeff_6, svfloat32_t coeff_7, svfloat32_t coeff_8)
+inline svfloat32_t svtaylor_poly_f32_z(svbool_t    pg,
+                                       svfloat32_t x,
+                                       svfloat32_t coeff_1,
+                                       svfloat32_t coeff_2,
+                                       svfloat32_t coeff_3,
+                                       svfloat32_t coeff_4,
+                                       svfloat32_t coeff_5,
+                                       svfloat32_t coeff_6,
+                                       svfloat32_t coeff_7,
+                                       svfloat32_t coeff_8)
 {
     const auto A   = svmla_f32_z(pg, coeff_1, coeff_5, x);
     const auto B   = svmla_f32_z(pg, coeff_3, coeff_7, x);
@@ -45,8 +57,16 @@ inline svfloat32_t svtaylor_poly_f32_z(svbool_t pg, svfloat32_t x, svfloat32_t c
     return res;
 }
 
-inline svfloat16_t svtaylor_poly_f16_z(svbool_t pg, svfloat16_t x, svfloat16_t coeff_1, svfloat16_t coeff_2, svfloat16_t coeff_3,
-                                       svfloat16_t coeff_4, svfloat16_t coeff_5, svfloat16_t coeff_6, svfloat16_t coeff_7, svfloat16_t coeff_8)
+inline svfloat16_t svtaylor_poly_f16_z(svbool_t    pg,
+                                       svfloat16_t x,
+                                       svfloat16_t coeff_1,
+                                       svfloat16_t coeff_2,
+                                       svfloat16_t coeff_3,
+                                       svfloat16_t coeff_4,
+                                       svfloat16_t coeff_5,
+                                       svfloat16_t coeff_6,
+                                       svfloat16_t coeff_7,
+                                       svfloat16_t coeff_8)
 {
     const auto A   = svmla_f16_z(pg, coeff_1, coeff_5, x);
     const auto B   = svmla_f16_z(pg, coeff_3, coeff_7, x);
@@ -90,15 +110,17 @@ inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
     const auto c4 = svreinterpret_f32_u32(svdup_n_u32(svexp_f32_coeff[3]));
     const auto c5 = svreinterpret_f32_u32(svdup_n_u32(svexp_f32_coeff[4]));
 
-    const auto shift   = svreinterpret_f32_u32(svdup_n_u32(0x4b00007f));  // 2^23 + 127 = 0x1.0000fep23f
-    const auto inv_ln2 = svreinterpret_f32_u32(svdup_n_u32(0x3fb8aa3b));  // 1 / ln(2) = 0x1.715476p+0f
-    const auto neg_ln2_hi  = svreinterpret_f32_u32(svdup_n_u32(0xbf317200));  // -ln(2) from bits  -1 to -19: -0x1.62e400p-1f
-    const auto neg_ln2_lo  = svreinterpret_f32_u32(svdup_n_u32(0xb5bfbe8e));  // -ln(2) from bits -20 to -42: -0x1.7f7d1cp-20f
+    const auto shift   = svreinterpret_f32_u32(svdup_n_u32(0x4b00007f)); // 2^23 + 127 = 0x1.0000fep23f
+    const auto inv_ln2 = svreinterpret_f32_u32(svdup_n_u32(0x3fb8aa3b)); // 1 / ln(2) = 0x1.715476p+0f
+    const auto neg_ln2_hi =
+        svreinterpret_f32_u32(svdup_n_u32(0xbf317200)); // -ln(2) from bits  -1 to -19: -0x1.62e400p-1f
+    const auto neg_ln2_lo =
+        svreinterpret_f32_u32(svdup_n_u32(0xb5bfbe8e)); // -ln(2) from bits -20 to -42: -0x1.7f7d1cp-20f
 
     const auto inf       = svdup_n_f32(std::numeric_limits<float>::infinity());
-    const auto max_input = svdup_n_f32(88.37f);  // Approximately ln(2^127.5)
+    const auto max_input = svdup_n_f32(88.37f); // Approximately ln(2^127.5)
     const auto zero      = svdup_n_f32(0.f);
-    const auto min_input = svdup_n_f32(-86.64f);  // Approximately ln(2^-125)
+    const auto min_input = svdup_n_f32(-86.64f); // Approximately ln(2^-125)
 
     // Range reduction:
     //   e^x = 2^n * e^r
@@ -114,23 +136,23 @@ inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
     //     (i.e. n) because the decimal part has been pushed out and lost.
     //   * The addition of 127 makes the FP32 fraction part of z ready to be used as the exponent
     //     in FP32 format. Left shifting z by 23 bits will result in 2^n.
-    const auto z = svmla_f32_z(pg, shift, x, inv_ln2);
-    const auto n = svsub_f32_z(pg, z, shift);
-    const auto scale = svreinterpret_f32_u32(svlsl_n_u32_z(pg, svreinterpret_u32_f32(z), 23));  // 2^n
+    const auto z     = svmla_f32_z(pg, shift, x, inv_ln2);
+    const auto n     = svsub_f32_z(pg, z, shift);
+    const auto scale = svreinterpret_f32_u32(svlsl_n_u32_z(pg, svreinterpret_u32_f32(z), 23)); // 2^n
 
     // The calculation of n * ln(2) is done using 2 steps to achieve accuracy beyond FP32.
     // This outperforms longer Taylor series (3-4 tabs) both in term of accuracy and performance.
     const auto r_hi = svmla_f32_z(pg, x, n, neg_ln2_hi);
-    const auto r = svmla_f32_z(pg, r_hi, n, neg_ln2_lo);
+    const auto r    = svmla_f32_z(pg, r_hi, n, neg_ln2_lo);
 
     // Compute the truncated Taylor series of e^r.
     //   poly = scale * (1 + c1 * r + c2 * r^2 + c3 * r^3 + c4 * r^4 + c5 * r^5)
     const auto r2 = svmul_f32_z(pg, r, r);
 
-    const auto p1 = svmul_f32_z(pg, c1, r);
-    const auto p23 = svmla_f32_z(pg, c2, c3, r);
-    const auto p45 = svmla_f32_z(pg, c4, c5, r);
-    const auto p2345 = svmla_f32_z(pg, p23, p45, r2);
+    const auto p1     = svmul_f32_z(pg, c1, r);
+    const auto p23    = svmla_f32_z(pg, c2, c3, r);
+    const auto p45    = svmla_f32_z(pg, c4, c5, r);
+    const auto p2345  = svmla_f32_z(pg, p23, p45, r2);
     const auto p12345 = svmla_f32_z(pg, p1, p2345, r2);
 
     auto poly = svmla_f32_z(pg, scale, p12345, scale);
@@ -145,23 +167,30 @@ inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
 inline svfloat16_t svexp_f16_z(svbool_t pg, svfloat16_t x)
 {
     auto bottom = svcvt_f32_z(pg, x);
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto top    = svcvtlt_f32_x(pg, x);
-    auto pg_top = pg;
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(x))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svexp_f32_z(pg, bottom);
     top    = svexp_f32_z(pg_top, top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svexp_f16_z_sve2(svbool_t pg, svfloat16_t x)
+{
+    auto bottom = svcvt_f32_z(pg, x);
+    auto top    = svcvtlt_f32_x(pg, x);
+    auto pg_top = pg;
+
+    bottom = svexp_f32_z(pg, bottom);
+    top    = svexp_f32_z(pg_top, top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 inline svfloat32_t svtanh_f32_z(svbool_t pg, svfloat32_t val)
 {
@@ -213,7 +242,8 @@ inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
     auto val = svreinterpret_f32_s32(svsub_s32_z(pg, svreinterpret_s32_f32(x), svlsl_n_s32_z(pg, m, 23)));
 
     // Polynomial Approximation
-    auto poly = svtaylor_poly_f32_z(pg, val, log_tab_1, log_tab_2, log_tab_3, log_tab_4, log_tab_5, log_tab_6, log_tab_7, log_tab_8);
+    auto poly = svtaylor_poly_f32_z(pg, val, log_tab_1, log_tab_2, log_tab_3, log_tab_4, log_tab_5, log_tab_6,
+                                    log_tab_7, log_tab_8);
 
     // Reconstruct
     poly = svmla_f32_z(pg, poly, svcvt_f32_s32_z(pg, m), CONST_LN2);
@@ -224,23 +254,30 @@ inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
 inline svfloat16_t svlog_f16_z(svbool_t pg, svfloat16_t x)
 {
     auto bottom = svcvt_f32_z(pg, x);
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto top    = svcvtlt_f32_x(pg, x);
-    auto pg_top = pg;
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(x))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svlog_f32_z(pg, bottom);
     top    = svlog_f32_z(pg_top, top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svlog_f16_z_sve2(svbool_t pg, svfloat16_t x)
+{
+    auto bottom = svcvt_f32_z(pg, x);
+    auto top    = svcvtlt_f32_x(pg, x);
+    auto pg_top = pg;
+
+    bottom = svlog_f32_z(pg, bottom);
+    top    = svlog_f32_z(pg_top, top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
 {
@@ -259,7 +296,8 @@ inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
     //Find positive or negative
     const auto c_v    = svabs_z(pg, wrapper::svcvt_z<int32_t>(pg, svmul_z(pg, val, ipi_v)));
     const auto sign_v = svcmple(pg, val, wrapper::svdup_n(ScalarType(0)));
-    const auto odd_v  = svcmpne(pg, svand_z(pg, wrapper::svreinterpret<IntType>(c_v), wrapper::svdup_n(IntType(1))), wrapper::svdup_n(IntType(0)));
+    const auto odd_v  = svcmpne(pg, svand_z(pg, wrapper::svreinterpret<IntType>(c_v), wrapper::svdup_n(IntType(1))),
+                                wrapper::svdup_n(IntType(0)));
 
     auto neg_v = sveor_z(pg, odd_v, sign_v);
 
@@ -297,23 +335,30 @@ inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
 inline svfloat16_t svsin_f16_z(svbool_t pg, svfloat16_t val)
 {
     auto bottom = svcvt_f32_z(pg, val);
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto top    = svcvtlt_f32_x(pg, val);
-    auto pg_top = pg;
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(val))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svsin_f32_z(pg, bottom);
     top    = svsin_f32_z(pg_top, top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svsin_f16_z_sve2(svbool_t pg, svfloat16_t val)
+{
+    auto bottom = svcvt_f32_z(pg, val);
+    auto top    = svcvtlt_f32_x(pg, val);
+    auto pg_top = pg;
+
+    bottom = svsin_f32_z(pg, bottom);
+    top    = svsin_f32_z(pg_top, top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 inline svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b)
 {
@@ -325,29 +370,41 @@ inline svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b)
     auto a_bottom = svcvt_f32_z(pg, a);
     auto b_bottom = svcvt_f32_z(pg, b);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto pg_top = pg;
-    auto a_top  = svcvtlt_f32_x(pg, a);
-    auto b_top  = svcvtlt_f32_x(pg, b);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto a_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(a))));
     auto b_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(b))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     auto res_bottom = svpow_f32_z(pg, a_bottom, b_bottom);
     auto res_top    = svpow_f32_z(pg_top, a_top, b_top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, res_bottom), pg_top, res_top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, res_bottom), svcvt_f16_z(pg_top, res_top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svpow_f16_z_sve2(svbool_t pg, svfloat16_t a, svfloat16_t b)
+{
+    auto a_bottom = svcvt_f32_z(pg, a);
+    auto b_bottom = svcvt_f32_z(pg, b);
+
+    auto pg_top = pg;
+    auto a_top  = svcvtlt_f32_x(pg, a);
+    auto b_top  = svcvtlt_f32_x(pg, b);
+
+    auto res_bottom = svpow_f32_z(pg, a_bottom, b_bottom);
+    auto res_top    = svpow_f32_z(pg_top, a_top, b_top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, res_bottom), pg_top, res_top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
 template <>
-inline svuint8_t convert_float_to_int<svuint8_t>(const svfloat32_t &in_0, const svfloat32_t &in_1, const svfloat32_t &in_2, const svfloat32_t &in_3)
+inline svuint8_t convert_float_to_int<svuint8_t>(const svfloat32_t &in_0,
+                                                 const svfloat32_t &in_1,
+                                                 const svfloat32_t &in_2,
+                                                 const svfloat32_t &in_3)
 {
     svuint8_t  out;
     const auto all_true_pg = svptrue_b32();
@@ -381,7 +438,10 @@ inline svuint8_t convert_float_to_int<svuint8_t>(const svfloat32_t &in_0, const 
 }
 
 template <>
-inline svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0, const svfloat32_t &in_1, const svfloat32_t &in_2, const svfloat32_t &in_3)
+inline svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0,
+                                               const svfloat32_t &in_1,
+                                               const svfloat32_t &in_2,
+                                               const svfloat32_t &in_3)
 {
     svint8_t   out;
     const auto all_true_pg = svptrue_b32();
@@ -417,3 +477,5 @@ inline svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0, const sv
 
 } // namespace arm_compute
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+
+#endif // ACL_SRC_CORE_NEON_SVEMATH_INL

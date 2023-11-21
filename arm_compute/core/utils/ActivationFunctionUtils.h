@@ -37,5 +37,5 @@ namespace arm_compute
  * @return The string describing the activation function.
  */
 const std::string &string_from_activation_func(const ActivationFunction &act);
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CORE_UTILS_ACTIVATIONFUNCTIONUTILS_H */

@@ -30,11 +30,12 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/common/cpuinfo/CpuIsaInfo.h"
-#include "src/core/NEON/NEMath.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/NEMath.h"
 #include "src/cpu/kernels/l2normlayer/list.h"
 
 #include <arm_neon.h>
@@ -55,7 +56,8 @@ struct L2NormalizeLayerSelectorData
 
 using L2NormalizeLayerKernelSelctorPtr = std::add_pointer<bool(const L2NormalizeLayerSelectorData &data)>::type;
 
-using L2NormalizeLayerPtr = std::add_pointer<void(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)>::type;
+using L2NormalizeLayerPtr = std::add_pointer<void(
+    const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)>::type;
 
 struct L2NormalizeLayerKernel
 {
@@ -64,26 +66,25 @@ struct L2NormalizeLayerKernel
     L2NormalizeLayerPtr                    ukernel;
 };
 
-static const L2NormalizeLayerKernel available_kernels[] =
-{
-    {
-        "fp32_neon_l2normalize_x",
-        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F32 && data.actual_axis == Window::DimX; },
-        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_x)
-    },
-    {
-        "fp32_neon_l2normalize_yz",
-        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F32 && data.actual_axis != Window::DimX; },
-        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_yz)
-    },
+static const L2NormalizeLayerKernel available_kernels[] = {
+    {"fp32_neon_l2normalize_x",
+     [](const L2NormalizeLayerSelectorData &data)
+     { return data.dt == DataType::F32 && data.actual_axis == Window::DimX; },
+     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_x)},
+    {"fp32_neon_l2normalize_yz",
+     [](const L2NormalizeLayerSelectorData &data)
+     { return data.dt == DataType::F32 && data.actual_axis != Window::DimX; },
+     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_yz)},
     {
         "fp16_neon_l2normalize_x",
-        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16 && data.actual_axis == Window::DimX; },
+        [](const L2NormalizeLayerSelectorData &data)
+        { return data.dt == DataType::F16 && data.isa.fp16 && data.actual_axis == Window::DimX; },
         REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_l2_normalize_x),
     },
     {
         "fp16_neon_l2normalize_yz",
-        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16 && data.actual_axis != Window::DimX; },
+        [](const L2NormalizeLayerSelectorData &data)
+        { return data.dt == DataType::F16 && data.isa.fp16 && data.actual_axis != Window::DimX; },
         REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_l2_normalize_yz),
     },
 };
@@ -96,9 +97,9 @@ static const L2NormalizeLayerKernel available_kernels[] =
  */
 const L2NormalizeLayerKernel *get_implementation(const L2NormalizeLayerSelectorData &data)
 {
-    for(const auto &uk : available_kernels)
+    for (const auto &uk : available_kernels)
     {
-        if(uk.is_selected(data))
+        if (uk.is_selected(data))
         {
             return &uk;
         }
@@ -106,7 +107,8 @@ const L2NormalizeLayerKernel *get_implementation(const L2NormalizeLayerSelectorD
     return nullptr;
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
+Status
+validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_UNUSED(epsilon);
 
@@ -115,14 +117,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis > 2, "Actual axis greater than 2 is not supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis >= TensorShape::num_max_dimensions, "Actual normalization axis greater than max number of dimensions");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis >= TensorShape::num_max_dimensions,
+                                    "Actual normalization axis greater than max number of dimensions");
 
     // Reduce shape on axis
     TensorShape sum_shape = input->tensor_shape();
     sum_shape.set(actual_axis, 1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(sum->tensor_shape(), sum_shape);
 
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -151,7 +154,8 @@ NEL2NormalizeLayerKernel::NEL2NormalizeLayerKernel()
 {
 }
 
-void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *sum, ITensor *output, int axis, float epsilon)
+void NEL2NormalizeLayerKernel::configure(
+    const ITensor *input, const ITensor *sum, ITensor *output, int axis, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));
@@ -169,10 +173,12 @@ void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *su
     INEKernel::configure(std::get<1>(win_config));
 }
 
-Status NEL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
+Status NEL2NormalizeLayerKernel::validate(
+    const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, sum, output, axis, epsilon));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get())));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get())));
 
     return Status{};
 }
@@ -183,12 +189,13 @@ void NEL2NormalizeLayerKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    if(_actual_axis > 2)
+    if (_actual_axis > 2)
     {
         ARM_COMPUTE_ERROR("Unsupported normalization axis");
     }
 
-    const auto *uk = get_implementation(L2NormalizeLayerSelectorData{ _output->info()->data_type(), _actual_axis, CPUInfo::get().get_isa() });
+    const auto *uk = get_implementation(
+        L2NormalizeLayerSelectorData{_output->info()->data_type(), _actual_axis, CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr);
     ARM_COMPUTE_ERROR_ON(uk->ukernel == nullptr);
 

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -64,7 +65,10 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      *
      */
-    void configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    void configure(ITensor          *tensor,
+                   BorderSize        border_size,
+                   BorderMode        border_mode,
+                   const PixelValue &constant_border_value = PixelValue());
     /** Initialise the function.
      *
      * @note This kernel fills the borders within the XY-planes.
@@ -75,7 +79,10 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      *
      */
-    void configure(ITensorInfo *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    void configure(ITensorInfo      *tensor,
+                   BorderSize        border_size,
+                   BorderMode        border_mode,
+                   const PixelValue &constant_border_value = PixelValue());
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

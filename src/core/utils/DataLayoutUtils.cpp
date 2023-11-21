@@ -29,11 +29,10 @@ namespace arm_compute
 
 const std::string &string_from_data_layout(DataLayout dl)
 {
-    static std::map<DataLayout, const std::string> dl_map =
-    {
-        { DataLayout::UNKNOWN, "UNKNOWN" },
-        { DataLayout::NCHW, "NCHW" },
-        { DataLayout::NHWC, "NHWC" },
+    static std::map<DataLayout, const std::string> dl_map = {
+        {DataLayout::UNKNOWN, "UNKNOWN"},
+        {DataLayout::NCHW, "NCHW"},
+        {DataLayout::NHWC, "NHWC"},
     };
 
     return dl_map[dl];

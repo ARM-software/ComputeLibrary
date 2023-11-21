@@ -27,6 +27,7 @@
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -57,7 +58,10 @@ public:
      * @param[in]      border_mode           Strategy to use for borders.
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(ITensor *input, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    void configure(ITensor          *input,
+                   unsigned int      border_width,
+                   BorderMode        border_mode,
+                   const PixelValue &constant_border_value = PixelValue());
 
     // Inherited methods overridden:
     void run() override;

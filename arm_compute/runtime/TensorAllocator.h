@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_TENSORALLOCATOR_H
 #define ARM_COMPUTE_TENSORALLOCATOR_H
 #include "arm_compute/runtime/ITensorAllocator.h"
-
 #include "arm_compute/runtime/Memory.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 

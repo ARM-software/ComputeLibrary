@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
 
@@ -61,13 +62,16 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, cons
     _input_squared.allocator()->allocate();
 }
 
-Status NENormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
+Status NENormalizationLayer::validate(const ITensorInfo            *input,
+                                      const ITensorInfo            *output,
+                                      const NormalizationLayerInfo &norm_info)
 {
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
     ARM_COMPUTE_RETURN_ON_ERROR(NENormalizationLayerKernel::validate(input, input, output, norm_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(input, input, output, 1.0f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(input, input, output, 1.0f, ConvertPolicy::SATURATE,
+                                                                    RoundingPolicy::TO_ZERO));
 
     return Status{};
 }
@@ -78,4 +82,4 @@ void NENormalizationLayer::run()
     _multiply_f.run();
     NEScheduler::get().schedule(_norm_kernel.get(), Window::DimY);
 }
-}
+} // namespace arm_compute

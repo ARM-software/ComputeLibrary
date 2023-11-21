@@ -56,5 +56,5 @@ public:
      */
     virtual std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) = 0;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_IALLOCATOR_H */

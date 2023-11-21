@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_ASSEMBLY_DISPATCH_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 
@@ -53,14 +54,22 @@ public:
      * @param[out] dst     Destination tensor info. Data type supported: same as @p src.
      * @param[in]  info    Depthwise convolution meta-data.
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *dst, const ConvolutionInfo &info);
+    void configure(const ITensorInfo     *src,
+                   const ITensorInfo     *weights,
+                   const ITensorInfo     *bias,
+                   ITensorInfo           *dst,
+                   const ConvolutionInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuDepthwiseConv2dAssemblyDispatch::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const ConvolutionInfo &info);
+    static Status validate(const ITensorInfo     *src,
+                           const ITensorInfo     *weights,
+                           const ITensorInfo     *bias,
+                           const ITensorInfo     *dst,
+                           const ConvolutionInfo &info);
     /** Checks if activation is supported by the assembly kernels
      *
      * @param[in] activation Activation to check
@@ -70,8 +79,8 @@ public:
     static bool is_activation_supported(const ActivationLayerInfo &activation);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

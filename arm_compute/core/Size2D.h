@@ -41,9 +41,7 @@ public:
      * @param[in] w Width of the image or rectangle
      * @param[in] h Height of the image or rectangle
      */
-    Size2D(size_t w, size_t h) noexcept
-        : width(w),
-          height(h)
+    Size2D(size_t w, size_t h) noexcept : width(w), height(h)
     {
     }
     /** The area of the image or rectangle calculated as (width * height)
@@ -90,5 +88,5 @@ public:
     size_t width  = {}; /**< Width of the image region or rectangle */
     size_t height = {}; /**< Height of the image region or rectangle */
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_SIZE2D_H */

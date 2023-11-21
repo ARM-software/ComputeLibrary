@@ -25,10 +25,10 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/kernels/CLComparisonKernel.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLComparisonKernel.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 namespace arm_compute
 {
@@ -37,25 +37,33 @@ void CLComparison::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *ou
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, operation);
 }
 
-void CLComparison::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
+void CLComparison::configure(const CLCompileContext &compile_context,
+                             ICLTensor              *input1,
+                             ICLTensor              *input2,
+                             ICLTensor              *output,
+                             ComparisonOperation     operation)
 {
     ARM_COMPUTE_LOG_PARAMS(input2, input2, output, operation);
     auto k = std::make_unique<CLComparisonKernel>();
     k->configure(compile_context, input1, input2, output, operation);
     _kernel = std::move(k);
 
-    if(output->info()->dimension(0) > 1)
+    if (output->info()->dimension(0) > 1)
     {
         ICLTensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
 
-        if(broadcasted_info->info()->dimension(0) == 1)
+        if (broadcasted_info->info()->dimension(0) == 1)
         {
-            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(),
+                                       BorderMode::REPLICATE);
         }
     }
 }
 
-Status CLComparison::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation operation)
+Status CLComparison::validate(const ITensorInfo  *input1,
+                              const ITensorInfo  *input2,
+                              const ITensorInfo  *output,
+                              ComparisonOperation operation)
 {
     return CLComparisonKernel::validate(input1, input2, output, operation);
 }
@@ -67,25 +75,30 @@ void CLComparisonStatic<COP>::configure(ICLTensor *input1, ICLTensor *input2, IC
 }
 
 template <ComparisonOperation COP>
-void CLComparisonStatic<COP>::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
+void CLComparisonStatic<COP>::configure(const CLCompileContext &compile_context,
+                                        ICLTensor              *input1,
+                                        ICLTensor              *input2,
+                                        ICLTensor              *output)
 {
     auto k = std::make_unique<CLComparisonKernel>();
     k->configure(compile_context, input1, input2, output, COP);
     _kernel = std::move(k);
 
-    if(output->info()->dimension(0) > 1)
+    if (output->info()->dimension(0) > 1)
     {
         ICLTensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
 
-        if(broadcasted_info->info()->dimension(0) == 1)
+        if (broadcasted_info->info()->dimension(0) == 1)
         {
-            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler->configure(compile_context, broadcasted_info, _kernel->border_size(),
+                                       BorderMode::REPLICATE);
         }
     }
 }
 
 template <ComparisonOperation COP>
-Status CLComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status
+CLComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     return CLComparisonKernel::validate(input1, input2, output, COP);
 }

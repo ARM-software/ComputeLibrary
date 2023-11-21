@@ -32,7 +32,9 @@ namespace arm_compute
 {
 namespace graph
 {
-PrintLayerNode::PrintLayerNode(std::ostream &stream, const IOFormatInfo &format_info, const std::function<ITensor *(ITensor *)> transform)
+PrintLayerNode::PrintLayerNode(std::ostream                             &stream,
+                               const IOFormatInfo                       &format_info,
+                               const std::function<ITensor *(ITensor *)> transform)
     : _stream(stream), _format_info(format_info), _transform(transform)
 {
     _input_edges.resize(1, EmptyEdgeID);
@@ -56,7 +58,7 @@ const std::function<ITensor *(ITensor *)> PrintLayerNode::transform() const
 
 bool PrintLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

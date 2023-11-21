@@ -335,6 +335,26 @@ void foo(const Goo &g);             // OK
 
 astyle (http://astyle.sourceforge.net/) and clang-format (https://clang.llvm.org/docs/ClangFormat.html) can check and help you apply some of these rules.
 
+We have also provided the python scripts we use in our precommit pipeline inside scripts directory.
+    - format_code.py: checks Android.bp, bad style, end of file, formats doxygen, runs astyle and clang-format (assuming necessary binaries are in the path). Example invocations:
+@code{.sh}
+        python format_code.py
+        python format_code.py --error-on-diff
+        python format_code.py --files=git-diff (Default behavior in pre-commit configuration, where it checks the staged files)
+@endcode
+    - generate_build_files.py: generates build files required for CMake and Bazel builds. Example invocations:
+@code{.sh}
+        python generate_build_files.py --cmake
+        python generate_build_files.py --bazel
+@endcode
+
+Another way of running the checks is using `pre-commit` (https://pre-commit.com/) framework, which has also nice features like checking trailing spaces, and large committed files etc.
+`pre-commit` can be installed via `pip`. After installing, run the following command in the root directory of the repository:
+
+	pre-commit install
+
+This will create the hooks that perform the formatting checks mentioned above and will automatically run just before committing to flag issues.
+
 @subsection S5_1_3_library_size_guidelines Library size: best practices and guidelines
 
 @subsubsection S5_1_3_1_template_suggestions Template suggestions

@@ -62,10 +62,7 @@ public:
      * @param[in]     dst        Destination tensor info.
      * @param[in]     attributes Operator attributes
      */
-    static void create_op(GpuWorkloadSketch &sketch,
-                          ITensorInfo       *src,
-                          ITensorInfo       *dst,
-                          const Attributes &attributes);
+    static void create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, ITensorInfo *dst, const Attributes &attributes);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context    Workload context within which the operator is running

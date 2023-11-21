@@ -26,22 +26,21 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/gpu/cl/operators/ClDequantize.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/gpu/cl/operators/ClDequantize.h"
 
 namespace arm_compute
 {
 struct CLDequantizationLayer::Impl
 {
-    const ICLTensor                      *src{ nullptr };
-    ICLTensor                            *dst{ nullptr };
-    std::unique_ptr<opencl::ClDequantize> op{ nullptr };
+    const ICLTensor                      *src{nullptr};
+    ICLTensor                            *dst{nullptr};
+    std::unique_ptr<opencl::ClDequantize> op{nullptr};
 };
 
-CLDequantizationLayer::CLDequantizationLayer()
-    : _impl(std::make_unique<Impl>())
+CLDequantizationLayer::CLDequantizationLayer() : _impl(std::make_unique<Impl>())
 {
 }
 CLDequantizationLayer::~CLDequantizationLayer() = default;
@@ -51,7 +50,9 @@ void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLDequantizationLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLDequantizationLayer::configure(const CLCompileContext &compile_context,
+                                      const ICLTensor        *input,
+                                      ICLTensor              *output)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output);
     _impl->src = input;

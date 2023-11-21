@@ -43,18 +43,21 @@ using namespace arm_compute::graph_utils;
 
 namespace
 {
-std::pair<arm_compute::TensorShape, arm_compute::PermutationVector> compute_permutation_parameters(const arm_compute::TensorShape &shape,
-                                                                                                   arm_compute::DataLayout data_layout)
+std::pair<arm_compute::TensorShape, arm_compute::PermutationVector>
+compute_permutation_parameters(const arm_compute::TensorShape &shape, arm_compute::DataLayout data_layout)
 {
     // Set permutation parameters if needed
     arm_compute::TensorShape       permuted_shape = shape;
     arm_compute::PermutationVector perm;
     // Permute only if num_dimensions greater than 2
-    if(shape.num_dimensions() > 2)
+    if (shape.num_dimensions() > 2)
     {
-        perm = (data_layout == arm_compute::DataLayout::NHWC) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
+        perm = (data_layout == arm_compute::DataLayout::NHWC) ? arm_compute::PermutationVector(2U, 0U, 1U)
+                                                              : arm_compute::PermutationVector(1U, 2U, 0U);
 
-        arm_compute::PermutationVector perm_shape = (data_layout == arm_compute::DataLayout::NCHW) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
+        arm_compute::PermutationVector perm_shape = (data_layout == arm_compute::DataLayout::NCHW)
+                                                        ? arm_compute::PermutationVector(2U, 0U, 1U)
+                                                        : arm_compute::PermutationVector(1U, 2U, 0U);
         arm_compute::permute(permuted_shape, perm_shape);
     }
 
@@ -62,17 +65,16 @@ std::pair<arm_compute::TensorShape, arm_compute::PermutationVector> compute_perm
 }
 } // namespace
 
-TFPreproccessor::TFPreproccessor(float min_range, float max_range)
-    : _min_range(min_range), _max_range(max_range)
+TFPreproccessor::TFPreproccessor(float min_range, float max_range) : _min_range(min_range), _max_range(max_range)
 {
 }
 void TFPreproccessor::preprocess(ITensor &tensor)
 {
-    if(tensor.info()->data_type() == DataType::F32)
+    if (tensor.info()->data_type() == DataType::F32)
     {
         preprocess_typed<float>(tensor);
     }
-    else if(tensor.info()->data_type() == DataType::F16)
+    else if (tensor.info()->data_type() == DataType::F16)
     {
         preprocess_typed<half>(tensor);
     }
@@ -89,19 +91,20 @@ void TFPreproccessor::preprocess_typed(ITensor &tensor)
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     const float range = _max_range - _min_range;
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const T value                                     = *reinterpret_cast<T *>(tensor.ptr_to_element(id));
-        float   res                                       = value / 255.f;            // Normalize to [0, 1]
-        res                                               = res * range + _min_range; // Map to [min_range, max_range]
-        *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = res;
-    });
+    execute_window_loop(window,
+                        [&](const Coordinates &id)
+                        {
+                            const T value = *reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                            float   res   = value / 255.f;            // Normalize to [0, 1]
+                            res           = res * range + _min_range; // Map to [min_range, max_range]
+                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = res;
+                        });
 }
 
 CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, float scale)
     : _mean(mean), _bgr(bgr), _scale(scale)
 {
-    if(_bgr)
+    if (_bgr)
     {
         std::swap(_mean[0], _mean[2]);
     }
@@ -109,11 +112,11 @@ CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, floa
 
 void CaffePreproccessor::preprocess(ITensor &tensor)
 {
-    if(tensor.info()->data_type() == DataType::F32)
+    if (tensor.info()->data_type() == DataType::F32)
     {
         preprocess_typed<float>(tensor);
     }
-    else if(tensor.info()->data_type() == DataType::F16)
+    else if (tensor.info()->data_type() == DataType::F16)
     {
         preprocess_typed<half>(tensor);
     }
@@ -130,15 +133,16 @@ void CaffePreproccessor::preprocess_typed(ITensor &tensor)
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     const int channel_idx = get_data_layout_dimension_index(tensor.info()->data_layout(), DataLayoutDimension::CHANNEL);
 
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const T value                                     = *reinterpret_cast<T *>(tensor.ptr_to_element(id)) - T(_mean[id[channel_idx]]);
-        *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = value * T(_scale);
-    });
+    execute_window_loop(window,
+                        [&](const Coordinates &id)
+                        {
+                            const T value =
+                                *reinterpret_cast<T *>(tensor.ptr_to_element(id)) - T(_mean[id[channel_idx]]);
+                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = value * T(_scale);
+                        });
 }
 
-PPMWriter::PPMWriter(std::string name, unsigned int maximum)
-    : _name(std::move(name)), _iterator(0), _maximum(maximum)
+PPMWriter::PPMWriter(std::string name, unsigned int maximum) : _name(std::move(name)), _iterator(0), _maximum(maximum)
 {
 }
 
@@ -150,15 +154,14 @@ bool PPMWriter::access_tensor(ITensor &tensor)
     arm_compute::utils::save_to_ppm(tensor, ss.str());
 
     _iterator++;
-    if(_maximum == 0)
+    if (_maximum == 0)
     {
         return true;
     }
     return _iterator < _maximum;
 }
 
-DummyAccessor::DummyAccessor(unsigned int maximum)
-    : _iterator(0), _maximum(maximum)
+DummyAccessor::DummyAccessor(unsigned int maximum) : _iterator(0), _maximum(maximum)
 {
 }
 
@@ -171,7 +174,7 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
 {
     ARM_COMPUTE_UNUSED(tensor);
     bool ret = _maximum == 0 || _iterator < _maximum;
-    if(_iterator == _maximum)
+    if (_iterator == _maximum)
     {
         _iterator = 0;
     }
@@ -182,7 +185,8 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
     return ret;
 }
 
-NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, DataLayout data_layout, std::ostream &output_stream)
+NumPyAccessor::NumPyAccessor(
+    std::string npy_path, TensorShape shape, DataType data_type, DataLayout data_layout, std::ostream &output_stream)
     : _npy_tensor(), _filename(std::move(npy_path)), _output_stream(output_stream)
 {
     NumPyBinLoader loader(_filename, data_layout);
@@ -203,8 +207,10 @@ void NumPyAccessor::access_numpy_tensor(ITensor &tensor, T tolerance)
     int       num_mismatches        = utils::compare_tensor<T>(tensor, _npy_tensor, tolerance);
     float     percentage_mismatches = static_cast<float>(num_mismatches) / num_elements;
 
-    _output_stream << "Results: " << 100.f - (percentage_mismatches * 100) << " % matches with the provided output[" << _filename << "]." << std::endl;
-    _output_stream << "         " << num_elements - num_mismatches << " out of " << num_elements << " matches with the provided output[" << _filename << "]." << std::endl
+    _output_stream << "Results: " << 100.f - (percentage_mismatches * 100) << " % matches with the provided output["
+                   << _filename << "]." << std::endl;
+    _output_stream << "         " << num_elements - num_mismatches << " out of " << num_elements
+                   << " matches with the provided output[" << _filename << "]." << std::endl
                    << std::endl;
 }
 
@@ -213,7 +219,7 @@ bool NumPyAccessor::access_tensor(ITensor &tensor)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON(_npy_tensor.info()->dimension(0) != tensor.info()->dimension(0));
 
-    switch(tensor.info()->data_type())
+    switch (tensor.info()->data_type())
     {
         case DataType::QASYMM8:
             access_numpy_tensor<qasymm8_t>(tensor, 0);
@@ -262,7 +268,7 @@ ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPr
 
 bool ImageAccessor::access_tensor(ITensor &tensor)
 {
-    if(!_already_loaded)
+    if (!_already_loaded)
     {
         auto image_loader = utils::ImageLoaderFactory::create(_filename);
         ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
@@ -273,27 +279,30 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
         // Get permutated shape and permutation parameters
         TensorShape                    permuted_shape = tensor.info()->tensor_shape();
         arm_compute::PermutationVector perm;
-        if(tensor.info()->data_layout() != DataLayout::NCHW)
+        if (tensor.info()->data_layout() != DataLayout::NCHW)
         {
-            std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
+            std::tie(permuted_shape, perm) =
+                compute_permutation_parameters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
         }
 
 #ifdef __arm__
-        ARM_COMPUTE_EXIT_ON_MSG_VAR(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
-                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu32 ",%" PRIu32 "].",
-                                    image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
+        ARM_COMPUTE_EXIT_ON_MSG_VAR(
+            image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
+            "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu32 ",%" PRIu32 "].",
+            image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
 #else  // __arm__
-        ARM_COMPUTE_EXIT_ON_MSG_VAR(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
-                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu64 ",%" PRIu64 "].",
-                                    image_loader->width(), image_loader->height(),
-                                    static_cast<uint64_t>(permuted_shape.x()), static_cast<uint64_t>(permuted_shape.y()));
+        ARM_COMPUTE_EXIT_ON_MSG_VAR(
+            image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
+            "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu64 ",%" PRIu64 "].",
+            image_loader->width(), image_loader->height(), static_cast<uint64_t>(permuted_shape.x()),
+            static_cast<uint64_t>(permuted_shape.y()));
 #endif // __arm__
 
         // Fill the tensor with the PPM content (BGR)
         image_loader->fill_planar_tensor(tensor, _bgr);
 
         // Preprocess tensor
-        if(_preprocessor)
+        if (_preprocessor)
         {
             _preprocessor->preprocess(tensor);
         }
@@ -310,7 +319,12 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
                                                  unsigned int                   start,
                                                  unsigned int                   end,
                                                  std::ostream                  &output_stream)
-    : _path(std::move(images_path)), _images(), _preprocessor(std::move(preprocessor)), _bgr(bgr), _offset(0), _output_stream(output_stream)
+    : _path(std::move(images_path)),
+      _images(),
+      _preprocessor(std::move(preprocessor)),
+      _bgr(bgr),
+      _offset(0),
+      _output_stream(output_stream)
 {
     ARM_COMPUTE_EXIT_ON_MSG(start > end, "Invalid validation range!");
 
@@ -322,10 +336,10 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
 
         // Parse image names
         unsigned int counter = 0;
-        for(std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
+        for (std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
         {
             // Add image to process if withing range
-            if(counter >= start)
+            if (counter >= start)
             {
                 std::stringstream linestream(line);
                 std::string       image_name;
@@ -335,7 +349,7 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
             }
         }
     }
-    catch(const std::ifstream::failure &e)
+    catch (const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", image_list.c_str(), e.what());
     }
@@ -344,7 +358,7 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
 bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
 {
     bool ret = _offset < _images.size();
-    if(ret)
+    if (ret)
     {
         utils::JPEGLoader jpeg;
 
@@ -356,28 +370,30 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
         // Get permutated shape and permutation parameters
         TensorShape                    permuted_shape = tensor.info()->tensor_shape();
         arm_compute::PermutationVector perm;
-        if(tensor.info()->data_layout() != DataLayout::NCHW)
+        if (tensor.info()->data_layout() != DataLayout::NCHW)
         {
-            std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(),
-                                                                            tensor.info()->data_layout());
+            std::tie(permuted_shape, perm) =
+                compute_permutation_parameters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
         }
 
 #ifdef __arm__
         ARM_COMPUTE_EXIT_ON_MSG_VAR(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
-                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu32 ",%" PRIu32 "].",
+                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu32
+                                    ",%" PRIu32 "].",
                                     jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
 #else  // __arm__
         ARM_COMPUTE_EXIT_ON_MSG_VAR(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
-                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu64 ",%" PRIu64 "].",
-                                    jpeg.width(), jpeg.height(),
-                                    static_cast<uint64_t>(permuted_shape.x()), static_cast<uint64_t>(permuted_shape.y()));
+                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu64
+                                    ",%" PRIu64 "].",
+                                    jpeg.width(), jpeg.height(), static_cast<uint64_t>(permuted_shape.x()),
+                                    static_cast<uint64_t>(permuted_shape.y()));
 #endif // __arm__
 
         // Fill the tensor with the JPEG content (BGR)
         jpeg.fill_planar_tensor(tensor, _bgr);
 
         // Preprocess tensor
-        if(_preprocessor)
+        if (_preprocessor)
         {
             _preprocessor->preprocess(tensor);
         }
@@ -402,10 +418,10 @@ ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list
 
         // Parse image correctly classified labels
         unsigned int counter = 0;
-        for(std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
+        for (std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
         {
             // Add label if within range
-            if(counter >= start)
+            if (counter >= start)
             {
                 std::stringstream linestream(line);
                 std::string       image_name;
@@ -416,7 +432,7 @@ ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list
             }
         }
     }
-    catch(const std::ifstream::failure &e)
+    catch (const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", image_list.c_str(), e.what());
     }
@@ -432,11 +448,11 @@ void ValidationOutputAccessor::reset()
 bool ValidationOutputAccessor::access_tensor(arm_compute::ITensor &tensor)
 {
     bool ret = _offset < _results.size();
-    if(ret)
+    if (ret)
     {
         // Get results
         std::vector<size_t> tensor_results;
-        switch(tensor.info()->data_type())
+        switch (tensor.info()->data_type())
         {
             case DataType::QASYMM8:
                 tensor_results = access_predictions_tensor<uint8_t>(tensor);
@@ -459,7 +475,7 @@ bool ValidationOutputAccessor::access_tensor(arm_compute::ITensor &tensor)
     }
 
     // Report top_n accuracy
-    if(_offset >= _results.size())
+    if (_offset >= _results.size())
     {
         report_top_n(1, _results.size(), _positive_samples_top1);
         report_top_n(5, _results.size(), _positive_samples_top5);
@@ -481,23 +497,19 @@ std::vector<size_t> ValidationOutputAccessor::access_predictions_tensor(arm_comp
 
     // Sort results
     std::iota(std::begin(index), std::end(index), static_cast<size_t>(0));
-    std::sort(std::begin(index), std::end(index),
-              [&](size_t a, size_t b)
-    {
-        return output_net[a] > output_net[b];
-    });
+    std::sort(std::begin(index), std::end(index), [&](size_t a, size_t b) { return output_net[a] > output_net[b]; });
 
     return index;
 }
 
-void ValidationOutputAccessor::aggregate_sample(const std::vector<size_t> &res, size_t &positive_samples, size_t top_n, size_t correct_label)
+void ValidationOutputAccessor::aggregate_sample(const std::vector<size_t> &res,
+                                                size_t                    &positive_samples,
+                                                size_t                     top_n,
+                                                size_t                     correct_label)
 {
-    auto is_valid_label = [correct_label](size_t label)
-    {
-        return label == correct_label;
-    };
+    auto is_valid_label = [correct_label](size_t label) { return label == correct_label; };
 
-    if(std::any_of(std::begin(res), std::begin(res) + top_n, is_valid_label))
+    if (std::any_of(std::begin(res), std::begin(res) + top_n, is_valid_label))
     {
         ++positive_samples;
     }
@@ -508,14 +520,15 @@ void ValidationOutputAccessor::report_top_n(size_t top_n, size_t total_samples, 
     size_t negative_samples = total_samples - positive_samples;
     float  accuracy         = positive_samples / static_cast<float>(total_samples);
 
-    _output_stream << "----------Top " << top_n << " accuracy ----------" << std::endl
-                   << std::endl;
+    _output_stream << "----------Top " << top_n << " accuracy ----------" << std::endl << std::endl;
     _output_stream << "Positive samples : " << positive_samples << std::endl;
     _output_stream << "Negative samples : " << negative_samples << std::endl;
     _output_stream << "Accuracy : " << accuracy << std::endl;
 }
 
-DetectionOutputAccessor::DetectionOutputAccessor(const std::string &labels_path, std::vector<TensorShape> &imgs_tensor_shapes, std::ostream &output_stream)
+DetectionOutputAccessor::DetectionOutputAccessor(const std::string        &labels_path,
+                                                 std::vector<TensorShape> &imgs_tensor_shapes,
+                                                 std::ostream             &output_stream)
     : _labels(), _tensor_shapes(std::move(imgs_tensor_shapes)), _output_stream(output_stream)
 {
     _labels.clear();
@@ -527,12 +540,12 @@ DetectionOutputAccessor::DetectionOutputAccessor(const std::string &labels_path,
         ifs.exceptions(std::ifstream::badbit);
         ifs.open(labels_path, std::ios::in | std::ios::binary);
 
-        for(std::string line; !std::getline(ifs, line).fail();)
+        for (std::string line; !std::getline(ifs, line).fail();)
         {
             _labels.emplace_back(line);
         }
     }
-    catch(const std::ifstream::failure &e)
+    catch (const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", labels_path.c_str(), e.what());
     }
@@ -542,26 +555,24 @@ template <typename T>
 void DetectionOutputAccessor::access_predictions_tensor(ITensor &tensor)
 {
     const size_t num_detection = tensor.info()->valid_region().shape.y();
-    const auto   output_prt    = reinterpret_cast<T *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
+    const auto   output_prt = reinterpret_cast<T *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
 
-    if(num_detection > 0)
+    if (num_detection > 0)
     {
-        _output_stream << "---------------------- Detections ----------------------" << std::endl
-                       << std::endl;
+        _output_stream << "---------------------- Detections ----------------------" << std::endl << std::endl;
 
-        _output_stream << std::left << std::setprecision(4) << std::setw(8) << "Image | " << std::setw(8) << "Label | " << std::setw(12) << "Confidence | "
+        _output_stream << std::left << std::setprecision(4) << std::setw(8) << "Image | " << std::setw(8) << "Label | "
+                       << std::setw(12) << "Confidence | "
                        << "[ xmin, ymin, xmax, ymax ]" << std::endl;
 
-        for(size_t i = 0; i < num_detection; ++i)
+        for (size_t i = 0; i < num_detection; ++i)
         {
             auto im = static_cast<const int>(output_prt[i * 7]);
-            _output_stream << std::setw(8) << im << std::setw(8)
-                           << _labels[output_prt[i * 7 + 1]] << std::setw(12) << output_prt[i * 7 + 2]
-                           << " [" << (output_prt[i * 7 + 3] * _tensor_shapes[im].x())
-                           << ", " << (output_prt[i * 7 + 4] * _tensor_shapes[im].y())
-                           << ", " << (output_prt[i * 7 + 5] * _tensor_shapes[im].x())
-                           << ", " << (output_prt[i * 7 + 6] * _tensor_shapes[im].y())
-                           << "]" << std::endl;
+            _output_stream << std::setw(8) << im << std::setw(8) << _labels[output_prt[i * 7 + 1]] << std::setw(12)
+                           << output_prt[i * 7 + 2] << " [" << (output_prt[i * 7 + 3] * _tensor_shapes[im].x()) << ", "
+                           << (output_prt[i * 7 + 4] * _tensor_shapes[im].y()) << ", "
+                           << (output_prt[i * 7 + 5] * _tensor_shapes[im].x()) << ", "
+                           << (output_prt[i * 7 + 6] * _tensor_shapes[im].y()) << "]" << std::endl;
         }
     }
     else
@@ -574,7 +585,7 @@ bool DetectionOutputAccessor::access_tensor(ITensor &tensor)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
 
-    switch(tensor.info()->data_type())
+    switch (tensor.info()->data_type())
     {
         case DataType::F32:
             access_predictions_tensor<float>(tensor);
@@ -586,7 +597,9 @@ bool DetectionOutputAccessor::access_tensor(ITensor &tensor)
     return false;
 }
 
-TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path, size_t top_n, std::ostream &output_stream)
+TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
+                                                 size_t             top_n,
+                                                 std::ostream      &output_stream)
     : _labels(), _output_stream(output_stream), _top_n(top_n)
 {
     _labels.clear();
@@ -598,12 +611,12 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
         ifs.exceptions(std::ifstream::badbit);
         ifs.open(labels_path, std::ios::in | std::ios::binary);
 
-        for(std::string line; !std::getline(ifs, line).fail();)
+        for (std::string line; !std::getline(ifs, line).fail();)
         {
             _labels.emplace_back(line);
         }
     }
-    catch(const std::ifstream::failure &e)
+    catch (const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", labels_path.c_str(), e.what());
     }
@@ -627,18 +640,13 @@ void TopNPredictionsAccessor::access_predictions_tensor(ITensor &tensor)
     // Sort results
     std::iota(std::begin(index), std::end(index), static_cast<size_t>(0));
     std::sort(std::begin(index), std::end(index),
-              [&](size_t a, size_t b)
-    {
-        return classes_prob[a] > classes_prob[b];
-    });
+              [&](size_t a, size_t b) { return classes_prob[a] > classes_prob[b]; });
 
-    _output_stream << "---------- Top " << _top_n << " predictions ----------" << std::endl
-                   << std::endl;
-    for(size_t i = 0; i < _top_n; ++i)
+    _output_stream << "---------- Top " << _top_n << " predictions ----------" << std::endl << std::endl;
+    for (size_t i = 0; i < _top_n; ++i)
     {
-        _output_stream << std::fixed << std::setprecision(4)
-                       << +classes_prob[index.at(i)]
-                       << " - [id = " << index.at(i) << "]"
+        _output_stream << std::fixed << std::setprecision(4) << +classes_prob[index.at(i)] << " - [id = " << index.at(i)
+                       << "]"
                        << ", " << _labels[index.at(i)] << std::endl;
     }
 }
@@ -648,7 +656,7 @@ bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON(_labels.size() != tensor.info()->dimension(0));
 
-    switch(tensor.info()->data_type())
+    switch (tensor.info()->data_type())
     {
         case DataType::QASYMM8:
             access_predictions_tensor<uint8_t>(tensor);
@@ -673,9 +681,9 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
 {
     std::mt19937 gen(_seed);
 
-    if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
+    if (tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
     {
-        for(size_t offset = 0; offset < tensor.info()->total_size(); offset += tensor.info()->element_size())
+        for (size_t offset = 0; offset < tensor.info()->total_size(); offset += tensor.info()->element_size())
         {
             const auto value                                 = static_cast<T>(distribution(gen));
             *reinterpret_cast<T *>(tensor.buffer() + offset) = value;
@@ -687,17 +695,18 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
         Window window;
         window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto value                                  = static_cast<T>(distribution(gen));
-            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = value;
-        });
+        execute_window_loop(window,
+                            [&](const Coordinates &id)
+                            {
+                                const auto value                                  = static_cast<T>(distribution(gen));
+                                *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = value;
+                            });
     }
 }
 
 bool RandomAccessor::access_tensor(ITensor &tensor)
 {
-    switch(tensor.info()->data_type())
+    switch (tensor.info()->data_type())
     {
         case DataType::QASYMM8:
         case DataType::U8:
@@ -750,7 +759,8 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
         }
         case DataType::F16:
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution_f16(_lower.get<float>(), _upper.get<float>());
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution_f16(_lower.get<float>(),
+                                                                                       _upper.get<float>());
             fill<half>(tensor, distribution_f16);
             break;
         }
@@ -779,7 +789,7 @@ NumPyBinLoader::NumPyBinLoader(std::string filename, DataLayout file_layout)
 
 bool NumPyBinLoader::access_tensor(ITensor &tensor)
 {
-    if(!_already_loaded)
+    if (!_already_loaded)
     {
         utils::NPYLoader loader;
         loader.open(_filename, _file_layout);

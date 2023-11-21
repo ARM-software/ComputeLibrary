@@ -62,7 +62,10 @@ public:
      * @param[in]  info            Contains Compute Anchors operation information described in @ref ComputeAnchorsInfo
      *
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info);
+    void configure(const CLCompileContext   &compile_context,
+                   const ICLTensor          *anchors,
+                   ICLTensor                *all_anchors,
+                   const ComputeAnchorsInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLComputeAllAnchorsKernel
      *
@@ -81,5 +84,5 @@ private:
     const ICLTensor *_anchors;
     ICLTensor       *_all_anchors;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif // ARM_COMPUTE_CLGENERATEPROSPOSALSLAYERKERNEL_H

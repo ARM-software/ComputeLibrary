@@ -23,17 +23,20 @@
  */
 #include "src/cpu/operators/CpuAdd.h"
 
-#include "src/cpu/kernels/CpuAddKernel.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
-
-#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/cpu/kernels/CpuAddKernel.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void CpuAdd::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+void CpuAdd::configure(const ITensorInfo         *src0,
+                       const ITensorInfo         *src1,
+                       ITensorInfo               *dst,
+                       ConvertPolicy              policy,
+                       const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst, policy, act_info);
@@ -42,7 +45,11 @@ void CpuAdd::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensor
     _kernel = std::move(k);
 }
 
-Status CpuAdd::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+Status CpuAdd::validate(const ITensorInfo         *src0,
+                        const ITensorInfo         *src1,
+                        const ITensorInfo         *dst,
+                        ConvertPolicy              policy,
+                        const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuAddKernel::validate(src0, src1, dst, policy);

@@ -25,6 +25,7 @@
 #include "arm_compute/core/CPP/CPPTypes.h"
 
 #include "arm_compute/core/Error.h"
+
 #include "src/common/cpuinfo/CpuInfo.h"
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 
@@ -43,8 +44,7 @@ CPUInfo &CPUInfo::get()
     return _cpuinfo;
 }
 
-CPUInfo::CPUInfo()
-    : _impl(std::make_unique<Impl>())
+CPUInfo::CPUInfo() : _impl(std::make_unique<Impl>())
 {
     _impl->info = cpuinfo::CpuInfo::build();
 }

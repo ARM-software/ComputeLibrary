@@ -27,8 +27,8 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
-#include "src/core/CPP/Validate.h"
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/addmuladd/list.h"
@@ -41,36 +41,28 @@ namespace kernels
 {
 namespace
 {
-static const std::vector<CpuAddMulAddKernel::AddMulAddKernel> available_kernels =
-{
+static const std::vector<CpuAddMulAddKernel::AddMulAddKernel> available_kernels = {
 #ifdef __aarch64__
-    {
-        "neon_fp32_add_mul_add",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::F32); },
-        REGISTER_FP32_NEON(arm_compute::cpu::add_mul_add_fp32_neon)
-    },
-    {
-        "neon_fp16_add_mul_add",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::F16); },
-        REGISTER_FP16_NEON(arm_compute::cpu::add_mul_add_fp16_neon)
-    },
-    {
-        "neon_qasymm8_add_mul_add",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::add_mul_add_u8_neon)
-    },
-    {
-        "neon_qasymm8_signed_add_mul_add",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::add_mul_add_s8_neon)
-    }
+    {"neon_fp32_add_mul_add", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
+     REGISTER_FP32_NEON(arm_compute::cpu::add_mul_add_fp32_neon)},
+    {"neon_fp16_add_mul_add", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F16); },
+     REGISTER_FP16_NEON(arm_compute::cpu::add_mul_add_fp16_neon)},
+    {"neon_qasymm8_add_mul_add", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8); },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::add_mul_add_u8_neon)},
+    {"neon_qasymm8_signed_add_mul_add",
+     [](const DataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8_SIGNED); },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::add_mul_add_s8_neon)}
 #endif // __aarch64__
 };
 
-Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2,
-                          const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                          const ITensorInfo *add_output, const ITensorInfo *final_output,
-                          ConvertPolicy policy, const ActivationLayerInfo &act_info)
+Status validate_arguments(const ITensorInfo         *input1,
+                          const ITensorInfo         *input2,
+                          const ITensorInfo         *bn_mul,
+                          const ITensorInfo         *bn_add,
+                          const ITensorInfo         *add_output,
+                          const ITensorInfo         *final_output,
+                          ConvertPolicy              policy,
+                          const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, bn_mul, bn_add, final_output);
 
@@ -78,16 +70,16 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2,
 
     using ActFunction          = ActivationLayerInfo::ActivationFunction;
     const ActFunction act_func = act_info.activation();
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        (act_func != ActFunction::BOUNDED_RELU && act_func != ActFunction::RELU && act_func != ActFunction::LU_BOUNDED_RELU && act_func != ActFunction::IDENTITY),
-        "Only RELU Family activations, or no activation, is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_func != ActFunction::BOUNDED_RELU && act_func != ActFunction::RELU &&
+                                     act_func != ActFunction::LU_BOUNDED_RELU && act_func != ActFunction::IDENTITY),
+                                    "Only RELU Family activations, or no activation, is supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2);
 
-    if(is_data_type_quantized(input1->data_type()))
+    if (is_data_type_quantized(input1->data_type()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bn_mul, 1, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bn_add, 1, DataType::F32);
@@ -101,39 +93,47 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2,
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, input2); // No broadcasting
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(bn_mul, bn_add);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(bn_mul->num_dimensions() != 1, "BatchNorm coefficients should be 1D array");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bn_mul->tensor_shape()[0] != input1->tensor_shape()[0], "First dimensions of inputs and batchNorm coefs should match");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bn_mul->tensor_shape()[0] != input1->tensor_shape()[0],
+                                    "First dimensions of inputs and batchNorm coefs should match");
 
     // Validate in case we have add layer's output (intermediate) initialized
-    if(add_output != nullptr && add_output->total_size() > 0)
+    if (add_output != nullptr && add_output->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, add_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, add_output);
     }
 
     // Validate in case final output has been initialized
-    if(final_output->total_size() > 0)
+    if (final_output->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, final_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, final_output);
     }
 
-    const auto uk = CpuAddMulAddKernel::get_implementation<DataTypeISASelectorData>(DataTypeISASelectorData{ input1->data_type(), CPUInfo::get().get_isa() });
+    const auto uk = CpuAddMulAddKernel::get_implementation<DataTypeISASelectorData>(
+        DataTypeISASelectorData{input1->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     return Status{};
 }
 } // namespace
 
-void CpuAddMulAddKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2,
-                                   const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                                   ITensorInfo *add_output, ITensorInfo *final_output,
-                                   ConvertPolicy policy, const ActivationLayerInfo &act_info)
+void CpuAddMulAddKernel::configure(const ITensorInfo         *input1,
+                                   const ITensorInfo         *input2,
+                                   const ITensorInfo         *bn_mul,
+                                   const ITensorInfo         *bn_add,
+                                   ITensorInfo               *add_output,
+                                   ITensorInfo               *final_output,
+                                   ConvertPolicy              policy,
+                                   const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(bn_mul, bn_add, input2);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, bn_add, bn_mul, final_output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        validate_arguments(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info));
 
-    const auto uk = CpuAddMulAddKernel::get_implementation<DataTypeISASelectorData>(DataTypeISASelectorData{ input1->data_type(), CPUInfo::get().get_isa() });
+    const auto uk = CpuAddMulAddKernel::get_implementation<DataTypeISASelectorData>(
+        DataTypeISASelectorData{input1->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
     ARM_COMPUTE_ERROR_ON(uk->ukernel == nullptr);
 
@@ -146,7 +146,7 @@ void CpuAddMulAddKernel::configure(const ITensorInfo *input1, const ITensorInfo 
     set_shape_if_empty(*final_output, input1->tensor_shape());
     set_data_type_if_unknown(*final_output, input1->data_type());
 
-    if(add_output != nullptr)
+    if (add_output != nullptr)
     {
         set_shape_if_empty(*add_output, input1->tensor_shape());
         set_data_type_if_unknown(*add_output, input1->data_type());
@@ -158,14 +158,19 @@ void CpuAddMulAddKernel::configure(const ITensorInfo *input1, const ITensorInfo 
     ICpuKernel::configure(win);
 }
 
-Status CpuAddMulAddKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2,
-                                    const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                                    const ITensorInfo *add_output, const ITensorInfo *final_output,
-                                    ConvertPolicy policy, const ActivationLayerInfo &act_info)
+Status CpuAddMulAddKernel::validate(const ITensorInfo         *input1,
+                                    const ITensorInfo         *input2,
+                                    const ITensorInfo         *bn_mul,
+                                    const ITensorInfo         *bn_add,
+                                    const ITensorInfo         *add_output,
+                                    const ITensorInfo         *final_output,
+                                    ConvertPolicy              policy,
+                                    const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, bn_mul, bn_add, final_output);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_arguments(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info));
 
     return Status{};
 }

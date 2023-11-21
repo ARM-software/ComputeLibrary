@@ -61,5 +61,5 @@ std::string float_to_string_with_full_precision(float val);
  * @return std::string
  */
 std::string join(const std::vector<std::string> strings, const std::string &sep);
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H */

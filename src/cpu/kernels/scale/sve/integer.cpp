@@ -25,9 +25,10 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
+
+#include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
 
@@ -39,8 +40,12 @@ namespace arm_compute
 {
 namespace
 {
-void u8_sve_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offsets,
-                          float sampling_offset, bool align_corners, const Window &window)
+void u8_sve_scale_nearest(const ITensor *src,
+                          ITensor       *dst,
+                          const ITensor *offsets,
+                          float          sampling_offset,
+                          bool           align_corners,
+                          const Window  &window)
 {
     const size_t in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
     const size_t in_stride_w  = src->info()->dimension(1) + src->info()->padding().top + src->info()->padding().bottom;
@@ -59,32 +64,40 @@ void u8_sve_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offse
     const uint8_t     *in_ptr_start        = src->buffer() + src->info()->offset_first_element_in_bytes();
     const unsigned int in_stride_bytes_hwc = src->info()->strides_in_bytes()[3];
 
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        const int32_t offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
-        const auto    in_hi      = static_cast<int>(align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr) : std::floor((id.z() + sampling_offset) * hr));
-        const int     offset_row = in_hi * in_stride_wc;
-        const auto    in_ptr     = reinterpret_cast<const uint8_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
-        const auto    out_ptr    = reinterpret_cast<uint8_t *>(out.ptr());
-
-        // Compute S elements per iteration
-        int      x  = window_start_x;
-        svbool_t pg = svwhilelt_b8(x, window_end_x);
-        do
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
         {
-            // Store results
-            svst1_u8(pg, out_ptr + x, svld1_u8(pg, in_ptr + offset + offset_row + x));
+            const int32_t offset =
+                *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
+            const auto in_hi = static_cast<int>(
+                align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr)
+                              : std::floor((id.z() + sampling_offset) * hr));
+            const int  offset_row = in_hi * in_stride_wc;
+            const auto in_ptr     = reinterpret_cast<const uint8_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
+            const auto out_ptr    = reinterpret_cast<uint8_t *>(out.ptr());
 
-            x += svcntw();
-            pg = svwhilelt_b8(x, window_end_x);
-        }
-        while(svptest_any(svptrue_b8(), pg));
-    },
-    out);
+            // Compute S elements per iteration
+            int      x  = window_start_x;
+            svbool_t pg = svwhilelt_b8(x, window_end_x);
+            do
+            {
+                // Store results
+                svst1_u8(pg, out_ptr + x, svld1_u8(pg, in_ptr + offset + offset_row + x));
+
+                x += svcntw();
+                pg = svwhilelt_b8(x, window_end_x);
+            } while (svptest_any(svptrue_b8(), pg));
+        },
+        out);
 }
 
-void s16_sve_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offsets,
-                           float sampling_offset, bool align_corners, const Window &window)
+void s16_sve_scale_nearest(const ITensor *src,
+                           ITensor       *dst,
+                           const ITensor *offsets,
+                           float          sampling_offset,
+                           bool           align_corners,
+                           const Window  &window)
 {
     const size_t in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
     const size_t in_stride_w  = src->info()->dimension(1) + src->info()->padding().top + src->info()->padding().bottom;
@@ -103,38 +116,50 @@ void s16_sve_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *offs
     const uint8_t     *in_ptr_start        = src->buffer() + src->info()->offset_first_element_in_bytes();
     const unsigned int in_stride_bytes_hwc = src->info()->strides_in_bytes()[3];
 
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        const int32_t offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
-        const auto    in_hi      = static_cast<int>(align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr) : std::floor((id.z() + sampling_offset) * hr));
-        const int     offset_row = in_hi * in_stride_wc;
-        const auto    in_ptr     = reinterpret_cast<const int16_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
-        const auto    out_ptr    = reinterpret_cast<int16_t *>(out.ptr());
-
-        // Compute S elements per iteration
-        int      x  = window_start_x;
-        svbool_t pg = svwhilelt_b16(x, window_end_x);
-        do
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
         {
-            // Store results
-            svst1_s16(pg, out_ptr + x, svld1_s16(pg, in_ptr + offset + offset_row + x));
+            const int32_t offset =
+                *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
+            const auto in_hi = static_cast<int>(
+                align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr)
+                              : std::floor((id.z() + sampling_offset) * hr));
+            const int  offset_row = in_hi * in_stride_wc;
+            const auto in_ptr     = reinterpret_cast<const int16_t *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
+            const auto out_ptr    = reinterpret_cast<int16_t *>(out.ptr());
 
-            x += svcntw();
-            pg = svwhilelt_b16(x, window_end_x);
-        }
-        while(svptest_any(svptrue_b16(), pg));
-    },
-    out);
+            // Compute S elements per iteration
+            int      x  = window_start_x;
+            svbool_t pg = svwhilelt_b16(x, window_end_x);
+            do
+            {
+                // Store results
+                svst1_s16(pg, out_ptr + x, svld1_s16(pg, in_ptr + offset + offset_row + x));
+
+                x += svcntw();
+                pg = svwhilelt_b16(x, window_end_x);
+            } while (svptest_any(svptrue_b16(), pg));
+        },
+        out);
 }
-}
+} // namespace
 namespace cpu
 {
-void u8_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                  InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                  bool align_corners, const Window &window)
+void u8_sve_scale(const ITensor      *src,
+                  ITensor            *dst,
+                  const ITensor      *offsets,
+                  const ITensor      *dx,
+                  const ITensor      *dy,
+                  InterpolationPolicy policy,
+                  BorderMode          border_mode,
+                  PixelValue          constant_border_value,
+                  float               sampling_offset,
+                  bool                align_corners,
+                  const Window       &window)
 {
     ARM_COMPUTE_UNUSED(dx, dy, border_mode, constant_border_value);
-    if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    if (policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
         u8_sve_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
     }
@@ -144,12 +169,20 @@ void u8_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, cons
     }
 }
 
-void s16_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                   bool align_corners, const Window &window)
+void s16_sve_scale(const ITensor      *src,
+                   ITensor            *dst,
+                   const ITensor      *offsets,
+                   const ITensor      *dx,
+                   const ITensor      *dy,
+                   InterpolationPolicy policy,
+                   BorderMode          border_mode,
+                   PixelValue          constant_border_value,
+                   float               sampling_offset,
+                   bool                align_corners,
+                   const Window       &window)
 {
     ARM_COMPUTE_UNUSED(dx, dy, border_mode, constant_border_value);
-    if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    if (policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
         s16_sve_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
     }

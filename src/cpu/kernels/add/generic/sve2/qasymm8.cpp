@@ -26,15 +26,18 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+
 #include "src/core/NEON/SVEMath.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
+
 #include <arm_sve.h>
 
 namespace arm_compute
 {
 namespace cpu
 {
-void add_qasymm8_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_qasymm8_sve2(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -58,7 +61,7 @@ void add_qasymm8_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, co
     const auto invvscaleo = svdup_n_f32(1.f / oq_info.scale);
     const auto voffseto   = svdup_n_f32(oq_info.offset);
 
-    if(is_broadcast_across_x)
+    if (is_broadcast_across_x)
     {
         const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
         Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
@@ -78,48 +81,89 @@ void add_qasymm8_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, co
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator output(dst, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto non_broadcast_input_ptr = reinterpret_cast<const uint8_t *>(non_broadcast_input.ptr());
-            const auto output_ptr              = reinterpret_cast<uint8_t *>(output.ptr());
-
-            const uint8_t   broadcast_value     = *reinterpret_cast<const uint8_t *>(broadcast_input.ptr());
-            const svuint8_t broadcast_value_vec = svdup_n_u8(broadcast_value);
-
-            int      x  = window_start_x;
-            svbool_t pg = svwhilelt_b8(x, window_end_x);
-
-            const auto bf_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(broadcast_value_vec))), voffset2)), vscale2);
-            const auto bf_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(broadcast_value_vec))), voffset2)), vscale2);
-            const auto bf_2 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(broadcast_value_vec))), voffset2)), vscale2);
-            const auto bf_3 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(broadcast_value_vec))), voffset2)), vscale2);
-
-            do
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                const svuint8_t a = svld1_u8(pg, non_broadcast_input_ptr + x);
+                const auto non_broadcast_input_ptr = reinterpret_cast<const uint8_t *>(non_broadcast_input.ptr());
+                const auto output_ptr              = reinterpret_cast<uint8_t *>(output.ptr());
 
-                const auto af_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(a))), voffset1)), vscale1);
-                const auto af_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(a))), voffset1)), vscale1);
-                const auto af_2 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(a))), voffset1)), vscale1);
-                const auto af_3 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(a))), voffset1)), vscale1);
+                const uint8_t   broadcast_value     = *reinterpret_cast<const uint8_t *>(broadcast_input.ptr());
+                const svuint8_t broadcast_value_vec = svdup_n_u8(broadcast_value);
 
-                const auto rf_0 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
-                const auto rf_1 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
-                const auto rf_2 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_2, bf_2), invvscaleo));
-                const auto rf_3 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_3, bf_3), invvscaleo));
+                int      x  = window_start_x;
+                svbool_t pg = svwhilelt_b8(x, window_end_x);
 
-                const auto pa = svqxtnt_u32(svqxtnb_u32(rf_0), rf_1);
-                const auto pb = svqxtnt_u32(svqxtnb_u32(rf_2), rf_3);
+                const auto bf_0 = svmul_f32_z(
+                    pg,
+                    svcvt_f32_s32_z(
+                        pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(broadcast_value_vec))),
+                                        voffset2)),
+                    vscale2);
+                const auto bf_1 = svmul_f32_z(
+                    pg,
+                    svcvt_f32_s32_z(
+                        pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(broadcast_value_vec))),
+                                        voffset2)),
+                    vscale2);
+                const auto bf_2 = svmul_f32_z(
+                    pg,
+                    svcvt_f32_s32_z(
+                        pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(broadcast_value_vec))),
+                                        voffset2)),
+                    vscale2);
+                const auto bf_3 = svmul_f32_z(
+                    pg,
+                    svcvt_f32_s32_z(
+                        pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(broadcast_value_vec))),
+                                        voffset2)),
+                    vscale2);
 
-                const auto res = svqxtnt_u16(svqxtnb_u16(pa), pb);
-                svst1_u8(pg, output_ptr + x, res);
+                do
+                {
+                    const svuint8_t a = svld1_u8(pg, non_broadcast_input_ptr + x);
 
-                x += svcntb();
-                pg = svwhilelt_b8(x, window_end_x);
-            }
-            while(svptest_any(all_true_pg, pg));
-        },
-        broadcast_input, non_broadcast_input, output);
+                    const auto af_0 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(a))), voffset1)),
+                        vscale1);
+                    const auto af_1 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(a))), voffset1)),
+                        vscale1);
+                    const auto af_2 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(a))), voffset1)),
+                        vscale1);
+                    const auto af_3 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(a))), voffset1)),
+                        vscale1);
+
+                    const auto rf_0 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
+                    const auto rf_1 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
+                    const auto rf_2 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_2, bf_2), invvscaleo));
+                    const auto rf_3 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_3, bf_3), invvscaleo));
+
+                    const auto pa = svqxtnt_u32(svqxtnb_u32(rf_0), rf_1);
+                    const auto pb = svqxtnt_u32(svqxtnb_u32(rf_2), rf_3);
+
+                    const auto res = svqxtnt_u16(svqxtnb_u16(pa), pb);
+                    svst1_u8(pg, output_ptr + x, res);
+
+                    x += svcntb();
+                    pg = svwhilelt_b8(x, window_end_x);
+                } while (svptest_any(all_true_pg, pg));
+            },
+            broadcast_input, non_broadcast_input, output);
     }
     else
     {
@@ -136,45 +180,82 @@ void add_qasymm8_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, co
         const auto voffset1 = svdup_n_s32(iq1_info.offset);
         const auto voffset2 = svdup_n_s32(iq2_info.offset);
 
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
-            const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
-            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
-
-            int      x  = window_start_x;
-            svbool_t pg = svwhilelt_b8(x, window_end_x);
-            do
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                const auto a    = svld1_u8(pg, input1_ptr + x);
-                const auto b    = svld1_u8(pg, input2_ptr + x);
-                const auto af_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(a))), voffset1)), vscale1);
-                const auto af_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(a))), voffset1)), vscale1);
-                const auto af_2 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(a))), voffset1)), vscale1);
-                const auto af_3 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(a))), voffset1)), vscale1);
+                const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
+                const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
+                const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                const auto bf_0 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(b))), voffset2)), vscale2);
-                const auto bf_1 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(b))), voffset2)), vscale2);
-                const auto bf_2 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(b))), voffset2)), vscale2);
-                const auto bf_3 = svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(b))), voffset2)), vscale2);
+                int      x  = window_start_x;
+                svbool_t pg = svwhilelt_b8(x, window_end_x);
+                do
+                {
+                    const auto a    = svld1_u8(pg, input1_ptr + x);
+                    const auto b    = svld1_u8(pg, input2_ptr + x);
+                    const auto af_0 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(a))), voffset1)),
+                        vscale1);
+                    const auto af_1 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(a))), voffset1)),
+                        vscale1);
+                    const auto af_2 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(a))), voffset1)),
+                        vscale1);
+                    const auto af_3 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(a))), voffset1)),
+                        vscale1);
 
-                const auto rf_0 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
-                const auto rf_1 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
-                const auto rf_2 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_2, bf_2), invvscaleo));
-                const auto rf_3 = svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_3, bf_3), invvscaleo));
+                    const auto bf_0 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(b))), voffset2)),
+                        vscale2);
+                    const auto bf_1 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(b))), voffset2)),
+                        vscale2);
+                    const auto bf_2 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(b))), voffset2)),
+                        vscale2);
+                    const auto bf_3 = svmul_f32_z(
+                        pg,
+                        svcvt_f32_s32_z(pg,
+                                        svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(b))), voffset2)),
+                        vscale2);
 
-                const auto pa  = svqxtnt_u32(svqxtnb_u32(rf_0), rf_1);
-                const auto pb  = svqxtnt_u32(svqxtnb_u32(rf_2), rf_3);
-                const auto res = svqxtnt_u16(svqxtnb_u16(pa), pb);
+                    const auto rf_0 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_0, bf_0), invvscaleo));
+                    const auto rf_1 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_1, bf_1), invvscaleo));
+                    const auto rf_2 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_2, bf_2), invvscaleo));
+                    const auto rf_3 =
+                        svcvt_u32_f32_z(pg, svmla_f32_z(pg, voffseto, svadd_f32_z(pg, af_3, bf_3), invvscaleo));
 
-                svst1_u8(pg, output_ptr + x, res);
+                    const auto pa  = svqxtnt_u32(svqxtnb_u32(rf_0), rf_1);
+                    const auto pb  = svqxtnt_u32(svqxtnb_u32(rf_2), rf_3);
+                    const auto res = svqxtnt_u16(svqxtnb_u16(pa), pb);
 
-                x += svcntb();
-                pg = svwhilelt_b8(x, window_end_x);
-            }
-            while(svptest_any(all_true_pg, pg));
-        },
-        input1, input2, output);
+                    svst1_u8(pg, output_ptr + x, res);
+
+                    x += svcntb();
+                    pg = svwhilelt_b8(x, window_end_x);
+                } while (svptest_any(all_true_pg, pg));
+            },
+            input1, input2, output);
     }
 }
 } // namespace cpu

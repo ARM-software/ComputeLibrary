@@ -85,7 +85,12 @@ public:
      * @param[in]      conv_info Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]      act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *input,
+                   const ITensor             *weights,
+                   const ITensor             *bias,
+                   ITensor                   *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayer
      *
      * @note: DirectConvolution only works in the following configurations:
@@ -106,7 +111,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *bias,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:

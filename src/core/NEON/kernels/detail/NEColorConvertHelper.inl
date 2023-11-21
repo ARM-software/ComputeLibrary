@@ -25,6 +25,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IMultiImage.h"
 #include "arm_compute/core/Utils.h"
+
 #include "src/core/NEON/NEMath.h"
 
 #include <arm_neon.h>
@@ -50,8 +51,12 @@ constexpr float rgb2u8_red_coef   = 0.2126f;
 constexpr float rgb2u8_green_coef = 0.7152f;
 constexpr float rgb2u8_blue_coef  = 0.0722f;
 
-inline float32x4_t rgb_to_greyscale_calculation(const float32x4_t &rcolor, const float32x4_t &gcolor, const float32x4_t &bcolor,
-                                                const float rcoef, const float gcoef, const float bcoef)
+inline float32x4_t rgb_to_greyscale_calculation(const float32x4_t &rcolor,
+                                                const float32x4_t &gcolor,
+                                                const float32x4_t &bcolor,
+                                                const float        rcoef,
+                                                const float        gcoef,
+                                                const float        bcoef)
 {
     float32x4_t greyscale = vmulq_n_f32(rcolor, rcoef);
     greyscale             = vmlaq_n_f32(greyscale, gcolor, gcoef);
@@ -86,8 +91,12 @@ inline void rgb_to_u8_conversion(const uint8x16x3_t &in, uint8x16_t &out)
     arm_compute::convert_float32x4x4_to_uint8x16(out_float32, out);
 }
 
-inline void rgb_to_yuv_calculation(const float32x4_t &rvec, const float32x4_t &gvec, const float32x4_t &bvec,
-                                   float32x4_t &yvec, float32x4_t &uvec, float32x4_t &vvec)
+inline void rgb_to_yuv_calculation(const float32x4_t &rvec,
+                                   const float32x4_t &gvec,
+                                   const float32x4_t &bvec,
+                                   float32x4_t       &yvec,
+                                   float32x4_t       &uvec,
+                                   float32x4_t       &vvec)
 {
     /*
     Y'= 0.2126*R' + 0.7152*G' + 0.0722*B'
@@ -110,8 +119,12 @@ inline void rgb_to_yuv_calculation(const float32x4_t &rvec, const float32x4_t &g
     vvec = vmlaq_n_f32(c128, vvec, rgb2yuv_bt709_cv);
 }
 
-inline void yuyv_to_rgb_calculation(const float32x4_t &yvec_val, float32x4_t uvec_val, const float32x4_t &yyvec_val,
-                                    float32x4_t vvec_val, unsigned char *output_ptr, const bool alpha)
+inline void yuyv_to_rgb_calculation(const float32x4_t &yvec_val,
+                                    float32x4_t        uvec_val,
+                                    const float32x4_t &yyvec_val,
+                                    float32x4_t        vvec_val,
+                                    unsigned char     *output_ptr,
+                                    const bool         alpha)
 {
     float32x4x3_t rgb1, rgb2;
 
@@ -126,8 +139,7 @@ inline void yuyv_to_rgb_calculation(const float32x4_t &yvec_val, float32x4_t uve
     // b = 1.8556f*f_u + 0.0000f*f_v;
     const auto red   = vmulq_n_f32(vvec_val, red_coef_bt709);
     const auto blue  = vmulq_n_f32(uvec_val, blue_coef_bt709);
-    const auto green = vaddq_f32(vmulq_n_f32(uvec_val, green_coef_bt709),
-                                 vmulq_n_f32(vvec_val, green_coef2_bt709));
+    const auto green = vaddq_f32(vmulq_n_f32(uvec_val, green_coef_bt709), vmulq_n_f32(vvec_val, green_coef2_bt709));
 
     // Compute the final r,g,b values using y1 for the first texel and y2 for the second one.
     // the result is stored in two float32x4x3_t which then are converted to one uint8x8x3_t
@@ -144,7 +156,7 @@ inline void yuyv_to_rgb_calculation(const float32x4_t &yvec_val, float32x4_t uve
     uint8x8x3_t u8_rgb;
     arm_compute::convert_float32x4x3_to_uint8x8x3(rgb1, rgb2, u8_rgb);
 
-    if(!alpha)
+    if (!alpha)
     {
         vst3_lane_u8(&output_ptr[0], u8_rgb, 0);
         vst3_lane_u8(&output_ptr[3], u8_rgb, 4);
@@ -177,7 +189,7 @@ inline uint8x16x3_t load_rgb(const unsigned char *const ptr, const bool alpha)
 {
     uint8x16x3_t rgb;
 
-    if(alpha)
+    if (alpha)
     {
         const auto tmp = vld4q_u8(ptr);
         rgb.val[0]     = tmp.val[0];
@@ -206,12 +218,12 @@ inline void rgb_to_yuv_conversion(uint8x16x3_t &vec_top, uint8x16x3_t &vec_botto
     float32x4x4_t fyvec_top, fuvec_top, fvvec_top;
     float32x4x4_t fyvec_bottom, fuvec_bottom, fvvec_bottom;
 
-    for(auto i = 0; i < 4; ++i)
+    for (auto i = 0; i < 4; ++i)
     {
-        rgb_to_yuv_calculation(frvec_top.val[i], fgvec_top.val[i], fbvec_top.val[i],
-                               fyvec_top.val[i], fuvec_top.val[i], fvvec_top.val[i]);
-        rgb_to_yuv_calculation(frvec_bottom.val[i], fgvec_bottom.val[i], fbvec_bottom.val[i],
-                               fyvec_bottom.val[i], fuvec_bottom.val[i], fvvec_bottom.val[i]);
+        rgb_to_yuv_calculation(frvec_top.val[i], fgvec_top.val[i], fbvec_top.val[i], fyvec_top.val[i], fuvec_top.val[i],
+                               fvvec_top.val[i]);
+        rgb_to_yuv_calculation(frvec_bottom.val[i], fgvec_bottom.val[i], fbvec_bottom.val[i], fyvec_bottom.val[i],
+                               fuvec_bottom.val[i], fvvec_bottom.val[i]);
     }
 
     arm_compute::convert_float32x4x4_to_uint8x16(fyvec_top, vec_top.val[0]);
@@ -222,9 +234,14 @@ inline void rgb_to_yuv_conversion(uint8x16x3_t &vec_top, uint8x16x3_t &vec_botto
     arm_compute::convert_float32x4x4_to_uint8x16(fvvec_bottom, vec_bottom.val[2]);
 }
 
-inline void store_rgb_to_nv12(const uint8x16_t &rvec_top, const uint8x16_t &gvec_top, const uint8x16_t &bvec_top,
-                              const uint8x16_t &rvec_bottom, const uint8x16_t &gvec_bottom, const uint8x16_t &bvec_bottom,
-                              unsigned char *const __restrict out_y_top, unsigned char *const __restrict out_y_bottom,
+inline void store_rgb_to_nv12(const uint8x16_t &rvec_top,
+                              const uint8x16_t &gvec_top,
+                              const uint8x16_t &bvec_top,
+                              const uint8x16_t &rvec_bottom,
+                              const uint8x16_t &gvec_bottom,
+                              const uint8x16_t &bvec_bottom,
+                              unsigned char *const __restrict out_y_top,
+                              unsigned char *const __restrict out_y_bottom,
                               unsigned char *const __restrict out_uv)
 {
     uint8x16x3_t vec_top, vec_bottom;
@@ -252,9 +269,14 @@ inline void store_rgb_to_nv12(const uint8x16_t &rvec_top, const uint8x16_t &gvec
     vst2_u8(out_uv, uvvec);
 }
 
-inline void store_rgb_to_iyuv(const uint8x16_t &rvec_top, const uint8x16_t &gvec_top, const uint8x16_t &bvec_top,
-                              const uint8x16_t &rvec_bottom, const uint8x16_t &gvec_bottom, const uint8x16_t &bvec_bottom,
-                              unsigned char *const __restrict out_y_top, unsigned char *const __restrict out_y_bottom,
+inline void store_rgb_to_iyuv(const uint8x16_t &rvec_top,
+                              const uint8x16_t &gvec_top,
+                              const uint8x16_t &bvec_top,
+                              const uint8x16_t &rvec_bottom,
+                              const uint8x16_t &gvec_bottom,
+                              const uint8x16_t &bvec_bottom,
+                              unsigned char *const __restrict out_y_top,
+                              unsigned char *const __restrict out_y_bottom,
                               unsigned char *const __restrict out_u,
                               unsigned char *const __restrict out_v)
 {
@@ -273,14 +295,16 @@ inline void store_rgb_to_iyuv(const uint8x16_t &rvec_top, const uint8x16_t &gvec
 
     const auto uvvec_top    = vuzpq_u8(vec_top.val[1], vec_top.val[2]);
     const auto uvvec_bottom = vuzpq_u8(vec_bottom.val[1], vec_bottom.val[2]);
-    const auto uvvec        = vhaddq_u8(vrhaddq_u8(uvvec_top.val[0], uvvec_top.val[1]),
-                                        vrhaddq_u8(uvvec_bottom.val[0], uvvec_bottom.val[1]));
+    const auto uvvec =
+        vhaddq_u8(vrhaddq_u8(uvvec_top.val[0], uvvec_top.val[1]), vrhaddq_u8(uvvec_bottom.val[0], uvvec_bottom.val[1]));
 
     vst1_u8(out_u, vget_low_u8(uvvec));
     vst1_u8(out_v, vget_high_u8(uvvec));
 }
 
-inline void store_rgb_to_yuv4(const uint8x16_t &rvec, const uint8x16_t &gvec, const uint8x16_t &bvec,
+inline void store_rgb_to_yuv4(const uint8x16_t &rvec,
+                              const uint8x16_t &gvec,
+                              const uint8x16_t &bvec,
                               unsigned char *const __restrict out_y,
                               unsigned char *const __restrict out_u,
                               unsigned char *const __restrict out_v)
@@ -291,10 +315,9 @@ inline void store_rgb_to_yuv4(const uint8x16_t &rvec, const uint8x16_t &gvec, co
     const float32x4x4_t fbvec = arm_compute::convert_uint8x16_to_float32x4x4(bvec);
 
     float32x4x4_t fyvec, fuvec, fvvec;
-    for(auto i = 0; i < 4; ++i)
+    for (auto i = 0; i < 4; ++i)
     {
-        rgb_to_yuv_calculation(frvec.val[i], fgvec.val[i], fbvec.val[i],
-                               fyvec.val[i], fuvec.val[i], fvvec.val[i]);
+        rgb_to_yuv_calculation(frvec.val[i], fgvec.val[i], fbvec.val[i], fyvec.val[i], fuvec.val[i], fvvec.val[i]);
     }
 
     uint8x16_t yvec, uvec, vvec;
@@ -307,7 +330,7 @@ inline void store_rgb_to_yuv4(const uint8x16_t &rvec, const uint8x16_t &gvec, co
     vst1q_u8(out_v, vvec);
 }
 #endif /* DOXYGEN_SKIP_THIS */
-}
+} // namespace
 
 namespace arm_compute
 {
@@ -329,17 +352,19 @@ void colorconvert_rgb_to_rgbx(const void *__restrict input, void *__restrict out
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto   ta1 = vld3q_u8(in.ptr());
-        uint8x16x4_t ta2;
-        ta2.val[0] = ta1.val[0];
-        ta2.val[1] = ta1.val[1];
-        ta2.val[2] = ta1.val[2];
-        ta2.val[3] = vdupq_n_u8(255);
-        vst4q_u8(out.ptr(), ta2);
-    },
-    in, out);
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto   ta1 = vld3q_u8(in.ptr());
+            uint8x16x4_t ta2;
+            ta2.val[0] = ta1.val[0];
+            ta2.val[1] = ta1.val[1];
+            ta2.val[2] = ta1.val[2];
+            ta2.val[3] = vdupq_n_u8(255);
+            vst4q_u8(out.ptr(), ta2);
+        },
+        in, out);
 }
 
 /** Convert RGB to U8.
@@ -360,14 +385,16 @@ void colorconvert_rgb_to_u8(const void *__restrict input, void *__restrict outpu
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta1 = vld3q_u8(in.ptr());
-        uint8x16_t ta2;
-        rgb_to_u8_conversion(ta1, ta2);
-        vst1q_u8(out.ptr(), ta2);
-    },
-    in, out);
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta1 = vld3q_u8(in.ptr());
+            uint8x16_t ta2;
+            rgb_to_u8_conversion(ta1, ta2);
+            vst1q_u8(out.ptr(), ta2);
+        },
+        in, out);
 }
 
 /** Convert RGBX to RGB.
@@ -388,16 +415,18 @@ void colorconvert_rgbx_to_rgb(const void *input, void *output, const Window &win
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto   ta1 = vld4q_u8(in.ptr());
-        uint8x16x3_t ta2;
-        ta2.val[0] = ta1.val[0];
-        ta2.val[1] = ta1.val[1];
-        ta2.val[2] = ta1.val[2];
-        vst3q_u8(out.ptr(), ta2);
-    },
-    in, out);
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto   ta1 = vld4q_u8(in.ptr());
+            uint8x16x3_t ta2;
+            ta2.val[0] = ta1.val[0];
+            ta2.val[1] = ta1.val[1];
+            ta2.val[2] = ta1.val[2];
+            vst3q_u8(out.ptr(), ta2);
+        },
+        in, out);
 }
 
 /** Convert YUYV to RGB.
@@ -422,26 +451,32 @@ void colorconvert_yuyv_to_rgb(const void *__restrict input, void *__restrict out
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta = vld4q_u8(in.ptr());
-        //ta.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta.val[1] = U0 U2 U4 U6 ...
-        //ta.val[2] = Y1 Y3 Y5 Y7 ...
-        //ta.val[3] = V0 V2 V4 V7 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta = vld4q_u8(in.ptr());
+            //ta.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta.val[1] = U0 U2 U4 U6 ...
+            //ta.val[2] = Y1 Y3 Y5 Y7 ...
+            //ta.val[3] = V0 V2 V4 V7 ...
 
-        // Convert the uint8x16x4_t to float32x4x4_t
-        const float32x4x4_t yvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[0 + shift]);
-        const float32x4x4_t uvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[1 - shift]);
-        const float32x4x4_t yyvec = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[2 + shift]);
-        const float32x4x4_t vvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[3 - shift]);
+            // Convert the uint8x16x4_t to float32x4x4_t
+            const float32x4x4_t yvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[0 + shift]);
+            const float32x4x4_t uvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[1 - shift]);
+            const float32x4x4_t yyvec = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[2 + shift]);
+            const float32x4x4_t vvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[3 - shift]);
 
-        yuyv_to_rgb_calculation(yvec.val[0], uvec.val[0], yyvec.val[0], vvec.val[0], out.ptr() + 0 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec.val[1], uvec.val[1], yyvec.val[1], vvec.val[1], out.ptr() + 1 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec.val[2], uvec.val[2], yyvec.val[2], vvec.val[2], out.ptr() + 2 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec.val[3], uvec.val[3], yyvec.val[3], vvec.val[3], out.ptr() + 3 * element_size, alpha);
-    },
-    in, out);
+            yuyv_to_rgb_calculation(yvec.val[0], uvec.val[0], yyvec.val[0], vvec.val[0], out.ptr() + 0 * element_size,
+                                    alpha);
+            yuyv_to_rgb_calculation(yvec.val[1], uvec.val[1], yyvec.val[1], vvec.val[1], out.ptr() + 1 * element_size,
+                                    alpha);
+            yuyv_to_rgb_calculation(yvec.val[2], uvec.val[2], yyvec.val[2], vvec.val[2], out.ptr() + 2 * element_size,
+                                    alpha);
+            yuyv_to_rgb_calculation(yvec.val[3], uvec.val[3], yyvec.val[3], vvec.val[3], out.ptr() + 3 * element_size,
+                                    alpha);
+        },
+        in, out);
 }
 
 /** Convert NV12 to RGB.
@@ -475,35 +510,45 @@ void colorconvert_nv12_to_rgb(const void *__restrict input, void *__restrict out
     Iterator in_uv(input_ptr->plane(1), win_uv);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_y_top    = vld2q_u8(in_y.ptr());
-        const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
-        const auto ta_uv       = vld2q_u8(in_uv.ptr());
-        //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
-        //ta_uv.val[0] = U0 U2 U4 U6 ...
-        //ta_uv.val[1] = V0 V2 V4 V6 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_y_top    = vld2q_u8(in_y.ptr());
+            const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
+            const auto ta_uv       = vld2q_u8(in_uv.ptr());
+            //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
+            //ta_uv.val[0] = U0 U2 U4 U6 ...
+            //ta_uv.val[1] = V0 V2 V4 V6 ...
 
-        // Convert the uint8x16x4_t to float32x4x4_t
-        float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
-        float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
-        float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
-        float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
-        float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_uv.val[0 + shift]);
-        float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_uv.val[1 - shift]);
+            // Convert the uint8x16x4_t to float32x4x4_t
+            float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
+            float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
+            float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
+            float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
+            float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_uv.val[0 + shift]);
+            float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_uv.val[1 - shift]);
 
-        yuyv_to_rgb_calculation(yvec_top.val[0], uvec.val[0], yyvec_top.val[0], vvec.val[0], out.ptr() + 0 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_top.val[1], uvec.val[1], yyvec_top.val[1], vvec.val[1], out.ptr() + 1 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_top.val[2], uvec.val[2], yyvec_top.val[2], vvec.val[2], out.ptr() + 2 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_top.val[3], uvec.val[3], yyvec_top.val[3], vvec.val[3], out.ptr() + 3 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[0], uvec.val[0], yyvec_top.val[0], vvec.val[0],
+                                    out.ptr() + 0 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[1], uvec.val[1], yyvec_top.val[1], vvec.val[1],
+                                    out.ptr() + 1 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[2], uvec.val[2], yyvec_top.val[2], vvec.val[2],
+                                    out.ptr() + 2 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[3], uvec.val[3], yyvec_top.val[3], vvec.val[3],
+                                    out.ptr() + 3 * element_size, alpha);
 
-        yuyv_to_rgb_calculation(yvec_bottom.val[0], uvec.val[0], yyvec_bottom.val[0], vvec.val[0], out.ptr() + out_stride + 0 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_bottom.val[1], uvec.val[1], yyvec_bottom.val[1], vvec.val[1], out.ptr() + out_stride + 1 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_bottom.val[2], uvec.val[2], yyvec_bottom.val[2], vvec.val[2], out.ptr() + out_stride + 2 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_bottom.val[3], uvec.val[3], yyvec_bottom.val[3], vvec.val[3], out.ptr() + out_stride + 3 * element_size, alpha);
-    },
-    in_y, in_uv, out);
+            yuyv_to_rgb_calculation(yvec_bottom.val[0], uvec.val[0], yyvec_bottom.val[0], vvec.val[0],
+                                    out.ptr() + out_stride + 0 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_bottom.val[1], uvec.val[1], yyvec_bottom.val[1], vvec.val[1],
+                                    out.ptr() + out_stride + 1 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_bottom.val[2], uvec.val[2], yyvec_bottom.val[2], vvec.val[2],
+                                    out.ptr() + out_stride + 2 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_bottom.val[3], uvec.val[3], yyvec_bottom.val[3], vvec.val[3],
+                                    out.ptr() + out_stride + 3 * element_size, alpha);
+        },
+        in_y, in_uv, out);
 }
 
 /** Convert IYUV to RGB.
@@ -537,59 +582,71 @@ void colorconvert_iyuv_to_rgb(const void *__restrict input, void *__restrict out
     Iterator in_v(input_ptr->plane(2), win_uv);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto *y_top_ptr    = in_y.ptr();
-        const auto *y_bottom_ptr = in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y();
-        const auto *u_ptr        = in_u.ptr();
-        const auto *v_ptr        = in_v.ptr();
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto *y_top_ptr    = in_y.ptr();
+            const auto *y_bottom_ptr = in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y();
+            const auto *u_ptr        = in_u.ptr();
+            const auto *v_ptr        = in_v.ptr();
 
         // Work-around issue in gcc 9(>=) where vld2q might cause issues with register allocation
 #if defined(__arch64__)
-        const auto ta0_y_top    = vld1q_u8(y_top_ptr);
-        const auto ta1_y_top    = vld1q_u8(y_top_ptr + 16);
-        const auto ta0_y_bottom = vld1q_u8(y_bottom_ptr);
-        const auto ta1_y_bottom = vld1q_u8(y_bottom_ptr + 16);
-        const auto ta_u         = vld1q_u8(u_ptr);
-        const auto ta_v         = vld1q_u8(v_ptr);
+            const auto ta0_y_top    = vld1q_u8(y_top_ptr);
+            const auto ta1_y_top    = vld1q_u8(y_top_ptr + 16);
+            const auto ta0_y_bottom = vld1q_u8(y_bottom_ptr);
+            const auto ta1_y_bottom = vld1q_u8(y_bottom_ptr + 16);
+            const auto ta_u         = vld1q_u8(u_ptr);
+            const auto ta_v         = vld1q_u8(v_ptr);
 
-        // Convert the uint8x16x4_t to float32x4x4_t
-        float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(vuzp1q_u8(ta0_y_top, ta1_y_top));
-        float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(vuzp2q_u8(ta0_y_top, ta1_y_top));
-        float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(vuzp1q_u8(ta0_y_bottom, ta1_y_bottom));
-        float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(vuzp2q_u8(ta0_y_bottom, ta1_y_bottom));
-        float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_u);
-        float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_v);
+            // Convert the uint8x16x4_t to float32x4x4_t
+            float32x4x4_t yvec_top  = arm_compute::convert_uint8x16_to_float32x4x4(vuzp1q_u8(ta0_y_top, ta1_y_top));
+            float32x4x4_t yyvec_top = arm_compute::convert_uint8x16_to_float32x4x4(vuzp2q_u8(ta0_y_top, ta1_y_top));
+            float32x4x4_t yvec_bottom =
+                arm_compute::convert_uint8x16_to_float32x4x4(vuzp1q_u8(ta0_y_bottom, ta1_y_bottom));
+            float32x4x4_t yyvec_bottom =
+                arm_compute::convert_uint8x16_to_float32x4x4(vuzp2q_u8(ta0_y_bottom, ta1_y_bottom));
+            float32x4x4_t uvec = arm_compute::convert_uint8x16_to_float32x4x4(ta_u);
+            float32x4x4_t vvec = arm_compute::convert_uint8x16_to_float32x4x4(ta_v);
 #else  /* defined(__arch64__) */
-        const auto ta_y_top    = vld2q_u8(y_top_ptr);
-        const auto ta_y_bottom = vld2q_u8(y_bottom_ptr);
-        const auto ta_u        = vld1q_u8(u_ptr);
-        const auto ta_v        = vld1q_u8(v_ptr);
-        //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
-        //ta_u.val[0] = U0 U2 U4 U6 ...
-        //ta_v.val[0] = V0 V2 V4 V6 ...
+            const auto ta_y_top    = vld2q_u8(y_top_ptr);
+            const auto ta_y_bottom = vld2q_u8(y_bottom_ptr);
+            const auto ta_u        = vld1q_u8(u_ptr);
+            const auto ta_v        = vld1q_u8(v_ptr);
+            //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
+            //ta_u.val[0] = U0 U2 U4 U6 ...
+            //ta_v.val[0] = V0 V2 V4 V6 ...
 
-        // Convert the uint8x16x4_t to float32x4x4_t
-        float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
-        float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
-        float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
-        float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
-        float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_u);
-        float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_v);
+            // Convert the uint8x16x4_t to float32x4x4_t
+            float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
+            float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
+            float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
+            float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
+            float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_u);
+            float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_v);
 #endif /* defined(__arch64__) */
 
-        yuyv_to_rgb_calculation(yvec_top.val[0], uvec.val[0], yyvec_top.val[0], vvec.val[0], out.ptr() + 0 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_top.val[1], uvec.val[1], yyvec_top.val[1], vvec.val[1], out.ptr() + 1 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_top.val[2], uvec.val[2], yyvec_top.val[2], vvec.val[2], out.ptr() + 2 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_top.val[3], uvec.val[3], yyvec_top.val[3], vvec.val[3], out.ptr() + 3 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[0], uvec.val[0], yyvec_top.val[0], vvec.val[0],
+                                    out.ptr() + 0 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[1], uvec.val[1], yyvec_top.val[1], vvec.val[1],
+                                    out.ptr() + 1 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[2], uvec.val[2], yyvec_top.val[2], vvec.val[2],
+                                    out.ptr() + 2 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_top.val[3], uvec.val[3], yyvec_top.val[3], vvec.val[3],
+                                    out.ptr() + 3 * element_size, alpha);
 
-        yuyv_to_rgb_calculation(yvec_bottom.val[0], uvec.val[0], yyvec_bottom.val[0], vvec.val[0], out.ptr() + out_stride + 0 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_bottom.val[1], uvec.val[1], yyvec_bottom.val[1], vvec.val[1], out.ptr() + out_stride + 1 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_bottom.val[2], uvec.val[2], yyvec_bottom.val[2], vvec.val[2], out.ptr() + out_stride + 2 * element_size, alpha);
-        yuyv_to_rgb_calculation(yvec_bottom.val[3], uvec.val[3], yyvec_bottom.val[3], vvec.val[3], out.ptr() + out_stride + 3 * element_size, alpha);
-    },
-    in_y, in_u, in_v, out);
+            yuyv_to_rgb_calculation(yvec_bottom.val[0], uvec.val[0], yyvec_bottom.val[0], vvec.val[0],
+                                    out.ptr() + out_stride + 0 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_bottom.val[1], uvec.val[1], yyvec_bottom.val[1], vvec.val[1],
+                                    out.ptr() + out_stride + 1 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_bottom.val[2], uvec.val[2], yyvec_bottom.val[2], vvec.val[2],
+                                    out.ptr() + out_stride + 2 * element_size, alpha);
+            yuyv_to_rgb_calculation(yvec_bottom.val[3], uvec.val[3], yyvec_bottom.val[3], vvec.val[3],
+                                    out.ptr() + out_stride + 3 * element_size, alpha);
+        },
+        in_y, in_u, in_v, out);
 }
 
 /** Convert YUYV to NV12.
@@ -621,31 +678,33 @@ void colorconvert_yuyv_to_nv12(const void *__restrict input, void *__restrict ou
     Iterator out_y(output_ptr->plane(0), win);
     Iterator out_uv(output_ptr->plane(1), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_top    = vld4q_u8(in.ptr());
-        const auto ta_bottom = vld4q_u8(in.ptr() + input_ptr->info()->strides_in_bytes().y());
-        //ta.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta.val[1] = U0 U2 U4 U6 ...
-        //ta.val[2] = Y1 Y3 Y5 Y7 ...
-        //ta.val[3] = V0 V2 V4 V7 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_top    = vld4q_u8(in.ptr());
+            const auto ta_bottom = vld4q_u8(in.ptr() + input_ptr->info()->strides_in_bytes().y());
+            //ta.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta.val[1] = U0 U2 U4 U6 ...
+            //ta.val[2] = Y1 Y3 Y5 Y7 ...
+            //ta.val[3] = V0 V2 V4 V7 ...
 
-        uint8x16x2_t yvec;
-        yvec.val[0] = ta_top.val[0 + shift];
-        yvec.val[1] = ta_top.val[2 + shift];
-        vst2q_u8(out_y.ptr(), yvec);
+            uint8x16x2_t yvec;
+            yvec.val[0] = ta_top.val[0 + shift];
+            yvec.val[1] = ta_top.val[2 + shift];
+            vst2q_u8(out_y.ptr(), yvec);
 
-        uint8x16x2_t yyvec;
-        yyvec.val[0] = ta_bottom.val[0 + shift];
-        yyvec.val[1] = ta_bottom.val[2 + shift];
-        vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), yyvec);
+            uint8x16x2_t yyvec;
+            yyvec.val[0] = ta_bottom.val[0 + shift];
+            yyvec.val[1] = ta_bottom.val[2 + shift];
+            vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), yyvec);
 
-        uint8x16x2_t uvvec;
-        uvvec.val[0] = vhaddq_u8(ta_top.val[1 - shift], ta_bottom.val[1 - shift]);
-        uvvec.val[1] = vhaddq_u8(ta_top.val[3 - shift], ta_bottom.val[3 - shift]);
-        vst2q_u8(out_uv.ptr(), uvvec);
-    },
-    in, out_y, out_uv);
+            uint8x16x2_t uvvec;
+            uvvec.val[0] = vhaddq_u8(ta_top.val[1 - shift], ta_bottom.val[1 - shift]);
+            uvvec.val[1] = vhaddq_u8(ta_top.val[3 - shift], ta_bottom.val[3 - shift]);
+            vst2q_u8(out_uv.ptr(), uvvec);
+        },
+        in, out_y, out_uv);
 }
 
 /** Convert IYUV to NV12.
@@ -676,23 +735,25 @@ void colorconvert_iyuv_to_nv12(const void *__restrict input, void *__restrict ou
     Iterator out_y(output_ptr->plane(0), win);
     Iterator out_uv(output_ptr->plane(1), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto   ta_y_top    = vld2q_u8(in_y.ptr());
-        const auto   ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
-        uint8x16x2_t ta_uv;
-        ta_uv.val[0] = vld1q_u8(in_u.ptr());
-        ta_uv.val[1] = vld1q_u8(in_v.ptr());
-        //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
-        //ta_uv.val[0] = U0 U2 U4 U6 ...
-        //ta_uv.val[1] = V0 V2 V4 V6 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto   ta_y_top    = vld2q_u8(in_y.ptr());
+            const auto   ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
+            uint8x16x2_t ta_uv;
+            ta_uv.val[0] = vld1q_u8(in_u.ptr());
+            ta_uv.val[1] = vld1q_u8(in_v.ptr());
+            //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
+            //ta_uv.val[0] = U0 U2 U4 U6 ...
+            //ta_uv.val[1] = V0 V2 V4 V6 ...
 
-        vst2q_u8(out_y.ptr(), ta_y_top);
-        vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
-        vst2q_u8(out_uv.ptr(), ta_uv);
-    },
-    in_y, in_u, in_v, out_y, out_uv);
+            vst2q_u8(out_y.ptr(), ta_y_top);
+            vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
+            vst2q_u8(out_uv.ptr(), ta_uv);
+        },
+        in_y, in_u, in_v, out_y, out_uv);
 }
 
 /** Convert NV12 to IYUV.
@@ -726,22 +787,24 @@ void colorconvert_nv12_to_iyuv(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win_uv);
     Iterator out_v(output_ptr->plane(2), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_y_top    = vld2q_u8(in_y.ptr());
-        const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
-        const auto ta_uv       = vld2q_u8(in_uv.ptr());
-        //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
-        //ta_uv.val[0] = U0 U2 U4 U6 ...
-        //ta_uv.val[1] = V0 V2 V4 V6 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_y_top    = vld2q_u8(in_y.ptr());
+            const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
+            const auto ta_uv       = vld2q_u8(in_uv.ptr());
+            //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
+            //ta_uv.val[0] = U0 U2 U4 U6 ...
+            //ta_uv.val[1] = V0 V2 V4 V6 ...
 
-        vst2q_u8(out_y.ptr(), ta_y_top);
-        vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
-        vst1q_u8(out_u.ptr(), ta_uv.val[0 + shift]);
-        vst1q_u8(out_v.ptr(), ta_uv.val[1 - shift]);
-    },
-    in_y, in_uv, out_y, out_u, out_v);
+            vst2q_u8(out_y.ptr(), ta_y_top);
+            vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
+            vst1q_u8(out_u.ptr(), ta_uv.val[0 + shift]);
+            vst1q_u8(out_v.ptr(), ta_uv.val[1 - shift]);
+        },
+        in_y, in_uv, out_y, out_u, out_v);
 }
 
 /** Convert YUYV to IYUV.
@@ -774,34 +837,36 @@ void colorconvert_yuyv_to_iyuv(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win_uv);
     Iterator out_v(output_ptr->plane(2), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_top    = vld4q_u8(in.ptr());
-        const auto ta_bottom = vld4q_u8(in.ptr() + input_ptr->info()->strides_in_bytes().y());
-        //ta.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta.val[1] = U0 U2 U4 U6 ...
-        //ta.val[2] = Y1 Y3 Y5 Y7 ...
-        //ta.val[3] = V0 V2 V4 V7 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_top    = vld4q_u8(in.ptr());
+            const auto ta_bottom = vld4q_u8(in.ptr() + input_ptr->info()->strides_in_bytes().y());
+            //ta.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta.val[1] = U0 U2 U4 U6 ...
+            //ta.val[2] = Y1 Y3 Y5 Y7 ...
+            //ta.val[3] = V0 V2 V4 V7 ...
 
-        uint8x16x2_t yvec;
-        yvec.val[0] = ta_top.val[0 + shift];
-        yvec.val[1] = ta_top.val[2 + shift];
-        vst2q_u8(out_y.ptr(), yvec);
+            uint8x16x2_t yvec;
+            yvec.val[0] = ta_top.val[0 + shift];
+            yvec.val[1] = ta_top.val[2 + shift];
+            vst2q_u8(out_y.ptr(), yvec);
 
-        uint8x16x2_t yyvec;
-        yyvec.val[0] = ta_bottom.val[0 + shift];
-        yyvec.val[1] = ta_bottom.val[2 + shift];
-        vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), yyvec);
+            uint8x16x2_t yyvec;
+            yyvec.val[0] = ta_bottom.val[0 + shift];
+            yyvec.val[1] = ta_bottom.val[2 + shift];
+            vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), yyvec);
 
-        uint8x16_t uvec;
-        uvec = vhaddq_u8(ta_top.val[1 - shift], ta_bottom.val[1 - shift]);
-        vst1q_u8(out_u.ptr(), uvec);
+            uint8x16_t uvec;
+            uvec = vhaddq_u8(ta_top.val[1 - shift], ta_bottom.val[1 - shift]);
+            vst1q_u8(out_u.ptr(), uvec);
 
-        uint8x16_t vvec;
-        vvec = vhaddq_u8(ta_top.val[3 - shift], ta_bottom.val[3 - shift]);
-        vst1q_u8(out_v.ptr(), vvec);
-    },
-    in, out_y, out_u, out_v);
+            uint8x16_t vvec;
+            vvec = vhaddq_u8(ta_top.val[3 - shift], ta_bottom.val[3 - shift]);
+            vst1q_u8(out_v.ptr(), vvec);
+        },
+        in, out_y, out_u, out_v);
 }
 
 /** Convert NV12 to YUV4.
@@ -835,32 +900,34 @@ void colorconvert_nv12_to_yuv4(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win);
     Iterator out_v(output_ptr->plane(2), win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_y_top    = vld2q_u8(in_y.ptr());
-        const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
-        const auto ta_uv       = vld2q_u8(in_uv.ptr());
-        //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
-        //ta_uv.val[0] = U0 U2 U4 U6 ...
-        //ta_uv.val[1] = V0 V2 V4 V6 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_y_top    = vld2q_u8(in_y.ptr());
+            const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
+            const auto ta_uv       = vld2q_u8(in_uv.ptr());
+            //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
+            //ta_uv.val[0] = U0 U2 U4 U6 ...
+            //ta_uv.val[1] = V0 V2 V4 V6 ...
 
-        vst2q_u8(out_y.ptr(), ta_y_top);
-        vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
+            vst2q_u8(out_y.ptr(), ta_y_top);
+            vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
 
-        uint8x16x2_t uvec;
-        uvec.val[0] = ta_uv.val[0 + shift];
-        uvec.val[1] = ta_uv.val[0 + shift];
-        vst2q_u8(out_u.ptr(), uvec);
-        vst2q_u8(out_u.ptr() + output_ptr->plane(1)->info()->strides_in_bytes().y(), uvec);
+            uint8x16x2_t uvec;
+            uvec.val[0] = ta_uv.val[0 + shift];
+            uvec.val[1] = ta_uv.val[0 + shift];
+            vst2q_u8(out_u.ptr(), uvec);
+            vst2q_u8(out_u.ptr() + output_ptr->plane(1)->info()->strides_in_bytes().y(), uvec);
 
-        uint8x16x2_t vvec;
-        vvec.val[0] = ta_uv.val[1 - shift];
-        vvec.val[1] = ta_uv.val[1 - shift];
-        vst2q_u8(out_v.ptr(), vvec);
-        vst2q_u8(out_v.ptr() + output_ptr->plane(2)->info()->strides_in_bytes().y(), vvec);
-    },
-    in_y, in_uv, out_y, out_u, out_v);
+            uint8x16x2_t vvec;
+            vvec.val[0] = ta_uv.val[1 - shift];
+            vvec.val[1] = ta_uv.val[1 - shift];
+            vst2q_u8(out_v.ptr(), vvec);
+            vst2q_u8(out_v.ptr() + output_ptr->plane(2)->info()->strides_in_bytes().y(), vvec);
+        },
+        in_y, in_uv, out_y, out_u, out_v);
 }
 
 /** Convert IYUV to YUV4.
@@ -892,33 +959,35 @@ void colorconvert_iyuv_to_yuv4(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win);
     Iterator out_v(output_ptr->plane(2), win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_y_top    = vld2q_u8(in_y.ptr());
-        const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
-        const auto ta_u        = vld1q_u8(in_u.ptr());
-        const auto ta_v        = vld1q_u8(in_v.ptr());
-        //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
-        //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
-        //ta_u = U0 U2 U4 U6 ...
-        //ta_v = V0 V2 V4 V6 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_y_top    = vld2q_u8(in_y.ptr());
+            const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
+            const auto ta_u        = vld1q_u8(in_u.ptr());
+            const auto ta_v        = vld1q_u8(in_v.ptr());
+            //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
+            //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
+            //ta_u = U0 U2 U4 U6 ...
+            //ta_v = V0 V2 V4 V6 ...
 
-        vst2q_u8(out_y.ptr(), ta_y_top);
-        vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
+            vst2q_u8(out_y.ptr(), ta_y_top);
+            vst2q_u8(out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), ta_y_bottom);
 
-        uint8x16x2_t uvec;
-        uvec.val[0] = ta_u;
-        uvec.val[1] = ta_u;
-        vst2q_u8(out_u.ptr(), uvec);
-        vst2q_u8(out_u.ptr() + output_ptr->plane(1)->info()->strides_in_bytes().y(), uvec);
+            uint8x16x2_t uvec;
+            uvec.val[0] = ta_u;
+            uvec.val[1] = ta_u;
+            vst2q_u8(out_u.ptr(), uvec);
+            vst2q_u8(out_u.ptr() + output_ptr->plane(1)->info()->strides_in_bytes().y(), uvec);
 
-        uint8x16x2_t vvec;
-        vvec.val[0] = ta_v;
-        vvec.val[1] = ta_v;
-        vst2q_u8(out_v.ptr(), vvec);
-        vst2q_u8(out_v.ptr() + output_ptr->plane(2)->info()->strides_in_bytes().y(), vvec);
-    },
-    in_y, in_u, in_v, out_y, out_u, out_v);
+            uint8x16x2_t vvec;
+            vvec.val[0] = ta_v;
+            vvec.val[1] = ta_v;
+            vst2q_u8(out_v.ptr(), vvec);
+            vst2q_u8(out_v.ptr() + output_ptr->plane(2)->info()->strides_in_bytes().y(), vvec);
+        },
+        in_y, in_u, in_v, out_y, out_u, out_v);
 }
 
 /** Convert RGB to NV12.
@@ -948,20 +1017,21 @@ void colorconvert_rgb_to_nv12(const void *__restrict input, void *__restrict out
     Iterator out_y(output_ptr->plane(0), win);
     Iterator out_uv(output_ptr->plane(1), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_rgb_top    = load_rgb(in.ptr(), alpha);
-        const auto ta_rgb_bottom = load_rgb(in.ptr() + input_ptr->info()->strides_in_bytes().y(), alpha);
-        //ta_rgb.val[0] = R0 R1 R2 R3 ...
-        //ta_rgb.val[1] = G0 G1 G2 G3 ...
-        //ta_rgb.val[2] = B0 B1 B2 B3 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_rgb_top    = load_rgb(in.ptr(), alpha);
+            const auto ta_rgb_bottom = load_rgb(in.ptr() + input_ptr->info()->strides_in_bytes().y(), alpha);
+            //ta_rgb.val[0] = R0 R1 R2 R3 ...
+            //ta_rgb.val[1] = G0 G1 G2 G3 ...
+            //ta_rgb.val[2] = B0 B1 B2 B3 ...
 
-        store_rgb_to_nv12(ta_rgb_top.val[0], ta_rgb_top.val[1], ta_rgb_top.val[2],
-                          ta_rgb_bottom.val[0], ta_rgb_bottom.val[1], ta_rgb_bottom.val[2],
-                          out_y.ptr(), out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(),
-                          out_uv.ptr());
-    },
-    in, out_y, out_uv);
+            store_rgb_to_nv12(ta_rgb_top.val[0], ta_rgb_top.val[1], ta_rgb_top.val[2], ta_rgb_bottom.val[0],
+                              ta_rgb_bottom.val[1], ta_rgb_bottom.val[2], out_y.ptr(),
+                              out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), out_uv.ptr());
+        },
+        in, out_y, out_uv);
 }
 
 /** Convert RGB to IYUV.
@@ -992,20 +1062,22 @@ void colorconvert_rgb_to_iyuv(const void *__restrict input, void *__restrict out
     Iterator out_u(output_ptr->plane(1), win_uv);
     Iterator out_v(output_ptr->plane(2), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_rgb_top    = load_rgb(in.ptr(), alpha);
-        const auto ta_rgb_bottom = load_rgb(in.ptr() + input_ptr->info()->strides_in_bytes().y(), alpha);
-        //ta_rgb.val[0] = R0 R1 R2 R3 ...
-        //ta_rgb.val[1] = G0 G1 G2 G3 ...
-        //ta_rgb.val[2] = B0 B1 B2 B3 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_rgb_top    = load_rgb(in.ptr(), alpha);
+            const auto ta_rgb_bottom = load_rgb(in.ptr() + input_ptr->info()->strides_in_bytes().y(), alpha);
+            //ta_rgb.val[0] = R0 R1 R2 R3 ...
+            //ta_rgb.val[1] = G0 G1 G2 G3 ...
+            //ta_rgb.val[2] = B0 B1 B2 B3 ...
 
-        store_rgb_to_iyuv(ta_rgb_top.val[0], ta_rgb_top.val[1], ta_rgb_top.val[2],
-                          ta_rgb_bottom.val[0], ta_rgb_bottom.val[1], ta_rgb_bottom.val[2],
-                          out_y.ptr(), out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(),
-                          out_u.ptr(), out_v.ptr());
-    },
-    in, out_y, out_u, out_v);
+            store_rgb_to_iyuv(ta_rgb_top.val[0], ta_rgb_top.val[1], ta_rgb_top.val[2], ta_rgb_bottom.val[0],
+                              ta_rgb_bottom.val[1], ta_rgb_bottom.val[2], out_y.ptr(),
+                              out_y.ptr() + output_ptr->plane(0)->info()->strides_in_bytes().y(), out_u.ptr(),
+                              out_v.ptr());
+        },
+        in, out_y, out_u, out_v);
 }
 
 /** Convert RGB to YUV4.
@@ -1030,16 +1102,17 @@ void colorconvert_rgb_to_yuv4(const void *__restrict input, void *__restrict out
     Iterator out_u(output_ptr->plane(1), win);
     Iterator out_v(output_ptr->plane(2), win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto ta_rgb = load_rgb(in.ptr(), alpha);
-        //ta_rgb.val[0] = R0 R1 R2 R3 ...
-        //ta_rgb.val[1] = G0 G1 G2 G3 ...
-        //ta_rgb.val[2] = B0 B1 B2 B3 ...
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto ta_rgb = load_rgb(in.ptr(), alpha);
+            //ta_rgb.val[0] = R0 R1 R2 R3 ...
+            //ta_rgb.val[1] = G0 G1 G2 G3 ...
+            //ta_rgb.val[2] = B0 B1 B2 B3 ...
 
-        store_rgb_to_yuv4(ta_rgb.val[0], ta_rgb.val[1], ta_rgb.val[2],
-                          out_y.ptr(), out_u.ptr(), out_v.ptr());
-    },
-    in, out_y, out_u, out_v);
+            store_rgb_to_yuv4(ta_rgb.val[0], ta_rgb.val[1], ta_rgb.val[2], out_y.ptr(), out_u.ptr(), out_v.ptr());
+        },
+        in, out_y, out_u, out_v);
 }
 } // namespace arm_compute

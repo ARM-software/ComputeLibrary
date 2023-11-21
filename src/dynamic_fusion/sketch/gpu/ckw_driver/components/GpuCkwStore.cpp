@@ -24,10 +24,12 @@
 #include "GpuCkwStore.h"
 
 #include "arm_compute/core/Error.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
+
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
+
 #include <string>
 
 namespace arm_compute
@@ -37,12 +39,14 @@ namespace experimental
 namespace dynamic_fusion
 {
 GpuCkwStore::GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuCkwComponentDriver{ id, tensors }, _src{}, _dst{}
+    : IGpuCkwComponentDriver{id, tensors}, _src{}, _dst{}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
 }
-void GpuCkwStore::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
+void GpuCkwStore::write_component_code(const ComponentGroup    &comp_group,
+                                       GpuCkwVariableTable     &vtable,
+                                       GpuCkwScopedKernelWriter writer) const
 {
     auto src = vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
     auto dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");

@@ -27,15 +27,16 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Traits.h"
+
 #include "src/core/CPP/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/helpers/AutoConfiguration.h"
-#include "src/core/helpers/WindowHelpers.h"
 
 #include <arm_neon.h>
 #include <cstddef>
@@ -49,7 +50,9 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst,
+Status validate_arguments(const ITensorInfo                                 *src,
+                          const ITensorInfo                                 *bias,
+                          const ITensorInfo                                 *dst,
                           const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
@@ -57,22 +60,23 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::S32, DataType::F32);
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bias);
-        ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != src->dimension(get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::CHANNEL)));
+        ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != src->dimension(get_data_layout_dimension_index(
+                                                              src->data_layout(), DataLayoutDimension::CHANNEL)));
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
     }
 
-    if(src->data_type() == DataType::S32)
+    if (src->data_type() == DataType::S32)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst == nullptr, "In-place computation not allowed for quantized output");
     }
 
     // Checks performed when output is configured
-    if((dst != nullptr) && (dst->total_size() != 0))
+    if ((dst != nullptr) && (dst->total_size() != 0))
     {
-        if(is_data_type_float(src->data_type()))
+        if (is_data_type_float(src->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         }
@@ -82,10 +86,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const
         }
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }
-    else if(src->data_type() == DataType::S32)
+    else if (src->data_type() == DataType::S32)
     {
         // In case of quantized computation and unconfigured output, the output data type must be provided through DirectConvolutionLayerOutputStageKernelInfo
-        ARM_COMPUTE_RETURN_ERROR_ON((info.output_data_type != DataType::QASYMM8) && (info.output_data_type != DataType::QASYMM8_SIGNED));
+        ARM_COMPUTE_RETURN_ERROR_ON((info.output_data_type != DataType::QASYMM8) &&
+                                    (info.output_data_type != DataType::QASYMM8_SIGNED));
     }
 
     return Status{};
@@ -93,8 +98,13 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const
 
 template <typename T>
 typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-output_stage_nchw(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
-                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+output_stage_nchw(ITensor       *src,
+                  const ITensor *bias,
+                  const Window  &window,
+                  ITensor       *dst,
+                  int            result_fixedpoint_multiplier,
+                  int            result_shift,
+                  int            result_offset_after_shift)
 {
     const bool has_bias = bias != nullptr;
     /** SIMD vector tag type. */
@@ -113,50 +123,57 @@ output_stage_nchw(ITensor *src, const ITensor *bias, const Window &window, ITens
 
     Iterator in(src, win);
     Iterator out(dst, win);
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
         {
-            // Get bias and pointer to input
-            const auto in_ptr = reinterpret_cast<const T *>(in.ptr()) + x;
-            auto       v_in   = wrapper::vloadq(in_ptr);
-
-            // Accumulate bias
-            if(has_bias)
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                const auto vb = wrapper::vdup_n(*reinterpret_cast<const T *>(bias->ptr_to_element(Coordinates(id.z()))), ExactTagType{});
-                v_in          = wrapper::vadd(v_in, vb);
+                // Get bias and pointer to input
+                const auto in_ptr = reinterpret_cast<const T *>(in.ptr()) + x;
+                auto       v_in   = wrapper::vloadq(in_ptr);
+
+                // Accumulate bias
+                if (has_bias)
+                {
+                    const auto vb = wrapper::vdup_n(
+                        *reinterpret_cast<const T *>(bias->ptr_to_element(Coordinates(id.z()))), ExactTagType{});
+                    v_in = wrapper::vadd(v_in, vb);
+                }
+
+                const auto out_ptr = reinterpret_cast<T *>(out.ptr()) + x;
+                wrapper::vstore(out_ptr, v_in);
             }
 
-            const auto out_ptr = reinterpret_cast<T *>(out.ptr()) + x;
-            wrapper::vstore(out_ptr, v_in);
-        }
-
-        // Left-overs loop
-        for(; x < window_end_x; ++x)
-        {
-            // Get bias and pointer to input
-            auto s_in = *(reinterpret_cast<const T *>(in.ptr()) + x);
-
-            // Accumulate bias
-            if(has_bias)
+            // Left-overs loop
+            for (; x < window_end_x; ++x)
             {
-                const auto b = *reinterpret_cast<const T *>(bias->ptr_to_element(Coordinates(id.z())));
-                s_in += b;
+                // Get bias and pointer to input
+                auto s_in = *(reinterpret_cast<const T *>(in.ptr()) + x);
+
+                // Accumulate bias
+                if (has_bias)
+                {
+                    const auto b = *reinterpret_cast<const T *>(bias->ptr_to_element(Coordinates(id.z())));
+                    s_in += b;
+                }
+
+                *(reinterpret_cast<T *>(out.ptr()) + x) = s_in;
             }
-
-            *(reinterpret_cast<T *>(out.ptr()) + x) = s_in;
-        }
-
-    },
-    in, out);
+        },
+        in, out);
 }
 
 template <typename T>
 typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-output_stage_nhwc(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
-                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+output_stage_nhwc(ITensor       *src,
+                  const ITensor *bias,
+                  const Window  &window,
+                  ITensor       *dst,
+                  int            result_fixedpoint_multiplier,
+                  int            result_shift,
+                  int            result_offset_after_shift)
 {
     const bool has_bias = bias != nullptr;
     ARM_COMPUTE_UNUSED(result_fixedpoint_multiplier);
@@ -179,50 +196,59 @@ output_stage_nhwc(ITensor *src, const ITensor *bias, const Window &window, ITens
     Iterator bi(bias, window_bias);
     Iterator out(dst, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
         {
-            // Get bias and pointer to input
-            const auto in_ptr = reinterpret_cast<const T *>(in.ptr());
-            auto       v_in   = wrapper::vloadq(in_ptr + x);
-
-            // Accumulate bias
-            if(has_bias)
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                const auto bias_ptr = reinterpret_cast<T *>(bi.ptr()) + x;
-                v_in                = wrapper::vadd(v_in, wrapper::vloadq(bias_ptr));
+                // Get bias and pointer to input
+                const auto in_ptr = reinterpret_cast<const T *>(in.ptr());
+                auto       v_in   = wrapper::vloadq(in_ptr + x);
+
+                // Accumulate bias
+                if (has_bias)
+                {
+                    const auto bias_ptr = reinterpret_cast<T *>(bi.ptr()) + x;
+                    v_in                = wrapper::vadd(v_in, wrapper::vloadq(bias_ptr));
+                }
+
+                const auto out_ptr = reinterpret_cast<T *>(out.ptr());
+                wrapper::vstore(out_ptr + x, v_in);
             }
 
-            const auto out_ptr = reinterpret_cast<T *>(out.ptr());
-            wrapper::vstore(out_ptr + x, v_in);
-        }
-
-        // Left-overs loop
-        for(; x < window_end_x; ++x)
-        {
-            // Get bias and pointer to input
-            auto s_in = *(reinterpret_cast<const T *>(in.ptr()) + x);
-
-            // Accumulate bias
-            if(has_bias)
+            // Left-overs loop
+            for (; x < window_end_x; ++x)
             {
-                const auto bias_ptr = reinterpret_cast<T *>(bi.ptr()) + x;
-                s_in += *bias_ptr;
-            }
+                // Get bias and pointer to input
+                auto s_in = *(reinterpret_cast<const T *>(in.ptr()) + x);
 
-            const auto out_ptr = reinterpret_cast<T *>(out.ptr());
-            *(out_ptr + x)     = s_in;
-        }
-    },
-    in, bi, out);
+                // Accumulate bias
+                if (has_bias)
+                {
+                    const auto bias_ptr = reinterpret_cast<T *>(bi.ptr()) + x;
+                    s_in += *bias_ptr;
+                }
+
+                const auto out_ptr = reinterpret_cast<T *>(out.ptr());
+                *(out_ptr + x)     = s_in;
+            }
+        },
+        in, bi, out);
 }
 
 // Quantized case
-template < typename TOut, typename std::enable_if < std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int >::type = 0 >
-void output_stage_nchw(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
-                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+template <
+    typename TOut,
+    typename std::enable_if<std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int>::type = 0>
+void output_stage_nchw(ITensor       *src,
+                       const ITensor *bias,
+                       const Window  &window,
+                       ITensor       *dst,
+                       int            result_fixedpoint_multiplier,
+                       int            result_shift,
+                       int            result_offset_after_shift)
 {
     const bool has_bias = bias != nullptr;
     using VectorType    = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
@@ -242,67 +268,63 @@ void output_stage_nchw(ITensor *src, const ITensor *bias, const Window &window, 
     Iterator in(src, win);
     Iterator out(dst, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
         {
-            // Get bias and pointer to input
-            const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
-            int32x4x4_t v_in =
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
+                // Get bias and pointer to input
+                const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
+                int32x4x4_t v_in = {{wrapper::vloadq(in_ptr), wrapper::vloadq(in_ptr + 4), wrapper::vloadq(in_ptr + 8),
+                                     wrapper::vloadq(in_ptr + 12)}};
+
+                // Accumulate bias
+                if (has_bias)
                 {
-                    wrapper::vloadq(in_ptr),
-                    wrapper::vloadq(in_ptr + 4),
-                    wrapper::vloadq(in_ptr + 8),
-                    wrapper::vloadq(in_ptr + 12)
+                    const auto vb = wrapper::vdup_n(
+                        *reinterpret_cast<const int32_t *>(bias->ptr_to_element(Coordinates(id.z()))), TagType{});
+                    v_in = {{wrapper::vadd(v_in.val[0], vb), wrapper::vadd(v_in.val[1], vb),
+                             wrapper::vadd(v_in.val[2], vb), wrapper::vadd(v_in.val[3], vb)}};
                 }
-            };
 
-            // Accumulate bias
-            if(has_bias)
+                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
+                wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift,
+                                                               result_offset_after_shift_s32, min, max, false));
+            }
+
+            // Left-overs loop
+            for (; x < window_end_x; ++x)
             {
-                const auto vb = wrapper::vdup_n(*reinterpret_cast<const int32_t *>(bias->ptr_to_element(Coordinates(id.z()))), TagType{});
-                v_in =
+                // Get bias and pointer to input
+                int32_t s_in = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
+
+                // Accumulate bias
+                if (has_bias)
                 {
-                    {
-                        wrapper::vadd(v_in.val[0], vb),
-                        wrapper::vadd(v_in.val[1], vb),
-                        wrapper::vadd(v_in.val[2], vb),
-                        wrapper::vadd(v_in.val[3], vb)
-                    }
-                };
+                    const auto b = *reinterpret_cast<const int32_t *>(bias->ptr_to_element(Coordinates(id.z())));
+                    s_in += b;
+                }
+
+                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
+                *out_ptr =
+                    finalize_quantization(s_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift,
+                                          std::numeric_limits<TOut>::lowest(), std::numeric_limits<TOut>::max(), false);
             }
-
-            const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-            wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32,
-                                                           min, max, false));
-        }
-
-        // Left-overs loop
-        for(; x < window_end_x; ++x)
-        {
-            // Get bias and pointer to input
-            int32_t s_in = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
-
-            // Accumulate bias
-            if(has_bias)
-            {
-                const auto b = *reinterpret_cast<const int32_t *>(bias->ptr_to_element(Coordinates(id.z())));
-                s_in += b;
-            }
-
-            const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-            *out_ptr           = finalize_quantization(s_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift,
-                                                       std::numeric_limits<TOut>::lowest(), std::numeric_limits<TOut>::max(), false);
-        }
-    },
-    in, out);
+        },
+        in, out);
 }
-template < typename TOut, typename std::enable_if < std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int >::type = 0 >
-void output_stage_nhwc(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
-                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+template <
+    typename TOut,
+    typename std::enable_if<std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int>::type = 0>
+void output_stage_nhwc(ITensor       *src,
+                       const ITensor *bias,
+                       const Window  &window,
+                       ITensor       *dst,
+                       int            result_fixedpoint_multiplier,
+                       int            result_shift,
+                       int            result_offset_after_shift)
 {
     const bool has_bias = bias != nullptr;
     using VectorType    = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
@@ -329,62 +351,65 @@ void output_stage_nhwc(ITensor *src, const ITensor *bias, const Window &window, 
     Iterator bi(bias, window_bias);
     Iterator out(dst, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
         {
-            // Get bias and pointer to input
-            const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
-            int32x4x4_t v_in =
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
+                // Get bias and pointer to input
+                const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
+                int32x4x4_t v_in   = {{
+                      wrapper::vloadq(in_ptr),
+                      wrapper::vloadq(in_ptr + 4),
+                      wrapper::vloadq(in_ptr + 8),
+                      wrapper::vloadq(in_ptr + 12),
+                }};
+
+                // Accumulate bias
+                if (has_bias)
                 {
-                    wrapper::vloadq(in_ptr),
-                    wrapper::vloadq(in_ptr + 4),
-                    wrapper::vloadq(in_ptr + 8),
-                    wrapper::vloadq(in_ptr + 12),
+                    const auto bias_ptr = reinterpret_cast<int32_t *>(bi.ptr()) + x;
+
+                    wrapper::vadd(v_in.val[0], wrapper::vloadq(bias_ptr));
+                    wrapper::vadd(v_in.val[1], wrapper::vloadq(bias_ptr + 4));
+                    wrapper::vadd(v_in.val[2], wrapper::vloadq(bias_ptr + 8));
+                    wrapper::vadd(v_in.val[3], wrapper::vloadq(bias_ptr + 12));
                 }
-            };
 
-            // Accumulate bias
-            if(has_bias)
-            {
-                const auto bias_ptr = reinterpret_cast<int32_t *>(bi.ptr()) + x;
-
-                wrapper::vadd(v_in.val[0], wrapper::vloadq(bias_ptr));
-                wrapper::vadd(v_in.val[1], wrapper::vloadq(bias_ptr + 4));
-                wrapper::vadd(v_in.val[2], wrapper::vloadq(bias_ptr + 8));
-                wrapper::vadd(v_in.val[3], wrapper::vloadq(bias_ptr + 12));
+                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
+                wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift,
+                                                               result_offset_after_shift_s32, min, max, false));
             }
 
-            const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-            wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max, false));
-        }
-
-        // Left-overs loop
-        for(; x < window_end_x; ++x)
-        {
-            // Get bias and pointer to input
-            const auto in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
-            int32_t    s_in   = *in_ptr;
-
-            // Accumulate bias
-            if(has_bias)
+            // Left-overs loop
+            for (; x < window_end_x; ++x)
             {
-                const auto bias_ptr = reinterpret_cast<int32_t *>(bi.ptr()) + x;
-                s_in += *bias_ptr;
-            }
+                // Get bias and pointer to input
+                const auto in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
+                int32_t    s_in   = *in_ptr;
 
-            const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-            *out_ptr           = finalize_quantization(s_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift,
-                                                       std::numeric_limits<TOut>::lowest(), std::numeric_limits<TOut>::max(), false);
-        }
-    },
-    in, bi, out);
+                // Accumulate bias
+                if (has_bias)
+                {
+                    const auto bias_ptr = reinterpret_cast<int32_t *>(bi.ptr()) + x;
+                    s_in += *bias_ptr;
+                }
+
+                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
+                *out_ptr =
+                    finalize_quantization(s_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift,
+                                          std::numeric_limits<TOut>::lowest(), std::numeric_limits<TOut>::max(), false);
+            }
+        },
+        in, bi, out);
 }
 } // namespace
 
-void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst,
+void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo                                       *src,
+                                                 const ITensorInfo                                 *bias,
+                                                 ITensorInfo                                       *dst,
                                                  const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
     ARM_COMPUTE_UNUSED(bias);
@@ -398,7 +423,7 @@ void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo *src, const ITensor
     _result_offset_after_shift    = info.result_offset_after_shift;
 
     // Auto-initialize output output if required
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         // Work out expected output data type
         const DataType output_dt = (src->data_type() == DataType::S32) ? info.output_data_type : DataType::S32;
@@ -410,16 +435,17 @@ void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo *src, const ITensor
 
     ICpuKernel::configure(win);
 
-    const bool is_qasymm8_signed = (dst != nullptr) ? is_data_type_quantized_asymmetric_signed(dst->data_type()) : false;
+    const bool is_qasymm8_signed =
+        (dst != nullptr) ? is_data_type_quantized_asymmetric_signed(dst->data_type()) : false;
 
     // Set appropriate function
-    if(src->data_layout() == DataLayout::NCHW)
+    if (src->data_layout() == DataLayout::NCHW)
     {
-        switch(src->data_type())
+        switch (src->data_type())
         {
             case DataType::S32:
             {
-                if(is_qasymm8_signed)
+                if (is_qasymm8_signed)
                 {
                     _func = &output_stage_nchw<int8_t>;
                 }
@@ -449,11 +475,11 @@ void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo *src, const ITensor
     }
     else
     {
-        switch(src->data_type())
+        switch (src->data_type())
         {
             case DataType::S32:
             {
-                if(is_qasymm8_signed)
+                if (is_qasymm8_signed)
                 {
                     _func = &output_stage_nhwc<int8_t>;
                 }
@@ -483,7 +509,9 @@ void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo *src, const ITensor
     }
 }
 
-Status CpuDirectConv2dOutputStageKernel::validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst,
+Status CpuDirectConv2dOutputStageKernel::validate(const ITensorInfo                                 *src,
+                                                  const ITensorInfo                                 *bias,
+                                                  const ITensorInfo                                 *dst,
                                                   const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, bias, dst, info));

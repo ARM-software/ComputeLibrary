@@ -57,15 +57,15 @@ public:
     static Status validate(const ITensorInfo *src, unsigned int batch_offset, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
     using BatchConcatFunction = void(const ITensor *, ITensor *, unsigned int, const Window &);
 
 private:
-    BatchConcatFunction *_func{ nullptr };
-    unsigned int         _batch_offset{ 0 };
+    BatchConcatFunction *_func{nullptr};
+    unsigned int         _batch_offset{0};
 };
 } // namespace kernels
 } // namespace cpu

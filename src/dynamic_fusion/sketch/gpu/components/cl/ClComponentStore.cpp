@@ -38,25 +38,19 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status ClComponentStore::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors)
+Status ClComponentStore::validate(const Properties &properties, const ArgumentPack<ITensorInfo> &tensors)
 {
     ARM_COMPUTE_UNUSED(properties, tensors);
     return Status{};
 }
-ClComponentStore::ClComponentStore(ComponentId id, const Properties &properties, const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuKernelComponent{ id, properties, tensors },
+ClComponentStore::ClComponentStore(ComponentId                      id,
+                                   const Properties                &properties,
+                                   const ArgumentPack<ITensorInfo> &tensors)
+    : IGpuKernelComponent{id, properties, tensors},
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<ClTemplateStore>(id, tensors)
-}
+      _component_writer{std::make_unique<ClTemplateStore>(id, tensors)}
 #else  //ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<GpuCkwStore>(id, tensors)
-}
+      _component_writer{std::make_unique<GpuCkwStore>(id, tensors)}
 #endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }

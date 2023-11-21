@@ -26,6 +26,7 @@
 #define ARM_COMPUTE_NEGATHERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -92,8 +93,8 @@ private:
     ITensor       *_output;
     kernel_ptr     _func;
 
-    Strides        _src_it_strides;
-    Strides        _idx_it_strides;
+    Strides _src_it_strides;
+    Strides _idx_it_strides;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEGATHERKERNEL_H */

@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 
@@ -36,11 +37,8 @@ namespace dynamic_fusion
 {
 constexpr unsigned int vector_size_byte_opencl = 16;
 
-ClTemplateReshape::ClTemplateReshape(ComponentId                      id,
-                                     const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuTemplateComponentWriter{ id, tensors },
-      _src{},
-      _dst{}
+ClTemplateReshape::ClTemplateReshape(ComponentId id, const ArgumentPack<ITensorInfo> &tensors)
+    : IGpuTemplateComponentWriter{id, tensors}, _src{}, _dst{}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
@@ -97,23 +95,17 @@ TILE(uint, M0, 1, g_dst_indirect_y);
 
 void ClTemplateReshape::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(common_tensor_type), // GpuKernelArgumentInfo::Type::Image_3D
-        "src");
+    vtable.declare_variable(comp_group, _src,
+                            GpuKernelArgumentInfo(common_tensor_type), // GpuKernelArgumentInfo::Type::Image_3D
+                            "src");
 
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(common_tensor_type),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(common_tensor_type), "dst");
 }
 
 TagLUT ClTemplateReshape::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
     ARM_COMPUTE_UNUSED(comp_group);
-    TagLUT     lut{};
+    TagLUT lut{};
 
     // Arguments and global shared variables
     lut["src"]            = vtable.get_variable(_src);
@@ -153,7 +145,7 @@ std::string ClTemplateReshape::get_config_id() const
 
 std::set<std::string> ClTemplateReshape::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h"};
 }
 
 Window ClTemplateReshape::get_window() const

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2018, 2020-2021 Arm Limited.
+# Copyright (c) 2017-2018, 2020-2021, 2023 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -74,7 +74,7 @@ def create_include_list(folder):
     files_path = folder + "/*.h"
     files = glob.glob(files_path)
     updated_files = [include_str + folder + "/" + x.rsplit('/',1)[1] + "\"\n" for x in files]
-    updated_files.sort()
+    updated_files.sort(key=lambda x: x.lower())
     return updated_files
 
 
@@ -86,7 +86,7 @@ def include_components(target, path, header_prefix, folder, subfolders=None):
             include_list = create_include_list(target_path + folder)
             for s in subfolders or []:
                 include_list += create_include_list( target_path + folder + "/" + s)
-            include_list.sort()
+            include_list.sort(key=lambda x: x.lower())
             lines = read_file(components_file)
             lines, first_pos = remove_existing_includes(lines)
             lines = add_updated_includes(lines, first_pos, include_list)

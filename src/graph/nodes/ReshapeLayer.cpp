@@ -21,17 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ReshapeLayerNode.h"
-
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
+#include "arm_compute/graph/nodes/ReshapeLayerNode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-ReshapeLayerNode::ReshapeLayerNode(TensorShape shape)
-    : _shape(shape)
+ReshapeLayerNode::ReshapeLayerNode(TensorShape shape) : _shape(shape)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -39,7 +37,7 @@ ReshapeLayerNode::ReshapeLayerNode(TensorShape shape)
 
 bool ReshapeLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

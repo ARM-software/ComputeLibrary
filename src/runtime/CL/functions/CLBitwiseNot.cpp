@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLBitwiseNot.h"
 
-#include "src/core/CL/kernels/CLBitwiseKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLBitwiseKernel.h"
 
 #include <utility>
 

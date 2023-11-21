@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 #ifndef ARM_COMPUTE_CPU_RESHAPE_H
 #define ARM_COMPUTE_CPU_RESHAPE_H
 
+#include "arm_compute/core/Window.h"
+
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute
@@ -47,6 +49,12 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
+
+    // Inherited methods overridden:
+    void run(ITensorPack &tensors) override;
+
+private:
+    bool _is_prepared{false};
 };
 } // namespace cpu
 } // namespace arm_compute

@@ -52,8 +52,8 @@ public:
     /** Structure to encapsulte program related information */
     struct ClProgramInfo
     {
-        std::string program{};          /**< Program raw string */
-        bool        is_binary{ false }; /**< Flag that indicates if is in binary format */
+        std::string program{};        /**< Program raw string */
+        bool        is_binary{false}; /**< Flag that indicates if is in binary format */
     };
 
 public:
@@ -84,10 +84,12 @@ public:
     std::string program_name(const std::string &kernel_name) const;
 
 private:
-    std::string _kernel_path{};                                                 /**< Path to the kernels folder. */
-    mutable std::map<std::string, std::string>      _decompressed_source_map{}; /**< Map holding the decompressed files when compression is used */
-    static const std::map<std::string, std::string> _kernel_program_map;        /**< Map that associates kernel names with programs. */
-    static const std::map<std::string, std::string> _program_source_map;        /**< Contains sources for all programs.
+    std::string _kernel_path{}; /**< Path to the kernels folder. */
+    mutable std::map<std::string, std::string>
+        _decompressed_source_map{}; /**< Map holding the decompressed files when compression is used */
+    static const std::map<std::string, std::string>
+        _kernel_program_map; /**< Map that associates kernel names with programs. */
+    static const std::map<std::string, std::string> _program_source_map; /**< Contains sources for all programs.
                                                                                      Used for compile-time kernel inclusion. >*/
 };
 } // namespace opencl

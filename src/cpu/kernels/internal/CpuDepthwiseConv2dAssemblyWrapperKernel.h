@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_ASSEMBLY_WRAPPER_KERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 #include "src/cpu/kernels/CpuKernelSelectionTypes.h"
@@ -35,8 +36,8 @@ namespace depthwise
 {
 // Forward declarations
 class IDepthwiseCommon;
-} // depthwise
-} // arm_conv
+} // namespace depthwise
+} // namespace arm_conv
 
 namespace arm_compute
 {
@@ -66,7 +67,12 @@ public:
      * @param[in]  info     Depthwise convolution layer meta-data.
      * @param[in]  cpu_info CPU information needed to select the most appropriate kernel.
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *dst, const ConvolutionInfo &info, const CPUInfo &cpu_info);
+    void configure(const ITensorInfo     *src,
+                   const ITensorInfo     *weights,
+                   const ITensorInfo     *bias,
+                   ITensorInfo           *dst,
+                   const ConvolutionInfo &info,
+                   const CPUInfo         &cpu_info);
 
     /** Indicates whether or not this function can be used to process the given parameters.
      *
@@ -74,10 +80,14 @@ public:
      *
      * @return a status.
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const ConvolutionInfo &info);
+    static Status validate(const ITensorInfo     *src,
+                           const ITensorInfo     *weights,
+                           const ITensorInfo     *bias,
+                           const ITensorInfo     *dst,
+                           const ConvolutionInfo &info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     /** Pack bias and weights in a storage space for the assembly kernel
@@ -88,7 +98,8 @@ public:
      * @param[in] ld_weights_col Columns displacement for the weights tensor.
      * @param[in] ld_weights_row Rows displacement for the weights tensor.
      */
-    void pack_parameters(void *parameters_ptr, void *bias_ptr, void *weights_ptr, size_t ld_weights_col, size_t ld_weights_row);
+    void pack_parameters(
+        void *parameters_ptr, void *bias_ptr, void *weights_ptr, size_t ld_weights_col, size_t ld_weights_row);
 
     /** Get the amount of storage space required for the rearranged weights and bias.
      *

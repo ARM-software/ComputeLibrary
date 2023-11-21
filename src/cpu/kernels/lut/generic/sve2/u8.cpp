@@ -32,11 +32,7 @@ namespace arm_compute
 namespace cpu
 {
 void lut_u8_sve2(
-    const uint8_t        *table,
-    size_t                num_strings,
-    size_t                string_length,
-    const uint8_t *const *input,
-    uint8_t *const       *output)
+    const uint8_t *table, size_t num_strings, size_t string_length, const uint8_t *const *input, uint8_t *const *output)
 {
     __asm__ __volatile__(
         "ptrue p0.b\n"
@@ -636,7 +632,9 @@ void lut_u8_sve2(
         "bne 2b\n"
         : [table] "+&r"(table)
         : [input] "r"(input), [num_strings] "r"(num_strings), [output] "r"(output), [string_length] "r"(string_length)
-        : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "x20", "x21", "x22", "x23", "x24", "x25", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31");
+        : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "x20", "x21", "x22", "x23", "x24", "x25", "z0", "z1",
+          "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z16", "z17", "z18", "z19", "z20", "z21",
+          "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31");
 }
 
 } // namespace cpu

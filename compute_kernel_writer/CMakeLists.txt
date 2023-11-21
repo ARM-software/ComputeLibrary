@@ -118,16 +118,22 @@ target_compile_definitions(ckw PUBLIC
 )
 
 target_sources(ckw PRIVATE
+    src/types/ConstantData.cpp
+    src/types/DataTypeHelpers.cpp
     src/Error.cpp
     src/Helpers.cpp
+    src/ITile.cpp
     src/Kernel.cpp
+    src/KernelArgument.cpp
     src/KernelWriter.cpp
+    src/Tensor3dMapper.cpp
     src/TensorInfo.cpp
     src/TensorOperand.cpp
     src/TensorSampler.cpp
     src/TensorUtils.cpp
     src/TileInfo.cpp
     src/TileOperand.cpp
+    src/TileView.cpp
 )
 
 if(CKW_ENABLE_OPENCL)
@@ -137,6 +143,8 @@ if(CKW_ENABLE_OPENCL)
         src/cl/CLHelpers.cpp
         src/cl/CLTile.cpp
         src/cl/CLKernelWriter.cpp
+        src/cl/helpers/CLMemoryOpBufferHelper.cpp
+        src/cl/helpers/CLMemoryOpImage2dHelper.cpp
     )
 endif()
 

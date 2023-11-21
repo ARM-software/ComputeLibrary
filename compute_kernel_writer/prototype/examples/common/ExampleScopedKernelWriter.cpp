@@ -23,6 +23,7 @@
  */
 
 #include "ExampleScopedKernelWriter.h"
+
 #include "ExampleKernelWriter.h"
 
 ExampleScopedKernelWriter::ExampleScopedKernelWriter(ExampleKernelWriter *writer)

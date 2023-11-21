@@ -23,15 +23,14 @@
  */
 #include "arm_compute/graph/mutators/GroupedConvolutionMutator.h"
 
+#include "arm_compute/graph/backends/BackendRegistry.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphBuilder.h"
 #include "arm_compute/graph/Logger.h"
-#include "arm_compute/graph/Utils.h"
-#include "arm_compute/graph/backends/BackendRegistry.h"
 #include "arm_compute/graph/nodes/Nodes.h"
+#include "arm_compute/graph/Utils.h"
 
 #include "support/Cast.h"
-
 #include "support/StringSupport.h"
 
 #include <set>
@@ -42,43 +41,51 @@ namespace graph
 {
 namespace
 {
-NodeID create_grouped_convolution(Graph &g, const NodeParams &params, NodeIdxPair input, NodeID weights, NodeID bias,
-                                  PadStrideInfo conv_info, ConvolutionMethod method, ActivationLayerInfo fused_act, FastMathHint fast_math_hint, unsigned int num_groups)
+NodeID create_grouped_convolution(Graph              &g,
+                                  const NodeParams   &params,
+                                  NodeIdxPair         input,
+                                  NodeID              weights,
+                                  NodeID              bias,
+                                  PadStrideInfo       conv_info,
+                                  ConvolutionMethod   method,
+                                  ActivationLayerInfo fused_act,
+                                  FastMathHint        fast_math_hint,
+                                  unsigned int        num_groups)
 {
     bool has_bias = (bias != EmptyNodeID);
 
     // Split input
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
-    const unsigned int     input_idx         = get_dimension_idx(input_tensor_desc.layout, DataLayoutDimension::CHANNEL);
-    NodeID                 input_split       = GraphBuilder::add_split_node(g, params, input, num_groups, input_idx);
+    const unsigned int     input_idx   = get_dimension_idx(input_tensor_desc.layout, DataLayoutDimension::CHANNEL);
+    NodeID                 input_split = GraphBuilder::add_split_node(g, params, input, num_groups, input_idx);
 
     // Split weights
     const TensorDescriptor weights_tensor_desc = get_tensor_descriptor(g, g.node(weights)->outputs()[0]);
-    const unsigned int     batch_idx           = get_dimension_idx(weights_tensor_desc.layout, DataLayoutDimension::BATCHES);
-    NodeID                 weights_split       = GraphBuilder::add_split_node(g, params, { weights, 0 }, num_groups, batch_idx);
+    const unsigned int     batch_idx     = get_dimension_idx(weights_tensor_desc.layout, DataLayoutDimension::BATCHES);
+    NodeID                 weights_split = GraphBuilder::add_split_node(g, params, {weights, 0}, num_groups, batch_idx);
 
     // Split bias
     NodeID bias_split = EmptyNodeID;
-    if(has_bias)
+    if (has_bias)
     {
         // Split bias
-        bias_split = GraphBuilder::add_split_node(g, params, { bias, 0 }, num_groups, 0);
+        bias_split = GraphBuilder::add_split_node(g, params, {bias, 0}, num_groups, 0);
     }
 
     std::vector<NodeIdxPair> convolution_outputs;
-    for(unsigned int i = 0; i < num_groups; ++i)
+    for (unsigned int i = 0; i < num_groups; ++i)
     {
         NodeParams group_params = params;
         NodeID     conv_nid     = g.add_node<ConvolutionLayerNode>(conv_info, 1, method, fast_math_hint);
         g.add_connection(input_split, i, conv_nid, 0);
         g.add_connection(weights_split, i, conv_nid, 1);
-        if(has_bias)
+        if (has_bias)
         {
             g.add_connection(bias_split, i, conv_nid, 2);
         }
 
         // Add group name
-        if(!group_params.name.empty())
+        if (!group_params.name.empty())
         {
             group_params.name.append("_g" + arm_compute::support::cpp11::to_string(i));
         }
@@ -92,7 +99,7 @@ NodeID create_grouped_convolution(Graph &g, const NodeParams &params, NodeIdxPai
         auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(node);
         conv_node->set_fused_activation(fused_act);
 
-        convolution_outputs.push_back({ conv_nid, 0 });
+        convolution_outputs.push_back({conv_nid, 0});
     }
 
     // Depth concatenate output
@@ -113,7 +120,7 @@ IGraphMutator::MutationType GroupedConvolutionMutator::type() const
 void GroupedConvolutionMutator::mutate(Graph &g)
 {
     // Early exit if no Convolution layers exist in graph
-    if(g.nodes(NodeType::ConvolutionLayer).empty())
+    if (g.nodes(NodeType::ConvolutionLayer).empty())
     {
         return;
     }
@@ -122,17 +129,18 @@ void GroupedConvolutionMutator::mutate(Graph &g)
     size_t total_nodes = g.nodes().size();
 
     // Iterate over convolution nodes
-    for(unsigned int i = 0; i < total_nodes; ++i)
+    for (unsigned int i = 0; i < total_nodes; ++i)
     {
         INode *node = g.node(i);
-        if(node != nullptr && node->type() == NodeType::ConvolutionLayer && arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(node)->num_groups() != 1)
+        if (node != nullptr && node->type() == NodeType::ConvolutionLayer &&
+            arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(node)->num_groups() != 1)
         {
             // Validate node
             backends::IDeviceBackend &backend = backends::BackendRegistry::get().get_backend(node->assigned_target());
             Status                    status  = backend.validate_node(*node);
 
             // If grouped convolution is not supported
-            if(!bool(status))
+            if (!bool(status))
             {
                 // Down-cast node
                 auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(node);
@@ -151,7 +159,8 @@ void GroupedConvolutionMutator::mutate(Graph &g)
                 ARM_COMPUTE_ERROR_ON(conv_node->input_edge(0) == nullptr || conv_node->input_edge(1) == nullptr);
                 const NodeID input_id   = conv_node->input_edge(0)->producer()->id();
                 const NodeID weights_id = conv_node->input_edge(1)->producer()->id();
-                const NodeID bias_id    = (conv_node->input_edge(2) != nullptr) ? conv_node->input_edge(2)->producer()->id() : EmptyNodeID;
+                const NodeID bias_id =
+                    (conv_node->input_edge(2) != nullptr) ? conv_node->input_edge(2)->producer()->id() : EmptyNodeID;
 
                 // Get driving nodes
                 std::vector<NodeIdxPair> driving_nodes = get_driving_nodes(*node);
@@ -164,14 +173,15 @@ void GroupedConvolutionMutator::mutate(Graph &g)
                 NodeID   latest_nid = g.nodes().size();
 
                 // Create grouped convolution node
-                NodeID grouped_conv_id = create_grouped_convolution(g, params, { input_id, 0 }, weights_id, bias_id,
-                                                                    conv_info, conv_method, fused_act_info, fast_math_hint, num_groups);
+                NodeID grouped_conv_id =
+                    create_grouped_convolution(g, params, {input_id, 0}, weights_id, bias_id, conv_info, conv_method,
+                                               fused_act_info, fast_math_hint, num_groups);
 
                 // Remove convolution node
                 g.remove_node(node->id());
 
                 // Update batch normalization node outputs
-                for(auto &driving_node : driving_nodes)
+                for (auto &driving_node : driving_nodes)
                 {
                     g.add_connection(grouped_conv_id, 0, driving_node.node_id, driving_node.index);
                 }
@@ -180,17 +190,16 @@ void GroupedConvolutionMutator::mutate(Graph &g)
                 g.node(grouped_conv_id)->output(0)->set_accessor(std::move(node_accessor));
 
                 // Configure new tensors and nodes
-                std::for_each(g.tensors().begin() + latest_tid, g.tensors().end(), [](std::unique_ptr<Tensor> &t)
-                {
-                    configure_tensor(t.get());
-                });
-                std::for_each(g.nodes().begin() + latest_nid, g.nodes().end(), [&assigned_target](std::unique_ptr<INode> &n)
-                {
-                    if(n != nullptr)
-                    {
-                        n->set_assigned_target(assigned_target);
-                    }
-                });
+                std::for_each(g.tensors().begin() + latest_tid, g.tensors().end(),
+                              [](std::unique_ptr<Tensor> &t) { configure_tensor(t.get()); });
+                std::for_each(g.nodes().begin() + latest_nid, g.nodes().end(),
+                              [&assigned_target](std::unique_ptr<INode> &n)
+                              {
+                                  if (n != nullptr)
+                                  {
+                                      n->set_assigned_target(assigned_target);
+                                  }
+                              });
             }
         }
     }

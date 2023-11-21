@@ -25,8 +25,7 @@
 
 namespace arm_compute
 {
-Tensor::Tensor(IRuntimeContext *)
-    : _allocator(this)
+Tensor::Tensor(IRuntimeContext *) : _allocator(this)
 {
 }
 

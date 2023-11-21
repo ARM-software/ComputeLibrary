@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
-#define ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
+#ifndef ACL_SRC_CORE_UTILS_HELPERS_FLOAT_OPS_H
+#define ACL_SRC_CORE_UTILS_HELPERS_FLOAT_OPS_H
+
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
 
 namespace arm_compute
 {
@@ -36,8 +40,7 @@ union RawFloat
      *
      * @param[in] val Floating-point value
      */
-    explicit RawFloat(float val)
-        : f32(val)
+    explicit RawFloat(float val) : f32(val)
     {
     }
     /** Extract sign of floating point number
@@ -113,4 +116,4 @@ inline bool is_zero(float a, float epsilon = 0.00001f)
 } // namespace float_ops
 } // namespace helpers
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H */
+#endif // ACL_SRC_CORE_UTILS_HELPERS_FLOAT_OPS_H

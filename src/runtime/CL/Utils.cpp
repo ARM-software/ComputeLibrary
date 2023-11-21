@@ -35,20 +35,20 @@ namespace arm_compute
 void restore_program_cache_from_file(const std::string &filename)
 {
     std::ifstream cache_file(filename, std::ios::binary);
-    if(cache_file.is_open())
+    if (cache_file.is_open())
     {
-        if(!CLScheduler::get().is_initialised())
+        if (!CLScheduler::get().is_initialised())
         {
             arm_compute::CLScheduler::get().default_init();
         }
 
-        while(!cache_file.eof())
+        while (!cache_file.eof())
         {
             size_t name_len   = 0;
             size_t binary_len = 0;
             cache_file.read(reinterpret_cast<char *>(&name_len), sizeof(size_t));
             cache_file.read(reinterpret_cast<char *>(&binary_len), sizeof(size_t));
-            if(name_len == 0 || binary_len == 0)
+            if (name_len == 0 || binary_len == 0)
             {
                 break;
             }
@@ -60,7 +60,7 @@ void restore_program_cache_from_file(const std::string &filename)
             tmp.resize(binary_len);
             cache_file.read(reinterpret_cast<char *>(binary.data()), binary_len);
             cl::Context             context = arm_compute::CLScheduler::get().context();
-            cl::Program::Binaries   binaries{ binary };
+            cl::Program::Binaries   binaries{binary};
             std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
             cl::Program             program(context, devices, binaries);
             program.build();
@@ -72,12 +72,12 @@ void restore_program_cache_from_file(const std::string &filename)
 
 void save_program_cache_to_file(const std::string &filename)
 {
-    if(CLScheduler::get().is_initialised())
+    if (CLScheduler::get().is_initialised())
     {
         std::ofstream cache_file(filename, std::ios::binary);
-        if(cache_file.is_open())
+        if (cache_file.is_open())
         {
-            for(const auto &it : CLKernelLibrary::get().get_built_programs())
+            for (const auto &it : CLKernelLibrary::get().get_built_programs())
             {
                 std::vector<std::vector<unsigned char>> binaries = it.second.getInfo<CL_PROGRAM_BINARIES>();
                 ARM_COMPUTE_ERROR_ON(binaries.size() != 1);

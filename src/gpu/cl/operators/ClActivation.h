@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_ACTIVATION_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
 
@@ -43,7 +44,10 @@ public:
      * @param[out] dst             Destination tensor info. Data type supported: same as @p src
      * @param[in]  activation_info Activation layer parameters.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ActivationLayerInfo &activation_info);
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &activation_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClActivation::configure()

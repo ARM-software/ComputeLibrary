@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
-#define CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
+#ifndef CKW_INCLUDE_CKW_TYPES_TENSORSAMPLERTYPES_H
+#define CKW_INCLUDE_CKW_TYPES_TENSORSAMPLERTYPES_H
 
 #include <cstdint>
 
@@ -33,9 +33,9 @@ namespace ckw
 // This enum class defines how the dimensions of a 3d tensor is mapped into x,y and z coordianates.
 enum class TensorSamplerFormat : int32_t
 {
-    Unknown    = 0,
-    D0_D1xD2_1 = 1, // Original dimensions 1 and 2 are collapsed onto y-axis
-    D0_D1_D2   = 2  // Original dimensions stays as they're defined. No collapsing.
+    Unknown          = 0,
+    Dim0_Dim1xDim2_1 = 1, // Original dimensions 1 and 2 are collapsed onto y-axis
+    Dim0_Dim1_Dim2   = 2  // Original dimensions stays as they're defined. No collapsing.
 };
 
 /** Tensor sampler address mode enum class for X dimension
@@ -47,15 +47,15 @@ enum class TensorSamplerFormat : int32_t
  *                             Leftover elements can be handled using overlapping. This involves processing some of the elements in the array twice.
  *      ClampToBorderMaxOnly : Clamp to max value allowed in the corresponding dimension, and construct an if/else guard to prevent out of bound access,
  *                             e.g. if( y < size-of-dimension-y ){ <do the operation>  }
+ *      SkipLessThanZero     : Skip loading/storing if the index is less than 0
  *
  *  Individual dimensions choose which adddress mode to implement in their respective enum classes.
  */
 enum class TensorSamplerAddressModeX : int32_t
 {
     Unknown        = 0,
-    None           = 1, // The user guarantees that the coordinate is always in-bound
-    OverlappingMin = 2  // (FIXED shapes only) Reduce the load/store length when x == 0 (MIN). The load length will be width % original length
-                        // Leftover elements can be handled using overlapping. This involves processing some of the elements in the array twice.
+    None           = 1,
+    OverlappingMin = 2
 };
 
 /**
@@ -66,7 +66,8 @@ enum class TensorSamplerAddressModeY : int32_t
     Unknown              = 0,
     None                 = 1,
     OverlappingMin       = 2,
-    ClampToBorderMaxOnly = 3
+    ClampToBorderMaxOnly = 3,
+    SkipLessThanZero     = 4
 };
 
 /**
@@ -74,10 +75,10 @@ enum class TensorSamplerAddressModeY : int32_t
  */
 enum class TensorSamplerAddressModeZ : int32_t
 {
-    Unknown        = 0,
-    None           = 1,
+    Unknown = 0,
+    None    = 1,
 };
 
 } // namespace ckw
 
-#endif //CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
+#endif // CKW_INCLUDE_CKW_TYPES_TENSORSAMPLERTYPES_H

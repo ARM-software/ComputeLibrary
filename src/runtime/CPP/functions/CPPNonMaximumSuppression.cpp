@@ -29,9 +29,12 @@
 
 namespace arm_compute
 {
-void CPPNonMaximumSuppression::configure(
-    const ITensor *bboxes, const ITensor *scores, ITensor *indices, unsigned int max_output_size,
-    const float score_threshold, const float nms_threshold)
+void CPPNonMaximumSuppression::configure(const ITensor *bboxes,
+                                         const ITensor *scores,
+                                         ITensor       *indices,
+                                         unsigned int   max_output_size,
+                                         const float    score_threshold,
+                                         const float    nms_threshold)
 {
     ARM_COMPUTE_LOG_PARAMS(bboxes, scores, indices, max_output_size, score_threshold, nms_threshold);
 
@@ -40,10 +43,14 @@ void CPPNonMaximumSuppression::configure(
     _kernel = std::move(k);
 }
 
-Status CPPNonMaximumSuppression::validate(
-    const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *indices, unsigned int max_output_size,
-    const float score_threshold, const float nms_threshold)
+Status CPPNonMaximumSuppression::validate(const ITensorInfo *bboxes,
+                                          const ITensorInfo *scores,
+                                          const ITensorInfo *indices,
+                                          unsigned int       max_output_size,
+                                          const float        score_threshold,
+                                          const float        nms_threshold)
 {
-    return CPPNonMaximumSuppressionKernel::validate(bboxes, scores, indices, max_output_size, score_threshold, nms_threshold);
+    return CPPNonMaximumSuppressionKernel::validate(bboxes, scores, indices, max_output_size, score_threshold,
+                                                    nms_threshold);
 }
 } // namespace arm_compute

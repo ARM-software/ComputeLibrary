@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -180,6 +180,20 @@ template <typename T, typename U>
 CartesianProductDataset<T, U> combine(T &&dataset1, U &&dataset2)
 {
     return CartesianProductDataset<T, U>(std::forward<T>(dataset1), std::forward<U>(dataset2));
+}
+
+/** Helper function to create a @ref CartesianProductDataset.
+ *
+ * @param[in] dataset1 First dataset.
+ * @param[in] dataset2 Second dataset.
+ * @param[in] datasets Subsequent dataset.
+ *
+ * @return A grid dataset.
+ */
+template <typename T1, typename T2, typename... Ts>
+auto combine(T1 &&dataset1, T2 &&dataset2, Ts &&... datasets) -> decltype(combine(std::forward<T1>(dataset1), combine(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...)))
+{
+    return combine(std::forward<T1>(dataset1), combine(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...));
 }
 
 /** Helper function to create a @ref CartesianProductDataset.

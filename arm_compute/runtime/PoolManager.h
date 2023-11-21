@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_POOLMANAGER_H
 #define ARM_COMPUTE_POOLMANAGER_H
 
-#include "arm_compute/runtime/IPoolManager.h"
-
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IMemoryPool.h"
+#include "arm_compute/runtime/IPoolManager.h"
+
 #include "support/Mutex.h"
 #include "support/Semaphore.h"
 
@@ -53,9 +53,9 @@ public:
     PoolManager &operator=(PoolManager &&) = delete;
 
     // Inherited methods overridden:
-    IMemoryPool *lock_pool() override;
-    void unlock_pool(IMemoryPool *pool) override;
-    void register_pool(std::unique_ptr<IMemoryPool> pool) override;
+    IMemoryPool                 *lock_pool() override;
+    void                         unlock_pool(IMemoryPool *pool) override;
+    void                         register_pool(std::unique_ptr<IMemoryPool> pool) override;
     std::unique_ptr<IMemoryPool> release_pool() override;
     void                         clear_pools() override;
     size_t                       num_pools() const override;
@@ -66,5 +66,5 @@ private:
     std::unique_ptr<arm_compute::Semaphore> _sem;            /**< Semaphore to control the queues */
     mutable arm_compute::Mutex              _mtx;            /**< Mutex to control access to the queues */
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_POOLMANAGER_H */

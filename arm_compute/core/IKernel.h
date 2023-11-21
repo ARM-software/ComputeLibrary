@@ -73,5 +73,5 @@ protected:
 private:
     Window _window;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_IKERNEL_H */
