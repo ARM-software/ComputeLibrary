@@ -766,6 +766,8 @@ filegroup(
 	"cpu/kernels/fuse_batch_normalization/generic/fp16.cpp",
 	"cpu/kernels/fuse_batch_normalization/generic/fp32.cpp",
 	"cpu/kernels/fuse_batch_normalization/nchw/all.cpp",
+	"cpu/kernels/fuse_batch_normalization/nchw/neon/fp16.cpp",
+	"cpu/kernels/fuse_batch_normalization/nchw/neon/fp32.cpp",
 	"cpu/kernels/fuse_batch_normalization/nhwc/neon/fp16.cpp",
 	"cpu/kernels/fuse_batch_normalization/nhwc/neon/fp32.cpp",
 	"cpu/kernels/gemm_matrix_add/generic/neon/fp16.cpp",

@@ -515,6 +515,8 @@ cc_library_static {
         "src/cpu/kernels/fuse_batch_normalization/generic/fp16.cpp",
         "src/cpu/kernels/fuse_batch_normalization/generic/fp32.cpp",
         "src/cpu/kernels/fuse_batch_normalization/nchw/all.cpp",
+        "src/cpu/kernels/fuse_batch_normalization/nchw/neon/fp16.cpp",
+        "src/cpu/kernels/fuse_batch_normalization/nchw/neon/fp32.cpp",
         "src/cpu/kernels/fuse_batch_normalization/nhwc/neon/fp16.cpp",
         "src/cpu/kernels/fuse_batch_normalization/nhwc/neon/fp32.cpp",
         "src/cpu/kernels/gemm_matrix_add/generic/neon/fp16.cpp",
