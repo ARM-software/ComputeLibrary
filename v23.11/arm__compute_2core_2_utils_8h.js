@@ -1,0 +1,26 @@
+var arm__compute_2core_2_utils_8h =
+[
+    [ "calculate_same_pad", "arm__compute_2core_2_utils_8h.xhtml#aa6d4f0b9fedd979c5b768f9b34fda9f6", null ],
+    [ "deconvolution_output_dimensions", "arm__compute_2core_2_utils_8h.xhtml#a1a0b7ff66a946db6252d2a4c40c04fa7", null ],
+    [ "get_padding_info", "arm__compute_2core_2_utils_8h.xhtml#a5f708f4acd49beb7d02d2ec9c2b7552f", null ],
+    [ "get_padding_info", "arm__compute_2core_2_utils_8h.xhtml#a456cc0b26fb17eee9942c8970f1c71db", null ],
+    [ "get_quantized_activation_min_max", "arm__compute_2core_2_utils_8h.xhtml#a549f4d59cb7f823d884ffe2424079c3a", null ],
+    [ "get_softmax_output_quantization_info", "arm__compute_2core_2_utils_8h.xhtml#a1dcccbff6075b2fad30ebd2a0da6b995", null ],
+    [ "has_padding_changed", "arm__compute_2core_2_utils_8h.xhtml#a7d5ebe14ba3526c8e2ed3c6949669f9c", null ],
+    [ "is_pool_3d_region_entirely_outside_input", "arm__compute_2core_2_utils_8h.xhtml#a7664c9a93a7007e06a991bb22a42c08e", null ],
+    [ "is_pool_region_entirely_outside_input", "arm__compute_2core_2_utils_8h.xhtml#a1a598d7174a66371ea772d4101760c25", null ],
+    [ "is_symmetric", "arm__compute_2core_2_utils_8h.xhtml#a50502af31f1ab8754ec19be799352dd8", null ],
+    [ "needs_serialized_reduction", "arm__compute_2core_2_utils_8h.xhtml#a28029771f7c2cd8bbe2855303d38f71f", null ],
+    [ "num_of_elements_in_range", "arm__compute_2core_2_utils_8h.xhtml#a22ef3e50f7dbf08c974a120588e1ad90", null ],
+    [ "permute_strides", "arm__compute_2core_2_utils_8h.xhtml#afcd35973f3a5d2d4d3015e155f185a81", null ],
+    [ "read_file", "arm__compute_2core_2_utils_8h.xhtml#ae0d288429eb20baf6da6109f3a21e6bb", null ],
+    [ "scaled_3d_dimensions_signed", "arm__compute_2core_2_utils_8h.xhtml#a7058bee3ed710f07d96cb0d856de3bec", null ],
+    [ "scaled_dimensions", "arm__compute_2core_2_utils_8h.xhtml#a138beaeb1260b90cb03bc3f761628724", null ],
+    [ "scaled_dimensions_signed", "arm__compute_2core_2_utils_8h.xhtml#a1d8da22845d57d4aacb55b7d5ae6c013", null ],
+    [ "string_from_border_mode", "arm__compute_2core_2_utils_8h.xhtml#ae0204b49ec236bbaedb1cf96def276d4", null ],
+    [ "string_from_channel", "arm__compute_2core_2_utils_8h.xhtml#af0dfcd19fb6510cd3c303db6c4583ee6", null ],
+    [ "string_from_gemmlowp_output_stage", "arm__compute_2core_2_utils_8h.xhtml#a291164a04581bf953aa65ae87cc201a2", null ],
+    [ "string_from_norm_type", "arm__compute_2core_2_utils_8h.xhtml#a0569839ee85ad0e35edaaf3b4c80d706", null ],
+    [ "string_from_pixel_value", "arm__compute_2core_2_utils_8h.xhtml#ad6eaf2181f8a8c418acaf3af76239997", null ],
+    [ "string_from_pooling_type", "arm__compute_2core_2_utils_8h.xhtml#a1040394085749e4d02a0d4350493ec94", null ]
+];

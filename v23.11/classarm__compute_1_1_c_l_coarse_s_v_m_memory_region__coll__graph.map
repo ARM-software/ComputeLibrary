@@ -1,0 +1,6 @@
+<map id="CLCoarseSVMMemoryRegion" name="CLCoarseSVMMemoryRegion">
+<area shape="rect" id="node1" title="OpenCL coarse&#45;grain SVM memory region implementation." alt="" coords="5,229,216,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_s_v_m_memory_region.xhtml" title="OpenCL SVM memory region interface." alt="" coords="25,155,196,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_memory_region.xhtml" title="OpenCL memory region interface." alt="" coords="40,80,181,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface." alt="" coords="48,5,173,32"/>
+</map>

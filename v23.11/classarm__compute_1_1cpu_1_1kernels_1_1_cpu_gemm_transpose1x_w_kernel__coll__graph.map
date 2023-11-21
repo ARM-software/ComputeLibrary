@@ -1,0 +1,7 @@
+<map id="CpuGemmTranspose1xWKernel" name="CpuGemmTranspose1xWKernel">
+<area shape="rect" id="node1" title="Kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element ..." alt="" coords="21,337,247,364"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="5,247,263,288"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="83,81,175,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="150,157,323,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="95,5,162,32"/>
+</map>

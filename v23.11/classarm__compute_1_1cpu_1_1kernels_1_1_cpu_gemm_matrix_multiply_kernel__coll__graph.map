@@ -1,0 +1,7 @@
+<map id="CpuGemmMatrixMultiplyKernel" name="CpuGemmMatrixMultiplyKernel">
+<area shape="rect" id="node1" title="Kernel to multiply two input matrices &quot;A&quot; and &quot;B&quot;." alt="" coords="5,337,232,364"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="9,247,228,288"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="67,81,159,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="135,157,308,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="80,5,147,32"/>
+</map>

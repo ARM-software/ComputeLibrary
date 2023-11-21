@@ -1,0 +1,7 @@
+<map id="CpuGemmMatrixAdditionKernel" name="CpuGemmMatrixAdditionKernel">
+<area shape="rect" id="node1" title="Kernel to perform the in&#45;place matrix addition between 2 matrices taking into account that the second..." alt="" coords="5,337,233,364"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="10,247,229,288"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="68,81,160,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="135,157,309,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="81,5,147,32"/>
+</map>
