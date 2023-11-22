@@ -1,5 +1,0 @@
-<map id="CLGEMMTranspose1xW" name="CLGEMMTranspose1xW">
-<area shape="rect" id="node1" title="Basic function to execute CLGEMMTranspose1xWKernel." alt="" coords="5,155,173,181"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple_function.xhtml" title="Basic interface for functions which have a single OpenCL kernel." alt="" coords="20,80,159,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="50,5,129,32"/>
-</map>
