@@ -262,6 +262,9 @@ class FormatCodeRun:
             self.shell.prepend_env("PATH","%s/../bin" % this_dir)
 
             for f in self.files:
+                if not self.skip_copyright:
+                    check_copyright(f)
+
                 skip_this_file = False
                 for e in exceptions:
                     if e in f:
@@ -272,8 +275,6 @@ class FormatCodeRun:
                     continue
 
                 logger.info("Formatting %s" % f)
-                if not self.skip_copyright:
-                    check_copyright(f)
 
             check_license("LICENSE")
 
