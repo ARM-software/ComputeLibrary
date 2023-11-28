@@ -66,7 +66,7 @@ def update_data_type_layout_flags(env, data_types, data_layouts):
         if  any(i in data_types for i in ['all', 'fp16']):
             env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS'])
     else:
-            if not 'v8a' in env['arch'] and not 'v7a' in env['arch']:
+            if not 'v8a' in env['arch'] and not 'v7a' in env['arch'] and not 'armv8r64' in env['arch']:
                 if  any(i in data_types for i in ['all', 'fp16']):
                     env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS'])
 
