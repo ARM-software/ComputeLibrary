@@ -46,6 +46,7 @@ func globalFlags(ctx android.BaseContext) []string {
         if theArch == "armv8-2a" {
           cppflags = append(cppflags, "-march=armv8.2-a+fp16")
           cppflags = append(cppflags, "-DARM_COMPUTE_ENABLE_FP16")
+          cppflags = append(cppflags, "-DENABLE_FP16_KERNELS")
         }
       }
     }
@@ -73,9 +74,6 @@ func globalFlags(ctx android.BaseContext) []string {
         }
         if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "QSYMM16" {
             cppflags = append(cppflags, "-DENABLE_QSYMM16_KERNELS")
-        }
-        if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "FP16" {
-            cppflags = append(cppflags, "-DENABLE_FP16_KERNELS")
         }
         if strings.ToUpper(x) == "ALL" || strings.ToUpper(x) == "FP32" {
             cppflags = append(cppflags, "-DENABLE_FP32_KERNELS")
