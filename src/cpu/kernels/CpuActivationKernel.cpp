@@ -83,6 +83,13 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
                 data.f != ActivationLayerInfo::ActivationFunction::GELU;
      },
      REGISTER_QSYMM16_SVE2(arm_compute::cpu::sve2_qsymm16_activation)},
+    {"sve_fp16_activation_lut",
+     [](const ActivationDataTypeISASelectorData &data)
+     {
+         return data.dt == DataType::F16 && data.isa.fp16 && data.isa.sve &&
+                data.f == ActivationLayerInfo::ActivationFunction::LOGISTIC;
+     },
+     REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_activation_lut)},
     {"sve_fp16_activation",
      [](const ActivationDataTypeISASelectorData &data)
      {
@@ -279,6 +286,9 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     _name       = std::string("CpuActivationKernel").append("/").append(uk->name);
 
 #ifdef __aarch64__
+    // Initialise lut_manager
+    LUTManager &lut_manager = LUTManager::get_instance();
+
     if ((src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED) &&
         activation_info.activation() != ActivationFunction::RELU)
     {
@@ -287,6 +297,13 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
                  (dst) ? dst->quantization_info().uniform() : src->quantization_info().uniform(), tmp_lut,
                  activation_info.a(), activation_info.b());
         activation_info.setLookupTable256(tmp_lut);
+    }
+
+    if (src->data_type() == DataType::F16 &&
+        activation_info.activation() == ActivationLayerInfo::ActivationFunction::LOGISTIC)
+    {
+        const LUTInfo info = {activation_info.activation(), src->data_type(), src->quantization_info()};
+        activation_info.setLookupTable65536((lut_manager.get_lut_table(info)));
     }
 #endif // __aarch64__
     _act_info = activation_info;

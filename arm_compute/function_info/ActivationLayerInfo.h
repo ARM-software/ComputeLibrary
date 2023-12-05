@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO
-#define ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO_H
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO_H
 
 #include "arm_compute/core/CoreTypes.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/QuantizationInfo.h"
 
 #include <array>
+#include <memory>
+
+#ifdef __aarch64__
+#include <arm_neon.h>
+#endif // __arch64__
 
 namespace arm_compute
 {
@@ -58,7 +64,10 @@ public:
     typedef arm_compute::ActivationFunction ActivationFunction;
 
     /** Lookup table  */
-    using LookupTable256 = std::array<qasymm8_t, 256>;
+#ifdef __aarch64__
+    using LookupTable256   = std::array<qasymm8_t, 256>;
+    using LookupTable65536 = std::array<float16_t, 65536>;
+#endif // __aarch64__
 
     ActivationLayerInfo() = default;
     /** Default Constructor
@@ -101,6 +110,16 @@ public:
     {
         _lut = std::move(lut);
     }
+
+    const LookupTable65536 &lut_fp16() const
+    {
+        ARM_COMPUTE_ERROR_ON(_lut_fp16 == nullptr);
+        return *_lut_fp16;
+    }
+    void setLookupTable65536(std::shared_ptr<LookupTable65536> lut)
+    {
+        _lut_fp16 = lut;
+    }
 #endif // __aarch64__
 private:
     ActivationFunction _act     = {ActivationLayerInfo::ActivationFunction::IDENTITY};
@@ -109,8 +128,9 @@ private:
     bool               _enabled = {false};
 
 #ifdef __aarch64__
-    LookupTable256 _lut = {};
+    LookupTable256                    _lut = {};
+    std::shared_ptr<LookupTable65536> _lut_fp16{nullptr};
 #endif // __aarch64__
 };
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO */
+#endif // ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO_H

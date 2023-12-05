@@ -312,6 +312,7 @@ target_sources(
 	cpu/kernels/elementwise_unary/generic/sve/fp32.cpp
 	cpu/kernels/elementwise_unary/generic/sve/impl.cpp
 	cpu/kernels/elementwise_unary/generic/sve/integer.cpp
+	cpu/kernels/lut/generic/sve/u16.cpp
 	cpu/kernels/scale/sve/fp16.cpp
 	cpu/kernels/scale/sve/fp32.cpp
 	cpu/kernels/scale/sve/integer.cpp
@@ -628,6 +629,7 @@ target_sources(
 	core/Utils.cpp
 	core/Validate.cpp
 	core/Version.cpp
+	core/helpers/LUTManager.cpp
 	core/helpers/SoftmaxHelpers.cpp
 	core/helpers/Utils.cpp
 	core/helpers/WindowHelpers.cpp

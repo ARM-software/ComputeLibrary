@@ -392,6 +392,7 @@ cc_library_static {
         "src/core/Utils.cpp",
         "src/core/Validate.cpp",
         "src/core/Version.cpp",
+        "src/core/helpers/LUTManager.cpp",
         "src/core/helpers/SoftmaxHelpers.cpp",
         "src/core/helpers/Utils.cpp",
         "src/core/helpers/WindowHelpers.cpp",

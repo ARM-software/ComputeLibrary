@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_ACTIVATION_KERNEL_H
-#define ARM_COMPUTE_CPU_ACTIVATION_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUACTIVATIONKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUACTIVATIONKERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "src/core/common/Macros.h"
+#include "src/core/helpers/LUTManager.h"
 #include "src/cpu/ICpuKernel.h"
 
 namespace arm_compute
@@ -103,4 +104,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_ACTIVATION_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUACTIVATIONKERNEL_H
