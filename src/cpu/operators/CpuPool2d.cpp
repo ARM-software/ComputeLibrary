@@ -69,8 +69,8 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
 
     if (run_optimised)
     {
-        const CPUInfo     &ci          = CPUInfo::get();
-        const unsigned int num_threads = NEScheduler::num_threads();
+        const CPUInfo     &ci          = NEScheduler::get().cpu_info();
+        const unsigned int num_threads = NEScheduler::get().num_threads();
 
         auto pooling_wrapper = std::make_unique<kernels::CpuPool2dAssemblyWrapperKernel>();
         ARM_COMPUTE_ERROR_ON(pooling_wrapper == nullptr);

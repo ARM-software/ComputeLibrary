@@ -78,12 +78,6 @@ bool_flag(
     visibility = ["//visibility:public"],
 )
 
-bool_flag(
-    name = "thread_local_scheduler",
-    build_setting_default = False,
-    visibility = ["//visibility:public"],
-)
-
 string_flag(
     name = "arch",
     build_setting_default = "armv8-a",
@@ -158,12 +152,6 @@ config_setting(
     }
 )
 
-config_setting(
-    name = "thread_local_scheduler_flag",
-    flag_values = {
-        ":thread_local_scheduler": "true",
-    },
-)
 
 #---------------------------------------------------------------------
 # Common defines used for all targets
@@ -207,10 +195,6 @@ cc_library(
               select({
                   "//:arch_armv8-a": [],
                   "//:arch_armv8.2-a+fp16": ["ENABLE_FP16_KERNELS", "ARM_COMPUTE_ENABLE_FP16"],
-                  "//conditions:default": [],
-              }) +
-              select({
-                  "//:thread_local_scheduler_flag": ["ARM_COMPUTE_THREAD_LOCAL_SCHEDULER"],
                   "//conditions:default": [],
               }),
     visibility = ["//visibility:public"],

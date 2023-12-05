@@ -103,7 +103,7 @@ bool get_winograd_kernel_implementation(const ITensorInfo                       
     Tensor4DShape  in_shape{internal_get_shape(src)};
     Tensor4DShape  out_shape{internal_get_shape(dst)};
     Tensor4DShape  kernel_shape{internal_get_shape(weights)};
-    uint32_t       nthreads = NEScheduler::num_threads();
+    uint32_t       nthreads = NEScheduler::get().num_threads();
     // Get configuration arguments for Winograd
     winograd_cfg.output_rows = 0;
     winograd_cfg.output_cols = 0;
@@ -183,7 +183,7 @@ void CpuWinogradConv2d::configure(const ITensorInfo         *src,
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info, enable_fast_math);
     ARM_COMPUTE_UNUSED(biases);
     const DataType data_type = src->data_type();
-    uint32_t       nthreads  = NEScheduler::num_threads();
+    uint32_t       nthreads  = NEScheduler::get().num_threads();
     _data_layout             = src->data_layout();
     const Tensor4DShape kernel_shape{internal_get_shape(weights)};
 
@@ -361,7 +361,7 @@ void CpuWinogradConv2d::run(ITensorPack &tensors)
     auto   output = tensors.get_tensor(ACL_DST);
     Window win;
 
-    const uint32_t nthreads = NEScheduler::num_threads();
+    const uint32_t nthreads = NEScheduler::get().num_threads();
 
     // The Winograd transform implementation does fine-grain threading inside the transforms. Just pass thread_id and nthreads.
     win.set(Window::DimX, Window::Dimension(0, nthreads, 1));
