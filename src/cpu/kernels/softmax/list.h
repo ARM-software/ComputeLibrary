@@ -37,6 +37,13 @@ DECLARE_SOFTMAX_KERNEL(neon_fp16_softmax);
 DECLARE_SOFTMAX_KERNEL(neon_qasymm8_softmax);
 DECLARE_SOFTMAX_KERNEL(neon_qasymm8_signed_softmax);
 
+#ifdef ARM_COMPUTE_ENABLE_SME2
+
+void sme2_fp32_softmax(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window);
+
+#endif // ARM_COMPUTE_ENABLE_SME2
+
 #undef DECLARE_SOFTMAX_KERNEL
 } // namespace cpu
 } // namespace arm_compute

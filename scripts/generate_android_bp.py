@@ -45,7 +45,9 @@ excluded_paths = ["build",
                   "/sve/",
                   "/SVE/",
                   "/sve2/",
-                  "/SVE2/"
+                  "/SVE2/",
+                  "/sme/",
+                  "/sme2/",
                   ]
 
 excluded_files = ["TracePoint.cpp"]

@@ -335,6 +335,7 @@ target_sources(
 	cpu/kernels/elementwise_binary/generic/sve2/qasymm8_signed.cpp
 	cpu/kernels/elementwise_unary/generic/sve2/q8.cpp
 	cpu/kernels/lut/generic/sve2/u8.cpp
+	cpu/kernels/softmax/generic/sme2/fp32.cpp
 	cpu/kernels/softmax/generic/sve2/impl.cpp
 )
 

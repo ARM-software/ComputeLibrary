@@ -50,6 +50,12 @@ namespace
 {
 /* Softmax */
 static const std::vector<typename CpuSoftmaxKernel::SoftmaxKernel> available_kernels = {
+#ifdef ARM_COMPUTE_ENABLE_SME2
+    {"sme2_fp32_softmax",
+     [](const SoftmaxKernelDataTypeISASelectorData &data)
+     { return (!data.is_log && data.dt == DataType::F32 && data.isa.sme2); },
+     REGISTER_FP32_NEON(sme2_fp32_softmax)},
+#endif // ARM_COMPUTE_ENABLE_SME2
     {"neon_fp32_softmax",
      [](const SoftmaxKernelDataTypeISASelectorData &data) { return (!data.is_log && data.dt == DataType::F32); },
      REGISTER_FP32_NEON(neon_fp32_softmax<false>)},

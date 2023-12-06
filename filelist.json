@@ -2237,7 +2237,8 @@
             "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ]
           },
           "sve2":{
-            "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"]
+            "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],
+            "fp32" :["src/cpu/kernels/softmax/generic/sme2/fp32.cpp"]
           }
         }
       },
