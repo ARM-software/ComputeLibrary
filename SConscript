@@ -86,9 +86,10 @@ def build_multiisa_lib_objects():
     lib_static_objs = [] # static objects
     lib_shared_objs = [] # shared objects
 
+    # note that ARM_COMPUTE_ENABLE_FP16 is enabled in update_data_type_layout_flags() to make
+    # sure the environment is progated to the validation suite
     arm_compute_env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON',
-                           'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE',
-                           'ARM_COMPUTE_ENABLE_FP16', 'ARM_COMPUTE_ENABLE_BF16',
+                           'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE','ARM_COMPUTE_ENABLE_BF16',
                            'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
 
     # Build all the common files for the base architecture
