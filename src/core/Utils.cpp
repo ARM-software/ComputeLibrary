@@ -450,8 +450,9 @@ std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLay
     const int  b_int          = is_qasymm8_signed ? quantize_qasymm8_signed(b, oq_info) : quantize_qasymm8(b, oq_info);
     const auto type_max_value = std::get<1>(get_min_max(data_type)).get<int32_t>();
 
-    const int32_t min_activation =
-        act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? oq_info.offset : b_int;
+    const int32_t min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
+                                       ? std::min(oq_info.offset, type_max_value)
+                                       : b_int;
     const int32_t max_activation =
         act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? type_max_value : a_int;
 
