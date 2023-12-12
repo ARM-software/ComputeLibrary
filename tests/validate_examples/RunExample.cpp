@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "ValidateExample.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "arm_compute/core/Version.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/framework/Framework.h"
