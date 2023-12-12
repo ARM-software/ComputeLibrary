@@ -122,13 +122,13 @@ bool get_winograd_kernel_implementation(const ITensorInfo                       
         success = arm_conv::winograd::get_implementation<float>(*winograd_impl, &CPUInfo::get(), *conv_args, nthreads,
                                                                 enable_fast_math, &winograd_cfg, nullptr);
     }
-#if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if defined(__aarch64__) && defined(ENABLE_FP16_KERNELS)
     else if (data_type == DataType::F16)
     {
         success = arm_conv::winograd::get_implementation<__fp16>(*winograd_impl, &CPUInfo::get(), *conv_args, nthreads,
                                                                  enable_fast_math, &winograd_cfg, nullptr);
     }
-#endif // defined(__aarch64__) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#endif // defined(__aarch64__) && defined(ENABLE_FP16_KERNELS)
     else
     {
         success = false;
