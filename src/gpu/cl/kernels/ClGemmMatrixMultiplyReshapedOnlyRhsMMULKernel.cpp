@@ -99,7 +99,16 @@ Status validate_arguments(const ITensorInfo       *src0,
     ARM_COMPUTE_UNUSED(k);
 
     ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(0) != k);
-    ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) != m);
+
+    // Validate the reinterpreted-as-3D-case
+    if (gemm_info.depth_output_gemm3d != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) * src0->dimension(2) != m);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) != m);
+    }
 
     // Validate the gemm-batched case
     if (src1->num_dimensions() > 2)
