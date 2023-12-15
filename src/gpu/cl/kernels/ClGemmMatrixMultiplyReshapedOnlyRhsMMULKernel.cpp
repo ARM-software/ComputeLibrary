@@ -101,7 +101,7 @@ Status validate_arguments(const ITensorInfo       *src0,
     ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(0) != k);
 
     // Validate the reinterpreted-as-3D-case
-    if (gemm_info.depth_output_gemm3d != 0)
+    if (gemm_info.reinterpret_input_as_3d != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) * src0->dimension(2) != m);
     }
