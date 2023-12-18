@@ -2230,6 +2230,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::VALHALL:
             os << "VALHALL";
             break;
+        case GPUTarget::FIFTHGEN:
+            os << "FIFTHGEN";
+            break;
         case GPUTarget::T600:
             os << "T600";
             break;
@@ -2298,6 +2301,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
             break;
         case GPUTarget::G615:
             os << "G615";
+            break;
+        case GPUTarget::G720:
+            os << "G720";
+            break;
+        case GPUTarget::G620:
+            os << "G620";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

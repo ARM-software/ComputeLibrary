@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CLGEMMKERNELSELECTION_H
-#define SRC_CLGEMMKERNELSELECTION_H
+#ifndef ACL_SRC_RUNTIME_CL_GEMM_CLGEMMKERNELSELECTION_H
+#define ACL_SRC_RUNTIME_CL_GEMM_CLGEMMKERNELSELECTION_H
 
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
 
@@ -53,6 +53,7 @@ public:
             case GPUTarget::BIFROST:
                 return std::make_unique<CLGEMMDefaultTypeBifrost>(gpu);
             case GPUTarget::VALHALL:
+            case GPUTarget::FIFTHGEN:
                 return std::make_unique<CLGEMMDefaultTypeValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
@@ -61,4 +62,4 @@ public:
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /* SRC_CLGEMMKERNELSELECTION_H */
+#endif // ACL_SRC_RUNTIME_CL_GEMM_CLGEMMKERNELSELECTION_H

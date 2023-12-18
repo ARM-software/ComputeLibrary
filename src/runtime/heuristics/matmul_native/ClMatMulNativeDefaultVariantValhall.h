@@ -21,42 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG_H
-#define ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG_H
+#ifndef ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTVARIANTVALHALL_H
+#define ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTVARIANTVALHALL_H
 
-#include "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.h"
-#include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelConfig.h"
-
-#include <memory>
+#include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelVariant.h"
 
 namespace arm_compute
 {
 namespace cl_matmul
 {
-/** ClMatMul configuration factory class */
-class ClMatMulNativeKernelConfigurationFactory final
+/** Valhall based OpenCL matmul configuration */
+class ClMatMulNativeDefaultVariantValhall final : public IClMatMulNativeKernelVariant
 {
 public:
-    /** Static method to call the ClMatMul configuration class accordingly with the GPU target
+    /** Constructor
      *
      * @param[in] gpu GPU target
-     *
-     * @return IClMatMulNativeKernelConfig
      */
-    static std::unique_ptr<IClMatMulNativeKernelConfig> create(GPUTarget gpu)
-    {
-        switch (get_arch_from_target(gpu))
-        {
-            case GPUTarget::MIDGARD:
-            case GPUTarget::BIFROST:
-            case GPUTarget::VALHALL:
-            case GPUTarget::FIFTHGEN:
-                return std::make_unique<ClMatMulNativeDefaultConfigValhall>(gpu);
-            default:
-                ARM_COMPUTE_ERROR("Not supported GPU target");
-        }
-    }
+    ClMatMulNativeDefaultVariantValhall(GPUTarget gpu);
+
+    // Inherited overridden method
+    MatMulKernelType select_kernel(const ITensorInfo         *lhs,
+                                   const ITensorInfo         *rhs,
+                                   const MatMulInfo          &info,
+                                   const ActivationLayerInfo &act_info) override;
+
+private:
+    MatMulKernelType configure_G715_float(int k, bool act_enabled);
+    MatMulKernelType configure_G715_quantized(int k, bool act_enabled);
+    MatMulKernelType configure_default_float(int k, bool act_enabled);
+    MatMulKernelType configure_default_quantized(int k, bool act_enabled);
 };
 } // namespace cl_matmul
 } // namespace arm_compute
-#endif // ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG_H
+#endif // ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEDEFAULTVARIANTVALHALL_H

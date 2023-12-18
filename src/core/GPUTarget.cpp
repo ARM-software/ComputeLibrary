@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,23 @@
 
 namespace
 {
+
+arm_compute::GPUTarget get_fifth_gen_target(const std::string &version)
+{
+    if (version.find("G720") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G720;
+    }
+    else if (version.find("G620") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G620;
+    }
+    else
+    {
+        return arm_compute::GPUTarget::UNKNOWN;
+    }
+}
+
 arm_compute::GPUTarget get_valhall_target(const std::string &version)
 {
     if (version.find("G77") != std::string::npos)
@@ -152,16 +169,18 @@ namespace arm_compute
 const std::string &string_from_target(GPUTarget target)
 {
     static std::map<GPUTarget, const std::string> gpu_target_map = {
-        {GPUTarget::MIDGARD, "midgard"}, {GPUTarget::BIFROST, "bifrost"}, {GPUTarget::VALHALL, "valhall"},
-        {GPUTarget::T600, "t600"},       {GPUTarget::T700, "t700"},       {GPUTarget::T800, "t800"},
-        {GPUTarget::G71, "g71"},         {GPUTarget::G72, "g72"},         {GPUTarget::G51, "g51"},
-        {GPUTarget::G51BIG, "g51big"},   {GPUTarget::G51LIT, "g51lit"},   {GPUTarget::G31, "g31"},
-        {GPUTarget::G76, "g76"},         {GPUTarget::G52, "g52"},         {GPUTarget::G52LIT, "g52lit"},
-        {GPUTarget::G77, "g77"},         {GPUTarget::G57, "g57"},         {GPUTarget::G78, "g78"},
-        {GPUTarget::G68, "g68"},         {GPUTarget::G78AE, "g78ae"},     {GPUTarget::G710, "g710"},
-        {GPUTarget::G610, "g610"},       {GPUTarget::G510, "g510"},       {GPUTarget::G310, "g310"},
-        {GPUTarget::G715, "g715"},       {GPUTarget::G615, "g615"},
-    };
+        {GPUTarget::MIDGARD, "midgard"},   {GPUTarget::BIFROST, "bifrost"}, {GPUTarget::VALHALL, "valhall"},
+        {GPUTarget::FIFTHGEN, "fifthgen"},
+
+        {GPUTarget::T600, "t600"},         {GPUTarget::T700, "t700"},       {GPUTarget::T800, "t800"},
+        {GPUTarget::G71, "g71"},           {GPUTarget::G72, "g72"},         {GPUTarget::G51, "g51"},
+        {GPUTarget::G51BIG, "g51big"},     {GPUTarget::G51LIT, "g51lit"},   {GPUTarget::G31, "g31"},
+        {GPUTarget::G76, "g76"},           {GPUTarget::G52, "g52"},         {GPUTarget::G52LIT, "g52lit"},
+        {GPUTarget::G77, "g77"},           {GPUTarget::G57, "g57"},         {GPUTarget::G78, "g78"},
+        {GPUTarget::G68, "g68"},           {GPUTarget::G78AE, "g78ae"},     {GPUTarget::G710, "g710"},
+        {GPUTarget::G610, "g610"},         {GPUTarget::G510, "g510"},       {GPUTarget::G310, "g310"},
+        {GPUTarget::G715, "g715"},         {GPUTarget::G615, "g615"},       {GPUTarget::G720, "g720"},
+        {GPUTarget::G620, "g620"}};
 
     return gpu_target_map[target];
 }
@@ -188,8 +207,13 @@ GPUTarget get_target_from_name(const std::string &device_name)
     GPUTarget gpu_target;
     if (target == 'G' || is_future_gpu)
     {
-        // Check for Valhall or Bifrost
-        gpu_target = get_valhall_target(version);
+        // Check for Valhall, Bifrost or 5-th Gen
+        gpu_target = get_fifth_gen_target(version);
+        if (gpu_target == GPUTarget::UNKNOWN)
+        {
+            gpu_target = get_valhall_target(version);
+        }
+
         if (gpu_target == GPUTarget::UNKNOWN)
         {
             gpu_target = get_bifrost_target(version);

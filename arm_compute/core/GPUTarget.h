@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GPUTARGET_H
-#define ARM_COMPUTE_GPUTARGET_H
+#ifndef ACL_ARM_COMPUTE_CORE_GPUTARGET_H
+#define ACL_ARM_COMPUTE_CORE_GPUTARGET_H
 
 #include "support/Traits.h"
 
@@ -39,6 +39,7 @@ enum class GPUTarget
     MIDGARD             = 0x100,
     BIFROST             = 0x200,
     VALHALL             = 0x300,
+    FIFTHGEN            = 0X400,
     T600                = 0x110,
     T700                = 0x120,
     T800                = 0x130,
@@ -62,6 +63,8 @@ enum class GPUTarget
     G310                = 0x343,
     G715                = 0x350,
     G615                = 0x351,
+    G720                = 0x410,
+    G620                = 0X411
 };
 
 /** Enable bitwise operations on GPUTarget enumerations */
@@ -114,4 +117,4 @@ inline bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target)
     return target_to_check == target;
 }
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GPUTARGET_H */
+#endif // ACL_ARM_COMPUTE_CORE_GPUTARGET_H

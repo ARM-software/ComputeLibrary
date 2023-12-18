@@ -1041,6 +1041,7 @@ cc_library_static {
         "src/runtime/heuristics/dwc_native/ClDWCNativeHeuristicsHelpers.cpp",
         "src/runtime/heuristics/indirect_conv/ClIndirectConvDefaultConfigValhall.cpp",
         "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.cpp",
+        "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultVariantValhall.cpp",
         "src/runtime/heuristics/matmul_native/ClMatMulNativeHelpers.cpp",
         "utils/CommonGraphOptions.cpp",
         "utils/GraphUtils.cpp",

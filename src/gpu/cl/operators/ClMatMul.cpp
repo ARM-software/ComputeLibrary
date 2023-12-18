@@ -34,6 +34,7 @@
 #include "src/gpu/cl/kernels/ClMatMulNativeMMULKernel.h"
 #include "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.h"
 #include "src/runtime/heuristics/matmul_native/ClMatMulNativeKernelConfig.h"
+#include "src/runtime/heuristics/matmul_native/ClMatMulNativeKernelVariant.h"
 #include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelConfig.h"
 
 using namespace arm_compute::cl_matmul;
@@ -42,57 +43,6 @@ namespace arm_compute
 {
 namespace opencl
 {
-namespace
-{
-enum class MatMulKernelType
-{
-    /** Native matrix multiplication for FP types */
-    NATIVE_FP,
-
-    /** Native matrix multiplication for quantized types */
-    NATIVE_QUANTIZED,
-
-    /** Native matrix multiplication using MMUL extension for FP types */
-    NATIVE_MMUL_FP,
-
-    /** Native matrix multiplication using MMUL extension for Quantized types */
-    NATIVE_MMUL_QUANTIZED
-};
-
-MatMulKernelType get_matmul_kernel(const ITensorInfo         *lhs,
-                                   const ITensorInfo         *rhs,
-                                   const MatMulInfo          &matmul_info,
-                                   const ActivationLayerInfo &act_info)
-{
-    ARM_COMPUTE_UNUSED(lhs, rhs, matmul_info, act_info);
-
-    const bool is_quantized      = is_data_type_quantized_asymmetric(lhs->data_type());
-    const bool is_mmul_supported = arm_matrix_multiply_supported(CLKernelLibrary::get().get_device());
-
-    const int k = matmul_info.adj_lhs() ? lhs->tensor_shape().y() : lhs->tensor_shape().x();
-
-    if (is_quantized)
-    {
-        // MMUL kernel works only when K is a multiple of 16
-        if (is_mmul_supported && !act_info.enabled() && k % 16 == 0)
-        {
-            return MatMulKernelType::NATIVE_MMUL_QUANTIZED;
-        }
-
-        return MatMulKernelType::NATIVE_QUANTIZED;
-    }
-    else
-    {
-        // MMUL kernel works only when K is a multiple of 4
-        if (is_mmul_supported && !act_info.enabled() && k % 4 == 0)
-        {
-            return MatMulKernelType::NATIVE_MMUL_FP;
-        }
-
-        return MatMulKernelType::NATIVE_FP;
-    }
-}
-} // namespace
 using namespace arm_compute::opencl::kernels;
 
 ClMatMul::ClMatMul()
@@ -117,7 +67,10 @@ Status ClMatMul::validate(const ITensorInfo         *lhs,
 
     const MatMulKernelInfo kernel_info = t->configure(lhs, rhs, matmul_info);
 
-    switch (get_matmul_kernel(lhs, rhs, matmul_info, act_info))
+    const auto             kernel_selector = ClMatMulNativeKernelVariantFactory::create(gpu_target);
+    const MatMulKernelType kernel_type     = kernel_selector->select_kernel(lhs, rhs, matmul_info, act_info);
+
+    switch (kernel_type)
     {
         case MatMulKernelType::NATIVE_FP:
             return ClMatMulNativeKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
@@ -149,7 +102,10 @@ void ClMatMul::configure(const CLCompileContext    &compile_context,
     const auto             kernel_config = ClMatMulNativeKernelConfigurationFactory::create(gpu_target);
     const MatMulKernelInfo kernel_info   = kernel_config->configure(lhs, rhs, matmul_info);
 
-    switch (get_matmul_kernel(lhs, rhs, matmul_info, act_info))
+    const auto             kernel_selector = ClMatMulNativeKernelVariantFactory::create(gpu_target);
+    const MatMulKernelType kernel_type     = kernel_selector->select_kernel(lhs, rhs, matmul_info, act_info);
+
+    switch (kernel_type)
     {
         case MatMulKernelType::NATIVE_FP:
         {

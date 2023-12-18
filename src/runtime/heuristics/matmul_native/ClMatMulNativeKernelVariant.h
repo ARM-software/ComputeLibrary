@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,46 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG_H
-#define ACL_SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG_H
+#ifndef ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELVARIANT_H
+#define ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELVARIANT_H
 
-#include "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigBifrost.h"
-#include "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigValhall.h"
-#include "src/runtime/heuristics/dwc_native/IClDWCNativeKernelConfig.h"
+#include "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultVariantValhall.h"
+#include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelVariant.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-namespace cl_dwc
+namespace cl_matmul
 {
-/** ClDWCNativeKernelConfigurationFactory factory class */
-class ClDWCNativeKernelConfigurationFactory final
+
+/** ClMatMul variant factory class */
+class ClMatMulNativeKernelVariantFactory final
 {
 public:
-    /** Static method to call the ClDWCNative kernel configuration class accordingly with the GPU target
+    /** Static method to call the ClMatMul configuration class accordingly with the GPU target
      *
      * @param[in] gpu GPU target
      *
-     * @return IClDWCNativeKernelConfig
+     * @return IClMatMulNativeKernelVariant
      */
-    static std::unique_ptr<IClDWCNativeKernelConfig> create(GPUTarget gpu)
+    static std::unique_ptr<IClMatMulNativeKernelVariant> create(GPUTarget gpu)
     {
         switch (get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
-                // The heuristic for Midgard is the same as the one used for Arm Mali-G71
-                return std::make_unique<ClDWCNativeDefaultConfigBifrost>(GPUTarget::G71);
             case GPUTarget::BIFROST:
-                return std::make_unique<ClDWCNativeDefaultConfigBifrost>(gpu);
             case GPUTarget::VALHALL:
             case GPUTarget::FIFTHGEN:
-                return std::make_unique<ClDWCNativeDefaultConfigValhall>(gpu);
+                return std::make_unique<ClMatMulNativeDefaultVariantValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
         }
     }
 };
-} // namespace cl_dwc
+} // namespace cl_matmul
 } // namespace arm_compute
-#endif // ACL_SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG_H
+#endif // ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELVARIANT_H

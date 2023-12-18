@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_GEMM_NATIVE_KERNEL_CONFIGURATION_H
-#define ARM_COMPUTE_CL_GEMM_NATIVE_KERNEL_CONFIGURATION_H
+#ifndef ACL_SRC_GPU_CL_KERNELS_GEMM_NATIVE_CLGEMMNATIVEKERNELCONFIG_H
+#define ACL_SRC_GPU_CL_KERNELS_GEMM_NATIVE_CLGEMMNATIVEKERNELCONFIG_H
 
 #include "src/gpu/cl/kernels/gemm/IClGemmKernelConfig.h"
 #include "src/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.h"
@@ -58,6 +58,7 @@ public:
             case GPUTarget::BIFROST:
                 return std::make_unique<ClGemmDefaultConfigNativeBifrost>(gpu);
             case GPUTarget::VALHALL:
+            case GPUTarget::FIFTHGEN:
                 return std::make_unique<ClGemmDefaultConfigNativeValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
@@ -68,4 +69,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_GEMM_NATIVE_KERNEL_CONFIGURATION_H */
+#endif // ACL_SRC_GPU_CL_KERNELS_GEMM_NATIVE_CLGEMMNATIVEKERNELCONFIG_H
