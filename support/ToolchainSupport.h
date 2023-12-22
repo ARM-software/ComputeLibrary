@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_SUPPORT_TOOLCHAINSUPPORT
-#define ARM_COMPUTE_SUPPORT_TOOLCHAINSUPPORT
+#ifndef ACL_SUPPORT_TOOLCHAINSUPPORT_H
+#define ACL_SUPPORT_TOOLCHAINSUPPORT_H
 
 #include "support/Bfloat16.h"
 #include "support/Half.h"
@@ -184,8 +184,7 @@ inline T nearbyint(T value)
 template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
 inline T round(T value)
 {
-    //Workaround Valgrind's mismatches: when running from Valgrind the call to std::round(-4.500000) == -4.000000 instead of 5.00000
-    return (value < 0.f) ? static_cast<int>(value - 0.5f) : static_cast<int>(value + 0.5f);
+    return std::round(value);
 }
 
 /** Round floating-point value with half value rounding away from zero and cast to long
@@ -331,4 +330,4 @@ inline bool signbit(bfloat16 value)
 } // namespace cpp11
 } // namespace support
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_SUPPORT_TOOLCHAINSUPPORT */
+#endif // ACL_SUPPORT_TOOLCHAINSUPPORT_H
