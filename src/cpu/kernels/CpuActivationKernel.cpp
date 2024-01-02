@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,8 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
      [](const ActivationDataTypeISASelectorData &data)
      {
          return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) &&
-                data.cpumodel == CPUModel::A510 && data.isa.sve2;
+                data.cpumodel == CPUModel::A510 && data.isa.sve2 &&
+                data.f != ActivationLayerInfo::ActivationFunction::RELU;
      },
      REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_q8_activation_lut)},
 #endif // ARM_COMPUTE_ENABLE_SVE
@@ -57,7 +58,10 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
     {// Neon LUT implementantion takes precedence
      "neon_q8_activation_lut",
      [](const ActivationDataTypeISASelectorData &data)
-     { return data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED; },
+     {
+         return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) &&
+                data.f != ActivationLayerInfo::ActivationFunction::RELU;
+     },
      REGISTER_Q8_NEON(arm_compute::cpu::neon_q8_activation_lut)},
 #endif // __aarch64__
     {"sve2_qu8_activation",
@@ -214,9 +218,6 @@ void init_lut(ActivationLayerInfo::ActivationFunction act_func,
             case ActivationLayerInfo::ActivationFunction::LINEAR:
                 tmp_f = a * tmp_f + b;
                 break;
-            case ActivationLayerInfo::ActivationFunction::RELU:
-                tmp_f = std::max<>(0.f, tmp_f);
-                break;
             case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
                 tmp_f = std::min<>(a, std::max(0.f, tmp_f));
                 break;
@@ -278,7 +279,8 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     _name       = std::string("CpuActivationKernel").append("/").append(uk->name);
 
 #ifdef __aarch64__
-    if (src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED)
+    if ((src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED) &&
+        activation_info.activation() != ActivationFunction::RELU)
     {
         ActivationLayerInfo::LookupTable256 tmp_lut;
         init_lut(activation_info.activation(), src->data_type(), src->quantization_info().uniform(),
