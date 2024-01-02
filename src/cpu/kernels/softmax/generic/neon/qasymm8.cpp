@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,15 +30,23 @@ namespace arm_compute
 namespace cpu
 {
 template <bool IS_LOG>
-void neon_qasymm8_softmax(const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window)
+void neon_qasymm8_softmax(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window)
 {
-    return neon_softmax_quantized<qasymm8_t, IS_LOG>(in, tmp, out, beta, window);
+    if (axis == 0)
+    {
+        return neon_softmax_x_quantized<qasymm8_t, IS_LOG>(in, tmp, out, beta, axis, window);
+    }
+    else
+    {
+        return neon_softmax_non_x_quantized<qasymm8_t, IS_LOG>(in, tmp, out, beta, axis, window);
+    }
 }
 
-template void
-neon_qasymm8_softmax<true>(const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window);
-template void
-neon_qasymm8_softmax<false>(const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window);
+template void neon_qasymm8_softmax<true>(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window);
+template void neon_qasymm8_softmax<false>(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window);
 
 } // namespace cpu
 } // namespace arm_compute

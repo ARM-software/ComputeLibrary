@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,16 +89,13 @@ private:
         COUNT
     };
 
-    CpuPermute                  _permute_input;
-    CpuPermute                  _permute_output;
     std::unique_ptr<ICPPKernel> _softmax_kernel;
 
     TensorInfo _tmp;
-    TensorInfo _input_permuted;
-    TensorInfo _output_permuted;
 
-    bool                             _needs_permute;
     experimental::MemoryRequirements _aux_mem{};
+
+    unsigned int _axis = 0;
 };
 
 } // namespace cpu

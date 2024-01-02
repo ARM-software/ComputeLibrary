@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,15 +31,23 @@ namespace cpu
 {
 
 template <bool IS_LOG>
-void neon_fp32_softmax(const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window)
+void neon_fp32_softmax(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window)
 {
-    return neon_softmax_float<float, IS_LOG>(in, tmp, out, beta, window);
+    if (axis == 0)
+    {
+        return neon_softmax_x_float<float, IS_LOG>(in, tmp, out, beta, axis, window);
+    }
+    else
+    {
+        return neon_softmax_non_x_float<float, IS_LOG>(in, tmp, out, beta, axis, window);
+    }
 }
 
-template void
-neon_fp32_softmax<true>(const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window);
-template void
-neon_fp32_softmax<false>(const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window);
+template void neon_fp32_softmax<true>(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window);
+template void neon_fp32_softmax<false>(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window);
 
 } // namespace cpu
 } // namespace arm_compute

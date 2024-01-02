@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@ namespace cpu
 {
 #define DECLARE_SOFTMAX_KERNEL(func_name) \
     template <bool IS_LOG>                \
-    void func_name(const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window)
+    void func_name(const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window)
 
 DECLARE_SOFTMAX_KERNEL(neon_fp32_softmax);
 DECLARE_SOFTMAX_KERNEL(neon_fp16_softmax);
