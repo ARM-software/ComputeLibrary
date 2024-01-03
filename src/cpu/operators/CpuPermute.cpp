@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,23 +23,91 @@
  */
 #include "src/cpu/operators/CpuPermute.h"
 
+#include "arm_compute/core/CoreTypes.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/ITensorInfo.h"
+
 #include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuCopyKernel.h"
 #include "src/cpu/kernels/CpuPermuteKernel.h"
+#include "src/cpu/kernels/CpuTransposeKernel.h"
+
+#include <algorithm>
+#include <array>
+#include <memory>
 
 namespace arm_compute
 {
 namespace cpu
 {
+namespace
+{
+// Handle "No-op" cases
+bool prefer_copy(const PermutationVector &v)
+{
+    static const std::array<PermutationVector, 6> permutations = {{
+        PermutationVector(0U),
+        PermutationVector(0U, 1U),
+        PermutationVector(0U, 1U, 2U),
+        PermutationVector(0U, 1U, 2U, 3U),
+        PermutationVector(0U, 1U, 2U, 3U, 4U),
+        PermutationVector(0U, 1U, 2U, 3U, 4U, 5U),
+    }};
+
+    return std::find(permutations.begin(), permutations.end(), v) != permutations.end();
+}
+
+// Transpose kernel is optimized for permuting the first two dimensions of a tensor
+bool prefer_transpose(const PermutationVector &v)
+{
+    static const std::array<PermutationVector, 5> permutations = {{
+        PermutationVector(1U, 0U),
+        PermutationVector(1U, 0U, 2U),
+        PermutationVector(1U, 0U, 2U, 3U),
+        PermutationVector(1U, 0U, 2U, 3U, 4U),
+        PermutationVector(1U, 0U, 2U, 3U, 4U, 5U),
+    }};
+
+    return std::find(permutations.begin(), permutations.end(), v) != permutations.end();
+}
+} // namespace
+
 void CpuPermute::configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
     ARM_COMPUTE_LOG_PARAMS(src, dst, perm);
-    auto k = std::make_unique<kernels::CpuPermuteKernel>();
-    k->configure(src, dst, perm);
-    _kernel = std::move(k);
+
+    if (prefer_copy(perm))
+    {
+        auto k = std::make_unique<kernels::CpuCopyKernel>();
+        k->configure(src, dst);
+        _kernel = std::move(k);
+    }
+    else if (prefer_transpose(perm))
+    {
+        auto k = std::make_unique<kernels::CpuTransposeKernel>();
+        k->configure(src, dst);
+        _kernel = std::move(k);
+    }
+    else
+    {
+        auto k = std::make_unique<kernels::CpuPermuteKernel>();
+        k->configure(src, dst, perm);
+        _kernel = std::move(k);
+    }
 }
 
 Status CpuPermute::validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm)
 {
+    if (prefer_copy(perm))
+    {
+        return kernels::CpuCopyKernel::validate(src, dst);
+    }
+
+    if (prefer_transpose(perm))
+    {
+        return kernels::CpuTransposeKernel::validate(src, dst);
+    }
+
     return kernels::CpuPermuteKernel::validate(src, dst, perm);
 }
 } // namespace cpu

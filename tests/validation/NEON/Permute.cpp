@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -173,6 +173,23 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint32_t>, framework::DatasetM
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(F16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<float16_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::F16))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<float16_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::F16))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE_END()
 TEST_SUITE_END()
