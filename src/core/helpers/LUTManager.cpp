@@ -45,16 +45,18 @@ void init_lut_fp16(ActivationLayerInfo::LookupTable65536 *lut)
 
 std::shared_ptr<ActivationLayerInfo::LookupTable65536> LUTManager::get_lut_table(LUTInfo info)
 {
-    const auto itr = map_fp16.find(info);
-    if (itr != map_fp16.end() && !itr->second.expired())
+    const auto itr   = map_fp16.find(info);
+    auto       s_ptr = (itr != map_fp16.end()) ? itr->second.lock() : nullptr; // nullptr if invalid or not found.
+    if (s_ptr != nullptr)
     {
         // Found and valid
-        return itr->second.lock(); // Return weak ptr as shared ptr
+        return s_ptr; // Return weak ptr as shared ptr
     }
     else
     {
         // Not found, or pointer not valid
-        const auto ptr = std::make_shared<ActivationLayerInfo::LookupTable65536>();
+        // We do not use make_shared to prevent the weak_ptr keeping the control block alive
+        std::shared_ptr<ActivationLayerInfo::LookupTable65536> ptr(new ActivationLayerInfo::LookupTable65536);
         init_lut_fp16(ptr.get());
         map_fp16[info] = ptr;
         return ptr;
