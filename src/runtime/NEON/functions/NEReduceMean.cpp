@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,14 @@ validate_config(const ITensorInfo *input, const Coordinates &reduction_axis, boo
         TensorShape out_shape = input->tensor_shape();
         // Validate output_shape only if not using auto_init
         convert_negative_axis(axis_local, input_dims);
+
+// Suppress warning produced by a compiler bug in GCC
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104165
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
         std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
+#pragma GCC diagnostic pop
+
         for (unsigned int i = 0; i < reduction_ops; ++i)
         {
             ARM_COMPUTE_RETURN_ERROR_ON(axis_local[i] > 3);
@@ -168,7 +175,14 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
         TensorShape out_shape = tmp_input->info()->tensor_shape();
         // We have to sort the reduction axis vectors in order for remove_dimension
         // to work properly
+
+// Suppress warning produced by a compiler bug in GCC
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104165
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
         std::sort(axis_local.begin(), axis_local.begin() + _reduction_ops);
+#pragma GCC diagnostic pop
+
         for (int i = 0; i < _reduction_ops; ++i)
         {
             out_shape.remove_dimension(axis_local[i] - i, false);

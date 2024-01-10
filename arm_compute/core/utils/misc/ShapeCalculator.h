@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,14 @@ inline TensorShape calculate_reduce_mean_shape(ITensorInfo *input, const Coordin
     {
         // We have to sort the reduction axis vectors in order for remove_dimension
         // to work properly
+
+// Suppress warning produced by a compiler bug in GCC
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104165
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
         std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
+#pragma GCC diagnostic pop
+
         for (int i = 0; i < reduction_ops; ++i)
         {
             out_shape.remove_dimension(axis_local[i] - i, false);
