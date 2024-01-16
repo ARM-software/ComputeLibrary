@@ -29,17 +29,22 @@ namespace arm_compute
 #ifdef __aarch64__
 namespace
 {
+
 void init_lut_fp16(ActivationLayerInfo::LookupTable65536 *lut)
 {
-    for (uint16_t i = 0; i < lut->size() - 1; ++i)
+    union Element
     {
-        const float16_t *v = reinterpret_cast<float16_t *>(&i);
-        (*lut)[i]          = 1.f / (1.f + std::exp(-*v));
+        uint16_t  i = 0;
+        float16_t fp;
+    } item;
+    // Fill lut by iterating over all 16 bit values using the union.
+    while (true)
+    {
+        (*lut)[item.i] = 1.f / (1.f + std::exp(-item.fp));
+        if (item.i == 65535)
+            break;
+        item.i++;
     }
-    // Final value should be filled outside of loop to avoid overflows.
-    const uint16_t   i = lut->size() - 1;
-    const float16_t *v = reinterpret_cast<const float16_t *>(&i);
-    (*lut)[i]          = 1.f / (1.f + std::exp(-*v));
 }
 } // namespace
 
