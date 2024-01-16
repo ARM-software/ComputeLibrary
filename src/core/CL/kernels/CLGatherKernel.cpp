@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,8 +112,6 @@ void CLGatherKernel::configure(const CLCompileContext &compile_context,
     build_opts.add_option("-DDATA_TYPE=" +
                           get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
     build_opts.add_option("-DOUTPUT_DIM_Z=" + support::cpp11::to_string(output->info()->dimension(2)));
-    build_opts.add_option("-DINDICES_DIM_Z=" + support::cpp11::to_string(indices->info()->dimension(2)));
-    build_opts.add_option("-DINPUT_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
     build_opts.add_option("-DINDICES_DIMS=" + support::cpp11::to_string(indices->info()->num_dimensions()));
     build_opts.add_option("-DAXIS=" + support::cpp11::to_string(_axis));
     build_opts.add_option("-DINDEX_LIMIT=" + support::cpp11::to_string(input->info()->tensor_shape()[_axis]));

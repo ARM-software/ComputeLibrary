@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ __kernel void compute_mean_var(
     TENSOR4D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
-    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
 
 #if defined(NHWC)
@@ -176,10 +176,10 @@ __kernel void instance_normalization(
 #endif /* IN_PLACE */
 )
 {
-    Tensor4D in       = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor4D in       = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input);
     Tensor3D mean_var = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(mean_var);
 #ifndef IN_PLACE
-    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
+    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output);
 #endif /* IN_PLACE */
 
 #if defined(NHWC)

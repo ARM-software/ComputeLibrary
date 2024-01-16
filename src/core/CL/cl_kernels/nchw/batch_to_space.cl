@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,7 @@ __kernel void batch_to_space_nchw(
     VECTOR_DECLARATION(block_shape),
     TENSOR3D_DECLARATION(output))
 {
-    Tensor4D in    = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor4D in    = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input);
     Tensor3D out   = CONVERT_TO_TENSOR3D_STRUCT(output);
     Vector   block = CONVERT_TO_VECTOR_STRUCT_NO_STEP(block_shape);
 
@@ -112,7 +112,7 @@ __kernel void batch_to_space_static_nchw(
     const int batch_id,
     TENSOR3D_DECLARATION(output))
 {
-    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
 
     const int block_x = BLOCK_SHAPE_X;

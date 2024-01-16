@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ __kernel void depth_to_space_nhwc(
     TENSOR4D_DECLARATION(output))
 {
     Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
+    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output);
 
     const int r = (CHANNEL_SIZE / (BLOCK_SHAPE * BLOCK_SHAPE));
     const int x = get_global_id(1);

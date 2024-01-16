@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ __kernel void permute(TENSOR4D_DECLARATION(input),
 
 {
     Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT(input, DEPTH_IN);
-    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
+    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output);
 
     int out_index[4] = { 0 };
     int in_index[4]  = { 0 };

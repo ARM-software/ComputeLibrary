@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,8 @@ __kernel void tile(
     TENSOR4D_DECLARATION(input),
     TENSOR4D_DECLARATION(output))
 {
-    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, DST_DEPTH);
-    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, SRC_DEPTH);
+    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output);
+    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input);
 
     // For all coordinates but x, each tile copies from the input
     const int y     = get_global_id(1);

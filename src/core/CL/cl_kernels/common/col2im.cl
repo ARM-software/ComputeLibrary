@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,7 @@ __kernel void col2im(
     TENSOR4D_DECLARATION(dst))
 {
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(dst, 0);
+    Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(dst);
 
     const uint xd = get_global_id(1) % WIDTH_OUTPUT; // x coordinate of the destination tensor
     const uint yd = get_global_id(1) / WIDTH_OUTPUT; // y coordinate of the destination tensor

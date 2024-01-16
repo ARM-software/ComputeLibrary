@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_HELPER_H
-#define ARM_COMPUTE_HELPER_H
+#ifndef ACL_SRC_CORE_CL_CL_KERNELS_HELPERS_H
+#define ACL_SRC_CORE_CL_CL_KERNELS_HELPERS_H
 
 #include "load_store_utility.h"
 
@@ -903,9 +903,9 @@
                                  name##_stride_y, name##_step_y, name##_stride_z, name##_step_z, name##_stride_w,  \
                                  name##_step_w, mod_size)
 
-#define CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(name, mod_size)                                             \
-    update_tensor4D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, \
-                                 name##_stride_y, 0, name##_stride_z, 0, name##_stride_w, 0, mod_size)
+#define CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(name)                                                            \
+    update_tensor4D_workitem_no_step_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, \
+                                         name##_stride_y, name##_stride_z, name##_stride_w)
 
 #define CONVERT_TO_TENSOR3D_STRUCT_NO_UPDATE_PTR(name)                                                       \
     tensor3D_ptr_no_update(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, \
@@ -1109,6 +1109,20 @@ inline Tensor4D update_tensor4D_workitem_ptr(__global uchar *ptr,
     return tensor;
 }
 
+inline Tensor4D update_tensor4D_workitem_no_step_ptr(
+    __global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint stride_y, uint stride_z, uint stride_w)
+{
+    Tensor4D tensor = {.ptr                           = ptr,
+                       .offset_first_element_in_bytes = offset_first_element_in_bytes,
+                       .stride_x                      = stride_x,
+                       .stride_y                      = stride_y,
+                       .stride_z                      = stride_z,
+                       .stride_w                      = stride_w};
+
+    tensor.ptr += tensor.offset_first_element_in_bytes;
+    return tensor;
+}
+
 /** Get the pointer position of a Vector
  *
  * @param[in] vec Pointer to the starting position of the buffer
@@ -1181,4 +1195,4 @@ inline __global const uchar *tensor3D_index2ptr(const Tensor3D *tensor, uint wid
            tensor->offset_first_element_in_bytes;
 }
 
-#endif // _HELPER_H
+#endif // ACL_SRC_CORE_CL_CL_KERNELS_HELPERS_H
