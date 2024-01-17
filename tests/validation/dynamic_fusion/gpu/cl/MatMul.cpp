@@ -25,6 +25,7 @@
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/LargeMatMulDataset.h"
+#include "tests/datasets/MatMulDataset.h"
 #include "tests/datasets/SmallMatMulDataset.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/framework/Fixture.h"
@@ -54,27 +55,36 @@ RelativeTolerance<half_float::half> tolerance_f16(half(
     0.02)); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
 } // namespace
 
-/** M0 values to test --precommit*/
-const auto m0_values_precommit = framework::dataset::make("M0", {1, 3});
+/** M0 values to test - precommit */
+const auto m0_values_lhs_nt_precommit = framework::dataset::make("M0", {1, 2, 3});
 
-/** N0 values to test --precommit*/
-const auto n0_values_precommit = framework::dataset::make("N0", {1, 2, 4});
+/** N0 values to test - precommit */
+const auto n0_values_rhs_t_precommit = framework::dataset::make("N0", {1, 2, 4});
 
-/** K0 values to test --precommit*/
-const auto k0_values_precommit = framework::dataset::make("K0", {1, 2, 3});
+/** K0 values to test - precommit */
+const auto k0_values_rhs_t_precommit = framework::dataset::make("K0", {1, 2, 4});
 
-/** M0 values to test --nightly*/
-const auto m0_values_nightly_lhs_nt = framework::dataset::make("M0", {1, 2, 3, 4, 5, 6, 7, 8});
-const auto m0_values_nightly_lhs_t  = framework::dataset::make("M0", {1, 2, 3, 4, 8});
+/** M0 values to test - nightly */
+const auto m0_values_lhs_nt_nightly = framework::dataset::make("M0", {1, 2, 3, 4});
 
-/** N0 values to test --nightly*/
-const auto n0_values_nightly_rhs_nt = framework::dataset::make("N0", {1, 2, 3, 4, 8, 16});
-const auto n0_values_nightly_rhs_t  = framework::dataset::make("N0", {1, 2, 3, 4, 8});
+/** N0 values to test - nightly */
+const auto n0_values_rhs_t_nightly = framework::dataset::make("N0", {1, 2, 3, 4, 8});
 
-/** K0 values to test --nightly*/
-const auto k0_values_nightly_lhs_nt_rhs_nt = framework::dataset::make("K0", {1, 2, 3, 4, 8, 16});
-const auto k0_values_nightly_rhs_t         = framework::dataset::make("K0", {1, 2, 3, 4, 8});
-const auto k0_values_nightly_lhs_t_rhs_nt  = framework::dataset::make("K0", {1, 2, 3, 4, 5, 6, 7, 8});
+/** K0 values to test - nightly */
+const auto k0_values_rhs_t_nightly = framework::dataset::make("K0", {1, 2, 3, 4, 8});
+
+class DFMatMulDataset final : public datasets::MatMulDataset
+{
+public:
+    DFMatMulDataset()
+    {
+        // LHS = [K, M], RHS = [N, K], DST = [N, M]
+        add_config(TensorShape(1U, 1U), TensorShape(1U, 1U), TensorShape(1U, 1U));
+        add_config(TensorShape(1U, 2U), TensorShape(2U, 1U), TensorShape(2U, 2U));
+        add_config(TensorShape(9U, 6U), TensorShape(5U, 9U), TensorShape(5U, 6U));
+        add_config(TensorShape(32U, 37U), TensorShape(17U, 32U), TensorShape(17U, 37U));
+    }
+};
 
 TEST_SUITE(CL)
 TEST_SUITE(DYNAMIC_FUSION)
@@ -247,70 +257,33 @@ using DynamicFusionGpuMatmulFixture = DynamicFusionGpuMatMulValidationFixture<CL
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
-FIXTURE_DATA_TEST_CASE(
-    RunTiny,
-    DynamicFusionGpuMatmulFixture<float>,
-    framework::DatasetMode::ALL,
-    combine(combine(combine(combine(combine(combine(combine(datasets::TinyMatMulDataset(),
-                                                            framework::dataset::make("TransposeA", {false})),
-                                                    framework::dataset::make("TransposeB", {true})),
-                                            m0_values_precommit),
-                                    n0_values_precommit),
-                            k0_values_precommit),
-                    framework::dataset::make("ExportRhsToCLImage", {false})),
-            framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunPrecommit,
+                       DynamicFusionGpuMatmulFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(DFMatMulDataset(),
+                               framework::dataset::make("TransposeA", {false}),
+                               framework::dataset::make("TransposeB", {true}),
+                               m0_values_lhs_nt_precommit,
+                               n0_values_rhs_t_precommit,
+                               k0_values_rhs_t_precommit,
+                               framework::dataset::make("ExportRhsToCLImage", {false}),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(
-    RunSmall,
-    DynamicFusionGpuMatmulFixture<float>,
-    framework::DatasetMode::ALL,
-    combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                            framework::dataset::make("TransposeA", {false})),
-                                                    framework::dataset::make("TransposeB", {true})),
-                                            m0_values_precommit),
-                                    n0_values_precommit),
-                            k0_values_precommit),
-                    framework::dataset::make("ExportRhsToCLImage", {false})),
-            framework::dataset::make("DataType", DataType::F32)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
-}
-
-FIXTURE_DATA_TEST_CASE(
-    RunLargeRhsTransposed,
-    DynamicFusionGpuMatmulFixture<float>,
-    framework::DatasetMode::NIGHTLY,
-    combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                            framework::dataset::make("TransposeA", {false})),
-                                                    framework::dataset::make("TransposeB", {true})),
-                                            m0_values_nightly_lhs_nt),
-                                    n0_values_nightly_rhs_t),
-                            k0_values_nightly_rhs_t),
-                    framework::dataset::make("ExportRhsToCLImage", {false})),
-            framework::dataset::make("DataType", DataType::F32)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
-}
-
-// Running High Dimensional test is enough for FP32, because we're stressing the number of dimensions, not data type or M0/N0/K0
-FIXTURE_DATA_TEST_CASE(
-    RunHighDimensional,
-    DynamicFusionGpuMatmulFixture<float>,
-    framework::DatasetMode::ALL,
-    combine(combine(combine(combine(combine(combine(combine(datasets::HighDimensionalMatMulDataset(),
-                                                            framework::dataset::make("TransposeA", {false})),
-                                                    framework::dataset::make("TransposeB", {true})),
-                                            framework::dataset::make("M0", {2})),
-                                    framework::dataset::make("N0", {2})),
-                            framework::dataset::make("K0", {2})),
-                    framework::dataset::make("ExportRhsToCLImage", {false})),
-            framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunNightly,
+                       DynamicFusionGpuMatmulFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(DFMatMulDataset(),
+                               framework::dataset::make("TransposeA", {false}),
+                               framework::dataset::make("TransposeB", {true}),
+                               m0_values_lhs_nt_nightly,
+                               n0_values_rhs_t_nightly,
+                               k0_values_rhs_t_nightly,
+                               framework::dataset::make("ExportRhsToCLImage", {false}),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
@@ -319,35 +292,33 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 
-FIXTURE_DATA_TEST_CASE(
-    RunSmall,
-    DynamicFusionGpuMatmulFixture<half>,
-    framework::DatasetMode::ALL,
-    combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                            framework::dataset::make("TransposeA", {false})),
-                                                    framework::dataset::make("TransposeB", {true})),
-                                            m0_values_precommit),
-                                    n0_values_precommit),
-                            k0_values_precommit),
-                    framework::dataset::make("ExportRhsToCLImage", {false})),
-            framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunPrecommit,
+                       DynamicFusionGpuMatmulFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(DFMatMulDataset(),
+                               framework::dataset::make("TransposeA", {false}),
+                               framework::dataset::make("TransposeB", {true}),
+                               m0_values_lhs_nt_precommit,
+                               n0_values_rhs_t_precommit,
+                               k0_values_rhs_t_precommit,
+                               framework::dataset::make("ExportRhsToCLImage", {false}),
+                               framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(
-    RunLargeRhsTransposed,
-    DynamicFusionGpuMatmulFixture<half>,
-    framework::DatasetMode::NIGHTLY,
-    combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                            framework::dataset::make("TransposeA", {false})),
-                                                    framework::dataset::make("TransposeB", {true})),
-                                            m0_values_nightly_lhs_nt),
-                                    n0_values_nightly_rhs_t),
-                            k0_values_nightly_rhs_t),
-                    framework::dataset::make("ExportRhsToCLImage", {false})),
-            framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunNightly,
+                       DynamicFusionGpuMatmulFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(DFMatMulDataset(),
+                               framework::dataset::make("TransposeA", {false}),
+                               framework::dataset::make("TransposeB", {true}),
+                               m0_values_lhs_nt_nightly,
+                               n0_values_rhs_t_nightly,
+                               k0_values_rhs_t_nightly,
+                               framework::dataset::make("ExportRhsToCLImage", {false}),
+                               framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);

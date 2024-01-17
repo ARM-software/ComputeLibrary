@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST
+#ifndef ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST_H
+#define ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST_H
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
 
@@ -49,13 +49,8 @@ public:
      * Valid data type configurations:
      * |src            |dst                                    |
      * |:--------------|:--------------------------------------|
-     * |U8             | S8, U16, S16, U32, S32, F16, F32      |
-     * |U16            | U8, S8, S16, U32, S32, F16, F32       |
-     * |S16            | U8, S8, U16, U32, S32, F16, F32       |
-     * |U32            | U8, S8, U16, S16, S32, F16, F32       |
-     * |S32            | U8, S8, U16, S16, U32, F16, F32       |
-     * |F16            | U8, S8, U16, S16, U32, S32, F32       |
-     * |F32            | U8, S8, U16, S16, U32, S32, F16       |
+     * |F16            | F32                                   |
+     * |F32            | F16                                   |
      *
      * Input data type must be different than output data type.
      *
@@ -90,4 +85,4 @@ public:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST */
+#endif // ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST_H

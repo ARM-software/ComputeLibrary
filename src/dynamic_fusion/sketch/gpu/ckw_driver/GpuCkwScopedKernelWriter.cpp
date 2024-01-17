@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,6 @@
 
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
-
 namespace arm_compute
 {
 namespace experimental
@@ -33,34 +31,34 @@ namespace experimental
 namespace dynamic_fusion
 {
 
-GpuCkwScopedKernelWriter::GpuCkwScopedKernelWriter(GpuCkwKernelWriter *writer)
+GpuCkwScopedKernelWriter::GpuCkwScopedKernelWriter(ckw::KernelWriter *writer)
     : _writer(writer), _parent_id_space(writer->id_space())
 {
-    _writer->next_id_space();
+    _writer->new_id_space();
 }
 
 GpuCkwScopedKernelWriter::GpuCkwScopedKernelWriter(const GpuCkwScopedKernelWriter &other)
     : _writer(other._writer), _parent_id_space(other._writer->id_space())
 {
-    _writer->next_id_space();
+    _writer->new_id_space();
 }
 
-GpuCkwKernelWriter *GpuCkwScopedKernelWriter::operator->()
+ckw::KernelWriter *GpuCkwScopedKernelWriter::operator->()
 {
     return _writer;
 }
 
-const GpuCkwKernelWriter *GpuCkwScopedKernelWriter::operator->() const
+const ckw::KernelWriter *GpuCkwScopedKernelWriter::operator->() const
 {
     return _writer;
 }
 
-GpuCkwKernelWriter *GpuCkwScopedKernelWriter::writer()
+ckw::KernelWriter *GpuCkwScopedKernelWriter::writer()
 {
     return _writer;
 }
 
-const GpuCkwKernelWriter *GpuCkwScopedKernelWriter::writer() const
+const ckw::KernelWriter *GpuCkwScopedKernelWriter::writer() const
 {
     return _writer;
 }

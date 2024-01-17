@@ -31,6 +31,10 @@
 namespace ckw
 {
 
+TileOperand::TileOperand() : _tile(nullptr), _row_start(0), _row_end(0), _col_start(0), _col_end(0)
+{
+}
+
 TileOperand::TileOperand(ITile &tile)
     : _tile(&tile), _row_start(0), _row_end(tile.info().height()), _col_start(0), _col_end(tile.info().width())
 {
@@ -44,6 +48,16 @@ TileOperand::TileOperand(
     CKW_ASSERT(row_end > row_start && row_end <= _tile->info().height());
     CKW_ASSERT(col_start >= 0 && col_start < _tile->info().width());
     CKW_ASSERT(col_end > col_start && col_end <= _tile->info().width());
+}
+
+bool TileOperand::is_valid() const
+{
+    return _tile != nullptr;
+}
+
+const TileInfo &TileOperand::tile_info() const
+{
+    return _tile->info();
 }
 
 TileOperand TileOperand::tile(int32_t row_start, int32_t row_end, int32_t col_start, int32_t col_end) const

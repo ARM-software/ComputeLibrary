@@ -61,25 +61,19 @@ public:
 
         _tests.push_back({ 2, 4, DataType::Bool, 2, 1, 2, 1, DataType::Fp32, BinaryOp::GreaterEqual, "G0__dst__0 = (float4)G0__lhs__0 >= (float4)G0__rhs__0;\nG0__dst__1 = (float4)G0__lhs__1 >= (float4)G0__rhs__1;\n" }); // LHS and RHS x-dimension broadcast.
 
-        _tests.push_back({ 2, 3, DataType::Fp32, 2, 3, 2, 3, DataType::Fp32, BinaryOp::MatMul_Nt_T,
+        _tests.push_back({ 2, 2, DataType::Fp32, 2, 3, 2, 3, DataType::Fp32, BinaryOp::MatMul_Nt_T,
                            "G0__dst__0.s0 = fma(G0__lhs__0.s0, G0__rhs__0.s0, G0__dst__0.s0);\n"
-                           "G0__dst__0.s0 = fma(G0__lhs__1.s0, G0__rhs__1.s0, G0__dst__0.s0);\n"
-                           "G0__dst__0.s0 = fma(G0__lhs__1.s0, G0__rhs__1.s0, G0__dst__0.s0);\n"
-                           "G0__dst__1.s0 = fma(G0__lhs__0.s0, G0__rhs__0.s1, G0__dst__1.s0);\n"
-                           "G0__dst__1.s0 = fma(G0__lhs__1.s0, G0__rhs__1.s1, G0__dst__1.s0);\n"
-                           "G0__dst__1.s0 = fma(G0__lhs__1.s0, G0__rhs__1.s1, G0__dst__1.s0);\n"
-                           "G0__dst__1.s0 = fma(G0__lhs__0.s0, G0__rhs__0.s2, G0__dst__1.s0);\n"
-                           "G0__dst__1.s0 = fma(G0__lhs__1.s0, G0__rhs__1.s2, G0__dst__1.s0);\n"
-                           "G0__dst__1.s0 = fma(G0__lhs__1.s0, G0__rhs__1.s2, G0__dst__1.s0);\n"
-                           "G0__dst__0.s1 = fma(G0__lhs__0.s1, G0__rhs__0.s0, G0__dst__0.s1);\n"
-                           "G0__dst__0.s1 = fma(G0__lhs__1.s1, G0__rhs__1.s0, G0__dst__0.s1);\n"
-                           "G0__dst__0.s1 = fma(G0__lhs__1.s1, G0__rhs__1.s0, G0__dst__0.s1);\n"
-                           "G0__dst__1.s1 = fma(G0__lhs__0.s1, G0__rhs__0.s1, G0__dst__1.s1);\n"
+                           "G0__dst__0.s0 = fma(G0__lhs__0.s1, G0__rhs__0.s1, G0__dst__0.s0);\n"
+                           "G0__dst__0.s0 = fma(G0__lhs__0.s2, G0__rhs__0.s2, G0__dst__0.s0);\n"
+                           "G0__dst__0.s1 = fma(G0__lhs__0.s0, G0__rhs__1.s0, G0__dst__0.s1);\n"
+                           "G0__dst__0.s1 = fma(G0__lhs__0.s1, G0__rhs__1.s1, G0__dst__0.s1);\n"
+                           "G0__dst__0.s1 = fma(G0__lhs__0.s2, G0__rhs__1.s2, G0__dst__0.s1);\n"
+                           "G0__dst__1.s0 = fma(G0__lhs__1.s0, G0__rhs__0.s0, G0__dst__1.s0);\n"
+                           "G0__dst__1.s0 = fma(G0__lhs__1.s1, G0__rhs__0.s1, G0__dst__1.s0);\n"
+                           "G0__dst__1.s0 = fma(G0__lhs__1.s2, G0__rhs__0.s2, G0__dst__1.s0);\n"
+                           "G0__dst__1.s1 = fma(G0__lhs__1.s0, G0__rhs__1.s0, G0__dst__1.s1);\n"
                            "G0__dst__1.s1 = fma(G0__lhs__1.s1, G0__rhs__1.s1, G0__dst__1.s1);\n"
-                           "G0__dst__1.s1 = fma(G0__lhs__1.s1, G0__rhs__1.s1, G0__dst__1.s1);\n"
-                           "G0__dst__1.s1 = fma(G0__lhs__0.s1, G0__rhs__0.s2, G0__dst__1.s1);\n"
-                           "G0__dst__1.s1 = fma(G0__lhs__1.s1, G0__rhs__1.s2, G0__dst__1.s1);\n"
-                           "G0__dst__1.s1 = fma(G0__lhs__1.s1, G0__rhs__1.s2, G0__dst__1.s1);\n" });
+                           "G0__dst__1.s1 = fma(G0__lhs__1.s2, G0__rhs__1.s2, G0__dst__1.s1);\n" });
     }
 
     bool run() override

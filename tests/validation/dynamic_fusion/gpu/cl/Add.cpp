@@ -22,9 +22,6 @@
  * SOFTWARE.
  */
 
-// TODO: Fix testing of CKW Elementwise Binary (COMPMID-6530)
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuAdd.h"
 
@@ -265,4 +262,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

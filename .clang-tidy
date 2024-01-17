@@ -1,9 +1,9 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,*,-abseil-*,-fuchsia-*,-bugprone-*,-hicpp-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cert-err58-cpp,-cppcoreguidelines-pro-type-reinterpret-cast,-google-runtime-references,-google-build-using-namespace,-readability-redundant-member-init,-readability-redundant-declaration,-readability-else-after-return,-performance-type-promotion-in-math-fn,-cert-err60-cpp,-cppcoreguidelines-narrowing-conversions,-readability-magic-numbers,-cppcoreguidelines-avoid-magic-numbers,-readability-named-parameter,-readability-implicit-bool-conversion,-readability-uppercase-literal-suffix,-clang-analyzer-optin.cplusplus.VirtualCall,-cppcoreguidelines-macro-usage'
+Checks:          'clang-diagnostic-*,*,-llvm-include-order,clang-analyzer-*,-abseil-*,-fuchsia-*,-bugprone-*,-hicpp-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cert-err58-cpp,-cppcoreguidelines-pro-type-reinterpret-cast,-google-runtime-references,-google-build-using-namespace,-readability-redundant-member-init,-readability-redundant-declaration,-readability-else-after-return,-performance-type-promotion-in-math-fn,-cert-err60-cpp,-cppcoreguidelines-narrowing-conversions,-readability-magic-numbers,-cppcoreguidelines-avoid-magic-numbers,-readability-named-parameter,-readability-implicit-bool-conversion,-readability-uppercase-literal-suffix,-clang-analyzer-optin.cplusplus.VirtualCall,-cppcoreguidelines-macro-usage'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
-CheckOptions:    
+CheckOptions:
   - key:             cert-dcl16-c.IgnoreMacros
     value:           '1'
   - key:             cert-dcl16-c.NewSuffixes
@@ -211,4 +211,3 @@ CheckOptions:
   - key:             zircon-temporary-objects.Names
     value:           ''
 ...
-

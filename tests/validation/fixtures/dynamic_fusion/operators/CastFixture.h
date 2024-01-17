@@ -120,6 +120,8 @@ protected:
         GpuWorkloadSketch sketch{&context};
 
         // Create sketch tensors
+        // Here, we use DataLayout::NCHW just for the test. However, the optimal data layout to
+        // be used with dynamic fusion is NHWC
         ITensorInfo *src_info =
             context.create_tensor_info(TensorInfo(shape, 1, dt_in, DataLayout::NCHW)); // layout is not important
         ITensorInfo *dst_info = context.create_tensor_info();

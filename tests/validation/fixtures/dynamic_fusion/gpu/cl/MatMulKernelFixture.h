@@ -203,7 +203,7 @@ protected:
                                       bool               pretranspose_b,
                                       DataType           data_type)
     {
-        // We collapse dimensions > 3 onto dimension 3, i.e. 5D+ tensors will look like 4D
+        // We collapse dimensions > 3 onto dimension 3, i.e. 5D+ tensors will look like 3D
         // This is necessary unless we choose to extend gemm reference for 5D+ tensors
         TensorShape output_shape_collapsed = output_shape.collapsed_from(Window::DimZ);
         TensorShape shape_a_collapsed      = shape_a.collapsed_from(Window::DimZ);

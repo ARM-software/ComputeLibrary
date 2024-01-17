@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,12 +42,6 @@ class GpuWorkloadContext;
 class GpuPool2dSettings
 {
 public:
-    /* Get mixed_precision*/
-    bool mixed_precision() const;
-
-    /* Set mixed_precision */
-    GpuPool2dSettings &mixed_precision(bool mixed_precision);
-
     /* Get using -infinity as limit flag */
     bool use_inf_as_limit() const;
 
@@ -55,7 +49,6 @@ public:
     GpuPool2dSettings use_inf_as_limit(bool use_inf_as_limit);
 
 private:
-    bool _mixed_precision{false};
     bool _use_inf_as_limit{true};
 };
 

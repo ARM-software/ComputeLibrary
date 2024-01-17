@@ -169,7 +169,7 @@ install_path = env['install_dir']
 if not env['install_dir'].startswith('/') and install_path != "":
     install_path = "%s/%s" % (build_path, install_path)
 
-env.Append(LIBPATH = [build_path, os.path.join(build_path, "prototype")])
+env.Append(LIBPATH = [build_path, os.path.join(build_path, "")])
 Export('env')
 Export('vars')
 
@@ -439,15 +439,14 @@ if env['experimental_dynamic_fusion']:
     CKW_ENABLE_ASSERTS = env['debug'] or env['asserts']
 
     CKW_PROJECT_DIR = Dir('.').path + "/compute_kernel_writer"
-    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/prototype/include"
+    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/include"
     CKW_BUILD_DIR = build_path.replace("#", "")
 
     CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" " \
                     "-S {CKW_PROJECT_DIR} -B {CKW_BUILD_DIR} " \
                     "-DCMAKE_BUILD_TYPE={CKW_BUILD_TYPE} " \
-                    "-DCKW_ENABLE_OPENCL={CKW_ENABLE_OPENCL} " \
+                    "-DCKW_ENABLE_OPENCL=ON " \
                     "-DCKW_ENABLE_ASSERTS={CKW_ENABLE_ASSERTS} " \
-                    "-DCKW_BUILD_PROTOTYPE=ON " \
                     "-DCKW_CCACHE={CKW_CCACHE} ".format(CKW_CC=CKW_CC,
                                                         CKW_CXX=CKW_CXX,
                                                         CKW_PROJECT_DIR=CKW_PROJECT_DIR,
@@ -460,7 +459,7 @@ if env['experimental_dynamic_fusion']:
 
     # Configure CKW static objects with -fPIC (CMAKE_POSITION_INDEPENDENT_CODE) option to enable linking statically to ACL
     CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} --target ckw_prototype -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
+    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} --target ckw -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
                                                                                                  NUM_JOBS=GetOption('num_jobs')
                                                                                                  )
 

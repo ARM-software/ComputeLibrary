@@ -107,7 +107,8 @@ TensorOperand KernelWriter::create_tensor_operand(ITensor &tensor)
 
 ITensor &KernelWriter::get_tensor(const TensorOperand &operand)
 {
-    return operand._tensor;
+    CKW_ASSERT(operand._tensor != nullptr);
+    return *operand._tensor;
 }
 
 const std::vector<std::vector<std::string>> &KernelWriter::get_values(const ConstantData &data)

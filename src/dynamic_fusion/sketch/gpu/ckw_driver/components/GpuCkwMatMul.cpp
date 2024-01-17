@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,18 +24,20 @@
 
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwMatMul.h"
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/CkwHelper.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
 
-using namespace ckw;
+#include "compute_kernel_writer/include/ckw/KernelWriter.h"
+#include <cstdint>
+
 namespace arm_compute
 {
 namespace experimental
@@ -59,189 +61,189 @@ void GpuCkwMatMul::write_component_code(const ComponentGroup    &comp_group,
                                         GpuCkwVariableTable     &vtable,
                                         GpuCkwScopedKernelWriter writer) const
 {
+    /********************************************************************************
+     * 1 - Define tensors
+     ********************************************************************************/
+    GpuCkwComponentArgument *lhs = vtable.declare_variable(comp_group, writer, _lhs, "lhs");
+    GpuCkwComponentArgument *rhs = vtable.declare_variable(comp_group, writer, _rhs, "rhs");
+    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
+
+    /********************************************************************************
+     * 2 - Define CKW constants
+     ********************************************************************************/
+    const auto k =
+        _attributes.adj_lhs() ? static_cast<int32_t>(_lhs->dimension(1)) : static_cast<int32_t>(_lhs->dimension(0));
+    const auto k0     = static_cast<int32_t>(adjust_vec_size(_settings.k0(), k));
+    const auto dst_dt = to_ckw(_dst->data_type());
+
+    // CKW constants
+    auto const_k_i32          = writer->declare_constant_tile(ckw::ConstantData({{k}}, ckw::DataType::Int32));
+    auto const_k0_i32         = writer->declare_constant_tile(ckw::ConstantData({{k0}}, ckw::DataType::Int32));
+    auto const_0_i32          = writer->declare_constant_tile(ckw::ConstantData({{0}}, ckw::DataType::Int32));
+    auto const_pos_1_i32      = writer->declare_constant_tile(ckw::ConstantData({{1}}, ckw::DataType::Int32));
+    auto const_0_fp           = writer->declare_constant_tile(ckw::ConstantData({{0.0f}}, dst_dt));
+    auto const_k_minus_k0_i32 = writer->declare_constant_tile(ckw::ConstantData({{k - k0}}, ckw::DataType::Int32));
+
+    /********************************************************************************
+     * 3 - Define the compute block parameters and destination tile (if not root component)
+     *     Bind the tile to the tensor to share it among different components and
+     *     initialize the compute block parameters
+     ********************************************************************************/
+    // The n0 and m0 parameters from root_window only refers to the output
     const auto root_window = comp_group.get_root_component()->ckw_component_driver()->get_window();
 
-    GpuCkwComponentArgument *lhs =
-        vtable.declare_variable(comp_group, writer, _lhs, TensorStorageType::ClBufferUint8Ptr, "lhs");
-    GpuCkwComponentArgument *rhs =
-        vtable.declare_variable(comp_group, writer, _rhs, TensorStorageType::ClBufferUint8Ptr, "rhs");
-    GpuCkwComponentArgument *dst =
-        vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
+    // Destination compute block size
+    const int32_t dst_n0 = root_window.x().step();
+    const int32_t dst_m0 = root_window.y().step();
 
-    // Constants
-    const int   height_idx = get_data_layout_dimension_index(_lhs->data_layout(), DataLayoutDimension::HEIGHT);
-    const auto &rhs_h      = writer->declare_tile("rhs_h", static_cast<int32_t>(_rhs->dimension(height_idx)));
-    const int   m          = static_cast<int>(_dst->dimension(1));
-    const int   n          = static_cast<int>(_dst->dimension(0));
-    const int   k =
-        _attributes.adj_lhs() ? static_cast<int>(_lhs->tensor_shape().y()) : static_cast<int>(_lhs->tensor_shape().x());
-    const int m0               = root_window.y().step();
-    const int n0               = root_window.x().step();
-    const int k0               = _settings.k0();
-    const int partial_store_m0 = m % m0;
-    const int partial_store_n0 = n % n0;
+    // Destination compute block size left-over
+    const int32_t dst_n0_partial = _dst->dimension(0) % dst_n0;
+    const int32_t dst_m0_partial = _dst->dimension(1) % dst_m0;
 
-    const auto &const_1 = writer->declare_tile("1", 1);
-    auto       &const_0 = writer->declare_tile("0", 0);
-    auto       &k0_tile = writer->declare_tile("k0", k0);
-    auto       &k_tile  = writer->declare_tile("k", k);
+    // Shift-back for the overlapping-min strategy
+    const int32_t dst_shift_back = (dst_n0 - dst_n0_partial) % dst_n0;
 
-    auto &gid_0 = writer->declare_tile("gid_0", ckw::DataType::Int32);
-    auto &gid_1 = writer->declare_tile("gid_1", ckw::DataType::Int32);
-    auto &gid_2 = writer->declare_tile("gid_2", ckw::DataType::Int32);
-
-    writer->op_get_global_id(gid_0, 0);
-    writer->op_get_global_id(gid_1, 1);
-    writer->op_get_global_id(gid_2, 2);
-
-    auto &x = writer->declare_tile("x", ckw::DataType::Int32);
-    auto &y = writer->declare_tile("y", ckw::DataType::Int32);
-    auto &z = writer->declare_tile("z", ckw::DataType::Int32);
-
-    get_coord(writer, x, gid_0, n0, partial_store_n0, "gid_x_", const_0);
-    get_coord(writer, y, gid_1, m0, partial_store_m0, "gid_y_", const_0);
-    get_coord(writer, z, gid_2, 1, 0, "gid_z_", const_0);
-
-    TensorTileSampler lhs_sampler;
-    lhs_sampler.height(m0);
-    lhs_sampler.width(k0);
-    lhs_sampler.format(TensorSamplerFormat::C_W_H);
-    lhs_sampler.address_mode_x(TensorSamplerAddressModeX::None);
-    lhs_sampler.address_mode_y(TensorSamplerAddressModeY::None);
-    lhs_sampler.address_mode_z(TensorSamplerAddressModeZ::None);
-
-    TensorTileSampler rhs_sampler;
-    rhs_sampler.height(k0);
-    rhs_sampler.width(n0);
-    rhs_sampler.format(TensorSamplerFormat::C_WH_1);
-    rhs_sampler.address_mode_x(TensorSamplerAddressModeX::None);
-    rhs_sampler.address_mode_y(TensorSamplerAddressModeY::None);
-    rhs_sampler.address_mode_z(TensorSamplerAddressModeZ::None);
-
-    TensorTileSampler dst_sampler;
-    dst_sampler.width(n0);
-    dst_sampler.height(m0);
-    dst_sampler.format(TensorSamplerFormat::C_W_H);
-    dst_sampler.address_mode_x(TensorSamplerAddressModeX::OverlappingMin);
-    dst_sampler.address_mode_y(TensorSamplerAddressModeY::None);
-    dst_sampler.address_mode_z(TensorSamplerAddressModeZ::None);
-    dst_sampler.x(x);
-    dst_sampler.y(y);
-    dst_sampler.z(z);
-    dst_sampler.b(const_0);
-
-    if (!dst->has_tile())
+    ckw::TensorSampler sampler_dst;
+    sampler_dst.format(ckw::TensorSamplerFormat::Dim0_Dim1_Dim2);
+    if (dst_n0_partial == 0)
     {
-        auto &dst_tile = writer->declare_tile("dst_tile", ckw::TileInfo(to_ckw(_dst->data_type()), m0, n0));
-        dst->init_virtual_tensor(dst_tile, dst_sampler);
+        sampler_dst.address_mode_x(ckw::TensorSamplerAddressModeX::None);
     }
-    auto &dst_tile = dst->tile();
+    else
+    {
+        sampler_dst.address_mode_x(ckw::TensorSamplerAddressModeX::OverlappingMin);
+    }
 
-    // Initialize the accumulators
-    writer->op_assign(dst_tile, const_0);
+    if (dst_m0_partial == 0)
+    {
+        sampler_dst.address_mode_y(ckw::TensorSamplerAddressModeY::None);
+    }
+    else
+    {
+        sampler_dst.address_mode_y(ckw::TensorSamplerAddressModeY::ClampToBorderMaxOnly);
+    }
 
-    auto &rhs_z = writer->declare_tile("rhs_z", ckw::DataType::Int32);
-    writer->op_binary_expression(rhs_z, z, BinaryOp::Mul, rhs_h);
+    sampler_dst.address_mode_z(ckw::TensorSamplerAddressModeZ::None);
+    sampler_dst.storage(ckw::TensorStorageType::BufferUint8Ptr);
 
-    auto &k_i     = writer->declare_tile("k_i", ckw::DataType::Int32);
-    auto &k_limit = writer->declare_tile("k_limit", k - k0);
+    // Declare destination tile
+    auto tile_dst = writer->declare_tile("dst", ckw::TileInfo(dst_dt, dst_m0, dst_n0));
 
-    auto &x_i = writer->declare_tile("x_i", ckw::DataType::Int32);
-    writer->op_assign(x_i, const_0);
+    // Initialize destination tile
+    writer->op_assign(tile_dst, const_0_fp);
 
-    writer->op_assign(k_i, const_0);
+    // Bind tile to the tensor
+    dst->init_virtual_tensor(tile_dst, sampler_dst);
 
-    // *INDENT-OFF*
+    /********************************************************************************
+     * 4 - Define the compute block parameters CKW constants
+     ********************************************************************************/
+    // Only now we can declare the N0 and M0 as constant
+    auto const_dst_n0_i32 = writer->declare_constant_tile(ckw::ConstantData({{dst_n0}}, ckw::DataType::Int32));
+    auto const_dst_m0_i32 = writer->declare_constant_tile(ckw::ConstantData({{dst_m0}}, ckw::DataType::Int32));
+    auto const_shift_back_dst_n0_i32 =
+        writer->declare_constant_tile(ckw::ConstantData({{dst_shift_back}}, ckw::DataType::Int32));
+
+    /********************************************************************************
+     * 5 - Define the samplers for the input tensors
+     ********************************************************************************/
+    // LHS SAMPLER
+    // The assumption here is that M is multiple of M0. This limitation will be removed once
+    // we have the support for OverlappingMin as address mode for the Y direction
+    ckw::TensorSampler sampler_lhs;
+    sampler_lhs.format(ckw::TensorSamplerFormat::Dim0_Dim1_Dim2);
+    sampler_lhs.address_mode_x(ckw::TensorSamplerAddressModeX::None);
+    sampler_lhs.address_mode_y(ckw::TensorSamplerAddressModeY::None);
+    sampler_lhs.address_mode_z(ckw::TensorSamplerAddressModeZ::None);
+    sampler_lhs.storage(ckw::TensorStorageType::BufferUint8Ptr);
+
+    // RHS SAMPLER
+    ckw::TensorSampler sampler_rhs;
+    sampler_rhs.format(ckw::TensorSamplerFormat::Dim0_Dim1_Dim2);
+    sampler_rhs.address_mode_x(ckw::TensorSamplerAddressModeX::None);
+    sampler_rhs.address_mode_y(ckw::TensorSamplerAddressModeY::None);
+    sampler_rhs.address_mode_z(ckw::TensorSamplerAddressModeZ::None);
+    sampler_rhs.storage(ckw::TensorStorageType::BufferUint8Ptr);
+
+    /********************************************************************************
+     * 6 - Extra operations required before writing the main code (optional)
+     ********************************************************************************/
+
+    // Not required
+
+    /********************************************************************************
+     * 7 - Get the coordinates of the destination tile
+     ********************************************************************************/
+    auto tile_gid_0 = writer->declare_tile("gid_0", ckw::TileInfo(ckw::DataType::Int32));
+    auto tile_gid_1 = writer->declare_tile("gid_1", ckw::TileInfo(ckw::DataType::Int32));
+    auto tile_gid_2 = writer->declare_tile("gid_2", ckw::TileInfo(ckw::DataType::Int32));
+
+    writer->op_get_global_id(tile_gid_0, 0);
+    writer->op_get_global_id(tile_gid_1, 1);
+    writer->op_get_global_id(tile_gid_2, 2);
+
+    auto tile_idx_n = writer->declare_tile("idx_n", ckw::TileInfo(ckw::DataType::Int32)); // N index
+    auto tile_idx_m = writer->declare_tile("idx_m", ckw::TileInfo(ckw::DataType::Int32)); // M index
+    auto tile_idx_b = writer->declare_tile("idx_b", ckw::TileInfo(ckw::DataType::Int32)); // BATCH index
+
+    // Calculate coordinates
+    get_coordinate_from_gws_overlapping_min(writer, tile_idx_n, tile_gid_0, const_dst_n0_i32,
+                                            const_shift_back_dst_n0_i32, const_0_i32);
+    get_coordinate_from_gws(writer, tile_idx_m, tile_gid_1, const_dst_m0_i32);
+    get_coordinate_from_gws(writer, tile_idx_b, tile_gid_2, const_pos_1_i32);
+
+    /********************************************************************************
+     * 8 - Write the rest of the code
+     ********************************************************************************/
+    auto tile_idx_k = writer->declare_tile("idx_k", ckw::TileInfo(ckw::DataType::Int32)); // K index
+
+    writer->op_assign(tile_idx_k, const_0_i32);
+
     // clang-format off
-    writer->op_for_loop(k_i, BinaryOp::LessEqual, k_limit, k_i, AssignmentOp::Increment, k0_tile,
-        [&]()
-        {
-            //Initialize tiles
-            // lhs_tile
-            auto &a = writer->declare_tile("a", ckw::TileInfo(to_ckw(_lhs->data_type()), m0, k0));
-            // rhs_tile
-            auto &b = writer->declare_tile("b", ckw::TileInfo(to_ckw(_rhs->data_type()), n0, k0));
-            writer->op_assign(a, const_0);
-            writer->op_assign(b, const_0);
-
-            // Loading the tiles
-            // LHS
-            lhs_sampler.x(x_i);
-            lhs_sampler.y(y);
-            lhs_sampler.z(z);
-            lhs_sampler.b(const_0);
-            writer->op_load(a, lhs->tensor(), lhs_sampler);
-
-            // RHS
-            auto &y_i = writer->declare_tile("y_i", ckw::DataType::Int32);
-            writer->op_binary_expression(y_i, x, BinaryOp::Add, rhs_z);
-            rhs_sampler.x(k_i);
-            rhs_sampler.y(y_i);
-            rhs_sampler.z(const_0);
-            rhs_sampler.b(const_0);
-            writer->op_load(b, rhs->tensor(), rhs_sampler);
-
-            // Perform Matmul
-            writer->op_binary_expression(dst_tile, a, BinaryOp::MatMul_Nt_T, b);
-            writer->op_binary_expression(x_i, x_i, BinaryOp::Add, k0_tile);
-        });
-// *INDENT-ON*
-    // clang-format on
-
-    // Handling leftovers
-    if (k % k0 != 0)
+    writer->op_for_loop(tile_idx_k, ckw::BinaryOp::LessEqual, const_k_minus_k0_i32, tile_idx_k, ckw::AssignmentOp::Increment, const_k0_i32,
+    [&]()
     {
-        // *INDENT-OFF*
-        // clang-format off
-        writer->op_for_loop(k_i, BinaryOp::Less, k_tile, k_i, AssignmentOp::Increment, const_1,
-            [&]()
-            {
-                //Initialize tiles
-                // lhs_tile
-                auto &a =
-                    writer->declare_tile("a_leftover", ckw::TileInfo(to_ckw(_lhs->data_type()), m0, 1));
-                // rhs_tile
-                auto &b =
-                    writer->declare_tile("b_leftover", ckw::TileInfo(to_ckw(_rhs->data_type()), n0, 1));
-                writer->op_assign(a, const_0);
-                writer->op_assign(b, const_0);
+        auto tile_lhs = writer->declare_tile("lhs", ckw::TileInfo(to_ckw(_lhs->data_type()), dst_m0, k0));
+        auto tile_rhs = writer->declare_tile("rhs", ckw::TileInfo(to_ckw(_rhs->data_type()), dst_n0, k0));
+        writer->op_assign(tile_lhs, const_0_fp);
+        writer->op_assign(tile_rhs, const_0_fp);
 
-                // Loading the tiles
-                // LHS
-                lhs_sampler.x(x_i);
-                lhs_sampler.y(y);
-                lhs_sampler.z(z);
-                lhs_sampler.b(const_0);
-                writer->op_load(a, lhs->tensor(), lhs_sampler);
+        writer->op_load(tile_lhs, lhs->tensor(), sampler_lhs, tile_idx_k, tile_idx_m, tile_idx_b, const_0_i32);
+        writer->op_load(tile_rhs, rhs->tensor(), sampler_rhs, tile_idx_k, tile_idx_n, tile_idx_b, const_0_i32);
 
-                // RHS
-                auto &y_i = writer->declare_tile("y_i_leftover", ckw::DataType::Int32);
-                writer->op_binary_expression(y_i, x, BinaryOp::Add, rhs_z);
-                rhs_sampler.x(k_i);
-                rhs_sampler.y(y_i);
-                rhs_sampler.z(const_0);
-                rhs_sampler.b(const_0);
-                writer->op_load(b, rhs->tensor(), rhs_sampler);
+        writer->op_binary(tile_dst, ckw::BinaryOp::MatMul_Nt_T, tile_lhs, tile_rhs);
 
-                // Perform Matmul
-                writer->op_binary_expression(dst_tile, a, BinaryOp::MatMul_Nt_T, b);
-                writer->op_binary_expression(x_i, x_i, BinaryOp::Add, const_1);
-            });
-// *INDENT-ON*
-        // clang-format on
+    });
+
+    // Left-over accumulations for when K is not a multiple of k0
+    if(((k % k0) != 0))
+    {
+        writer->op_for_loop(tile_idx_k, ckw::BinaryOp::Less, const_k_i32, tile_idx_k, ckw::AssignmentOp::Increment, const_pos_1_i32, [&]()
+        {
+            auto tile_lhs = writer->declare_tile("lhs", ckw::TileInfo(to_ckw(_lhs->data_type()), dst_m0, 1));
+            auto tile_rhs = writer->declare_tile("rhs", ckw::TileInfo(to_ckw(_rhs->data_type()), dst_n0, 1));
+            writer->op_assign(tile_lhs, const_0_fp);
+            writer->op_assign(tile_rhs, const_0_fp);
+
+            writer->op_load(tile_lhs, lhs->tensor(), sampler_lhs, tile_idx_k, tile_idx_m, tile_idx_b, const_0_i32);
+            writer->op_load(tile_rhs, rhs->tensor(), sampler_rhs, tile_idx_k, tile_idx_n, tile_idx_b, const_0_i32);
+
+            writer->op_binary(tile_dst, ckw::BinaryOp::MatMul_Nt_T, tile_lhs, tile_rhs);
+        });
     }
+    // clang-format on
 }
 
 Window GpuCkwMatMul::get_window() const
 {
     ARM_COMPUTE_ERROR_ON_MSG(_dst->tensor_shape().total_size() == 0U, "Destination tensor is not initialized");
 
-    const int  m       = _dst->dimension(1);
-    const int  n       = _dst->dimension(0);
-    const bool adj_lhs = _attributes.adj_lhs();
+    const int32_t m       = _dst->dimension(1);
+    const int32_t n       = _dst->dimension(0);
+    const bool    adj_lhs = _attributes.adj_lhs();
 
-    int m0 = adj_lhs ? adjust_vec_size(_settings.m0(), m) : std::min(_settings.m0(), m);
-    int n0 = adjust_vec_size(_settings.n0(), n);
+    const int32_t m0 = adj_lhs ? adjust_vec_size(_settings.m0(), m) : std::min(_settings.m0(), m);
+    const int32_t n0 = adjust_vec_size(_settings.n0(), n);
 
     // Configure kernel window
     Window win = calculate_max_window(_dst->tensor_shape(), Steps(n0, m0));
@@ -256,9 +258,9 @@ std::string GpuCkwMatMul::get_name(const ComponentGroup &comp_group) const
 
     std::string kernel_name("mat_mul_native");
 
-    const int m = _dst->dimension(1);
-    const int n = _dst->dimension(0);
-    const int k = _attributes.adj_lhs() ? _lhs->tensor_shape().y() : _lhs->tensor_shape().x();
+    const int32_t m = _dst->dimension(1);
+    const int32_t n = _dst->dimension(0);
+    const int32_t k = _attributes.adj_lhs() ? _lhs->tensor_shape().y() : _lhs->tensor_shape().x();
 
     kernel_name += _attributes.adj_lhs() ? "_t" : "_nt";
     kernel_name += _attributes.adj_rhs() ? "_t" : "_nt";

@@ -55,17 +55,11 @@ const auto PoolingLayerDatasetFP =
                     framework::dataset::make("Stride", {Size2D(1, 1), Size2D(2, 1), Size2D(5, 7)})),
             framework::dataset::make("ExcludePadding", {true}));
 
-const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", {true, false});
-
 template <typename T>
 using DynamicFusionGpuPool2dFixture = DynamicFusionGpuPool2dValidationFixture<CLTensor, CLAccessor, GpuPool2d, T>;
 
 template <typename T>
 using DFSpecialGpuPool2dFixture = DynamicFusionGpuPool2dSpecialValidationFixture<CLTensor, CLAccessor, GpuPool2d, T>;
-
-template <typename T>
-using DFPoolMixedPrecisionFixture =
-    DynamicFusionGpuPool2dMixedPrecisionValidationFixture<CLTensor, CLAccessor, GpuPool2d, T>;
 // *INDENT-OFF*
 // clang-format off
 
@@ -92,7 +86,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
     GpuWorkloadSketch sketch{ &context };
 
     // Declare GpuPool2d settings
-    const GpuPool2dSettings &settings = GpuPool2dSettings().mixed_precision(false);
+    const GpuPool2dSettings &settings = GpuPool2dSettings();
 
     // Validate Pool2d Configuration
     auto                   src_info    = context.create_tensor_info(input_info);
@@ -175,27 +169,6 @@ TEST_SUITE_END() // GlobalPooling
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall,
-                       DFPoolMixedPrecisionFixture<half>,
-                       framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallNoneUnitShapes(), PoolingLayerDatasetFP),
-                                       framework::dataset::make("DataType", DataType::F16)),
-                               pool_fp_mixed_precision_dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge,
-                       DFPoolMixedPrecisionFixture<half>,
-                       framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), PoolingLayerDatasetFP),
-                                       framework::dataset::make("DataType", DataType::F16)),
-                               pool_fp_mixed_precision_dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
-}
-
 TEST_SUITE(GlobalPooling)
 FIXTURE_DATA_TEST_CASE(
     RunSmall,

@@ -27,6 +27,7 @@
 #include "ckw/types/TensorComponentType.h"
 #include "ckw/types/TensorStorageType.h"
 
+#include "src/cl/CLTensorComponent.h"
 #include "src/ITensor.h"
 
 #include <memory>
@@ -39,8 +40,6 @@ namespace ckw
 class TensorInfo;
 
 class ITensorComponent;
-class CLTensorComponent;
-class CLTensorStorage;
 
 /** OpenCL specific tensor argument
  *  Internally, the object keeps track of the components and storages used to minimize the number

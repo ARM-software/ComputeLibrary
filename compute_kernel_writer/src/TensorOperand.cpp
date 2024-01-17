@@ -21,91 +21,115 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "ckw/TensorOperand.h"
+
+#include "ckw/Error.h"
 
 #include "src/ITensor.h"
 
 namespace ckw
 {
 
-TensorOperand::TensorOperand(ITensor &tensor) : _tensor(tensor)
+TensorOperand::TensorOperand() : _tensor(nullptr)
 {
+}
+
+TensorOperand::TensorOperand(ITensor &tensor) : _tensor(&tensor)
+{
+}
+
+bool TensorOperand::is_valid() const
+{
+    return _tensor != nullptr;
 }
 
 const TensorInfo &TensorOperand::info() const
 {
-    return _tensor.info();
+    CKW_ASSERT(is_valid() == true);
+    return _tensor->info();
 }
 
 TileOperand TensorOperand::stride0()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Stride0));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Stride0));
 }
 
 TileOperand TensorOperand::stride1()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Stride1));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Stride1));
 }
 
 TileOperand TensorOperand::stride2()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Stride2));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Stride2));
 }
 
 TileOperand TensorOperand::stride3()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Stride3));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Stride3));
 }
 
 TileOperand TensorOperand::stride4()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Stride4));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Stride4));
 }
 
 TileOperand TensorOperand::dim0()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim0));
+    return TileOperand(_tensor->component(TensorComponentType::Dim0));
 }
 
 TileOperand TensorOperand::dim1()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim1));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Dim1));
 }
 
 TileOperand TensorOperand::dim2()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim2));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Dim2));
 }
 
 TileOperand TensorOperand::dim3()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim3));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Dim3));
 }
 
 TileOperand TensorOperand::dim4()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim4));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Dim4));
 }
 
 TileOperand TensorOperand::dim1_dim2()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim1xDim2));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Dim1xDim2));
 }
 
 TileOperand TensorOperand::dim1_dim2_dim3()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim1xDim2xDim3));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Dim1xDim2xDim3));
 }
 
 TileOperand TensorOperand::dim2_dim3()
 {
-    return TileOperand(_tensor.component(TensorComponentType::Dim2xDim3));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::Dim2xDim3));
 }
 
 TileOperand TensorOperand::offset_first_element_in_bytes()
 {
-    return TileOperand(_tensor.component(TensorComponentType::OffsetFirstElement));
+    CKW_ASSERT(is_valid() == true);
+    return TileOperand(_tensor->component(TensorComponentType::OffsetFirstElement));
 }
 
 } // namespace ckw

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 
 #include "arm_compute/core/CL/CLCompileContext.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
@@ -52,27 +53,18 @@ void calculate_and_init_dst_if_empty(ITensorInfo             *dst,
                                      const Pool2dAttributes  &attributes,
                                      const GpuPool2dSettings &settings)
 {
+    ARM_COMPUTE_UNUSED(settings);
+
     if (dst->total_size() == 0U)
     {
         auto shape = misc::shape_calculator::compute_pool_shape(
-            *src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision()));
+            *src, convert_pool_attr_to_pool_info(attributes, /* mixed_precision */ true));
         auto_init_if_empty(*dst, src->clone()->set_tensor_shape(shape));
     }
 }
 
 constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
 } // namespace
-
-GpuPool2dSettings &GpuPool2dSettings::mixed_precision(bool mixed_precision)
-{
-    _mixed_precision = mixed_precision;
-    return *this;
-}
-
-bool GpuPool2dSettings::mixed_precision() const
-{
-    return _mixed_precision;
-}
 
 GpuPool2dSettings GpuPool2dSettings::use_inf_as_limit(bool use_inf_as_limit)
 {

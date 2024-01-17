@@ -2388,7 +2388,9 @@
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwMatMul.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwResize.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwStore.cpp",
-        "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.cpp",
+        "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/CkwHelper.cpp",
+        "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.cpp",
+        "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/ElementwiseBinary.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.cpp",
         "src/dynamic_fusion/runtime/gpu/cl/ckw_driver/GpuCkwKernelArgumentsHelpers.cpp"

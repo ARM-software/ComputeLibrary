@@ -22,9 +22,6 @@
  * SOFTWARE.
  */
 
-// TODO: Fix testing of CKW Elementwise Binary (COMPMID-6530)
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuSub.h"
 
@@ -63,13 +60,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),    // Unsupported data type QASYMM8
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),    // Unsupported data type QASYMM8
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Invalid data type combination
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),    // S16 is valid data type for Sub
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),    // S32 is valid data type for Sub
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),    // Invalid data type combination
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),    // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching shapes
                                                         TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32),    // Broadcasting allowed for lhs
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(15U, 23U, 3U), 1, DataType::F32),    // Broadcast Y dimension is not allowed
-                                                        TensorInfo(TensorShape( 3U,  8U, 9U), 1, DataType::S16),    // Broadcast Z dimension is not allowed
+                                                        TensorInfo(TensorShape( 3U,  8U, 9U), 1, DataType::S16),    // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32), // Batching is allowed
                                                       }),
                framework::dataset::make("RhsInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
@@ -86,7 +83,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                        TensorInfo(TensorShape( 3U,  8U, 1U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32),
                                                       })),
-               framework::dataset::make("Expected", { true, false, false, false, false, true, true, false, true, true, false, false, true })),
+               framework::dataset::make("Expected", { true, false, false, false, false, false, false, false, true, true, false, false, true })),
                input1_info, input2_info, expected)
 {
     // Create a new workload sketch
@@ -263,4 +260,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

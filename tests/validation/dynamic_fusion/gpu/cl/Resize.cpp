@@ -64,10 +64,7 @@ const auto QuantizationInfoSet = framework::dataset::make("QuantizationInfo",
                                                           });
 
 /** Tolerance */
-constexpr AbsoluteTolerance<uint8_t> tolerance_q8(1);
-constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(1);
-constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
-constexpr float                      tolerance_f32_absolute(0.001f);
+constexpr float tolerance_f32_absolute(0.001f);
 
 RelativeTolerance<float> tolerance_f32(0.05);
 constexpr float          abs_tolerance_f16(0.1f);
@@ -105,26 +102,27 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 
 TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
 {
-    const std::map<DataType, bool> supported_data_types = {
-        {DataType::U8, true},
-        {DataType::S8, false},
-        {DataType::QSYMM8, false},
-        {DataType::QASYMM8, true},
-        {DataType::QASYMM8_SIGNED, true},
-        {DataType::QSYMM8_PER_CHANNEL, false},
-        {DataType::U16, false},
-        {DataType::S16, true},
-        {DataType::QSYMM16, false},
-        {DataType::QASYMM16, false},
-        {DataType::U32, false},
-        {DataType::S32, false},
-        {DataType::U64, false},
-        {DataType::S64, false},
-        {DataType::BFLOAT16, false},
-        {DataType::F16, true},
-        {DataType::F32, true},
-        {DataType::F64, false},
-        {DataType::SIZET, false},
+    const std::map<DataType, bool> supported_data_types =
+    {
+        { DataType::U8, false },
+        { DataType::S8, false },
+        { DataType::QSYMM8, false },
+        { DataType::QASYMM8, false },
+        { DataType::QASYMM8_SIGNED, false },
+        { DataType::QSYMM8_PER_CHANNEL, false },
+        { DataType::U16, false },
+        { DataType::S16, false },
+        { DataType::QSYMM16, false },
+        { DataType::QASYMM16, false },
+        { DataType::U32, false },
+        { DataType::S32, false },
+        { DataType::U64, false },
+        { DataType::S64, false },
+        { DataType::BFLOAT16, false },
+        { DataType::F16, true },
+        { DataType::F32, true },
+        { DataType::F64, false },
+        { DataType::SIZET, false },
     };
 
     for (auto &kv : supported_data_types)
@@ -351,266 +349,6 @@ FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners,
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
-
-TEST_SUITE(Integer)
-TEST_SUITE(U8)
-const auto u8_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<uint8_t>())),
-                              framework::dataset::make("DataType", DataType::U8));
-FIXTURE_DATA_TEST_CASE(Run,
-                       DynamicFusionResizeFixture<uint8_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(u8_shape, ScaleSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-FIXTURE_DATA_TEST_CASE(RunAlignCorners,
-                       DynamicFusionResizeFixture<uint8_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(u8_shape, ScaleAlignCornersSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-const auto u8_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<uint8_t>())),
-                                      framework::dataset::make("DataType", DataType::U8));
-FIXTURE_DATA_TEST_CASE(RunNightly,
-                       DynamicFusionResizeFixture<uint8_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(u8_nightly_shape, ScaleSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners,
-                       DynamicFusionResizeFixture<uint8_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(u8_nightly_shape, ScaleAlignCornersSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-TEST_SUITE_END() // U8
-
-TEST_SUITE(S16)
-const auto s16_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<int16_t>())),
-                               framework::dataset::make("DataType", DataType::S16));
-FIXTURE_DATA_TEST_CASE(Run,
-                       DynamicFusionResizeFixture<int16_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(s16_shape, ScaleSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
-}
-FIXTURE_DATA_TEST_CASE(RunAlignCorners,
-                       DynamicFusionResizeFixture<int16_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(s16_shape, ScaleAlignCornersSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
-}
-const auto s16_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<int16_t>())),
-                                       framework::dataset::make("DataType", DataType::S16));
-FIXTURE_DATA_TEST_CASE(RunNightly,
-                       DynamicFusionResizeFixture<int16_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(s16_nightly_shape, ScaleSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
-}
-FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners,
-                       DynamicFusionResizeFixture<int16_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_DATASET_DYNAMIC_FUSION(s16_nightly_shape, ScaleAlignCornersSamplingPolicySet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
-}
-TEST_SUITE_END() // S16
-TEST_SUITE_END() // Integer
-
-template <typename T>
-using DynamicFusionResizeQuantizedFixture =
-    DynamicFusionResizeQuantizedValidationFixture<CLTensor, CLAccessor, GpuResize, T>;
-TEST_SUITE(Quantized)
-TEST_SUITE(QASYMM8)
-const auto qasymm8_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<uint8_t>())),
-                                   framework::dataset::make("DataType", DataType::QASYMM8));
-FIXTURE_DATA_TEST_CASE(Run,
-                       DynamicFusionResizeQuantizedFixture<uint8_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_shape,
-                                                                 ScaleSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-FIXTURE_DATA_TEST_CASE(RunAlignCorners,
-                       DynamicFusionResizeQuantizedFixture<uint8_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_shape,
-                                                                 ScaleAlignCornersSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-const auto qasymm8_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<uint8_t>())),
-                                           framework::dataset::make("DataType", DataType::QASYMM8));
-FIXTURE_DATA_TEST_CASE(RunNightly,
-                       DynamicFusionResizeQuantizedFixture<uint8_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_nightly_shape,
-                                                                 ScaleSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners,
-                       DynamicFusionResizeQuantizedFixture<uint8_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_nightly_shape,
-                                                                 ScaleAlignCornersSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
-}
-TEST_SUITE_END() // QASYMM8
-
-TEST_SUITE(QASYMM8_SIGNED)
-const auto qasymm8_signed_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<int8_t>())),
-                                          framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
-FIXTURE_DATA_TEST_CASE(Run,
-                       DynamicFusionResizeQuantizedFixture<int8_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_signed_shape,
-                                                                 ScaleSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
-}
-FIXTURE_DATA_TEST_CASE(RunAlignCorners,
-                       DynamicFusionResizeQuantizedFixture<int8_t>,
-                       framework::DatasetMode::ALL,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_signed_shape,
-                                                                 ScaleAlignCornersSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
-}
-const auto qasymm8_signed_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<int8_t>())),
-                                                  framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
-FIXTURE_DATA_TEST_CASE(RunNightly,
-                       DynamicFusionResizeQuantizedFixture<int8_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_signed_nightly_shape,
-                                                                 ScaleSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
-}
-FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners,
-                       DynamicFusionResizeQuantizedFixture<int8_t>,
-                       framework::DatasetMode::NIGHTLY,
-                       ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(qasymm8_signed_nightly_shape,
-                                                                 ScaleAlignCornersSamplingPolicySet,
-                                                                 QuantizationInfoSet))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region =
-        calculate_valid_region_scale(src_info, _reference.shape(), _interpolation_policy, _sampling_policy, false);
-
-    // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
-}
-TEST_SUITE_END() // QASYMM8_SIGNED
-
-TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // RESIZE
 TEST_SUITE_END() // DYNAMIC_FUSION

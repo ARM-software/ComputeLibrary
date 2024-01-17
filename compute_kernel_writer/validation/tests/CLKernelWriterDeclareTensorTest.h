@@ -81,7 +81,15 @@ public:
             "{\n"
             "}\n";
 
-        const auto &actual_code = kernel->source_code();
+        std::string actual_code = kernel->source_code();
+
+        std::size_t pos = actual_code.find("__kernel");
+
+        if (pos != std::string::npos)
+        {
+            // Remove text before "__kernel"
+            actual_code = actual_code.substr(pos);
+        }
 
         int test_id = 0;
         VALIDATE_TEST(kernel->arguments().size() == 4, all_tests_passed, test_id++);

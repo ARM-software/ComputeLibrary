@@ -28,6 +28,7 @@
 #include "ckw/TensorSampler.h"
 
 #include "src/Tensor3dMapper.h"
+#include "src/TileView.h"
 
 #include <cstdint>
 #include <memory>
@@ -55,18 +56,24 @@ public:
      * @param[in] tensor  @ref ckw::ITensor object to perform the memory operation on
      * @param[in] sampler @ref ckw::TensorSampler object that tells how to sample a tensor
      * @param[in] op      The memory operation to be done (e.g. Load/Store)
+     * @param[in] dst     The tile to perform the memory operation on
      */
-    ICLMemoryOpHelper(CLKernelWriter *writer, ITensor *tensor, TensorSampler *sampler, MemoryOperation op)
-        : _writer(writer), _tensor(tensor), _sampler(sampler), _op(op)
+    ICLMemoryOpHelper(CLKernelWriter         *writer,
+                      ITensor                *tensor,
+                      TensorSampler          *sampler,
+                      MemoryOperation         op,
+                      const TileView<CLTile> &dst)
+        : _writer(writer), _tensor(tensor), _sampler(sampler), _op(op), _dst(dst)
     {
-        _mapper = std::make_unique<Tensor3dMapper>(tensor, sampler->format());
+        _mapper        = std::make_unique<Tensor3dMapper>(tensor, sampler->format());
+        _ls_width_full = _dst.width();
     }
 
     /** Copy constructor */
-    ICLMemoryOpHelper(const ICLMemoryOpHelper &) = default;
+    ICLMemoryOpHelper(const ICLMemoryOpHelper &) = delete;
 
     /** Assignment operator overload */
-    ICLMemoryOpHelper &operator=(const ICLMemoryOpHelper &) = default;
+    ICLMemoryOpHelper &operator=(const ICLMemoryOpHelper &) = delete;
 
     /** Destructor */
     virtual ~ICLMemoryOpHelper() = default;
@@ -75,12 +82,11 @@ public:
      *  the batch offset as a tile object, and initializes the code inside
      *  the writer object.
      *
-     * @param[in] dst  tile object to perform the memory operation on
      * @param[in] x    tile object that describes the x-coordinate of the tensor involved
      * @param[in] z    tile object that describes the z-coordinate of the tensor involved
      * @param[in] b    tile object that describes the batch offset of the tensor involved
      */
-    virtual void initialize(const CLTile *dst, const CLTile *x, const CLTile *z, const CLTile *b) = 0;
+    virtual void initialize(const CLTile *x, const CLTile *z, const CLTile *b) = 0;
 
     /** Method that writes the actual code to the writer that performs the mentioned memory
      *  operation on the tile initialized. It writes the code for a specific row given in the
@@ -104,7 +110,7 @@ protected:
     TensorSampler                  *_sampler{nullptr};
     MemoryOperation                 _op;
     std::unique_ptr<Tensor3dMapper> _mapper{nullptr};
-    const CLTile                   *_dst{nullptr};
+    TileView<CLTile>                _dst{};
     int32_t                         _ls_width_full{0};
     std::string                     _coord_x{};
     std::string                     _coord_z{};
@@ -112,4 +118,4 @@ protected:
 };
 } // namespace ckw
 
-#endif /* CKW_SRC_CL_HELPERS_ICLMEMORYOPHELPER_H */
+#endif // CKW_SRC_CL_HELPERS_ICLMEMORYOPHELPER_H

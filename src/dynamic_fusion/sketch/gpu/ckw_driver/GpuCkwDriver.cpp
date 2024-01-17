@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,13 +28,17 @@
 
 #include "src/common/utils/Log.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
+#include "compute_kernel_writer/include/ckw/KernelWriter.h"
+#include "compute_kernel_writer/include/ckw/types/TargetArchitecture.h"
+#include "compute_kernel_writer/include/ckw/types/TargetLanguage.h"
+
 using namespace ckw;
+
 namespace arm_compute
 {
 namespace experimental
@@ -42,21 +46,22 @@ namespace experimental
 namespace dynamic_fusion
 {
 GpuCkwDriver::GpuCkwDriver(const GpuKernelComponentGroup &components)
-    : _components{components}, _kernel{GpuTargetLanguage::OpenCL}, _code{}
 {
+    _components = components;
+
     // Generate kernel name
-    std::string name = "";
+    std::string kernel_name;
     for (auto &comp : _components)
     {
         auto ckw_driver = comp->ckw_component_driver();
         ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
-        name += ckw_driver->get_name(_components) + "__";
+        kernel_name += ckw_driver->get_name(_components) + "__";
     }
 
     // Generate kernel code
-    _kernel.name(name);
-    GpuCkwKernelWriter       root_writer(_kernel);
-    GpuCkwScopedKernelWriter writer(&root_writer);
+    auto root_writer =
+        KernelWriter::create_instance(ckw::TargetArchitecture::GpuArmMaliValhall, ckw::TargetLanguage::OpenCL);
+    GpuCkwScopedKernelWriter writer(root_writer.get());
     GpuCkwVariableTable      vtable{};
 
     for (auto &comp : _components)
@@ -65,22 +70,27 @@ GpuCkwDriver::GpuCkwDriver(const GpuKernelComponentGroup &components)
         ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
         ckw_driver->write_component_code(_components, vtable, writer);
     }
-    _code = root_writer.generate_code();
+    auto kernel = root_writer->emit_kernel(kernel_name);
+
+    // Set the kernel name, kernel arguments and source code
+    _kernel_name = kernel_name;
+    _kernel_args = kernel->arguments();
+    _kernel_code = kernel->source_code();
 }
 
 std::string GpuCkwDriver::get_name()
 {
-    return _kernel.name();
+    return _kernel_name;
 }
 
 std::string GpuCkwDriver::get_code()
 {
-    return _code;
+    return _kernel_code;
 }
 
 std::string GpuCkwDriver::get_config_id()
 {
-    std::string id = "";
+    std::string id;
     for (auto &comp : _components)
     {
         auto ckw_driver = comp->ckw_component_driver();
@@ -100,7 +110,7 @@ Window GpuCkwDriver::get_window() const
 GpuKernelArgumentList GpuCkwDriver::get_kernel_arguments()
 {
     GpuKernelArgumentList args{};
-    for (const auto &arg : _kernel.arguments())
+    for (const auto &arg : _kernel_args)
     {
         switch (arg.type())
         {

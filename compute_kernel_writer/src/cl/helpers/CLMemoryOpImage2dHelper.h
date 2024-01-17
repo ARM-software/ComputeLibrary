@@ -35,6 +35,8 @@ namespace ckw
 // Forward Declarations
 class CLKernelWriter;
 class CLTile;
+template <class CLTile>
+class TileView;
 enum class MemoryOperation;
 
 /** Helper class to write memory operations (like load/store) in OpenCL for Image2d type */
@@ -42,29 +44,33 @@ class CLMemoryOpImage2dHelper : public ICLMemoryOpHelper
 {
 public:
     /** Constructor similar to @ref ICLMemoryOpHelper() */
-    CLMemoryOpImage2dHelper(CLKernelWriter *writer, ITensor *tensor, TensorSampler *sampler, MemoryOperation op)
-        : ICLMemoryOpHelper(writer, tensor, sampler, op)
+    CLMemoryOpImage2dHelper(CLKernelWriter         *writer,
+                            ITensor                *tensor,
+                            TensorSampler          *sampler,
+                            MemoryOperation         op,
+                            const TileView<CLTile> &dst)
+        : ICLMemoryOpHelper(writer, tensor, sampler, op, dst)
     {
     }
 
     /** Copy constructor */
-    CLMemoryOpImage2dHelper(const CLMemoryOpImage2dHelper &) = default;
+    CLMemoryOpImage2dHelper(const CLMemoryOpImage2dHelper &) = delete;
 
     /** Assignment operator overload */
-    CLMemoryOpImage2dHelper &operator=(const CLMemoryOpImage2dHelper &) = default;
+    CLMemoryOpImage2dHelper &operator=(const CLMemoryOpImage2dHelper &) = delete;
 
     // Methods overridden
-    void initialize(const CLTile *dst, const CLTile *x, const CLTile *z, const CLTile *b) override;
+    void initialize(const CLTile *x, const CLTile *z, const CLTile *b) override;
     void write_row(int32_t row_id, const std::string &coord_y) override;
     void finalize() override;
 
 private:
-    static bool validate(const CLKernelWriter *writer,
-                         const ITensor        *tensor,
-                         const TensorSampler  *sampler,
-                         const Tensor3dMapper *mapper,
-                         MemoryOperation       op,
-                         const CLTile         *dst);
+    static bool validate(const CLKernelWriter   *writer,
+                         const ITensor          *tensor,
+                         const TensorSampler    *sampler,
+                         const Tensor3dMapper   *mapper,
+                         MemoryOperation         op,
+                         const TileView<CLTile> &dst);
 
     void out_of_bound_initialize_y(const std::string &coord);
     void out_of_bound_finalize_y();

@@ -33,18 +33,15 @@
 #include "src/cl/CLTile.h"
 #include "src/ITensor.h"
 #include "src/Tensor3dMapper.h"
+#include "src/TileView.h"
 
 namespace ckw
 {
-void CLMemoryOpImage2dHelper::initialize(const CLTile *dst, const CLTile *x, const CLTile *z, const CLTile *b)
+void CLMemoryOpImage2dHelper::initialize(const CLTile *x, const CLTile *z, const CLTile *b)
 {
-    CKW_ASSERT(validate(_writer, _tensor, _sampler, _mapper.get(), _op, dst));
-
-    _dst           = dst;
-    _ls_width_full = dst->info().width();
-    _coord_x       = x->scalar(0, 0).str;
-    _coord_z       = z->scalar(0, 0).str;
-    _coord_b       = b->scalar(0, 0).str;
+    _coord_x = x->scalar(0, 0).str;
+    _coord_z = z->scalar(0, 0).str;
+    _coord_b = b->scalar(0, 0).str;
 }
 
 void CLMemoryOpImage2dHelper::write_row(int32_t row_id, const std::string &coord_y)
@@ -52,7 +49,7 @@ void CLMemoryOpImage2dHelper::write_row(int32_t row_id, const std::string &coord
     // The only check required is on Y.
     out_of_bound_initialize_y(coord_y);
 
-    const std::string dst     = _dst->vector(row_id).str;
+    const std::string dst     = _dst.vector(row_id).str;
     const std::string sampler = to_ls_image2d_sampler();
     const std::string coord   = to_ls_image2d_address(_coord_x, coord_y, _coord_z, _coord_b);
     const std::string ls_buf  = to_ls_image2d(_op, _ls_width_full, dst, sampler, coord);
@@ -66,16 +63,16 @@ void CLMemoryOpImage2dHelper::finalize()
 {
 }
 
-bool CLMemoryOpImage2dHelper::validate(const CLKernelWriter *writer,
-                                       const ITensor        *tensor,
-                                       const TensorSampler  *sampler,
-                                       const Tensor3dMapper *mapper,
-                                       MemoryOperation       op,
-                                       const CLTile         *dst)
+bool CLMemoryOpImage2dHelper::validate(const CLKernelWriter   *writer,
+                                       const ITensor          *tensor,
+                                       const TensorSampler    *sampler,
+                                       const Tensor3dMapper   *mapper,
+                                       MemoryOperation         op,
+                                       const TileView<CLTile> &dst)
 {
     CKW_UNUSED(writer, tensor, mapper);
 
-    if (dst->info().width() != 4)
+    if (dst.width() != 4)
     {
         return false;
     }
@@ -95,7 +92,7 @@ bool CLMemoryOpImage2dHelper::validate(const CLKernelWriter *writer,
     {
         return false;
     }
-    if ((dst->info().data_type() != DataType::Fp32) && (dst->info().data_type() != DataType::Fp16))
+    if ((dst.data_type() != DataType::Fp32) && (dst.data_type() != DataType::Fp16))
     {
         return false;
     }
@@ -143,10 +140,12 @@ std::string CLMemoryOpImage2dHelper::to_ls_image2d(MemoryOperation    op,
                                                    const std::string &address) const
 {
     CKW_UNUSED(vector_width);
+    CKW_ASSERT_MSG(_dst.data_type() == DataType::Fp32 || _dst.data_type() == DataType::Fp16,
+                   "Image2d only supports floating-point data type");
 
     const TensorStorageType tensor_storage = _sampler->storage();
     const std::string       image2d_obj    = _tensor->storage(tensor_storage).val;
-    const std::string       post_fix       = _dst->info().data_type() == DataType::Fp32 ? "f" : "h";
+    const std::string       post_fix       = _dst.data_type() == DataType::Fp32 ? "f" : "h";
 
     switch (op)
     {

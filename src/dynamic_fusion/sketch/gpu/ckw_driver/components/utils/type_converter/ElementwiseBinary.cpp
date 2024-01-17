@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,17 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/ElementwiseBinary.h"
 
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWKERNELWRITER_H
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWKERNELWRITER_H
-
-#include "ckw/KernelWriter.h"
-#include "ckw/TensorTileSampler.h"
-
-namespace ckw
-{
-class Kernel;
-} // namespace ckw
+#include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
 
 namespace arm_compute
 {
@@ -39,29 +31,27 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-
-class GpuCkwComponentArgument;
-
-/** Extended implementation of kernel writer for dynamic fusion. */
-class GpuCkwKernelWriter : public ckw::KernelWriter
+ckw::BinaryOp to_ckw(const ElementwiseBinaryCommonAttributes &attributes)
 {
-public:
-    /** Initialize a new instance of @ref GpuCkwKernelWriter class.
-     *
-     * @param[in] kernel The kernel to be generated.
-     */
-    explicit GpuCkwKernelWriter(ckw::Kernel &kernel);
-
-    /** Load the user tensor to the tile in the same component argument if it hasn't been loaded.
-     *
-     * @param[in] tensor_or_tile The component argument that is either a user tensor or a virtual tensor.
-     * @param[in] sampler        The tensor sampling information to load the tile.
-     */
-    void op_load_once(GpuCkwComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler);
-};
-
+    switch (attributes.operation())
+    {
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Add:
+            return ckw::BinaryOp::Add;
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Sub:
+            return ckw::BinaryOp::Sub;
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Div:
+            return ckw::BinaryOp::Div;
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Mul:
+            return ckw::BinaryOp::Mul;
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Min:
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Max:
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Power:
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Prelu:
+        case ElementwiseBinaryCommonAttributes::ElementwiseOp::SquaredDiff:
+        default:
+            ARM_COMPUTE_ERROR("Cannot convert ElementwiseBinaryCommonAttributes to corresponding ckw::BinaryOp");
+    }
+}
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-
-#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWKERNELWRITER_H

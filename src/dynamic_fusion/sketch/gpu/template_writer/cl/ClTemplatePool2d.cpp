@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,9 +78,8 @@ std::string ClTemplatePool2d::get_component_code(const ComponentGroup &comp_grou
 
 std::string ClTemplatePool2d::get_MxN_kernel_code() const
 {
-    const auto pool_type = _attributes.pool_type();
-    const bool fp_mixed_precision =
-        (_src->data_type() == DataType::F16) && _settings.mixed_precision() && pool_type != PoolingType::MAX;
+    const auto pool_type          = _attributes.pool_type();
+    const bool fp_mixed_precision = (_src->data_type() == DataType::F16) && pool_type != PoolingType::MAX;
 
     // Define pool op macro.
     std::string pool_op = (pool_type == PoolingType::AVG) ? R"_(#define POOL_OP(x,y) ((x) + (y)))_"
@@ -226,11 +225,10 @@ std::string ClTemplatePool2d::get_MxN_kernel_code() const
 
 std::string ClTemplatePool2d::get_2x2_kernel_code() const
 {
-    const auto pool_type = _attributes.pool_type();
-    const bool fp_mixed_precision =
-        (_src->data_type() == DataType::F16) && _settings.mixed_precision() && pool_type != PoolingType::MAX;
-    std::string pool_op = (pool_type == PoolingType::AVG) ? R"_(#define POOL_OP(x,y) ((x) + (y)))_"
-                                                          : R"_(#define POOL_OP(x,y) (fmax((x), (y))) )_";
+    const auto  pool_type          = _attributes.pool_type();
+    const bool  fp_mixed_precision = (_src->data_type() == DataType::F16) && pool_type != PoolingType::MAX;
+    std::string pool_op            = (pool_type == PoolingType::AVG) ? R"_(#define POOL_OP(x,y) ((x) + (y)))_"
+                                                                     : R"_(#define POOL_OP(x,y) (fmax((x), (y))) )_";
 
     std::string code = R"_(
 //------------------ START KERNEL {{meta_kernel_id}} ---------------------
@@ -385,12 +383,12 @@ TagLUT ClTemplatePool2d::get_tag_lut(const GpuKernelVariableTable &vtable, const
     lut["meta_kernel_id"] = id();
 
     // Retrieve relevant data
-    const auto padding                = _attributes.pad();
-    const auto stride                 = _attributes.stride();
-    const auto pool_size              = _attributes.pool_size();
-    const auto data_type              = _src->data_type();
-    const auto use_fp_mixed_precision = (_src->data_type() == DataType::F16) && _settings.mixed_precision() &&
-                                        _attributes.pool_type() != PoolingType::MAX;
+    const auto padding   = _attributes.pad();
+    const auto stride    = _attributes.stride();
+    const auto pool_size = _attributes.pool_size();
+    const auto data_type = _src->data_type();
+    const auto use_fp_mixed_precision =
+        (_src->data_type() == DataType::F16) && _attributes.pool_type() != PoolingType::MAX;
     const std::string max_initial_value =
         _settings.use_inf_as_limit() ? "(-INFINITY)"
                                      : float_to_string_with_full_precision(std::numeric_limits<float>::lowest());

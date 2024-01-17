@@ -33,6 +33,7 @@ namespace ckw
 class KernelWriter;
 class TensorOperand;
 class ITile;
+class TileInfo;
 
 /** A tile operand refers to a tile object that can be used for kernel writing. */
 class TileOperand
@@ -42,6 +43,18 @@ public:
     // Only kernel writer and tensor operand classes create and interact with tile operand hence we allow them to access this field.
     friend class KernelWriter;
     friend class TensorOperand;
+
+    /** Create an empty tile operand.
+     *
+     * The new tile operand doesn't refer to any tile therefore it is not useable.
+     */
+    TileOperand();
+
+    /** Check if the tile operand contains a tile and therefore useable. */
+    bool is_valid() const;
+
+    /** Get the tile info. */
+    const TileInfo &tile_info() const;
 
     /** Get a row vector of the current tile operand.
      *

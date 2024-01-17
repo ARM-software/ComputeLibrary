@@ -43,6 +43,7 @@ enum class UnaryOp : int32_t
     Fabs  = 0x0014,
     Log   = 0x0015,
     Round = 0x0016,
+    Floor = 0x0017,
 };
 
 /** Assignment operators. */

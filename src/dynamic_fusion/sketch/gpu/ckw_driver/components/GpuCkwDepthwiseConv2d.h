@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "src/core/common/Macros.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDepthwiseConv2d.h"
+
 namespace arm_compute
 {
 namespace experimental
@@ -67,8 +68,8 @@ public:
 
 private:
     const ITensorInfo *_src;
-    const ITensorInfo *_weight;
-    const ITensorInfo *_bias;
+    const ITensorInfo *_wei;
+    const ITensorInfo *_bia;
     const ITensorInfo *_dst;
     Attributes         _attributes;
     Settings           _settings;

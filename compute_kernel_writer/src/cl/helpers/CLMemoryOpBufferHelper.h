@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_SRC_CL_CLMEMORYOPBUFFERHELPER_H
-#define CKW_SRC_CL_CLMEMORYOPBUFFERHELPER_H
+#ifndef CKW_SRC_CL_HELPERS_CLMEMORYOPBUFFERHELPER_H
+#define CKW_SRC_CL_HELPERS_CLMEMORYOPBUFFERHELPER_H
 
 #include "src/cl/helpers/ICLMemoryOpHelper.h"
 
@@ -37,6 +37,8 @@ namespace ckw
 // Forward Declarations
 class CLKernelWriter;
 class CLTile;
+template <class CLTile>
+class TileView;
 enum class MemoryOperation;
 
 /** Helper class to write memory operations (like load/store) in OpenCL
@@ -45,19 +47,23 @@ class CLMemoryOpBufferHelper : public ICLMemoryOpHelper
 {
 public:
     /** Constructor similar to @ref ICLMemoryOpHelper() */
-    CLMemoryOpBufferHelper(CLKernelWriter *writer, ITensor *tensor, TensorSampler *sampler, MemoryOperation op)
-        : ICLMemoryOpHelper(writer, tensor, sampler, op)
+    CLMemoryOpBufferHelper(CLKernelWriter         *writer,
+                           ITensor                *tensor,
+                           TensorSampler          *sampler,
+                           MemoryOperation         op,
+                           const TileView<CLTile> &dst)
+        : ICLMemoryOpHelper(writer, tensor, sampler, op, dst)
     {
     }
 
     /** Copy constructor */
-    CLMemoryOpBufferHelper(const CLMemoryOpBufferHelper &) = default;
+    CLMemoryOpBufferHelper(const CLMemoryOpBufferHelper &) = delete;
 
     /** Assignment operator overload */
-    CLMemoryOpBufferHelper &operator=(const CLMemoryOpBufferHelper &) = default;
+    CLMemoryOpBufferHelper &operator=(const CLMemoryOpBufferHelper &) = delete;
 
     // Methods overridden
-    void initialize(const CLTile *dst, const CLTile *x, const CLTile *z, const CLTile *b) override;
+    void initialize(const CLTile *x, const CLTile *z, const CLTile *b) override;
     void write_row(int32_t row_id, const std::string &coord_y) override;
     void finalize() override;
 
@@ -78,12 +84,12 @@ private:
     std::vector<LeftoverDescriptor> _leftovers_x{};
     std::string                     _coord_orig_z{};
 
-    static bool validate(const CLKernelWriter *writer,
-                         const ITensor        *tensor,
-                         const TensorSampler  *sampler,
-                         const Tensor3dMapper *mapper,
-                         MemoryOperation       op,
-                         const CLTile         *dst);
+    static bool validate(const CLKernelWriter   *writer,
+                         const ITensor          *tensor,
+                         const TensorSampler    *sampler,
+                         const Tensor3dMapper   *mapper,
+                         MemoryOperation         op,
+                         const TileView<CLTile> &dst);
 
     void out_of_bound_initialize_x(const std::string &coord);
     void out_of_bound_finalize_x();
@@ -99,4 +105,4 @@ private:
 };
 } // namespace ckw
 
-#endif /* CKW_SRC_CL_CLMEMORYOPBUFFERHELPER_H */
+#endif // CKW_SRC_CL_HELPERS_CLMEMORYOPBUFFERHELPER_H

@@ -137,7 +137,7 @@ def recursive_glob(root_dir, pattern):
 
 
 def get_ckw_obj_list():
-    cmake_obj_dir = os.path.abspath("prototype/CMakeFiles/ckw_prototype.dir/src")
+    cmake_obj_dir = os.path.abspath("CMakeFiles/ckw.dir/src")
     return recursive_glob(root_dir=cmake_obj_dir, pattern=".*.o$")
 
 
@@ -163,7 +163,7 @@ def build_library(name, build_env, sources, static=False, libs=[]):
     else:
         # Always statically link Compute Library against CKW
         if env['experimental_dynamic_fusion'] and name == "arm_compute":
-            libs.append('libckw_prototype.a')
+            libs.append('libckw.a')
 
         # Add shared library versioning
         if env['set_soname']:

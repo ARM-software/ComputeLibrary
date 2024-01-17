@@ -280,10 +280,10 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
     ITensorInfo *out_1_info = context.create_tensor_info();
 
     CastAttributes cast_0_attr;
-    cast_0_attr.data_type(DataType::S32).convert_policy(ConvertPolicy::SATURATE);
+    cast_0_attr.data_type(DataType::F16);
 
     CastAttributes cast_1_attr;
-    cast_1_attr.data_type(DataType::F32).convert_policy(ConvertPolicy::SATURATE);
+    cast_1_attr.data_type(DataType::F32);
 
     ITensorInfo *ans_0_info = GpuAdd::create_op(sketch, in_0_info, in_1_info);
     GpuOutput::create_op(sketch, ans_0_info, out_0_info);
