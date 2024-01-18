@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,10 +29,10 @@
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/dynamic_fusion/operators/ActivationFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -65,9 +65,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     GpuWorkloadSketch sketch{ &context };
 
     // Fuse tanh
-    const TensorInfo src_info = context.create_tensor_info(input_info);
+    const ITensorInfo* src_info = context.create_tensor_info(input_info);
 
-    const bool res = static_cast<bool>(GpuTanh::validate_op(sketch, &src_info));
+    const bool res = static_cast<bool>(GpuTanh::validate_op(sketch, src_info));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -81,8 +81,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionTanhOpFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(combine(datasets::SmallShapes(),
-                                       framework::dataset::make("Fuse", { false })),
+                       combine(combine(datasets::SmallShapes(), framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -92,8 +91,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
 FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
                        DynamicFusionTanhOpFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(combine(datasets::Small5dShapes(),
-                                       framework::dataset::make("Fuse", { false })),
+                       combine(combine(datasets::Small5dShapes(), framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -104,8 +102,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
 FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
                        DynamicFusionTanhOpFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(combine(datasets::SmallShapes(),
-                                       framework::dataset::make("Fuse", { true })),
+                       combine(combine(datasets::SmallShapes(), framework::dataset::make("Fuse", {true})),
                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -118,8 +115,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionTanhOpFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(combine(datasets::SmallShapes(),
-                                       framework::dataset::make("Fuse", { false })),
+                       combine(combine(datasets::SmallShapes(), framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -129,8 +125,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
 FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
                        DynamicFusionTanhOpFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(combine(datasets::Small5dShapes(),
-                                       framework::dataset::make("Fuse", { false })),
+                       combine(combine(datasets::Small5dShapes(), framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -141,8 +136,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
 FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
                        DynamicFusionTanhOpFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(combine(datasets::SmallShapes(),
-                                       framework::dataset::make("Fuse", { true })),
+                       combine(combine(datasets::SmallShapes(), framework::dataset::make("Fuse", {true})),
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output

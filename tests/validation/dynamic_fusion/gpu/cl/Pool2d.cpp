@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,13 @@
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 
 #include "tests/CL/CLAccessor.h"
-#include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/dynamic_fusion/PoolingLayerDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/datasets/Datasets.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/dynamic_fusion/gpu/cl/Pool2dFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,15 +43,19 @@ TEST_SUITE(CL)
 TEST_SUITE(DYNAMIC_FUSION)
 TEST_SUITE(POOL2D)
 
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
-constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
+constexpr AbsoluteTolerance<float> tolerance_f32(
+    0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
+constexpr AbsoluteTolerance<float> tolerance_f16(
+    0.01f); /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
 
-const auto PoolingLayerDatasetFP = combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3) })),
-                                                           framework::dataset::make("Pad", { Padding2D() })),
-                                                   framework::dataset::make("Stride", { Size2D(1, 1), Size2D(2, 1), Size2D(5, 7) })),
-                                           framework::dataset::make("ExcludePadding", { true }));
+const auto PoolingLayerDatasetFP =
+    combine(combine(combine(combine(framework::dataset::make("PoolingType", {PoolingType::MAX, PoolingType::AVG}),
+                                    framework::dataset::make("PoolingSize", {Size2D(2, 2), Size2D(3, 3)})),
+                            framework::dataset::make("Pad", {Padding2D()})),
+                    framework::dataset::make("Stride", {Size2D(1, 1), Size2D(2, 1), Size2D(5, 7)})),
+            framework::dataset::make("ExcludePadding", {true}));
 
-const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", { true, false });
+const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", {true, false});
 
 template <typename T>
 using DynamicFusionGpuPool2dFixture = DynamicFusionGpuPool2dValidationFixture<CLTensor, CLAccessor, GpuPool2d, T>;
@@ -60,7 +64,8 @@ template <typename T>
 using DFSpecialGpuPool2dFixture = DynamicFusionGpuPool2dSpecialValidationFixture<CLTensor, CLAccessor, GpuPool2d, T>;
 
 template <typename T>
-using DFPoolMixedPrecisionFixture = DynamicFusionGpuPool2dMixedPrecisionValidationFixture<CLTensor, CLAccessor, GpuPool2d, T>;
+using DFPoolMixedPrecisionFixture =
+    DynamicFusionGpuPool2dMixedPrecisionValidationFixture<CLTensor, CLAccessor, GpuPool2d, T>;
 // *INDENT-OFF*
 // clang-format off
 
@@ -91,7 +96,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 
     // Validate Pool2d Configuration
     auto                   src_info    = context.create_tensor_info(input_info);
-    bool                   res         = bool(GpuPool2d::validate_op(sketch, &src_info, pool2d_attr, settings));
+    bool                   res         = bool(GpuPool2d::validate_op(sketch, src_info, pool2d_attr, settings));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 
@@ -100,53 +105,68 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuPool2dFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), PoolingLayerDatasetFP),
-                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       DynamicFusionGpuPool2dFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(datasets::SmallNoneUnitShapes(), PoolingLayerDatasetFP),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuPool2dFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), PoolingLayerDatasetFP),
-                                                                                                                framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       DynamicFusionGpuPool2dFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(combine(datasets::LargeShapes(), PoolingLayerDatasetFP),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSpecial, DFSpecialGpuPool2dFixture<float>, framework::DatasetMode::ALL, combine(datasets::PoolingLayerDatasetSpecialDynamicFusion(),
-                                                                                                          framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSpecial,
+                       DFSpecialGpuPool2dFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::PoolingLayerDatasetSpecialDynamicFusion(),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 TEST_SUITE(GlobalPooling)
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuPool2dFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(combine(combine(
-                                                                   framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                                                                            TensorShape(27U, 13U, 2U, 4U)
-                                                                                                          }),
-                                                                   framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::MAX })),
-                                                               framework::dataset::make("PoolingSize", { Size2D(27, 13) })),
-                                                       framework::dataset::make("Pad", { Padding2D() })),
-                                               framework::dataset::make("Stride", { Size2D(1, 1) })),
-                                       framework::dataset::make("ExcludePadding", true)),
-                               framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    DynamicFusionGpuPool2dFixture<float>,
+    framework::DatasetMode::ALL,
+    combine(combine(combine(combine(combine(combine(framework::dataset::make("InputShape",
+                                                                             {TensorShape(27U, 13U, 2U),
+                                                                              TensorShape(27U, 13U, 2U, 4U)}),
+                                                    framework::dataset::make("PoolingType",
+                                                                             {PoolingType::AVG, PoolingType::MAX})),
+                                            framework::dataset::make("PoolingSize", {Size2D(27, 13)})),
+                                    framework::dataset::make("Pad", {Padding2D()})),
+                            framework::dataset::make("Stride", {Size2D(1, 1)})),
+                    framework::dataset::make("ExcludePadding", true)),
+            framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuPool2dFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(
-                                                                   framework::dataset::make("InputShape", { TensorShape(79U, 37U, 11U),
-                                                                                                            TensorShape(79U, 37U, 11U, 4U)
-                                                                                                          }),
-                                                                   framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::MAX })),
-                                                               framework::dataset::make("PoolingSize", { Size2D(79, 37) })),
-                                                       framework::dataset::make("Pad", { Padding2D() })),
-                                               framework::dataset::make("Stride", { Size2D(1, 1) })),
-                                       framework::dataset::make("ExcludePadding", true)),
-                               framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(
+    RunLarge,
+    DynamicFusionGpuPool2dFixture<float>,
+    framework::DatasetMode::NIGHTLY,
+    combine(combine(combine(combine(combine(combine(framework::dataset::make("InputShape",
+                                                                             {TensorShape(79U, 37U, 11U),
+                                                                              TensorShape(79U, 37U, 11U, 4U)}),
+                                                    framework::dataset::make("PoolingType",
+                                                                             {PoolingType::AVG, PoolingType::MAX})),
+                                            framework::dataset::make("PoolingSize", {Size2D(79, 37)})),
+                                    framework::dataset::make("Pad", {Padding2D()})),
+                            framework::dataset::make("Stride", {Size2D(1, 1)})),
+                    framework::dataset::make("ExcludePadding", true)),
+            framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -155,49 +175,61 @@ TEST_SUITE_END() // GlobalPooling
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, DFPoolMixedPrecisionFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallNoneUnitShapes(), PoolingLayerDatasetFP),
-                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
-                                                                                                               pool_fp_mixed_precision_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       DFPoolMixedPrecisionFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallNoneUnitShapes(), PoolingLayerDatasetFP),
+                                       framework::dataset::make("DataType", DataType::F16)),
+                               pool_fp_mixed_precision_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, DFPoolMixedPrecisionFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), PoolingLayerDatasetFP),
-                                                                                                                     framework::dataset::make("DataType", DataType::F16)),
-                                                                                                             pool_fp_mixed_precision_dataset))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       DFPoolMixedPrecisionFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeShapes(), PoolingLayerDatasetFP),
+                                       framework::dataset::make("DataType", DataType::F16)),
+                               pool_fp_mixed_precision_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 
 TEST_SUITE(GlobalPooling)
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuPool2dFixture<half>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(combine(combine(
-                                                                   framework::dataset::make("InputShape", { TensorShape(27U, 13U, 2U),
-                                                                                                            TensorShape(27U, 13U, 2U, 4U)
-                                                                                                          }),
-                                                                   framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::MAX })),
-                                                               framework::dataset::make("PoolingSize", { Size2D(27, 13) })),
-                                                       framework::dataset::make("Pad", { Padding2D() })),
-                                               framework::dataset::make("Stride", { Size2D(1, 1) })),
-                                       framework::dataset::make("ExcludePadding", true)),
-                               framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    DynamicFusionGpuPool2dFixture<half>,
+    framework::DatasetMode::ALL,
+    combine(combine(combine(combine(combine(combine(framework::dataset::make("InputShape",
+                                                                             {TensorShape(27U, 13U, 2U),
+                                                                              TensorShape(27U, 13U, 2U, 4U)}),
+                                                    framework::dataset::make("PoolingType",
+                                                                             {PoolingType::AVG, PoolingType::MAX})),
+                                            framework::dataset::make("PoolingSize", {Size2D(27, 13)})),
+                                    framework::dataset::make("Pad", {Padding2D()})),
+                            framework::dataset::make("Stride", {Size2D(1, 1)})),
+                    framework::dataset::make("ExcludePadding", true)),
+            framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuPool2dFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(
-                                                                   framework::dataset::make("InputShape", { TensorShape(79U, 37U, 11U),
-                                                                                                            TensorShape(79U, 37U, 11U, 4U)
-                                                                                                          }),
-                                                                   framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::MAX })),
-                                                               framework::dataset::make("PoolingSize", { Size2D(79, 37) })),
-                                                       framework::dataset::make("Pad", { Padding2D() })),
-                                               framework::dataset::make("Stride", { Size2D(1, 1) })),
-                                       framework::dataset::make("ExcludePadding", true)),
-                               framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(
+    RunLarge,
+    DynamicFusionGpuPool2dFixture<half>,
+    framework::DatasetMode::NIGHTLY,
+    combine(combine(combine(combine(combine(combine(framework::dataset::make("InputShape",
+                                                                             {TensorShape(79U, 37U, 11U),
+                                                                              TensorShape(79U, 37U, 11U, 4U)}),
+                                                    framework::dataset::make("PoolingType",
+                                                                             {PoolingType::AVG, PoolingType::MAX})),
+                                            framework::dataset::make("PoolingSize", {Size2D(79, 37)})),
+                                    framework::dataset::make("Pad", {Padding2D()})),
+                            framework::dataset::make("Stride", {Size2D(1, 1)})),
+                    framework::dataset::make("ExcludePadding", true)),
+            framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -209,7 +241,7 @@ TEST_SUITE_END() // FLOAT
 TEST_SUITE_END() // POOL2D
 TEST_SUITE_END() // DYNAMIC_FUSION
 TEST_SUITE_END() // CL
-}
-}
-}
+} // namespace validation
+} // namespace test
+} // namespace arm_compute
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF

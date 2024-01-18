@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL_H
 
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
@@ -60,6 +60,11 @@ public:
     Implementation &operator=(Implementation &&impl) = default;
     /** Get workload context */
     const Context *context() const
+    {
+        return _context;
+    }
+    /** Get workload context */
+    Context *context()
     {
         return _context;
     }
@@ -126,4 +131,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCHIMPL_H

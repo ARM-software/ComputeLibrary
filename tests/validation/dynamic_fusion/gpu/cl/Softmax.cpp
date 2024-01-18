@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,11 @@
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
+#include "tests/framework/datasets/Datasets.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/dynamic_fusion/operators/SoftmaxFixture.h"
+#include "tests/validation/Validation.h"
 
 using namespace arm_compute::experimental::dynamic_fusion;
 
@@ -110,9 +110,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
     SoftmaxAttributes softmax_attr{};
     softmax_attr.axis(axis).beta(beta).is_log_softmax(false);
-    TensorInfo src_info  = context.create_tensor_info(input_info);
-    TensorInfo dst_info = context.create_tensor_info(output_info);
-    const bool res = static_cast<bool>(GpuSoftmax::validate_op(sketch, &src_info, &dst_info, softmax_attr));
+    ITensorInfo* src_info  = context.create_tensor_info(input_info);
+    ITensorInfo* dst_info = context.create_tensor_info(output_info);
+    const bool res = static_cast<bool>(GpuSoftmax::validate_op(sketch, src_info, dst_info, softmax_attr));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 

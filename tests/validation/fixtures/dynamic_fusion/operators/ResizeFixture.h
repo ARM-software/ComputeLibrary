@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022-2023 Arm Limited.
+* Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESIZEFIXTURE
-#define TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESIZEFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESIZEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESIZEFIXTURE_H
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -33,12 +33,12 @@
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
 #include "tests/CL/CLAccessor.h"
-#include "tests/SimpleTensor.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/SimpleTensor.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Scale.h"
+#include "tests/validation/Validation.h"
 
 using namespace arm_compute::experimental::dynamic_fusion;
 
@@ -52,9 +52,14 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionResizeGenericValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout,
-               InterpolationPolicy interpolation_policy, SamplingPolicy sampling_policy,
-               bool align_corners, QuantizationInfo output_quantization_info)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               QuantizationInfo    quantization_info,
+               DataLayout          data_layout,
+               InterpolationPolicy interpolation_policy,
+               SamplingPolicy      sampling_policy,
+               bool                align_corners,
+               QuantizationInfo    output_quantization_info)
     {
         _shape                    = shape;
         _interpolation_policy     = interpolation_policy;
@@ -79,13 +84,13 @@ public:
 protected:
     void generate_scale(const TensorShape &shape)
     {
-        static constexpr float _min_scale{ 0.25f };
-        static constexpr float _max_scale{ 3.f };
+        static constexpr float _min_scale{0.25f};
+        static constexpr float _max_scale{3.f};
 
-        constexpr float max_width{ 8192.0f };
-        constexpr float max_height{ 6384.0f };
-        constexpr float min_width{ 1.f };
-        constexpr float min_height{ 1.f };
+        constexpr float max_width{8192.0f};
+        constexpr float max_height{6384.0f};
+        constexpr float min_width{1.f};
+        constexpr float min_height{1.f};
 
         std::mt19937                          generator(library->seed());
         std::uniform_real_distribution<float> distribution_float(_min_scale, _max_scale);
@@ -93,7 +98,8 @@ protected:
         auto generate = [&](size_t input_size, float min_output, float max_output) -> int
         {
             const float generated_scale = distribution_float(generator);
-            const int   output_size     = static_cast<int>(utility::clamp(static_cast<float>(input_size) * generated_scale, min_output, max_output));
+            const int   output_size     = static_cast<int>(
+                utility::clamp(static_cast<float>(input_size) * generated_scale, min_output, max_output));
             return output_size;
         };
 
@@ -108,17 +114,17 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::F32)
+        if (tensor.data_type() == DataType::F32)
         {
             std::uniform_real_distribution<float> distribution(-5.0f, 5.0f);
             library->fill(tensor, distribution, 0);
         }
-        else if(tensor.data_type() == DataType::F16)
+        else if (tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -5.0f, 5.0f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-5.0f, 5.0f};
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized(tensor.data_type()))
+        else if (is_data_type_quantized(tensor.data_type()))
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);
@@ -136,26 +142,30 @@ protected:
 
         // Create a new workload sketch
         CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch  sketch{ &context };
+        GpuWorkloadContext context        = GpuWorkloadContext{&cl_compile_ctx};
+        GpuWorkloadSketch  sketch{&context};
 
         // Create sketch tensors
-        TensorInfo src_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type, _data_layout));
-        src_info.set_quantization_info(_input_quantization_info);
-        TensorInfo dst_info = context.create_tensor_info();
+        ITensorInfo *src_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type, _data_layout));
+        src_info->set_quantization_info(_input_quantization_info);
+        ITensorInfo *dst_info = context.create_tensor_info();
 
         ResizeAttributes attributes;
-        attributes.align_corners(_align_corners).sampling_policy(_sampling_policy).interpolation_policy(_interpolation_policy).output_width(_output_width).output_height(_output_height);
+        attributes.align_corners(_align_corners)
+            .sampling_policy(_sampling_policy)
+            .interpolation_policy(_interpolation_policy)
+            .output_width(_output_width)
+            .output_height(_output_height);
 
-        ITensorInfo *scale_result_info = FunctionType::create_op(sketch, &src_info, attributes);
-        GpuOutput::create_op(sketch, scale_result_info, &dst_info);
+        ITensorInfo *scale_result_info = FunctionType::create_op(sketch, src_info, attributes);
+        GpuOutput::create_op(sketch, scale_result_info, dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;
         runtime.configure(sketch);
 
         // (Important) Allocate auxiliary tensor memory if there are any
-        for(auto &data : runtime.get_auxiliary_tensors())
+        for (auto &data : runtime.get_auxiliary_tensors())
         {
             CLTensor     *tensor      = std::get<0>(data);
             TensorInfo    info        = std::get<1>(data);
@@ -169,8 +179,8 @@ protected:
         TensorType t_dst{};
 
         // Initialize user tensors
-        t_src.allocator()->init(src_info);
-        t_dst.allocator()->init(dst_info);
+        t_src.allocator()->init(*src_info);
+        t_dst.allocator()->init(*dst_info);
 
         // Allocate and fill user tensors
         t_src.allocator()->allocate();
@@ -179,7 +189,7 @@ protected:
         fill(AccessorType(t_src));
 
         // Run runtime
-        runtime.run({ &t_src, &t_dst });
+        runtime.run({&t_src, &t_dst});
 
         return t_dst;
     }
@@ -187,7 +197,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, _data_type, 1, _input_quantization_info };
+        SimpleTensor<T> src{shape, _data_type, 1, _input_quantization_info};
 
         // Reference code is NCHW, so the input shapes are NCHW
         const int idx_width  = get_data_layout_dimension_index(DataLayout::NCHW, DataLayoutDimension::WIDTH);
@@ -199,9 +209,9 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::scale<T>(src, scale_x, scale_y, _interpolation_policy,
-                                   BorderMode::REPLICATE, static_cast<T>(0), _sampling_policy, /* ceil_policy_scale */ false,
-                                   _align_corners, _output_quantization_info);
+        return reference::scale<T>(src, scale_x, scale_y, _interpolation_policy, BorderMode::REPLICATE,
+                                   static_cast<T>(0), _sampling_policy, /* ceil_policy_scale */ false, _align_corners,
+                                   _output_quantization_info);
     }
 
     TensorType          _target{};
@@ -213,43 +223,45 @@ protected:
     DataLayout          _data_layout{};
     QuantizationInfo    _input_quantization_info{};
     QuantizationInfo    _output_quantization_info{};
-    bool                _align_corners{ false };
-    int                 _output_width{ 0 };
-    int                 _output_height{ 0 };
+    bool                _align_corners{false};
+    int                 _output_width{0};
+    int                 _output_height{0};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DynamicFusionResizeValidationFixture : public DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
+class DynamicFusionResizeValidationFixture
+    : public DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, DataType data_type, DataLayout data_layout, InterpolationPolicy policy, SamplingPolicy sampling_policy, bool align_corners)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               DataLayout          data_layout,
+               InterpolationPolicy policy,
+               SamplingPolicy      sampling_policy,
+               bool                align_corners)
     {
-        DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                                      data_type,
-                                                                                                      QuantizationInfo(),
-                                                                                                      data_layout,
-                                                                                                      policy,
-                                                                                                      sampling_policy,
-                                                                                                      align_corners,
-                                                                                                      QuantizationInfo());
+        DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, QuantizationInfo(), data_layout, policy, sampling_policy, align_corners,
+            QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class DynamicFusionResizeQuantizedValidationFixture : public DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
+class DynamicFusionResizeQuantizedValidationFixture
+    : public DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, SamplingPolicy sampling_policy,
-               bool align_corners)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               QuantizationInfo    quantization_info,
+               DataLayout          data_layout,
+               InterpolationPolicy policy,
+               SamplingPolicy      sampling_policy,
+               bool                align_corners)
     {
-        DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                                      data_type,
-                                                                                                      quantization_info,
-                                                                                                      data_layout,
-                                                                                                      policy,
-                                                                                                      sampling_policy,
-                                                                                                      align_corners,
-                                                                                                      quantization_info);
+        DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, quantization_info, data_layout, policy, sampling_policy, align_corners,
+            quantization_info);
     }
 };
 
@@ -257,4 +269,4 @@ public:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESIZEFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESIZEFIXTURE_H

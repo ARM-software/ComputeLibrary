@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,14 +29,13 @@
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuSub.h"
 
 #include "tests/CL/CLAccessor.h"
-#include "tests/framework/Fixture.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
-
 #include "tests/datasets/DynamicFusionDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Fixture.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/dynamic_fusion/gpu/cl/ElementwiseBinaryFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -99,29 +98,32 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
     auto          lhs_info         = context.create_tensor_info(input1_info);
     auto          rhs_info         = context.create_tensor_info(input2_info);
 
-    bool res = bool(GpuSub::validate_op(sketch, &lhs_info, &rhs_info));
+    bool res = bool(GpuSub::validate_op(sketch, lhs_info, rhs_info));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
 
 template <typename T>
-using DynamicFusionCLSubFixture = DynamicFusionGpuElementwiseBinaryOneOpValidationFixture<CLTensor, CLAccessor, GpuSub, T>;
+using DynamicFusionCLSubFixture =
+    DynamicFusionGpuElementwiseBinaryOneOpValidationFixture<CLTensor, CLAccessor, GpuSub, T>;
 
 template <typename T>
-using DynamicFusionCLSubBroadcastFixture = DynamicFusionGpuElementwiseBinaryBroadcastOneOpValidationFixture<CLTensor, CLAccessor, GpuSub, T>;
+using DynamicFusionCLSubBroadcastFixture =
+    DynamicFusionGpuElementwiseBinaryBroadcastOneOpValidationFixture<CLTensor, CLAccessor, GpuSub, T>;
 
 template <typename T>
-using DynamicFusionCLSubTwoOpsFixture = DynamicFusionGpuElementwiseBinaryTwoOpsValidationFixture<CLTensor, CLAccessor, GpuSub, T>;
+using DynamicFusionCLSubTwoOpsFixture =
+    DynamicFusionGpuElementwiseBinaryTwoOpsValidationFixture<CLTensor, CLAccessor, GpuSub, T>;
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionCLSubFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::SmallShapes()),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -129,10 +131,10 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
 FIXTURE_DATA_TEST_CASE(RunLargeOneOp,
                        DynamicFusionCLSubFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::LargeShapes()),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -140,10 +142,10 @@ FIXTURE_DATA_TEST_CASE(RunLargeOneOp,
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
                        DynamicFusionCLSubBroadcastFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::TemporaryLimitedSmallShapesBroadcast()),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -152,22 +154,23 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
 FIXTURE_DATA_TEST_CASE(RunLargeBroadcastOneOp,
                        DynamicFusionCLSubBroadcastFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::TemporaryLimitedLargeShapesBroadcast()),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
-                       DynamicFusionCLSubTwoOpsFixture<float>,
-                       framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
-                                                       datasets::DynamicFusionElementwiseBinaryTwoOpsSmallShapes()),
-                                               framework::dataset::make("DataType", { DataType::F32 })),
-                                       framework::dataset::make("InPlace", { false })),
-                               framework::dataset::make("FuseTwoOps", { true })))
+FIXTURE_DATA_TEST_CASE(
+    RunSmallTwoOps,
+    DynamicFusionCLSubTwoOpsFixture<float>,
+    framework::DatasetMode::PRECOMMIT,
+    combine(combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
+                                    datasets::DynamicFusionElementwiseBinaryTwoOpsSmallShapes()),
+                            framework::dataset::make("DataType", {DataType::F32})),
+                    framework::dataset::make("InPlace", {false})),
+            framework::dataset::make("FuseTwoOps", {true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -178,10 +181,10 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionCLSubFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::SmallShapes()),
-                                       framework::dataset::make("DataType", { DataType::F16 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F16})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -190,10 +193,10 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
                        DynamicFusionCLSubBroadcastFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::TemporaryLimitedSmallShapesBroadcast()),
-                                       framework::dataset::make("DataType", { DataType::F16 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F16})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -205,10 +208,10 @@ TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionCLSubFixture<int32_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::SmallShapes()),
-                                       framework::dataset::make("DataType", { DataType::S32 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::S32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -219,10 +222,10 @@ TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionCLSubFixture<int16_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::SmallShapes()),
-                                       framework::dataset::make("DataType", { DataType::S16 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::S16})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -230,10 +233,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        DynamicFusionCLSubFixture<int16_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::LargeShapes()),
-                                       framework::dataset::make("DataType", { DataType::S16 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::S16})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -244,10 +247,10 @@ TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionCLSubFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(framework::dataset::make("ElementwiseOp", { ArithmeticOperation::SUB }),
+                       combine(combine(combine(framework::dataset::make("ElementwiseOp", {ArithmeticOperation::SUB}),
                                                datasets::SmallShapes()),
-                                       framework::dataset::make("DataType", { DataType::U8 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::U8})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

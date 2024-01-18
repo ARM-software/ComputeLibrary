@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,9 +64,11 @@ public:
 
     /** Set a new ID and register the user tensor info.
      *
-     * @param[in, out] tensor_info The tensor info to be registered.
+     * The ownership of the tensor info object will be transfered to this context object.
+     *
+     * @param[in] tensor_info The tensor info to be registered.
      */
-    void register_user_tensor(ITensorInfo &tensor_info);
+    void register_user_tensor(std::unique_ptr<TensorInfo> &&tensor_info);
 
     /** Create a virtual (see @ref MemoryType) tensor info and save it
      *

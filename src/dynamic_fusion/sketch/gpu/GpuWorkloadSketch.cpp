@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,14 +31,25 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
+
 GpuWorkloadSketch::GpuWorkloadSketch(Context *context) : _impl{std::make_unique<Implementation>(context)}
 {
 }
+
 GpuWorkloadSketch::~GpuWorkloadSketch()
 {
 }
 
+GpuWorkloadSketch::GpuWorkloadSketch(GpuWorkloadSketch &&) = default;
+
+GpuWorkloadSketch &GpuWorkloadSketch::operator=(GpuWorkloadSketch &&) = default;
+
 const GpuWorkloadSketch::Context *GpuWorkloadSketch::gpu_context() const
+{
+    return _impl->context();
+}
+
+GpuWorkloadSketch::Context *GpuWorkloadSketch::gpu_context()
 {
     return _impl->context();
 }
@@ -47,6 +58,7 @@ GpuWorkloadSketch::Implementation &GpuWorkloadSketch::implementation()
 {
     return *_impl;
 }
+
 const GpuWorkloadSketch::Implementation &GpuWorkloadSketch::implementation() const
 {
     return *_impl;

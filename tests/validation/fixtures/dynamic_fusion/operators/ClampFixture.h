@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CLAMPFIXTURE
-#define TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CLAMPFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CLAMPFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CLAMPFIXTURE_H
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -107,18 +107,18 @@ protected:
         GpuWorkloadSketch  sketch{ &context };
 
         // Create sketch tensors
-        TensorInfo src_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
-        TensorInfo dst_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
+        ITensorInfo* src_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
+        ITensorInfo* dst_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
 
-        ITensorInfo *ans_0_info = FunctionType::create_op(sketch, &src_info, attributes);
+        ITensorInfo *ans_0_info = FunctionType::create_op(sketch, src_info, attributes);
         if(_fuse)
         {
             ITensorInfo *ans_1_info = FunctionType::create_op(sketch, ans_0_info, attributes);
-            GpuOutput::create_op(sketch, ans_1_info, &dst_info);
+            GpuOutput::create_op(sketch, ans_1_info, dst_info);
         }
         else
         {
-            GpuOutput::create_op(sketch, ans_0_info, &dst_info);
+            GpuOutput::create_op(sketch, ans_0_info, dst_info);
         }
 
         // Configure runtime
@@ -130,8 +130,8 @@ protected:
         TensorType t_dst{};
 
         // Initialize user tensors
-        t_src.allocator()->init(src_info);
-        t_dst.allocator()->init(dst_info);
+        t_src.allocator()->init(*src_info);
+        t_dst.allocator()->init(*dst_info);
 
         // Allocate and fill user tensors
         t_src.allocator()->allocate();
@@ -168,4 +168,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CLAMPFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CLAMPFIXTURE_H

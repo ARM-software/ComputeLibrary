@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -288,6 +288,10 @@ ClWorkloadRuntime::ClWorkloadRuntime() : _impl{std::make_unique<Implementation>(
 }
 
 ClWorkloadRuntime::~ClWorkloadRuntime() = default;
+
+ClWorkloadRuntime::ClWorkloadRuntime(ClWorkloadRuntime &&) = default;
+
+ClWorkloadRuntime &ClWorkloadRuntime::operator=(ClWorkloadRuntime &&) = default;
 
 Status ClWorkloadRuntime::configure(const GpuWorkloadSketch &sketch)
 {

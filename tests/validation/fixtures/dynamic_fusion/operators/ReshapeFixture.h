@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESHAPEFIXTURE
-#define TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESHAPEFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESHAPEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESHAPEFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -33,9 +33,9 @@
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuReshape.h"
 
-#include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
 #include "tests/validation/reference/ReshapeLayer.h"
 
 using namespace arm_compute::experimental::dynamic_fusion;
@@ -70,24 +70,24 @@ protected:
 
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &context };
+        auto              context        = GpuWorkloadContext{&cl_compile_ctx};
+        GpuWorkloadSketch sketch{&context};
 
         // Create sketch tensors
-        TensorInfo        src_info = context.create_tensor_info(TensorInfo(input_shape, 1, data_type));
-        TensorInfo        dst_info = context.create_tensor_info(TensorInfo(output_shape, 1, data_type));
+        ITensorInfo      *src_info = context.create_tensor_info(TensorInfo(input_shape, 1, data_type));
+        ITensorInfo      *dst_info = context.create_tensor_info(TensorInfo(output_shape, 1, data_type));
         ReshapeAttributes attributes;
         attributes.shape(output_shape);
 
-        ITensorInfo *ans_info = FunctionType::create_op(sketch, &src_info, attributes);
-        GpuOutput::create_op(sketch, ans_info, &dst_info);
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, src_info, attributes);
+        GpuOutput::create_op(sketch, ans_info, dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;
         runtime.configure(sketch);
 
         // (Important) Allocate auxiliary tensor memory if there are any
-        for(auto &data : runtime.get_auxiliary_tensors())
+        for (auto &data : runtime.get_auxiliary_tensors())
         {
             CLTensor     *tensor      = std::get<0>(data);
             TensorInfo    info        = std::get<1>(data);
@@ -100,8 +100,8 @@ protected:
         TensorType t_src{};
         TensorType t_dst{};
         // Initialize user tensors
-        t_src.allocator()->init(src_info);
-        t_dst.allocator()->init(dst_info);
+        t_src.allocator()->init(*src_info);
+        t_dst.allocator()->init(*dst_info);
 
         // Allocate and fill user tensors
         t_src.allocator()->allocate();
@@ -110,15 +110,16 @@ protected:
         fill(AccessorType(t_src), 0);
 
         // Run runtime
-        runtime.run({ &t_src, &t_dst });
+        runtime.run({&t_src, &t_dst});
 
         return t_dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type };
+        SimpleTensor<T> src{input_shape, data_type};
 
         // Fill reference
         fill(src, 0);
@@ -133,4 +134,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESHAPEFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_RESHAPEFIXTURE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,9 +60,9 @@ const CLCompileContext *GpuWorkloadContext::cl_compile_context() const
     return _impl->cl_compile_context();
 }
 
-void GpuWorkloadContext::register_user_tensor(ITensorInfo &tensor_info)
+void GpuWorkloadContext::register_user_tensor(std::unique_ptr<TensorInfo> &&tensor_info)
 {
-    _impl->register_user_tensor(tensor_info);
+    _impl->register_user_tensor(std::move(tensor_info));
 }
 
 GpuWorkloadContext::Impl &GpuWorkloadContext::implementation()
@@ -99,17 +99,17 @@ const MemoryDescriptorMap &GpuWorkloadContext::Impl::mem_map() const
     return _mem_map;
 }
 
-void GpuWorkloadContext::Impl::register_user_tensor(ITensorInfo &tensor_info)
+void GpuWorkloadContext::Impl::register_user_tensor(std::unique_ptr<TensorInfo> &&tensor_info)
 {
-    ARM_COMPUTE_ERROR_ON(tensor_info.has_valid_id());
+    ARM_COMPUTE_ERROR_ON(tensor_info->has_valid_id());
 
     const auto tensor_id = next_tensor_id();
 
-    tensor_info.set_id(tensor_id);
+    tensor_info->set_id(tensor_id);
     _mem_map[tensor_id] = MemoryDescriptor{MemoryType::User};
     // Save a *copy* of the user tensor info in workload context for future reference
     // Note that this means if the user modifies the @p tensor_info, the change will not be reflected in the context
-    _managed_tensor_info.emplace(tensor_info.id(), std::make_unique<TensorInfo>(tensor_info));
+    _managed_tensor_info.emplace(tensor_info->id(), std::move(tensor_info));
 }
 
 ITensorInfo *GpuWorkloadContext::Impl::create_virtual_tensor()

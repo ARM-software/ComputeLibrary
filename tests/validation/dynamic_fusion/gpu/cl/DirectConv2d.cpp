@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,14 +24,13 @@
 
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
+#include "tests/datasets/SmallConvolutionLayerDataset.h"
+#include "tests/framework/datasets/Datasets.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
-#include "tests/validation/reference/ConvolutionLayer.h"
-
-#include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/validation/fixtures/dynamic_fusion/gpu/cl/DirectConv2dFixture.h"
+#include "tests/validation/reference/ConvolutionLayer.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,10 +42,12 @@ namespace
 {
 /** Tolerances from tests/validation/CL/DirectConvolutionLayer.cpp
  */
-RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr float                     abs_tolerance_f32(0.0001f);           /**< Absolute tolerance for FP32 tests*/
-constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
+RelativeTolerance<float> tolerance_f32(
+    0.05f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> tolerance_f16(half_float::half(
+    0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr float                     abs_tolerance_f32(0.0001f); /**< Absolute tolerance for FP32 tests*/
+constexpr float                     tolerance_num = 0.07f;      /**< Tolerance number */
 } // namespace
 
 TEST_SUITE(CL)
@@ -69,8 +70,13 @@ TEST_SUITE(CONV2D)
 template <typename T>
 using DynamicFusionGpuConv2dFixture = DynamicFusionGpuConv2dValidationFixture<CLTensor, CLAccessor, GpuConv2d, T>;
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NHWC })), framework::dataset::make("QuantizationInfo", QuantizationInfo())))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       DynamicFusionGpuConv2dFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                               framework::dataset::make("DataType", DataType::F32)),
+                                       framework::dataset::make("DataLayout", {DataLayout::NHWC})),
+                               framework::dataset::make("QuantizationInfo", QuantizationInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -78,8 +84,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<float>, framework
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("DataLayout", { DataLayout::NHWC })), framework::dataset::make("QuantizationInfo", QuantizationInfo())))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       DynamicFusionGpuConv2dFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                               framework::dataset::make("DataType", DataType::F16)),
+                                       framework::dataset::make("DataLayout", {DataLayout::NHWC})),
+                               framework::dataset::make("QuantizationInfo", QuantizationInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -156,10 +167,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
     auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch sketch{ &context };
 
-    const TensorInfo sketch_input_info   = context.create_tensor_info(input_info);
-    const TensorInfo sketch_weights_info = context.create_tensor_info(weights_info);
-    const TensorInfo sketch_biases_info  = context.create_tensor_info(biases_info);
-    bool is_valid = bool(GpuConv2d::validate_op(sketch, &sketch_input_info, &sketch_weights_info, &sketch_biases_info, conv2d_attrs));
+    const ITensorInfo* sketch_input_info   = context.create_tensor_info(input_info);
+    const ITensorInfo* sketch_weights_info = context.create_tensor_info(weights_info);
+    const ITensorInfo* sketch_biases_info  = context.create_tensor_info(biases_info);
+    bool is_valid = bool(GpuConv2d::validate_op(sketch, sketch_input_info, sketch_weights_info, sketch_biases_info, conv2d_attrs));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 template <typename T>

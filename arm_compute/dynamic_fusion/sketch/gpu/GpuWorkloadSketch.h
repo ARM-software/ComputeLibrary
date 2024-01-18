@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH
+#ifndef ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH_H
+#define ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH_H
 
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadContext.h"
 
@@ -53,14 +53,27 @@ public:
      * @param[in] context Gpu context for the creation of a workload
      */
     explicit GpuWorkloadSketch(GpuWorkloadContext *context);
+
     /** Destructor */
     ~GpuWorkloadSketch();
+
+    /** Move constructor */
+    GpuWorkloadSketch(GpuWorkloadSketch &&);
+
+    /** Move assignment */
+    GpuWorkloadSketch &operator=(GpuWorkloadSketch &&);
+
     /** Get the implementation */
     Implementation &implementation();
+
     /** Get the implementation */
     const Implementation &implementation() const;
+
     /** Get the gpu workload context of this sketch */
     const GpuWorkloadContext *gpu_context() const;
+
+    /** Get the gpu workload context of this sketch */
+    GpuWorkloadContext *gpu_context();
 
 private:
     std::unique_ptr<Implementation> _impl; /**< Internal opaque implementation*/
@@ -69,4 +82,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH */
+#endif // ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH_H
