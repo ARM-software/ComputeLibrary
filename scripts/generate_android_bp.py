@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -29,9 +29,9 @@ import datetime
 
 # Paths to exclude
 excluded_paths = ["build",
-                  "compute_kernel_writer/build",
-                  "compute_kernel_writer/src",
-                  "compute_kernel_writer/validation",
+                  "compute_kernel_writer/",
+                  "src/dynamic_fusion/runtime/gpu/cl/ckw_driver/",
+                  "src/dynamic_fusion/sketch/gpu/ckw_driver/",
                   "docs/",
                   "documentation/",
                   "examples/",
@@ -97,8 +97,7 @@ arm_compute_library_defaults {
             "-Wno-unused-parameter",
             "-DNO_DOT_IN_TOOLCHAIN",
             "-Wno-implicit-fallthrough",
-            "-fPIC",
-            "-DACL_INTERNAL_TEST_CKW_IN_DF"
+            "-fPIC"
     ],
     rtti: true,
 }
@@ -109,8 +108,6 @@ cc_library_static {
     proprietary: true,
     local_include_dirs: ["build/android-arm64v8a/src/core",
                          "build/android-arm64v8a/src/core/CL",
-                         "compute_kernel_writer/prototype/include",
-                         "compute_kernel_writer/prototype",
                          "src/core/common",
                          "src/core/helpers",
                          "src/core/NEON/kernels/arm_gemm",
