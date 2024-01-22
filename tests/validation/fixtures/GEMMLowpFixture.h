@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMMLOWP_FIXTURE
-#define ARM_COMPUTE_TEST_GEMMLOWP_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_GEMMLOWPFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_GEMMLOWPFIXTURE_H
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/utils/quantization/AsymmHelpers.h"
+#include "tests/validation/Helpers.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/reference/GEMMLowp.h"
+
+#include <cstdint>
+#include <vector>
 
 namespace arm_compute
 {
@@ -37,82 +42,46 @@ namespace validation
 {
 namespace
 {
+
 template <typename U>
 void fill(U &&tensor, int i)
 {
-    switch(tensor.data_type())
-    {
-        case DataType::QSYMM8_PER_CHANNEL:
-        {
-            int min_bound = 128;
-            int max_bound = -127;
-            for(size_t j = 0; j < tensor.quantization_info().scale().size(); j++)
-            {
-                std::pair<int, int> bounds = get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -1.0f, 1.0f, i);
-                if(bounds.first < min_bound)
-                {
-                    min_bound = bounds.first;
-                }
-                if(bounds.second > max_bound)
-                {
-                    max_bound = bounds.second;
-                }
-            }
-            std::uniform_int_distribution<int32_t> distribution(min_bound, max_bound);
-            library->fill(tensor, distribution, i);
-            break;
-        }
-        case DataType::QASYMM8:
-        {
-            std::uniform_int_distribution<uint32_t> distribution(1, 254);
-            library->fill(tensor, distribution, i);
-            break;
-        }
-        case DataType::S32:
-        {
-            std::uniform_int_distribution<int32_t> distribution(-20000, 20000);
-            library->fill(tensor, distribution, i);
-            break;
-        }
-        case DataType::F16:
-        {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
-            library->fill(tensor, distribution, i);
-            break;
-        }
-        case DataType::F32:
-        {
-            std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-            library->fill(tensor, distribution, i);
-            break;
-        }
-        default:
-            library->fill_tensor_uniform(tensor, i);
-    }
+    ARM_COMPUTE_ASSERT(is_data_type_quantized(tensor.data_type()));
+    library->fill_tensor_uniform(tensor, i);
 }
 
-template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d, bool reinterpret_output_as_3d, typename OutputType, bool is_fused = false, bool run_twice = false>
-TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset,
-                                   GEMMLowpOutputStageInfo output_stage = GEMMLowpOutputStageInfo(), DataType data_type_a = DataType::QASYMM8, DataType data_type_b = DataType::QASYMM8,
-                                   QuantizationInfo b_qinfo = QuantizationInfo(), bool reshape_b_only_on_first_run = false)
+template <typename U>
+void fill_bias_s32(U &&tensor, int i, int32_t min, int32_t max)
 {
+    ARM_COMPUTE_ASSERT(tensor.data_type() == DataType::S32);
+    std::uniform_int_distribution<int32_t> distribution(min, max);
+    library->fill(tensor, distribution, i);
+}
+
+/** Information about how to fill tensors */
+struct TensorFillInfo
+{
+    // Bias fill range. Default values are arbitrary
+    int32_t min_bias {-20000};
+    int32_t max_bias {20000};
+    // Optional extra hash to randomize tensor filling
+    int32_t hash     {0};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d, bool reinterpret_output_as_3d, typename OutputType, bool is_fused = false, bool run_twice = false>
+TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo,
+                                   const QuantizationInfo& output_qinfo, DataType data_type_a = DataType::QASYMM8, DataType data_type_b = DataType::QASYMM8,
+                                   GEMMLowpOutputStageInfo output_stage = GEMMLowpOutputStageInfo(), bool reshape_b_only_on_first_run = false, const TensorFillInfo& finfo = TensorFillInfo() )
+{
+    ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_a));
+    ARM_COMPUTE_ASSERT(data_type_a == data_type_b);
     // Create tensors
-    DataType data_type_output = output_stage.type == GEMMLowpOutputStageType::NONE ? DataType::S32 : data_type_a;
+    const DataType data_type_output = output_stage.type == GEMMLowpOutputStageType::NONE ? DataType::S32 : data_type_a;
 
-    TensorType a      = create_tensor<TensorType>(shape_a, data_type_a, 1);
-    TensorType b      = create_tensor<TensorType>(shape_b, data_type_b, 1); // gemm output before output stage mismatch if i pass data_layout_output here. to be investigated
-    TensorType output = create_tensor<TensorType>(shape_output, data_type_output, 1);
+    TensorType a      = create_tensor<TensorType>(shape_a, data_type_a, 1, a_qinfo);
+    TensorType b      = create_tensor<TensorType>(shape_b, data_type_b, 1, b_qinfo); // gemm output before output stage mismatch if i pass data_layout_output here. to be investigated
+    TensorType output = create_tensor<TensorType>(shape_output, data_type_output, 1, output_qinfo /* output_qinfo will be ignored when output stage type is None */);
 
-    a.info()->set_quantization_info(QuantizationInfo(1.0f / 255, a_offset));
-
-    if(data_type_b == DataType::QSYMM8_PER_CHANNEL)
-    {
-        b.info()->set_quantization_info(b_qinfo);
-    }
-    else
-    {
-        b.info()->set_quantization_info(QuantizationInfo(1.0f / 255, b_offset));
-    }
     TensorType bias;
     if(is_fused)
     {
@@ -142,26 +111,26 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
     ARM_COMPUTE_ASSERT(!output.info()->is_resizable());
 
     // Fill tensors
-    fill(AccessorType(a), 0);
-    fill(AccessorType(b), 1);
+    fill(AccessorType(a), 0 + finfo.hash);
+    fill(AccessorType(b), 1 + finfo.hash);
 
     if(is_fused)
     {
         ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         bias.allocator()->allocate();
         ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
-        fill(AccessorType(bias), 2);
+        fill_bias_s32(AccessorType(bias), 2 + finfo.hash, finfo.min_bias, finfo.max_bias);
     }
 
     // Run with variable inputs.
     if(run_twice)
     {
         gemmlowp.run();
-        fill(AccessorType(a), 3); // Fill tensors with new seed after run
-        fill(AccessorType(b), 4);
+        fill(AccessorType(a), 3 + finfo.hash); // Fill tensors with new seed after run
+        fill(AccessorType(b), 4 + finfo.hash);
         if(is_fused)
         {
-            fill(AccessorType(bias), 5);
+            fill_bias_s32(AccessorType(bias), 5 + finfo.hash, finfo.min_bias, finfo.max_bias);
         }
     }
 
@@ -171,9 +140,11 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
 }
 
 template <bool reinterpret_input_as_3d, typename TI = uint8_t, typename TW = uint8_t, bool pretranspose_A = false, bool pretranspose_B = false, bool run_twice = false>
-SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset,
-                                                 DataType data_type_a = DataType::QASYMM8, DataType data_type_b = DataType::QASYMM8, QuantizationInfo b_qinfo = QuantizationInfo())
+SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo,
+                                                 DataType data_type_a = DataType::QASYMM8, DataType data_type_b = DataType::QASYMM8, const TensorFillInfo& finfo = TensorFillInfo())
 {
+    ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_a));
+    ARM_COMPUTE_ASSERT(data_type_a == data_type_b);
     TensorShape shape_a_to_use = shape_a;
     if(reinterpret_input_as_3d)
     {
@@ -182,8 +153,8 @@ SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, con
     }
 
     // Create reference
-    SimpleTensor<TI> a{ shape_a_to_use, data_type_a, 1 };
-    SimpleTensor<TW> b{ shape_b, data_type_b, 1, data_type_b == DataType::QSYMM8_PER_CHANNEL ? b_qinfo : QuantizationInfo(1.0f / 255, b_offset) };
+    SimpleTensor<TI> a{ shape_a_to_use, data_type_a, 1, a_qinfo };
+    SimpleTensor<TW> b{ shape_b, data_type_b, 1, b_qinfo };
 
     TensorShape shape_a_to_use_transposed{ shape_a_to_use };
     TensorShape shape_b_transposed{ shape_b };
@@ -193,12 +164,12 @@ SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, con
     shape_b_transposed.set(0, shape_b[1]);
     shape_b_transposed.set(1, shape_b[0]);
 
-    SimpleTensor<TI> a_transposed{ shape_a_to_use_transposed, data_type_a, 1 };
-    SimpleTensor<TW> b_transposed{ shape_b_transposed, data_type_b, 1, data_type_b == DataType::QSYMM8_PER_CHANNEL ? b_qinfo : QuantizationInfo(1.0f / 255, b_offset) };
+    SimpleTensor<TI> a_transposed{ shape_a_to_use_transposed, data_type_a, 1, a_qinfo };
+    SimpleTensor<TW> b_transposed{ shape_b_transposed, data_type_b, 1, b_qinfo };
 
     // Fill reference
-    fill(a, 0);
-    fill(b, 1);
+    fill(a, 0 + finfo.hash);
+    fill(b, 1 + finfo.hash);
 
     // Transpose reference if required
     /* Note: Assuming the usual batch matmul dimensions A = (B x M x K), B = (B x K x N), if pretranspose_A is set to true, then A is assumed to be (B x K x M),
@@ -216,16 +187,18 @@ SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, con
     }
 
     // Run with variable inputs.
+    const int32_t a_offset = a_qinfo.uniform().offset;
+    const int32_t b_offset = b_qinfo.uniform().offset;
     if(run_twice)
     {
         reference::gemmlowp_matrix_multiply_core<int32_t, TI, TW>((pretranspose_A ? a_transposed : a), (pretranspose_B ? b_transposed : b), shape_output, a_offset, b_offset);
-        fill((pretranspose_A) ? a_transposed : a, 3);
-        fill((pretranspose_B) ? b_transposed : b, 4);
+        fill((pretranspose_A) ? a_transposed : a, 3 + finfo.hash);
+        fill((pretranspose_B) ? b_transposed : b, 4 + finfo.hash);
     }
 
     return reference::gemmlowp_matrix_multiply_core<int32_t, TI, TW>((pretranspose_A ? a_transposed : a), (pretranspose_B ? b_transposed : b), shape_output, a_offset, b_offset);
 }
-}
+} // namespace
 
 template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, bool run_twice = false>
 class GEMMLowpMatrixMultiplyCoreValidationFixture : public framework::Fixture
@@ -233,20 +206,22 @@ class GEMMLowpMatrixMultiplyCoreValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset)
     {
-        _target    = compute_target(shape_a, shape_b, shape_output, a_offset, b_offset);
-        _reference = compute_reference(shape_a, shape_b, shape_output, a_offset, b_offset);
+        const auto a_qinfo = QuantizationInfo(1.0f / 255, a_offset);
+        const auto b_qinfo = QuantizationInfo(1.0f / 255, b_offset);
+        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo);
+        _reference = compute_reference(shape_a, shape_b, shape_output, a_qinfo, b_qinfo);
     }
 
 protected:
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset)
+    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo)
     {
-        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, int32_t, false, run_twice>(shape_a, shape_b, shape_output, a_offset,
-                b_offset);
+        const auto output_qinfo = QuantizationInfo(); // No output stage
+        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, int32_t, false, run_twice>(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, output_qinfo);
     }
 
-    SimpleTensor<int32_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset)
+    SimpleTensor<int32_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo)
     {
-        return compute_gemmlowp_reference<reinterpret_input_as_3d, uint8_t, uint8_t, false, false, run_twice>(shape_a, shape_b, shape_output, a_offset, b_offset);
+        return compute_gemmlowp_reference<reinterpret_input_as_3d, uint8_t, uint8_t, false, false, run_twice>(shape_a, shape_b, shape_output, a_qinfo, b_qinfo);
     }
 
     TensorType            _target{};
@@ -257,54 +232,138 @@ template <typename TensorType, typename AccessorType, typename FunctionType, boo
 class GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b,
+    /** Dynamically initialize the quantization info with saturation awareness
+     */
+    template <typename T>
+    static void setup_quantization(DataType data_type, const TensorShape& shape_a, const TensorShape& shape_b, QuantizationInfo& a_qinfo, QuantizationInfo& b_qinfo, QuantizationInfo& output_qinfo, TensorFillInfo& finfo)
+    {
+        // This hash is used by random generators. There may be hash collisions but
+        // this is intentional as it's a very easy way to make the the current
+        // random generation process almost different for many test configurations,
+        // which were using the same set of values before.
+        finfo.hash = shape_a[0] + shape_a[1] + shape_b[0] + shape_b[1];
+
+        const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
+        const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
+
+        std::mt19937                           generator(library->seed() + finfo.hash);
+        std::uniform_real_distribution<float>  distribution_float(-5.0f, 3.0f);
+        std::uniform_int_distribution<int32_t> distribution_t(t_min, t_max);
+
+        const float scale_lhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        const float scale_rhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+
+        const int32_t offset_lhs = distribution_t(generator);
+        const int32_t offset_rhs = distribution_t(generator);
+
+        a_qinfo = QuantizationInfo(scale_lhs, offset_lhs);
+        b_qinfo = QuantizationInfo(scale_rhs, offset_rhs);
+
+        // reinterpret_input_as_3d or reinterpret_output_as_3d can be ignored, as the underlying gemm / matmul computation
+        // is equivalent to a standard 2D one with m-n-k dimensions
+        const int m = shape_a.y();
+        const int n = shape_b.x();
+        const int k = shape_a.x();
+
+        const float bias_fraction = 0.5f; // We enabled is_fused in compute_gemmlowp_target below, thus bias is included
+
+        QuantizationHint q_hint = suggest_matmul_dst_q_info_and_bias(a_qinfo, b_qinfo, m, n, k, data_type, bias_fraction);
+        output_qinfo            = q_hint.q_info;
+        finfo.min_bias          = q_hint.bias_min;
+        finfo.max_bias          = q_hint.bias_max;
+
+        // Both target and reference implementations use negated offsets, i.e.
+        //      float_val = (int_val + offset) * scale
+        // instead of
+        //      float_val = (int_val - offset) * scale
+        // as usual. Therefore, after calculating the output quantization above, we
+        // negate the offsets of inputs' offsets.
+        a_qinfo = QuantizationInfo(scale_lhs, -offset_lhs);
+        b_qinfo = QuantizationInfo(scale_rhs, -offset_rhs);
+    }
+
+    /** Initialize output stage info from quantization info */
+    static Status init_gemmlowp_output_stage_info(
+                                        DataType                data_type,
+                                        const QuantizationInfo& a_qinfo,
+                                        const QuantizationInfo& b_qinfo,
+                                        const QuantizationInfo& output_qinfo,
+                                        GEMMLowpOutputStageType type,
+                                        GEMMLowpOutputStageInfo &gemmlowp_output_stage_info)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(!is_data_type_quantized_asymmetric(data_type));
+
+        const UniformQuantizationInfo aq_unif   = a_qinfo.uniform();
+        const UniformQuantizationInfo bq_unif   = b_qinfo.uniform();
+        const UniformQuantizationInfo oq_unif   = output_qinfo.uniform();
+
+        float   multiplier = (aq_unif.scale * bq_unif.scale) / oq_unif.scale;
+        int32_t int_multiplier;
+        int32_t shift;
+
+        ARM_COMPUTE_RETURN_ON_ERROR(
+            quantization::calculate_quantized_multiplier(multiplier, &int_multiplier, &shift));
+
+        int32_t type_min             = 0;
+        int32_t type_max             = 0;
+        std::tie(type_min, type_max) = quantization::get_quantized_asymmetric_output_min_max(output_qinfo, ActivationLayerInfo(), data_type);
+
+        gemmlowp_output_stage_info.gemmlowp_real_multiplier = multiplier;
+        gemmlowp_output_stage_info.gemmlowp_multiplier = int_multiplier;
+        gemmlowp_output_stage_info.gemmlowp_multipliers = { int_multiplier };
+        gemmlowp_output_stage_info.gemmlowp_shift      = shift;
+        gemmlowp_output_stage_info.gemmlowp_shifts     = { shift };
+        gemmlowp_output_stage_info.gemmlowp_offset     = oq_unif.offset;
+        gemmlowp_output_stage_info.type                = type;
+        gemmlowp_output_stage_info.gemmlowp_min_bound  = type_min;
+        gemmlowp_output_stage_info.gemmlowp_max_bound  = type_max;
+
+        return Status{};
+    }
+
+    /** Currently this fixture only tests the following data type configurations:
+     *
+     * 1. a and b are of the same data type
+     * 2. The data type is quantized asymmetric
+     *
+     */
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, GEMMLowpOutputStageType output_stage_type, DataType data_type,
                bool reshape_b_only_on_first_run)
     {
-        ARM_COMPUTE_ASSERT(output_stage.type != GEMMLowpOutputStageType::NONE);
-        DataType data_type_a = data_type_b == DataType::QASYMM8_SIGNED ? DataType::QASYMM8_SIGNED : DataType::QASYMM8;
+        ARM_COMPUTE_ASSERT(output_stage_type != GEMMLowpOutputStageType::NONE);
+        ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type));
 
-        if(data_type_b == DataType::QSYMM8_PER_CHANNEL)
-        {
-            output_stage.is_quantized_per_channel              = true;
-            const size_t                          num_channels = shape_b[0];
-            std::vector<float>                    scales(num_channels);
-            std::uniform_real_distribution<float> distribution(0.f, 1.f);
-            library->fill(scales, distribution, 0);
-            output_stage.gemmlowp_multipliers.resize(num_channels);
-            output_stage.gemmlowp_shifts.resize(num_channels);
-            for(size_t i = 0; i < num_channels; ++i)
-            {
-                quantization::calculate_quantized_multiplier(scales[i], &output_stage.gemmlowp_multipliers[i], &output_stage.gemmlowp_shifts[i]);
-            }
+        // Randomized dynamic quantization: randomize quantization info in a way that ensures no result saturation
+        // most of the time
+        QuantizationInfo a_qinfo;
+        QuantizationInfo b_qinfo;
+        QuantizationInfo output_qinfo;
+        TensorFillInfo finfo;
+        setup_quantization<TI>(data_type, shape_a, shape_b, a_qinfo, b_qinfo, output_qinfo, finfo);
 
-            _reference = compute_reference(shape_a, shape_b, shape_output, a_offset, 0, output_stage, data_type_a, data_type_b, QuantizationInfo(scales));
-            _target    = compute_target(shape_a, shape_b, shape_output, a_offset, 0, output_stage, data_type_a, data_type_b, QuantizationInfo(scales), reshape_b_only_on_first_run);
-        }
-        else
-        {
-            _reference = compute_reference(shape_a, shape_b, shape_output, a_offset, b_offset, output_stage, data_type_a, data_type_b, QuantizationInfo());
-            _target    = compute_target(shape_a, shape_b, shape_output, a_offset, b_offset, output_stage, data_type_a, data_type_b, QuantizationInfo(), reshape_b_only_on_first_run);
-        }
+        GEMMLowpOutputStageInfo output_stage;
+        init_gemmlowp_output_stage_info(data_type, a_qinfo, b_qinfo, output_qinfo, output_stage_type, output_stage);
+
+        _reference = compute_reference(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type, data_type, output_stage, finfo);
+        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, output_qinfo, data_type, data_type, output_stage, reshape_b_only_on_first_run, finfo);
     }
 
 protected:
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage,
-                              DataType data_type_a, DataType data_type_b, QuantizationInfo b_qinfo, bool reshape_b_only_on_first_run = false)
+    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, const QuantizationInfo& output_qinfo,
+                              DataType data_type_a, DataType data_type_b, const GEMMLowpOutputStageInfo& output_stage, bool reshape_b_only_on_first_run = false, const TensorFillInfo& finfo = TensorFillInfo())
     {
-        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, qasymm8_t, true, run_twice>(shape_a, shape_b, shape_output, a_offset,
-                b_offset,
-                output_stage, data_type_a, data_type_b, b_qinfo, reshape_b_only_on_first_run);
+        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, qasymm8_t, true, run_twice>(shape_a, shape_b, shape_output, a_qinfo,
+                b_qinfo, output_qinfo, data_type_a, data_type_b, output_stage, reshape_b_only_on_first_run, finfo);
     }
 
-    SimpleTensor<TI> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset,
-                                       GEMMLowpOutputStageInfo output_stage, DataType data_type_a, DataType data_type_b, QuantizationInfo b_qinfo)
+    SimpleTensor<TI> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo,
+                                       DataType data_type_a, DataType data_type_b, const GEMMLowpOutputStageInfo& output_stage, const TensorFillInfo& finfo = TensorFillInfo())
     {
-        SimpleTensor<int32_t> output = compute_gemmlowp_reference<reinterpret_input_as_3d, TI, TW, false, false, run_twice>(shape_a, shape_b, shape_output, a_offset, b_offset, data_type_a, data_type_b,
-                                                                                                                            b_qinfo);
+        SimpleTensor<int32_t> output = compute_gemmlowp_reference<reinterpret_input_as_3d, TI, TW, false, false, run_twice>(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, finfo);
 
         TensorShape           bias_shape(shape_b[0]);
         SimpleTensor<int32_t> bias{ bias_shape, DataType::S32, 1 };
-        (run_twice) ? fill(bias, 5) : fill(bias, 2); // Fill bias with same seed as last run of gemmlowp_target
+        (run_twice) ? fill_bias_s32(bias, 5 + finfo.hash, finfo.min_bias, finfo.max_bias) : fill_bias_s32(bias, 2 + finfo.hash, finfo.min_bias, finfo.max_bias); // Fill bias with same seed as last run of gemmlowp_target
 
         switch(output_stage.type)
         {
@@ -330,10 +389,10 @@ class GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture : public
     GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW>
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, GEMMLowpOutputStageType output_stage_type, DataType data_type)
     {
         GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW>::setup(shape_a, shape_b,
-                shape_output, a_offset, b_offset, output_stage, data_type_b, false);
+                shape_output, output_stage_type, data_type, false /* reshape_b_only_on_first_run */);
     }
 };
 
@@ -2076,4 +2135,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMMLOWP_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_GEMMLOWPFIXTURE_H

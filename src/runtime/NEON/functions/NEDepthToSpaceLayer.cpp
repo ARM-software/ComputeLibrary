@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,15 +25,20 @@
 #include "arm_compute/runtime/NEON/functions/NEDepthToSpaceLayer.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 
 namespace arm_compute
 {
+NEDepthToSpaceLayer::NEDepthToSpaceLayer() : _kernel{}
+{
+}
+
+NEDepthToSpaceLayer::~NEDepthToSpaceLayer() = default;
+
 void NEDepthToSpaceLayer::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
@@ -47,4 +52,10 @@ Status NEDepthToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo
 {
     return NEDepthToSpaceLayerKernel::validate(input, output, block_shape);
 }
+
+void NEDepthToSpaceLayer::run()
+{
+    NEScheduler::get().schedule(_kernel.get(), _kernel->get_split_dimension());
+}
+
 } // namespace arm_compute

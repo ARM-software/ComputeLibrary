@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,9 @@ namespace arm_compute
 {
 namespace cpu
 {
+/// TODO: (COMPMID-6505) Similar to Neon(TM), this implementation be converted to
+/// a single kernel that performs softmax operation. Leaving the SVE2 code here for
+/// future references. Implementation for Neon(TM) is introduced in COMPMID-6500
 template <typename ScalarType>
 void sve2_softmax_logits_1d_quantized(
     const ITensor *in, const ITensor *max, void *const tmp, ITensor *out, float beta, bool is_log, const Window &window)
@@ -205,20 +208,5 @@ void sve2_softmax_logits_1d_quantized(
         },
         in_it, max_it, out_it);
 }
-
-template void sve2_softmax_logits_1d_quantized<qasymm8_signed_t>(const ITensor *in,
-                                                                 const ITensor *max,
-                                                                 void *const    tmp,
-                                                                 ITensor       *out,
-                                                                 float          beta,
-                                                                 bool           is_log,
-                                                                 const Window  &window);
-template void sve2_softmax_logits_1d_quantized<qasymm8_t>(const ITensor *in,
-                                                          const ITensor *max,
-                                                          void *const    tmp,
-                                                          ITensor       *out,
-                                                          float          beta,
-                                                          bool           is_log,
-                                                          const Window  &window);
 } // namespace cpu
 } // namespace arm_compute

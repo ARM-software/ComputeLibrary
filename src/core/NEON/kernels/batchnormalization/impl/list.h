@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_BATCH_NORMALIZATION_LIST_H
-#define SRC_CORE_NEON_KERNELS_BATCH_NORMALIZATION_LIST_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_BATCHNORMALIZATION_IMPL_LIST_H
+#define ACL_SRC_CORE_NEON_KERNELS_BATCHNORMALIZATION_IMPL_LIST_H
 
 namespace arm_compute
 {
@@ -37,8 +37,23 @@ DECLARE_BATCH_NORMALIZATION_KERNEL(fp16_sve_batch_normalization);
 DECLARE_BATCH_NORMALIZATION_KERNEL(fp32_neon_batch_normalization);
 DECLARE_BATCH_NORMALIZATION_KERNEL(fp32_sve_batch_normalization);
 
-#undef DECLARE_ACTIVATION_KERNEL
+#define DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(func_name)                                                         \
+    void func_name(const Window &window, ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, \
+                   const ITensor *beta, const ITensor *gamma, float epsilon, ActivationLayerInfo act_info)
+
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp16_batch_normalization_nchw_non_fused);
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp32_batch_normalization_nchw_non_fused);
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp16_batch_normalization_nchw_non_fused_relu);
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp16_batch_normalization_nchw_non_fused_brelu);
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp16_batch_normalization_nchw_non_fused_lubrelu);
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp32_batch_normalization_nchw_non_fused_relu);
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp32_batch_normalization_nchw_non_fused_brelu);
+DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL(fp32_batch_normalization_nchw_non_fused_lubrelu);
+
+#undef DECLARE_BATCH_NORMALIZATION_KERNEL
+#undef DECLARE_BATCH_NORMALIZATION_NCHW_KERNEL
+
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* SRC_CORE_NEON_KERNELS_BATCH_NORMALIZATION_LIST_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_BATCHNORMALIZATION_IMPL_LIST_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/graph.h"
 
 #include "support/ToolchainSupport.h"
@@ -757,7 +758,8 @@ private:
                                   std::move(conv_16_2_class_pre), std::move(conv_17_2_class_pre))
                           .set_name("ClassPrediction/concat");
 
-        const QuantizationInfo logistic_out_qinfo = QuantizationInfo(0.00390625f, 0);
+        const QuantizationInfo logistic_out_qinfo = QuantizationInfo(
+            0.00390625f, quantization::get_min_max_values_from_quantized_data_type(common_params.data_type).first);
         class_pred << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
                                       logistic_out_qinfo)
                           .set_name("ClassPrediction/logistic");

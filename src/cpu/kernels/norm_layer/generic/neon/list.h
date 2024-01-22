@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#include "arm_compute/core/Helpers.h"
-
-#include "src/cpu/kernels/softmax/generic/sve/impl.h"
-
+#ifndef ACL_SRC_CPU_KERNELS_NORM_LAYER_GENERIC_NEON_LIST_H
+#define ACL_SRC_CPU_KERNELS_NORM_LAYER_GENERIC_NEON_LIST_H
 namespace arm_compute
 {
 namespace cpu
 {
-void sve_qasymm8_logits(const ITensor *in, ITensor *out, const Window &window)
-{
-    return sve_logits_1d_max<qasymm8_t>(in, out, window);
-}
+
+#define DECLARE_NORMALIZATION_KERNEL(func_name)                                                      \
+    void func_name(const Window &window, const ITensor *in, const ITensor *in_squared, ITensor *out, \
+                   NormalizationLayerInfo ninfo)
+
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float32_4_0_2D);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float32_4_0);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float32_4_1_2D);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float32_4_1);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float32_4_2);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float16_8_0_2D);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float16_8_0);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float16_8_1_2D);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float16_8_1);
+DECLARE_NORMALIZATION_KERNEL(neon_normalize_float16_8_2);
+
+#undef DECLARE_NORMALIZATION_KERNEL
 } // namespace cpu
 } // namespace arm_compute
+#endif // ACL_SRC_CPU_KERNELS_NORM_LAYER_GENERIC_NEON_LIST_H

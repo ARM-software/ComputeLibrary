@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/NormalizationHelpers.h"
@@ -37,6 +38,8 @@
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/norm_layer/generic/neon/impl.h"
+#include "src/cpu/kernels/norm_layer/generic/neon/list.h"
 
 namespace arm_compute
 {
@@ -91,7 +94,6 @@ void NENormalizationLayerKernel::configure(const ITensor         *input,
     _input_squared = input_squared;
     _output        = output;
     _norm_info     = norm_info;
-
     switch (_input->info()->data_type())
     {
         case DataType::F32:
@@ -102,33 +104,33 @@ void NENormalizationLayerKernel::configure(const ITensor         *input,
                 {
                     if (norm_info.type() == NormType::IN_MAP_2D)
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float, 4, 0, true>;
+                        _func = REGISTER_FP32_NEON(cpu::neon_normalize_float32_4_0_2D);
                     }
                     else
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float, 4, 0, false>;
+                        _func = REGISTER_FP32_NEON(cpu::neon_normalize_float32_4_0);
                     }
                     break;
                 }
                 case 1:
                     if (norm_info.type() == NormType::IN_MAP_2D)
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float, 4, 1, true>;
+                        _func = REGISTER_FP32_NEON(cpu::neon_normalize_float32_4_1_2D);
                     }
                     else
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float, 4, 1, false>;
+                        _func = REGISTER_FP32_NEON(cpu::neon_normalize_float32_4_1);
                     }
                     break;
                 case 2:
-                    _func = &NENormalizationLayerKernel::normalize_float<float, 4, 2, false>;
+                    _func = REGISTER_FP32_NEON(cpu::neon_normalize_float32_4_2);
                     break;
                 default:
                     break;
             }
             break;
         }
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
         {
             switch (norm_idx)
@@ -137,33 +139,33 @@ void NENormalizationLayerKernel::configure(const ITensor         *input,
                 {
                     if (norm_info.type() == NormType::IN_MAP_2D)
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float16_t, 8, 0, true>;
+                        _func = REGISTER_FP16_NEON(cpu::neon_normalize_float16_8_0_2D);
                     }
                     else
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float16_t, 8, 0, false>;
+                        _func = REGISTER_FP16_NEON(cpu::neon_normalize_float16_8_0);
                     }
                     break;
                 }
                 case 1:
                     if (norm_info.type() == NormType::IN_MAP_2D)
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float16_t, 8, 1, true>;
+                        _func = REGISTER_FP16_NEON(cpu::neon_normalize_float16_8_1_2D);
                     }
                     else
                     {
-                        _func = &NENormalizationLayerKernel::normalize_float<float16_t, 8, 1, false>;
+                        _func = REGISTER_FP16_NEON(cpu::neon_normalize_float16_8_1);
                     }
                     break;
                 case 2:
-                    _func = &NENormalizationLayerKernel::normalize_float<float16_t, 8, 2, false>;
+                    _func = REGISTER_FP16_NEON(cpu::neon_normalize_float16_8_2);
                     break;
                 default:
                     break;
             }
             break;
         }
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
@@ -171,124 +173,6 @@ void NENormalizationLayerKernel::configure(const ITensor         *input,
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     INEKernel::configure(win);
-}
-
-template <typename T, unsigned int S, unsigned int dim, bool do_2D_norm>
-void NENormalizationLayerKernel::normalize_float(const Window &window)
-{
-    /** SIMD vector tag type. */
-    using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
-
-    Window win(window);
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-    const int  window_step_x  = S;
-
-    Iterator input(_input, win);
-    Iterator input_squared(_input_squared, win);
-    Iterator output(_output, win);
-
-    const int dim_y                      = _input->info()->data_layout() == DataLayout::NCHW ? 1 : 2;
-    const int radius                     = _norm_info.norm_size() / 2;
-    const int input_squared_stride_x     = _input_squared->info()->strides_in_bytes()[0];
-    const int input_squared_stride_slice = _input_squared->info()->strides_in_bytes()[dim];
-    const int input_squared_stride_row   = _input_squared->info()->strides_in_bytes()[dim_y];
-
-    const int max_right  = _input->info()->dimension(dim) - 1;
-    const int max_bottom = _input->info()->dimension(dim_y) - 1;
-
-    const auto coeff_vec = wrapper::vdup_n(static_cast<T>(_norm_info.scale_coeff()), ExactTagType{});
-    const auto beta_vec  = wrapper::vdup_n(static_cast<T>(_norm_info.beta()), ExactTagType{});
-    const auto kappa_vec = wrapper::vdup_n(static_cast<T>(_norm_info.kappa()), ExactTagType{});
-
-    auto sequential_normalization = [&](const int x, const Coordinates &id, const int current_row, const int first_row,
-                                        const int last_row, const T *input_ptr, const uint8_t *input_squared_start_ptr,
-                                        T *output_ptr)
-    {
-        const int current_slice = dim == 0 ? x : id[dim];
-        const int first_slice   = std::max(current_slice - radius, 0);
-        const int last_slice    = std::min(current_slice + radius, max_right);
-
-        const uint8_t *const input_squared_x_ptr = input_squared_start_ptr + x * input_squared_stride_x;
-        // Accumulate 2D In-Map values
-        auto accu = static_cast<T>(0.f);
-        for (int j = first_row; j <= last_row; ++j)
-        {
-            // Compute row displacement
-            const uint8_t *const input_squared_ptr = input_squared_x_ptr + (j - current_row) * input_squared_stride_row;
-            for (int i = first_slice; i <= last_slice; ++i)
-            {
-                accu +=
-                    *reinterpret_cast<const T *>(input_squared_ptr + (i - current_slice) * input_squared_stride_slice);
-            }
-        }
-
-        // Normalize
-        const auto normalized = std::pow(
-            accu * static_cast<T>(_norm_info.scale_coeff()) + static_cast<T>(_norm_info.kappa()), _norm_info.beta());
-        const auto normalized_pixel = (*(input_ptr + x)) / normalized;
-        *(output_ptr + x)           = normalized_pixel;
-    };
-
-    execute_window_loop(
-        win,
-        [&](const Coordinates &id)
-        {
-            const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
-            auto       output_ptr = reinterpret_cast<T *>(output.ptr());
-
-            // Get range to normalize
-            const int current_row = do_2D_norm ? id[dim_y] : 0;
-            const int first_row   = do_2D_norm ? std::max(current_row - radius, 0) : 0;
-            const int last_row    = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
-
-            int x = window_start_x;
-            // Compute serially starting elements for the case x dimension is width
-            for (; x < radius && x < window_end_x && dim == 0; ++x)
-            {
-                sequential_normalization(x, id, current_row, first_row, last_row, input_ptr, input_squared.ptr(),
-                                         output_ptr);
-            }
-
-            // Compute vectorized
-            for (; x <= window_end_x - window_step_x - radius; x += window_step_x)
-            {
-                const int current_slice = dim == 0 ? x : id[dim];
-                const int first_slice   = std::max(current_slice - radius, 0);
-                const int last_slice    = std::min(current_slice + radius, max_right);
-
-                const uint8_t *const input_squared_x_ptr = input_squared.ptr() + x * input_squared_stride_x;
-                // Accumulate 2D In-Map values
-                auto accu = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
-                for (int j = first_row; j <= last_row; ++j)
-                {
-                    // Compute row displacement
-                    const uint8_t *const input_squared_ptr =
-                        input_squared_x_ptr + (j - current_row) * input_squared_stride_row;
-                    for (int i = first_slice; i <= last_slice; ++i)
-                    {
-                        accu = wrapper::vadd(
-                            accu, wrapper::vloadq(reinterpret_cast<const T *>(
-                                      input_squared_ptr + (i - current_slice) * input_squared_stride_slice)));
-                    }
-                }
-
-                // Normalize
-                const auto normalized       = wrapper::vpow(wrapper::vmla(kappa_vec, coeff_vec, accu), beta_vec);
-                const auto normalized_pixel = wrapper::vmul(wrapper::vloadq(input_ptr + x), wrapper::vinv(normalized));
-                wrapper::vstore(reinterpret_cast<T *>(output_ptr + x), normalized_pixel);
-            }
-
-            // Compute left-over elements
-            for (; x < window_end_x; ++x)
-            {
-                sequential_normalization(x, id, current_row, first_row, last_row, input_ptr, input_squared.ptr(),
-                                         output_ptr);
-            }
-        },
-        input, input_squared, output);
 }
 
 Status NENormalizationLayerKernel::validate(const ITensorInfo           *input,
@@ -309,6 +193,6 @@ void NENormalizationLayerKernel::run(const Window &window, const ThreadInfo &inf
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
     // Run function
-    (this->*_func)(window);
+    (*_func)(window, _input, _input_squared, _output, _norm_info);
 }
 } // namespace arm_compute

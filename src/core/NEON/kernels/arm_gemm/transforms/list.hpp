@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,7 @@
 #include "a64_transpose_interleave_32_2x2.hpp"
 #include "a64_transpose_interleave_4_1x16.hpp"
 #include "a64_transpose_interleave_4_1x4.hpp"
+#include "a64_transpose_interleave_4_2x4_fp32bf16.hpp"
 #include "a64_transpose_interleave_48.hpp"
 #include "a64_transpose_interleave_64.hpp"
 #include "a64_transpose_interleave_96.hpp"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,30 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-#include "arm_compute/core/Helpers.h"
 
-#include "src/cpu/CpuTypes.h"
-#include "src/cpu/kernels/softmax/generic/sve/impl.h"
+#ifndef ACL_SRC_CPU_KERNELS_DEPTH_TO_SPACE_LIST_H
+#define ACL_SRC_CPU_KERNELS_DEPTH_TO_SPACE_LIST_H
+
+#include <cstdint>
+
 namespace arm_compute
 {
 namespace cpu
 {
-void sve_fp16_softmax(const ITensor *in,
-                      const ITensor *max,
-                      void *const    tmp,
-                      ITensor       *out,
-                      const float    beta,
-                      bool           is_log,
-                      const Window  &window)
-{
-    return sve_softmax_logits_1d_float<float16_t>(in, max, tmp, out, beta, is_log, window);
-}
 
-void sve_fp16_logits(const ITensor *in, ITensor *out, const Window &window)
-{
-    return sve_logits_1d_max<float16_t>(in, out, window);
-}
+#define DECLARE_DEPTHTOSPACE_KERNEL(func_name)                                                                     \
+    void func_name(const uint8_t *src, uint8_t *dst, const uintptr_t src_shape[4], const uintptr_t src_strides[4], \
+                   const uintptr_t dst_strides[4], uintptr_t element_size, uintptr_t block_size)
+
+DECLARE_DEPTHTOSPACE_KERNEL(depth_to_space_nhwc_any);
+DECLARE_DEPTHTOSPACE_KERNEL(depth_to_space_nchw_any);
+
+#undef DECLARE_DEPTHTOSPACE_KERNEL
+
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
+
+#endif // ACL_SRC_CPU_KERNELS_DEPTH_TO_SPACE_LIST_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,20 +29,17 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_qasymm8_signed_softmax(const ITensor *in,
-                                 const ITensor *max,
-                                 void *const    tmp,
-                                 ITensor       *out,
-                                 const float    beta,
-                                 bool           is_log,
-                                 const Window  &window)
+template <bool IS_LOG>
+void neon_qasymm8_signed_softmax(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window)
 {
-    return neon_softmax_logits_1d_quantized<qasymm8_signed_t>(in, max, tmp, out, beta, is_log, window);
+    return neon_softmax_quantized<qasymm8_signed_t, IS_LOG>(in, tmp, out, beta, window);
 }
 
-void neon_qasymm8_singed_logits(const ITensor *in, ITensor *out, const Window &window)
-{
-    return neon_logits_1d_max<qasymm8_signed_t>(in, out, window);
-}
+template void neon_qasymm8_signed_softmax<true>(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window);
+template void neon_qasymm8_signed_softmax<false>(
+    const ITensor *in, void *const tmp, ITensor *out, const float beta, const Window &window);
+
 } // namespace cpu
 } // namespace arm_compute

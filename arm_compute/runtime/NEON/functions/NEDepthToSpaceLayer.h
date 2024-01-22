@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,25 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEDEPTHTOSPACELAYER_H
-#define ARM_COMPUTE_NEDEPTHTOSPACELAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHTOSPACELAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHTOSPACELAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
 class ITensorInfo;
+class NEDepthToSpaceLayerKernel;
 
 /** Basic function to run @ref NEDepthToSpaceLayerKernel. */
-class NEDepthToSpaceLayer : public INESimpleFunctionNoBorder
+class NEDepthToSpaceLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEDepthToSpaceLayer() = default;
+    NEDepthToSpaceLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDepthToSpaceLayer(const NEDepthToSpaceLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -49,7 +51,7 @@ public:
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
     NEDepthToSpaceLayer &operator=(NEDepthToSpaceLayer &&) = delete;
     /** Default destructor */
-    ~NEDepthToSpaceLayer() = default;
+    ~NEDepthToSpaceLayer();
     /** Set the input and output tensors.
      *
      * Valid data layouts:
@@ -75,6 +77,11 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape);
+
+    void run() override;
+
+private:
+    std::unique_ptr<NEDepthToSpaceLayerKernel> _kernel;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEDEPTHTOSPACELAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHTOSPACELAYER_H

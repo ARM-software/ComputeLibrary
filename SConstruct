@@ -62,8 +62,14 @@ def read_build_config_json(build_config):
 
 def update_data_type_layout_flags(env, data_types, data_layouts):
     # Manage data-types
-    if any(i in data_types for i in ['all', 'fp16']):
-        env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS'])
+    if env['multi_isa']:
+        if  any(i in data_types for i in ['all', 'fp16']):
+            env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS', '-DARM_COMPUTE_ENABLE_FP16'])
+    else:
+            if not 'v8a' in env['arch'] and not 'v7a' in env['arch'] and not 'armv8r64' in env['arch']:
+                if  any(i in data_types for i in ['all', 'fp16']):
+                    env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS','-DARM_COMPUTE_ENABLE_FP16'])
+
     if any(i in data_types for i in ['all', 'fp32']):
         env.Append(CXXFLAGS = ['-DENABLE_FP32_KERNELS'])
     if any(i in data_types for i in ['all', 'qasymm8']):
@@ -112,7 +118,7 @@ vars.AddVariables(
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     BoolVariable("high_priority", "Generate a library containing only the high priority operators", False),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
-    PathVariable("external_tests_dir", """Add examples, benchmarks and tests to the tests suite from an external path. In order to use this option, the external tests directory must have the following structure: 
+    PathVariable("external_tests_dir", """Add examples, benchmarks and tests to the tests suite from an external path. In order to use this option, the external tests directory must have the following structure:
     EXTERNAL_TESTS_DIR:
     └── tests
         ├── benchmark
@@ -240,7 +246,6 @@ env.Append(CXXFLAGS = ['-DARCH_ARM',
 if not 'windows' in env['os']:
     env.Append(CXXFLAGS = ['-Wall','-std=c++14', '-pedantic' ])
 
-env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
 cpp_tool = {'linux': 'g++', 'android' : 'clang++',
              'tizen': 'g++', 'macos':'clang++',
@@ -312,8 +317,7 @@ if env['multi_isa']:
         Exit(1)
 
     if 'v8a' in env['arch']:
-        print("INFO: multi_isa armv8-a architecture build doesn't enable __ARM_FEATURE_FP16_VECTOR_ARITHMETIC. Use armv8.2-a or beyond to enable FP16 vector arithmetic support")
-        env.Append(CXXFLAGS = ['-march=armv8-a']) # note: this will disable fp16 extension __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        env.Append(CXXFLAGS = ['-march=armv8-a'])
     else:
         if 'v8.6-a' in env['arch']:
             if "disable_mmla_fp" not in env['custom_options']:
@@ -536,7 +540,7 @@ if env['standalone']:
     if not 'windows' in env['os']:
         env.Append(CXXFLAGS = ['-fPIC'])
         env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
-       
+
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
 
@@ -597,7 +601,7 @@ if env['debug']:
     else:
         env.Append(CXXFLAGS = ['-Z7','-MTd','-fms-compatibility','-fdelayed-template-parsing'])
         env.Append(LINKFLAGS = ['-DEBUG'])
- 
+
     env.Append(CPPDEFINES = ['ARM_COMPUTE_DEBUG_ENABLED'])
 else:
     if not 'windows' in env['os']:

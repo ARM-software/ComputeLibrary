@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "src/core/NEON/SVEMath.h"
+#include "src/cpu/kernels/lut/list.h"
 
 #include <arm_sve.h>
 #include <cmath>
@@ -138,6 +139,32 @@ void sve_fp16_activation(const ITensor *src, ITensor *dst, const ActivationLayer
                 pg = svwhilelt_b16(x, window_end_x);
 
             } while (svptest_any(svptrue_b16(), pg));
+        },
+        input, output);
+}
+
+void sve_fp16_activation_lut(const ITensor             *src,
+                             ITensor                   *dst,
+                             const ActivationLayerInfo &act_info,
+                             const Window              &window)
+{
+    ARM_COMPUTE_ERROR_ON(src->info()->data_type() != DataType::F16);
+    const auto window_start_x = window.x().start();
+    const auto window_end_x   = window.x().end();
+    const auto size           = window_end_x - window_start_x;
+    Window     win_collapsed  = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
+    execute_window_loop(
+        win_collapsed,
+        [&](const Coordinates &)
+        {
+            const auto input_ptr  = reinterpret_cast<const uint16_t *>(input.ptr());
+            auto       output_ptr = reinterpret_cast<uint16_t *>(output.ptr());
+            lut_u16_sve(reinterpret_cast<const uint16_t *>(act_info.lut_fp16().data()), 1U /* num_strings (UNUSED) */,
+                        size, input_ptr + window_start_x, output_ptr + window_start_x);
         },
         input, output);
 }

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG
-#define SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG
+#ifndef ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG_H
+#define ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG_H
 
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -85,7 +85,9 @@ private:
     std::array<T, 3> _configs;
 };
 
-/** Basic interface for the matmul native kernel configuration */
+/** Basic interface for the matmul native kernel configuration
+ *  This is the base class that chooses architecture specific kernel configurations.
+*/
 class IClMatMulNativeKernelConfig
 {
 public:
@@ -112,4 +114,4 @@ protected:
 };
 } // namespace cl_matmul
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG */
+#endif // ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG_H

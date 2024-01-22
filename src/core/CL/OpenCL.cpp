@@ -132,6 +132,10 @@ bool CLSymbols::load(const std::vector<std::string> &libraries_filenames, bool u
     func_name##_ptr = reinterpret_cast<decltype(func_name) *>(dlsym(handle, #func_name));
 #endif /* __ANDROID__ */
 
+#define LOAD_EXTENSION_FUNCTION_PTR(func_name, platform_id) \
+    func_name##_ptr =                                       \
+        reinterpret_cast<decltype(func_name) *>(clGetExtensionFunctionAddressForPlatform(platform_id, #func_name));
+
     LOAD_FUNCTION_PTR(clCreateContext, handle);
     LOAD_FUNCTION_PTR(clCreateContextFromType, handle);
     LOAD_FUNCTION_PTR(clCreateCommandQueue, handle);
@@ -181,8 +185,27 @@ bool CLSymbols::load(const std::vector<std::string> &libraries_filenames, bool u
     LOAD_FUNCTION_PTR(clWaitForEvents, handle);
     LOAD_FUNCTION_PTR(clCreateImage, handle);
     LOAD_FUNCTION_PTR(clSetKernelExecInfo, handle);
+    LOAD_FUNCTION_PTR(clGetExtensionFunctionAddressForPlatform, handle);
+
+    // Load Extensions
+
+    // Number of platforms is assumed to be 1. For this to be greater than 1,
+    // the system must have more than one OpenCL implementation provided by
+    // different vendors. This is not our use case. Besides, the library
+    // already assumes one implementation as it uses one handle to load core
+    // functions.
+    constexpr unsigned int      num_platforms = 1U;
+    std::vector<cl_platform_id> platform_ids(num_platforms);
+    clGetPlatformIDs(num_platforms, platform_ids.data(), nullptr);
 
     // Command buffer and mutable dispatch command buffer extensions
+    /// TODO: (COMPMID-6742) Load Command Buffer extensions in a Portable way
+    /// using clGetExtensionFunctionAddressForPlatform().
+    /// The details can be found here:
+    ///    https://registry.khronos.org/OpenCL/specs/3.0-unified/html/OpenCL_Ext.html#getting-opencl-api-extension-function-pointers
+    ///
+    /// @note: There are some problems reported while loading these extensions in the recommended way.
+    ///        For details, please see COMPUTE-16545
     LOAD_FUNCTION_PTR(clCreateCommandBufferKHR, handle);
     LOAD_FUNCTION_PTR(clRetainCommandBufferKHR, handle);
     LOAD_FUNCTION_PTR(clReleaseCommandBufferKHR, handle);
@@ -193,9 +216,10 @@ bool CLSymbols::load(const std::vector<std::string> &libraries_filenames, bool u
     LOAD_FUNCTION_PTR(clUpdateMutableCommandsKHR, handle);
 
     // Third-party extensions
-    LOAD_FUNCTION_PTR(clImportMemoryARM, handle);
+    LOAD_EXTENSION_FUNCTION_PTR(clImportMemoryARM, platform_ids[0]);
 
 #undef LOAD_FUNCTION_PTR
+#undef LOAD_EXTENSION_FUNCTION_PTR
 
     //Don't call dlclose(handle) or all the symbols will be unloaded !
 
@@ -1061,6 +1085,19 @@ clSetKernelExecInfo(cl_kernel kernel, cl_kernel_exec_info param_name, size_t par
     {
         return CL_OUT_OF_RESOURCES;
     }
+}
+
+void *clGetExtensionFunctionAddressForPlatform(cl_platform_id platform, const char *funcname)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clGetExtensionFunctionAddressForPlatform_ptr;
+
+    if (func != nullptr)
+    {
+        return func(platform, funcname);
+    }
+
+    return nullptr;
 }
 
 cl_command_buffer_khr clCreateCommandBufferKHR(cl_uint                                 num_queues,

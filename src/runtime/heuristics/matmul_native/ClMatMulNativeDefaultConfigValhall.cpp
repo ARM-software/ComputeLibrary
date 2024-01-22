@@ -62,6 +62,7 @@ ClMatMulNativeDefaultConfigValhall::configure(const ITensorInfo *lhs, const ITen
     switch (_target)
     {
         case GPUTarget::G715:
+        case GPUTarget::G615:
             func = configs_G715.get_function(lhs->data_type());
             break;
         case GPUTarget::G710:

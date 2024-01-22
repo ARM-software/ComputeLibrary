@@ -271,11 +271,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo            *
                         break;
                 }
                 break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
                 num_elems_processed_per_iteration = 1;
                 break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
                 num_elems_processed_per_iteration = 1;
                 break;

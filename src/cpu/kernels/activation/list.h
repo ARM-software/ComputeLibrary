@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_ACTIVATION_LIST_H
-#define SRC_CORE_NEON_KERNELS_ACTIVATION_LIST_H
+#ifndef ACL_SRC_CPU_KERNELS_ACTIVATION_LIST_H
+#define ACL_SRC_CPU_KERNELS_ACTIVATION_LIST_H
 
 namespace arm_compute
 {
@@ -42,6 +42,7 @@ DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_signed_activation);
 DECLARE_ACTIVATION_KERNEL(neon_qsymm16_activation);
 DECLARE_ACTIVATION_KERNEL(sve2_qsymm16_activation);
 DECLARE_ACTIVATION_KERNEL(sve_fp16_activation);
+DECLARE_ACTIVATION_KERNEL(sve_fp16_activation_lut);
 DECLARE_ACTIVATION_KERNEL(sve_fp32_activation);
 DECLARE_ACTIVATION_KERNEL(neon_fp16_activation);
 DECLARE_ACTIVATION_KERNEL(neon_fp32_activation);
@@ -50,4 +51,4 @@ DECLARE_ACTIVATION_KERNEL(neon_fp32_activation);
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* SRC_CORE_NEON_KERNELS_ACTIVATION_LIST_H */
+#endif // ACL_SRC_CPU_KERNELS_ACTIVATION_LIST_H

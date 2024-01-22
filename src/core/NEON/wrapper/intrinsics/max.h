@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_WRAPPER_MAX_H
-#define ARM_COMPUTE_WRAPPER_MAX_H
+#ifndef ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_MAX_H
+#define ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_MAX_H
 
 #include <arm_neon.h>
 
@@ -59,6 +59,39 @@ VMAX_IMPL(float16_t, float16x8_t, vmaxq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VMAX_IMPL
+
+#if defined(__aarch64__)
+// VMAXV: Across vector max
+#define VMAXV_IMPL(stype, vtype, prefix, postfix) \
+    inline stype vmaxv(const vtype &a)            \
+    {                                             \
+        return prefix##_##postfix(a);             \
+    }
+
+VMAXV_IMPL(uint8_t, uint8x8_t, vmaxv, u8)
+VMAXV_IMPL(int8_t, int8x8_t, vmaxv, s8)
+VMAXV_IMPL(uint16_t, uint16x4_t, vmaxv, u16)
+VMAXV_IMPL(int16_t, int16x4_t, vmaxv, s16)
+VMAXV_IMPL(uint32_t, uint32x2_t, vmaxv, u32)
+VMAXV_IMPL(int32_t, int32x2_t, vmaxv, s32)
+VMAXV_IMPL(float, float32x2_t, vmaxv, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMAXV_IMPL(float16_t, float16x4_t, vmaxv, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+VMAXV_IMPL(uint8_t, uint8x16_t, vmaxvq, u8)
+VMAXV_IMPL(int8_t, int8x16_t, vmaxvq, s8)
+VMAXV_IMPL(uint16_t, uint16x8_t, vmaxvq, u16)
+VMAXV_IMPL(int16_t, int16x8_t, vmaxvq, s16)
+VMAXV_IMPL(uint32_t, uint32x4_t, vmaxvq, u32)
+VMAXV_IMPL(int32_t, int32x4_t, vmaxvq, s32)
+VMAXV_IMPL(float, float32x4_t, vmaxvq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMAXV_IMPL(float16_t, float16x8_t, vmaxvq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+#undef VMAXV_IMPL
+#endif // defined(__aarch64__)
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_WRAPPER_MAX_H */
+#endif // ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_MAX_H

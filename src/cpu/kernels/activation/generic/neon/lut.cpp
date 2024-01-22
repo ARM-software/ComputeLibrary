@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,9 @@ namespace cpu
 #ifdef __aarch64__
 void neon_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON(src->info()->data_type() != DataType::QASYMM8 &&
-                         src->info()->data_type() != DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_ERROR_ON( // LUT does not provide any performance benefit for ReLU as it's a single max() operation
+        (src->info()->data_type() != DataType::QASYMM8 && src->info()->data_type() != DataType::QASYMM8_SIGNED) ||
+        act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU);
     const auto window_end_x  = window.x().end();
     Window     win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));

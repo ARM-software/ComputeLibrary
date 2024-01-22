@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG
-#define SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG
+#ifndef ACL_SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG_H
+#define ACL_SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG_H
 
 #include "src/runtime/heuristics/indirect_conv/ClIndirectConvDefaultConfigValhall.h"
 #include "src/runtime/heuristics/indirect_conv/IClIndirectConvKernelConfig.h"
@@ -50,6 +50,7 @@ public:
             case GPUTarget::MIDGARD:
             case GPUTarget::BIFROST:
             case GPUTarget::VALHALL:
+            case GPUTarget::FIFTHGEN:
                 return std::make_unique<ClIndirectConvDefaultConfigValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
@@ -58,4 +59,4 @@ public:
 };
 } // namespace cl_indirect_conv
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG */
+#endif // ACL_SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG_H

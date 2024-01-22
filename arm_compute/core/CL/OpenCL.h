@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_OPENCL_H
-#define ARM_COMPUTE_OPENCL_H
+#ifndef ACL_ARM_COMPUTE_CORE_CL_OPENCL_H
+#define ACL_ARM_COMPUTE_CORE_CL_OPENCL_H
 
 #include <string>
 #include <utility>
@@ -139,6 +139,7 @@ public:
     DECLARE_FUNCTION_PTR(clWaitForEvents);
     DECLARE_FUNCTION_PTR(clCreateImage);
     DECLARE_FUNCTION_PTR(clSetKernelExecInfo);
+    DECLARE_FUNCTION_PTR(clGetExtensionFunctionAddressForPlatform);
 
     // Command buffer and mutable dispatch command buffer extensions
     DECLARE_FUNCTION_PTR(clCreateCommandBufferKHR);
@@ -159,4 +160,4 @@ private:
     std::pair<bool, bool> _loaded;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_OPENCL_H */
+#endif // ACL_ARM_COMPUTE_CORE_CL_OPENCL_H

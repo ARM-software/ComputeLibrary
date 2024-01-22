@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG
-#define SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG
+#ifndef ACL_SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG_H
+#define ACL_SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG_H
 
 #include "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigBifrost.h"
 #include "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigValhall.h"
@@ -54,6 +54,7 @@ public:
             case GPUTarget::BIFROST:
                 return std::make_unique<ClDWCNativeDefaultConfigBifrost>(gpu);
             case GPUTarget::VALHALL:
+            case GPUTarget::FIFTHGEN:
                 return std::make_unique<ClDWCNativeDefaultConfigValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
@@ -62,4 +63,4 @@ public:
 };
 } // namespace cl_dwc
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG */
+#endif // ACL_SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG_H

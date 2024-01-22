@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,18 +59,16 @@ __kernel void generate_proposals_compute_all_anchors(
     Vector anchors = CONVERT_TO_VECTOR_STRUCT_NO_STEP(anchors);
     Vector rois    = CONVERT_TO_VECTOR_STRUCT(rois);
 
-    const size_t idx = get_global_id(0);
+    const unsigned int idx = get_global_id(0);
     // Find the index of the anchor
-    const size_t anchor_idx = idx % NUM_ANCHORS;
+    const unsigned int anchor_idx = idx % NUM_ANCHORS;
 
     // Find which shift is this thread using
-    const size_t shift_idx = idx / NUM_ANCHORS;
+    const unsigned int shift_idx = idx / NUM_ANCHORS;
 
     // Compute the shift on the X and Y direction (the shift depends exclusively by the index thread id)
-    const DATA_TYPE
-    shift_x = (DATA_TYPE)(shift_idx % WIDTH) * STRIDE;
-    const DATA_TYPE
-    shift_y = (DATA_TYPE)(shift_idx / WIDTH) * STRIDE;
+    const float shift_x = (float)(shift_idx % WIDTH) * STRIDE;
+    const float shift_y = (float)(shift_idx / WIDTH) * STRIDE;
 
     const VEC_DATA_TYPE(DATA_TYPE, NUM_ROI_FIELDS)
     shift = (VEC_DATA_TYPE(DATA_TYPE, NUM_ROI_FIELDS))(shift_x, shift_y, shift_x, shift_y);

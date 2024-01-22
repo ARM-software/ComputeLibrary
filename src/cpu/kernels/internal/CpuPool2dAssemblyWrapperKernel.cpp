@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,11 +79,11 @@ void CpuPool2dAssemblyWrapperKernel::configure(const ITensorInfo      *src,
                 create_arm_pooling<int8_t, int8_t>(src, dst, info, cpu_info);
             }
             break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#if defined(ENABLE_FP16_KERNELS)
         case DataType::F16:
             create_arm_pooling<float16_t, float16_t>(src, dst, info, cpu_info);
             break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif // defined(ENABLE_FP16_KERNELS)
         case DataType::F32:
             create_arm_pooling<float, float>(src, dst, info, cpu_info);
             break;

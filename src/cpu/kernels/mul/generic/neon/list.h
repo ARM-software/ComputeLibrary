@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#include "arm_compute/core/Helpers.h"
-
-#include "src/cpu/kernels/softmax/generic/sve/impl.h"
-
+#ifndef ACL_SRC_CPU_KERNELS_MUL_GENERIC_NEON_LIST_H
+#define ACL_SRC_CPU_KERNELS_MUL_GENERIC_NEON_LIST_H
 namespace arm_compute
 {
 namespace cpu
 {
-void sve_qasymm8_signed_logits(const ITensor *in, ITensor *out, const Window &window)
-{
-    return sve_logits_1d_max<qasymm8_signed_t>(in, out, window);
-}
+#define DECLARE_MUL_KERNEL(func_name) \
+    void func_name(const ITensor *src1, const ITensor *src2, ITensor *out, const Window &window, float scale)
+
+DECLARE_MUL_KERNEL(mul_F32_F32_F32);
+DECLARE_MUL_KERNEL(mul_F16_F16_F16);
+#undef DECLARE_MUL_KERNEL
 } // namespace cpu
 } // namespace arm_compute
+#endif // ACL_SRC_CPU_KERNELS_MUL_GENERIC_NEON_LIST_H

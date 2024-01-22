@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H
-#define ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NEBATCHNORMALIZATIONLAYERKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NEBATCHNORMALIZATIONLAYERKERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
@@ -110,31 +110,19 @@ private:
     /** Configure execution function in case of fused activation **/
     void configure_fused();
 
-    /** Template function to run batch normalization on fp32
-     *
-     * @tparam T                Specialization data type
-     * @tparam fused_activation Boolean that flags if its a fused activation or not
-     * @tparam F                Activation function functor to run
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T, bool fused_activation, typename F>
-    void batch_normalization_nchw(const Window &window);
-    /** Template function to run batch normalization on fp32 on tensors with NHWC format
-     *
-     * @tparam T                Specialization data type
-     * @tparam fused_activation Boolean that flags if its a fused activation or not
-     * @tparam F                Activation function functor to run
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T, bool fused_activation, typename F>
-    void batch_normalization_nhwc(const Window &window);
     /** Common signature for all the batch normalization functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using BatchNormFunctionPtr = void (NEBatchNormalizationLayerKernel::*)(const Window &window);
+    using BatchNormFunctionPtr = void (*)(const Window       &window,
+                                          ITensor            *input,
+                                          ITensor            *output,
+                                          const ITensor      *mean,
+                                          const ITensor      *var,
+                                          const ITensor      *beta,
+                                          const ITensor      *gamma,
+                                          float               epsilon,
+                                          ActivationLayerInfo act_info);
 
 private:
     BatchNormFunctionPtr _func;
@@ -148,4 +136,4 @@ private:
     ActivationLayerInfo  _act_info;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NEBATCHNORMALIZATIONLAYERKERNEL_H

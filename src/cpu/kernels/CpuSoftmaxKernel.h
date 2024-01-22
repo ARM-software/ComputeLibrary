@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_SOFTMAX_KERNEL_H
-#define ARM_COMPUTE_CPU_SOFTMAX_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUSOFTMAXKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUSOFTMAXKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
@@ -33,102 +33,55 @@ namespace cpu
 {
 namespace kernels
 {
-/** Interface for the identifying the max value of 1D Logits */
-class CpuLogits1DMaxKernel : public ICpuKernel<CpuLogits1DMaxKernel>
+/** Interface for softmax computation */
+class CpuSoftmaxKernel : public ICpuKernel<CpuSoftmaxKernel>
 {
 private:
-    using SoftmaxLogits1DMaxKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &)>::type;
+    using SoftmaxKernelPtr =
+        std::add_pointer<void(const ITensor *, void *const, ITensor *, float, const Window &)>::type;
 
 public:
-    CpuLogits1DMaxKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuLogits1DMaxKernel);
-    /** Set the input and output tensors.
-     *
-     * @param[in]  src Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[out] dst Destination tensor info. Data types supported: same as @p input
-     */
-    void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration
-     *
-     * Similar to CpuLogits1DMaxKernel::configure()
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
-
-    // Inherited methods overridden:
-    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
-    const char *name() const override;
-
-    struct SoftmaxLogits1DMaxKernel
-    {
-        const char                  *name;
-        const DataTypeISASelectorPtr is_selected;
-        SoftmaxLogits1DMaxKernelPtr  ukernel;
-    };
-
-    static const std::vector<SoftmaxLogits1DMaxKernel> &get_available_kernels();
-
-private:
-    SoftmaxLogits1DMaxKernelPtr _run_method{nullptr};
-    std::string                 _name{};
-};
-
-/** Interface for softmax computation for QASYMM8 with pre-computed max. */
-template <bool IS_LOG = false>
-class CpuLogits1DSoftmaxKernel : public ICpuKernel<CpuLogits1DSoftmaxKernel<IS_LOG>>
-{
-private:
-    using SoftmaxLogits1DKernelPtr = std::add_pointer<void(
-        const ITensor *, const ITensor *, void *const, ITensor *, float, bool, const Window &)>::type;
-
-public:
-    CpuLogits1DSoftmaxKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuLogits1DSoftmaxKernel);
+    CpuSoftmaxKernel() = default;
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuSoftmaxKernel);
 
     /** Set the input and output tensors.
      *
-     * @param[in]  src  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  max  Max values tensor info. Same shape as input with dimension 0 set to 1.
-     *                  Data types supported: same as @p input.
-     * @param[out] dst  Destination tensor info. Data types supported: same as @p input.
-     * @param[in]  beta A scaling factor for the exponent.
+     * @param[in]  src    Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[out] dst    Destination tensor info. Data types supported: same as @p input.
+     * @param[in]  beta   A scaling factor for the exponent.
+     * @param[in]  is_log True if the operation is log-softmax
      *
      * @param      tmp    Auxiliary tensor info. Must be type F32 and same shape as the input.
      */
-    void
-    configure(const ITensorInfo *src, const ITensorInfo *max, ITensorInfo *dst, const float beta, ITensorInfo *tmp);
+    void configure(const ITensorInfo *src, ITensorInfo *dst, float beta, bool is_log, ITensorInfo *tmp);
     /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to CpuLogits1DSoftmaxKernel::configure()
+     * Similar to CpuSoftmaxKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src,
-                           const ITensorInfo *max,
-                           const ITensorInfo *dst,
-                           const float        beta,
-                           const ITensorInfo *tmp);
+    static Status
+    validate(const ITensorInfo *src, const ITensorInfo *dst, float beta, bool is_log, const ITensorInfo *tmp);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
-    struct SoftmaxLogits1DKernel
+    struct SoftmaxKernel
     {
-        const char                  *name;
-        const DataTypeISASelectorPtr is_selected;
-        SoftmaxLogits1DKernelPtr     ukernel;
+        const char                                   *name;
+        const SoftmaxKernelDataTypeISASelectorDataPtr is_selected;
+        SoftmaxKernelPtr                              ukernel;
     };
 
-    static const std::vector<SoftmaxLogits1DKernel> &get_available_kernels();
+    static const std::vector<SoftmaxKernel> &get_available_kernels();
 
 private:
-    float                    _beta{1.0f};
-    SoftmaxLogits1DKernelPtr _run_method{nullptr};
-    std::string              _name{};
+    float            _beta{1.0f};
+    SoftmaxKernelPtr _run_method{nullptr};
+    std::string      _name{};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_SOFTMAX_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUSOFTMAXKERNEL_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,7 @@ struct NEWinogradConvolutionLayer::Impl
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _impl(std::make_unique<Impl>())
 {
-    _impl->memory_group = MemoryGroup(std::move(memory_manager));
+    _impl->memory_group = MemoryGroup(memory_manager);
 }
 
 NEWinogradConvolutionLayer::~NEWinogradConvolutionLayer() = default;

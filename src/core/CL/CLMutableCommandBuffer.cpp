@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 
+#include "src/common/utils/Log.h"
 #include "src/core/CL/CLUtils.h"
 
 namespace arm_compute
@@ -48,7 +49,11 @@ CLMutableCommandBuffer::CLMutableCommandBuffer(cl_command_queue queue) : CLComma
 CLMutableCommandBuffer::~CLMutableCommandBuffer()
 {
     const auto status = clReleaseCommandBufferKHR(_cb);
-    handle_cl_error("clReleaseCommandBufferKHR", status);
+    if (status != CL_SUCCESS)
+    {
+        const std::string error_message = "clReleaseCommandBufferKHR - Error code: " + std::to_string(status);
+        ARM_COMPUTE_LOG_ERROR_ACL(error_message);
+    }
 }
 
 void CLMutableCommandBuffer::add_kernel(cl_kernel          kernel,

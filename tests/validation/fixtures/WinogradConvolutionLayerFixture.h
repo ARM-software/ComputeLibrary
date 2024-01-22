@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_WINOGRAD_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_WINOGRAD_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_WINOGRADCONVOLUTIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_WINOGRADCONVOLUTIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -229,7 +229,7 @@ protected:
         SimpleTensor<T1> filter_transform_out = reference::winograd_filter_transform<T1>(weights_t1, filter_transform_shape, winograd_info);
         SimpleTensor<T1> batched_gemm         = reference::gemm<T1>(input_transform_out, filter_transform_out, dummy_c, 1.0f, 0.0f);
         SimpleTensor<T1> conv_out             = reference::winograd_output_transform<T1>(batched_gemm, bias_t1, output_transform_shape, winograd_info);
-        SimpleTensor<T>  conv_out_t(std::move(copy_tensor<T, T1>(conv_out)));
+        SimpleTensor<T>  conv_out_t(copy_tensor<T, T1>(conv_out));
         return (act_info.enabled()) ? reference::activation_layer<T>(conv_out_t, act_info) : conv_out_t;
     }
 
@@ -584,4 +584,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_WINOGRAD_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_WINOGRADCONVOLUTIONLAYERFIXTURE_H

@@ -83,17 +83,12 @@ if 'macos' in test_env['os']:
 
 if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
-    Import("arm_compute_core_a")
     Import("arm_compute_graph_a")
-    if env['os']=='windows':
-        test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a])
-    else:
-        test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a, arm_compute_core_a])
+    test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a])
     arm_compute_lib = arm_compute_graph_a
 else:
     Import("arm_compute_graph_so")
-    Import("arm_compute_core_a")
-    test_env.Append(LIBS = ["arm_compute_graph", "arm_compute", "arm_compute_core"])
+    test_env.Append(LIBS = ["arm_compute_graph", "arm_compute"])
     arm_compute_lib = arm_compute_graph_so
 
 if env['os'] in ['bare_metal']:
@@ -189,9 +184,8 @@ if env['fixed_format_kernels'] and test_env['validation_tests']:
     test_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
 
 if test_env['validation_tests']:
-    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework, arm_compute_core_a])
+    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework ])
     Depends(arm_compute_validation_framework , arm_compute_test_framework)
-    Depends(arm_compute_validation_framework , arm_compute_core_a)
 
     program_objects = files_validation + common_objects
     if test_env['os'] == 'bare_metal':

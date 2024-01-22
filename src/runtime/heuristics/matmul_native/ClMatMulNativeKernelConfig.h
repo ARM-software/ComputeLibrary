@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG
-#define SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG
+#ifndef ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG_H
+#define ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG_H
 
 #include "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.h"
 #include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelConfig.h"
@@ -50,6 +50,7 @@ public:
             case GPUTarget::MIDGARD:
             case GPUTarget::BIFROST:
             case GPUTarget::VALHALL:
+            case GPUTarget::FIFTHGEN:
                 return std::make_unique<ClMatMulNativeDefaultConfigValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
@@ -58,4 +59,4 @@ public:
 };
 } // namespace cl_matmul
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG */
+#endif // ACL_SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG_H
