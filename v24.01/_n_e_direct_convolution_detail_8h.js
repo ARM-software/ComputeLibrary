@@ -1,0 +1,28 @@
+var _n_e_direct_convolution_detail_8h =
+[
+    [ "accumulate_results", "_n_e_direct_convolution_detail_8h.xhtml#a707ebe432919e3b95fc164bc682a6a52", null ],
+    [ "accumulate_results", "_n_e_direct_convolution_detail_8h.xhtml#a31dcca2f3a7368cdd24e6a634b51de4b", null ],
+    [ "accumulate_results< 1 >", "_n_e_direct_convolution_detail_8h.xhtml#a8412c50a5db2c94cc74cc899096c3556", null ],
+    [ "accumulate_results< 1 >", "_n_e_direct_convolution_detail_8h.xhtml#ada0c5c8101ce3172ca465bb3ff6843b1", null ],
+    [ "accumulate_results< 2 >", "_n_e_direct_convolution_detail_8h.xhtml#a2e42bf13e98e9df972c85e0789c20917", null ],
+    [ "accumulate_results< 2 >", "_n_e_direct_convolution_detail_8h.xhtml#acf4d4b5e75140c76124c95c0b28b28b7", null ],
+    [ "accumulate_results< 3 >", "_n_e_direct_convolution_detail_8h.xhtml#a81988c246feb5c82855f969e072bce0b", null ],
+    [ "accumulate_results< 3 >", "_n_e_direct_convolution_detail_8h.xhtml#a33b299a9a74e372d06b83c033958d428", null ],
+    [ "convolve_3x3", "_n_e_direct_convolution_detail_8h.xhtml#a3d385d5e688ccef1d42c7d9285fb0d03", null ],
+    [ "convolve_3x3", "_n_e_direct_convolution_detail_8h.xhtml#ab7917579d8077eb6d044b63f675409cd", null ],
+    [ "convolve_3x3_dilation", "_n_e_direct_convolution_detail_8h.xhtml#acd78cf020600423cd03654ca37776f87", null ],
+    [ "convolve_3x3_dilation", "_n_e_direct_convolution_detail_8h.xhtml#a3714766fb92e59c3264d5a981e58d7ee", null ],
+    [ "get_input_num_elems_processed", "_n_e_direct_convolution_detail_8h.xhtml#a17a8ccb1f281296a0ee7eb00693febbd", null ],
+    [ "load_matrix_row", "_n_e_direct_convolution_detail_8h.xhtml#a5db34f1ae85326efebbe1dadb65f0301", null ],
+    [ "load_matrix_row", "_n_e_direct_convolution_detail_8h.xhtml#a87d22164f804124f911636193e4c10e6", null ],
+    [ "single_convolve_3x3_dilation", "_n_e_direct_convolution_detail_8h.xhtml#a703f0d5487e077348c2ac6bce80d9abb", null ],
+    [ "single_convolve_3x3_dilation", "_n_e_direct_convolution_detail_8h.xhtml#ae63552b4bf3d8bda8762cf39c8082ce0", null ],
+    [ "store_results", "_n_e_direct_convolution_detail_8h.xhtml#a1ac67082e6f68cb7ed1939240fb6bdb5", null ],
+    [ "store_results", "_n_e_direct_convolution_detail_8h.xhtml#aa9f26cd83047a111336033fb7466faf1", null ],
+    [ "store_results< 1 >", "_n_e_direct_convolution_detail_8h.xhtml#ad61a01ef06cc3c41e4bb5006d9307687", null ],
+    [ "store_results< 1 >", "_n_e_direct_convolution_detail_8h.xhtml#a143f43b1fb56a8d806145e95d4c3995e", null ],
+    [ "store_results< 2 >", "_n_e_direct_convolution_detail_8h.xhtml#abaf3037739c190361ad3f827d73440a1", null ],
+    [ "store_results< 2 >", "_n_e_direct_convolution_detail_8h.xhtml#af63e34203346681c35b68fcca2026a06", null ],
+    [ "store_results< 3 >", "_n_e_direct_convolution_detail_8h.xhtml#a208468ac4ffbfe19d7fb03402ca927f6", null ],
+    [ "store_results< 3 >", "_n_e_direct_convolution_detail_8h.xhtml#a991bde46f2841422fb98258127305050", null ]
+];

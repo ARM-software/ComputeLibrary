@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_c_l_command_buffer.xhtml" title="Command buffer contains a list of commands that is constructed once and later enqueued multiple times..." alt="" coords="5,31,149,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_compat_command_buffer.xhtml" title="Command buffer implementation for platform without mutable dispatch command buffer extension." alt="" coords="199,5,393,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_mutable_command_buffer.xhtml" title="Command buffer implementaton based on CL mutable dispatch command buffer extension." alt="" coords="197,56,395,83"/>
+</map>

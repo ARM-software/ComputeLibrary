@@ -1,0 +1,4 @@
+<map id="MemoryDescriptor" name="MemoryDescriptor">
+<area shape="rect" id="node1" title="Descriptor of a workload tensor memory." alt="" coords="5,95,148,121"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_aux_memory_info.xhtml" title="Memory information for tensors with MemoryType::Auxiliary." alt="" coords="13,5,140,32"/>
+</map>

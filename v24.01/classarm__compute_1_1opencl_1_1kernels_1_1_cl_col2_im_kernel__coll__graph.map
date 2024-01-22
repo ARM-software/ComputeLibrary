@@ -1,0 +1,6 @@
+<map id="ClCol2ImKernel" name="ClCol2ImKernel">
+<area shape="rect" id="node1" title="Interface for the col2im reshaping kernel." alt="" coords="56,171,179,197"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="5,81,85,108"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="12,5,79,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_size2_d.xhtml" title="Class for specifying the size of an image or rectangle." alt="" coords="109,81,176,108"/>
+</map>

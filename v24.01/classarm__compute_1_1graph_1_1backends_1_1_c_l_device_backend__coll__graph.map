@@ -1,0 +1,4 @@
+<map id="CLDeviceBackend" name="CLDeviceBackend">
+<area shape="rect" id="node1" title="OpenCL device backend." alt="" coords="5,80,144,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml" title="Device backend interface." alt="" coords="11,5,138,32"/>
+</map>

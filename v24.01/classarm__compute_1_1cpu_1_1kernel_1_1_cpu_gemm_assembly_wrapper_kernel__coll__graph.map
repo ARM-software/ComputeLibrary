@@ -1,0 +1,5 @@
+<map id="CpuGemmAssemblyWrapperKernel&lt; TypeInput, TypeOutput &gt;" name="CpuGemmAssemblyWrapperKernel&lt; TypeInput, TypeOutput &gt;">
+<area shape="rect" id="node1" title="This class is a wrapper for the assembly kernels." alt="" coords="5,155,256,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="88,80,173,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="97,5,164,32"/>
+</map>

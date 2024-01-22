@@ -1,7 +1,0 @@
-<map id="CpuLogits1DMaxKernel" name="CpuLogits1DMaxKernel">
-<area shape="rect" id="node1" title="Interface for the identifying the max value of 1D Logits." alt="" coords="27,337,201,364"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="5,247,223,288"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="63,81,155,108"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="130,157,303,184"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="75,5,142,32"/>
-</map>

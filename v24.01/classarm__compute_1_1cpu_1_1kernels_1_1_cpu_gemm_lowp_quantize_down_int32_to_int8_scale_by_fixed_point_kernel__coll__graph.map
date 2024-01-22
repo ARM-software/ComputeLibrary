@@ -1,0 +1,7 @@
+<map id="CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel" name="CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel">
+<area shape="rect" id="node1" title="Kernel used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8_SIGNED." alt="" coords="32,352,285,393"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="5,261,312,303"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="107,81,199,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="175,157,348,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="120,5,187,32"/>
+</map>
