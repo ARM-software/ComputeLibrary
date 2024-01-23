@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -141,8 +141,7 @@ void CpuSoftmaxKernel::configure(const ITensorInfo *src, ITensorInfo *dst, float
     // Tmp auto initialization if not yet initialized and src is quantized
     if (is_quantized_asymmetric)
     {
-        const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : src->data_type();
-        auto_init_if_empty(*tmp, TensorInfo(*src).set_data_type(tmp_data_type).reset_padding());
+        auto_init_if_empty(*tmp, TensorInfo(*src).set_data_type(DataType::F32).reset_padding());
     }
 
     const auto *uk = CpuSoftmaxKernel::get_implementation(
