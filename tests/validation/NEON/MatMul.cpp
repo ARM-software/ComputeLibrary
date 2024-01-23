@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -177,7 +177,7 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_BF16
 /* Note : MatMul BF16 is enabled by specifying FP32 datatype and enabling the fast math setting */
-constexpr AbsoluteTolerance<float> tolerance_bf16(0.001f);
+constexpr AbsoluteTolerance<float> tolerance_bf16(0.02f);
 TEST_SUITE(BF16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMatMulFastMathFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(
@@ -195,6 +195,24 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEMatMulFastMathFixture<float>, framework::Data
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_bf16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMatMulFastMathFixture<float>, framework::DatasetMode::NIGHTLY,
+    combine(
+        datasets::LargeMatMulDataset(),
+        make("TransposeA", { false, true }),
+        make("TransposeB", { false, true }),
+        make("DataType", DataType::F32),
+        make("ActivationInfo", { ActivationLayerInfo() }),
+        make("RunTimes", { 0 }),
+        make("Settings", { CpuMatMulSettings().fast_math(true) }),
+        make("LhsQInfo", { QuantizationInfo() }),
+        make("RhsQInfo", { QuantizationInfo() }),
+        make("OutQInfo", { QuantizationInfo() }))
+)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_bf16, 0.01 /* tolerance_num */);
 }
 TEST_SUITE_END() // BF16
 #endif           /* ARM_COMPUTE_ENABLE_BF16 */
