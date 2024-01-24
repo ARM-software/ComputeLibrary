@@ -166,6 +166,12 @@ public:
     {
     }
 
+    /*** Dequanize scale interface (optional) ***/
+    /* Set the dequantize scale for GEMMs when converting from int to float (float out = scale * float(int out) ) */
+    virtual void set_dequantize_scale(const float)
+    {
+    }
+
     /*** Introspection interface ***/
     /* Get the configuration of this GEMM */
     virtual GemmConfig get_config() = 0;

@@ -53,6 +53,7 @@ namespace
 {
     constexpr AbsoluteTolerance<float> tolerance_batched(1);
     constexpr AbsoluteTolerance<float> tolerance_quant(1);
+    constexpr AbsoluteTolerance<float> tolerance_dequantized(0.01f);
 } // namespace
 
 
@@ -62,6 +63,11 @@ TEST_SUITE(MatrixMultiplyCore)
 
 using NEGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
 using NEGEMMLowpMatrixMultiplyCoreAccumulateFixture = GEMMLowpMatrixMultiplyAccumulateValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
+using NEGEMMLowpBatchedMatMulFixture      = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, true>;
+using NEGEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture = GEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
+using NEGEMMLowpDequantizedMatrixMultiplyValidationFixture = GEMMLowpDequantizedMatrixMultiplyValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
+
+using framework::dataset::make;
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
                shape_a, shape_b, shape_c, a_offset, b_offset)
@@ -336,6 +342,34 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreAccumulateFixture, 
 TEST_SUITE_END() // S32
 TEST_SUITE_END() // ACCUMULATION
 #endif // __arch64__
+
+TEST_SUITE(DynamicQuantization)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // DynamicQuantization
+
+TEST_SUITE(Dequant)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_dequantized);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_dequantized);
+}
+TEST_SUITE_END() // Dequant
 
 TEST_SUITE_END() // MatrixMultiplyCore
 TEST_SUITE_END() // GEMMLowp

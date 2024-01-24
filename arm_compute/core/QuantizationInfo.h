@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_QUANTIZATION_INFO_H
-#define ARM_COMPUTE_QUANTIZATION_INFO_H
+#ifndef ACL_ARM_COMPUTE_CORE_QUANTIZATIONINFO_H
+#define ACL_ARM_COMPUTE_CORE_QUANTIZATIONINFO_H
 
 #include "arm_compute/core/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"
@@ -84,10 +84,12 @@ public:
      *
      * @note Used for asymmetric quantization
      *
-     * @param[in] scale  Scale.
-     * @param[in] offset Offset.
+     * @param[in] scale      Scale.
+     * @param[in] offset     Offset.
+     * @param[in] is_dynamic Whether this QuantizationInfo is dynamic, i.e. the scale and offset may change.
      */
-    QuantizationInfo(float scale, int offset) : _scale(1, scale), _offset(1, offset)
+    QuantizationInfo(float scale, int offset, bool is_dynamic = false)
+        : _scale(1, scale), _offset(1, offset), _is_dynamic(is_dynamic)
     {
     }
     /** Construct quantization info.
@@ -103,10 +105,12 @@ public:
      *
      * @note Used for asymmetric per channel quantization
      *
-     * @param[in] scale  Scale.
-     * @param[in] offset Offset.
+     * @param[in] scale      Scale.
+     * @param[in] offset     Offset.
+     * @param[in] is_dynamic Whether this QuantizationInfo is dynamic, i.e. the scale and offset may change.
      */
-    QuantizationInfo(std::vector<float> scale, std::vector<int32_t> offset) : _scale(scale), _offset(offset)
+    QuantizationInfo(std::vector<float> scale, std::vector<int32_t> offset, bool is_dynamic = false)
+        : _scale(scale), _offset(offset), _is_dynamic(is_dynamic)
     {
     }
     /** Scale vector accessor
@@ -124,6 +128,14 @@ public:
     const std::vector<int32_t> &offset() const
     {
         return _offset;
+    }
+    /** is_dynamic accessor
+     *
+     * @return If true, the scale and offset may change, so operators will need to read on every run
+     */
+    bool is_dynamic() const
+    {
+        return _is_dynamic;
     }
     /** Indicates whether this QuantizationInfo has valid settings or not
      *
@@ -149,6 +161,8 @@ public:
 private:
     std::vector<float>   _scale;  /**< Vector containing scaling factors */
     std::vector<int32_t> _offset; /**< Vector containing zero offsets */
+    bool                 _is_dynamic =
+        false; /**< If true, the scale and offset may change, so operators will need to read on every run */
 };
 
 /** Check whether two quantization info are equal.
@@ -430,6 +444,19 @@ inline float dequantize(uint16_t value, float scale, int32_t offset)
     return (static_cast<int>(value) - offset) * scale;
 }
 
+/** Dequantize a value given a 32-bit asymmetric quantization scheme
+ *
+ * @param[in] value  Value to dequantize
+ * @param[in] scale  Scale to use for dequantization
+ * @param[in] offset Zero-offset to use for dequantization
+ *
+ * @return Dequantized value
+ */
+inline float dequantize(int32_t value, float scale, int32_t offset)
+{
+    return (static_cast<int>(value) - offset) * scale;
+}
+
 /** Quantize a value given a 16-bit symmetric quantization scheme
  *
  * @param[in] value           Value to quantize
@@ -536,6 +563,31 @@ inline float dequantize_qasymm16(uint16_t value, const QuantizationInfo &qinfo)
     return dequantize_qasymm16(value, qinfo.uniform());
 }
 
+/** Dequantize a value given a 32-bit asymmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] qinfo Quantization information to use for dequantizing
+ *
+ * @return Dequantized value
+ */
+inline float dequantize_s32(int32_t value, const UniformQuantizationInfo &qinfo)
+{
+    return (static_cast<int>(value) - qinfo.offset) * qinfo.scale;
+}
+
+/** Dequantize a value given a 32-bit asymmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] qinfo Quantization information to use for dequantizing
+ *
+ * @return Dequantized value
+ */
+
+inline float dequantize_s32(int32_t value, const QuantizationInfo &qinfo)
+{
+    return dequantize_s32(value, qinfo.uniform());
+}
+
 /*
  * In case of requantization of a quantized input tensor to an output tensor with another quantization
  * instead of applying dequantization and then a quantization functions, we just compute new scale and
@@ -581,4 +633,4 @@ inline UniformQuantizationInfo compute_requantization_scale_offset(const Uniform
 }
 
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_QUANTIZATION_INFO_H */
+#endif // ACL_ARM_COMPUTE_CORE_QUANTIZATIONINFO_H

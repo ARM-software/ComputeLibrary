@@ -49,6 +49,9 @@ v24.04 Public major release
  - Performance optimizations:
    - Optimize @ref NESoftmaxLayer for axis != 0 by natively supporting higher axes up to axis 3.
  - Add support for in place accumulation to CPU GEMM kernels.
+ - Add low-precision Int8 * Int8 -> FP32 CPU GEMM which dequantizes after multiplication
+ - Add is_dynamic flag to QuantizationInfo to signal to operators that it may change after configuration
+
 
 v24.02.1 Public patch release
  - Fix performance regression in fixed-format kernels

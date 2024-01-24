@@ -238,6 +238,9 @@ target_sources(
 	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_1VLx4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_2VLx2VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_4VLx1VL/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8qfp32_mopa_1VLx4VL/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8qfp32_mopa_2VLx2VL/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8qfp32_mopa_4VLx1VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_1VLx4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_4VLx1VL/generic.cpp
@@ -509,6 +512,7 @@ target_sources(
 	core/NEON/kernels/arm_gemm/gemm_int8.cpp
 	core/NEON/kernels/arm_gemm/gemm_qint8.cpp
 	core/NEON/kernels/arm_gemm/gemm_quint8.cpp
+	core/NEON/kernels/arm_gemm/gemm_s8fp32.cpp
 	core/NEON/kernels/arm_gemm/gemm_uint16.cpp
 	core/NEON/kernels/arm_gemm/gemm_uint8.cpp
 	core/NEON/kernels/arm_gemm/interleave-8way.cpp

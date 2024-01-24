@@ -260,6 +260,19 @@ public:
     }
 };
 
+struct DequantizeFloat
+{
+public:
+    float scale = 0;
+
+    DequantizeFloat() = default;
+
+    // Constructor
+    DequantizeFloat(const float scale) : scale(scale)
+    {
+    }
+};
+
 struct Nothing
 {
 };

@@ -128,6 +128,11 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
                        _reshape_b_only_on_first_run;
     _gemm_info = gemm_info;
 
+    // Offset kernel is need if offset is non-zero or it may change (i.e. dynamic).
+    // It is not needed if the datatype is symmetric, because there is no offset
+    bool a_offset_kernel_needed = _a_offset != 0 || a->quantization_info().is_dynamic();
+    bool b_offset_kernel_needed = _b_offset != 0 || b->quantization_info().is_dynamic();
+
     _asm_glue = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
 
     const ITensorInfo *a_to_use = a;
@@ -229,8 +234,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
         // Build reduction info
         const GEMMLowpReductionKernelInfo reduction_info(a_to_use->dimension(0), false, 0, false);
 
-        // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
-        if (_a_offset != 0)
+        if (a_offset_kernel_needed)
         {
             _vector_sum_col = TensorInfo(compute_reductionA_shape(*b), 1, DataType::S32);
 
@@ -239,8 +243,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
             _mtx_b_reduction_kernel->configure(b, &_vector_sum_col, reduction_info);
         }
 
-        // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
-        if (_b_offset != 0)
+        if (b_offset_kernel_needed)
         {
             _vector_sum_row = TensorInfo(compute_reductionB_shape(*a_to_use), 1, DataType::S32);
 
@@ -261,8 +264,8 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
             _offset_contribution_output_stage_kernel =
                 std::make_unique<kernels::CpuGemmLowpOffsetContributionOutputStageKernel>();
             _offset_contribution_output_stage_kernel->configure(
-                &_mm_result_s32, _a_offset == 0 ? nullptr : &_vector_sum_col,
-                _b_offset == 0 ? nullptr : &_vector_sum_row, c, _flip_signedness ? &_signed_output : dst,
+                &_mm_result_s32, a_offset_kernel_needed ? &_vector_sum_col : nullptr,
+                b_offset_kernel_needed ? &_vector_sum_row : nullptr, c, _flip_signedness ? &_signed_output : dst,
                 a->dimension(0), _a_offset, _b_offset, info.gemmlowp_output_stage());
 
             if (_flip_signedness)
@@ -273,6 +276,11 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
         }
         else
         {
+            // This scale is needed for the s8_f32 kernel where the multiplication output is dequantized to F32.
+            const float dequantize_scale =
+                (dst->data_type() == DataType::F32)
+                    ? a->quantization_info().uniform().scale * b->quantization_info().uniform().scale
+                    : 1.0f;
             // Configure matrix multiply kernel
             if (!_assembly_path)
             {
@@ -281,9 +289,9 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
             }
             // Configure offset contribution kernel
             _offset_contribution_kernel = std::make_unique<kernels::CpuGemmLowpOffsetContributionKernel>();
-            _offset_contribution_kernel->configure(dst, _a_offset == 0 ? nullptr : &_vector_sum_col,
-                                                   _b_offset == 0 ? nullptr : &_vector_sum_row, a_to_use->dimension(0),
-                                                   _a_offset, _b_offset);
+            _offset_contribution_kernel->configure(dst, a_offset_kernel_needed ? &_vector_sum_col : nullptr,
+                                                   b_offset_kernel_needed ? &_vector_sum_row : nullptr,
+                                                   a_to_use->dimension(0), _a_offset, _b_offset, dequantize_scale);
         }
     }
     // Configure activation
@@ -306,11 +314,11 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
     }
 
     // Request memory for LHS and RHS reshape matrix
-    _aux_mem[VectorSumCol] =
-        MemoryInfo(offset_int_vec(VectorSumCol),
-                   !_fused_assembly_path && _a_offset != 0 && _reshape_b_only_on_first_run ? MemoryLifetime::Persistent
-                                                                                           : MemoryLifetime::Temporary,
-                   _vector_sum_col.total_size());
+    _aux_mem[VectorSumCol] = MemoryInfo(offset_int_vec(VectorSumCol),
+                                        !_fused_assembly_path && a_offset_kernel_needed && _reshape_b_only_on_first_run
+                                            ? MemoryLifetime::Persistent
+                                            : MemoryLifetime::Temporary,
+                                        _vector_sum_col.total_size());
     _aux_mem[VectorSumRow] =
         MemoryInfo(offset_int_vec(VectorSumRow), MemoryLifetime::Temporary, _vector_sum_row.total_size());
     _aux_mem[TmpA] = MemoryInfo(offset_int_vec(TmpA), MemoryLifetime::Temporary, _tmp_a.total_size());
@@ -334,8 +342,8 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32, DataType::QASYMM8,
-                                                         DataType::QASYMM8_SIGNED);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(c != nullptr &&
+                                                         DataType::QASYMM8_SIGNED, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(c != nullptr && output->data_type() != DataType::F32 &&
                                         gemm_info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::NONE,
                                     "Bias addition not supported in NEGEMMLowpMatrixMultiplyCore for output S32");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
@@ -366,6 +374,10 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
 
     int32_t a_offset = a->quantization_info().uniform().offset;
     int32_t b_offset = b->quantization_info().uniform().offset;
+
+    // Offset kernel is need if offset is non-zero or it may change (i.e. dynamic).
+    bool a_offset_kernel_needed = a_offset != 0 || a->quantization_info().is_dynamic();
+    bool b_offset_kernel_needed = b_offset != 0 || b->quantization_info().is_dynamic();
 
     bool fuse_output_stage = info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;
     if (fuse_output_stage)
@@ -489,7 +501,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         const GEMMLowpReductionKernelInfo reduction_info(a_to_use->dimension(0), false, 0, false);
 
         // Validate matrix B reduction kernel only if _a_offset is not equal to 0
-        if (a_offset != 0)
+        if (a_offset_kernel_needed)
         {
             info_vector_sum_col = TensorInfo(compute_reductionA_shape(*b), 1, DataType::S32);
 
@@ -499,7 +511,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         }
 
         // Validate Matrix A reduction kernel only if _b_offset is not equal to 0
-        if (b_offset != 0)
+        if (b_offset_kernel_needed)
         {
             info_vector_sum_row = TensorInfo(compute_reductionB_shape(*a), 1, DataType::S32);
 
@@ -525,9 +537,9 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
 
             // Validate offset contribution kernel
             ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuGemmLowpOffsetContributionOutputStageKernel::validate(
-                &mm_result_s32_info, a_offset == 0 ? nullptr : &info_vector_sum_col,
-                b_offset == 0 ? nullptr : &info_vector_sum_row, c, flip_signedness ? &signed_output : output, a_offset,
-                b_offset, info.gemmlowp_output_stage()));
+                &mm_result_s32_info, a_offset_kernel_needed ? &info_vector_sum_col : nullptr,
+                b_offset_kernel_needed ? &info_vector_sum_row : nullptr, c, flip_signedness ? &signed_output : output,
+                a_offset, b_offset, info.gemmlowp_output_stage()));
         }
         else
         {
@@ -545,8 +557,8 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
             }
             // Validate offset contribution kernel
             ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuGemmLowpOffsetContributionKernel::validate(
-                output, a_offset == 0 ? nullptr : &info_vector_sum_col, b_offset == 0 ? nullptr : &info_vector_sum_row,
-                a_offset, b_offset));
+                output, a_offset_kernel_needed ? &info_vector_sum_col : nullptr,
+                b_offset_kernel_needed ? &info_vector_sum_row : nullptr, a_offset, b_offset));
         }
     }
 
@@ -579,6 +591,14 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
     CpuAuxTensorHandler mm_result_s32(offset_int_vec(MMResultS32), _mm_result_s32, tensors, false);
     CpuAuxTensorHandler signed_a(offset_int_vec(SignedA), _signed_a, tensors, false);
     CpuAuxTensorHandler signed_output(offset_int_vec(SignedOutput), _signed_output, tensors, false);
+
+    const QuantizationInfo a_qinfo = a->info()->quantization_info();
+    const QuantizationInfo b_qinfo = b->info()->quantization_info();
+
+    if (a_qinfo.is_dynamic())
+        _a_offset = a_qinfo.uniform().offset;
+    if (b_qinfo.is_dynamic())
+        _b_offset = b_qinfo.uniform().offset;
 
     // Convert QASYMM8->QASYMM8_SIGNED
     if (_flip_signedness)
@@ -662,6 +682,11 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
 
         if (_fuse_output_stage)
         {
+            if (a_qinfo.is_dynamic())
+                _offset_contribution_output_stage_kernel->set_a_offset(_a_offset);
+            if (b_qinfo.is_dynamic())
+                _offset_contribution_output_stage_kernel->set_b_offset(_b_offset);
+
             ITensorPack pack;
             pack.add_tensor(TensorType::ACL_SRC_0, mm_result_s32.get());
             pack.add_tensor(TensorType::ACL_SRC_1, _a_offset == 0 ? nullptr : vector_sum_col.get());
@@ -675,6 +700,16 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
         }
         else
         {
+            if (a_qinfo.is_dynamic())
+                _offset_contribution_kernel->set_a_offset(_a_offset);
+            if (b_qinfo.is_dynamic())
+                _offset_contribution_kernel->set_b_offset(_b_offset);
+            if (a_qinfo.is_dynamic() || b_qinfo.is_dynamic())
+            {
+                const float dequantize_scale = a_qinfo.uniform().scale * b_qinfo.uniform().scale;
+                _offset_contribution_kernel->set_scale(dequantize_scale);
+            }
+
             ITensorPack pack;
             pack.add_tensor(TensorType::ACL_SRC_0, _a_offset == 0 ? nullptr : vector_sum_col.get());
             pack.add_tensor(TensorType::ACL_SRC_1, _b_offset == 0 ? nullptr : vector_sum_row.get());

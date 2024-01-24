@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMMLOWP_OFFSETCONTRIBUTION_OUTPUTSTAGE_KERNEL_H
-#define ARM_COMPUTE_CPU_GEMMLOWP_OFFSETCONTRIBUTION_OUTPUTSTAGE_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 
@@ -110,6 +110,22 @@ public:
                            int32_t                 b_offset,
                            GEMMLowpOutputStageInfo output_stage);
 
+    /** Set the a offset
+     * Warning: if a_offset is non-zero then vector_sum_col must be set in run_op.
+     *          Run configure or validate again if you aren't sure
+     *
+     * @param[in] a_offset Offset to be added to each element of the matrix A.
+     */
+    void set_a_offset(int32_t a_offset);
+
+    /** Set the b offset
+     * Warning: if b_offset is non-zero then vector_sum_col must be set in run_op.
+     *          Run configure or validate again if you aren't sure
+     *
+     * @param[in] b_offset Offset to be added to each element of the matrix B.
+     */
+    void set_b_offset(int32_t b_offset);
+
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
@@ -118,11 +134,11 @@ private:
     /** Function to use for the particular tensors passed to configure() */
     int32_t                 _a_offset{0};
     int32_t                 _b_offset{0};
-    int32_t                 _k_offset{0};
+    int32_t                 _k{0}; // Number of columns of A or rows of B, used in last offset term
     bool                    _is_vector_sum_col_batched{true};
     GEMMLowpOutputStageInfo _output_stage{GEMMLowpOutputStageInfo()};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMMLOWP_OFFSETCONTRIBUTION_OUTPUTSTAGE_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H

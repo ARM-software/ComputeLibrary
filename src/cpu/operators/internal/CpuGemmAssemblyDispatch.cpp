@@ -540,6 +540,13 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
     {
         configure_indirect(a, b, d, gemm_info);
     }
+
+    if (std::is_same<OutputStage, arm_gemm::DequantizeFloat>::value)
+    {
+        // Output dequantization is just the two src scales multiplied together
+        _gemm_kernel_asm->set_dequantize_scale(a->quantization_info().uniform().scale *
+                                               b->quantization_info().uniform().scale);
+    }
 }
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -629,6 +636,15 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
     auto c = tensors.get_const_tensor(TensorType::ACL_SRC_2);
     auto d = tensors.get_tensor(TensorType::ACL_DST);
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, d);
+
+    // Only update at runtime if the src quantization is dynamic
+    if (std::is_same<OutputStage, arm_gemm::DequantizeFloat>::value &&
+        (a->info()->quantization_info().is_dynamic() || b->info()->quantization_info().is_dynamic()))
+    {
+        // Output dequantization is just the two src scales multiplied together
+        _gemm_kernel_asm->set_dequantize_scale(a->info()->quantization_info().uniform().scale *
+                                               b->info()->quantization_info().uniform().scale);
+    }
 
     int       lda = a->info()->strides_in_bytes().y() / a->info()->element_size();
     int       ldb = 0;
@@ -780,6 +796,39 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
     fallback->configure(a, b, c, d, args, info);
+    arm_gemm = std::move(fallback);
+}
+
+template <typename TypeInput, typename TypeOutput>
+void create_arm_gemm_dequant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm,
+                             const ITensorInfo                                   *a,
+                             const ITensorInfo                                   *b,
+                             const ITensorInfo                                   *c,
+                             ITensorInfo                                         *d,
+                             arm_gemm::Activation                                 activation,
+                             const AsmGemmInfo                                   &info)
+{
+    ARM_COMPUTE_UNUSED(activation);
+
+    Params             p           = extract_parameters(a, b, d, info);
+    const CPUInfo     &ci          = NEScheduler::get().cpu_info();
+    const unsigned int num_threads = NEScheduler::get().num_threads();
+
+    arm_gemm::GemmConfig cfg;
+    cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads,
+                            info.fixed_format, info.fast_mode, info.accumulate, &cfg);
+
+    // Create arm_gemm fallback
+    auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::DequantizeFloat>>();
+
+    // Configure requantization info
+    const GEMMLowpOutputStageInfo os_info = info.output_stage;
+
+    arm_gemm::DequantizeFloat gemm_dequant_info{};
+    gemm_dequant_info = arm_gemm::DequantizeFloat(d->quantization_info().uniform().scale);
+
+    fallback->configure(a, b, c, d, args, info, gemm_dequant_info);
     arm_gemm = std::move(fallback);
 }
 
@@ -1030,6 +1079,10 @@ void CpuGemmAssemblyDispatch::configure(
             if (d->data_type() == DataType::S32)
             {
                 create_arm_gemm<int8_t, int32_t>(_arm_gemm, a, b, c, d, act, info);
+            }
+            else if (d->data_type() == DataType::F32)
+            {
+                create_arm_gemm_dequant<int8_t, float>(_arm_gemm, a, b, c, d, act, info);
             }
             else
             {

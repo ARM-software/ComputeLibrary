@@ -57,7 +57,7 @@ endif()
 # ---------------------------------------------------------------------
 # Configuration
 
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -gdwarf-2 -DARM_COMPUTE_ASSERTS_ENABLED")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -gdwarf-2 -DARM_COMPUTE_ASSERTS_ENABLED -DARM_COMPUTE_DEBUG_ENABLED")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # Default to Release Build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
