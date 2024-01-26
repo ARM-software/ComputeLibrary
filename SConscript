@@ -716,10 +716,7 @@ Export('bootcode_o')
 
 if (env['multi_isa']):
     lib_static_objs, lib_shared_objs = build_multiisa_lib_objects()
-
-
-# STATIC library build.
-if (env['multi_isa']):
+    # STATIC library build.
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_static_objs, static=True)
 else:
     if 'sve2' in env['arch']:

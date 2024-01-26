@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -509,6 +509,7 @@ filegroup(
 	"core/NEON/kernels/arm_conv/pooling/pooling_u8.cpp",
 	"core/NEON/kernels/arm_conv/pooling/pooling_u8q.cpp",
 	"core/NEON/kernels/arm_gemm/gemm_bf16.cpp",
+	"core/NEON/kernels/arm_gemm/gemm_bf16bf16.cpp",
 	"core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
 	"core/NEON/kernels/arm_gemm/gemm_fp32.cpp",
 	"core/NEON/kernels/arm_gemm/gemm_int16.cpp",

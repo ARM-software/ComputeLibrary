@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2023,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "support/Half.h"
 #include "tests/Globals.h"
 #include "tests/SimpleTensor.h"
@@ -50,6 +51,10 @@ struct is_floating_point : public std::is_floating_point<T>
 
 template <>
 struct is_floating_point<half> : public std::true_type
+{
+};
+template <>
+struct is_floating_point<bfloat16> : public std::true_type
 {
 };
 
@@ -78,13 +83,13 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
 {
     std::pair<T, T> bounds;
 
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::F16:
         {
             using namespace half_float::literal;
 
-            switch(activation)
+            switch (activation)
             {
                 case ActivationLayerInfo::ActivationFunction::TANH:
                 case ActivationLayerInfo::ActivationFunction::SQUARE:
@@ -104,7 +109,7 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
             break;
         }
         case DataType::F32:
-            switch(activation)
+            switch (activation)
             {
                 case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
                     // Reduce range as exponent overflows
@@ -227,7 +232,8 @@ std::pair<int, int> get_quantized_qasymm8_signed_bounds(const QuantizationInfo &
  * @param[in] max        Floating point maximum value to be quantized
  * @param[in] channel_id Channel id for per channel quantization info.
  */
-std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id = 0);
+std::pair<int, int>
+get_symm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id = 0);
 
 /** Add random padding along the X axis (between 1 and 16 columns per side) to all the input tensors.
  *  This is used in our validation suite in order to simulate implicit padding addition after configuring, but before allocating.
@@ -238,7 +244,9 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
  *
  * @note This function adds padding to the input tensors only if data_layout == DataLayout::NHWC
  */
-void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC, bool only_right_pad = false);
+void add_padding_x(std::initializer_list<ITensor *> tensors,
+                   const DataLayout                &data_layout    = DataLayout::NHWC,
+                   bool                             only_right_pad = false);
 
 /** For 2d convolution, given the Lhs/Rhs matrix quantization informations and the convolution dimension,
  *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
@@ -255,11 +263,11 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
  */
 QuantizationHint suggest_conv_dst_q_info_and_bias(const QuantizationInfo &in_q_info,
                                                   const QuantizationInfo &weight_q_info,
-                                                  int32_t height,
-                                                  int32_t width,
-                                                  int32_t channels,
-                                                  DataType data_type,
-                                                  float bias_fraction);
+                                                  int32_t                 height,
+                                                  int32_t                 width,
+                                                  int32_t                 channels,
+                                                  DataType                data_type,
+                                                  float                   bias_fraction);
 
 /** For a matrix multiplication, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
  *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
@@ -275,8 +283,12 @@ QuantizationHint suggest_conv_dst_q_info_and_bias(const QuantizationInfo &in_q_i
  * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
 QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
-                                                    const QuantizationInfo &rhs_q_info, int32_t m, int32_t n, int32_t k, DataType data_type,
-                                                    float bias_fraction);
+                                                    const QuantizationInfo &rhs_q_info,
+                                                    int32_t                 m,
+                                                    int32_t                 n,
+                                                    int32_t                 k,
+                                                    DataType                data_type,
+                                                    float                   bias_fraction);
 
 /** For a multiply-accumulate (mac), given the Lhs/Rhs vector quantization informations and the dot product dimensions,
  *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
@@ -291,8 +303,11 @@ QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_
  * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
 QuantizationHint suggest_mac_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
-                                                 const QuantizationInfo &rhs_q_info, int32_t k, DataType data_type, float bias_fraction,
-                                                 int num_sd = 2);
+                                                 const QuantizationInfo &rhs_q_info,
+                                                 int32_t                 k,
+                                                 DataType                data_type,
+                                                 float                   bias_fraction,
+                                                 int                     num_sd = 2);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

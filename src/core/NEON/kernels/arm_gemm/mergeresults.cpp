@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 
 #include "arm_gemm.hpp"
 #include "asmlib.hpp"
+#include "bfloat.hpp"
 #include "utils.hpp"
 
 namespace arm_gemm {
@@ -112,6 +113,10 @@ template void MergeResults<12u, 8u, false, float, __fp16>(__fp16*, float const*,
 
 #if defined(__arm__) && defined(__ARM_FP16_ARGS)
 template void MergeResults<8u, 6u, false, float, __fp16>(__fp16*, float const*, int, int, int, int, int, __fp16 const*, Activation, bool);
+#endif
+
+#if defined(__arm__) && defined(ARM_COMPUTE_ENABLE_BF16)
+template void MergeResults<8u, 6u, false, float, bfloat16>(bfloat16*, float const*, int, int, int, int, int, bfloat16 const*, Activation, bool);
 #endif
 
 } // namespace arm_gemm

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,14 +44,15 @@ SimpleTensor<T> reshape_layer(const SimpleTensor<T> &src, const TensorShape &out
     return dst;
 }
 
-template SimpleTensor<uint8_t> reshape_layer(const SimpleTensor<uint8_t> &src, const TensorShape &output_shape);
-template SimpleTensor<int8_t> reshape_layer(const SimpleTensor<int8_t> &src, const TensorShape &output_shape);
+template SimpleTensor<uint8_t>  reshape_layer(const SimpleTensor<uint8_t> &src, const TensorShape &output_shape);
+template SimpleTensor<int8_t>   reshape_layer(const SimpleTensor<int8_t> &src, const TensorShape &output_shape);
 template SimpleTensor<uint16_t> reshape_layer(const SimpleTensor<uint16_t> &src, const TensorShape &output_shape);
-template SimpleTensor<int16_t> reshape_layer(const SimpleTensor<int16_t> &src, const TensorShape &output_shape);
+template SimpleTensor<int16_t>  reshape_layer(const SimpleTensor<int16_t> &src, const TensorShape &output_shape);
 template SimpleTensor<uint32_t> reshape_layer(const SimpleTensor<uint32_t> &src, const TensorShape &output_shape);
-template SimpleTensor<int32_t> reshape_layer(const SimpleTensor<int32_t> &src, const TensorShape &output_shape);
-template SimpleTensor<half> reshape_layer(const SimpleTensor<half> &src, const TensorShape &output_shape);
-template SimpleTensor<float> reshape_layer(const SimpleTensor<float> &src, const TensorShape &output_shape);
+template SimpleTensor<int32_t>  reshape_layer(const SimpleTensor<int32_t> &src, const TensorShape &output_shape);
+template SimpleTensor<half>     reshape_layer(const SimpleTensor<half> &src, const TensorShape &output_shape);
+template SimpleTensor<float>    reshape_layer(const SimpleTensor<float> &src, const TensorShape &output_shape);
+template SimpleTensor<bfloat16> reshape_layer(const SimpleTensor<bfloat16> &src, const TensorShape &output_shape);
 /** [ReshapeLayer] **/
 } // namespace reference
 } // namespace validation

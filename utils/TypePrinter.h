@@ -3601,7 +3601,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::CpuMatM
 {
     os << "CpuMatMulSettings="
        << "["
-       << "fast_math=" << settings.fast_math() << "]";
+       << "fast_math=" << settings.fast_math() << ",fixed_format=" << settings.fixed_format() << "]";
 
     return os;
 }

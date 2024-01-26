@@ -1586,6 +1586,7 @@
               "src/core/NEON/kernels/arm_gemm/gemm_bf16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_fp32.cpp",
+              "src/core/NEON/kernels/arm_gemm/gemm_bf16bf16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_int16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_int8.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_qint8.cpp",

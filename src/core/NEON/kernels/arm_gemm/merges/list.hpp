@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "a32_merge_float_8x6.hpp"
 #include "a64_merge_fp32_12x8.hpp"
+#include "a64_merge_fp32_bf16_8x12.hpp"
 #include "a64_merge_s32_12x8.hpp"
 #include "a64_merge_s32_4x4.hpp"
 #include "a64_merge_u32_12x8.hpp"

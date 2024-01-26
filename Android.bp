@@ -324,6 +324,7 @@ cc_library_static {
         "src/core/NEON/kernels/arm_conv/pooling/pooling_u8.cpp",
         "src/core/NEON/kernels/arm_conv/pooling/pooling_u8q.cpp",
         "src/core/NEON/kernels/arm_gemm/gemm_bf16.cpp",
+        "src/core/NEON/kernels/arm_gemm/gemm_bf16bf16.cpp",
         "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
         "src/core/NEON/kernels/arm_gemm/gemm_fp32.cpp",
         "src/core/NEON/kernels/arm_gemm/gemm_int16.cpp",

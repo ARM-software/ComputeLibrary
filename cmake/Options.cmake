@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -48,7 +48,7 @@ set(ARM_COMPUTE_ARCH armv8-a CACHE STRING "Architecture to use")
 # ---------------------------------------------------------------------
 # Backends
 
-option(ARM_COMPUTE_ENABLE_BF16_VALIDATION "" OFF)
+option(ARM_COMPUTE_ENABLE_BF16_VALIDATION "" ON)
 option(ARM_COMPUTE_ENABLE_SVE_VALIDATION "" OFF)
 
 option(ENABLE_NEON "Enable Arm® Neon™ support" ON)

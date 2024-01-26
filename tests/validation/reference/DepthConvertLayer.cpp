@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -165,7 +165,7 @@ template SimpleTensor<half> depth_convert(const SimpleTensor<int32_t> &src, Data
 template SimpleTensor<float> depth_convert(const SimpleTensor<int32_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 
 // BFLOAT16
-template SimpleTensor<float> depth_convert(const SimpleTensor<bfloat16> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<bfloat16> depth_convert(const SimpleTensor<bfloat16> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 
 // F16
 template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<half> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
