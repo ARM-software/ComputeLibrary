@@ -93,7 +93,7 @@ def build_multiisa_lib_objects():
                            'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
 
     # Build all the common files for the base architecture
-    if env['arch'] == 'armv8a':
+    if env['arch'] == 'armv8a' or env['arch'] == 'arm64-v8a':
         lib_static_objs += build_obj_list(filedefs["armv8-a"], misa_lib_files, static=True)
         lib_shared_objs += build_obj_list(filedefs["armv8-a"], misa_lib_files, static=False)
     else:
