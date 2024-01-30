@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/QuantizationLayerFixture.h"
+
 
 namespace arm_compute
 {
@@ -182,7 +183,16 @@ FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, NEQuantizationLayerQASYMM8GenFixture<uin
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
                        framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(0.5f, 10) })),
-                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(2.0f, 15) })))
+                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(2.0f, 15), QuantizationInfo(0.5f, 25) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_u8);
+}
+FIXTURE_DATA_TEST_CASE(ConvertUint8toInt8, NEQuantizationLayerQASYMM8GenFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED })),
+                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(2.0f, -1) })),
+                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(2.0f, 127) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
@@ -191,7 +201,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, NEQuantizationLayerQASYMM8_SIGNED
                        framework::dataset::make("DataTypeIn", DataType::QASYMM8)),
                        framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED })),
                        framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10), QuantizationInfo(2.0f, -25) })),
-                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.0f, 15) })))
+                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.0f, 15), QuantizationInfo(1.0f, 127) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_s8);
@@ -211,7 +221,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, NEQuantizationLayerQASYMM8_SIGNED
                        framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED })),
                        framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10) })),
-                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(2.0f, -5) })))
+                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(2.0f, -5), QuantizationInfo(1.0f, 43) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_s8);
@@ -220,11 +230,21 @@ FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, NEQuantizationLayerQASYMM8GenFixture<int
                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
                        framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(2.0f, 10), QuantizationInfo(2.0f, -25) })),
-                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.0f, 30) })))
+                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.0f, 30), QuantizationInfo(2.0f, -128) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
 }
+FIXTURE_DATA_TEST_CASE(ConvertInt8toUint8, NEQuantizationLayerQASYMM8_SIGNEDGenFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
+                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 0) })),
+                       framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.0f, -128) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_s8);
+}
+
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 

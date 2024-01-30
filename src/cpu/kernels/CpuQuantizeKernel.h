@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_QUANTIZE_KERNEL_H
-#define ARM_COMPUTE_CPU_QUANTIZE_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUQUANTIZEKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUQUANTIZEKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
@@ -58,6 +58,15 @@ public:
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
+    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
+    *
+    * @return The split dimension hint.
+    */
+    size_t get_split_dimension_hint() const
+    {
+        return _split_dimension;
+    }
+
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
@@ -86,9 +95,17 @@ private:
     template <typename TIn, typename TOut>
     void run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window);
 
+    template <typename TIn, typename TOut>
+    void run_requantize_offset_only(const ITensor *src, ITensor *dst, const Window &window);
+
+    template <typename TIn, typename TOut>
+    void run_requantize_offset_only_convert(const ITensor *src, ITensor *dst, const Window &window);
+
     QuantizeFunctionExecutorPtr _func{nullptr};
+    size_t                      _split_dimension{Window::DimY};
 };
+
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_QUANTIZE_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUQUANTIZEKERNEL_H

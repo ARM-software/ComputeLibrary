@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CORE_UTILS_DATATYPEUTILS_H
-#define ARM_COMPUTE_CORE_UTILS_DATATYPEUTILS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_DATATYPEUTILS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_DATATYPEUTILS_H
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
@@ -373,6 +373,24 @@ inline bool is_data_type_quantized_asymmetric_signed(DataType dt)
     }
 }
 
+/** Check if a given data type is of 8-bit asymmetric quantized signed type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of 8-bit asymmetric quantized signed type, else false.
+ */
+inline bool is_data_type_quantized_asymmetric_char(DataType dt)
+{
+    switch (dt)
+    {
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QASYMM8:
+            return true;
+        default:
+            return false;
+    }
+}
+
 /** Check if a given data type is of symmetric quantized type
  *
  * @param[in] dt Input data type.
@@ -528,4 +546,4 @@ inline std::string cpu_impl_dt(const DataType &data_type)
 }
 
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CORE_UTILS_DATATYPEUTILS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_DATATYPEUTILS_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,11 +64,7 @@ inline void fill_tensor(SimpleTensor<T> &tensor, const std::vector<T> &v)
 }
 
 /** Tolerance for quantized asymmetric operations */
-#if defined(__aarch64__)
-constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(0);
-#else  // defined(__aarch64__)
 constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);
-#endif // defined(__aarch64__)
 
 } // namespace
 
