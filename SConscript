@@ -532,7 +532,7 @@ arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSI
 
 # Don't allow undefined references in the libraries:
 undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else '-Wl,--no-undefined'
-if not env['thread_sanitizer'] or not env['address_sanitizer'] or not env['undefined_sanitizer']:
+if not env['thread_sanitizer'] and not env['address_sanitizer'] and not env['undefined_sanitizer']:
     arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
