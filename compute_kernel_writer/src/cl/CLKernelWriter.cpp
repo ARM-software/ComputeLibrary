@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -334,6 +334,7 @@ void CLKernelWriter::op_ternary(
     const std::string second_prefix = broadcast_second_x ? "(" + data_type_str + ")" : "";
     const std::string third_prefix  = broadcast_third_x ? "(" + data_type_str + ")" : "";
 
+    CKW_UNUSED(op_is_func);
     CKW_ASSERT_MSG(op_is_func, "The only supported ternary operator is function.");
     CKW_ASSERT_MSG(second_view.data_type() == dst_view.data_type(), "2nd source and destination type must match.");
     CKW_ASSERT_MSG(third_view.data_type() == dst_view.data_type(), "3rd source and destination type must match.");
