@@ -58,7 +58,7 @@ class States(Enum):
 
 class OperatorsTable:
     def __init__(self):
-        self.project_dir = Path(__file__).parents[1]  # ComputeLibrary directory
+        self.project_dir = Path(__file__).resolve().parents[1]  # ComputeLibrary directory
         self.xml = ""
 
     def generate_operator_list(self):
