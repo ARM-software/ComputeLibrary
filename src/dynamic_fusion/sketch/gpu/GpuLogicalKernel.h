@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_GPULOGICALKERNEL
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPULOGICALKERNEL
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPULOGICALKERNEL_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPULOGICALKERNEL_H
 
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelSourceCode.h"
@@ -52,7 +52,7 @@ public:
      * @param[in] services   @ref GpuComponentServices to be used
      * @param[in] components Component group from which this logical kernel is initialized
      */
-    explicit GpuLogicalKernel(GpuComponentServices *services, const GpuKernelComponentGroup &components);
+    explicit GpuLogicalKernel(GpuComponentServices *services, GpuKernelComponentGroup components); // NOLINT
     /** Allow instances of this class to be copy constructed */
     GpuLogicalKernel(const GpuLogicalKernel &) = default;
     /** Allow instances of this class to be copied */
@@ -71,4 +71,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_GPULOGICALKERNEL */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPULOGICALKERNEL_H

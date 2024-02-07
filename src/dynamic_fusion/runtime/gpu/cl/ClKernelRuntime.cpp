@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,12 +26,11 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 
 #include "src/core/CL/CLUtils.h"
-#ifdef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/runtime/gpu/cl/ckw_driver/GpuCkwKernelArgumentsHelpers.h"
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelSourceCode.h"
 #include "src/gpu/cl/ClKernelLibrary.h"
 #include "support/Cast.h"
+
 namespace arm_compute
 {
 namespace experimental
@@ -61,128 +60,6 @@ void ClKernelRuntime::configure(const ClCompileContext &compile_ctx, const GpuKe
     _arguments = code.arguments();
 }
 
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-
-inline void ClKernelRuntime::add_tensor_argument(unsigned int                &idx,
-                                                 const GpuKernelArgumentInfo &arg,
-                                                 const ICLTensor             *tensor,
-                                                 const Window                &arg_slice,
-                                                 std::vector<cl::Image2D>    &cl_images)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-
-    switch (arg.type)
-    {
-        case GpuKernelArgumentInfo::Type::Scalar:
-        {
-            ARM_COMPUTE_ERROR("Unsupported yet");
-            break;
-        }
-
-        case GpuKernelArgumentInfo::Type::Vector:
-        {
-            add_1D_tensor_argument(idx, tensor, arg_slice);
-            break;
-        }
-
-        case GpuKernelArgumentInfo::Type::Image:
-        {
-            add_2D_tensor_argument(idx, tensor, arg_slice);
-            break;
-        }
-        case GpuKernelArgumentInfo::Type::Image_Reinterpret_As_3D:
-        {
-            add_2D_tensor_argument(idx, tensor, arg_slice);
-            const unsigned int total_cross_plane_pad = tensor->info()->padding().top + tensor->info()->padding().bottom;
-            _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(total_cross_plane_pad));
-            break;
-        }
-        case GpuKernelArgumentInfo::Type::Image_Export_To_ClImage2D:
-        {
-            const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) *
-                                                                            tensor->info()->dimension(2) *
-                                                                            tensor->info()->dimension(3));
-            const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
-            cl::Image2D       tensor_image2d =
-                create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d,
-                                           tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
-            cl_images.push_back(tensor_image2d);
-            _kernel.setArg(idx++, tensor_image2d);
-            break;
-        }
-
-        case GpuKernelArgumentInfo::Type::Image_3D:
-        {
-            add_2D_tensor_argument(idx, tensor, arg_slice);
-            _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(tensor->info()->strides_in_bytes()[2]));
-            break;
-        }
-        case GpuKernelArgumentInfo::Type::Image_3D_Export_To_ClImage2D:
-        {
-            const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) *
-                                                                            tensor->info()->dimension(2) *
-                                                                            tensor->info()->dimension(3));
-            const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
-            cl::Image2D       tensor_image2d =
-                create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d,
-                                           tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
-            cl_images.push_back(tensor_image2d);
-            _kernel.setArg(idx++, tensor_image2d);
-            _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(tensor->info()->strides_in_bytes()[2]));
-            break;
-        }
-
-        case GpuKernelArgumentInfo::Type::Tensor_3D:
-        {
-            add_3D_tensor_argument(idx, tensor, arg_slice);
-            break;
-        }
-
-        case GpuKernelArgumentInfo::Type::Tensor_4D:
-        {
-            add_4D_tensor_argument(idx, tensor, arg_slice);
-            break;
-        }
-        case GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer:
-        {
-            add_4d_tensor_nhwc_argument(idx, tensor);
-            break;
-        }
-        case GpuKernelArgumentInfo::Type::Tensor_4D_t_Image:
-        {
-            const size_t image_w        = tensor->info()->dimension(0) / 4;
-            const size_t image_h        = tensor->info()->tensor_shape().total_size_upper(1);
-            const size_t image_stride_y = tensor->info()->strides_in_bytes()[1];
-
-            cl::Image2D tensor_image2d = create_image2d_from_buffer(
-                CLKernelLibrary::get().context(), tensor->cl_buffer(), TensorShape(image_w, image_h),
-                tensor->info()->data_type(), image_stride_y, CLImage2DType::ReadOnly);
-            cl_images.push_back(tensor_image2d);
-
-            _kernel.setArg(idx++, tensor_image2d);
-            add_4d_tensor_nhwc_argument(idx, tensor);
-            break;
-        }
-        case GpuKernelArgumentInfo::Type::Tensor_Special_0:
-        {
-            const ITensorInfo *info    = tensor->info();
-            const Strides     &strides = info->strides_in_bytes();
-
-            _kernel.setArg(idx++, tensor->cl_buffer());
-            const size_t dim1xdim2 = info->tensor_shape()[1] * info->tensor_shape()[2];
-            _kernel.setArg<cl_int>(idx++, static_cast<int32_t>(dim1xdim2));
-            const size_t stride1 = strides[1];
-            _kernel.setArg<cl_int>(idx++, static_cast<int32_t>(stride1));
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Unsupported");
-        }
-    }
-}
-
-#else // ACL_INTERNAL_TEST_CKW_IN_DF
 inline void ClKernelRuntime::add_kernel_argument(unsigned int                   &idx,
                                                  const GpuKernelArgumentBinding &arg,
                                                  const ICLTensor                *tensor,
@@ -234,7 +111,6 @@ inline void ClKernelRuntime::add_kernel_argument(unsigned int                   
     }
 }
 
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 void ClKernelRuntime::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -253,17 +129,7 @@ void ClKernelRuntime::run_op(ITensorPack &tensors, const Window &window, cl::Com
         // Set kernel arguments
         // CLImages created from tensor arguments. Need to be retained until enqueue
         std::vector<cl::Image2D> cl_images;
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-        for (auto id_arg : _arguments)
-        {
-            const auto arg    = id_arg.second;
-            auto       tensor = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(id_arg.first));
-            ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-            ARM_COMPUTE_ERROR_ON_NULLPTR(tensor->info());
-            add_tensor_argument(idx, *arg.kernel_argument_info(), tensor, slice, cl_images);
-        }
 
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
         for (const auto &arg : _arguments)
         {
             auto tensor = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(arg.id()));
@@ -271,7 +137,6 @@ void ClKernelRuntime::run_op(ITensorPack &tensors, const Window &window, cl::Com
             ARM_COMPUTE_ERROR_ON_NULLPTR(tensor->info());
             add_kernel_argument(idx, arg, tensor, cl_images);
         }
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
         // Dispatch kernel
         enqueue(queue, *this, slice, lws_hint(), use_dummy_work_items);

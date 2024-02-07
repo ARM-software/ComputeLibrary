@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,6 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/core/CL/CLValidate.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateReshape.h"
 
 namespace arm_compute
 {
@@ -54,15 +53,16 @@ Status ClComponentReshape::validate(const ArgumentPack<ITensorInfo> &tensors)
 ClComponentReshape::ClComponentReshape(ComponentId                      id,
                                        const Properties                &properties,
                                        const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuKernelComponent{id, properties, tensors}, _component_writer{std::make_unique<ClTemplateReshape>(id, tensors)}
+    : IGpuKernelComponent{id, properties, tensors}
 {
 }
 ClComponentReshape::~ClComponentReshape()
 {
 }
-const IGpuTemplateComponentWriter *ClComponentReshape::template_writer() const
+const IGpuCkwComponentDriver *ClComponentReshape::ckw_component_driver() const
 {
-    return _component_writer.get();
+    /* NOT IMPLEMENTED */
+    return nullptr;
 }
 } // namespace dynamic_fusion
 } // namespace experimental

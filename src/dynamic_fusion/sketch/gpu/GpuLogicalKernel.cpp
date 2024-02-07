@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,14 +26,10 @@
 #include "arm_compute/core/experimental/Types.h"
 
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwDriver.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuComponentServices.h"
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.h"
-#else // ACL_INTERNAL_TEST_CKW_IN_DF
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwDriver.h"
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 namespace arm_compute
 {
@@ -41,8 +37,8 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-GpuLogicalKernel::GpuLogicalKernel(GpuComponentServices *services, const GpuKernelComponentGroup &components)
-    : _comp_group{components}, _store_components{}
+GpuLogicalKernel::GpuLogicalKernel(GpuComponentServices *services, GpuKernelComponentGroup components) // NOLINT
+    : _comp_group{std::move(components)}, _store_components{}
 {
     ARM_COMPUTE_UNUSED(services);
 }
@@ -50,19 +46,11 @@ GpuLogicalKernel::GpuLogicalKernel(GpuComponentServices *services, const GpuKern
 GpuKernelSourceCode GpuLogicalKernel::write_kernel_code()
 {
     GpuKernelSourceCode code;
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    ClTemplateWriter writer{_comp_group};
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
-    GpuCkwDriver writer{_comp_group};
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
+    GpuCkwDriver        writer{_comp_group};
 
     code.name(writer.get_name());
     code.code(writer.get_code());
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    code.arguments(writer.get_tensors());
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
     code.arguments(writer.get_kernel_arguments());
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
     code.build_options(writer.get_build_options());
     code.config_id(writer.get_config_id());
     code.window(writer.get_window());

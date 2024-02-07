@@ -2324,7 +2324,6 @@
         "src/dynamic_fusion/sketch/attributes/ResizeAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/SoftmaxAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/ReshapeAttributes.cpp",
-        "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.cpp",
         "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGraph.cpp",
         "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.cpp",
         "src/dynamic_fusion/sketch/gpu/GpuKernelComponentStream.cpp",
@@ -2339,8 +2338,6 @@
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentMatMul.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentPool2d.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.cpp",
-        "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DMaxShiftExpSum.cpp",
-        "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DNorm.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentReshape.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentResize.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.cpp",
@@ -2360,21 +2357,6 @@
         "src/dynamic_fusion/sketch/gpu/operators/GpuSub.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuTanh.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.cpp"
-      ],
-      "template_writer": [
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateCast.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDepthwiseConv2d.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDirectConv2d.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplatePool2d.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateElementwiseBinary.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DMaxShiftExpSum.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DNorm.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateReshape.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateResize.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.cpp"
       ],
       "ckw_driver": [
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.cpp",

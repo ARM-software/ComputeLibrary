@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY_H
 
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
@@ -40,11 +40,7 @@ template <typename T>
 class ArgumentPack;
 
 /** Forward declaration */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-class ClTemplateElementwiseBinary;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
 class GpuCkwElementwiseBinary;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentElementwiseBinary final : public IGpuKernelComponent
 {
@@ -105,12 +101,7 @@ public:
     /** Allow instances of this class to be moved */
     ClComponentElementwiseBinary &operator=(ClComponentElementwiseBinary &&component) = default;
     /** Get writer for the component */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuTemplateComponentWriter *template_writer() const override;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuCkwComponentDriver            *ckw_component_driver() const override;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
-
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -118,13 +109,9 @@ public:
     }
 
 private:
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    std::unique_ptr<ClTemplateElementwiseBinary> _component_writer;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<GpuCkwElementwiseBinary> _component_writer;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY_H

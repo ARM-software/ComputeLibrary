@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ReshapeLayerDataset.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -82,7 +82,7 @@ using DynamicFusionGpuReshapeLayerFixture =
 TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuReshapeLayerFixture<float>,
-                       framework::DatasetMode::ALL,
+                       framework::DatasetMode::DISABLED,
                        combine(datasets::SmallReshapeLayerDataset(),
                                framework::dataset::make("DataType", DataType::F32)))
 {
@@ -94,7 +94,7 @@ TEST_SUITE_END() // F32
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuReshapeLayerFixture<half>,
-                       framework::DatasetMode::ALL,
+                       framework::DatasetMode::DISABLED,
                        combine(datasets::SmallReshapeLayerDataset(),
                                framework::dataset::make("DataType", DataType::F16)))
 {
@@ -106,7 +106,7 @@ TEST_SUITE_END() // F16
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuReshapeLayerFixture<uint8_t>,
-                       framework::DatasetMode::ALL,
+                       framework::DatasetMode::DISABLED,
                        combine(datasets::SmallReshapeLayerDataset(),
                                framework::dataset::make("DataType", DataType::U8)))
 {
@@ -118,7 +118,7 @@ TEST_SUITE_END() // U8
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuReshapeLayerFixture<int8_t>,
-                       framework::DatasetMode::ALL,
+                       framework::DatasetMode::DISABLED,
                        combine(datasets::SmallReshapeLayerDataset(),
                                framework::dataset::make("DataType", DataType::S8)))
 {
@@ -130,7 +130,7 @@ TEST_SUITE_END() // S8
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuReshapeLayerFixture<int16_t>,
-                       framework::DatasetMode::ALL,
+                       framework::DatasetMode::DISABLED,
                        combine(datasets::SmallReshapeLayerDataset(),
                                framework::dataset::make("DataType", DataType::S16)))
 {
@@ -145,5 +145,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef ACL_INTERNAL_TEST_CKW_IN_DF
 
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentMatMul.h"
 
@@ -147,5 +146,3 @@ const IGpuCkwComponentDriver *ClComponentMatMul::ckw_component_driver() const
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

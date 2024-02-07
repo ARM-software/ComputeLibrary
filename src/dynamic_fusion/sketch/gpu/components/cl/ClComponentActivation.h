@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
@@ -41,11 +41,7 @@ template <typename T>
 class ArgumentPack;
 
 /** Forward declaration */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-class ClTemplateActivation;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
 class GpuCkwActivation;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentActivation final : public IGpuKernelComponent
 {
@@ -106,11 +102,7 @@ public:
     ClComponentActivation &operator=(ClComponentActivation &&component) = default;
 
     /** Get writer for the component */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuTemplateComponentWriter *template_writer() const override;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuCkwComponentDriver     *ckw_component_driver() const override;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
 
     /** Get component type */
     GpuComponentType type() const override
@@ -119,13 +111,9 @@ public:
     }
 
 private:
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    std::unique_ptr<ClTemplateActivation> _component_writer;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<GpuCkwActivation> _component_writer;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION_H

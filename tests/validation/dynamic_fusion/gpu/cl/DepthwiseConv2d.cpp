@@ -290,7 +290,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
+
 TEST_SUITE(Dilation)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuDepthwiseConv2dFixture<half>,
@@ -313,7 +313,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END() // Dilation
-#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(Generic)
@@ -336,7 +335,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 {
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
+
 TEST_SUITE(Dilation)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuDepthwiseConv2dFixture<half>,
@@ -359,7 +358,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END() // Dilation
-#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // Generic
 TEST_SUITE_END() // FP16
 
@@ -385,7 +383,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
 TEST_SUITE(Dilation)
 
 FIXTURE_DATA_TEST_CASE(RunSmall,
@@ -409,7 +406,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END() // Dilation
-#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(Generic)
@@ -445,7 +441,6 @@ FIXTURE_DATA_TEST_CASE(RunLargeKernelSize,
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test as dilation not supported yet in DepthwiseConv2d CKW kernel
 TEST_SUITE(Dilation)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        DynamicFusionGpuDepthwiseConv2dFixture<float>,
@@ -468,7 +463,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END() // Dilation
-#endif           // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_SUITE_END() // Generic
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float

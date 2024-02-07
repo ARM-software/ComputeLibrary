@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,11 +24,7 @@
 #include "ClComponentActivation.h"
 
 #include "src/core/CL/CLValidate.h"
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.h"
-#else //ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwActivation.h"
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 namespace arm_compute
 {
@@ -69,11 +65,7 @@ ClComponentActivation::ClComponentActivation(ComponentId                        
                                              const ArgumentPack<ITensorInfo>       &tensors,
                                              const Attributes                      &attributes)
     : IGpuKernelComponent{id, properties, tensors},
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer{std::make_unique<ClTemplateActivation>(id, tensors, attributes)}
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
       _component_writer{std::make_unique<GpuCkwActivation>(id, tensors, attributes)}
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }
 
@@ -81,11 +73,7 @@ ClComponentActivation::~ClComponentActivation()
 {
 }
 
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-const IGpuTemplateComponentWriter *ClComponentActivation::template_writer() const
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuCkwComponentDriver *ClComponentActivation::ckw_component_driver() const
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
     return _component_writer.get();
 }

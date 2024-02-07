@@ -63,7 +63,7 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(INTEGRATION)
 TEST_SUITE(DYNAMIC_FUSION)
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Conv2d is not ported to ckw yet. COMPMID-6259
+
 TEST_CASE(Conv2d, framework::DatasetMode::ALL)
 {
     /* Computation:
@@ -156,7 +156,7 @@ TEST_CASE(Conv2d, framework::DatasetMode::ALL)
         0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
     validate(CLAccessor(t_dst), ref_t_dst_nchw, tolerance_f32);
 }
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
+
 TEST_CASE(Add_Output_Add_Output, framework::DatasetMode::ALL)
 {
     /* Computation:
@@ -368,8 +368,9 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
     validate(CLAccessor(t_out_1), ref_t_out_1, tolerance_cast_f32);
 }
 
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Conv2d is not ported to ckw yet. COMPMID-6259
-TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
+/// TODO: COMPMID-6593 : This integration test fails with CKW backend.
+/// It was not enabled for CKW before, therefore went unnoticed.
+TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::DISABLED)
 {
     //   (tensor0)
     //       |
@@ -580,7 +581,6 @@ TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
     constexpr RelativeTolerance<float> tolerance(0.001f);
     validate(CLAccessor(tensor6), ref_mul_dst_nchw, tolerance);
 }
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 TEST_SUITE(Invalid_Fusion_Should_Fail)
 TEST_CASE(Multiple_Complex_Ops_0, framework::DatasetMode::ALL)

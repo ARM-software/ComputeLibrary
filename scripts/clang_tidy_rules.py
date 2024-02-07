@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2023 Arm Limited.
+# Copyright (c) 2017-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -28,7 +28,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "compute_kernel_writer/prototype/include " \
+    return "compute_kernel_writer/include " \
            "src/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
@@ -43,8 +43,6 @@ def get_list_flags( filename, arch):
     flags.append("-DARM_COMPUTE_OPENCL_ENABLED")
     if arch == "aarch64":
         flags.append("-DARM_COMPUTE_AARCH64_V8_2")
-    if "ckw_driver" in filename:
-        flags.append("-DACL_INTERNAL_TEST_CKW_IN_DF")
 
     return flags
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLKERNELRUNTIME
-#define SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLKERNELRUNTIME
+#ifndef ACL_SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLKERNELRUNTIME_H
+#define ACL_SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLKERNELRUNTIME_H
 
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelSourceCode.h"
@@ -59,21 +59,6 @@ public:
     virtual void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    /** Set a kernel tensor argument
-     *
-     * @param[in,out] idx       Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
-     * @param[in]     arg       Kernel argument descriptor accompanying @p tensor
-     * @param[in]     tensor    Tensor to set as an argument of the object's kernel
-     * @param[in]     arg_slice Window the kernel will be run on
-     * @param[out]    cl_images Extra cl images created from the tensor (will need to be retained until the kernel is enqueued)
-     */
-    inline void add_tensor_argument(unsigned int                &idx,
-                                    const GpuKernelArgumentInfo &arg,
-                                    const ICLTensor             *tensor,
-                                    const Window                &arg_slice,
-                                    std::vector<cl::Image2D>    &cl_images);
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
     /** Set a kernel argument as part of a tensor
      *
      * @param[in,out] idx       Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
@@ -85,7 +70,6 @@ private:
                                     const GpuKernelArgumentBinding &arg,
                                     const ICLTensor                *tensor,
                                     std::vector<cl::Image2D>       &cl_images);
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 private:
     GpuKernelArgumentList _arguments{};
@@ -94,4 +78,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLKERNELRUNTIME */
+#endif // ACL_SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLKERNELRUNTIME_H

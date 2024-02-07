@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESIZE
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESIZE
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESIZE_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESIZE_H
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
 
@@ -42,11 +42,7 @@ template <typename T>
 class ArgumentPack;
 
 /** Forward declaration */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-class ClTemplateResize;
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
 class GpuCkwResize;
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentResize final : public IGpuKernelComponent
 {
@@ -111,11 +107,7 @@ public:
     ClComponentResize &operator=(ClComponentResize &&component) = default;
 
     /** Get writer for the component */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuTemplateComponentWriter *template_writer() const override;
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuCkwComponentDriver *ckw_component_driver() const override;
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
     /** Get component type */
     GpuComponentType type() const override
@@ -124,15 +116,11 @@ public:
     }
 
 private:
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    std::unique_ptr<ClTemplateResize> _component_writer;
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<GpuCkwResize> _component_writer;
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };
 
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESIZE */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESIZE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT_H
 
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSourceCode.h"
@@ -100,10 +100,6 @@ public:
         return _properties;
     }
     /** Get writer for the component */
-    virtual const IGpuTemplateComponentWriter *template_writer() const
-    {
-        return nullptr;
-    }
     virtual const IGpuCkwComponentDriver *ckw_component_driver() const
     {
         return nullptr;
@@ -119,4 +115,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT_H

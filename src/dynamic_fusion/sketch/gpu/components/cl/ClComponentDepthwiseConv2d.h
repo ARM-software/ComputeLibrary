@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,11 +44,7 @@ class ArgumentPack;
 class DepthwiseConv2dAttributes;
 
 /** Forward declaration */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-class ClTemplateDepthwiseConv2d;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
 class GpuCkwDepthwiseConv2d;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 /** Component specific settings
  */
@@ -161,13 +157,8 @@ public:
     ClComponentDepthwiseConv2d(ClComponentDepthwiseConv2d &&component) = default;
     /** Allow instances of this class to be moved */
     ClComponentDepthwiseConv2d &operator=(ClComponentDepthwiseConv2d &&component) = default;
-    /** Get template writer for the component */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuTemplateComponentWriter *template_writer() const override;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuCkwComponentDriver          *ckw_component_driver() const override;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
-
+    /** Get writer for the component */
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -175,11 +166,7 @@ public:
     }
 
 private:
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    std::unique_ptr<ClTemplateDepthwiseConv2d> _component_writer;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<GpuCkwDepthwiseConv2d> _component_writer;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental
