@@ -242,12 +242,7 @@ void GpuCkwActivation::write_component_code(const ComponentGroup    &comp_group,
         }
         case ActivationLayerInfo::ActivationFunction::TANH:
         {
-            // dst = B_VAL * src
-            writer->op_binary(tile_dst, ckw::BinaryOp::Mul, tile_src, const_B_fp);
-            // dst = tanh(B_VAL * src)
-            writer->op_unary(tile_dst, ckw::UnaryOp::Tanh, tile_dst);
-            // dst = A_VAL * tanh(B_VAL * src)
-            writer->op_binary(tile_dst, ckw::BinaryOp::Mul, tile_dst, const_A_fp);
+            writer->op_unary(tile_dst, ckw::UnaryOp::Tanh, tile_src);
             break;
         }
         case ActivationLayerInfo::ActivationFunction::RELU:

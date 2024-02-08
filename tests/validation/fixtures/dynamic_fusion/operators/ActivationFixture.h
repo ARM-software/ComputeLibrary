@@ -194,7 +194,7 @@ class DynamicFusionTanhValidationFixture
 public:
     void setup(TensorShape shape, bool fuse, DataType data_type)
     {
-        ActivationLayerInfo act_info{ActivationLayerInfo::ActivationFunction::TANH};
+        ActivationLayerInfo act_info{ActivationLayerInfo::ActivationFunction::TANH, 1.0f, 1.0f};
         DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, fuse,
                                                                                                    data_type, act_info);
     }
