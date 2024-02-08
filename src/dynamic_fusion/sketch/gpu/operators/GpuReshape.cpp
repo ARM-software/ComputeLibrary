@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,7 +74,7 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
         ARM_COMPUTE_RETURN_ERROR_MSG("Unimplemented Gpu language");
     }
 
-    return Status{};
+    return Status{ErrorCode::RUNTIME_ERROR, "GpuReshape is not Supported"};
 }
 
 GpuOperatorType operator_type = GpuOperatorType::Complex;
