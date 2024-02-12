@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -215,7 +215,9 @@ public:
         }
     }
 
-    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+        assert(!transposed);
+
         requantize_bias(buffer, B, ldb, B_multi_stride);
 
         // The actual transposed buffer goes after the column sums (if any)
@@ -225,7 +227,7 @@ public:
         strategy strat(_args._ci);
 
         for (unsigned int multi=0; multi<_args._nmulti; multi++) {
-            strat.transforms.PrepareB(B_buffer + (multi * _buffer_per_multi), B + (multi * B_multi_stride), ldb, 0, _args._Nsize, 0, _args._Ksize);
+            strat.transforms.PrepareB(B_buffer + (multi * _buffer_per_multi), B + (multi * B_multi_stride), ldb, 0, _args._Nsize, 0, _args._Ksize, false);
         }
 
         _B_pretransposed = B_buffer;

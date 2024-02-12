@@ -517,6 +517,7 @@ filegroup(
 	"core/NEON/kernels/arm_gemm/gemm_quint8.cpp",
 	"core/NEON/kernels/arm_gemm/gemm_uint16.cpp",
 	"core/NEON/kernels/arm_gemm/gemm_uint8.cpp",
+	"core/NEON/kernels/arm_gemm/interleave-8way.cpp",
 	"core/NEON/kernels/arm_gemm/interleave_indirect.cpp",
 	"core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_bf16fp32_mmla_6x16/generic.cpp",
 	"core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp16_mla_6x32/generic.cpp",

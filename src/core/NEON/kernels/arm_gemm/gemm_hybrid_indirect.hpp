@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -631,11 +631,16 @@ public:
         }
     }
 
-    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
-        pretranspose_B_array_part(in_buffer, B, ldb, B_multi_stride, 0, get_B_pretranspose_window_size());
+    bool B_pretranspose_supports_transpose() const override {
+        strategy strat(_args._ci);
+        return strat.transforms.PrepareB_supports_transpose();
     }
 
-    void pretranspose_B_array_part(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, size_t start, size_t end) override {
+    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+        pretranspose_B_array_part(in_buffer, B, ldb, B_multi_stride, transposed, 0, get_B_pretranspose_window_size());
+    }
+
+    void pretranspose_B_array_part(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed, size_t start, size_t end) override {
         if (end >= get_B_pretranspose_window_size()) {
             requantize_bias(in_buffer, B, ldb, B_multi_stride);
         }
@@ -717,7 +722,8 @@ public:
                             strat.transforms.PrepareB(buffer, B + (multi * B_multi_stride), ldb,
                                                       x0, xmax,
                                                       (k_section_base * _args._Ksize) + k_offset,               // K starting point - compute row to read based on our section and the true section length.
-                                                      (k_section_base * _args._Ksize) + k_offset + k_length);   // K end point - starting point plus length computed above.
+                                                      (k_section_base * _args._Ksize) + k_offset + k_length,    // K end point - starting point plus length computed above.
+                                                      transposed);
 
                             // We need to modify our position based on the ROUNDED version of what we just did.
                             unsigned int padded_length = roundup(k_length, strategy::k_unroll());
@@ -731,7 +737,7 @@ public:
                 } else {
                     // In the single K section case, can process the whole lot in one go.
                     strat.transforms.PrepareB(buffer, B + (multi * B_multi_stride), ldb,
-                                              n_start, n_end, k0, std::min(kmax, _args._Ksize));
+                                              n_start, n_end, k0, std::min(kmax, _args._Ksize), transposed);
                 }
             }
         }

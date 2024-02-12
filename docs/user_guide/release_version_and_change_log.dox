@@ -41,6 +41,9 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v24.04 Public major release
+ - Optimize start-up time of @ref NEConvolutionLayer for some input configurations where GeMM is selected as the convolution algorithm
+
 v24.02 Public major release
  - Replace template writer with compute kernel writer in dynamic fusion.
  - Performance optimizations:

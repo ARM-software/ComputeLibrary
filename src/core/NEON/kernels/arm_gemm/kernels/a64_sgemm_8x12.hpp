@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #ifdef __aarch64__
 
-#include "../std_transforms_fixed.hpp"
+#include "../std_transforms_fixed_trB.hpp"
 #include "../performance_parameters.hpp"
 
 #include "../bfloat.hpp"
@@ -68,7 +68,7 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsFixed<operand_type, result_type, 8, 12> transforms = {};
+    StdTransformsFixedTRB<operand_type, result_type, 8, 12> transforms = {};
 
     template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {

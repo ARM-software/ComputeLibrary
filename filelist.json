@@ -1592,6 +1592,7 @@
               "src/core/NEON/kernels/arm_gemm/gemm_quint8.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_uint16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_uint8.cpp",
+              "src/core/NEON/kernels/arm_gemm/interleave-8way.cpp",
               "src/core/NEON/kernels/arm_gemm/interleave_indirect.cpp",
               "src/core/NEON/kernels/arm_gemm/mergeresults-fp16.cpp",
               "src/core/NEON/kernels/arm_gemm/mergeresults.cpp",
