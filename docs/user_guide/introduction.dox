@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2023 Arm Limited.
+/// Copyright (c) 2017-2024 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -39,7 +39,9 @@ Several builds of the library are available using various configurations:
  - Technology: Arm® Neon™ / OpenCL / Arm® Neon™ and OpenCL.
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
 
-@warning From 22.08 release, armv7a with Android build will no longer be tested or maintained.
+@warning Depecation Notice from 24.01: NCHW data format specific optimizations will gradually be removed from the code base in
+    future releases. The implication of this is that the user is expected to translate NCHW models into NHWC in
+    order to benefit from the optimizations.
 
 @b Minimum toolchains requirements are shown below:
 
