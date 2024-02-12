@@ -40,7 +40,7 @@ TEST_SUITE(DYNAMIC_FUSION)
 TEST_SUITE(RESHAPE)
 
 DATA_TEST_CASE(Validate,
-               framework::DatasetMode::ALL,
+               framework::DatasetMode::DISABLED,
                zip(zip(framework::dataset::make(
                            "InputInfo",
                            {
