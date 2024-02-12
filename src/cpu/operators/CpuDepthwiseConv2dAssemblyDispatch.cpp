@@ -110,7 +110,7 @@ void CpuDepthwiseConv2dAssemblyDispatch::run(ITensorPack &tensors)
 
     // Split over rows (z) if there's more than 1, otherwise batches (w). This logic
     // corresponds to the threading strategy in DepthFirstDriver::execute_internal
-    auto split_dimension = _pImpl->asm_kernel->window().num_iterations(Window::DimZ) == 1 ? Window::DimZ : Window::DimW;
+    auto split_dimension = _pImpl->asm_kernel->window().num_iterations(Window::DimZ) != 1 ? Window::DimZ : Window::DimW;
 
     NEScheduler::get().schedule_op(_pImpl->asm_kernel.get(), split_dimension, _pImpl->asm_kernel->window(), tensors);
 }
