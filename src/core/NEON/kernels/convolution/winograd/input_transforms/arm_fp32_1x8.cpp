@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,11 +31,11 @@ namespace input_transform {
 
 void arm_fp32_1x8(
   const unsigned int n_channels,
-  const float *const input_base,
+  const float * input_base,
   size_t,  // We don't need to stride over rows
-  const size_t input_col_stride,
+  size_t input_col_stride,
   float *outptr,
-  const size_t matrix_stride
+  size_t matrix_stride
 )
 {
   constexpr int inner_tile_cols = 8;
