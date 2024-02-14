@@ -1,0 +1,4 @@
+var structarm__conv_1_1depthwise_1_1_planar_kernel_type_3_01_t_input_00_01_t_weight_00_01_t_output_00_01_t_accum_00_01_nothing_01_4 =
+[
+    [ "Type", "structarm__conv_1_1depthwise_1_1_planar_kernel_type_3_01_t_input_00_01_t_weight_00_01_t_output_00_01_t_accum_00_01_nothing_01_4.xhtml#af698b468a5157e13732120579986b7c6", null ]
+];

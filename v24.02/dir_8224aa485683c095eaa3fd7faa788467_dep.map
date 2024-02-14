@@ -1,0 +1,10 @@
+<map id="src/core/NEON/wrapper" name="src/core/NEON/wrapper">
+<area shape="rect" id="node2" href="dir_bc2a33106e4dbca04e80e17904e2949d.xhtml" title="intrinsics" alt="" coords="38,159,119,207"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000029_000030.xhtml" title="1" alt="" coords="117,145,127,160"/>
+<area shape="rect" id="node3" href="dir_f9427c208c41c5c69e9fd49708c1bf01.xhtml" title="scalar" alt="" coords="144,159,216,207"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000029_000473.xhtml" title="1" alt="" coords="183,133,193,148"/>
+<area shape="rect" id="node4" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="248,159,360,207"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000029_000000.xhtml" title="2" alt="" coords="259,134,269,148"/>
+<area shape="rect" id="clust2" href="dir_8224aa485683c095eaa3fd7faa788467.xhtml" alt="" coords="27,52,227,217"/>
+<area shape="rect" id="clust1" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml" title="NEON" alt="" coords="16,16,237,228"/>
+</map>
