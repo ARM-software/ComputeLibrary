@@ -1,0 +1,11 @@
+digraph "src/runtime/OMP" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_bf9f26469d00835ba20ff8d80ee5a804 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="runtime" fontname="Helvetica", fontsize="10", URL="dir_bf9f26469d00835ba20ff8d80ee5a804.xhtml"]
+  dir_016fa5637888b23a90b93c4e98f1766c [shape=box, label="OMP", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_016fa5637888b23a90b93c4e98f1766c.xhtml"];
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_016fa5637888b23a90b93c4e98f1766c->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="5", labeldistance=1.5 headhref="dir_000546_000000.xhtml"];
+}

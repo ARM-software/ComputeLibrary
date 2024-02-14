@@ -1,0 +1,9 @@
+digraph "arm_compute/runtime/OMP" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_8bc26130589aa16388b5a02f17abf2c2 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="runtime" fontname="Helvetica", fontsize="10", URL="dir_8bc26130589aa16388b5a02f17abf2c2.xhtml"]
+  dir_b88a6d23833cc7e200916be8af5e3057 [shape=box, label="OMP", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_b88a6d23833cc7e200916be8af5e3057.xhtml"];
+  }
+}

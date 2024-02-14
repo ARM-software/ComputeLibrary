@@ -1,0 +1,20 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_i_accessor.xhtml",tooltip="Common interface to provide information and access to tensor like structures."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="SimpleTensor\< uint8_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_simple_tensor.xhtml",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="RawTensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_raw_tensor.xhtml",tooltip="Subclass of SimpleTensor using uint8_t as value type."];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="Accessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_accessor.xhtml",tooltip="Accessor implementation for Tensor objects."];
+  Node0 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="CLAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_c_l_accessor.xhtml",tooltip="Accessor implementation for CLTensor objects."];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="SimpleTensor\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_simple_tensor.xhtml",tooltip="Simple tensor object that stores elements in a consecutive chunk of memory."];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="SimpleTensorAccessor\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_simple_tensor_accessor.xhtml",tooltip="Accessor implementation for SimpleTensor objects."];
+}

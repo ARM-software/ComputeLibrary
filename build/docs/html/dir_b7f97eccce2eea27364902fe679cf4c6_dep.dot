@@ -1,0 +1,11 @@
+digraph "src/core/NEON/kernels/arm_conv/depthwise/interleaves" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_abb214ad2a926c78a0f27cabc6cb4a00 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="depthwise" fontname="Helvetica", fontsize="10", URL="dir_abb214ad2a926c78a0f27cabc6cb4a00.xhtml"]
+  dir_b7f97eccce2eea27364902fe679cf4c6 [shape=box, label="interleaves", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_b7f97eccce2eea27364902fe679cf4c6.xhtml"];
+  }
+  dir_9847dd9cb7a28e46201717fa7336cf62 [shape=box label="arm_gemm" fillcolor="white" style="filled" color="red" URL="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml"];
+  dir_b7f97eccce2eea27364902fe679cf4c6->dir_9847dd9cb7a28e46201717fa7336cf62 [headlabel="1", labeldistance=1.5 headhref="dir_000104_000233.xhtml"];
+}

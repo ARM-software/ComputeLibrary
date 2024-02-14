@@ -1,0 +1,22 @@
+digraph "src/cpu/kernels/sub" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_1de7bcbbdec2bf3559cb3c688662d4f5 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="kernels" fontname="Helvetica", fontsize="10", URL="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml"]
+  dir_7f0c74cf3e327840dbe789f241faca2d [shape=box label="add" fillcolor="white" style="filled" color="red" URL="dir_7f0c74cf3e327840dbe789f241faca2d.xhtml"];
+  subgraph clusterdir_c23da6d0121d9e41cbcfbd10d12118af {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_c23da6d0121d9e41cbcfbd10d12118af.xhtml"];
+    dir_c23da6d0121d9e41cbcfbd10d12118af [shape=plaintext label="sub"];
+  dir_ed28a18a0c8f834a856026c95063e21d [shape=box label="neon" fillcolor="white" style="filled" URL="dir_ed28a18a0c8f834a856026c95063e21d.xhtml"];
+  }
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183 [shape=box label="core" fillcolor="white" style="filled" color="red" URL="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="686", labeldistance=1.5 headhref="dir_000017_000000.xhtml"];
+  dir_ed28a18a0c8f834a856026c95063e21d->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="16", labeldistance=1.5 headhref="dir_000415_000000.xhtml"];
+  dir_ed28a18a0c8f834a856026c95063e21d->dir_7f0c74cf3e327840dbe789f241faca2d [headlabel="2", labeldistance=1.5 headhref="dir_000415_000376.xhtml"];
+  dir_ed28a18a0c8f834a856026c95063e21d->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="6", labeldistance=1.5 headhref="dir_000415_000017.xhtml"];
+  dir_7f0c74cf3e327840dbe789f241faca2d->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="36", labeldistance=1.5 headhref="dir_000376_000000.xhtml"];
+  dir_7f0c74cf3e327840dbe789f241faca2d->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="12", labeldistance=1.5 headhref="dir_000376_000017.xhtml"];
+}

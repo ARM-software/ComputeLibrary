@@ -1,0 +1,26 @@
+digraph "tests/validation/dynamic_fusion" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_e7c7b16542faa38cb4655ff1750d3604 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="validation" fontname="Helvetica", fontsize="10", URL="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml"]
+  dir_46fdb196cebdbffe77dac340cde62f29 [shape=box label="reference" URL="dir_46fdb196cebdbffe77dac340cde62f29.xhtml"];
+  subgraph clusterdir_d178b4fe845b8ce36c704432820c8c40 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_d178b4fe845b8ce36c704432820c8c40.xhtml"];
+    dir_d178b4fe845b8ce36c704432820c8c40 [shape=plaintext label="dynamic_fusion"];
+  dir_36525c4f440e1302e710dd3570052bdf [shape=box label="gpu" fillcolor="white" style="filled" color="red" URL="dir_36525c4f440e1302e710dd3570052bdf.xhtml"];
+  }
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_896191444cf08ec8ade6f88256cb2bdd [shape=box label="CL" URL="dir_896191444cf08ec8ade6f88256cb2bdd.xhtml"];
+  dir_9e71e2da941d3cafc4d98a9f6ae3de4f [shape=box label="framework" fillcolor="white" style="filled" color="red" URL="dir_9e71e2da941d3cafc4d98a9f6ae3de4f.xhtml"];
+  dir_46fdb196cebdbffe77dac340cde62f29->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="82", labeldistance=1.5 headhref="dir_000040_000000.xhtml"];
+  dir_46fdb196cebdbffe77dac340cde62f29->dir_9e71e2da941d3cafc4d98a9f6ae3de4f [headlabel="2", labeldistance=1.5 headhref="dir_000040_000038.xhtml"];
+  dir_9e71e2da941d3cafc4d98a9f6ae3de4f->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="16", labeldistance=1.5 headhref="dir_000038_000000.xhtml"];
+  dir_36525c4f440e1302e710dd3570052bdf->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="39", labeldistance=1.5 headhref="dir_000558_000000.xhtml"];
+  dir_36525c4f440e1302e710dd3570052bdf->dir_46fdb196cebdbffe77dac340cde62f29 [headlabel="8", labeldistance=1.5 headhref="dir_000558_000040.xhtml"];
+  dir_36525c4f440e1302e710dd3570052bdf->dir_896191444cf08ec8ade6f88256cb2bdd [headlabel="13", labeldistance=1.5 headhref="dir_000558_000553.xhtml"];
+  dir_36525c4f440e1302e710dd3570052bdf->dir_9e71e2da941d3cafc4d98a9f6ae3de4f [headlabel="37", labeldistance=1.5 headhref="dir_000558_000038.xhtml"];
+  dir_896191444cf08ec8ade6f88256cb2bdd->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="6", labeldistance=1.5 headhref="dir_000553_000000.xhtml"];
+  dir_896191444cf08ec8ade6f88256cb2bdd->dir_9e71e2da941d3cafc4d98a9f6ae3de4f [headlabel="1", labeldistance=1.5 headhref="dir_000553_000038.xhtml"];
+}

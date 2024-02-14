@@ -1,0 +1,11 @@
+digraph "tests/framework/printers" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_9e71e2da941d3cafc4d98a9f6ae3de4f {
+    graph [ bgcolor="#ddddee", pencolor="black", label="framework" fontname="Helvetica", fontsize="10", URL="dir_9e71e2da941d3cafc4d98a9f6ae3de4f.xhtml"]
+  dir_4efd0ee2ecda32567e74991b08d544ea [shape=box label="instruments" URL="dir_4efd0ee2ecda32567e74991b08d544ea.xhtml"];
+  dir_68cb0bded1cc5601c88ddaacbb31e482 [shape=box, label="printers", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_68cb0bded1cc5601c88ddaacbb31e482.xhtml"];
+  }
+  dir_68cb0bded1cc5601c88ddaacbb31e482->dir_4efd0ee2ecda32567e74991b08d544ea [headlabel="3", labeldistance=1.5 headhref="dir_000047_000557.xhtml"];
+}

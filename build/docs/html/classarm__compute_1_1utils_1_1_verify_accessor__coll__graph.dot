@@ -1,0 +1,36 @@
+digraph "VerifyAccessor&lt; D &gt;"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="VerifyAccessor\< D \>",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Graph example validation accessor class."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ITensorAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml",tooltip="Tensor accessor interface."];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" _params" ,fontname="Helvetica"];
+  Node3 [label="ExampleParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_example_params.xhtml",tooltip="Structure holding all the graph Example parameters."];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="CommonParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_common_params.xhtml",tooltip="Structure holding all the graph Example parameters."];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" data_type" ,fontname="Helvetica"];
+  Node5 [label="DataType",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node6 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" bias\ninput\noutput\nweights" ,fontname="Helvetica"];
+  Node6 [label="TensorParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_tensor_params.xhtml",tooltip="Structure holding all the input tensor graph parameters."];
+  Node7 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" quant_info" ,fontname="Helvetica"];
+  Node7 [label="QuantizationInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_quantization_info.xhtml",tooltip="Quantization information."];
+  Node8 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" verification" ,fontname="Helvetica"];
+  Node8 [label="VerificationParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_verification_params.xhtml",tooltip="Structure holding all the verification graph parameters."];
+  Node9 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" common_params" ,fontname="Helvetica"];
+  Node9 [label="FrameworkParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_framework_params.xhtml",tooltip="Structure holding all the common graph parameters."];
+  Node10 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" data_layout" ,fontname="Helvetica"];
+  Node10 [label="DataLayout",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node11 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" convolution" ,fontname="Helvetica"];
+  Node11 [label="ConvolutionParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_convolution_params.xhtml",tooltip="Structure holding all the Convolution layer graph parameters."];
+  Node12 -> Node11 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" padding\nstride" ,fontname="Helvetica"];
+  Node12 [label="struct",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node13 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" fully_connected" ,fontname="Helvetica"];
+  Node13 [label="FullyConnectedParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_fully_connected_params.xhtml",tooltip="Structure holding all the fully_connected layer graph parameters."];
+  Node14 -> Node13 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" info" ,fontname="Helvetica"];
+  Node14 [label="FullyConnectedLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_fully_connected_layer_info.xhtml",tooltip="Fully connected layer info."];
+  Node15 -> Node14 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" activation_info" ,fontname="Helvetica"];
+  Node15 [label="ActivationLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_activation_layer_info.xhtml",tooltip="Activation Layer Information class."];
+}

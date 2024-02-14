@@ -1,0 +1,15 @@
+digraph "tests/validation/cpu" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_e7c7b16542faa38cb4655ff1750d3604 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="validation" fontname="Helvetica", fontsize="10", URL="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml"]
+  subgraph clusterdir_58f3176b1e99b444b21d021594354993 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_58f3176b1e99b444b21d021594354993.xhtml"];
+    dir_58f3176b1e99b444b21d021594354993 [shape=plaintext label="cpu"];
+  dir_de8ca8351c4b1c74337051de1ebf6d17 [shape=box label="unit" fillcolor="white" style="filled" URL="dir_de8ca8351c4b1c74337051de1ebf6d17.xhtml"];
+  }
+  }
+  dir_68267d1309a1af8e8297ef4c3efbcdba [shape=box label="src" fillcolor="white" style="filled" color="red" URL="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml"];
+  dir_de8ca8351c4b1c74337051de1ebf6d17->dir_68267d1309a1af8e8297ef4c3efbcdba [headlabel="2", labeldistance=1.5 headhref="dir_000089_000003.xhtml"];
+}

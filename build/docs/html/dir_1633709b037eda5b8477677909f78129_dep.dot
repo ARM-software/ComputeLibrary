@@ -1,0 +1,9 @@
+digraph "arm_compute/core/CL" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_1fb090f0c6070330bfaccc4236d3ca0d {
+    graph [ bgcolor="#ddddee", pencolor="black", label="core" fontname="Helvetica", fontsize="10", URL="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml"]
+  dir_1633709b037eda5b8477677909f78129 [shape=box, label="CL", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_1633709b037eda5b8477677909f78129.xhtml"];
+  }
+}

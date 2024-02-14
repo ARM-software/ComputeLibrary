@@ -1,0 +1,11 @@
+digraph "ContainerDataset&lt; T &gt;"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="ContainerDataset\< T \>",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Implementation of a dataset created from a container."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="NamedDataset",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset.xhtml",tooltip="Abstract implementation of a named dataset."];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="Dataset",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_dataset.xhtml",tooltip="Abstract dataset base class."];
+}

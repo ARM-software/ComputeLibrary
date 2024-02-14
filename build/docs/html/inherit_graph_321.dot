@@ -1,0 +1,20 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IMemoryRegion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_memory_region.xhtml",tooltip="Memory region interface."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="ICLMemoryRegion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_c_l_memory_region.xhtml",tooltip="OpenCL memory region interface."];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="CLBufferMemoryRegion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_c_l_buffer_memory_region.xhtml",tooltip="OpenCL buffer memory region implementation."];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="ICLSVMMemoryRegion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_c_l_s_v_m_memory_region.xhtml",tooltip="OpenCL SVM memory region interface."];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="CLCoarseSVMMemoryRegion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_c_l_coarse_s_v_m_memory_region.xhtml",tooltip="OpenCL coarse-grain SVM memory region implementation."];
+  Node3 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="CLFineSVMMemoryRegion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_c_l_fine_s_v_m_memory_region.xhtml",tooltip="OpenCL fine-grain SVM memory region implementation."];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="MemoryRegion",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_memory_region.xhtml",tooltip="Memory region CPU implementation."];
+}

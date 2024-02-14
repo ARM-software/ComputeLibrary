@@ -1,0 +1,11 @@
+digraph "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_032f7aa13c62ebf44c0c8538051c1ee7 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="kernels" fontname="Helvetica", fontsize="10", URL="dir_032f7aa13c62ebf44c0c8538051c1ee7.xhtml"]
+  dir_833cd37eb4afaff020c00d6902fb38e5 [shape=box, label="sve_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_833cd37eb4afaff020c00d6902fb38e5.xhtml"];
+  }
+  dir_2c61f424fd391396db977702a2beee9a [shape=box label="cpu" fillcolor="white" style="filled" color="red" URL="dir_2c61f424fd391396db977702a2beee9a.xhtml"];
+  dir_833cd37eb4afaff020c00d6902fb38e5->dir_2c61f424fd391396db977702a2beee9a [headlabel="1", labeldistance=1.5 headhref="dir_000166_000373.xhtml"];
+}

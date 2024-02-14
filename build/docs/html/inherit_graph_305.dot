@@ -1,0 +1,12 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IGpuKernelWriter",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_i_gpu_kernel_writer.xhtml",tooltip="An interface that can write a gpu kernel."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="ClTemplateWriter",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_template_writer.xhtml",tooltip="Use a templated-string-based method to write kernel code It stitches the component code templates tog..."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="GpuCkwDriver",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_gpu_ckw_driver.xhtml",tooltip="Use Kernel Writer to write kernel code Used by dynamic_fusion module."];
+}

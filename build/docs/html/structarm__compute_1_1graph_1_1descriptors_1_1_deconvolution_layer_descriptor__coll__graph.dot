@@ -1,0 +1,11 @@
+digraph "DeconvolutionLayerDescriptor"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="DeconvolutionLayerDescriptor",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Deconvolution layer descriptor."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" info" ,fontname="Helvetica"];
+  Node2 [label="PadStrideInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_pad_stride_info.xhtml",tooltip=" "];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" out_quant_info" ,fontname="Helvetica"];
+  Node3 [label="QuantizationInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_quantization_info.xhtml",tooltip="Quantization information."];
+}

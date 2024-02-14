@@ -1,0 +1,8 @@
+digraph "support" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  dir_5815af820a9cc9481f1d0990a0d60286 [shape=box, label="support", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_5815af820a9cc9481f1d0990a0d60286.xhtml"];
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_5815af820a9cc9481f1d0990a0d60286->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="6", labeldistance=1.5 headhref="dir_000031_000000.xhtml"];
+}

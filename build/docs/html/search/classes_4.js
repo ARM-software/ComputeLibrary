@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['edge_12943',['Edge',['../classarm__compute_1_1graph_1_1_edge.xhtml',1,'arm_compute::graph']]],
+  ['elementwisebinarycommonattributes_12944',['ElementwiseBinaryCommonAttributes',['../classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_elementwise_binary_common_attributes.xhtml',1,'arm_compute::experimental::dynamic_fusion']]],
+  ['elementwisedatatypeisaselectordata_12945',['ElementwiseDataTypeISASelectorData',['../structarm__compute_1_1cpu_1_1kernels_1_1_elementwise_data_type_i_s_a_selector_data.xhtml',1,'arm_compute::cpu::kernels']]],
+  ['elementwisekernel_12946',['ElementwiseKernel',['../structarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_kernel_1_1_elementwise_kernel.xhtml',1,'arm_compute::cpu::kernels::CpuElementwiseKernel']]],
+  ['elementwiseunarykernel_12947',['ElementwiseUnaryKernel',['../structarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_unary_kernel_1_1_elementwise_unary_kernel.xhtml',1,'arm_compute::cpu::kernels::CpuElementwiseUnaryKernel']]],
+  ['eltwiselayer_12948',['EltwiseLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_eltwise_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['eltwiselayerdescriptor_12949',['EltwiseLayerDescriptor',['../structarm__compute_1_1graph_1_1descriptors_1_1_eltwise_layer_descriptor.xhtml',1,'arm_compute::graph::descriptors']]],
+  ['eltwiselayernode_12950',['EltwiseLayerNode',['../classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml',1,'arm_compute::graph']]],
+  ['enable_5fbitwise_5fops_12951',['enable_bitwise_ops',['../structarm__compute_1_1enable__bitwise__ops.xhtml',1,'arm_compute']]],
+  ['enable_5fbitwise_5fops_3c_20arm_5fcompute_3a_3agputarget_20_3e_12952',['enable_bitwise_ops&lt; arm_compute::GPUTarget &gt;',['../structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml',1,'arm_compute']]],
+  ['enumlistoption_12953',['EnumListOption',['../classarm__compute_1_1utils_1_1_enum_list_option.xhtml',1,'arm_compute::utils']]],
+  ['enumlistoption_3c_20instrumentsdescription_20_3e_12954',['EnumListOption&lt; InstrumentsDescription &gt;',['../classarm__compute_1_1utils_1_1_enum_list_option.xhtml',1,'arm_compute::utils']]],
+  ['enumoption_12955',['EnumOption',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
+  ['enumoption_3c_20arm_5fcompute_3a_3acltunermode_20_3e_12956',['EnumOption&lt; arm_compute::CLTunerMode &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
+  ['enumoption_3c_20arm_5fcompute_3a_3adatalayout_20_3e_12957',['EnumOption&lt; arm_compute::DataLayout &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
+  ['enumoption_3c_20arm_5fcompute_3a_3adatatype_20_3e_12958',['EnumOption&lt; arm_compute::DataType &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
+  ['enumoption_3c_20arm_5fcompute_3a_3agraph_3a_3atarget_20_3e_12959',['EnumOption&lt; arm_compute::graph::Target &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
+  ['enumoption_3c_20logformat_20_3e_12960',['EnumOption&lt; LogFormat &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
+  ['enumoption_3c_20loglevel_20_3e_12961',['EnumOption&lt; LogLevel &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
+  ['erflutentry_12962',['ErfLutEntry',['../structarm__compute_1_1_erf_lut_entry.xhtml',1,'arm_compute']]],
+  ['example_12963',['Example',['../classarm__compute_1_1utils_1_1_example.xhtml',1,'arm_compute::utils']]],
+  ['exampleparams_12964',['ExampleParams',['../structarm__compute_1_1utils_1_1_example_params.xhtml',1,'arm_compute::utils']]],
+  ['executiontask_12965',['ExecutionTask',['../structarm__compute_1_1graph_1_1_execution_task.xhtml',1,'arm_compute::graph']]],
+  ['executionworkload_12966',['ExecutionWorkload',['../structarm__compute_1_1graph_1_1_execution_workload.xhtml',1,'arm_compute::graph']]]
+];

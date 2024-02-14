@@ -1,0 +1,11 @@
+digraph "FullyConnectedParams"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="FullyConnectedParams",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Structure holding all the fully_connected layer graph parameters."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" info" ,fontname="Helvetica"];
+  Node2 [label="FullyConnectedLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_fully_connected_layer_info.xhtml",tooltip="Fully connected layer info."];
+  Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" activation_info" ,fontname="Helvetica"];
+  Node3 [label="ActivationLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_activation_layer_info.xhtml",tooltip="Activation Layer Information class."];
+}

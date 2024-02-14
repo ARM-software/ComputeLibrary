@@ -1,0 +1,9 @@
+digraph "CLMutableCommandBuffer"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="CLMutableCommandBuffer",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Command buffer implementaton based on CL mutable dispatch command buffer extension."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="CLCommandBuffer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_c_l_command_buffer.xhtml",tooltip="Command buffer contains a list of commands that is constructed once and later enqueued multiple times..."];
+}

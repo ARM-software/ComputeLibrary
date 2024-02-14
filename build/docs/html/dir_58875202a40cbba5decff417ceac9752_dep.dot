@@ -1,0 +1,18 @@
+digraph "src/cpu/kernels/meanstddevnorm" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_1de7bcbbdec2bf3559cb3c688662d4f5 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="kernels" fontname="Helvetica", fontsize="10", URL="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml"]
+  subgraph clusterdir_58875202a40cbba5decff417ceac9752 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_58875202a40cbba5decff417ceac9752.xhtml"];
+    dir_58875202a40cbba5decff417ceac9752 [shape=plaintext label="meanstddevnorm"];
+  dir_d4584240033af5aa2f3fe3bbd7b0af82 [shape=box label="generic" fillcolor="white" style="filled" color="red" URL="dir_d4584240033af5aa2f3fe3bbd7b0af82.xhtml"];
+  }
+  }
+  dir_aebb8dcc11953d78e620bbef0b9e2183 [shape=box label="core" fillcolor="white" style="filled" color="red" URL="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml"];
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_d4584240033af5aa2f3fe3bbd7b0af82->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="4", labeldistance=1.5 headhref="dir_000461_000017.xhtml"];
+  dir_d4584240033af5aa2f3fe3bbd7b0af82->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="3", labeldistance=1.5 headhref="dir_000461_000000.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="686", labeldistance=1.5 headhref="dir_000017_000000.xhtml"];
+}

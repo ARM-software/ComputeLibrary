@@ -1,0 +1,16 @@
+digraph "src/cpu/kernels/addmuladd" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_1de7bcbbdec2bf3559cb3c688662d4f5 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="kernels" fontname="Helvetica", fontsize="10", URL="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml"]
+  subgraph clusterdir_aee67d0e886ff83db98501018f2989c4 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_aee67d0e886ff83db98501018f2989c4.xhtml"];
+    dir_aee67d0e886ff83db98501018f2989c4 [shape=plaintext label="addmuladd"];
+  dir_591370e390cd0164f31c67a3dd5027ba [shape=box label="generic" fillcolor="white" style="filled" color="red" URL="dir_591370e390cd0164f31c67a3dd5027ba.xhtml"];
+  }
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_aee67d0e886ff83db98501018f2989c4->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="25", labeldistance=1.5 headhref="dir_000377_000000.xhtml"];
+  dir_591370e390cd0164f31c67a3dd5027ba->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="22", labeldistance=1.5 headhref="dir_000424_000000.xhtml"];
+}

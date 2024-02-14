@@ -1,0 +1,9 @@
+digraph "src/cpu/kernels/lut/generic/neon" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_759ad130c4d2ade5bdd75789c156321e {
+    graph [ bgcolor="#ddddee", pencolor="black", label="generic" fontname="Helvetica", fontsize="10", URL="dir_759ad130c4d2ade5bdd75789c156321e.xhtml"]
+  dir_bcdcfeafa1fc614e266e5c60698ef6ce [shape=box, label="neon", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_bcdcfeafa1fc614e266e5c60698ef6ce.xhtml"];
+  }
+}

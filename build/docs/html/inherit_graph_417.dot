@@ -1,0 +1,46 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Option",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_option.xhtml",tooltip="Abstract base class for a command line option."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="EnumListOption\< Instruments\lDescription \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_list_option.xhtml",tooltip=" "];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="SimpleOption\< std::\lstring \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="SimpleOption\< float \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node0 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="SimpleOption\< int \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="SimpleOption\< arm_compute\l::CLTunerMode \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node5 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="EnumOption\< arm_compute\l::CLTunerMode \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="SimpleOption\< unsigned\l int \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node0 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="SimpleOption\< size_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node0 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="SimpleOption\< bool \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node9 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="ToggleOption",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_toggle_option.xhtml",tooltip="Implementation of an option that can be either true or false."];
+  Node0 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="EnumListOption\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_list_option.xhtml",tooltip="Implementation of an option that accepts any number of values from a fixed set."];
+  Node0 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="ListOption\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_list_option.xhtml",tooltip="Implementation of an option that accepts any number of values."];
+  Node0 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="SimpleOption\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip="Implementation of an option that accepts a single value."];
+  Node13 -> Node14 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node14 [label="EnumOption\< LogFormat \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node13 -> Node15 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node15 [label="EnumOption\< arm_compute\l::graph::Target \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node13 -> Node16 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node16 [label="EnumOption\< LogLevel \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node13 -> Node17 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node17 [label="EnumOption\< arm_compute\l::DataLayout \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node13 -> Node18 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node18 [label="EnumOption\< arm_compute\l::DataType \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node13 -> Node19 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node19 [label="EnumOption\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip="Implementation of a simple option that accepts a value from a fixed set."];
+}

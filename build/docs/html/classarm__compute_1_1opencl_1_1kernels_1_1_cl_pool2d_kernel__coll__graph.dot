@@ -1,0 +1,17 @@
+digraph "ClPool2dKernel"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="ClPool2dKernel",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Interface for the pooling layer kernel."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="IClKernel",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_c_l_kernel.xhtml",tooltip="Common interface for all the OpenCL kernels."];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="IKernel",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_kernel.xhtml",tooltip="Common information for all the kernels."];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" _pool_info" ,fontname="Helvetica"];
+  Node4 [label="PoolingLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_pooling_layer_info.xhtml",tooltip="Pooling Layer Information struct."];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" pad_stride_info" ,fontname="Helvetica"];
+  Node5 [label="PadStrideInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_pad_stride_info.xhtml",tooltip=" "];
+  Node6 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" pool_size" ,fontname="Helvetica"];
+  Node6 [label="Size2D",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_size2_d.xhtml",tooltip="Class for specifying the size of an image or rectangle."];
+}

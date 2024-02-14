@@ -1,0 +1,9 @@
+digraph "CpuCapabilities"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="CpuCapabilities",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Structure that encodes the CPU capabilities to be used."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" cpu_info" ,fontname="Helvetica"];
+  Node2 [label="CpuInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cpuinfo_1_1_cpu_info.xhtml",tooltip="Aggregate class that contains CPU related information."];
+}

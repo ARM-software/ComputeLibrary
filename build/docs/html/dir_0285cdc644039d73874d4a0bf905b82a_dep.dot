@@ -1,0 +1,15 @@
+digraph "src/cpu/kernels/depth_to_space/nchw" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_40191566c84c2de2358bfd3154ec47bb {
+    graph [ bgcolor="#ddddee", pencolor="black", label="depth_to_space" fontname="Helvetica", fontsize="10", URL="dir_40191566c84c2de2358bfd3154ec47bb.xhtml"]
+  subgraph clusterdir_0285cdc644039d73874d4a0bf905b82a {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_0285cdc644039d73874d4a0bf905b82a.xhtml"];
+    dir_0285cdc644039d73874d4a0bf905b82a [shape=plaintext label="nchw"];
+  dir_55530cf51a5542e0a945b74c3ec0567e [shape=box label="any" fillcolor="white" style="filled" URL="dir_55530cf51a5542e0a945b74c3ec0567e.xhtml"];
+  }
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_55530cf51a5542e0a945b74c3ec0567e->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="1", labeldistance=1.5 headhref="dir_000485_000000.xhtml"];
+}

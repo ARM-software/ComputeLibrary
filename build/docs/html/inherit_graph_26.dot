@@ -1,0 +1,20 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1531 [label="NamedTuple",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node1531 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node0 [label="BenchmarkResult",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_gemm_tuner_1_1_benchmark_result.xhtml",tooltip=" "];
+  Node1531 -> Node1533 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1533 [label="GEMMParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_gemm_tuner_1_1_g_e_m_m_param.xhtml",tooltip=" "];
+  Node1531 -> Node1534 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1534 [label="Measurement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_gemm_tuner_1_1_measurement.xhtml",tooltip=" "];
+  Node1531 -> Node1535 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1535 [label="NativeGEMMConfig",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_gemm_tuner_1_1_native_g_e_m_m_config.xhtml",tooltip=" "];
+  Node1531 -> Node1536 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1536 [label="ReshapedGEMMConfig",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_gemm_tuner_1_1_reshaped_g_e_m_m_config.xhtml",tooltip=" "];
+  Node1531 -> Node1537 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1537 [label="ReshapedOnlyRHSGEMMConfig",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_gemm_tuner_1_1_reshaped_only_r_h_s_g_e_m_m_config.xhtml",tooltip=" "];
+}

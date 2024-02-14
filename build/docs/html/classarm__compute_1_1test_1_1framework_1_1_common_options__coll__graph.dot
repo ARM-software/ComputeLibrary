@@ -1,0 +1,41 @@
+digraph "CommonOptions"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="CommonOptions",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Common command line options used to configure the framework."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" log_level" ,fontname="Helvetica"];
+  Node2 [label="EnumOption\< LogLevel \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="SimpleOption\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip="Implementation of an option that accepts a single value."];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="Option",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_option.xhtml",tooltip="Abstract base class for a command line option."];
+  Node5 -> Node2 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< LogLevel \>" ,fontname="Helvetica"];
+  Node5 [label="EnumOption\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip="Implementation of a simple option that accepts a value from a fixed set."];
+  Node3 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" instruments" ,fontname="Helvetica"];
+  Node6 [label="EnumListOption\< Instruments\lDescription \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_list_option.xhtml",tooltip=" "];
+  Node4 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 -> Node6 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< InstrumentsDescription \>" ,fontname="Helvetica"];
+  Node7 [label="EnumListOption\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_list_option.xhtml",tooltip="Implementation of an option that accepts any number of values from a fixed set."];
+  Node4 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" color_output\nhelp\npretty_console\nthrow_errors" ,fontname="Helvetica"];
+  Node8 [label="ToggleOption",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_toggle_option.xhtml",tooltip="Implementation of an option that can be either true or false."];
+  Node9 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="SimpleOption\< bool \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node4 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node9 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< bool \>" ,fontname="Helvetica"];
+  Node10 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" iterations" ,fontname="Helvetica"];
+  Node10 [label="SimpleOption\< int \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node4 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node10 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< int \>" ,fontname="Helvetica"];
+  Node11 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" log_format" ,fontname="Helvetica"];
+  Node11 [label="EnumOption\< LogFormat \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_enum_option.xhtml",tooltip=" "];
+  Node3 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node11 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< LogFormat \>" ,fontname="Helvetica"];
+  Node12 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" json_file\nlog_file\npretty_file" ,fontname="Helvetica"];
+  Node12 [label="SimpleOption\< std::\lstring \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_simple_option.xhtml",tooltip=" "];
+  Node4 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node12 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< std::string \>" ,fontname="Helvetica"];
+}

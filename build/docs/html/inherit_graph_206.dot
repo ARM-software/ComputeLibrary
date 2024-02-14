@@ -1,0 +1,8 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="GEMMLHSMatrixInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml",tooltip="GEMM LHS (Left Hand Side) matrix information."];
+}

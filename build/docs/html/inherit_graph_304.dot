@@ -1,0 +1,32 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IGpuKernelComponent",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_i_gpu_kernel_component.xhtml",tooltip="An abstract interface of a component."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="ClComponentActivation",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_activation.xhtml",tooltip=" "];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ClComponentCast",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_cast.xhtml",tooltip=" "];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="ClComponentDepthwiseConv2d",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_depthwise_conv2d.xhtml",tooltip=" "];
+  Node0 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="ClComponentDirectConv2d",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_direct_conv2d.xhtml",tooltip=" "];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="ClComponentElementwiseBinary",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_elementwise_binary.xhtml",tooltip=" "];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="ClComponentLogits1DMaxShift\lExpSum",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_logits1_d_max_shift_exp_sum.xhtml",tooltip="Component to calculate max-shifted exponentials and their sum."];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="ClComponentLogits1DNorm",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_logits1_d_norm.xhtml",tooltip="Component to calculate the final step of the Softmax Layer where each logit value is multiplied by th..."];
+  Node0 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="ClComponentMatMul",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_mat_mul.xhtml",tooltip=" "];
+  Node0 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="ClComponentPool2d",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_pool2d.xhtml",tooltip=" "];
+  Node0 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="ClComponentReshape",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_reshape.xhtml",tooltip=" "];
+  Node0 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="ClComponentResize",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_resize.xhtml",tooltip=" "];
+  Node0 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="ClComponentStore",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_component_store.xhtml",tooltip=" "];
+}

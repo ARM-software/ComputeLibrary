@@ -1,0 +1,11 @@
+digraph "CpuFloor"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="CpuFloor",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Basic function to run kernels::CpuFloorKernel."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ICpuOperator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1_i_n_e_operator.xhtml",tooltip="Basic interface for functions which have a single async CPU kernel."];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="IOperator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1_i_operator.xhtml",tooltip="Base class for all async functions."];
+}

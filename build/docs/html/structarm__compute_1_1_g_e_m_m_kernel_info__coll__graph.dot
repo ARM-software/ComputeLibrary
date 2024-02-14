@@ -1,0 +1,15 @@
+digraph "GEMMKernelInfo"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="GEMMKernelInfo",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Descriptor used by the GEMM kernels."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" output_stage" ,fontname="Helvetica"];
+  Node2 [label="GEMMLowpOutputStageInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml",tooltip="GEMMLowp output stage info."];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" lhs_info" ,fontname="Helvetica"];
+  Node3 [label="GEMMLHSMatrixInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml",tooltip="GEMM LHS (Left Hand Side) matrix information."];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" rhs_info" ,fontname="Helvetica"];
+  Node4 [label="GEMMRHSMatrixInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml",tooltip="GEMM RHS (Right Hand Side) matrix information."];
+  Node5 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" activation_info" ,fontname="Helvetica"];
+  Node5 [label="ActivationLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_activation_layer_info.xhtml",tooltip="Activation Layer Information class."];
+}

@@ -1,0 +1,35 @@
+digraph "src/dynamic_fusion/runtime/gpu/cl" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_084dc2df57e7ed7ac176c18ca580848e {
+    graph [ bgcolor="#ddddee", pencolor="black", label="gpu" fontname="Helvetica", fontsize="10", URL="dir_084dc2df57e7ed7ac176c18ca580848e.xhtml"]
+  subgraph clusterdir_19295c3848cb9fbcf1155f42ab5752ba {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_19295c3848cb9fbcf1155f42ab5752ba.xhtml"];
+    dir_19295c3848cb9fbcf1155f42ab5752ba [shape=plaintext label="cl"];
+  dir_4cbecf219386db6f382530754a6157e3 [shape=box label="ckw_driver" fillcolor="white" style="filled" URL="dir_4cbecf219386db6f382530754a6157e3.xhtml"];
+  }
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_5815af820a9cc9481f1d0990a0d60286 [shape=box label="support" URL="dir_5815af820a9cc9481f1d0990a0d60286.xhtml"];
+  dir_729ca8b25cabcdcb8b11b571ea7b237a [shape=box label="sketch" fillcolor="white" style="filled" color="red" URL="dir_729ca8b25cabcdcb8b11b571ea7b237a.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183 [shape=box label="core" fillcolor="white" style="filled" color="red" URL="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml"];
+  dir_cf895c1ed808af158264b2f3d8d7f8f0 [shape=box label="gpu" fillcolor="white" style="filled" color="red" URL="dir_cf895c1ed808af158264b2f3d8d7f8f0.xhtml"];
+  dir_cf895c1ed808af158264b2f3d8d7f8f0->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="631", labeldistance=1.5 headhref="dir_000004_000000.xhtml"];
+  dir_cf895c1ed808af158264b2f3d8d7f8f0->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="235", labeldistance=1.5 headhref="dir_000004_000017.xhtml"];
+  dir_cf895c1ed808af158264b2f3d8d7f8f0->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="110", labeldistance=1.5 headhref="dir_000004_000031.xhtml"];
+  dir_729ca8b25cabcdcb8b11b571ea7b237a->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="184", labeldistance=1.5 headhref="dir_000021_000000.xhtml"];
+  dir_729ca8b25cabcdcb8b11b571ea7b237a->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="11", labeldistance=1.5 headhref="dir_000021_000031.xhtml"];
+  dir_729ca8b25cabcdcb8b11b571ea7b237a->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="52", labeldistance=1.5 headhref="dir_000021_000017.xhtml"];
+  dir_729ca8b25cabcdcb8b11b571ea7b237a->dir_cf895c1ed808af158264b2f3d8d7f8f0 [headlabel="2", labeldistance=1.5 headhref="dir_000021_000004.xhtml"];
+  dir_214608ef36d61442cb2b0c1c4e9a7def->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="16", labeldistance=1.5 headhref="dir_000000_000031.xhtml"];
+  dir_19295c3848cb9fbcf1155f42ab5752ba->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="2", labeldistance=1.5 headhref="dir_000501_000031.xhtml"];
+  dir_19295c3848cb9fbcf1155f42ab5752ba->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="1", labeldistance=1.5 headhref="dir_000501_000017.xhtml"];
+  dir_19295c3848cb9fbcf1155f42ab5752ba->dir_cf895c1ed808af158264b2f3d8d7f8f0 [headlabel="3", labeldistance=1.5 headhref="dir_000501_000004.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="686", labeldistance=1.5 headhref="dir_000017_000000.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="55", labeldistance=1.5 headhref="dir_000017_000031.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_cf895c1ed808af158264b2f3d8d7f8f0 [headlabel="4", labeldistance=1.5 headhref="dir_000017_000004.xhtml"];
+  dir_5815af820a9cc9481f1d0990a0d60286->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="6", labeldistance=1.5 headhref="dir_000031_000000.xhtml"];
+  dir_4cbecf219386db6f382530754a6157e3->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="1", labeldistance=1.5 headhref="dir_000502_000000.xhtml"];
+  dir_4cbecf219386db6f382530754a6157e3->dir_729ca8b25cabcdcb8b11b571ea7b237a [headlabel="1", labeldistance=1.5 headhref="dir_000502_000021.xhtml"];
+}

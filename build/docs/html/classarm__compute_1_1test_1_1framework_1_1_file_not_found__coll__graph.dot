@@ -1,0 +1,9 @@
+digraph "FileNotFound"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="FileNotFound",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Error class for when some external assets are missing."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="runtime_error",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+}

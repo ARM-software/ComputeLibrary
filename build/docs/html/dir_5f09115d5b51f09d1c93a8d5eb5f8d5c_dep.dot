@@ -1,0 +1,14 @@
+digraph "src/runtime/CL/gemm" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_43c3fdbf778d1fd99e2e38f09fddd920 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="CL" fontname="Helvetica", fontsize="10", URL="dir_43c3fdbf778d1fd99e2e38f09fddd920.xhtml"]
+  dir_5f09115d5b51f09d1c93a8d5eb5f8d5c [shape=box, label="gemm", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_5f09115d5b51f09d1c93a8d5eb5f8d5c.xhtml"];
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_cf895c1ed808af158264b2f3d8d7f8f0 [shape=box label="gpu" fillcolor="white" style="filled" color="red" URL="dir_cf895c1ed808af158264b2f3d8d7f8f0.xhtml"];
+  dir_cf895c1ed808af158264b2f3d8d7f8f0->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="631", labeldistance=1.5 headhref="dir_000004_000000.xhtml"];
+  dir_5f09115d5b51f09d1c93a8d5eb5f8d5c->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="11", labeldistance=1.5 headhref="dir_000533_000000.xhtml"];
+  dir_5f09115d5b51f09d1c93a8d5eb5f8d5c->dir_cf895c1ed808af158264b2f3d8d7f8f0 [headlabel="3", labeldistance=1.5 headhref="dir_000533_000004.xhtml"];
+}

@@ -1,0 +1,22 @@
+digraph "src/cpu/kernels/elementwise_unary" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_1de7bcbbdec2bf3559cb3c688662d4f5 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="kernels" fontname="Helvetica", fontsize="10", URL="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml"]
+  dir_a5a25de4bd483a211edd2f30cef0dda2 [shape=box label="lut" fillcolor="white" style="filled" color="red" URL="dir_a5a25de4bd483a211edd2f30cef0dda2.xhtml"];
+  subgraph clusterdir_7b986f77a4cb09adf01d2578e4ce937d {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_7b986f77a4cb09adf01d2578e4ce937d.xhtml"];
+    dir_7b986f77a4cb09adf01d2578e4ce937d [shape=plaintext label="elementwise_unary"];
+  dir_15acb9606a67b692f1c5b11ae176d45d [shape=box label="generic" fillcolor="white" style="filled" color="red" URL="dir_15acb9606a67b692f1c5b11ae176d45d.xhtml"];
+  }
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183 [shape=box label="core" fillcolor="white" style="filled" color="red" URL="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml"];
+  dir_15acb9606a67b692f1c5b11ae176d45d->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="12", labeldistance=1.5 headhref="dir_000440_000000.xhtml"];
+  dir_15acb9606a67b692f1c5b11ae176d45d->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="3", labeldistance=1.5 headhref="dir_000440_000017.xhtml"];
+  dir_15acb9606a67b692f1c5b11ae176d45d->dir_a5a25de4bd483a211edd2f30cef0dda2 [headlabel="2", labeldistance=1.5 headhref="dir_000440_000395.xhtml"];
+  dir_a5a25de4bd483a211edd2f30cef0dda2->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="1", labeldistance=1.5 headhref="dir_000395_000000.xhtml"];
+  dir_7b986f77a4cb09adf01d2578e4ce937d->dir_15acb9606a67b692f1c5b11ae176d45d [headlabel="2", labeldistance=1.5 headhref="dir_000387_000440.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="686", labeldistance=1.5 headhref="dir_000017_000000.xhtml"];
+}

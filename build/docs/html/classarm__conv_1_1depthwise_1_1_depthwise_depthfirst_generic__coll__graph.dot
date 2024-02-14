@@ -1,0 +1,21 @@
+digraph "DepthwiseDepthfirstGeneric&lt; TInput, TWeight, TOutput, TAccum, OutputStage &gt;"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="DepthwiseDepthfirstGeneric\l\< TInput, TWeight, TOutput,\l TAccum, OutputStage \>",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="DepthwiseDepthfirstCommon\l\< TInput, TInput, TInput,\l typename DefaultTAccum\<\l TInput \>::Type, typename\l DefaultOutputStage\< TInput\l \>::Type \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_common.xhtml",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="DepthfirstDriver\< TInput,\l TInput, TInput \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthfirst_driver.xhtml",tooltip=" "];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="DepthwiseCommon\< TInput,\l TInput , TInput  \>",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node5 -> Node3 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< TInput, TInput, TInput \>" ,fontname="Helvetica"];
+  Node5 [label="DepthfirstDriver\< TInput,\l TWeight, TOutput \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthfirst_driver.xhtml",tooltip=" "];
+  Node6 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="DepthwiseCommon\< TInput,\l TWeight, TOutput \>",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node7 -> Node2 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< TInput, TInput, TInput,\l typename DefaultTAccum\l\< TInput \>::Type, typename\l DefaultOutputStage\< TInput\l \>::Type \>" ,fontname="Helvetica"];
+  Node7 [label="DepthwiseDepthfirstCommon\l\< TInput, TWeight, TOutput,\l TAccum, OutputStage \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_common.xhtml",tooltip=" "];
+  Node5 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

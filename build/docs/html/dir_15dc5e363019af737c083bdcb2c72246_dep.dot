@@ -1,0 +1,19 @@
+digraph "src/cpu/kernels/scale/sve" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_d124c31da0c35b9984b69db8d6578477 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="scale" fontname="Helvetica", fontsize="10", URL="dir_d124c31da0c35b9984b69db8d6578477.xhtml"]
+  dir_15dc5e363019af737c083bdcb2c72246 [shape=box, label="sve", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_15dc5e363019af737c083bdcb2c72246.xhtml"];
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_5815af820a9cc9481f1d0990a0d60286 [shape=box label="support" URL="dir_5815af820a9cc9481f1d0990a0d60286.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183 [shape=box label="core" fillcolor="white" style="filled" color="red" URL="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml"];
+  dir_214608ef36d61442cb2b0c1c4e9a7def->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="16", labeldistance=1.5 headhref="dir_000000_000031.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="686", labeldistance=1.5 headhref="dir_000017_000000.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="55", labeldistance=1.5 headhref="dir_000017_000031.xhtml"];
+  dir_5815af820a9cc9481f1d0990a0d60286->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="6", labeldistance=1.5 headhref="dir_000031_000000.xhtml"];
+  dir_15dc5e363019af737c083bdcb2c72246->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="12", labeldistance=1.5 headhref="dir_000411_000000.xhtml"];
+  dir_15dc5e363019af737c083bdcb2c72246->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="4", labeldistance=1.5 headhref="dir_000411_000031.xhtml"];
+  dir_15dc5e363019af737c083bdcb2c72246->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="16", labeldistance=1.5 headhref="dir_000411_000017.xhtml"];
+}

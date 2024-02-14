@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['debug_23418',['DEBUG',['../namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9adc30ec20708ef7b0f641ef78b7880a15',1,'arm_compute::test::framework']]],
+  ['deconvolutionlayer_23419',['DeconvolutionLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16ac814c26a7c5317e2a2f58fe0e5a0d410',1,'arm_compute::graph']]],
+  ['default_23420',['Default',['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6a7a1920d61156abc05a60135aefe8bc67',1,'arm_compute::IOFormatInfo']]],
+  ['default_23421',['DEFAULT',['../namespacearm__gemm.xhtml#a24fb31c876e67f529bd128983460f6f5a5b39c8b553c821e7cddc6da64b5bd2ee',1,'arm_gemm']]],
+  ['default_23422',['Default',['../namespacearm__compute_1_1graph.xhtml#a75ce9b1baad4303a53124d6f0795821fa7a1920d61156abc05a60135aefe8bc67',1,'arm_compute::graph::Default()'],['../namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da7a1920d61156abc05a60135aefe8bc67',1,'arm_compute::graph::Default()']]],
+  ['depth_23423',['DEPTH',['../namespacearm__compute.xhtml#a74ce3f7420453d3446218ff3b7453e02aaa1780b4fcce2d5d9af13dc25386d111',1,'arm_compute']]],
+  ['depthtospacelayer_23424',['DepthToSpaceLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a2c77fe48e06dc15838adafc96eb07809',1,'arm_compute::graph']]],
+  ['depthwise_23425',['DEPTHWISE',['../namespacearm__compute.xhtml#a6df16a1b3b5af590a14f55e983d3428ea6d5ec5f6909788df3453f62a3bd6ad78',1,'arm_compute']]],
+  ['depthwiseconvolution_23426',['DEPTHWISECONVOLUTION',['../namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0caa481bc07ed7c792045e8b277c0c88f8d4',1,'arm_compute']]],
+  ['depthwiseconvolutionlayer_23427',['DepthwiseConvolutionLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a5b7955cb74be105cc7e044a370d4fce8',1,'arm_compute::graph']]],
+  ['dequantizationlayer_23428',['DequantizationLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a6dc16ed47490b9162258248a67a28149',1,'arm_compute::graph']]],
+  ['detectionoutputlayer_23429',['DetectionOutputLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16ae1b0b91c003f871664a4e289977ef02e',1,'arm_compute::graph']]],
+  ['detectionpostprocesslayer_23430',['DetectionPostProcessLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a0e5a1913b18dbe59dcbcf4e85148802d',1,'arm_compute::graph']]],
+  ['direct_23431',['Direct',['../namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517dafd1dd0c603be8170f9eae0be9f2f6afb',1,'arm_compute::graph']]],
+  ['direct_23432',['DIRECT',['../namespacearm__compute.xhtml#a6df16a1b3b5af590a14f55e983d3428ea1ea328a644e627283a35716a54108248',1,'arm_compute::DIRECT()'],['../namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da4c5d06b02c97731aaa976179c62dcf76',1,'arm_compute::DIRECT()'],['../namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada4c5d06b02c97731aaa976179c62dcf76',1,'arm_compute::DIRECT()']]],
+  ['disabled_23433',['DISABLED',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfa055c1a591abb0e8cd86dc969727bcc0b',1,'arm_compute::test::framework']]],
+  ['disabled_23434',['Disabled',['../namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ab9f5c797ebbf55adccdd8539a65a0241',1,'arm_compute::graph']]],
+  ['disabled_23435',['DISABLED',['../classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba055c1a591abb0e8cd86dc969727bcc0b',1,'arm_compute::test::framework::TestCaseFactory::DISABLED()'],['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba055c1a591abb0e8cd86dc969727bcc0b',1,'arm_compute::test::framework::TestResult::DISABLED()']]],
+  ['div_23436',['Div',['../classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_elementwise_binary_common_attributes.xhtml#a62f68d1b8c7ffe90f85b3a7a7a677dd1a43d11850893d2fe84a1e618121c1cc0a',1,'arm_compute::experimental::dynamic_fusion::ElementwiseBinaryCommonAttributes::Div()'],['../namespacearm__compute_1_1graph.xhtml#aa12973876c037bddff8e9ece94aca0e4a43d11850893d2fe84a1e618121c1cc0a',1,'arm_compute::graph::Div()']]],
+  ['div_23437',['DIV',['../namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea29bbf66f7f8529ec47e394fb5a36c646',1,'arm_compute']]],
+  ['dummy_23438',['Dummy',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16abcf036b6f33e182d4705f4f5b1af13ac',1,'arm_compute::graph']]],
+  ['dynamic_23439',['DYNAMIC',['../classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808a0fcc90da4811c877ba9f9c12f7d60bc9',1,'arm_compute::IScheduler']]]
+];

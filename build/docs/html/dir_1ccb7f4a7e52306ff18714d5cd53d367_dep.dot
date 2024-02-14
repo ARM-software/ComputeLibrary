@@ -1,0 +1,9 @@
+digraph "src/core/CL/cl_kernels/nchw" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_25885286e9dad4fa105b7b25a8031bbf {
+    graph [ bgcolor="#ddddee", pencolor="black", label="cl_kernels" fontname="Helvetica", fontsize="10", URL="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml"]
+  dir_1ccb7f4a7e52306ff18714d5cd53d367 [shape=box, label="nchw", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_1ccb7f4a7e52306ff18714d5cd53d367.xhtml"];
+  }
+}

@@ -1,0 +1,11 @@
+digraph "GEMMConfigResult"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="GEMMConfigResult",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Result of querying about GEMM config ( GEMMLHSMatrixInfo and GEMMRHSMatrixInfo)"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" lhs_info" ,fontname="Helvetica"];
+  Node2 [label="GEMMLHSMatrixInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml",tooltip="GEMM LHS (Left Hand Side) matrix information."];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" rhs_info" ,fontname="Helvetica"];
+  Node3 [label="GEMMRHSMatrixInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml",tooltip="GEMM RHS (Right Hand Side) matrix information."];
+}

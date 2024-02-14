@@ -1,0 +1,21 @@
+digraph "CpuArithmeticKernel"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="CpuArithmeticKernel",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="CpuElementwiseKernel\l\< CpuArithmeticKernel \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_kernel.xhtml",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="ICpuKernel\< CpuArithmetic\lKernel \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml",tooltip=" "];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="ICPPKernel",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_c_p_p_kernel.xhtml",tooltip="Common interface for all kernels implemented in C++."];
+  Node5 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="IKernel",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_kernel.xhtml",tooltip="Common information for all the kernels."];
+  Node6 -> Node3 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< CpuArithmeticKernel \>" ,fontname="Helvetica"];
+  Node6 [label="ICpuKernel\< Derived \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml",tooltip=" "];
+  Node4 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 -> Node2 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< CpuArithmeticKernel \>" ,fontname="Helvetica"];
+  Node7 [label="CpuElementwiseKernel\l\< Derived \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_kernel.xhtml",tooltip="Interface for an element-wise operation kernel."];
+  Node6 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

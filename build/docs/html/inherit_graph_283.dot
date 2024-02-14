@@ -1,0 +1,14 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="ICLGEMMKernelSelection",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cl__gemm_1_1_i_c_l_g_e_m_m_kernel_selection.xhtml",tooltip="Basic interface for the GEMM kernel selection."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="CLGEMMDefaultTypeBifrost",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_default_type_bifrost.xhtml",tooltip="Bifrost based OpenCL GEMMKernel selection."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="CLGEMMDefaultTypeMidgard",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_default_type_midgard.xhtml",tooltip="Midgard based OpenCL GEMMKernel selection."];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="CLGEMMDefaultTypeValhall",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_default_type_valhall.xhtml",tooltip="Valhall based OpenCL GEMMKernel selection."];
+}

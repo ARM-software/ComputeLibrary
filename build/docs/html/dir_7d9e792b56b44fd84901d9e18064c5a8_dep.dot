@@ -1,0 +1,9 @@
+digraph "arm_compute/graph/detail" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_99ae3712d1eecd2a93fc4d38b59a99ba {
+    graph [ bgcolor="#ddddee", pencolor="black", label="graph" fontname="Helvetica", fontsize="10", URL="dir_99ae3712d1eecd2a93fc4d38b59a99ba.xhtml"]
+  dir_7d9e792b56b44fd84901d9e18064c5a8 [shape=box, label="detail", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_7d9e792b56b44fd84901d9e18064c5a8.xhtml"];
+  }
+}

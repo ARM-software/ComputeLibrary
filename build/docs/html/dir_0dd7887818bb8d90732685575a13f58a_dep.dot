@@ -1,0 +1,14 @@
+digraph "tests/framework/datasets" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_9e71e2da941d3cafc4d98a9f6ae3de4f {
+    graph [ bgcolor="#ddddee", pencolor="black", label="framework" fontname="Helvetica", fontsize="10", URL="dir_9e71e2da941d3cafc4d98a9f6ae3de4f.xhtml"]
+  dir_0dd7887818bb8d90732685575a13f58a [shape=box, label="datasets", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_0dd7887818bb8d90732685575a13f58a.xhtml"];
+  }
+  dir_5815af820a9cc9481f1d0990a0d60286 [shape=box label="support" URL="dir_5815af820a9cc9481f1d0990a0d60286.xhtml"];
+  dir_cbdb8362360e11eafe2fa3bc74cf0ffd [shape=box label="utils" fillcolor="white" style="filled" color="red" URL="dir_cbdb8362360e11eafe2fa3bc74cf0ffd.xhtml"];
+  dir_cbdb8362360e11eafe2fa3bc74cf0ffd->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="4", labeldistance=1.5 headhref="dir_000041_000031.xhtml"];
+  dir_0dd7887818bb8d90732685575a13f58a->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="3", labeldistance=1.5 headhref="dir_000556_000031.xhtml"];
+  dir_0dd7887818bb8d90732685575a13f58a->dir_cbdb8362360e11eafe2fa3bc74cf0ffd [headlabel="1", labeldistance=1.5 headhref="dir_000556_000041.xhtml"];
+}

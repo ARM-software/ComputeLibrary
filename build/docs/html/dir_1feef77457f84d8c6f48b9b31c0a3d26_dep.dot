@@ -1,0 +1,15 @@
+digraph "src/cpu/kernels/roialign/generic" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_4d42741066f864a7850480cc2fab45b6 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="roialign" fontname="Helvetica", fontsize="10", URL="dir_4d42741066f864a7850480cc2fab45b6.xhtml"]
+  subgraph clusterdir_1feef77457f84d8c6f48b9b31c0a3d26 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_1feef77457f84d8c6f48b9b31c0a3d26.xhtml"];
+    dir_1feef77457f84d8c6f48b9b31c0a3d26 [shape=plaintext label="generic"];
+  dir_e6b46351122e2d2070667355fd5770fb [shape=box label="neon" fillcolor="white" style="filled" URL="dir_e6b46351122e2d2070667355fd5770fb.xhtml"];
+  }
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_e6b46351122e2d2070667355fd5770fb->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="2", labeldistance=1.5 headhref="dir_000467_000000.xhtml"];
+}

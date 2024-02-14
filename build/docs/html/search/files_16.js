@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['wallclocktimer_2ecpp_16582',['WallClockTimer.cpp',['../_wall_clock_timer_8cpp.xhtml',1,'']]],
+  ['wallclocktimer_2eh_16583',['WallClockTimer.h',['../_wall_clock_timer_8h.xhtml',1,'']]],
+  ['warp_5fhelpers_2eh_16584',['warp_helpers.h',['../warp__helpers_8h.xhtml',1,'']]],
+  ['weightsreshape_2ecpp_16585',['WeightsReshape.cpp',['../reference_2_weights_reshape_8cpp.xhtml',1,'(Global Namespace)'],['../_c_l_2_weights_reshape_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['weightsreshape_2eh_16586',['WeightsReshape.h',['../_weights_reshape_8h.xhtml',1,'']]],
+  ['weightsretention_2ecpp_16587',['WeightsRetention.cpp',['../_weights_retention_8cpp.xhtml',1,'']]],
+  ['widthconcatenatelayer_2ecpp_16588',['WidthConcatenateLayer.cpp',['../_n_e_o_n_2_width_concatenate_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_c_l_2_width_concatenate_layer_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['window_2eh_16589',['Window.h',['../_window_8h.xhtml',1,'']]],
+  ['window_2einl_16590',['Window.inl',['../_window_8inl.xhtml',1,'']]],
+  ['windowhelpers_2ecpp_16591',['WindowHelpers.cpp',['../_window_helpers_8cpp.xhtml',1,'']]],
+  ['windowhelpers_2eh_16592',['WindowHelpers.h',['../_window_helpers_8h.xhtml',1,'']]],
+  ['windowiterator_2ecpp_16593',['WindowIterator.cpp',['../_window_iterator_8cpp.xhtml',1,'']]],
+  ['windowiterator_2eh_16594',['WindowIterator.h',['../_window_iterator_8h.xhtml',1,'']]],
+  ['winograd_2ecpp_16595',['Winograd.cpp',['../_c_l_2_winograd_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_winograd_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['winograd_2eh_16596',['Winograd.h',['../_winograd_8h.xhtml',1,'']]],
+  ['winograd_5ffilter_5ftransform_2ecl_16597',['winograd_filter_transform.cl',['../nhwc_2winograd__filter__transform_8cl.xhtml',1,'(Global Namespace)'],['../nchw_2winograd__filter__transform_8cl.xhtml',1,'(Global Namespace)']]],
+  ['winograd_5finput_5ftransform_2ecl_16598',['winograd_input_transform.cl',['../nhwc_2winograd__input__transform_8cl.xhtml',1,'(Global Namespace)'],['../nchw_2winograd__input__transform_8cl.xhtml',1,'(Global Namespace)']]],
+  ['winograd_5foutput_5ftransform_2ecl_16599',['winograd_output_transform.cl',['../nhwc_2winograd__output__transform_8cl.xhtml',1,'(Global Namespace)'],['../nchw_2winograd__output__transform_8cl.xhtml',1,'(Global Namespace)']]],
+  ['working_5fspace_2ehpp_16600',['working_space.hpp',['../working__space_8hpp.xhtml',1,'']]],
+  ['workload_2ecpp_16601',['Workload.cpp',['../_workload_8cpp.xhtml',1,'']]],
+  ['workload_2eh_16602',['Workload.h',['../_workload_8h.xhtml',1,'']]],
+  ['wrapper_2eh_16603',['wrapper.h',['../wrapper_8h.xhtml',1,'']]]
+];

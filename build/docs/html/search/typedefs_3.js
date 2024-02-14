@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['datatypedatalayoutselectorptr_22753',['DataTypeDataLayoutSelectorPtr',['../namespacearm__compute_1_1cpu_1_1kernels.xhtml#a1b21150c829c630e35e908b4fcbb76fd',1,'arm_compute::cpu::kernels']]],
+  ['datatypeisaselectorptr_22754',['DataTypeISASelectorPtr',['../namespacearm__compute_1_1cpu_1_1kernels.xhtml#aaaf57088b1cced4263da533eafa10034',1,'arm_compute::cpu::kernels']]],
+  ['depthwiseconv2dnativedatatypeisaselectorptr_22755',['DepthwiseConv2dNativeDataTypeISASelectorPtr',['../namespacearm__compute_1_1cpu_1_1kernels.xhtml#ab43a8d80452e4e9e7590280b63440f1c',1,'arm_compute::cpu::kernels']]],
+  ['detectionwindow_22756',['DetectionWindow',['../src_2core_2_c_l_2cl__kernels_2_types_8h.xhtml#ab93115f23a1f06c4358d0b2c1709c1c3',1,'types.h']]],
+  ['directkerneltype_22757',['DirectKernelType',['../classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy.xhtml#a74bbe6ac464d521bf9b2750799ea9ebc',1,'arm_conv::depthwise::DepthwiseDepthfirstStrategy']]],
+  ['dt_22758',['DT',['../classarm__compute_1_1utils_1_1random_1_1_ranged_uniform_distribution.xhtml#a9866a921ffb2f3d3d7345b55d1a09c73',1,'arm_compute::utils::random::RangedUniformDistribution']]],
+  ['dynamicfusioncladdbroadcastfixture_22759',['DynamicFusionCLAddBroadcastFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a2f59e48547a20a2b39a65cce4912c016',1,'arm_compute::test::validation']]],
+  ['dynamicfusioncladdfixture_22760',['DynamicFusionCLAddFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a153b21ef6153039f3185f015a049e897',1,'arm_compute::test::validation']]],
+  ['dynamicfusioncladdtwoopsfixture_22761',['DynamicFusionCLAddTwoOpsFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#ae524e74ddc87cf0ae2db709e9f4dceb5',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclampopfixture_22762',['DynamicFusionClampOpFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a16020ee65c44cad084b5d95bf9407e64',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclcasttof16fixture_22763',['DynamicFusionCLCastToF16Fixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a59b4b04d0f46232c6ff17d95f74568cb',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclcasttof32fixture_22764',['DynamicFusionCLCastToF32Fixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#ac79139a66ac6e260c5e9dab77f6ef3bb',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclmulbroadcastfixture_22765',['DynamicFusionCLMulBroadcastFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#aed8a1317cfdf1e6e5df21e3daf55ebec',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclmulfixture_22766',['DynamicFusionCLMulFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a2c53687515d0e570e77467910777fae9',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclmultwoopsfixture_22767',['DynamicFusionCLMulTwoOpsFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#aac24304f17108cd617f73b4fa6f1de2b',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclsubbroadcastfixture_22768',['DynamicFusionCLSubBroadcastFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#ab6b0193013d1bd1621d590cdff6db47e',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclsubfixture_22769',['DynamicFusionCLSubFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#aae06e48c9f2134ea797221a5bb0293c4',1,'arm_compute::test::validation']]],
+  ['dynamicfusionclsubtwoopsfixture_22770',['DynamicFusionCLSubTwoOpsFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a98c58550b2511f3c147f35b32828dc70',1,'arm_compute::test::validation']]],
+  ['dynamicfusiongpuconv2dfixture_22771',['DynamicFusionGpuConv2dFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#af6bc52d53c62d2063bdd8307ed9a4a05',1,'arm_compute::test::validation']]],
+  ['dynamicfusiongpudepthwiseconv2dfixture_22772',['DynamicFusionGpuDepthwiseConv2dFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a002f2e36f3c0a4506db3c660b5f8ba26',1,'arm_compute::test::validation']]],
+  ['dynamicfusiongpudirectconv2dfixture_22773',['DynamicFusionGpuDirectConv2dFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a5225921c501b0b499ee5cee157c644a4',1,'arm_compute::test::validation']]],
+  ['dynamicfusiongpureshapelayerfixture_22774',['DynamicFusionGpuReshapeLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a00cb7875cfe7a402051f75ebbce62c57',1,'arm_compute::test::validation']]],
+  ['dynamicfusionsigmoidopfixture_22775',['DynamicFusionSigmoidOpFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1641e7e3733cd983d9281fde31f0d2cc',1,'arm_compute::test::validation']]],
+  ['dynamicfusionsoftmaxlayerfixture_22776',['DynamicFusionSoftmaxLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a3b9fd3f229136a688ff7aea1df02935a',1,'arm_compute::test::validation']]],
+  ['dynamicfusiontanhopfixture_22777',['DynamicFusionTanhOpFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a64a1d5541a12d0aa26ce493aa0fa42e1',1,'arm_compute::test::validation']]]
+];

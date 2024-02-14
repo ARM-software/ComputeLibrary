@@ -1,0 +1,9 @@
+digraph "GpuCkwDirectConv2d"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="GpuCkwDirectConv2d",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="IGpuCkwComponentDriver",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_i_gpu_ckw_component_driver.xhtml",tooltip="An interface used by GpuCkwDriver to write source code for a kernel component."];
+}

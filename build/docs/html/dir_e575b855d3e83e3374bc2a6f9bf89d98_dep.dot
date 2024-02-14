@@ -1,0 +1,13 @@
+digraph "arm_compute/core/utils/logging" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_7b0825b7536eda12b63e5d87347b1c7d {
+    graph [ bgcolor="#ddddee", pencolor="black", label="utils" fontname="Helvetica", fontsize="10", URL="dir_7b0825b7536eda12b63e5d87347b1c7d.xhtml"]
+  dir_4165fcd8206cc52fde421ae1f1275b40 [shape=box label="io" URL="dir_4165fcd8206cc52fde421ae1f1275b40.xhtml"];
+  dir_e575b855d3e83e3374bc2a6f9bf89d98 [shape=box, label="logging", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_e575b855d3e83e3374bc2a6f9bf89d98.xhtml"];
+  }
+  dir_5815af820a9cc9481f1d0990a0d60286 [shape=box label="support" URL="dir_5815af820a9cc9481f1d0990a0d60286.xhtml"];
+  dir_e575b855d3e83e3374bc2a6f9bf89d98->dir_4165fcd8206cc52fde421ae1f1275b40 [headlabel="1", labeldistance=1.5 headhref="dir_000012_000043.xhtml"];
+  dir_e575b855d3e83e3374bc2a6f9bf89d98->dir_5815af820a9cc9481f1d0990a0d60286 [headlabel="3", labeldistance=1.5 headhref="dir_000012_000031.xhtml"];
+}

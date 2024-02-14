@@ -1,0 +1,11 @@
+digraph "src/cpu/kernels/roialign/generic/neon" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_1feef77457f84d8c6f48b9b31c0a3d26 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="generic" fontname="Helvetica", fontsize="10", URL="dir_1feef77457f84d8c6f48b9b31c0a3d26.xhtml"]
+  dir_e6b46351122e2d2070667355fd5770fb [shape=box, label="neon", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_e6b46351122e2d2070667355fd5770fb.xhtml"];
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_e6b46351122e2d2070667355fd5770fb->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="2", labeldistance=1.5 headhref="dir_000467_000000.xhtml"];
+}

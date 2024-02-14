@@ -1,0 +1,9 @@
+digraph "src/core/NEON/kernels/arm_gemm/transforms" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_9847dd9cb7a28e46201717fa7336cf62 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="arm_gemm" fontname="Helvetica", fontsize="10", URL="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml"]
+  dir_f11c7bbf76b3b5417003d346f29c89d2 [shape=box, label="transforms", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_f11c7bbf76b3b5417003d346f29c89d2.xhtml"];
+  }
+}

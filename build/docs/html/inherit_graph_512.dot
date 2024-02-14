@@ -1,0 +1,8 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="TensorPack::PackPair",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structacl_1_1_tensor_pack_1_1_pack_pair.xhtml",tooltip="Pack pair construct."];
+}

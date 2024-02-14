@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['r_23707',['R',['../namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aae1e1d3d40573127e9ee0480caf1283d6',1,'arm_compute']]],
+  ['r_5flist_23708',['R_List',['../namespacearm__compute_1_1mlgo_1_1parser.xhtml#aa520fbf142ba1e7e659590c07da31921ae548515899d6319e76dfd23ce87623e5',1,'arm_compute::mlgo::parser']]],
+  ['rapid_23709',['Rapid',['../namespaceacl.xhtml#a63674c70cc3037c6ac5a8b4ec8424278ab571ef5b2664270d25bea4f4b61ffe68',1,'acl']]],
+  ['rapid_23710',['RAPID',['../namespacearm__compute.xhtml#ae76ef5bd3ad69f7380ebb3ac6033ec5caba44d3559b36fc1c14e5752bccce1eef',1,'arm_compute']]],
+  ['readonly_23711',['ReadOnly',['../namespacearm__compute.xhtml#a41a1889b2fdf01056017b9f8b58dda6ea131fb182a881796e7606ed6da27f1197',1,'arm_compute']]],
+  ['reductionoperationlayer_23712',['ReductionOperationLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a7315a114ff1ceed2eb2410f0cb4bfd04',1,'arm_compute::graph']]],
+  ['reflect_23713',['REFLECT',['../namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91ae4f6a05f82ed398f984f4bc1a55838df',1,'arm_compute']]],
+  ['relu_23714',['ReLU',['../structarm__gemm_1_1_activation.xhtml#a1d1cfd8ffb84e947f82999c682b666a7add10d919fa85cf27fc78c0e06fe0b378',1,'arm_gemm::Activation']]],
+  ['relu_23715',['RELU',['../namespacearm__compute.xhtml#a56297e0f7b215eea46c818cb7528d9eaad346bb4679d29be241279f15d7795c1c',1,'arm_compute']]],
+  ['reorglayer_23716',['ReorgLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16af119c4b7a889a65e39ef53786dce0c84',1,'arm_compute::graph']]],
+  ['replicate_23717',['REPLICATE',['../namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a4ef59320fbe90fe47d40f1f71e4c5daa',1,'arm_compute']]],
+  ['reshaped_23718',['RESHAPED',['../namespacearm__compute.xhtml#a6f7d2fe6b41e36d408375ad6bf9a612aa6cee782c1c68991f5738005f33558df6',1,'arm_compute']]],
+  ['reshaped_5fonly_5frhs_23719',['RESHAPED_ONLY_RHS',['../namespacearm__compute.xhtml#a6f7d2fe6b41e36d408375ad6bf9a612aae5baae53d329b252d56acec1bc0b5868',1,'arm_compute']]],
+  ['reshaped_5fonly_5frhs_5fmmul_23720',['RESHAPED_ONLY_RHS_MMUL',['../namespacearm__compute.xhtml#a6f7d2fe6b41e36d408375ad6bf9a612aa4361824f1748299245ef0ad0cb7d6111',1,'arm_compute']]],
+  ['reshapelayer_23721',['ReshapeLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a1ee0d44744be1e17e38ad5a4e9dcf5dd',1,'arm_compute::graph']]],
+  ['resizelayer_23722',['ResizeLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16aea2ded20d74b2bf7921551363737777e',1,'arm_compute::graph']]],
+  ['rgb888_23723',['RGB888',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a30ff380a3be74628024063a99fba10f0',1,'arm_compute']]],
+  ['rgba8888_23724',['RGBA8888',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a165f06116e7b8d9b2481dfc805db4619',1,'arm_compute']]],
+  ['roialignlayer_23725',['ROIAlignLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a9724a5f06f63ab3de9e8af69d20069fb',1,'arm_compute::graph']]],
+  ['round_23726',['ROUND',['../namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da2ea77cf582892014b30e6fa7e558350d',1,'arm_compute']]],
+  ['rsqrt_23727',['RSQRT',['../namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da66bac724670f51e77f3688d33ca0d781',1,'arm_compute']]],
+  ['run_23728',['Run',['../structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_unit_workload_stage.xhtml#aca8133200c1122e29b87b314d82604ebac5301693c4e792bcd5a479ef38fb8f8d',1,'arm_compute::experimental::dynamic_fusion::UnitWorkloadStage']]],
+  ['runtime_5ferror_23729',['RUNTIME_ERROR',['../namespacearm__compute.xhtml#a59e56af19e754a6aa26a612ebf91d05fa62be47fdd89da032cf78dfce82239579',1,'arm_compute']]],
+  ['runtimeerror_23730',['RuntimeError',['../namespaceacl.xhtml#ae98a46f4ea1a43ca48acaf15d2eb7113aa334b8fdd25f8fb3e632228494604ee1',1,'acl::RuntimeError()'],['../namespacearm__compute.xhtml#ae98a46f4ea1a43ca48acaf15d2eb7113aa334b8fdd25f8fb3e632228494604ee1',1,'arm_compute::RuntimeError()']]]
+];

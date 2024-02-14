@@ -1,0 +1,46 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IDepthfirstStrategy",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_i_depthfirst_strategy.xhtml",tooltip=" "];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="DepthfirstStrategyUntyped",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthfirst_strategy_untyped.xhtml",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="DepthfirstStrategy\l\< TInput, TWeight, TOutput,\l TAccum, OutputStage \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthfirst_strategy.xhtml",tooltip=" "];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="DepthwiseDepthfirstStrategy\lCommon\< TInput, TWeight,\l TOutput, TAccum, typename\l DefaultOutputStage\< TOutput\l \>::Type \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_common.xhtml",tooltip=" "];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="DepthwiseDepthfirstStrategy\l\< TInput, TWeight, TOutput,\l TAccum, OutputStage \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy.xhtml",tooltip=" "];
+  Node2 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="DepthwiseDepthfirstStrategy\lCommon\< TInput, TWeight,\l TOutput, int32_t, arm_gemm\l::Requantize32 \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_common.xhtml",tooltip=" "];
+  Node5 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="DepthfirstMultiplierStrategy\l\< TInput, TWeight, TOutput,\l int32_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthfirst_multiplier_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml",tooltip=" "];
+  Node5 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="DepthwiseDepthfirstStrategy\l\< TInput, TWeight, TOutput,\l int32_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml",tooltip=" "];
+  Node2 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="DepthwiseDepthfirstStrategy\lCommon\< TInput, TWeight,\l TOutput, TAccum, Nothing \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_common.xhtml",tooltip=" "];
+  Node8 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="DepthfirstMultiplierStrategy\l\< TInput, TWeight, TOutput,\l TAccum \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthfirst_multiplier_strategy.xhtml",tooltip=" "];
+  Node2 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="DepthwiseDepthfirstStrategy\lCommon\< TInput, TInput,\l TInput, typename DefaultTAccum\l\< TInput \>::Type, typename DefaultOutput\lStage\< TInput \>::Type \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_common.xhtml",tooltip=" "];
+  Node10 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="GenericDepthfirstMultiplier\lStrategy\< TInput, TWeight,\l TOutput, TAccum, OutputStage \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_generic_depthfirst_multiplier_strategy.xhtml",tooltip=" "];
+  Node10 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="GenericDepthfirstStrategy\l\< TInput, TWeight, TOutput,\l TAccum, OutputStage \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_generic_depthfirst_strategy.xhtml",tooltip=" "];
+  Node2 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="DepthwiseDepthfirstStrategy\lCommon\< TInput, TWeight,\l TOutput, TAccum, OutputStage \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_common.xhtml",tooltip=" "];
+  Node13 -> Node14 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node14 [label="DepthwiseDepthfirstStrategy\l\< __fp16, __fp16, __fp16,\l __fp16 \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy.xhtml",tooltip=" "];
+  Node14 -> Node15 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node15 [label="sme2_fp16_nhwc_3x3\l_s1_output2x2_mla_depthfirst",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1sme2__fp16__nhwc__3x3__s1__output2x2__mla__depthfirst.xhtml",tooltip=" "];
+  Node14 -> Node16 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node16 [label="sme2_fp16_nhwc_3x3\l_s1_output3x3_mla_depthfirst",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1sme2__fp16__nhwc__3x3__s1__output3x3__mla__depthfirst.xhtml",tooltip=" "];
+  Node14 -> Node17 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node17 [label="sme2_fp16_nhwc_3x3\l_s1_output4x4_mla_depthfirst",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1sme2__fp16__nhwc__3x3__s1__output4x4__mla__depthfirst.xhtml",tooltip=" "];
+  Node14 -> Node18 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node18 [label="sme2_fp16_nhwc_3x3\l_s2_output2x2_mla_depthfirst",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1sme2__fp16__nhwc__3x3__s2__output2x2__mla__depthfirst.xhtml",tooltip=" "];
+  Node14 -> Node19 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node19 [label="sme2_fp16_nhwc_5x5\l_s1_output2x2_mla_depthfirst",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__conv_1_1depthwise_1_1sme2__fp16__nhwc__5x5__s1__output2x2__mla__depthfirst.xhtml",tooltip=" "];
+}

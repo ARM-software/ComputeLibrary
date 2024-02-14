@@ -1,0 +1,8 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="PlanarKernelType\< TInput,\l TWeight, TOutput, int32\l_t, arm_gemm::Requantize32 \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__conv_1_1depthwise_1_1_planar_kernel_type_3_01_t_input_00_01_t_weight_00_01_t_output_074bba6d85fd01387143cc0ca9a1d92fe.xhtml",tooltip=" "];
+}

@@ -1,0 +1,23 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IMemoryManageable",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_memory_manageable.xhtml",tooltip="Interface of an object than can be memory managed."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="CLTensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_c_l_tensor.xhtml",tooltip="Basic implementation of the OpenCL tensor interface."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="Tensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_tensor.xhtml",tooltip="Basic implementation of the tensor interface."];
+  Node1245 [label="ITensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_tensor.xhtml",tooltip="Interface for CPU tensor."];
+  Node1245 -> Node1246 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1246 [label="ICLTensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_i_c_l_tensor.xhtml",tooltip="Interface for OpenCL tensor."];
+  Node1246 -> Node1247 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1247 [label="CLSubTensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_c_l_sub_tensor.xhtml",tooltip="Basic implementation of the OpenCL sub-tensor interface."];
+  Node1246 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1245 -> Node1248 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1248 [label="SubTensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_sub_tensor.xhtml",tooltip="Basic implementation of the sub-tensor interface."];
+  Node1245 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1245 -> Node1249 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1249 [label="OperatorTensor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1experimental_1_1_operator_tensor.xhtml",tooltip="Basic implementation of the tensor interface."];
+}

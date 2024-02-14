@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['backendregistrar_12296',['BackendRegistrar',['../classarm__compute_1_1graph_1_1backends_1_1detail_1_1_backend_registrar.xhtml',1,'arm_compute::graph::backends::detail']]],
+  ['backendregistry_12297',['BackendRegistry',['../classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml',1,'arm_compute::graph::backends']]],
+  ['barrier_12298',['barrier',['../classarm__gemm_1_1barrier.xhtml',1,'arm_gemm']]],
+  ['batchnormalizationlayer_12299',['BatchNormalizationLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_batch_normalization_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['batchnormalizationlayernode_12300',['BatchNormalizationLayerNode',['../classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml',1,'arm_compute::graph']]],
+  ['benchmarkresult_12301',['BenchmarkResult',['../class_gemm_tuner_1_1_benchmark_result.xhtml',1,'GemmTuner']]],
+  ['bfloat16_12302',['bfloat16',['../classarm__compute_1_1bfloat16.xhtml',1,'arm_compute']]],
+  ['blobinfo_12303',['BlobInfo',['../structarm__compute_1_1_blob_info.xhtml',1,'arm_compute']]],
+  ['bloblifetimemanager_12304',['BlobLifetimeManager',['../classarm__compute_1_1_blob_lifetime_manager.xhtml',1,'arm_compute']]],
+  ['blobmemorypool_12305',['BlobMemoryPool',['../classarm__compute_1_1_blob_memory_pool.xhtml',1,'arm_compute']]],
+  ['bordersize_12306',['BorderSize',['../structarm__compute_1_1_border_size.xhtml',1,'arm_compute']]],
+  ['boundingboxtransforminfo_12307',['BoundingBoxTransformInfo',['../classarm__compute_1_1_bounding_box_transform_info.xhtml',1,'arm_compute']]],
+  ['boundingboxtransformlayer_12308',['BoundingBoxTransformLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_bounding_box_transform_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['boundingboxtransformlayernode_12309',['BoundingBoxTransformLayerNode',['../classarm__compute_1_1graph_1_1_bounding_box_transform_layer_node.xhtml',1,'arm_compute::graph']]],
+  ['boxnmslimitinfo_12310',['BoxNMSLimitInfo',['../classarm__compute_1_1_box_n_m_s_limit_info.xhtml',1,'arm_compute']]],
+  ['branchnode_12311',['BranchNode',['../structarm__compute_1_1mlgo_1_1_heuristic_tree_1_1_branch_node.xhtml',1,'arm_compute::mlgo::HeuristicTree']]],
+  ['brelu_12312',['brelu',['../structarm__compute_1_1detail_1_1brelu.xhtml',1,'arm_compute::detail']]]
+];

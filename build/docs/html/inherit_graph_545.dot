@@ -1,0 +1,8 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="WorkspaceFinalElement\l\< int32_t, arm_gemm::\lRequantize32, false \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__conv_1_1depthwise_1_1depthwise__depthfirst_1_1_workspace_final_element_3_01int32__t_01ccc8c041a687c4471c5aaa78ea74506.xhtml",tooltip=" "];
+}

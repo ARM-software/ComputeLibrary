@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['v_23816',['V',['../namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa5206560a306a2e085a437fd258eb57ce',1,'arm_compute']]],
+  ['v1_23817',['V1',['../namespacearm__compute.xhtml#aa41d7415a5386798147cccae2333d5d4ab4daca084ad9eabfc8de231929477ed6',1,'arm_compute']]],
+  ['valhall_23818',['VALHALL',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a35213429e39ad02be7c3c44fc87cde57',1,'arm_compute']]],
+  ['valid_23819',['Valid',['../namespacearm__compute_1_1utils.xhtml#a52b975f9f11b484d21969f9a8fefb29da3ac705f2acd51a4613f9188c05c91d0d',1,'arm_compute::utils']]],
+  ['validregion_23820',['ValidRegion',['../structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0a3131a0d8b04c3dbc9119dc93a14bdbb9',1,'arm_compute::IOFormatInfo']]],
+  ['var_23821',['Var',['../namespacearm__compute_1_1mlgo_1_1parser.xhtml#a1e92ccbb4f87d26f5da6bc220138a80ca5a92344ee95acf10c31901b36418be77',1,'arm_compute::mlgo::parser']]],
+  ['vector_23822',['Vector',['../structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_gpu_kernel_argument_info.xhtml#a17016d41439c2e42399cc92d8a95ad1da57dea6f5039281b7fee517fc43bf3110',1,'arm_compute::experimental::dynamic_fusion::GpuKernelArgumentInfo']]],
+  ['verbose_23823',['VERBOSE',['../namespacearm__compute_1_1logging.xhtml#aca1fd1d8935433e6ba2e3918214e07f9aec1f06e9fb39c4ef0729b3c7c9c8e8cc',1,'arm_compute::logging']]],
+  ['virtual_23824',['Virtual',['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#a462bfa9dfea81692463ecb192183dd01a615e6f9baca5553d44683a098d342b70',1,'arm_compute::experimental::dynamic_fusion']]],
+  ['vl128_5fbl16_23825',['VL128_BL16',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76aad4d5fd069e9d845d371199e819b9935',1,'arm_gemm']]],
+  ['vl128_5fbl32_23826',['VL128_BL32',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76a927ef1845254e94feea3508f071669c1',1,'arm_gemm']]],
+  ['vl128_5fbl32_5fbf16_23827',['VL128_BL32_BF16',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76aa135d787a2a55a0d941fc2892f9804c4',1,'arm_gemm']]],
+  ['vl128_5fbl64_23828',['VL128_BL64',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76ab6426811f0cdf342947b1c4b5932cc50',1,'arm_gemm']]],
+  ['vl1vl_5fbl16_23829',['VL1VL_BL16',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76a2c5ba9f23f492ca3abc8ab6f9db4a9c6',1,'arm_gemm']]],
+  ['vl1vl_5fbl32_23830',['VL1VL_BL32',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76a0385682ff278916d5325f43f2fbd7917',1,'arm_gemm']]],
+  ['vl1vl_5fbl32_5fbf16_23831',['VL1VL_BL32_BF16',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76aaad411ce55355aa01689506d459c7923',1,'arm_gemm']]],
+  ['vl1vl_5fbl64_23832',['VL1VL_BL64',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76a321ee3ec61a6f03bcbbbf64d6626ba67',1,'arm_gemm']]],
+  ['vl256_5fbl64_23833',['VL256_BL64',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76a98e86e70d3e2ada0d1a6ee63d98298f4',1,'arm_gemm']]],
+  ['vl256_5fbl64_5fbf16_23834',['VL256_BL64_BF16',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76aa4805539b25e4102ef1b172350ee6824',1,'arm_gemm']]],
+  ['vl2vl_5fbl64_23835',['VL2VL_BL64',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76a441b568e112a23748c34023a73f6feff',1,'arm_gemm']]],
+  ['vl2vl_5fbl64_5fbf16_23836',['VL2VL_BL64_BF16',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76a2b97a9a580c202eb744106b077505bcf',1,'arm_gemm']]]
+];

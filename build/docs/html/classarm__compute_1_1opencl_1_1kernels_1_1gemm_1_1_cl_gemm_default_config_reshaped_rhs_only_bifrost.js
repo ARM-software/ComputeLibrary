@@ -1,0 +1,5 @@
+var classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_bifrost =
+[
+    [ "ClGemmDefaultConfigReshapedRhsOnlyBifrost", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_bifrost.xhtml#a71758ac7956b5155686a85de0c536d45", null ],
+    [ "configure", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_bifrost.xhtml#ab6d0980d5c4bff1c0e3284b895c36248", null ]
+];

@@ -1,0 +1,32 @@
+digraph "ExampleParams"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="ExampleParams",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Structure holding all the graph Example parameters."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="CommonParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_common_params.xhtml",tooltip="Structure holding all the graph Example parameters."];
+  Node3 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" data_type" ,fontname="Helvetica"];
+  Node3 [label="DataType",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node4 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" bias\ninput\noutput\nweights" ,fontname="Helvetica"];
+  Node4 [label="TensorParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_tensor_params.xhtml",tooltip="Structure holding all the input tensor graph parameters."];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" quant_info" ,fontname="Helvetica"];
+  Node5 [label="QuantizationInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_quantization_info.xhtml",tooltip="Quantization information."];
+  Node6 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" verification" ,fontname="Helvetica"];
+  Node6 [label="VerificationParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_verification_params.xhtml",tooltip="Structure holding all the verification graph parameters."];
+  Node7 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" common_params" ,fontname="Helvetica"];
+  Node7 [label="FrameworkParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_framework_params.xhtml",tooltip="Structure holding all the common graph parameters."];
+  Node8 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" data_layout" ,fontname="Helvetica"];
+  Node8 [label="DataLayout",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node9 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" convolution" ,fontname="Helvetica"];
+  Node9 [label="ConvolutionParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_convolution_params.xhtml",tooltip="Structure holding all the Convolution layer graph parameters."];
+  Node10 -> Node9 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" padding\nstride" ,fontname="Helvetica"];
+  Node10 [label="struct",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node11 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" fully_connected" ,fontname="Helvetica"];
+  Node11 [label="FullyConnectedParams",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1utils_1_1_fully_connected_params.xhtml",tooltip="Structure holding all the fully_connected layer graph parameters."];
+  Node12 -> Node11 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" info" ,fontname="Helvetica"];
+  Node12 [label="FullyConnectedLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_fully_connected_layer_info.xhtml",tooltip="Fully connected layer info."];
+  Node13 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" activation_info" ,fontname="Helvetica"];
+  Node13 [label="ActivationLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_activation_layer_info.xhtml",tooltip="Activation Layer Information class."];
+}

@@ -1,0 +1,34 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="ITensorAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml",tooltip="Tensor accessor interface."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="DetectionOutputAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_detection_output_accessor.xhtml",tooltip="Detection output accessor class."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="DummyAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml",tooltip="Dummy accessor class."];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="ImageAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_image_accessor.xhtml",tooltip="Image accessor class."];
+  Node0 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="NumPyAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml",tooltip="NumPy accessor class."];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="NumPyBinLoader",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml",tooltip="Numpy Binary loader class."];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="PPMWriter",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_p_p_m_writer.xhtml",tooltip="PPM writer class."];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="PrintAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_print_accessor.xhtml",tooltip="Print accessor class."];
+  Node0 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="RandomAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml",tooltip="Random accessor class."];
+  Node0 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="SaveNumPyAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_save_num_py_accessor.xhtml",tooltip="SaveNumPy accessor class."];
+  Node0 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="TopNPredictionsAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml",tooltip="Result accessor class."];
+  Node0 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="ValidationInputAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_validation_input_accessor.xhtml",tooltip="Input Accessor used for network validation."];
+  Node0 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="ValidationOutputAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph__utils_1_1_validation_output_accessor.xhtml",tooltip="Output Accessor used for network validation."];
+  Node0 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="VerifyAccessor\< D \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1utils_1_1_verify_accessor.xhtml",tooltip="Graph example validation accessor class."];
+}

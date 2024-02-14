@@ -1,0 +1,14 @@
+digraph "src/cpu/kernels/fuse_batch_normalization/generic" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_bb11e055db43bd302d9253e2592a4191 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="fuse_batch_normalization" fontname="Helvetica", fontsize="10", URL="dir_bb11e055db43bd302d9253e2592a4191.xhtml"]
+  dir_a1c5d8e5f910cc021621e5f63768cddc [shape=box, label="generic", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_a1c5d8e5f910cc021621e5f63768cddc.xhtml"];
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183 [shape=box label="core" fillcolor="white" style="filled" color="red" URL="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml"];
+  dir_a1c5d8e5f910cc021621e5f63768cddc->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="1", labeldistance=1.5 headhref="dir_000444_000000.xhtml"];
+  dir_a1c5d8e5f910cc021621e5f63768cddc->dir_aebb8dcc11953d78e620bbef0b9e2183 [headlabel="1", labeldistance=1.5 headhref="dir_000444_000017.xhtml"];
+  dir_aebb8dcc11953d78e620bbef0b9e2183->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="686", labeldistance=1.5 headhref="dir_000017_000000.xhtml"];
+}

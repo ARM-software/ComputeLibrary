@@ -1,0 +1,12 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Printer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1logging_1_1_printer.xhtml",tooltip="Base printer class to be inherited by other printer classes."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="FilePrinter",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1logging_1_1_file_printer.xhtml",tooltip="File Printer."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="StdPrinter",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1logging_1_1_std_printer.xhtml",tooltip="Std Printer."];
+}

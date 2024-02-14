@@ -1,0 +1,14 @@
+digraph "RawTensor"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="RawTensor",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Subclass of SimpleTensor using uint8_t as value type."];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="SimpleTensor\< uint8_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_simple_tensor.xhtml",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="IAccessor",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_i_accessor.xhtml",tooltip="Common interface to provide information and access to tensor like structures."];
+  Node4 -> Node2 [dir="back",color="orange",fontsize="10",style="dashed",label=" \< uint8_t \>" ,fontname="Helvetica"];
+  Node4 [label="SimpleTensor\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1test_1_1_simple_tensor.xhtml",tooltip="Simple tensor object that stores elements in a consecutive chunk of memory."];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

@@ -1,0 +1,22 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IGraphMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml",tooltip="Graph mutator interface."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="DepthConcatSubTensorMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml",tooltip="Mutation pass to optimize depth concatenation operations by using sub-tensors."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="GroupedConvolutionMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml",tooltip="Mutation pass to implement/optimize grouped convolutions."];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="InPlaceOperationMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml",tooltip="Mutation pass to optimize operations that can be performed in-place."];
+  Node0 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="NodeExecutionMethodMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml",tooltip="Mutation pass to fall-back to default execution method."];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="NodeFusionMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml",tooltip="Mutation pass to fuss nodes."];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="SplitLayerSubTensorMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml",tooltip="Mutation pass to optimize split operations by using sub-tensors."];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="SyntheticDataTypeMutator",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1graph_1_1_synthetic_data_type_mutator.xhtml",tooltip="Mutation pass to create synthetic graphs of a given data type."];
+}

@@ -1,0 +1,8 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="Invoke\< TInput, TWeight,\l TOutput, TAccum, arm\l_gemm::Requantize32 \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__conv_1_1depthwise_1_1depthwise__depthfirst_1_1_invoke_3_01_t_input_00_01_t_weight_00_1463cc7f15aa576f94b74f6b8930f46d.xhtml",tooltip=" "];
+}

@@ -1,0 +1,22 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IClGemmKernelConfig",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_i_cl_gemm_kernel_config.xhtml",tooltip="Basic interface for the GEMM kernel configuration."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="ClGemmDefaultConfigNative\lBifrost",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_bifrost.xhtml",tooltip="Bifrost based OpenCL GEMMNative configuration."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ClGemmDefaultConfigNative\lMidgard",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_midgard.xhtml",tooltip="Midgard based OpenCL GEMMNative configuration."];
+  Node0 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="ClGemmDefaultConfigNative\lValhall",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_valhall.xhtml",tooltip="Valhall based OpenCL GEMMNative configuration."];
+  Node0 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="ClGemmDefaultConfigReshaped\lBifrost",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_bifrost.xhtml",tooltip="Bifrost based OpenCL GEMMReshaped configuration."];
+  Node0 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="ClGemmDefaultConfigReshaped\lRhsOnlyBifrost",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_bifrost.xhtml",tooltip="Bifrost based OpenCL GEMMReshapedOnlyRHS configuration."];
+  Node0 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="ClGemmDefaultConfigReshaped\lRhsOnlyValhall",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_valhall.xhtml",tooltip="Valhall based OpenCL GEMMReshapedOnlyRHS configuration."];
+  Node0 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="ClGemmDefaultConfigReshaped\lValhall",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_valhall.xhtml",tooltip="Valhall based OpenCL GEMMReshaped configuration."];
+}

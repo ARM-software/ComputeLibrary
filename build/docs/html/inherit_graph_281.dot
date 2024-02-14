@@ -1,0 +1,12 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="IClDWCNativeKernelConfig",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cl__dwc_1_1_i_cl_d_w_c_native_kernel_config.xhtml",tooltip="Basic interface for the depthwise convolution kernel configuration."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="ClDWCNativeDefaultConfig\lBifrost",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cl__dwc_1_1_cl_d_w_c_native_default_config_bifrost.xhtml",tooltip="Bifrost based OpenCL depthwise convolution configuration."];
+  Node0 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="ClDWCNativeDefaultConfig\lValhall",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1cl__dwc_1_1_cl_d_w_c_native_default_config_valhall.xhtml",tooltip="Valhall based OpenCL depthwise convolution configuration."];
+}

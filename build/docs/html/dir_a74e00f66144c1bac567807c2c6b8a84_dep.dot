@@ -1,0 +1,9 @@
+digraph "src/cpu/kernels/lut/generic/sve2" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_759ad130c4d2ade5bdd75789c156321e {
+    graph [ bgcolor="#ddddee", pencolor="black", label="generic" fontname="Helvetica", fontsize="10", URL="dir_759ad130c4d2ade5bdd75789c156321e.xhtml"]
+  dir_a74e00f66144c1bac567807c2c6b8a84 [shape=box, label="sve2", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_a74e00f66144c1bac567807c2c6b8a84.xhtml"];
+  }
+}

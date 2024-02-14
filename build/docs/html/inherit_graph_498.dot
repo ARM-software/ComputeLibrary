@@ -1,0 +1,8 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="StrategyType\< false,\l TInput, TWeight, TOutput,\l int32_t, arm_gemm::Requantize32 \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__conv_1_1depthwise_1_1depthfirst__multiplier_1_1_strategy_type_3_01false_00_01_t_input8633ae7ee5836c9610d7020e509234f1.xhtml",tooltip=" "];
+}

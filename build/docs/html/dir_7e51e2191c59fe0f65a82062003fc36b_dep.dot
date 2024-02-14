@@ -1,0 +1,11 @@
+digraph "src/gpu/cl/kernels/gemm/reshaped" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_018e5f183895eab11e8c75deb74ae4bb {
+    graph [ bgcolor="#ddddee", pencolor="black", label="gemm" fontname="Helvetica", fontsize="10", URL="dir_018e5f183895eab11e8c75deb74ae4bb.xhtml"]
+  dir_7e51e2191c59fe0f65a82062003fc36b [shape=box, label="reshaped", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_7e51e2191c59fe0f65a82062003fc36b.xhtml"];
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_7e51e2191c59fe0f65a82062003fc36b->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="9", labeldistance=1.5 headhref="dir_000519_000000.xhtml"];
+}

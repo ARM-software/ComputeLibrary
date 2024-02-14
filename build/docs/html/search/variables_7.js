@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['gamma_21677',['gamma',['../structarm__compute_1_1_instance_normalization_layer_kernel_info.xhtml#a44978e15ba7fdb6b664ea10411fbe69d',1,'arm_compute::InstanceNormalizationLayerKernelInfo']]],
+  ['gamma_5finfo_21678',['gamma_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1f276657689eabe34429cb9d767560cb',1,'arm_compute::test::validation']]],
+  ['gather_5fsmall_5fshapes_21679',['gather_small_shapes',['../namespacearm__compute_1_1test_1_1validation.xhtml#a8b46490c0e6708a9a8e98e6b8d8f0ca8',1,'arm_compute::test::validation']]],
+  ['gemm_5fconfig_5ffactory_21680',['GEMM_CONFIG_FACTORY',['../namespace_gemm_tuner.xhtml#a3c0f164b66e196f940f4b9e206d586d5',1,'GemmTuner']]],
+  ['gemm_5fexample_5fargs_5ffactory_21681',['GEMM_EXAMPLE_ARGS_FACTORY',['../namespace_gemm_tuner.xhtml#abfd6c8b5e818f3a2a5dac6717b853018',1,'GemmTuner']]],
+  ['gemm_5ftype_21682',['gemm_type',['../structarm__compute_1_1cl__gemm_1_1auto__heuristics_1_1_g_e_m_m_type_result.xhtml#a0133eef4c694c97735739e85d334609a',1,'arm_compute::cl_gemm::auto_heuristics::GEMMTypeResult']]],
+  ['gemmconfigt_21683',['GEMMConfigT',['../namespace_gemm_tuner.xhtml#a696b6940cef01d03e1fc064d8be3727b',1,'GemmTuner']]],
+  ['gemmlowp_5fmax_5fbound_21684',['gemmlowp_max_bound',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a6db94040329f1dedcd348ec7de072e2a',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fmin_5fbound_21685',['gemmlowp_min_bound',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a155d27c75f14a82a74e5039c9657c8eb',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fmultiplier_21686',['gemmlowp_multiplier',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a1cfb92f1c287bf099c3fca0ef0391a2b',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fmultipliers_21687',['gemmlowp_multipliers',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ae5bd6bebbc0c7ebd9e7dbfd47d939c2a',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5foffset_21688',['gemmlowp_offset',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a01934c5087f5193aaf3ea9bf41d1a8dc',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5freal_5fmultiplier_21689',['gemmlowp_real_multiplier',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#adc26274f64ea797e55d06e6a813f30f9',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fshift_21690',['gemmlowp_shift',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a3f0613aeb69c326e7d8ffb34b44fae94',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fshifts_21691',['gemmlowp_shifts',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ab269b182588a158cd256f9d4bb2a00dd',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['get_5fweight_5fpos_21692',['get_weight_pos',['../structarm__conv_1_1depthwise_1_1interleaves_1_1_packing_arguments.xhtml#a573eafa692d92219aa60bf1e2016c467',1,'arm_conv::depthwise::interleaves::PackingArguments']]],
+  ['gpu_5fid_21693',['gpu_id',['../_mali_counter_8cpp.xhtml#a0169f78cfbefd7d7d6dee6d1df40ee58',1,'MaliCounter.cpp']]],
+  ['gpu_5ftarget_21694',['gpu_target',['../structarm__compute_1_1_c_l_device_options.xhtml#aadf3b16e351860b4ba10a540a621b392',1,'arm_compute::CLDeviceOptions::gpu_target()'],['../structarm__compute_1_1cl__gemm_1_1auto__heuristics_1_1_common_query.xhtml#aadf3b16e351860b4ba10a540a621b392',1,'arm_compute::cl_gemm::auto_heuristics::CommonQuery::gpu_target()']]],
+  ['graph_21695',['graph',['../structarm__compute_1_1graph_1_1_execution_workload.xhtml#a2360aba01fa93c8493ba96683c4fb89c',1,'arm_compute::graph::ExecutionWorkload::graph()'],['../classarm__compute_1_1utils_1_1_graph_validate_example.xhtml#a07594d6d567cdd219788762307f60941',1,'arm_compute::utils::GraphValidateExample::graph()']]],
+  ['graph_5fdef_21696',['graph_def',['../namespacetf__frozen__model__extractor.xhtml#a33046379607784b45c2794cbaeedc1ff',1,'tf_frozen_model_extractor']]],
+  ['graph_5ffiles_21697',['graph_files',['../namespacegenerate__build__files.xhtml#ab1bbe489597c6a42ff90ab2a456e2d8f',1,'generate_build_files']]],
+  ['green_5fcoef2_5fbt709_21698',['green_coef2_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a27e073d020236f5a325762985b10f8d0',1,'arm_compute::test::colorconvert_helper::detail']]],
+  ['green_5fcoef_5fbt709_21699',['green_coef_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a5e59bd8be31e871da2db7572e8b788ce',1,'arm_compute::test::colorconvert_helper::detail']]],
+  ['guards_5fupdated_21700',['guards_updated',['../namespacecheck__header__guards.xhtml#ab73722b87fb32d0ffba5dffd39e6d239',1,'check_header_guards']]]
+];

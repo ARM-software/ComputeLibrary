@@ -1,0 +1,13 @@
+digraph "Conv3dInfo"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="Conv3dInfo",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Descriptor used by the 3d Convolution function."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" padding" ,fontname="Helvetica"];
+  Node2 [label="Padding3D",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structarm__compute_1_1_padding3_d.xhtml",tooltip="Padding information for 3D operations like Conv3d."];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" act_info" ,fontname="Helvetica"];
+  Node3 [label="ActivationLayerInfo",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_activation_layer_info.xhtml",tooltip="Activation Layer Information class."];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" dilation\nstride" ,fontname="Helvetica"];
+  Node4 [label="Size3D",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classarm__compute_1_1_size3_d.xhtml",tooltip="Class for specifying the size of a 3D shape or object."];
+}

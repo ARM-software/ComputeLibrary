@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['f16_23456',['F16',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a56d8353718e6fdc78b8d69078a2cdb94',1,'arm_compute::F16()'],['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a56d8353718e6fdc78b8d69078a2cdb94',1,'arm_compute::F16()']]],
+  ['f32_23457',['F32',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a44ad4ef5a76e6aa6fb3e3fa079a54fda',1,'arm_compute::F32()'],['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a44ad4ef5a76e6aa6fb3e3fa079a54fda',1,'arm_compute::F32()']]],
+  ['f64_23458',['F64',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a1ad5f6f3069070ec4cbbdc94d5e61e0e',1,'arm_compute']]],
+  ['failed_23459',['FAILED',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70bab9e14d9b2886bcff408b85aefa780419',1,'arm_compute::test::framework::TestResult']]],
+  ['fastrerun_23460',['FastRerun',['../namespaceacl.xhtml#ad14b0c6d4ed8fcadff6dcf39c5cf17fdaf95f14e210df849606f3efdac49759df',1,'acl::FastRerun()'],['../namespacearm__compute.xhtml#ad14b0c6d4ed8fcadff6dcf39c5cf17fdaf95f14e210df849606f3efdac49759df',1,'arm_compute::FastRerun()']]],
+  ['faststart_23461',['FastStart',['../namespaceacl.xhtml#ad14b0c6d4ed8fcadff6dcf39c5cf17fda35d1ce83cbba19d83e2735b102ec28c3',1,'acl::FastStart()'],['../namespacearm__compute.xhtml#ad14b0c6d4ed8fcadff6dcf39c5cf17fda35d1ce83cbba19d83e2735b102ec28c3',1,'arm_compute::FastStart()']]],
+  ['fft_23462',['FFT',['../namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da86de502ad3fe05ceedaba87164d54d28',1,'arm_compute']]],
+  ['fifthgen_23463',['FIFTHGEN',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3acc9d7296b395b31b90c3c2ab006a19df',1,'arm_compute']]],
+  ['filter_23464',['FILTER',['../namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a5d19c046f7c6ca24d067312183e8871eae75ab17a550f46adbbe891b819cf951d',1,'arm_compute::test::validation::reference']]],
+  ['flattenlayer_23465',['FlattenLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16ad87240455a60f188b358a370fe1a83a5',1,'arm_compute::graph']]],
+  ['float_23466',['Float',['../namespacearm__compute_1_1mlgo_1_1parser.xhtml#aa520fbf142ba1e7e659590c07da31921a22ae0e2b89e5e3d477f988cc36d3272b',1,'arm_compute::mlgo::parser']]],
+  ['float16_23467',['Float16',['../namespaceacl.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a26e6ed77470c6f2f830ecf874e6c0d55',1,'acl']]],
+  ['float32_23468',['Float32',['../namespaceacl.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a166495adc0d0f53bee6baecc577f5204',1,'acl']]],
+  ['floor_23469',['FLOOR',['../namespacearm__compute.xhtml#a1fece1bd804e64f39f602d1c3969849aa56c1e354d36beb85b0d881c5b2e24cbe',1,'arm_compute']]],
+  ['forward_23470',['Forward',['../namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a86a0c8e195c900a895c249662cfaa564a67d2f6740a8eaebf4d5c6f79be8da481',1,'arm_compute::test::validation::reference::Forward()'],['../namespacearm__compute.xhtml#a86a0c8e195c900a895c249662cfaa564a67d2f6740a8eaebf4d5c6f79be8da481',1,'arm_compute::Forward()']]],
+  ['full_23471',['Full',['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6abbd47109890259c0127154db1af26c75',1,'arm_compute::IOFormatInfo::Full()'],['../structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0abbd47109890259c0127154db1af26c75',1,'arm_compute::IOFormatInfo::Full()']]],
+  ['fullyconnectedlayer_23472',['FullyConnectedLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a658061ff1dac70c02116fae6c044da1a',1,'arm_compute::graph']]],
+  ['fusedconvolutionbatchnormalizationlayer_23473',['FusedConvolutionBatchNormalizationLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a6f89e5fc5edf43300199d6bc8f5088de',1,'arm_compute::graph']]],
+  ['fuseddepthwiseconvolutionbatchnormalizationlayer_23474',['FusedDepthwiseConvolutionBatchNormalizationLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a5955c7816e24dbfab34403cca9a133fc',1,'arm_compute::graph']]]
+];

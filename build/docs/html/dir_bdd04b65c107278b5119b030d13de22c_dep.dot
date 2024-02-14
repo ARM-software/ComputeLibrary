@@ -1,0 +1,11 @@
+digraph "src/dynamic_fusion/sketch/utils" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_729ca8b25cabcdcb8b11b571ea7b237a {
+    graph [ bgcolor="#ddddee", pencolor="black", label="sketch" fontname="Helvetica", fontsize="10", URL="dir_729ca8b25cabcdcb8b11b571ea7b237a.xhtml"]
+  dir_bdd04b65c107278b5119b030d13de22c [shape=box, label="utils", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_bdd04b65c107278b5119b030d13de22c.xhtml"];
+  }
+  dir_214608ef36d61442cb2b0c1c4e9a7def [shape=box label="arm_compute" fillcolor="white" style="filled" color="red" URL="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml"];
+  dir_bdd04b65c107278b5119b030d13de22c->dir_214608ef36d61442cb2b0c1c4e9a7def [headlabel="1", labeldistance=1.5 headhref="dir_000515_000000.xhtml"];
+}
