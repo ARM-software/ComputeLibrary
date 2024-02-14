@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
-
-#include "ckw/Error.h"
-#include "ckw/TileInfo.h"
-
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
+#include "CkwHelper.h"
 
 namespace arm_compute
 {
@@ -35,29 +29,28 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-
-GpuCkwKernelWriter::GpuCkwKernelWriter(ckw::Kernel &kernel) : KernelWriter(kernel)
+void get_coordinate_from_gws(GpuCkwScopedKernelWriter writer,
+                             ckw::TileOperand        &coord,
+                             const ckw::TileOperand  &gid,
+                             ckw::TileOperand        &step)
 {
+    writer->op_binary(coord, ckw::BinaryOp::Mul, gid, step);
 }
 
-void GpuCkwKernelWriter::op_load_once(GpuCkwComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler)
+void get_coordinate_from_gws_overlapping_min(GpuCkwScopedKernelWriter writer,
+                                             ckw::TileOperand        &coord,
+                                             const ckw::TileOperand  &gid,
+                                             ckw::TileOperand        &step,
+                                             ckw::TileOperand        &shift_back,
+                                             ckw::TileOperand        &const_0)
 {
-    if (!tensor_or_tile->has_tile())
-    {
-        CKW_ASSERT(tensor_or_tile->has_tensor());
+    // Applied formula: max((gid * step) - shift_back, 0)
+    // where the shift_back operand is: (step - leftover_step) % step
 
-        auto &tensor = tensor_or_tile->tensor();
-
-        const auto tile_name = tensor.name() + "_tile";
-        auto      &tile =
-            declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
-
-        op_load(tile, tensor, sampler);
-
-        tensor_or_tile->init_virtual_tensor(tile, sampler);
-    }
+    writer->op_binary(coord, ckw::BinaryOp::Mul, gid, step);
+    writer->op_binary(coord, ckw::BinaryOp::Sub, coord, shift_back);
+    writer->op_binary(coord, ckw::BinaryOp::Max, coord, const_0);
 }
-
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

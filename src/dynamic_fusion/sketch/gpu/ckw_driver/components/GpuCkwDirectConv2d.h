@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWDIRECTCONV2D
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWDIRECTCONV2D
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWDIRECTCONV2D_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWDIRECTCONV2D_H
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 
 #include "src/core/common/Macros.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 
 namespace arm_compute
 {
@@ -37,7 +38,7 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-class GpuCkwDirectConv2d final : public IGpuCkwComponentDriver
+class GpuCkwDirectConv2d : public IGpuCkwComponentDriver
 {
 public:
     using Attributes = ClComponentDirectConv2d::Attributes;
@@ -57,9 +58,7 @@ public:
                        const ArgumentPack<ITensorInfo> &tensors,
                        const Attributes                &attributes,
                        const Settings                  &settings);
-
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(GpuCkwDirectConv2d);
-
     /** Destructor */
     ~GpuCkwDirectConv2d() override = default;
 
@@ -76,11 +75,11 @@ private:
     const ITensorInfo *_bia;
     const ITensorInfo *_dst;
 
-    const Attributes _attributes;
-    const Settings   _settings;
+    Attributes _attributes;
+    Settings   _settings;
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWDIRECTCONV2D */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWDIRECTCONV2D_H

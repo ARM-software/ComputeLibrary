@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,14 +28,13 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-
 #include "arm_compute/dynamic_fusion/runtime/gpu/cl/ClWorkloadRuntime.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
-#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
-#include "src/dynamic_fusion/utils/Utils.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 
+#include "src/dynamic_fusion/utils/Utils.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/PoolingLayer.h"
@@ -52,21 +51,22 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuPool2dValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, const Pool2dAttributes &pool_attr, DataType data_type, bool mixed_precision)
+    void setup(TensorShape input_shape, const Pool2dAttributes &pool_attr, DataType data_type)
     {
-        _target    = compute_target(input_shape, pool_attr, data_type, mixed_precision);
-        _reference = compute_reference(input_shape, convert_pool_attr_to_pool_info(pool_attr, mixed_precision), data_type);
+        _target    = compute_target(input_shape, pool_attr, data_type);
+        _reference = compute_reference(
+            input_shape, convert_pool_attr_to_pool_info(pool_attr, true /* mixed_precision */), data_type);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -82,7 +82,7 @@ protected:
     }
 
     // Given input is in nchw format
-    TensorType compute_target(TensorShape input_shape, const Pool2dAttributes &pool_attr, const DataType data_type, bool mixed_precision)
+    TensorType compute_target(TensorShape input_shape, const Pool2dAttributes &pool_attr, const DataType data_type)
     {
         CLScheduler::get().default_reinit();
 
@@ -91,24 +91,24 @@ protected:
 
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &context };
+        auto              context        = GpuWorkloadContext{&cl_compile_ctx};
+        GpuWorkloadSketch sketch{&context};
 
         // Create sketch tensors
         auto input_info = context.create_tensor_info(TensorInfo(input_shape, 1, data_type, DataLayout::NHWC));
         auto dst_info   = context.create_tensor_info();
 
         // Create Pool2dSettings
-        GpuPool2dSettings pool_settings = GpuPool2dSettings().mixed_precision(mixed_precision);
+        GpuPool2dSettings pool_settings = GpuPool2dSettings();
 
-        ITensorInfo *ans_info = FunctionType::create_op(sketch, &input_info, pool_attr, pool_settings);
-        GpuOutput::create_op(sketch, ans_info, &dst_info);
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, input_info, pool_attr, pool_settings);
+        GpuOutput::create_op(sketch, ans_info, dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;
         runtime.configure(sketch);
         // (Important) Allocate auxiliary tensor memory if there are any
-        for(auto &data : runtime.get_auxiliary_tensors())
+        for (auto &data : runtime.get_auxiliary_tensors())
         {
             CLTensor     *tensor      = std::get<0>(data);
             TensorInfo    info        = std::get<1>(data);
@@ -121,8 +121,8 @@ protected:
         TensorType t_dst{};
 
         // Initialize user tensors
-        t_input.allocator()->init(input_info);
-        t_dst.allocator()->init(dst_info);
+        t_input.allocator()->init(*input_info);
+        t_dst.allocator()->init(*dst_info);
 
         // Allocate and fill user tensors
         t_input.allocator()->allocate();
@@ -131,7 +131,7 @@ protected:
         fill(AccessorType(t_input), 0);
 
         // Run runtime
-        runtime.run({ &t_input, &t_dst });
+        runtime.run({&t_input, &t_dst});
         return t_dst;
     }
 
@@ -149,36 +149,35 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DynamicFusionGpuPool2dValidationFixture : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class DynamicFusionGpuPool2dValidationFixture
+    : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape input_shape, PoolingType pool_type, Size2D pool_size, Padding2D pad, Size2D stride, bool exclude_padding, DataType data_type)
+    void setup(TensorShape input_shape,
+               PoolingType pool_type,
+               Size2D      pool_size,
+               Padding2D   pad,
+               Size2D      stride,
+               bool        exclude_padding,
+               DataType    data_type)
     {
-        DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape,
-                                                                                                         Pool2dAttributes().pool_type(pool_type).pool_size(pool_size).pad(pad).stride(stride).exclude_padding(exclude_padding),
-                                                                                                         data_type, false);
+        DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            input_shape,
+            Pool2dAttributes().pool_type(pool_type).pool_size(pool_size).pad(pad).stride(stride).exclude_padding(
+                exclude_padding),
+            data_type);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DynamicFusionGpuPool2dMixedPrecisionValidationFixture : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    void setup(TensorShape input_shape, PoolingType pool_type, Size2D pool_size, Padding2D pad, Size2D stride, bool exclude_padding, DataType data_type, bool mixed_precision)
-    {
-        DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape,
-                                                                                                         Pool2dAttributes().pool_type(pool_type).pool_size(pool_size).pad(pad).stride(stride).exclude_padding(exclude_padding),
-                                                                                                         data_type, mixed_precision);
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DynamicFusionGpuPool2dSpecialValidationFixture : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class DynamicFusionGpuPool2dSpecialValidationFixture
+    : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape input_shape, Pool2dAttributes pool_attr, DataType data_type)
     {
-        DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, pool_attr, data_type, false);
+        DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            input_shape, pool_attr, data_type);
     }
 };
 

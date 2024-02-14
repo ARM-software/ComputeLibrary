@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,10 +29,10 @@
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/dynamic_fusion/operators/ClampFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -73,13 +73,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     GpuWorkloadSketch sketch{ &context };
 
     // Fuse Clamp
-    const TensorInfo src_info = context.create_tensor_info(input_info);
+    const ITensorInfo* src_info = context.create_tensor_info(input_info);
 
     ClampAttributes attributes {};
     attributes.min_val(min_val)
               .max_val(max_val);
 
-    const bool res = static_cast<bool>(GpuClamp::validate_op(sketch, &src_info, attributes));
+    const bool res = static_cast<bool>(GpuClamp::validate_op(sketch, src_info, attributes));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -94,8 +94,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionClampOpFixture<half>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::SmallShapes(),
-                                               framework::dataset::make("ClampAttributes", { ClampAttributes().min_val(0.1f).max_val(0.6f) })),
-                                       framework::dataset::make("Fuse", { false })),
+                                               framework::dataset::make(
+                                                   "ClampAttributes", {ClampAttributes().min_val(0.1f).max_val(0.6f)})),
+                                       framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -106,8 +107,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
                        DynamicFusionClampOpFixture<half>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::Small5dShapes(),
-                                               framework::dataset::make("ClampAttributes", { ClampAttributes().min_val(0.1f).max_val(0.6f) })),
-                                       framework::dataset::make("Fuse", { false })),
+                                               framework::dataset::make(
+                                                   "ClampAttributes", {ClampAttributes().min_val(0.1f).max_val(0.6f)})),
+                                       framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -119,8 +121,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
                        DynamicFusionClampOpFixture<half>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::SmallShapes(),
-                                               framework::dataset::make("ClampAttributes", { ClampAttributes().min_val(0.2f).max_val(0.4f) })),
-                                       framework::dataset::make("Fuse", { true })),
+                                               framework::dataset::make(
+                                                   "ClampAttributes", {ClampAttributes().min_val(0.2f).max_val(0.4f)})),
+                                       framework::dataset::make("Fuse", {true})),
                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -134,8 +137,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionClampOpFixture<float>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::SmallShapes(),
-                                               framework::dataset::make("ClampAttributes", { ClampAttributes().min_val(0.3f).max_val(0.7f) })),
-                                       framework::dataset::make("Fuse", { false })),
+                                               framework::dataset::make(
+                                                   "ClampAttributes", {ClampAttributes().min_val(0.3f).max_val(0.7f)})),
+                                       framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -146,8 +150,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
                        DynamicFusionClampOpFixture<float>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::Small5dShapes(),
-                                               framework::dataset::make("ClampAttributes", { ClampAttributes().min_val(0.3f).max_val(0.7f) })),
-                                       framework::dataset::make("Fuse", { false })),
+                                               framework::dataset::make(
+                                                   "ClampAttributes", {ClampAttributes().min_val(0.3f).max_val(0.7f)})),
+                                       framework::dataset::make("Fuse", {false})),
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -159,8 +164,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
                        DynamicFusionClampOpFixture<float>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::SmallShapes(),
-                                               framework::dataset::make("ClampAttributes", { ClampAttributes().min_val(0.1f).max_val(0.9f) })),
-                                       framework::dataset::make("Fuse", { true })),
+                                               framework::dataset::make(
+                                                   "ClampAttributes", {ClampAttributes().min_val(0.1f).max_val(0.9f)})),
+                                       framework::dataset::make("Fuse", {true})),
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output

@@ -216,7 +216,7 @@ class FormatCodeRun:
         if strategy == "git-head":
             cmd = "git diff-tree --no-commit-id --name-status -r HEAD | grep \"^[AMRT]\" | cut -f 2"
         elif strategy == "git-diff":
-            cmd = "git diff --name-status --cached -r HEAD | grep \"^[AMRT]\" | cut -f 2"
+            cmd = "git diff --name-status --cached -r HEAD | grep \"^[AMRT]\" | rev | cut -f 1 | rev"
         else:
             cmd = "git ls-tree -r HEAD --name-only"
             # Skip copyright checks when running on all files because we don't know when they were last modified

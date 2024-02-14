@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -3330,7 +3330,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynami
 {
     os << "Settings="
        << "["
-       << "FPMixedPrecision=" << settings.mixed_precision() << "]";
+       << "UseInfAsLimit=" << settings.use_inf_as_limit() << "]";
     return os;
 }
 

@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021 Arm Limited.
+/// Copyright (c) 2017-2021, 2024 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -24,6 +24,52 @@
 namespace arm_compute
 {
 /** @page implementation_topic Implementation Topics
+
+@section implementation_topic_assembly_kernels Assembly kernels
+
+Arm Compute Library contains a collection of highly optimized assembly kernels for Arm® A profile architecture. At runtime the
+library selects the best kernel based on the CPU detected. For example if the CPU supports the dot product instruction
+the library will choose a GEMM kernel which uses the dot product instruction. There are various kernels using Neon™ and
+architecture extensions like FP16, Dot product, SVE, SVE2 and SME.
+
+For example, some assembly kernels are located in the folders:
+- src/core/NEON/kernels/arm_gemm/kernels
+- src/core/NEON/kernels/arm_gemm/pooling
+- src/core/NEON/kernels/arm_conv/depthwise
+
+
+The assembly kernels are written using assembly mnemonics and the .inst directive which inserts the machine code to the output directly.
+
+Below you can see a code block from one of the kernels in the library which uses the .inst directive to generate the sdot instruction.
+This code can be found in the kernel @ref src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8qa_dot_4x16/a55.cpp
+
+@code{.cpp}
+".inst 0x4f80eb10  // sdot v16.4s, v24.16b, v0.4b[2]\n"
+".inst 0x4f81eb14  // sdot v20.4s, v24.16b, v1.4b[2]\n"
+" ldr d24, [x12, #0xf0]\n"
+" ldr x20, [x12, #0xf8]\n"
+" .inst 0x4f80ebd1  // sdot v17.4s, v30.16b, v0.4b[2]\n"
+" .inst 0x4f81ebd5  // sdot v21.4s, v30.16b, v1.4b[2]\n"
+" mov v27.d[1], x23\n"
+" .inst 0x4f80ebb2  // sdot v18.4s, v29.16b, v0.4b[2]\n"
+" mov v26.d[1], x22\n"
+" .inst 0x4f81ebb6  // sdot v22.4s, v29.16b, v1.4b[2]\n"
+" mov v25.d[1], x21\n"
+" .inst 0x4f80eb93  // sdot v19.4s, v28.16b, v0.4b[2]\n"
+" mov v24.d[1], x20\n"
+" .inst 0x4f81eb97  // sdot v23.4s, v28.16b, v1.4b[2]\n"
+" add x9, x9, #0x10\n"
+" add x28, x28, #0x10\n"
+" add x12, x12, #0x100\n"
+" .inst 0x4fa0eb70  // sdot v16.4s, v27.16b, v0.4b[3]\n"
+" .inst 0x4fa1eb74  // sdot v20.4s, v27.16b, v1.4b[3]\n"
+" .inst 0x4fa0eb51  // sdot v17.4s, v26.16b, v0.4b[3]\n"
+" .inst 0x4fa1eb55  // sdot v21.4s, v26.16b, v1.4b[3]\n"
+@endcode
+
+Note that every occurrence of .inst is accompanied by a comment with the original opcode for readability purposes.
+
+The reason for using the opcodes instead of the mnemonic is that this approach will work on any toolchain, including the ones without support for the dot product mnemonic. The .inst directive is used to generate many other instructions and ensuring the code will compile on older toolchains that do not support them.
 
 @section implementation_topic_windows Windows
 

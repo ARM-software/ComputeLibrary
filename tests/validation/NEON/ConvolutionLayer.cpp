@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -957,7 +957,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallFloat, VarWidth<float>, framework::DatasetMode::A
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 
-#if defined(ARM_COMPUTE_ENABLE_FP16)
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 FIXTURE_DATA_TEST_CASE(RunSmallHalf, VarWidth<half>, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallConvolutionLayerDataset(),
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
@@ -966,7 +966,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallHalf, VarWidth<half>, framework::DatasetMode::ALL
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
 }
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 template <typename ScalarType>
@@ -998,7 +998,7 @@ FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallFloat, NEGEMMVarWidth<float>, framework::Da
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 
-#if defined(ARM_COMPUTE_ENABLE_FP16)
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallHalf, NEGEMMVarWidth<half>, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallConvolutionLayerDataset(),
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
@@ -1007,7 +1007,7 @@ FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallHalf, NEGEMMVarWidth<half>, framework::Data
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
 }
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 template <typename ScalarType>

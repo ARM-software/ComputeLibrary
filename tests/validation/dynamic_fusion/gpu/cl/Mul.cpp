@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,21 +22,17 @@
  * SOFTWARE.
  */
 
-// TODO: Fix testing of CKW Elementwise Binary (COMPMID-6530)
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuMul.h"
 
 #include "tests/CL/CLAccessor.h"
-#include "tests/framework/Fixture.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
-
 #include "tests/datasets/DynamicFusionDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Fixture.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/dynamic_fusion/operators/MulFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -58,8 +54,10 @@ namespace validation
  */
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> tolerance_f16(
+    0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float> tolerance_f32(
+    0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(DYNAMIC_FUSION)
@@ -112,7 +110,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
     auto          lhs_info         = context.create_tensor_info(input1_info);
     auto          rhs_info         = context.create_tensor_info(input2_info);
 
-    bool res = bool(GpuMul::validate_op(sketch, &lhs_info, &rhs_info));
+    bool res = bool(GpuMul::validate_op(sketch, lhs_info, rhs_info));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -129,9 +127,8 @@ TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionCLMulFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(combine(datasets::SmallShapes(),
-                                       framework::dataset::make("DataType", { DataType::F16 })),
-                               framework::dataset::make("InPlace", { false })))
+                       combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", {DataType::F16})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -141,8 +138,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
                        DynamicFusionCLMulBroadcastFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(combine(datasets::TemporaryLimitedSmallShapesBroadcast(),
-                                       framework::dataset::make("DataType", { DataType::F16 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F16})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -152,8 +149,8 @@ FIXTURE_DATA_TEST_CASE(RunLargeBroadcastOneOp,
                        DynamicFusionCLMulBroadcastFixture<half>,
                        framework::DatasetMode::NIGHTLY,
                        combine(combine(datasets::TemporaryLimitedLargeShapesBroadcast(),
-                                       framework::dataset::make("DataType", { DataType::F16 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F16})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -164,9 +161,8 @@ TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                        DynamicFusionCLMulFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(datasets::SmallShapes(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                       combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -175,9 +171,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
 FIXTURE_DATA_TEST_CASE(RunLargeOneOp,
                        DynamicFusionCLMulFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(datasets::LargeShapes(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                       combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -187,8 +182,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
                        DynamicFusionCLMulBroadcastFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(combine(datasets::TemporaryLimitedSmallShapesBroadcast(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -198,8 +193,8 @@ FIXTURE_DATA_TEST_CASE(RunLargeBroadcastOneOp,
                        DynamicFusionCLMulBroadcastFixture<float>,
                        framework::DatasetMode::NIGHTLY,
                        combine(combine(datasets::TemporaryLimitedLargeShapesBroadcast(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("InPlace", { false })))
+                                       framework::dataset::make("DataType", {DataType::F32})),
+                               framework::dataset::make("InPlace", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -209,9 +204,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
                        DynamicFusionCLMulTwoOpsFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::DynamicFusionElementwiseBinaryTwoOpsSmallShapes(),
-                                               framework::dataset::make("DataType", { DataType::F32 })),
-                                       framework::dataset::make("InPlace", { false })),
-                               framework::dataset::make("FuseTwoOps", { true })))
+                                               framework::dataset::make("DataType", {DataType::F32})),
+                                       framework::dataset::make("InPlace", {false})),
+                               framework::dataset::make("FuseTwoOps", {true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -224,4 +219,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

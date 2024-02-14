@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,6 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
                               const ResizeAttributes   &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
-
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
@@ -73,8 +72,7 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 
     // Check support level
     // Data type
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
     // Data layout
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
     // Interpolation policy

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADCONTEXT
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADCONTEXT
+#ifndef ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADCONTEXT_H
+#define ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADCONTEXT_H
 
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -85,11 +85,14 @@ public:
      * @return TensorInfo Newly created tensor info
      */
     template <typename... TArgs>
-    TensorInfo create_tensor_info(TArgs &&...args)
+    ITensorInfo *create_tensor_info(TArgs &&...args)
     {
-        auto tensor_info = TensorInfo(std::forward<TArgs>(args)...);
-        register_user_tensor(tensor_info);
-        return tensor_info;
+        auto  tensor_info     = std::make_unique<TensorInfo>(std::forward<TArgs>(args)...);
+        auto *tensor_info_ptr = tensor_info.get();
+
+        register_user_tensor(std::move(tensor_info));
+
+        return tensor_info_ptr;
     }
 
     /** Get the internal implementation */
@@ -101,9 +104,11 @@ public:
 private:
     /** Set a new ID to the tensor info and register its memory descriptor to the context.
      *
-     * @param[in,out] tensor_info @ref ITensorInfo to be registered.
+     * The ownership of the tensor info object will be transfered to this context object.
+     *
+     * @param[in] tensor_info @ref TensorInfo to be registered.
      */
-    void register_user_tensor(ITensorInfo &tensor_info);
+    void register_user_tensor(std::unique_ptr<TensorInfo> &&tensor_info);
 
     /** Internal implementation */
     std::unique_ptr<Impl> _impl;
@@ -113,4 +118,4 @@ private:
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADCONTEXT */
+#endif // ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADCONTEXT_H

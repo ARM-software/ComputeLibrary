@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE
+#ifndef ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE_H
+#define ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE_H
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
 
@@ -51,12 +51,8 @@ public:
      * Valid data type configurations:
      * |src            |dst            |
      * |:--------------|:--------------|
-     * |QASYMM8        |QASYMM8        |
-     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
      * |F16            |F16            |
      * |F32            |F32            |
-     * |U8             |U8             |
-     * |S16            |S16            |
      *
      * Valid data layouts:
      * - NHWC
@@ -90,4 +86,4 @@ public:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE */
+#endif // ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE_H

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,7 +71,7 @@ __kernel void reverse(TENSOR4D_DECLARATION(src),
 {
     Tensor4D src  = CONVERT_TO_TENSOR4D_STRUCT(src, depth);
     Vector   axis = CONVERT_TO_VECTOR_STRUCT_NO_STEP(axis);
-    Tensor4D dst  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(dst, depth);
+    Tensor4D dst  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(dst);
 
     const uint x_in = get_global_id(0);
     const uint y_in = get_global_id(1);

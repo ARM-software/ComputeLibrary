@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CASTFIXTURE
-#define TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CASTFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CASTFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CASTFIXTURE_H
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -58,14 +58,14 @@ protected:
     void fill(U &&tensor, int i, DataType dt_in, DataType dt_out)
     {
         // Restricting range to avoid inf values
-        if(dt_out == DataType::F16)
+        if (dt_out == DataType::F16)
         {
             constexpr int signed_min   = -32000;
             constexpr int signed_max   = 32000;
             constexpr int unsigned_min = 0;
             constexpr int unsigned_max = 65000;
 
-            switch(dt_in)
+            switch (dt_in)
             {
                 case DataType::U8:
                 case DataType::QASYMM8:
@@ -78,22 +78,26 @@ protected:
                 }
                 case DataType::U16:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<uint16_t>(unsigned_min), static_cast<uint16_t>(unsigned_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<uint16_t>(unsigned_min),
+                                                 static_cast<uint16_t>(unsigned_max));
                     break;
                 }
                 case DataType::S16:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<int16_t>(signed_min), static_cast<int16_t>(signed_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<int16_t>(signed_min),
+                                                 static_cast<int16_t>(signed_max));
                     break;
                 }
                 case DataType::U32:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<uint32_t>(unsigned_min), static_cast<uint32_t>(unsigned_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<uint32_t>(unsigned_min),
+                                                 static_cast<uint32_t>(unsigned_max));
                     break;
                 }
                 case DataType::S32:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(signed_min), static_cast<int32_t>(signed_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(signed_min),
+                                                 static_cast<int32_t>(signed_max));
                     break;
                 }
                 default:
@@ -107,29 +111,33 @@ protected:
     }
 
     // Given input is in nchw format
-    TensorType compute_target(const TensorShape &shape, const DataType dt_in, const DataType dt_out, const ConvertPolicy policy)
+    TensorType
+    compute_target(const TensorShape &shape, const DataType dt_in, const DataType dt_out, const ConvertPolicy policy)
     {
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &context };
+        auto              context        = GpuWorkloadContext{&cl_compile_ctx};
+        GpuWorkloadSketch sketch{&context};
 
         // Create sketch tensors
-        TensorInfo src_info = context.create_tensor_info(TensorInfo(shape, 1, dt_in, DataLayout::NCHW)); // layout is not important
-        TensorInfo dst_info = context.create_tensor_info();
+        // Here, we use DataLayout::NCHW just for the test. However, the optimal data layout to
+        // be used with dynamic fusion is NHWC
+        ITensorInfo *src_info =
+            context.create_tensor_info(TensorInfo(shape, 1, dt_in, DataLayout::NCHW)); // layout is not important
+        ITensorInfo *dst_info = context.create_tensor_info();
 
         CastAttributes attributes;
         attributes.convert_policy(policy).data_type(dt_out);
 
-        ITensorInfo *ans_info = FunctionType::create_op(sketch, &src_info, attributes);
-        GpuOutput::create_op(sketch, ans_info, &dst_info);
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, src_info, attributes);
+        GpuOutput::create_op(sketch, ans_info, dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;
         runtime.configure(sketch);
 
         // (Important) Allocate auxiliary tensor memory if there are any
-        for(auto &data : runtime.get_auxiliary_tensors())
+        for (auto &data : runtime.get_auxiliary_tensors())
         {
             CLTensor     *tensor      = std::get<0>(data);
             TensorInfo    info        = std::get<1>(data);
@@ -143,8 +151,8 @@ protected:
         TensorType t_dst{};
 
         // Initialize user tensors
-        t_src.allocator()->init(src_info);
-        t_dst.allocator()->init(dst_info);
+        t_src.allocator()->init(*src_info);
+        t_dst.allocator()->init(*dst_info);
 
         // Allocate and fill user tensors
         t_src.allocator()->allocate();
@@ -153,14 +161,15 @@ protected:
         fill(AccessorType(t_src), 0, dt_in, dt_out);
 
         // Run runtime
-        runtime.run({ &t_src, &t_dst });
+        runtime.run({&t_src, &t_dst});
         return t_dst;
     }
 
-    SimpleTensor<T2> compute_reference(const TensorShape &shape, const DataType dt_in, const DataType dt_out, const ConvertPolicy policy)
+    SimpleTensor<T2>
+    compute_reference(const TensorShape &shape, const DataType dt_in, const DataType dt_out, const ConvertPolicy policy)
     {
         // Create reference
-        SimpleTensor<T1> src{ shape, dt_in, 1 };
+        SimpleTensor<T1> src{shape, dt_in, 1};
 
         // Fill reference
         fill(src, 0, dt_in, dt_out);
@@ -174,4 +183,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CASTFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_CASTFIXTURE_H

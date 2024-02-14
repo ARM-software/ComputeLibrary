@@ -53,6 +53,10 @@ public:
     template <typename T>
     ConstantData(std::initializer_list<std::initializer_list<T>> values, DataType data_type);
 
+    /** Templated constructor */
+    template <typename T>
+    ConstantData(const std::vector<std::vector<T>> &values, DataType data_type);
+
 private:
     /** Validate the given data type and the template type
      *

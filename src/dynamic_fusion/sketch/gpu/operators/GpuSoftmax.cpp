@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,7 +97,7 @@ Status GpuSoftmax::is_supported_op(const GpuWorkloadContext &context,
         ARM_COMPUTE_RETURN_ERROR_MSG("Unimplemented Gpu language");
     }
 
-    return Status{};
+    return Status{ErrorCode::RUNTIME_ERROR, "GpuSoftmax is not Supported"};
 }
 
 Status GpuSoftmax::validate_op(const GpuWorkloadSketch &sketch,

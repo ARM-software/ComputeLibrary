@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWSCOPEDKERNELWRITER_H
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWSCOPEDKERNELWRITER_H
 
+#include "compute_kernel_writer/include/ckw/KernelWriter.h"
 #include <cstdint>
 
 namespace arm_compute
@@ -34,14 +35,12 @@ namespace experimental
 namespace dynamic_fusion
 {
 
-class GpuCkwKernelWriter;
-
 /** Helper to automatically manage kernel writer ID space. */
 class GpuCkwScopedKernelWriter
 {
 public:
     /** Initialize a new instance of @ref GpuCkwScopedKernelWriter class. */
-    explicit GpuCkwScopedKernelWriter(GpuCkwKernelWriter *writer);
+    explicit GpuCkwScopedKernelWriter(ckw::KernelWriter *writer);
 
     /** Create a new scope from the specified scoped kernel writer. */
     GpuCkwScopedKernelWriter(const GpuCkwScopedKernelWriter &other);
@@ -50,20 +49,20 @@ public:
     GpuCkwScopedKernelWriter &operator=(const GpuCkwScopedKernelWriter &) = delete;
 
     /** Access the underlying kernel writer. */
-    GpuCkwKernelWriter *operator->();
+    ckw::KernelWriter *operator->();
 
     /** Access the underlying kernel writer. */
-    const GpuCkwKernelWriter *operator->() const;
+    const ckw::KernelWriter *operator->() const;
 
     /** Get the kernel writer. */
-    GpuCkwKernelWriter *writer();
+    ckw::KernelWriter *writer();
 
     /** Get the kernel writer. */
-    const GpuCkwKernelWriter *writer() const;
+    const ckw::KernelWriter *writer() const;
 
 private:
-    GpuCkwKernelWriter *_writer;
-    int32_t             _parent_id_space;
+    ckw::KernelWriter *_writer;
+    int32_t            _parent_id_space;
 };
 
 } // namespace dynamic_fusion

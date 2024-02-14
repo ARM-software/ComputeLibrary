@@ -27,6 +27,8 @@
 namespace ckw
 {
 
+TensorSampler::TensorSampler() = default;
+
 TensorSampler::TensorSampler(TensorStorageType         storage,
                              TensorSamplerFormat       format,
                              TensorSamplerAddressModeX address_mode_x,

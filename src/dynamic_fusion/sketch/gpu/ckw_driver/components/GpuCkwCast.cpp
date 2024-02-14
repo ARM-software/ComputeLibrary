@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,65 +26,25 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/Validate.h"
-#include "ckw/TensorTileSampler.h"
 
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/CkwHelper.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 
+#include "compute_kernel_writer/include/ckw/KernelWriter.h"
+#include <cstdint>
 #include <string>
 
-using namespace ckw;
 namespace arm_compute
 {
 namespace experimental
 {
 namespace dynamic_fusion
 {
-namespace
-{
-/** Create a simple sampler from tile of dimension [m0, n0]
- */
-inline TensorTileSampler create_sampler(GpuCkwScopedKernelWriter &writer, int32_t m0, int32_t n0)
-{
-    TensorTileSampler sampler;
-
-    auto &gid_0 = writer->declare_tile("gid_0", ckw::DataType::Int32);
-    auto &gid_1 = writer->declare_tile("gid_1", ckw::DataType::Int32);
-    auto &gid_2 = writer->declare_tile("gid_2", ckw::DataType::Int32);
-
-    auto &const_0 = writer->declare_tile("0", 0);
-    writer->op_get_global_id(gid_0, 0);
-    writer->op_get_global_id(gid_1, 1);
-    writer->op_get_global_id(gid_2, 2);
-
-    auto &x_coord = writer->declare_tile("x_coord", ckw::DataType::Int32);
-    auto &y_coord = writer->declare_tile("y_coord", ckw::DataType::Int32);
-    auto &m0_t    = writer->declare_tile("m0", m0);
-    auto &n0_t    = writer->declare_tile("n0", n0);
-    writer->op_binary_expression(x_coord, gid_0, BinaryOp::Mul, n0_t);
-    writer->op_binary_expression(y_coord, gid_1, BinaryOp::Mul, m0_t);
-
-    sampler.x(x_coord);
-    sampler.y(y_coord);
-    sampler.z(const_0); // 3rd dimension collapsed with 2nd dimension
-    sampler.b(gid_2);
-
-    sampler.width(n0);
-    sampler.height(m0);
-
-    sampler.format(TensorSamplerFormat::C_WH_1); // 3rd dimension collapsed with 2nd dimension
-    sampler.address_mode_x(TensorSamplerAddressModeX::None);
-    sampler.address_mode_y(TensorSamplerAddressModeY::ClampToBorder);
-    sampler.address_mode_z(TensorSamplerAddressModeZ::Skip); // Dimensions higher than 3 not supported yet
-
-    return sampler;
-}
-} // namespace
 
 GpuCkwCast::GpuCkwCast(ComponentId id, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes)
     : IGpuCkwComponentDriver{id, tensors}, _src{}, _dst{}, _attributes{attributes}
@@ -92,72 +52,187 @@ GpuCkwCast::GpuCkwCast(ComponentId id, const ArgumentPack<ITensorInfo> &tensors,
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_src, _dst);
+    ARM_COMPUTE_ERROR_ON_MSG(is_data_type_float(_src->data_type()) == false,
+                             "The source data type must be a floating-point data type");
 }
 
 void GpuCkwCast::write_component_code(const ComponentGroup    &comp_group,
                                       GpuCkwVariableTable     &vtable,
                                       GpuCkwScopedKernelWriter writer) const
 {
-    const auto         root_window = comp_group.get_root_component()->ckw_component_driver()->get_window();
-    const unsigned int n0          = root_window.x().step();
-    const unsigned int m0          = root_window.y().step();
+    /********************************************************************************
+     * 1 - Define tensors
+     ********************************************************************************/
+    GpuCkwComponentArgument *src = vtable.declare_variable(comp_group, writer, _src, "src");
+    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
 
-    GpuCkwComponentArgument *src =
-        vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
-    GpuCkwComponentArgument *dst =
-        vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
+    /********************************************************************************
+     * 2 - Define CKW constants
+     ********************************************************************************/
+    const auto dst_h = static_cast<int32_t>(_dst->dimension(1));
 
-    // Load the source tile and prepare the sampler.
-    if (!src->has_tile())
+    // CKW constants
+    auto const_dst_h_i32 = writer->declare_constant_tile(ckw::ConstantData({{dst_h}}, ckw::DataType::Int32));
+    auto const_pos_1_i32 = writer->declare_constant_tile(ckw::ConstantData({{1}}, ckw::DataType::Int32));
+    auto const_0_i32     = writer->declare_constant_tile(ckw::ConstantData({{0}}, ckw::DataType::Int32));
+
+    /********************************************************************************
+     * 3 - Define the compute block parameters and destination tile (if not root component)
+     *     Bind the tile to the tensor to share it among different components and
+     *     initialize the compute block parameters
+     ********************************************************************************/
+    // The compute block parameters depend on the employed tensor format
+
+    // Destination compute block size
+    int32_t dst_n0 = -1;
+    int32_t dst_m0 = -1;
+
+    // Destination compute block size left-over
+    int32_t dst_n0_partial = -1;
+    int32_t dst_m0_partial = -1;
+
+    // Shift-back for the overlapping-min strategy
+    int32_t dst_shift_back = -1;
+
+    if (!dst->has_tile())
     {
-        const auto sampler = create_sampler(writer, m0, n0);
-        writer->op_load_once(src, sampler);
+        // If ROOT component, we use ckw::TensorSamplerFormat::Dim0_Dim1xDim2_1
+        // as tensor format
+        const auto root_window = comp_group.get_root_component()->ckw_component_driver()->get_window();
+
+        dst_n0         = root_window.x().step();
+        dst_m0         = root_window.y().step();
+        dst_n0_partial = _dst->dimension(0) % dst_n0;
+        dst_m0_partial = (_dst->dimension(1) * _dst->dimension(2)) % dst_m0;
+        dst_shift_back = (dst_n0 - dst_n0_partial) % dst_n0;
+
+        ckw::TensorSampler sampler_dst;
+        sampler_dst.format(ckw::TensorSamplerFormat::Dim0_Dim1xDim2_1);
+        if (dst_n0_partial == 0)
+        {
+            sampler_dst.address_mode_x(ckw::TensorSamplerAddressModeX::None);
+        }
+        else
+        {
+            sampler_dst.address_mode_x(ckw::TensorSamplerAddressModeX::OverlappingMin);
+        }
+
+        if (dst_m0_partial == 0)
+        {
+            sampler_dst.address_mode_y(ckw::TensorSamplerAddressModeY::None);
+        }
+        else
+        {
+            sampler_dst.address_mode_y(ckw::TensorSamplerAddressModeY::ClampToBorderMaxOnly);
+        }
+
+        sampler_dst.address_mode_z(ckw::TensorSamplerAddressModeZ::None);
+        sampler_dst.storage(ckw::TensorStorageType::BufferUint8Ptr);
+
+        // Declare destination tile
+        ckw::DataType dst_dt   = to_ckw(_dst->data_type());
+        auto          tile_dst = writer->declare_tile("dst", ckw::TileInfo(dst_dt, dst_m0, dst_n0));
+
+        // Bind tile to the tensor
+        dst->init_virtual_tensor(tile_dst, sampler_dst);
     }
     else
     {
-        const auto &sampler = src->tile_sampler();
-        writer->op_load_once(src, sampler);
+        // Change dst_n0 and dst_m0 if NOT root component!
+        // ATTENTION:
+        // dst_m0_partial depends on the TensorSamplerFormat
+        dst_n0         = dst->tile().tile_info().width();
+        dst_m0         = dst->tile().tile_info().height();
+        dst_n0_partial = _dst->dimension(0) % dst_n0;
+
+        ckw::TensorSampler sampler_dst = dst->tensor_sampler();
+
+        if (sampler_dst.format() == ckw::TensorSamplerFormat::Dim0_Dim1xDim2_1)
+        {
+            dst_m0_partial = (_dst->dimension(1) * _dst->dimension(2)) % dst_m0;
+        }
+        else if (sampler_dst.format() == ckw::TensorSamplerFormat::Dim0_Dim1_Dim2)
+        {
+            dst_m0_partial = _dst->dimension(1) % dst_m0;
+        }
+
+        // Shift-back for the overlapping-min strategy
+        dst_shift_back = (dst_n0 - dst_n0_partial) % dst_n0;
     }
 
-    const auto &src_tile = src->tile();
-    const auto &sampler  = src->tile_sampler();
+    const auto &tile_dst = dst->tile();
 
-    // Prepare the output tile.
-    if (!dst->has_tile())
+    /********************************************************************************
+     * 4 - Define the compute block parameters CKW constants
+     ********************************************************************************/
+    // Only now we can declare the N0 and M0 as constant
+    auto const_dst_n0_i32 = writer->declare_constant_tile(ckw::ConstantData({{dst_n0}}, ckw::DataType::Int32));
+    auto const_dst_m0_i32 = writer->declare_constant_tile(ckw::ConstantData({{dst_m0}}, ckw::DataType::Int32));
+    auto const_dst_shift_back_n0_i32 =
+        writer->declare_constant_tile(ckw::ConstantData({{dst_shift_back}}, ckw::DataType::Int32));
+
+    /********************************************************************************
+     * 5 - Define the sampler for the input tensor
+     ********************************************************************************/
+    if (!src->has_tile())
     {
-        // Get Target datatype and convert it to ckw::DataType.
-        ckw::DataType target_dt = dynamic_fusion::to_ckw(_attributes.data_type());
+        // Sampler
+        ckw::TensorSampler sampler_src = dst->tensor_sampler();
 
-        // Create dst_tile based on src_tile dimensions and with target DataType.
-        const TileInfo src_tile_info = src_tile.tile_info();
-        const TileInfo dst_tile_info = TileInfo(target_dt, src_tile_info.height(), src_tile_info.width());
+        auto tile_gid_0 = writer->declare_tile("gid_0", ckw::TileInfo(ckw::DataType::Int32));
+        auto tile_gid_1 = writer->declare_tile("gid_1", ckw::TileInfo(ckw::DataType::Int32));
+        auto tile_gid_2 = writer->declare_tile("gid_2", ckw::TileInfo(ckw::DataType::Int32));
 
-        // Declare dst_tile
-        auto &tile = writer->declare_tile("dst_tile", dst_tile_info);
-        dst->init_virtual_tensor(tile, sampler);
+        writer->op_get_global_id(tile_gid_0, 0);
+        writer->op_get_global_id(tile_gid_1, 1);
+        writer->op_get_global_id(tile_gid_2, 2);
+
+        auto tile_cout0 = writer->declare_tile("cout0", ckw::TileInfo(ckw::DataType::Int32)); // OFM
+        auto tile_mout0 = writer->declare_tile("mout0", ckw::TileInfo(ckw::DataType::Int32)); // WIDTH or WIDTH x HEIGHT
+        auto tile_mout1 = writer->declare_tile("mout1", ckw::TileInfo(ckw::DataType::Int32)); // HEIGHT or 0
+        auto tile_bout0 = writer->declare_tile("bout0", ckw::TileInfo(ckw::DataType::Int32)); // BATCH SIZE IDX
+
+        // Calculate coordinates
+        get_coordinate_from_gws_overlapping_min(writer, tile_cout0, tile_gid_0, const_dst_n0_i32,
+                                                const_dst_shift_back_n0_i32, const_0_i32);
+        get_coordinate_from_gws(writer, tile_mout0, tile_gid_1, const_dst_m0_i32);
+
+        // Get the boundary aware coordinates at each global dimension index
+        if (sampler_src.format() == ckw::TensorSamplerFormat::Dim0_Dim1xDim2_1)
+        {
+            writer->op_assign(tile_mout1, const_0_i32);
+            get_coordinate_from_gws(writer, tile_bout0, tile_gid_2, const_pos_1_i32);
+        }
+        else if (sampler_src.format() == ckw::TensorSamplerFormat::Dim0_Dim1_Dim2)
+        {
+            writer->op_binary(tile_mout1, ckw::BinaryOp::Mod, tile_gid_2, const_dst_h_i32);
+            writer->op_binary(tile_bout0, ckw::BinaryOp::Div, tile_gid_2, const_dst_h_i32);
+        }
+        ckw::DataType src_dt   = to_ckw(_src->data_type());
+        auto          tile_src = writer->declare_tile("src", ckw::TileInfo(src_dt, dst_m0, dst_n0));
+
+        writer->op_load(tile_src, src->tensor(), sampler_src, tile_cout0, tile_mout0, tile_mout1, tile_bout0);
+
+        // Here, init_virtual_tensor() it is used to bring the tile_src outside the compound statement
+        src->init_virtual_tensor(tile_src, sampler_src);
     }
 
-    const auto &dst_tile = dst->tile();
+    auto tile_src = src->tile();
 
-    // Check if this op is cast-down or cast-up
-    const size_t src_size  = data_size_from_type(_src->data_type());
-    const size_t dst_size  = data_size_from_type(_dst->data_type());
-    const bool   cast_down = (src_size >= dst_size);
+    /********************************************************************************
+     * 6 - Extra operations required before writing the main code (optional)
+     ********************************************************************************/
 
-    if (cast_down && is_data_type_quantized(_src->data_type()))
-    {
-        const auto &constant_x80 = writer->declare_tile("0x80", 0x80);
-        writer->op_binary_expression(src_tile, src_tile, BinaryOp::BitwiseXOR, constant_x80);
-    }
+    // Not required
 
+    /********************************************************************************
+     * 7 - Write the rest of the code
+     ********************************************************************************/
+    // Only None ConvertPolicy is supported for floating-point data types
     ckw::ConvertPolicy convert_policy = ckw::ConvertPolicy::None;
 
-    if (cast_down && (is_data_type_float(_src->data_type()) || _attributes.convert_policy() == ConvertPolicy::SATURATE))
-    {
-        convert_policy = ckw::ConvertPolicy::Saturate;
-    }
-
-    writer->op_cast_expression(dst_tile, src_tile, convert_policy);
+    writer->op_cast(tile_dst, tile_src, convert_policy);
+    ARM_COMPUTE_ERROR_ON_MSG(dst->has_tile() == false, "You must bind a tile before appending another component");
 }
 
 Window GpuCkwCast::get_window() const
@@ -168,8 +243,8 @@ Window GpuCkwCast::get_window() const
     // Collapse Dim 1 (W) and Dim 2 (H) together, leave Dim 0 (C) unchanged
     // This is in line with the collapsing convention used by operators like Conv2d
     output_shape.collapse(2U, 1U);
-    constexpr unsigned int vector_size_byte_opencl = 16;
-    const unsigned int     num_elems_processed_per_iteration =
+    constexpr uint32_t vector_size_byte_opencl = 16;
+    const uint32_t     num_elems_processed_per_iteration =
         adjust_vec_size(vector_size_byte_opencl / _dst->element_size(), _dst->dimension(0));
     Window win = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
 

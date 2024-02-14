@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021, 2023 Arm Limited.
+/// Copyright (c) 2017-2021, 2023-2024 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -568,9 +568,14 @@ The responsibilities of the operators can be summarized as follows:
 
 Selecting multi_isa when building Compute Library, will create a library that contains all the supported ISA features.
 Based on the CPU support, the appropriate kernel will be selected at runtime for execution. Currently this option is
-supported in two configurations: (i) with armv8.2-a as the base architecture where all the supported ISA features are enabled and
-(ii) with armv8-a as the base architecture where only a subset of ISA features (everything except FP16 vector arithmetic)
-are enabled in the build.
+supported in two configurations: (i) with armv8.2-a (ii) with armv8-a. In both cases all the supported ISA features are enabled
+in the build.
+
+The arch option in a multi_isa build sets the minimum architecture required to run the resulting binary.
+For example a multi_isa build for armv8-a will run on any armv8-a or later, when the binary is executed on a armv8.2-a device
+it will use the additional cpu features present in this architecture: FP16 and dot product.
+In order to have a binary like this (multi_isa+armv8-a) the FP16 and dot product kernels in the library are compiled for the
+target armv8.2-a and all other common code for armv8-a.
 
 @subsection architecture_experimental_per_operator_build Per-operator build
 

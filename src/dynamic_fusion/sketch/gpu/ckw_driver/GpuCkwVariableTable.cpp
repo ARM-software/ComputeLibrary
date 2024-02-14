@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
@@ -40,7 +39,6 @@ namespace dynamic_fusion
 GpuCkwComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelComponentGroup &comp_group,
                                                                GpuCkwScopedKernelWriter      &writer,
                                                                const ITensorInfo             *tensor,
-                                                               TensorStorageType              storage,
                                                                const std::string             &alias)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!tensor->has_valid_id(), "Tensor info with valid id expected");
@@ -65,7 +63,7 @@ GpuCkwComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelCo
         std::stringstream ss;
         ss << alias << "_t" << abs(tensor->id());
         const auto              uniq_name = ss.str();
-        GpuCkwComponentArgument var{writer->declare_tensor_argument(uniq_name, to_ckw(*tensor), to_ckw(storage))};
+        GpuCkwComponentArgument var{writer->declare_tensor_argument(uniq_name, to_ckw(*tensor))};
         auto                  &&inserted = _vars.emplace(tensor->id(), var);
         return &(inserted.first->second);
     }

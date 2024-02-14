@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_ELEMENTWISEBINARY
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_ELEMENTWISEBINARY
-
-#include "ckw/types/Operators.h"
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_ELEMENTWISEBINARY_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_ELEMENTWISEBINARY_H
 
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
+
+#include "compute_kernel_writer/include/ckw/types/Operators.h"
 
 namespace arm_compute
 {
@@ -34,29 +34,9 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-inline ckw::BinaryOp to_ckw(const ElementwiseBinaryCommonAttributes &attributes)
-{
-    switch (attributes.operation())
-    {
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Add:
-            return ckw::BinaryOp::Add;
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Sub:
-            return ckw::BinaryOp::Sub;
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Div:
-            return ckw::BinaryOp::Div;
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Mul:
-            return ckw::BinaryOp::Mul;
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Min:
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Max:
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Power:
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::Prelu:
-        case ElementwiseBinaryCommonAttributes::ElementwiseOp::SquaredDiff:
-        default:
-            ARM_COMPUTE_ERROR("Cannot convert ElementwiseBinaryCommonAttributes to corresponding ckw::BinaryOp");
-    }
-}
+ckw::BinaryOp to_ckw(const ElementwiseBinaryCommonAttributes &attributes);
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_ELEMENTWISEBINARY */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_ELEMENTWISEBINARY_H

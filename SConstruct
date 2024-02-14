@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2023 Arm Limited.
+# Copyright (c) 2016-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -139,6 +139,8 @@ vars.AddVariables(
     ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),
     ("toolchain_prefix", "Override the toolchain prefix; used by all toolchain components: compilers, linker, assembler etc. If unspecified, use default(auto) prefixes; if passed an empty string '' prefixes would be disabled", "auto"),
     ("compiler_prefix", "Override the compiler prefix; used by just compilers (CC,CXX); further overrides toolchain_prefix for compilers; this is for when the compiler prefixes are different from that of the linkers, archivers etc. If unspecified, this is the same as toolchain_prefix; if passed an empty string '' prefixes would be disabled", "auto"),
+    BoolVariable("address_sanitizer", "Enable AddressSanitizer", False),
+    BoolVariable("undefined_sanitizer", "Enable UndefinedBehaviorSanitizer", False),
     BoolVariable("thread_sanitizer", "Enable ThreadSanitizer", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
@@ -167,7 +169,7 @@ install_path = env['install_dir']
 if not env['install_dir'].startswith('/') and install_path != "":
     install_path = "%s/%s" % (build_path, install_path)
 
-env.Append(LIBPATH = [build_path, os.path.join(build_path, "prototype")])
+env.Append(LIBPATH = [build_path, os.path.join(build_path, "")])
 Export('env')
 Export('vars')
 
@@ -224,6 +226,9 @@ if env['os'] == 'bare_metal':
 if env['experimental_dynamic_fusion']:
     # Dynamic Fusion on GPU has a direct dependency on OpenCL and Compute Kernel Writer
     env['opencl'] = 1
+
+    # Build CKW by default
+    env["extra_cxx_flags"] += ' -DACL_INTERNAL_TEST_CKW_IN_DF'
 
 if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
     print("Compressed kernels are supported only for android builds")
@@ -437,15 +442,14 @@ if env['experimental_dynamic_fusion']:
     CKW_ENABLE_ASSERTS = env['debug'] or env['asserts']
 
     CKW_PROJECT_DIR = Dir('.').path + "/compute_kernel_writer"
-    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/prototype/include"
+    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/include"
     CKW_BUILD_DIR = build_path.replace("#", "")
 
     CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" " \
                     "-S {CKW_PROJECT_DIR} -B {CKW_BUILD_DIR} " \
                     "-DCMAKE_BUILD_TYPE={CKW_BUILD_TYPE} " \
-                    "-DCKW_ENABLE_OPENCL={CKW_ENABLE_OPENCL} " \
+                    "-DCKW_ENABLE_OPENCL=ON " \
                     "-DCKW_ENABLE_ASSERTS={CKW_ENABLE_ASSERTS} " \
-                    "-DCKW_BUILD_PROTOTYPE=ON " \
                     "-DCKW_CCACHE={CKW_CCACHE} ".format(CKW_CC=CKW_CC,
                                                         CKW_CXX=CKW_CXX,
                                                         CKW_PROJECT_DIR=CKW_PROJECT_DIR,
@@ -458,7 +462,7 @@ if env['experimental_dynamic_fusion']:
 
     # Configure CKW static objects with -fPIC (CMAKE_POSITION_INDEPENDENT_CODE) option to enable linking statically to ACL
     CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} --target ckw_prototype -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
+    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} --target ckw -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
                                                                                                  NUM_JOBS=GetOption('num_jobs')
                                                                                                  )
 
@@ -617,6 +621,18 @@ if env['asserts']:
 
 if env['logging']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])
+
+if env['address_sanitizer']:
+    if 'android' in env['os']:
+        env.Append(CXXFLAGS = ['-fsanitize=hwaddress'])
+        env.Append(LINKFLAGS = ['-fsanitize=hwaddress'])
+    else:
+        env.Append(CXXFLAGS = ['-fsanitize=address'])
+        env.Append(LINKFLAGS = ['-fsanitize=address'])
+
+if env['undefined_sanitizer']:
+    env.Append(CXXFLAGS = ['-fsanitize=undefined'])
+    env.Append(LINKFLAGS = ['-fsanitize=undefined'])
 
 if env['thread_sanitizer']:
     env.Append(CXXFLAGS = ['-fsanitize=thread'])

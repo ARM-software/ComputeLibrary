@@ -25,11 +25,22 @@
 #ifndef CKW_INCLUDE_CKW_KERNELWRITER_H
 #define CKW_INCLUDE_CKW_KERNELWRITER_H
 
+#include "ckw/Kernel.h"
+#include "ckw/TensorInfo.h"
 #include "ckw/TensorOperand.h"
+#include "ckw/TensorSampler.h"
+#include "ckw/TileInfo.h"
 #include "ckw/TileOperand.h"
 #include "ckw/types/ConstantData.h"
 #include "ckw/types/ConvertPolicy.h"
+#include "ckw/types/DataType.h"
 #include "ckw/types/Operators.h"
+#include "ckw/types/TargetArchitecture.h"
+#include "ckw/types/TargetLanguage.h"
+#include "ckw/types/TensorComponentType.h"
+#include "ckw/types/TensorDataLayout.h"
+#include "ckw/types/TensorSamplerTypes.h"
+#include "ckw/types/TensorStorageType.h"
 
 #include <functional>
 #include <memory>
@@ -39,16 +50,8 @@
 namespace ckw
 {
 
-/** Forward Declerations */
-class Kernel;
-class TensorInfo;
-class TensorSampler;
+/** Forward Declarations */
 class TileArea;
-class TileInfo;
-
-enum class DataType;
-enum class TargetArchitecture;
-enum class TargetLanguage;
 
 /** A kernel writer.
  *
@@ -350,7 +353,6 @@ public:
                                   const TileOperand   &z,
                                   const TileOperand   &batch_op) = 0;
 
-protected:
     // =============================================================================================
     // ID space management
     // =============================================================================================
@@ -367,6 +369,7 @@ protected:
     /** Get the current ID space. */
     int32_t id_space() const;
 
+protected:
     /** Set the current ID space.
      *
      * @param[in] value The ID space to be used.

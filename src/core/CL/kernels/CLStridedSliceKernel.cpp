@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,8 +142,6 @@ void CLStridedSliceKernel::configure(const CLCompileContext &compile_context,
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(
                                                                         std::max<int>(output_width_x - vec_size_x, 0)));
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
-    build_opts.add_option_if_else(input_shape.num_dimensions() > 2,
-                                  "-DSRC_DEPTH=" + support::cpp11::to_string(input_shape.z()), "-DSRC_DEPTH=1");
     build_opts.add_option_if_else(output->num_dimensions() > 2,
                                   "-DDST_DEPTH=" + support::cpp11::to_string(output->tensor_shape().z()),
                                   "-DDST_DEPTH=1");

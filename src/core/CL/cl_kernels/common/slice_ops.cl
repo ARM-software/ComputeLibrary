@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
  * @attention Supported tensor rank: up to 4
  *
  * @attention Data type can be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
- * @attention Input and output tensor dephts should be given as a preprocessor arguments using -DSRC_DEPTH=size. and -DDST_DEPTH=size
+ * @attention Output tensor depht should be given as a preprocessor arguments using -DDST_DEPTH=size
  * @attention Absolute start coordinates for each dimension should be given as preprocessor -DSTART_index=value e.g. -DSTART_0=2
  * @attention Strides for each dimension should be given as preprocessor -DSTRIDE_index=value e.g. -DSTRIDE_1=1
  *
@@ -58,7 +58,7 @@ __kernel void strided_slice(
     TENSOR4D_DECLARATION(output))
 {
     // Get pixels pointer
-    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, SRC_DEPTH);
+    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input);
     Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DST_DEPTH);
 
     int offset = 0;

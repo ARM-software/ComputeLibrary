@@ -31,7 +31,7 @@ namespace ckw
 namespace
 {
 template <typename T>
-inline typename std::enable_if<std::is_same<T, float>::value, std::string>::type to_str(T value)
+typename std::enable_if<std::is_same<T, float>::value, std::string>::type to_str(T value)
 {
     std::stringstream ss;
     ss << std::scientific << std::setprecision(std::numeric_limits<T>::max_digits10) << value;
@@ -39,14 +39,14 @@ inline typename std::enable_if<std::is_same<T, float>::value, std::string>::type
 }
 
 template <typename T>
-inline typename std::enable_if<!std::is_same<T, float>::value && !std::is_same<T, bool>::value, std::string>::type
+typename std::enable_if<!std::is_same<T, float>::value && !std::is_same<T, bool>::value, std::string>::type
 to_str(T value)
 {
     return std::to_string(value);
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_same<T, bool>::value, std::string>::type to_str(T value)
+typename std::enable_if<std::is_same<T, bool>::value, std::string>::type to_str(T value)
 {
     return std::to_string((int)value);
 }
@@ -55,6 +55,24 @@ inline typename std::enable_if<std::is_same<T, bool>::value, std::string>::type 
 template <typename T>
 ConstantData::ConstantData(std::initializer_list<std::initializer_list<T>> values, DataType data_type)
     : _data_type(data_type)
+{
+    CKW_ASSERT(validate<T>(data_type));
+    CKW_ASSERT(values.size() > 0);
+
+    for (auto value_arr : values)
+    {
+        // Each row must have the same number of elements
+        CKW_ASSERT(value_arr.size() == (*values.begin()).size());
+
+        StringVector vec;
+        std::transform(value_arr.begin(), value_arr.end(), std::back_inserter(vec), [](T val) { return to_str(val); });
+
+        _values.push_back(std::move(vec));
+    }
+}
+
+template <typename T>
+ConstantData::ConstantData(const std::vector<std::vector<T>> &values, DataType data_type) : _data_type(data_type)
 {
     CKW_ASSERT(validate<T>(data_type));
     CKW_ASSERT(values.size() > 0);
@@ -100,6 +118,10 @@ template ConstantData::ConstantData(std::initializer_list<std::initializer_list<
 template ConstantData::ConstantData(std::initializer_list<std::initializer_list<uint32_t>>, DataType);
 template ConstantData::ConstantData(std::initializer_list<std::initializer_list<bool>>, DataType);
 template ConstantData::ConstantData(std::initializer_list<std::initializer_list<float>>, DataType);
+template ConstantData::ConstantData(const std::vector<std::vector<int32_t>> &, DataType);
+template ConstantData::ConstantData(const std::vector<std::vector<uint32_t>> &, DataType);
+template ConstantData::ConstantData(const std::vector<std::vector<bool>> &, DataType);
+template ConstantData::ConstantData(const std::vector<std::vector<float>> &, DataType);
 
 template bool ConstantData::validate<int32_t>(DataType);
 template bool ConstantData::validate<uint32_t>(DataType);

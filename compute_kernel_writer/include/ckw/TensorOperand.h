@@ -43,6 +43,15 @@ public:
     // Only kernel writer class interacts with tensor operand hence we allow it to access this field.
     friend class KernelWriter;
 
+    /** Create an empty tensor operand.
+     *
+     * The new tensor operand doesn't refer to any tensor therefore it is not useable.
+     */
+    TensorOperand();
+
+    /** Check if the tensor operand contains a tensor and therefore useable. */
+    bool is_valid() const;
+
     /** Get the tensor info. */
     const TensorInfo &info() const;
 
@@ -92,7 +101,7 @@ private:
     /** Initialize a new instance of @ref TensorOperand class for a tensor. */
     TensorOperand(ITensor &tensor);
 
-    ITensor &_tensor;
+    ITensor *_tensor;
 };
 
 } // namespace ckw

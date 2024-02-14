@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_ACTIVATIONFIXTURE
-#define TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_ACTIVATIONFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_ACTIVATIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_ACTIVATIONFIXTURE_H
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -49,11 +49,11 @@ class DynamicFusionActivationValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, bool fuse, DataType data_type, ActivationLayerInfo act_info, TArgs... args)
     {
-        _fuse       = fuse;
-        _data_type  = data_type;
-        _function   = act_info.activation();
-        _target     = compute_target(shape, args...);
-        _reference  = compute_reference(shape, act_info);
+        _fuse      = fuse;
+        _data_type = data_type;
+        _function  = act_info.activation();
+        _target    = compute_target(shape, args...);
+        _reference = compute_reference(shape, act_info);
     }
 
 protected:
@@ -73,17 +73,19 @@ protected:
         // To ensure all the inserted values are within the given range after subtracing/adding delta
         auto insert_values = [&boundary_values, &min, &max](const std::initializer_list<T> &new_values)
         {
-            for(auto &v : new_values)
+            for (auto &v : new_values)
             {
-                if(v >= min && v <= max)
+                if (v >= min && v <= max)
                 {
                     boundary_values.emplace_back(v);
                 }
             }
         };
 
-        insert_values({ min, static_cast<T>(min + delta), static_cast<T>(lower_quarter), static_cast<T>(center_value - delta) });                               // lower partition
-        insert_values({ static_cast<T>(center_value), static_cast<T>(center_value + delta), static_cast<T>(upper_quarter), static_cast<T>(max - delta), max }); // upper partition
+        insert_values({min, static_cast<T>(min + delta), static_cast<T>(lower_quarter),
+                       static_cast<T>(center_value - delta)}); // lower partition
+        insert_values({static_cast<T>(center_value), static_cast<T>(center_value + delta),
+                       static_cast<T>(upper_quarter), static_cast<T>(max - delta), max}); // upper partition
 
         return boundary_values;
     }
@@ -91,8 +93,8 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        float min_bound = 0;
-        float max_bound = 0;
+        float min_bound                = 0;
+        float max_bound                = 0;
         std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type);
         library->fill_static_values(tensor, get_boundary_values(static_cast<T>(min_bound), static_cast<T>(max_bound)));
     }
@@ -101,22 +103,22 @@ protected:
     {
         // Create a new workload sketch
         CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        GpuWorkloadContext context{ &cl_compile_ctx };
-        GpuWorkloadSketch  sketch{ &context };
+        GpuWorkloadContext context{&cl_compile_ctx};
+        GpuWorkloadSketch  sketch{&context};
 
         // Create sketch tensors
-        TensorInfo src_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
-        TensorInfo dst_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
+        ITensorInfo *src_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
+        ITensorInfo *dst_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type));
 
-        ITensorInfo *ans_0_info = FunctionType::create_op(sketch, &src_info, args...);
-        if(_fuse)
+        ITensorInfo *ans_0_info = FunctionType::create_op(sketch, src_info, args...);
+        if (_fuse)
         {
             ITensorInfo *ans_1_info = FunctionType::create_op(sketch, ans_0_info, args...);
-            GpuOutput::create_op(sketch, ans_1_info, &dst_info);
+            GpuOutput::create_op(sketch, ans_1_info, dst_info);
         }
         else
         {
-            GpuOutput::create_op(sketch, ans_0_info, &dst_info);
+            GpuOutput::create_op(sketch, ans_0_info, dst_info);
         }
 
         // Configure runtime
@@ -128,8 +130,8 @@ protected:
         TensorType t_dst{};
 
         // Initialize user tensors
-        t_src.allocator()->init(src_info);
-        t_dst.allocator()->init(dst_info);
+        t_src.allocator()->init(*src_info);
+        t_dst.allocator()->init(*dst_info);
 
         // Allocate and fill user tensors
         t_src.allocator()->allocate();
@@ -138,7 +140,7 @@ protected:
         fill(AccessorType(t_src));
 
         // Run runtime
-        runtime.run({ &t_src, &t_dst });
+        runtime.run({&t_src, &t_dst});
 
         return t_dst;
     }
@@ -146,14 +148,14 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo act_info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, _data_type, 1 };
+        SimpleTensor<T> src{shape, _data_type, 1};
 
         // Fill reference
         fill(src);
 
         auto tmp = reference::activation_layer<T>(src, act_info);
 
-        if(_fuse)
+        if (_fuse)
         {
             auto dst = reference::activation_layer<T>(tmp, act_info);
             return dst;
@@ -166,31 +168,35 @@ protected:
 
 protected:
     ActivationLayerInfo::ActivationFunction _function{};
-    bool                                    _fuse{ false };
+    bool                                    _fuse{false};
     DataType                                _data_type{};
     TensorType                              _target{};
     SimpleTensor<T>                         _reference{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DynamicFusionSigmoidValidationFixture : public DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>
+class DynamicFusionSigmoidValidationFixture
+    : public DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, bool fuse, DataType data_type)
     {
-        ActivationLayerInfo act_info{ ActivationLayerInfo::ActivationFunction::LOGISTIC };
-        DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, fuse, data_type, act_info);
+        ActivationLayerInfo act_info{ActivationLayerInfo::ActivationFunction::LOGISTIC};
+        DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, fuse,
+                                                                                                   data_type, act_info);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DynamicFusionTanhValidationFixture : public DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>
+class DynamicFusionTanhValidationFixture
+    : public DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, bool fuse, DataType data_type)
     {
-        ActivationLayerInfo act_info{ ActivationLayerInfo::ActivationFunction::TANH };
-        DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, fuse, data_type, act_info);
+        ActivationLayerInfo act_info{ActivationLayerInfo::ActivationFunction::TANH, 1.0f, 1.0f};
+        DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, fuse,
+                                                                                                   data_type, act_info);
     }
 };
 
@@ -198,4 +204,4 @@ public:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_ACTIVATIONFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_OPERATORS_ACTIVATIONFIXTURE_H

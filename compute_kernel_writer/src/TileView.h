@@ -78,6 +78,10 @@ template <typename T>
 class TileView
 {
 public:
+    /** Default constructor */
+    TileView() : _tile(nullptr), _area(0, 0, 0, 0)
+    {
+    }
     /** Create a tile view that refers to the whole tile.
      *
      * @param[in] tile The tile object.
@@ -177,6 +181,22 @@ public:
     {
         return row_start() == 0 && row_end() == _tile->info().height() && col_start() == 0 &&
                col_end() == _tile->info().width();
+    }
+
+    /** Set the rectangular active area.
+     *
+     * @param[in] area The rectangular active area.
+    */
+    TileView &area(const TileArea &area)
+    {
+        _area = area;
+        return *this;
+    }
+
+    /** Get the tile area */
+    TileArea area() const
+    {
+        return _area;
     }
 
 private:

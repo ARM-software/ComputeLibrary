@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD
+#ifndef ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD_H
+#define ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD_H
 
 #include "arm_compute/core/Error.h"
 
@@ -52,9 +52,6 @@ public:
      * |:--------------|:--------------|:-------------|
      * |F16            |F16            |F16           |
      * |F32            |F32            |F32           |
-     * |S32            |S32            |S32           |
-     * |S16            |S16            |S16           |
-     * |U8             |U8             |U8            |
      *
      * Valid data layouts:
      * - Any
@@ -86,4 +83,4 @@ public:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD */
+#endif // ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD_H

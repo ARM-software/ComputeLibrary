@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Axis should be given as a preprocessor argument using -DAXIS=axis. e.g. -DAXIS=1
  * @attention Output tensor depth should be given as a preprocessor argument using -DOUTPUT_DIM_Z=size. e.g. -DOUTPUT_DIM_Z=16
- * @attention Input tensor depth should be given as a preprocessor argument using -DINPUT_DIM_Z=size. e.g. -DINPUT_DIM_Z=16
  *
  *
  * @param[in]  input_ptr                             Pointer to the source tensor. Supported data types: All
@@ -67,8 +66,8 @@ __kernel void gather(
     const int pz = get_global_id(2) % OUTPUT_DIM_Z;
     const int pw = (get_global_id(2) / OUTPUT_DIM_Z );
 
-    const Tensor4D input   = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, INPUT_DIM_Z);
-    const Tensor4D indices = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(indices, INDICES_DIM_Z);
+    const Tensor4D input   = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input);
+    const Tensor4D indices = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(indices);
     Tensor4D       output  = CONVERT_TO_TENSOR4D_STRUCT(output, OUTPUT_DIM_Z);
 
 #if AXIS == 0

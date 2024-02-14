@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "src/core/common/Macros.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentMatMul.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 
 namespace arm_compute
 {
@@ -75,8 +76,8 @@ private:
     const ITensorInfo *_rhs;
     const ITensorInfo *_dst;
 
-    const Attributes _attributes;
-    const Settings   _settings;
+    Attributes _attributes;
+    Settings   _settings;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

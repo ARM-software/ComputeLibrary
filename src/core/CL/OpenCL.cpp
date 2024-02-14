@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -196,7 +196,11 @@ bool CLSymbols::load(const std::vector<std::string> &libraries_filenames, bool u
     // functions.
     constexpr unsigned int      num_platforms = 1U;
     std::vector<cl_platform_id> platform_ids(num_platforms);
-    clGetPlatformIDs(num_platforms, platform_ids.data(), nullptr);
+    cl_int                      err = clGetPlatformIDs(num_platforms, platform_ids.data(), nullptr);
+    if (err != CL_SUCCESS)
+    {
+        return false;
+    }
 
     // Command buffer and mutable dispatch command buffer extensions
     /// TODO: (COMPMID-6742) Load Command Buffer extensions in a Portable way

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,8 +49,7 @@ Status GpuAdd::validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *l
 Status GpuAdd::is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *lhs, const ITensorInfo *rhs)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32, DataType::U8,
-                                                         DataType::S16, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs->data_type() != rhs->data_type(), "Input tensors must be the same data type");
 
     // Set the elementwise operation to Add then call the elementwise common is_supported_op

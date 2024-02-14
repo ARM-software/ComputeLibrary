@@ -193,6 +193,9 @@ std::tuple<bool, std::string> cl_get_unary_op(UnaryOp op)
         case UnaryOp::Round:
             return {true, "round"};
 
+        case UnaryOp::Floor:
+            return {true, "floor"};
+
         default:
             CKW_THROW_MSG("Unsupported unary operation!");
     }

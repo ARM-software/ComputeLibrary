@@ -31,8 +31,8 @@ import zlib
 import json
 import codecs
 
-VERSION = "v24.01"
-LIBRARY_VERSION_MAJOR = 34
+VERSION = "v24.02"
+LIBRARY_VERSION_MAJOR = 35
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -93,7 +93,7 @@ def build_multiisa_lib_objects():
                            'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
 
     # Build all the common files for the base architecture
-    if env['arch'] == 'armv8a':
+    if env['arch'] == 'armv8a' or env['arch'] == 'arm64-v8a':
         lib_static_objs += build_obj_list(filedefs["armv8-a"], misa_lib_files, static=True)
         lib_shared_objs += build_obj_list(filedefs["armv8-a"], misa_lib_files, static=False)
     else:
@@ -137,7 +137,7 @@ def recursive_glob(root_dir, pattern):
 
 
 def get_ckw_obj_list():
-    cmake_obj_dir = os.path.abspath("prototype/CMakeFiles/ckw_prototype.dir/src")
+    cmake_obj_dir = os.path.abspath("CMakeFiles/ckw.dir/src")
     return recursive_glob(root_dir=cmake_obj_dir, pattern=".*.o$")
 
 
@@ -163,7 +163,7 @@ def build_library(name, build_env, sources, static=False, libs=[]):
     else:
         # Always statically link Compute Library against CKW
         if env['experimental_dynamic_fusion'] and name == "arm_compute":
-            libs.append('libckw_prototype.a')
+            libs.append('libckw.a')
 
         # Add shared library versioning
         if env['set_soname']:
@@ -532,8 +532,9 @@ arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSI
 
 # Don't allow undefined references in the libraries:
 undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else '-Wl,--no-undefined'
-if not env['thread_sanitizer']:
+if not env['thread_sanitizer'] and not env['address_sanitizer'] and not env['undefined_sanitizer']:
     arm_compute_env.Append(LINKFLAGS=[undefined_flag])
+
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env['os'] != 'openbsd':

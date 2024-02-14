@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ Status ClComponentPool2d::validate(const Properties                &properties,
                                    const Attributes                &attributes,
                                    const Settings                  &settings)
 {
-    ARM_COMPUTE_UNUSED(properties);
+    ARM_COMPUTE_UNUSED(properties, settings);
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     const auto dst = tensors.get_const_tensor(TensorType::ACL_DST_0);
 
@@ -57,7 +57,7 @@ Status ClComponentPool2d::validate(const Properties                &properties,
     // 1. Check validity
     // Check if pooling is valid
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        is_pool_region_entirely_outside_input(convert_pool_attr_to_pool_info(attributes, settings.mixed_precision())),
+        is_pool_region_entirely_outside_input(convert_pool_attr_to_pool_info(attributes, true)),
         "Pooling region that is entirely outside input tensor is unsupported");
 
     // Matching data type
@@ -74,8 +74,8 @@ Status ClComponentPool2d::validate(const Properties                &properties,
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
-        dst->tensor_shape(), misc::shape_calculator::compute_pool_shape(
-                                 *src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision())));
+        dst->tensor_shape(),
+        misc::shape_calculator::compute_pool_shape(*src, convert_pool_attr_to_pool_info(attributes, true)));
 
     // 2. Check support level
     // Data type

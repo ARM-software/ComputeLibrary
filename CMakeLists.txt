@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 list(APPEND CMAKE_MESSAGE_CONTEXT ArmCompute)
 project(
   ArmCompute
-  VERSION 34.0.0
+  VERSION 35.0.0
   DESCRIPTION
     "The Arm Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A CPU and Arm® Mali™ GPU architectures"
   LANGUAGES C CXX ASM)
@@ -58,6 +58,7 @@ endif()
 # Configuration
 
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -gdwarf-2 -DARM_COMPUTE_ASSERTS_ENABLED")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # Default to Release Build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE
@@ -106,8 +107,7 @@ set(COMMON_CXX_FLAGS
     -Wlogical-op
     -Wnoexcept
     -Wstrict-null-sentinel
-    -Wno-misleading-indentation
-    -O3)
+    -Wno-misleading-indentation)
 
 # Disable note popups on compiler ABI changes
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

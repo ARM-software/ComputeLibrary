@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME
-#define ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME
+#ifndef ACL_ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME_H
+#define ACL_ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
@@ -46,8 +46,18 @@ class GpuWorkloadSketch;
 class ClWorkloadRuntime
 {
 public:
+    /** Default constructor. */
     ClWorkloadRuntime();
+
+    /** Destructor */
     ~ClWorkloadRuntime();
+
+    /** Move constructor */
+    ClWorkloadRuntime(ClWorkloadRuntime &&);
+
+    /** Move assignment */
+    ClWorkloadRuntime &operator=(ClWorkloadRuntime &&);
+
     /** Configure @ref ClWorkloadRuntime
      * @note A runtime cannot be re-configured
      *
@@ -78,4 +88,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME */
+#endif // ACL_ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME_H

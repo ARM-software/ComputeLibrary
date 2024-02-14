@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWELEMENTWISEBINARY
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWELEMENTWISEBINARY
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWELEMENTWISEBINARY_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWELEMENTWISEBINARY_H
 
 #include "src/core/common/Macros.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
@@ -56,7 +56,6 @@ public:
                                       GpuCkwScopedKernelWriter writer) const override;
     Window       get_window() const override;
     std::string  get_name(const ComponentGroup &comp_group) const override;
-    std::string  get_tuner_id(const ComponentGroup &comp_group) const override;
 
 private:
     const ITensorInfo *_lhs;
@@ -68,4 +67,4 @@ private:
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWELEMENTWISEBINARY */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWELEMENTWISEBINARY_H
