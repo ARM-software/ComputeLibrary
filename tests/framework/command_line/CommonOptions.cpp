@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,8 @@ CommonOptions::CommonOptions(CommandLineParser &parser)
       throw_errors(parser.add_option<ToggleOption>("throw-errors")),
 #if !defined(_WIN64)
      color_output(parser.add_option<ToggleOption>("color-output", isatty(STDOUT_FILENO))), // Only enable colors by default if we're running in a terminal
+#else // !defined(_WIN64)
+     color_output(parser.add_option<ToggleOption>("color-output", 0)),
 #endif // !defined(_WIN64)
       pretty_console(parser.add_option<ToggleOption>("pretty-console", false)),
       json_file(parser.add_option<SimpleOption<std::string>>("json-file")),
