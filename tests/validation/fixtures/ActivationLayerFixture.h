@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ACTIVATION_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_ACTIVATION_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ACTIVATIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ACTIVATIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -47,10 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ActivationValidationGenericFixture : public framework::Fixture
 {
 public:
-    ActivationValidationGenericFixture()
-        : _target(parameters->get_ctx<TensorType>())
-    {
-    }
 
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
     {
@@ -119,13 +115,12 @@ protected:
 
     TensorType compute_target(const TensorShape &shape, ActivationLayerInfo info)
     {
-        auto ctx = parameters->get_ctx<TensorType>();
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, _input_quantization_info, DataLayout::NCHW, ctx);
-        TensorType dst = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info, DataLayout::NCHW, ctx);
+        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, _input_quantization_info, DataLayout::NCHW);
+        TensorType dst = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info, DataLayout::NCHW);
 
         // Create and configure function
-        FunctionType act_layer(ctx);
+        FunctionType act_layer;
 
         TensorType *dst_ptr = _in_place ? nullptr : &dst;
 
@@ -252,4 +247,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ACTIVATION_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ACTIVATIONLAYERFIXTURE_H
