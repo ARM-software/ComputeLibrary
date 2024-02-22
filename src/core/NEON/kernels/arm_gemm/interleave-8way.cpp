@@ -25,7 +25,10 @@
 
 #include <arm_neon.h>
 
+#if !defined(_WIN64) && !defined(__OpenBSD__)
 #include <alloca.h>
+#endif /* !defined(_WIN64) && !defined(__OpenBSD__) */
+
 #include <cstring>
 
 #include "transform.hpp"
