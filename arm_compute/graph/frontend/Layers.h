@@ -693,6 +693,27 @@ private:
     SubStream        _ss1;
     EltwiseOperation _op;
 };
+
+/** FeedForwardLayer */
+class FeedForwardLayer final : public ILayer
+{
+public:
+    /** Construct a feed forward layer.
+     *
+     */
+    FeedForwardLayer()
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+
+    }
+
+private:
+
+};
+
 /** Flatten Layer */
 class FlattenLayer final : public ILayer
 {
@@ -848,6 +869,26 @@ private:
     GenerateProposalsInfo _info;
 };
 
+/** LayerNormLayer */
+class LayerNormLayer final : public ILayer
+{
+public:
+    /** Construct a layer norm layer.
+     *
+     */
+    LayerNormLayer()
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+
+    }
+
+private:
+
+};
+
 /** L2 Normalize Layer */
 class L2NormalizeLayer final : public ILayer
 {
@@ -871,6 +912,27 @@ public:
 private:
     int   _axis;
     float _epsilon;
+};
+
+/** MultiHeadAttentionLayer */
+class MultiHeadAttentionLayer final: public ILayer
+{
+public:
+    /** Construct a multi-head attention layer.
+     *
+     * 
+     */
+    MultiHeadAttentionLayer()
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+
+    }
+
+private:
+
 };
 
 /** Normalization Layer */
@@ -999,6 +1061,26 @@ public:
 
 private:
     PoolingLayerInfo _pool_info;
+};
+
+/** PositionalEncodingLayer */
+class PositionalEncodingLayer final : public ILayer
+{
+public:
+    /** Construct a positional encoding layer.
+     *
+     */
+    PositionalEncodingLayer()
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+
+    }
+
+private:
+
 };
 
 /** PRelu Layer */
@@ -1267,6 +1349,27 @@ private:
     SubStream           _ss_input;
     SubStream           _ss_rois;
     ROIPoolingLayerInfo _pool_info;
+};
+
+/** ScaleDotProductionAttentionLayer */
+class ScaleDotProductionAttentionLayer final: public ILayer
+{
+public:
+    /** Construct a scale dot production attention layer.
+     *
+     * 
+     */
+    ScaleDotProductionAttentionLayer()
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+
+    }
+
+private:
+
 };
 
 /** Scale Layer */
