@@ -1,9 +1,0 @@
-<map id="tests/instruments" name="tests/instruments">
-<area shape="rect" id="node1" href="dir_bf8055138dca2e0cf3a462401cd745bf.xhtml" title="instruments" alt="" coords="42,52,141,100"/>
-<area shape="rect" id="node2" href="dir_9e71e2da941d3cafc4d98a9f6ae3de4f.xhtml" title="framework" alt="" coords="5,148,95,196"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000022_000034.xhtml" title="1" alt="" coords="71,127,80,142"/>
-<area shape="rect" id="node3" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="35,244,147,292"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000022_000000.xhtml" title="1" alt="" coords="106,221,115,236"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000034_000000.xhtml" title="16" alt="" coords="73,217,90,231"/>
-<area shape="rect" id="clust1" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml" title="tests" alt="" coords="31,16,151,111"/>
-</map>
