@@ -180,7 +180,7 @@ public:
                                  this->_Cptr + (multi * this->_C_multi_stride) + n,
                                  (nmax - n), (kmax-k0),
                                  this->_bias ? this->_bias + (multi * this->_bias_multi_stride) + n : nullptr,
-                                 _args._act, (k0 != 0),
+                                 _args._act, (k0 != 0) || _args._accumulate,
                                  _os, col_bias, n + (_args._Nsize * multi));
                 }
             }

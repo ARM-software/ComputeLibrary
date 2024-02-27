@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SMALL_GEMM_DATASET
-#define ARM_COMPUTE_TEST_SMALL_GEMM_DATASET
+#ifndef ACL_TESTS_DATASETS_SMALLGEMMDATASET_H
+#define ACL_TESTS_DATASETS_SMALLGEMMDATASET_H
 
 #include "tests/datasets/GEMMDataset.h"
 
@@ -97,7 +97,18 @@ public:
     }
 };
 
+class SmallAccumulateGEMMDataset final : public GEMMDataset
+{
+public:
+    SmallAccumulateGEMMDataset()
+    {
+        add_config(TensorShape(8U, 2U), TensorShape(16U, 8U), TensorShape(16U, 2U), TensorShape(16U, 2U), 1.0f, 0.0f);
+        add_config(TensorShape(31U, 1U), TensorShape(23U, 31U), TensorShape(23U, 1U), TensorShape(23U, 1U), 1.0f, 0.0f);
+        add_config(TensorShape(21U, 13U), TensorShape(33U, 21U), TensorShape(33U, 13U), TensorShape(33U, 13U), 1.0f, 0.0f);
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SMALL_GEMM_DATASET */
+#endif // ACL_TESTS_DATASETS_SMALLGEMMDATASET_H

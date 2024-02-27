@@ -530,7 +530,7 @@ public:
                                  (m_end - m_start), (nmax - n0), kern_k, b_panel, this->_ldb, out_arg,
                                  (this->_bias && first_pass) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
-                                 !first_pass,
+                                 !first_pass || _args._accumulate,
                                  // Quantization parameters
                                  _os, _col_bias+(multi * _args._Nsize), n0);
                 } else if (_convolver) {
@@ -563,7 +563,7 @@ public:
                                  (m_end - m_start), (nmax - n0), kern_k, b_panel, this->_ldb, out_arg,
                                  (this->_bias && first_pass) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
-                                 !first_pass,
+                                 !first_pass || _args._accumulate,
                                  // Quantization parameters
                                  _os, _col_bias+(multi * _args._Nsize), n0);
                 } else {
@@ -579,7 +579,7 @@ public:
                                  (m_end - m_start), (nmax - n0), kern_k, b_panel, this->_ldb, out_arg,
                                  (this->_bias && first_pass) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
-                                 !first_pass,
+                                 !first_pass || _args._accumulate,
                                  // Quantization parameters
                                  _os, _col_bias+(multi * _args._Nsize), n0);
                 }

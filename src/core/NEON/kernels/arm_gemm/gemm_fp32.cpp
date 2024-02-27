@@ -293,14 +293,14 @@ GemmImplementation<float, float>::with_estimate(
 {
     GemmMethod::GEMM_HYBRID,
     "a64_smallK_hybrid_fp32_mla_8x4",
-    [](const GemmArgs &args) { return args._Ksize <= 8 && (args._Nsize % 4)==0 && !args._indirect_input; },
+    [](const GemmArgs &args) { return args._Ksize <= 8 && (args._Nsize % 4)==0 && !args._indirect_input && !args._accumulate; },
     nullptr,
     [](const GemmArgs &args) { return new GemmHybrid<cls_a64_smallK_hybrid_fp32_mla_8x4, float, float>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "a64_smallK_hybrid_fp32_mla_6x4",
-    [](const GemmArgs &args) { return (args._Ksize > 8 && args._Ksize <= 16) && (args._Nsize % 4)==0 && !args._indirect_input; },
+    [](const GemmArgs &args) { return (args._Ksize > 8 && args._Ksize <= 16) && (args._Nsize % 4)==0 && !args._indirect_input && !args._accumulate; },
     nullptr,
     [](const GemmArgs &args) { return new GemmHybrid<cls_a64_smallK_hybrid_fp32_mla_6x4, float, float>(args); }
 },

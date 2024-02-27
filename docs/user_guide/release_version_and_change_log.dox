@@ -48,6 +48,7 @@ v24.04 Public major release
  - Add support for SoftMax in SME2 for FP32.
  - Performance optimizations:
    - Optimize @ref NESoftmaxLayer for axis != 0 by natively supporting higher axes up to axis 3.
+ - Add support for in place accumulation to CPU GEMM kernels.
 
 v24.02.1 Public patch release
  - Fix performance regression in fixed-format kernels

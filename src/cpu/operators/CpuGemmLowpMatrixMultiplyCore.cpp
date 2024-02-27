@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,7 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
     asm_info.activation_info         = info.activation_info();
     asm_info.output_stage            = info.gemmlowp_output_stage();
     asm_info.fast_mode               = info.fast_math();
+    asm_info.accumulate              = info.accumulate();
 
     return asm_info;
 }
@@ -342,6 +343,13 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
+
+    // When using accumulation(in place summation), for now, the only supported DataType for output is S32.
+    if (gemm_info.accumulate())
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE,
+                                        "Accumulation is not supported for output QASYMM8/QASYMM8_SIGNED");
+    }
 
     GEMMInfo           info          = gemm_info;
     const ITensorInfo *matrix_a_info = a;

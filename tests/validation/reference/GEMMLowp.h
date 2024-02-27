@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMMLOWP_H
-#define ARM_COMPUTE_TEST_GEMMLOWP_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_GEMMLOWP_H
+#define ACL_TESTS_VALIDATION_REFERENCE_GEMMLOWP_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -37,6 +37,9 @@ namespace reference
 {
 template <typename T1, typename T2, typename T3>
 SimpleTensor<T1> gemmlowp_matrix_multiply_core(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
+
+template <typename T1, typename T2, typename T3>
+void gemmlowp_matrix_multiply_core_accumulate(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset, SimpleTensor<T1> &dst_);
 
 template <typename T1, typename T2, typename T3 = T2>
 SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c);
@@ -71,4 +74,4 @@ SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_float(const SimpleTensor<TIn>
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMMLOWP_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_GEMMLOWP_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CPU_KERNELS_ASSEMBLY_ARM_GEMM_HPP
+#define ACL_SRC_CPU_KERNELS_ASSEMBLY_ARM_GEMM_HPP
+
 #pragma once
 
 #include "arm_gemm_local.hpp"
@@ -151,6 +155,7 @@ public:
     int               _maxthreads;
     bool              _fixed_format;
     bool              _fast_mode;
+    bool              _accumulate;
     const GemmConfig *_cfg;
 
     GemmArgs(const CPUInfo    *ci,
@@ -165,6 +170,7 @@ public:
              const int         maxthreads,
              bool              fixed_format = false,
              bool              fast_mode    = false,
+             bool              accumulate   = false,
              const GemmConfig *cfg          = nullptr)
         : _ci(ci),
           _Msize(M),
@@ -178,6 +184,7 @@ public:
           _maxthreads(maxthreads),
           _fixed_format(fixed_format),
           _fast_mode(fast_mode),
+          _accumulate(accumulate),
           _cfg(cfg)
     {
     }
@@ -278,3 +285,5 @@ template <typename Top, typename Tret, class OutputStage = Nothing>
 bool has_opt_gemm(WeightFormat &weight_format, const GemmArgs &args, const OutputStage & = {});
 
 } // namespace arm_gemm
+
+#endif // ACL_SRC_CPU_KERNELS_ASSEMBLY_ARM_GEMM_HPP

@@ -350,6 +350,7 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
     const bool _thread_columns;
 
     const Activation _act;
+    const bool _accumulate;
 
     const int _maxthreads;
     int _nthreads;
@@ -680,7 +681,7 @@ public:
                       _Ksections(args._Ksections), _Ktotal(get_ktotal(args)),
                       _rounded_Ksize(roundup(_Ksize, strategy::k_unroll())),
                       _nbatches(args._nbatches), _nmulti(args._nmulti), _thread_columns(is_thread_columns(args)),
-                      _act(args._act), _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
+                      _act(args._act), _accumulate(args._accumulate), _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
                       _k_block(get_k_block_size(args)), _x_block(get_x_block_size(args)), _Mround(roundup(args._Msize, strategy::out_height())),
                       _os(os) { }
 
@@ -690,7 +691,7 @@ public:
                       _Ksections(args._Ksections), _Ktotal(get_ktotal(args)),
                       _rounded_Ksize(roundup(_Ksize, strategy::k_unroll())),
                       _nbatches(args._nbatches), _nmulti(args._nmulti), _thread_columns(is_thread_columns(args)),
-                      _act(args._act), _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
+                      _act(args._act), _accumulate(args._accumulate),  _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
                       _k_block(get_k_block_size(args)), _x_block(get_x_block_size(args)), _Mround(roundup(args._Msize, strategy::out_height())),
                       _os() { }
 
@@ -823,7 +824,7 @@ public:
                             // Only do bias on the first pass
                             ((first_pass && this->_bias) ? this->_bias + (multi * this->_bias_multi_stride) : nullptr),
                             // Only do activation on the last pass, and accumulation on any non-first pass.
-                            (last_pass ? _act : Activation()), !first_pass,
+                            (last_pass ? _act : Activation()), (!first_pass || _accumulate),
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
                             _os, col_bias + (multi * _Nsize),
                             // Accumulation buffer
@@ -971,7 +972,7 @@ public:
                             // Only do bias on the first pass
                             ((first_pass && this->_bias) ? this->_bias + (current.multi() * this->_bias_multi_stride) : nullptr),
                             // Only do activation on the last pass, and accumulation on any non-first pass.
-                            (last_pass ? _act : Activation()), !first_pass,
+                            (last_pass ? _act : Activation()), (!first_pass || _accumulate),
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
                             _os, col_bias + (current.multi() * _Nsize),
                             // Accumulation buffer

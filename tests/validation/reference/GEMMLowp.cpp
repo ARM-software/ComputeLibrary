@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "GEMMLowp.h"
 
 #include "arm_compute/core/Types.h"
+#include "tests/validation/reference/ArithmeticOperations.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
 #include "support/ToolchainSupport.h"
@@ -230,6 +231,13 @@ SimpleTensor<T_out> gemmlowp_matrix_multiply_core(const SimpleTensor<T_in> &a, c
     return c;
 }
 
+template <typename T_out, typename T_in, typename T_in_1>
+void gemmlowp_matrix_multiply_core_accumulate(const SimpleTensor<T_in> &a, const SimpleTensor<T_in_1> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset, SimpleTensor<T_out> &dst)
+{
+    SimpleTensor<T_out> dst_gemm = gemmlowp_matrix_multiply_core<T_out, T_in, T_in_1>(a, b, shape_c, a_offset, b_offset);
+    reference::arithmetic_operation<T_out>(reference::ArithmeticOperation::ADD, dst, dst_gemm, dst, ConvertPolicy::SATURATE);
+}
+
 // used to validate assembly kernels which don't know anything about offsets
 template <typename T1, typename T2, typename T3>
 SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c)
@@ -336,6 +344,8 @@ template SimpleTensor<int8_t> gemmlowp_quantize_down_scale(const SimpleTensor<in
                                                            std::vector<int32_t> result_shift, int32_t min, int32_t max);
 template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
 template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
+template void gemmlowp_matrix_multiply_core_accumulate(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset, SimpleTensor<int32_t> &dst);
+template void gemmlowp_matrix_multiply_core_accumulate(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset, SimpleTensor<int32_t> &dst);
 template SimpleTensor<int32_t> gemmlowp<int32_t, int8_t, int8_t>(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c);
 template SimpleTensor<int32_t> gemmlowp<int32_t, uint8_t, uint8_t>(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, TensorShape shape_c);
 template SimpleTensor<int32_t> gemmlowp<int32_t, uint8_t, int8_t>(const SimpleTensor<uint8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c);
