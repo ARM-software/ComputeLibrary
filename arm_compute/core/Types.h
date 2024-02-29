@@ -1255,6 +1255,121 @@ struct Pooling3dLayerInfo
     DimensionRoundingType round_type;
 };
 
+/** Token Embedding Layer Information Class */
+class TokenEmbeddingLayerInfo final
+{
+public:
+    /** Constructor
+     *
+     * @param[in] d_model   Model dimesion
+     */
+    TokenEmbeddingLayerInfo(unsigned int d_model = 512)
+        : _d_model(d_model)
+    {
+    }
+
+    /* Get Model dimesion */
+    unsigned int d_model() const
+    {
+        return _d_model;
+    }
+    
+private:
+    unsigned int _d_model;
+};
+
+/** Positional Encoding Layer Information Class */
+class PositionalEncodingLayerInfo final
+{
+public:
+    /** Constructor
+     *
+     * @param[in] seq_len   Input token sequence length
+     * @param[in] d_model   Model dimesion
+     */
+    PositionalEncodingLayerInfo(unsigned int seq_len = 25000,
+                                unsigned int d_model = 512)
+        : _seq_len(seq_len), _d_model(d_model)
+    {
+    }
+
+    /* Get input sequence length */
+    unsigned int seq_len() const
+    {
+        return _seq_len;
+    }
+
+    /* Get Model dimesion */
+    unsigned int d_model() const
+    {
+        return _d_model;
+    }
+
+private:
+    unsigned int _seq_len;
+    unsigned int _d_model;
+};
+
+/** Multi Head Attention Layer Information Class */
+class MultiHeadAttentionLayerInfo final
+{
+public:
+    /** Constructor
+     * 
+     */
+    MultiHeadAttentionLayerInfo()
+    {
+    }
+    
+private:
+
+};
+
+/** Scale Dot Production Attention Layer Information Class*/
+class ScaleDotProductionAttentionLayerInfo final
+{
+public:
+    /** Constructor
+     * 
+     */
+    ScaleDotProductionAttentionLayerInfo()
+    {
+    }
+
+private:
+
+};
+
+/** Layer Normalization Layer Information Class */
+class LayerNormLayerInfo final
+{
+public:
+    /** Constructor
+     * 
+     */
+    LayerNormLayerInfo()
+    {
+    }
+
+private:
+
+};
+
+/** Feed Forward Layer Information Class */
+class FeedForwardLayerInfo final
+{
+public:
+    /** Constructor
+     * 
+     */
+    FeedForwardLayerInfo()
+    {
+    }
+
+private:
+
+};
+
 /** ROI Pooling Layer Information class */
 class ROIPoolingLayerInfo final
 {

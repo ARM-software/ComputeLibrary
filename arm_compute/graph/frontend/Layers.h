@@ -1069,8 +1069,9 @@ class PositionalEncodingLayer final : public ILayer
 public:
     /** Construct a positional encoding layer.
      *
+     * @param[in] 
      */
-    PositionalEncodingLayer()
+    PositionalEncodingLayer(PositionalEncodingLayerInfo position_encode_info) : _position_encode_info(position_encode_info)
     {
     }
 
@@ -1080,7 +1081,7 @@ public:
     }
 
 private:
-
+    PositionalEncodingLayerInfo _position_encode_info;
 };
 
 /** PRelu Layer */
@@ -1557,6 +1558,30 @@ private:
     Coordinates           _ends;
     BiStrides             _strides;
     StridedSliceLayerInfo _info;
+};
+
+
+/** Token Embedding Layer */
+class TokenEmbeddingLayer final : public ILayer
+{
+public:
+    /** Construct a token embedding  layer.
+     *
+     * @param[in] tkemb_info Token embedding layer info
+     */
+    TokenEmbeddingLayer(TokenEmbeddingLayerInfo tkemb_info) : _tkemb_info(tkemb_info)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = {name(), s.hints().target_hint};
+        NodeIdxPair input         = {s.tail_node(), 0};
+        return GraphBuilder::add_yolo_node(s.graph(), common_params, input, _tkemb_info);
+    }
+
+private:
+    TokenEmbeddingLayerInfo _tkemb_info;
 };
 
 /** YOLO Layer */

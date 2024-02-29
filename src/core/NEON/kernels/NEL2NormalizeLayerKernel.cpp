@@ -67,14 +67,16 @@ struct L2NormalizeLayerKernel
 };
 
 static const L2NormalizeLayerKernel available_kernels[] = {
-    {"fp32_neon_l2normalize_x",
-     [](const L2NormalizeLayerSelectorData &data)
-     { return data.dt == DataType::F32 && data.actual_axis == Window::DimX; },
-     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_x)},
-    {"fp32_neon_l2normalize_yz",
-     [](const L2NormalizeLayerSelectorData &data)
-     { return data.dt == DataType::F32 && data.actual_axis != Window::DimX; },
-     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_yz)},
+    {
+        "fp32_neon_l2normalize_x",
+        [](const L2NormalizeLayerSelectorData &data)
+        { return data.dt == DataType::F32 && data.actual_axis == Window::DimX; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_x)},
+    {
+        "fp32_neon_l2normalize_yz",
+        [](const L2NormalizeLayerSelectorData &data)
+        { return data.dt == DataType::F32 && data.actual_axis != Window::DimX; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_yz)},
     {
         "fp16_neon_l2normalize_x",
         [](const L2NormalizeLayerSelectorData &data)

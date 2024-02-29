@@ -1,5 +1,5 @@
 
-#include "arm_compute/graph/nodes/PositionalEncodingNode.h"
+#include "arm_compute/graph/nodes/TokenEmbeddingLayerNode.h"
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
@@ -8,24 +8,24 @@ namespace arm_compute
 {
 namespace graph
 {
-PositionalEncodingNode::PositionalEncodingNode(PositionalEncodingLayerInfo info) : _info(std::move(info))
+TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info) : _info(std::move(info))
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
-PositionalEncodingLayerInfo PositionalEncodingNode::positional_encoding_info() const
+TokenEmbeddingLayerInfo TokenEmbeddingLayerNode::token_embedding_info() const
 {
     return _info;
 }
 
-TensorDescriptor PositionalEncodingNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                   PositionalEncodingLayerInfo info)
+TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                                   TokenEmbeddingLayerInfo info)
 {
 
 }
 
-bool PositionalEncodingNode::forward_descriptors()
+bool TokenEmbeddingLayerNode::forward_descriptors()
 {
     if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
@@ -37,7 +37,7 @@ bool PositionalEncodingNode::forward_descriptors()
     return false;
 }
 
-TensorDescriptor PositionalEncodingNode::configure_output(size_t idx) const
+TensorDescriptor TokenEmbeddingLayerNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
@@ -49,12 +49,12 @@ TensorDescriptor PositionalEncodingNode::configure_output(size_t idx) const
 }
 
 
-NodeType PositionalEncodingNode::type() const
+NodeType TokenEmbeddingLayerNode::type() const
 {
-    return NodeType::PositionalEncodingLayer;
+    return NodeType::TokenEmbeddingLayer;
 }
 
-void PositionalEncodingNode::accept(INodeVisitor &v)
+void TokenEmbeddingLayerNode::accept(INodeVisitor &v)
 {
     v.visit(*this);
 }

@@ -1,5 +1,5 @@
-#ifndef ARM_COMPUTE_NEPOSITIONALENCODINGLAYER_H
-#define ARM_COMPUTE_NEPOSITIONALENCODINGLAYER_H
+#ifndef ARM_COMPUTE_NETOKENEMBEDDINGLAYER_H
+#define ARM_COMPUTE_NETOKENEMBEDDINGLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -12,17 +12,17 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-class NEPositionalEncodingLayer : public IFunction
+class NETokenEmbeddingLayer : public IFunction
 {
 public:
     /** Default Constructor */
-    NEPositionalEncodingLayer();
+    NETokenEmbeddingLayer();
     /** Default Destructor */
-    ~NEPositionalEncodingLayer();
+    ~NETokenEmbeddingLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEPositionalEncodingLayer(const NEPositionalEncodingLayer &) = delete;
+    NETokenEmbeddingLayer(const NETokenEmbeddingLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEPositionalEncodingLayer &operator=(const NEPositionalEncodingLayer &) = delete;
+    NETokenEmbeddingLayer &operator=(const NETokenEmbeddingLayer &) = delete;
 
 
     /** TODO: Move able ?*/
@@ -39,12 +39,11 @@ public:
      * |TBA            |TBA            |
      * |TBA            |TBA            |
      *
-     * @param[in]  seq_len  Input token sequence length. Data types supported: TBA
      * @param[in]  d_model  Model dimension. Data types supported: TBA
      * @param[out] output   Output tensor, shape (seq_len,d_model). Data type supported: TBA
      */
-    void configure(const unsigned int seq_len, const unsigned int d_model, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEPositionalEncodingLayer
+    void configure(const unsigned int d_model, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NETokenEmbeddingLayer
      *
      * @param[in] input  Source tensor info. Data types supported: TBA
      * @param[in] alpha  Source alpha tensor info. Data types supported: same of @p input.
@@ -52,7 +51,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const unsigned int seq_len, const unsigned int d_model, ITensor *output);
+    static Status validate(const unsigned int d_model, ITensor *output);
 
     // Inherited methods overridden:
     void run() override;
@@ -62,4 +61,4 @@ private:
 };
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_NEPOSITIONALENCODINGLAYER_H */
+#endif /* ARM_COMPUTE_NETOKENEMBEDDINGLAYER_H */

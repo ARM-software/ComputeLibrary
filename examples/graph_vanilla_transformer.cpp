@@ -60,12 +60,57 @@ public:
         // Print parameter values
         std::cout << common_params << std::endl;
 
-        // Encode Input
 
-        // Decode Input
+        /*
+            Args:
+                d_model: the number of expected features in the input (required).
+                nhead: the number of heads in the multiheadattention models (required).
+                dim_feedforward: the dimension of the feedforward network model (default=2048).
+                dropout: the dropout value (default=0.1).
+                activation: the activation function of the intermediate layer, can be a string
+                    ("relu" or "gelu") or a unary callable. Default: relu
+                layer_norm_eps: the eps value in layer normalization components (default=1e-5).
+                batch_first: If ``True``, then the input and output tensors are provided
+                    as (batch, seq, feature). Default: ``False`` (seq, batch, feature).
+                norm_first: if ``True``, layer norm is done prior to attention and feedforward
+                    operations, respectively. Otherwise it's done after. Default: ``False`` (after).
+                bias: If set to ``False``, ``Linear`` and ``LayerNorm`` layers will not learn an additive
+                    bias. Default: ``True``.
+        */
+       // Model parameters
+       constexpr unsigned int d_model   = 512U;     // Dim layer output 
+       constexpr unsigned int h         = 8U;       // Parallel attention (Heads)
+       constexpr unsigned int d_ff      = 2024U;    // Dim feedforward
+       constexpr unsigned int d_q       = 64U;      // Dim query, 512U/8U
+       constexpr unsigned int d_k       = 64U;      // Dim key, 512U/8U
+       constexpr unsigned int d_v       = 64U;      // Dim value, 512U/8U
+       constexpr float        P_drop    = 0.1f;     // Dropout rate
+
+       constexpr unsigned int bs        = 1U;       // Batch size
+       constexpr unsigned int seq_src   = 25000U;   // Input token sequence
+       constexpr unsigned int seq_tgt   = 25000U;   // Output token sequence
+       
+
+       // Compute library best operate on NHWC(default) layout
+       //const auto operation_layout = common_params.data_layout;
+
+       // Create input tensor
+       const TensorShape src_tensor = TensorShape(bs,seq_src);
+
+       // Maybe permute input data layout to target operation layout  
+
+
+
 
         // Set graph hints
         graph << common_params.target << common_params.fast_math_hint;
+
+        // Encode Input
+        graph << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model))
+              << PositionalEncodingLayer(PositionalEncodingLayerInfo(seq_src,d_model));
+
+        // Decode Input
+
 
         
     }

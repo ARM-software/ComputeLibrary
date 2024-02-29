@@ -669,6 +669,16 @@ public:
                                          Coordinates          &ends,
                                          BiStrides            &strides,
                                          StridedSliceLayerInfo info);
+    /** Adds a token embedding layer to the graph
+     *
+     * @param[in] g        Graph to add the node to
+     * @param[in] params   Common node parameters
+     * @param[in] input    Input to the token embedding layer node as a NodeID-Index pair
+     * @param[in] tkemb_info Activation layer parameters
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_tkemb_node(Graph &g, NodeParams params, NodeIdxPair input, TokenEmbeddingLayerInfo tkemb_info);
     /** Adds a yolo layer to the graph
      *
      * @param[in] g        Graph to add the node to
