@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -365,7 +365,12 @@ CpuInfo CpuInfo::build()
     isainfo.dot  = get_hw_capability("hw.optional.arm.FEAT_DotProd");
     CpuInfo info(isainfo, cpus_model);
     return info;
-#else                                            /* #elif defined(__aarch64__) && defined(__APPLE__) */
+#elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
+    CpuIsaInfo isainfo;
+    isainfo.neon = true;
+    CpuInfo info(isainfo, {CpuModel::GENERIC});
+    return info;
+#else                                            /* #elif defined(__aarch64__) && defined(_WIN64) */
     CpuInfo info(CpuIsaInfo(), {CpuModel::GENERIC});
     return info;
 #endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
