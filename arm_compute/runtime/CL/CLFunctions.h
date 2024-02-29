@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,6 +101,7 @@
 #include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
+#include "arm_compute/runtime/CL/functions/CLScatter.h"
 #include "arm_compute/runtime/CL/functions/CLSelect.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"

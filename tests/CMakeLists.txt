@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -100,6 +100,7 @@ target_sources(
           validation/reference/Floor.cpp
           validation/reference/PriorBoxLayer.cpp
           validation/reference/Scale.cpp
+          validation/reference/ScatterLayer.cpp
           validation/reference/ReorgLayer.cpp
           validation/reference/Range.cpp
           validation/reference/ArithmeticDivision.cpp

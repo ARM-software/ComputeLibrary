@@ -49,6 +49,7 @@
 #include "arm_compute/function_info/FullyConnectedLayerInfo.h"
 #include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/function_info/MatMulInfo.h"
+#include "arm_compute/function_info/ScatterInfo.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
@@ -3615,6 +3616,77 @@ inline std::string to_string(const arm_compute::CpuMatMulSettings &settings)
 {
     std::stringstream str;
     str << settings;
+    return str.str();
+}
+
+/** Formatted output of the scatter function type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  function arm_compute::ScatterFunction type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ScatterFunction &function)
+{
+    switch (function)
+    {
+        case ScatterFunction::Update:
+            os << "UPDATE";
+            break;
+        case ScatterFunction::Add:
+            os << "ADD";
+            break;
+        case ScatterFunction::Sub:
+            os << "SUB";
+            break;
+        case ScatterFunction::Max:
+            os << "MAX";
+            break;
+        case ScatterFunction::Min:
+            os << "MIN";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+/** Formatted output of the arm_compute::ScatterFunction type.
+ *
+ * @param[in] func arm_compute::ScatterFunction type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::ScatterFunction &func)
+{
+    std::stringstream str;
+    str << func;
+    return str.str();
+}
+/** Formatted output of the arm_compute::ScatterInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info arm_compute::ScatterInfo  type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::ScatterInfo &info)
+{
+    os << "ScatterInfo="
+       << "["
+       << "Function=" << info.func << ", "
+       << "InitialiseZero=" << info.zero_initialization << "] ";
+    return os;
+}
+/** Formatted output of the arm_compute::ScatterInfo type.
+ *
+ * @param[in] info arm_compute::ScatterInfo type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::ScatterInfo &info)
+{
+    std::stringstream str;
+    str << info;
     return str.str();
 }
 

@@ -770,6 +770,15 @@
         ]
       }
     },
+    "Scatter": {
+      "files": {
+        "common": [
+          "src/gpu/cl/kernels/ClScatterKernel.cpp",
+          "src/gpu/cl/operators/ClScatter.cpp",
+          "src/runtime/CL/functions/CLScatter.cpp"
+        ]
+      }
+    },
     "Select": {
       "files": {
         "common": [
