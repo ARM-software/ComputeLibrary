@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ inline bool is_feature_supported(uint64_t features, uint64_t feature_mask)
 void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps2)
 {
     ARM_COMPUTE_UNUSED(hwcaps2);
-    isa.fp16 = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_HALF);
+    isa.fp16 = false;
     isa.neon = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_NEON);
 }
 #elif defined(__aarch64__)
