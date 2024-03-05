@@ -678,7 +678,11 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_tkemb_node(Graph &g, NodeParams params, NodeIdxPair input, TokenEmbeddingLayerInfo tkemb_info);
+    static NodeID add_tkemb_node(Graph &g,
+                                 NodeParams params, 
+                                 NodeIdxPair input, 
+                                 TokenEmbeddingLayerInfo tkemb_info,
+                                 ITensorAccessorUPtr     weights = nullptr);
     /** Adds a yolo layer to the graph
      *
      * @param[in] g        Graph to add the node to

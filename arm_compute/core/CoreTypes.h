@@ -54,6 +54,13 @@ enum class Channel
     V        /**< Cr/V/Value channel. */
 };
 
+/** Text encoding formats */
+enum class TextFormat
+{
+    UNKNOWN,  /**< Unknown text format */
+    UTF8      /**< Utf-8 */
+};
+
 /** Image colour formats */
 enum class Format
 {

@@ -198,6 +198,29 @@ ImageType get_image_type_from_file(const std::string &filename)
     return type;
 }
 
+TextType get_text_type_from_file(const std::string &filename)
+{
+    TextType type = TextType::UNKNOWN;
+
+    try
+    {
+        // Open file
+        std::ifstream fs;
+        fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fs.open(filename, std::ios::in | std::ios::binary);
+
+        type = TextType::UTF8;
+
+        fs.close();
+    }
+    catch(std::runtime_error &e)
+    {
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
+    }
+    
+    return type;
+}
+
 std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs)
 {
     // Check the PPM magic number is valid
@@ -227,6 +250,11 @@ std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs)
     fs.ignore(1);
 
     return std::make_tuple(width, height, max_val);
+}
+std::tuple<unsigned int> parse_txt_header(std::ifstream &fs)
+{   
+    unsigned int length;
+    return std::make_tuple(length);
 }
 
 npy::header_t parse_npy_header(std::ifstream &fs) //NOLINT

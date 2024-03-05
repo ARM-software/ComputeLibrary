@@ -60,6 +60,9 @@ public:
         // Print parameter values
         std::cout << common_params << std::endl;
 
+        // Get trainable parameters data path
+        std::string data_path = common_params.data_path;
+
 
         /*
             Args:
@@ -101,13 +104,17 @@ public:
 
 
 
-
+        TensorDescriptor input_descriptor =
+            TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
+            
         // Set graph hints
         graph << common_params.target << common_params.fast_math_hint;
 
         // Encode Input
-        graph << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model))
-              << PositionalEncodingLayer(PositionalEncodingLayerInfo(seq_src,d_model));
+        graph << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor)))
+            << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),
+                                     get_weights_accessor(data_path,"data/npy/token_embedding.npy"))
+            << PositionalEncodingLayer(PositionalEncodingLayerInfo(seq_src,d_model));
 
         // Decode Input
 

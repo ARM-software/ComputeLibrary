@@ -67,6 +67,13 @@ enum class ImageType
     JPEG
 };
 
+/** Supported text types */
+enum class TextType
+{
+    UNKNOWN,
+    UTF8
+};
+
 /** Abstract Example class.
  *
  * All examples have to inherit from this class.
@@ -128,6 +135,14 @@ void draw_detection_rectangle(
  */
 ImageType get_image_type_from_file(const std::string &filename);
 
+/** Gets text type given a file
+ *
+ * @param[in] filename File to identify its image type
+ *
+ * @return Text type
+ */
+TextType get_text_type_from_file(const std::string &filename);
+
 /** Parse the ppm header from an input file stream. At the end of the execution,
  *  the file position pointer will be located at the first pixel stored in the ppm file
  *
@@ -136,6 +151,16 @@ ImageType get_image_type_from_file(const std::string &filename);
  * @return The width, height and max value stored in the header of the PPM file
  */
 std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs);
+
+
+/** Parse the text header from an input file stream. At the end of the execution,
+ *  the file position pointer will be located at the first pixel stored in the txt file
+ *
+ * @param[in] fs Input file stream to parse
+ *
+ * @return The length stored in the header of the txt file
+ */
+std::tuple<unsigned int> parse_txt_header(std::ifstream &fs);
 
 /** Parse the npy header from an input file stream. At the end of the execution,
  *  the file position pointer will be located at the first pixel stored in the npy file //TODO

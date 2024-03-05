@@ -1569,7 +1569,8 @@ public:
      *
      * @param[in] tkemb_info Token embedding layer info
      */
-    TokenEmbeddingLayer(TokenEmbeddingLayerInfo tkemb_info) : _tkemb_info(tkemb_info)
+    TokenEmbeddingLayer(TokenEmbeddingLayerInfo tkemb_info,
+                        ITensorAccessorUPtr     weights) : _tkemb_info(tkemb_info), _weights(std::move(weights))
     {
     }
 
@@ -1577,11 +1578,12 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_yolo_node(s.graph(), common_params, input, _tkemb_info);
+        return GraphBuilder::add_tkemb_node(s.graph(), common_params, input, _tkemb_info, std::move(_weights));
     }
 
 private:
     TokenEmbeddingLayerInfo _tkemb_info;
+    ITensorAccessorUPtr     _weights;
 };
 
 /** YOLO Layer */

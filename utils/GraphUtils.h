@@ -255,6 +255,27 @@ private:
     std::unique_ptr<IPreprocessor> _preprocessor;
 };
 
+/** Text accessor class */
+class TextAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[in] filename     Text file
+     * @param[in] preprocessor (Optional) Text pre-processing object
+     */
+    TextAccessor(std::string filename, std::unique_ptr<IPreprocessor> preprocessor = nullptr);
+    /** Allow instances of this class to be move constructed */
+    TextAccessor(TextAccessor &&) = default;
+
+private:
+    bool                           _already_loaded;
+    const std::string              _filename;
+    std::unique_ptr<IPreprocessor> _preprocessor;
+};
+
+
+
 /** Input Accessor used for network validation */
 class ValidationInputAccessor final : public graph::ITensorAccessor
 {
@@ -516,6 +537,8 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
     {
         const std::string &image_file       = graph_parameters.image;
         const std::string &image_file_lower = lower_string(image_file);
+        const std::string &text_file        = graph_parameters.text;
+        const std::string &text_file_lower = lower_string(text_file);
         if (arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
             return std::make_unique<NumPyBinLoader>(image_file, graph_parameters.data_layout);
@@ -526,7 +549,11 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
         {
             return std::make_unique<ImageAccessor>(image_file, bgr, std::move(preprocessor));
         }
-        else
+        else if (arm_compute::utility::endswith(text_file_lower, ".txt"))
+        {
+            return std::make_unique<TextAccessor>(text_file, std::move(preprocessor));
+        }
+        else 
         {
             return std::make_unique<DummyAccessor>();
         }

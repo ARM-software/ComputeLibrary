@@ -1,4 +1,5 @@
 Vanilla_Transformer
+|- Utils -------------------> utils/GraphUtils.h
 |
 |- Graph Representation ----> examples/graph_vanilla_transformer.cpp
 |
@@ -55,10 +56,39 @@ Vanilla_Transformer
 |
 |
 |- Core --------------------> arm_compute/core/Types.h
-                                               |-> TokenEmbeddingLayerInfo
-                                               |-> PositionalEncodingLayerInfo
-                                               |-> MultiHeadAttentionLayerInfo
-                                               |-> ScaleDotProductionAttentionLayerInfo
-                                               |-> LayerNormLayerInfo
-                                               |-> FeedForwardLayerInfo
+|       |                                      |-> TokenEmbeddingLayerInfo
+|       |                                      |-> PositionalEncodingLayerInfo
+|       |                                      |-> MultiHeadAttentionLayerInfo
+|       |                                      |-> ScaleDotProductionAttentionLayerInfo
+|       |                                      |-> LayerNormLayerInfo
+|       |                                      |-> FeedForwardLayerInfo
+|       |
+|       |-------------------> arm_compute/core/CoreTypes.h
+|       |                                      |-> TextFormat: utf-8
+|       |
+|       |-------------------> arm_compute/core/TensorInfo.h
+|                                              |-> TensorInfo: 1D tensor info for text input 
+|
+|- Utils -------------------> utils/GraphUtils.h
+         |                          |-> get_input_accessor : add txt reader
+         |
+         |
+         |------------------> utils/TextLoader.h
+         |                          |-> TextDataFeeder
+         |                          |-> TXTLoader
+         |                          |-> TextLoaderFactory
+         |                          |-> ITextLoader   
+         |
+         |
+         |------------------> utils/CommonGraphOptions.h
+         |                          |-> add text type
+         |
+         |------------------> utils/Utils.h
+         |                          |-> TextType
+         |                          |-> parse_txt_header: TO BE USE?
+         |                          |-> get_text_type_from_file
+         |
+         |------------------> utils/Utils.cpp
+                                    |-> parse_txt_header: TO BE USE?
+                                    |-> get_text_type_from_file: TODO: now just return Default UTF-8
 

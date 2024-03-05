@@ -63,7 +63,12 @@ public:
      * @param[in] format Format of the tensor.
      */
     TensorInfo(Format format);
-
+    /** 1D tensor constructor
+     *
+     * @param[in] length Length of the 1D tensor
+     * @param[in] format Single plane text format of the tensor.
+     */
+    TensorInfo(unsigned int length, TextFormat format);
     /** 2D tensor constructor
      *
      * @param[in] width  Width of the 2D tensor

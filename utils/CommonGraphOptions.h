@@ -104,6 +104,7 @@ struct CommonGraphParams
     arm_compute::graph::FastMathHint fast_math_hint{arm_compute::graph::FastMathHint::Disabled};
     std::string                      data_path{};
     std::string                      image{};
+    std::string                      text{};
     std::string                      labels{};
     std::string                      validation_file{};
     std::string                      validation_path{};
