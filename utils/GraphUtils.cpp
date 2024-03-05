@@ -32,6 +32,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "utils/ImageLoader.h"
+#include "utils/TextLoader.h"
 #pragma GCC diagnostic pop
 #include "utils/Utils.h"
 
@@ -306,6 +307,36 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
         {
             _preprocessor->preprocess(tensor);
         }
+    }
+
+    _already_loaded = !_already_loaded;
+    return _already_loaded;
+}
+
+TextAccessor::TextAccessor(std::string filename, std::unique_ptr<IPreprocessor> preprocessor)
+    : _already_loaded(false), _filename(std::move(filename)), _preprocessor(std::move(preprocessor))
+{
+}
+
+bool TextAccessor::access_tensor(ITensor &tensor)
+{
+    if (!_already_loaded)
+    {
+        auto textloader = utils::TextLoaderFactory::create(_filename);
+        ARM_COMPUTE_EXIT_ON_MSG(textloader == nullptr, "Unsupported Text type");
+
+        // Open a text feeder from file (ifstream)
+        textloader->open(_filename);
+
+        // Fill tensor with text
+        textloader->fill_text(tensor);
+
+        // Preprocess tensor
+        if (_preprocessor)
+        {
+            _preprocessor->preprocess(tensor);
+        }
+
     }
 
     _already_loaded = !_already_loaded;

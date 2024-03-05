@@ -268,6 +268,9 @@ public:
     /** Allow instances of this class to be move constructed */
     TextAccessor(TextAccessor &&) = default;
 
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
 private:
     bool                           _already_loaded;
     const std::string              _filename;
@@ -538,7 +541,7 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
         const std::string &image_file       = graph_parameters.image;
         const std::string &image_file_lower = lower_string(image_file);
         const std::string &text_file        = graph_parameters.text;
-        const std::string &text_file_lower = lower_string(text_file);
+        const std::string &text_file_lower  = lower_string(text_file);
         if (arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
             return std::make_unique<NumPyBinLoader>(image_file, graph_parameters.data_layout);

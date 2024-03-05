@@ -100,7 +100,7 @@ public:
     }
     /** Fill an text tensor with the content of the currently open text file.
      *
-     * @param[in,out] text Image to fill (Must be allocated, and of matching dimensions with the opened image file).
+     * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
      */
     template <typename T>
     void fill_text(T &text)
@@ -110,10 +110,13 @@ public:
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&text, TextFormat::UTF8);
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
 
+        unsigned char c = 0;
+
         /* read input from text data feeder */
         try
         {
-
+            c = _feeder->get();
+            std::cout << c <<std::endl;
         }
         catch (const std::ifstream::failure &e)
         {

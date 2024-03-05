@@ -1,5 +1,4 @@
 Vanilla_Transformer
-|- Utils -------------------> utils/GraphUtils.h
 |
 |- Graph Representation ----> examples/graph_vanilla_transformer.cpp
 |
@@ -70,6 +69,10 @@ Vanilla_Transformer
 |                                              |-> TensorInfo: 1D tensor info for text input 
 |
 |- Utils -------------------> utils/GraphUtils.h
+         |                          |-> TextAccessor
+         |                          |-> get_input_accessor : add txt reader
+         |------------------> utils/GraphUtils.cpp
+         |                          |-> TextAccessor
          |                          |-> get_input_accessor : add txt reader
          |
          |
@@ -87,7 +90,6 @@ Vanilla_Transformer
          |                          |-> TextType
          |                          |-> parse_txt_header: TO BE USE?
          |                          |-> get_text_type_from_file
-         |
          |------------------> utils/Utils.cpp
                                     |-> parse_txt_header: TO BE USE?
                                     |-> get_text_type_from_file: TODO: now just return Default UTF-8

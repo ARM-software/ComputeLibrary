@@ -98,20 +98,19 @@ public:
        //const auto operation_layout = common_params.data_layout;
 
        // Create input tensor
-       const TensorShape src_tensor = TensorShape(bs,seq_src);
+       const TensorShape src_tensor = TensorShape(bs,5U);
 
        // Maybe permute input data layout to target operation layout  
 
 
 
-        TensorDescriptor input_descriptor =
-            TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
-            
+        TensorDescriptor input_descriptor = TensorDescriptor(src_tensor, common_params.data_type);
+
         // Set graph hints
         graph << common_params.target << common_params.fast_math_hint;
 
         // Encode Input
-        graph << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor)))
+        graph << InputLayer(input_descriptor, get_input_accessor(common_params))
             << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),
                                      get_weights_accessor(data_path,"data/npy/token_embedding.npy"))
             << PositionalEncodingLayer(PositionalEncodingLayerInfo(seq_src,d_model));
