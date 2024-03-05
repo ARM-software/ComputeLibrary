@@ -112,15 +112,29 @@ public:
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params))
             << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),
-                                     get_weights_accessor(data_path,"data/npy/token_embedding.npy"))
-            << PositionalEncodingLayer(PositionalEncodingLayerInfo(seq_src,d_model));
+                                     get_weights_accessor(data_path,"data/npy/token_embedding.npy"));
 
         // Decode Input
+        // Finalize graph
+        GraphConfig config;
 
+        config.num_threads = common_params.threads;
+        config.use_tuner   = common_params.enable_tuner;
+        config.tuner_mode  = common_params.tuner_mode;
+        config.tuner_file  = common_params.tuner_file;
+        config.mlgo_file   = common_params.mlgo_file;
 
-        
+        graph.finalize(common_params.target, config);
+
+        return true;
     }
 
+    void do_run() override
+    {
+        // Run graph
+        graph.run();
+    }
+    
 private:
     CommandLineParser  cmd_parser;
     CommonGraphOptions common_opts;
