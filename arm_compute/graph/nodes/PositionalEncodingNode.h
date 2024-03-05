@@ -28,7 +28,7 @@ public:
      * 
      * @return Output descriptor
      */
-    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, PositionalEncodingLayerInfo info);
+    //static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, PositionalEncodingLayerInfo info);
 
     // Inherited overridden methods:
     NodeType         type() const override;
