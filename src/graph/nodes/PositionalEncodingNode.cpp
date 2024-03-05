@@ -24,7 +24,8 @@ TensorDescriptor PositionalEncodingNode::compute_output_descriptor(const TensorD
                                                                    PositionalEncodingLayerInfo info)
 {
     TensorDescriptor output_descriptor = input_descriptor;
-    const unsigned int pool_size_x  = info.seq_len();
+    const unsigned int seq_len  = info.seq_len();
+    output_descriptor.shape.set(1,seq_len);
     return output_descriptor;
 }
 
