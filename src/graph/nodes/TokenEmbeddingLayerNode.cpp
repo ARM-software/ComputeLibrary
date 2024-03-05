@@ -23,7 +23,7 @@ TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const Tensor
                                                                    TokenEmbeddingLayerInfo info)
 {
     TensorDescriptor output_descriptor = input_descriptor;
-    const unsigned int seq_len  = info.d_model;
+    const unsigned int seq_len  = info.d_model();
     output_descriptor.shape.set(1,seq_len);
     return output_descriptor;
 }
