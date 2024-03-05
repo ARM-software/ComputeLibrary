@@ -254,6 +254,7 @@ std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs)
 std::tuple<unsigned int> parse_txt_header(std::ifstream &fs)
 {   
     unsigned int length;
+    discard_comments_and_spaces(fs); //do nothing 
     return std::make_tuple(length);
 }
 
