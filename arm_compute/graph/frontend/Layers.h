@@ -1077,7 +1077,7 @@ public:
      *
      * @param[in] 
      */
-    PositionalEncodingLayer(PositionalEncodingLayerInfo position_encode_info, TensorShape shape) : _position_encode_info(position_encode_info), _shape(shape)
+    PositionalEncodingLayer(PositionalEncodingLayerInfo position_encode_info, TensorShape shape) : _shape(shape), _position_encode_info(position_encode_info) 
     {
     }
 
