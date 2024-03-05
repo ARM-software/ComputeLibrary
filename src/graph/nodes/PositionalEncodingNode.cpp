@@ -19,13 +19,15 @@ PositionalEncodingLayerInfo PositionalEncodingNode::positional_encoding_info() c
     return _info;
 }
 
-/*
+
 TensorDescriptor PositionalEncodingNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                                    PositionalEncodingLayerInfo info)
 {
-
+    TensorDescriptor output_descriptor = input_descriptor;
+    const unsigned int pool_size_x  = info.seq_len();
+    return output_descriptor;
 }
-*/
+
 
 bool PositionalEncodingNode::forward_descriptors()
 {
