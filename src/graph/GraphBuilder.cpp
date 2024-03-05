@@ -842,7 +842,7 @@ NodeID GraphBuilder::add_tkemb_node(Graph &g,
                                  TokenEmbeddingLayerInfo tkemb_info,
                                  ITensorAccessorUPtr     weights = nullptr)
 {
-
+    return create_simple_single_input_output_node<DummyNode>(g, params, input);
 }
 
 NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info)

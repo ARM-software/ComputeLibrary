@@ -926,7 +926,7 @@ public:
      *
      * 
      */
-    MultiHeadAttentionLayer()
+    MultiHeadAttentionLayer(TensorShape shape) : _shape(shape)
     {
     }
 
@@ -1077,7 +1077,7 @@ public:
      *
      * @param[in] 
      */
-    PositionalEncodingLayer(PositionalEncodingLayerInfo position_encode_info) : _position_encode_info(position_encode_info)
+    PositionalEncodingLayer(PositionalEncodingLayerInfo position_encode_info, TensorShape shape) : _position_encode_info(position_encode_info), _shape(shape)
     {
     }
 
@@ -1369,7 +1369,7 @@ public:
      *
      * 
      */
-    ScaleDotProductionAttentionLayer()
+    ScaleDotProductionAttentionLayer(TensorShape shape) : _shape(shape)
     {
     }
 
