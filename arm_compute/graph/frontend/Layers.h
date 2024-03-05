@@ -701,17 +701,19 @@ public:
     /** Construct a feed forward layer.
      *
      */
-    FeedForwardLayer()
+    FeedForwardLayer(TensorShape shape) : _shape(shape)
     {
     }
 
     NodeID create_layer(IStream &s) override
     {
-
+        NodeParams  common_params = {name(), s.hints().target_hint};
+        NodeIdxPair input         = {s.tail_node(), 0};
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
     }
 
 private:
-
+    TensorShape _shape;
 };
 
 /** Flatten Layer */
@@ -876,17 +878,19 @@ public:
     /** Construct a layer norm layer.
      *
      */
-    LayerNormLayer()
+    LayerNormLayer(TensorShape shape) : _shape(shape)
     {
     }
 
     NodeID create_layer(IStream &s) override
     {
-
+        NodeParams  common_params = {name(), s.hints().target_hint};
+        NodeIdxPair input         = {s.tail_node(), 0};
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
     }
 
 private:
-
+    TensorShape _shape;
 };
 
 /** L2 Normalize Layer */
@@ -928,11 +932,13 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-
+        NodeParams  common_params = {name(), s.hints().target_hint};
+        NodeIdxPair input         = {s.tail_node(), 0};
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
     }
 
 private:
-
+    TensorShape _shape;
 };
 
 /** Normalization Layer */
@@ -1077,10 +1083,13 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-
+        NodeParams  common_params = {name(), s.hints().target_hint};
+        NodeIdxPair input         = {s.tail_node(), 0};
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
     }
 
 private:
+    TensorShape _shape;
     PositionalEncodingLayerInfo _position_encode_info;
 };
 
@@ -1366,11 +1375,13 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-
+        NodeParams  common_params = {name(), s.hints().target_hint};
+        NodeIdxPair input         = {s.tail_node(), 0};
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
     }
 
 private:
-
+    TensorShape _shape;
 };
 
 /** Scale Layer */
