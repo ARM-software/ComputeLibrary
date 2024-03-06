@@ -92,6 +92,7 @@ bool Tensor::call_accessor()
         // Return in case of null backend buffer
         if (_handle->tensor().buffer() == nullptr)
         {
+            std::cout << "tensor nullptr" << std::endl;
             return false;
         }
     }
