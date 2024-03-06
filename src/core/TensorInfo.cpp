@@ -43,6 +43,7 @@ TensorInfo::TensorInfo()
       _dims_state(),
       _data_type(DataType::UNKNOWN),
       _format(Format::UNKNOWN),
+      _text_format(TextFormat::UTF8),
       _is_resizable{true},
       _valid_region{Coordinates(), _tensor_shape},
       _padding{0},
