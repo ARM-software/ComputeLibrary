@@ -316,6 +316,7 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
 TextAccessor::TextAccessor(std::string filename, std::unique_ptr<IPreprocessor> preprocessor)
     : _already_loaded(false), _filename(std::move(filename)), _preprocessor(std::move(preprocessor))
 {
+    std::cout << "text accessor created " << std::endl;
 }
 
 bool TextAccessor::access_tensor(ITensor &tensor)
