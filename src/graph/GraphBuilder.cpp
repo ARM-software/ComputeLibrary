@@ -126,6 +126,7 @@ GraphBuilder::add_input_node(Graph &g, NodeParams params, const TensorDescriptor
     auto nid = g.add_node<InputNode>(desc);
     set_node_params(g, nid, params);
     set_accessor_on_node(g, nid, true, 0, std::move(accessor));
+    std::cout << "graph accessor set" <<std::endl;
     return nid;
 }
 
