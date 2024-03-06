@@ -140,6 +140,10 @@ public:
     {
         return _fs.is_open();
     }
+    void set_length(unsigned int length)
+    {
+        _length = length;
+    }
     void open(const std::string &filename) override
     {
         ARM_COMPUTE_ERROR_ON(is_open());

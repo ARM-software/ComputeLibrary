@@ -28,12 +28,14 @@ public:
         if (argc < 2)
         {
             loader.open("./data/test.txt");
+            loader.set_length(5);
             // Create an empty grayscale 640x480 image
-            src.allocator()->init(TensorInfo(640, 480, Format::U8));
+            loader.init_text(src,TextFormat::UTF8);
         }
         else
         {
             loader.open(argv[1]);
+            loader.set_length(5);
             loader.init_text(src,TextFormat::UTF8);
         }
 
