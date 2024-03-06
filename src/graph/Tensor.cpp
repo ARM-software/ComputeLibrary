@@ -98,7 +98,7 @@ bool Tensor::call_accessor()
 
     // Call accessor
     bool retval = _accessor->access_tensor(_handle->tensor());
-
+    std::cout << _handle->tensor().info() << std::endl;
     if (access_data)
     {
         // Unmap tensor
