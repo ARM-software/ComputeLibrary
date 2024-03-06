@@ -42,7 +42,7 @@
 #include "arm_compute/runtime/OffsetLifetimeManager.h"
 #include "arm_compute/runtime/PoolManager.h"
 #include "arm_compute/runtime/Scheduler.h"
-#include <iostream>
+
 namespace arm_compute
 {
 namespace graph
@@ -114,7 +114,7 @@ std::unique_ptr<ITensorHandle> NEDeviceBackend::create_tensor(const Tensor &tens
     // Get tensor descriptor
     const TensorDescriptor &tensor_desc = tensor.desc();
     ARM_COMPUTE_ERROR_ON(tensor_desc.target != Target::NEON);
-    std::cout<<tensor_desc.shape.total_size()<<std::endl;
+
     // Create backend tensor handle
     TensorInfo info(tensor_desc.shape, 1, tensor_desc.data_type, tensor_desc.quant_info);
     info.set_data_layout(tensor_desc.layout);

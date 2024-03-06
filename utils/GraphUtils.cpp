@@ -330,7 +330,7 @@ bool TextAccessor::access_tensor(ITensor &tensor)
 
         // Fill tensor with text
         textloader->fill_text(tensor);
-
+        std::cout << "text accessor called" << std::endl;
         // Preprocess tensor
         if (_preprocessor)
         {
