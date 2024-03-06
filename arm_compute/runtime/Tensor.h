@@ -67,5 +67,6 @@ private:
 
 /** Image */
 using Image = Tensor;
+using Text  = Tensor;
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_TENSOR_H */
