@@ -321,6 +321,7 @@ TextAccessor::TextAccessor(std::string filename, std::unique_ptr<IPreprocessor> 
 
 bool TextAccessor::access_tensor(ITensor &tensor)
 {
+    std::cout << "text accessor called" << std::endl;
     if (!_already_loaded)
     {
         auto textloader = utils::TextLoaderFactory::create(_filename);
@@ -331,7 +332,6 @@ bool TextAccessor::access_tensor(ITensor &tensor)
 
         // Fill tensor with text
         textloader->fill_text(tensor);
-        std::cout << "text accessor called" << std::endl;
         // Preprocess tensor
         if (_preprocessor)
         {
