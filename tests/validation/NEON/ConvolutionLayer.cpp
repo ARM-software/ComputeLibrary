@@ -109,6 +109,11 @@ const auto ActivationFunctionsDataset = make("ActivationInfo",
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f)
 });
 
+const auto NoActivation = make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+});
+
 const auto ActivationFunctionsDatasetNightly = make("ActivationInfo",
 {
     ActivationLayerInfo(),
@@ -1201,6 +1206,20 @@ FIXTURE_DATA_TEST_CASE(RunPaddedWeights, NEGEMMConvolutionLayerPaddedWeightsFixt
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
+
+// This very large shape test is required to test heuristic paths where the tensor size is > 1e7 bytes
+// and weight dimensions larger than 7
+FIXTURE_DATA_TEST_CASE(RunVeryLarge, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+    combine(datasets::VeryLargeConvolutionLayerDataset(),
+        framework::dataset::make("ReshapeWeights", { true }),
+        framework::dataset::make("DataType", DataType::F32),
+        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+        NoActivation))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
