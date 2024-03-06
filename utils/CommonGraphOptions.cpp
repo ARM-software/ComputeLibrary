@@ -129,6 +129,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
       fast_math_hint(parser.add_option<ToggleOption>("fast-math")),
       data_path(parser.add_option<SimpleOption<std::string>>("data")),
       image(parser.add_option<SimpleOption<std::string>>("image")),
+      text(parser.add_option<SimpleOption<std::string>>("text")),
       labels(parser.add_option<SimpleOption<std::string>>("labels")),
       validation_file(parser.add_option<SimpleOption<std::string>>("validation-file")),
       validation_path(parser.add_option<SimpleOption<std::string>>("validation-path")),
@@ -176,6 +177,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     fast_math_hint->set_help("Enable fast math");
     data_path->set_help("Path where graph parameters reside");
     image->set_help("Input image for the graph");
+    text->set_help("Input text for the graph");
     labels->set_help("File containing the output labels");
     validation_file->set_help("File used to validate the graph");
     validation_path->set_help("Path to the validation data");
@@ -208,6 +210,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.fast_math_hint  = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
     common_params.data_path       = options.data_path->value();
     common_params.image           = options.image->value();
+    common_params.text            = options.text->value();
     common_params.labels          = options.labels->value();
     common_params.validation_file = options.validation_file->value();
     common_params.validation_path = options.validation_path->value();

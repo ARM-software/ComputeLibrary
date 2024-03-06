@@ -163,6 +163,7 @@ public:
     ToggleOption                           *fast_math_hint;   /**< Fast math hint */
     SimpleOption<std::string>              *data_path;        /**< Trainable parameters path */
     SimpleOption<std::string>              *image;            /**< Image */
+    SimpleOption<std::string>              *text;             /**< Text */
     SimpleOption<std::string>              *labels;           /**< Labels */
     SimpleOption<std::string>              *validation_file;  /**< Validation file */
     SimpleOption<std::string>              *validation_path;  /**< Validation data path */
