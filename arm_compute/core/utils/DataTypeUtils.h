@@ -148,6 +148,24 @@ inline DataType data_type_from_format(Format format)
     }
 }
 
+/** Return the data type used by a given single-planar pixel format
+ *
+ * @param[in] format Input format
+ *
+ * @return The size in bytes of the pixel format
+ */
+inline DataType data_type_from_format(TextFormat format)
+{
+    switch (format)
+    {
+        case TextFormat::UTF8:
+            return DataType::U32;
+        default:
+            ARM_COMPUTE_ERROR("Not supported data_type for given format");
+            return DataType::UNKNOWN;
+    }
+}
+
 /** Return the promoted data type of a given data type.
  *
  * @note If promoted data type is not supported an error will be thrown

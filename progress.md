@@ -66,7 +66,15 @@ Vanilla_Transformer
 |       |                                      |-> TextFormat: utf-8
 |       |
 |       |-------------------> arm_compute/core/TensorInfo.h
-|                                              |-> TensorInfo: 1D tensor info for text input 
+|       |                                      |-> TensorInfo: 1D tensor info for text input 
+|       |
+|       |-------------------> src/core/TensorInfo.cpp
+|       |                              |-> TensorInfo: wrapper over init
+|       |                              |-> init
+|       |
+|       |-------------------> arm_compute/core/utils/DataTypeUtils.h
+|                                                    |-> data_type_from_format: configure tensor data type
+|
 |
 |- Utils -------------------> utils/GraphUtils.h
          |                          |-> TextAccessor

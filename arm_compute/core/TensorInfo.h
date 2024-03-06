@@ -82,6 +82,12 @@ public:
      * @param[in] format       Single plane format of the tensor.
      */
     TensorInfo(const TensorShape &tensor_shape, Format format);
+    /** Constructor
+     *
+     * @param[in] tensor_shape It specifies the size for each dimension of the tensor in number of elements.
+     * @param[in] format       Single plane format of the tensor.
+     */
+    TensorInfo(const TensorShape &tensor_shape, TextFormat format);
 
     /** Construct a tensor info with a data type and number of channels.
      *
@@ -137,6 +143,12 @@ public:
     void init(const TensorShape &tensor_shape, Format format);
     /** Initialize the metadata structure with the given parameters
      *
+     * @param[in] tensor_shape Size for each dimension of the tensor in number of elements.
+     * @param[in] format       Single text format of the tensor.
+     */
+    void init(const TensorShape &tensor_shape, TextFormat format);
+    /** Initialize the metadata structure with the given parameters
+     *
      * @param[in] tensor_shape                  Size for each dimension of the tensor in number of elements.
      * @param[in] format                        Single plane format of the tensor.
      * @param[in] strides_in_bytes              Stride in bytes for accessing each dimension of the tensor.
@@ -166,6 +178,12 @@ public:
      */
     void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type);
 
+    /** Initialize the metadata structure with the given parameters
+     *
+     * @param[in] tensor_shape Size for each dimension of the tensor in number of elements.
+     * @param[in] data_type    Data type to use for each tensor element.
+     */
+    void init(const TensorShape &tensor_shape, DataType data_type);
     /** Initialize the metadata structure with the given parameters
      *
      * @param[in] tensor_shape                  Size for each dimension of the tensor in number of elements.
@@ -340,6 +358,7 @@ private:
     TensorDimsState  _dims_state;
     DataType         _data_type;
     Format           _format;
+    TextFormat       _text_format;
     bool             _is_resizable;
     ValidRegion      _valid_region;
     PaddingSize      _padding;

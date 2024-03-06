@@ -68,6 +68,8 @@
         "__memory": "cpp",
         "memory_resource": "cpp",
         "filesystem": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "concepts": "cpp",
+        "numeric": "cpp"
     }
 }

@@ -97,12 +97,22 @@ TensorInfo::TensorInfo(Format format) : TensorInfo(TensorShape(), format)
 {
 }
 
+/* transformer */
+TensorInfo::TensorInfo(unsigned int length, TextFormat format): TensorInfo(TensorShape(length), format)
+{
+}
+
 TensorInfo::TensorInfo(unsigned int width, unsigned int height, Format format)
     : TensorInfo(TensorShape(width, height), format)
 {
 }
 
 TensorInfo::TensorInfo(const TensorShape &tensor_shape, Format format) : TensorInfo()
+{
+    init(tensor_shape, format);
+}
+
+TensorInfo::TensorInfo(const TensorShape &tensor_shape, TextFormat format) : TensorInfo()
 {
     init(tensor_shape, format);
 }
@@ -149,6 +159,15 @@ void TensorInfo::init(const TensorShape &tensor_shape, Format format)
     _format = format;
 }
 
+void TensorInfo::init(const TensorShape &tensor_shape, TextFormat format)
+{
+    const DataType type         = data_type_from_format(format);
+
+    init(tensor_shape, type);
+
+    _text_format = format;
+}
+
 void TensorInfo::init(const TensorShape &tensor_shape,
                       Format             format,
                       const Strides     &strides_in_bytes,
@@ -174,6 +193,16 @@ void TensorInfo::init(const TensorShape &tensor_shape, size_t num_channels, Data
 
     _data_type    = data_type;
     _num_channels = num_channels;
+    _format       = Format::UNKNOWN;
+
+    set_tensor_shape(tensor_shape);
+}
+
+void TensorInfo::init(const TensorShape &tensor_shape, DataType data_type)
+{
+    ARM_COMPUTE_ERROR_ON(num_channels == 0);
+
+    _data_type    = data_type;
     _format       = Format::UNKNOWN;
 
     set_tensor_shape(tensor_shape);
