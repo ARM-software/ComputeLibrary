@@ -91,14 +91,14 @@ public:
 
        
        constexpr unsigned int seq_src   = 25000U;   // Input token sequence
-       constexpr unsigned int seq_tgt   = 25000U;   // Output token sequence.*/
-       constexpr unsigned int bs        = 1U;       // Batch size
+       constexpr unsigned int seq_tgt   = 25000U;   // Output token sequence.
+       constexpr unsigned int bs        = 1U;       // Batch size*/
 
        // Compute library best operate on NHWC(default) layout
        //const auto operation_layout = common_params.data_layout;
 
        // Create input tensor
-       const TensorShape src_tensor = TensorShape(bs,5U);
+       const TensorShape src_tensor = TensorShape(5U);
 
        // Maybe permute input data layout to target operation layout  
 

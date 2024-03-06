@@ -39,7 +39,7 @@ public:
             loader.init_text(src,TextFormat::UTF8);
         }
 
-        // Allocate all the images
+        // Allocate all the text
         src.allocator()->allocate();
         dst.allocator()->allocate();
 
