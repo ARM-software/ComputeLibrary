@@ -98,5 +98,6 @@ private:
 };
 
 using IImage = ITensor;
+using IText  = ITensor;
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_ITENSOR_H */

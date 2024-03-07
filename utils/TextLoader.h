@@ -97,6 +97,7 @@ public:
         // Use the size of the input text
         TensorInfo text_info(_length, format);
         text.allocator()->init(text_info);
+        std::cout << "Textloader init text" <<std::endl;
     }
     /** Fill an text tensor with the content of the currently open text file.
      *
