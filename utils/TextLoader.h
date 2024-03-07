@@ -147,13 +147,16 @@ public:
     }
     void open(const std::string &filename) override
     {
+        std::cout << "open start" <<std::endl;
         ARM_COMPUTE_ERROR_ON(is_open());
         try
         {
+            std::cout << "opening" <<std::endl;
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(filename, std::ios::in | std::ios::binary);
 
             _feeder = std::make_unique<FileTextFeeder>(_fs);
+            std::cout << "open end" <<std::endl;
         }
         catch (std::runtime_error &e)
         {

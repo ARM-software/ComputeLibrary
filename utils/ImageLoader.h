@@ -163,7 +163,6 @@ public:
         // Use the size of the input image
         TensorInfo image_info(_width, _height, format);
         image.allocator()->init(image_info);
-        std::cout << "init image" <<std::endl;
     }
     /** Fill an image with the content of the currently open image file.
      *
