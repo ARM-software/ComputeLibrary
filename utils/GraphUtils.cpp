@@ -322,6 +322,7 @@ TextAccessor::TextAccessor(std::string filename, std::unique_ptr<IPreprocessor> 
 bool TextAccessor::access_tensor(ITensor &tensor)
 {
     std::cout << "text accessor called" << std::endl;
+    std::cout << _already_loaded <<std::endl;
     if (!_already_loaded)
     {
         auto textloader = utils::TextLoaderFactory::create(_filename);
