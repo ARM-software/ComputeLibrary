@@ -554,6 +554,7 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
         }
         else if (arm_compute::utility::endswith(text_file_lower, ".txt"))
         {
+            std::cout << "graphutil txt" << std::endl;
             return std::make_unique<TextAccessor>(text_file, std::move(preprocessor));
         }
         else 
