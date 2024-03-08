@@ -64,6 +64,8 @@ void configure_all_tensors(Graph &g)
             Target                         target  = tensor->desc().target;
             backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(target);
             std::unique_ptr<ITensorHandle> handle  = backend.create_tensor(*tensor);
+            std::cout << "exection helper: " << std::endl;
+            std::cout << tensor->desc().shape.total_size() <<std::endl;
             ARM_COMPUTE_ERROR_ON_MSG(!handle, "Couldn't create backend handle!");
             tensor->set_handle(std::move(handle));
         }
