@@ -390,7 +390,6 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
 
 bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
 {
-    std::cout << "GraphUtils ValidationInputAccessor" <<std::endl;
     bool ret = _offset < _images.size();
     if (ret)
     {
@@ -444,7 +443,6 @@ ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list
 {
     ARM_COMPUTE_EXIT_ON_MSG(start > end, "Invalid validation range!");
 
-    std::cout << "GraphUtils ValidationOutputAccessor" <<std::endl;
     std::ifstream ifs;
     try
     {
