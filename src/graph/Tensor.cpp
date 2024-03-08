@@ -75,7 +75,6 @@ std::unique_ptr<ITensorAccessor> Tensor::extract_accessor()
 
 bool Tensor::call_accessor()
 {
-    std::cout << "accessor being calleld" << std::endl;
     // Early exit guard
     if (!_accessor || !_handle)
     {
@@ -83,9 +82,6 @@ bool Tensor::call_accessor()
     }
 
     const bool access_data = _accessor->access_tensor_data();
-
-    std::cout << "access_tensor_data: ";
-    std::cout << access_data << std::endl;
     
     if (access_data)
     {
@@ -95,7 +91,6 @@ bool Tensor::call_accessor()
         // Return in case of null backend buffer
         if (_handle->tensor().buffer() == nullptr)
         {
-            std::cout << "tensor nullptr" << std::endl;
             return false;
         }
     }
