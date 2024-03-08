@@ -110,7 +110,7 @@ public:
         graph << common_params.target << common_params.fast_math_hint;
 
         // Encode Input
-        graph << InputLayer(input_descriptor, get_input_accessor(common_params));
+        graph << InputLayer(input_descriptor, get_input_accessor(common_params)).set_name("in1");
             //<< TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),get_weights_accessor(data_path,"data/npy/token_embedding.npy"));
 
         // Decode Input

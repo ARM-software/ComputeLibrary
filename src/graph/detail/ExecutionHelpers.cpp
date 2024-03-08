@@ -64,8 +64,6 @@ void configure_all_tensors(Graph &g)
             Target                         target  = tensor->desc().target;
             backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(target);
             std::unique_ptr<ITensorHandle> handle  = backend.create_tensor(*tensor);
-            std::cout << "exection helper: " << std::endl;
-            std::cout << tensor->desc().shape.total_size() <<std::endl;
             ARM_COMPUTE_ERROR_ON_MSG(!handle, "Couldn't create backend handle!");
             tensor->set_handle(std::move(handle));
         }
@@ -87,6 +85,8 @@ void allocate_all_input_tensors(INode &node)
 
 void allocate_all_output_tensors(INode &node)
 {
+    std::cout << "Execution Helper ";
+    std::cout << node.name() << std::endl;
     for (unsigned int i = 0; i < node.num_outputs(); ++i)
     {
         Tensor *tensor = node.output(i);
@@ -216,7 +216,6 @@ bool call_all_input_node_accessors(ExecutionWorkload &workload)
                   [&](Tensor *input_tensor)
                   {
                       bool valid_input = (input_tensor != nullptr) && input_tensor->call_accessor();
-                      std::cout << "Ecection call input accessor" << std::endl;
                       is_valid         = is_valid && valid_input;
                   });
     return is_valid;
