@@ -149,7 +149,6 @@ PPMWriter::PPMWriter(std::string name, unsigned int maximum) : _name(std::move(n
 
 bool PPMWriter::access_tensor(ITensor &tensor)
 {
-    std::cout << "PPM" << std::endl;
     std::stringstream ss;
     ss << _name << _iterator << ".ppm";
 
@@ -174,7 +173,6 @@ bool DummyAccessor::access_tensor_data()
 
 bool DummyAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "Dummy" << std::endl;
     ARM_COMPUTE_UNUSED(tensor);
     bool ret = _maximum == 0 || _iterator < _maximum;
     if (_iterator == _maximum)
@@ -219,7 +217,6 @@ void NumPyAccessor::access_numpy_tensor(ITensor &tensor, T tolerance)
 
 bool NumPyAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "numpy" << std::endl;
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON(_npy_tensor.info()->dimension(0) != tensor.info()->dimension(0));
 
@@ -258,7 +255,6 @@ SaveNumPyAccessor::SaveNumPyAccessor(std::string npy_name, const bool is_fortran
 
 bool SaveNumPyAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "save npy" << std::endl;
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
 
     utils::save_to_npy(tensor, _npy_name, _is_fortran);
@@ -274,7 +270,6 @@ ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPr
 
 bool ImageAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "image" << std::endl;
     if (!_already_loaded)
     {
         auto image_loader = utils::ImageLoaderFactory::create(_filename);
@@ -396,7 +391,6 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
 
 bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
 {
-    std::cout << "validationinput" << std::endl;
     bool ret = _offset < _images.size();
     if (ret)
     {
@@ -487,7 +481,6 @@ void ValidationOutputAccessor::reset()
 
 bool ValidationOutputAccessor::access_tensor(arm_compute::ITensor &tensor)
 {
-    std::cout << "validationoutput" << std::endl;
     bool ret = _offset < _results.size();
     if (ret)
     {
@@ -624,7 +617,6 @@ void DetectionOutputAccessor::access_predictions_tensor(ITensor &tensor)
 
 bool DetectionOutputAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "detection output" << std::endl;
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
 
     switch (tensor.info()->data_type())
@@ -695,7 +687,6 @@ void TopNPredictionsAccessor::access_predictions_tensor(ITensor &tensor)
 
 bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "topn prediction" << std::endl;
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON(_labels.size() != tensor.info()->dimension(0));
 
@@ -749,7 +740,6 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
 
 bool RandomAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "random access" << std::endl;
     switch (tensor.info()->data_type())
     {
         case DataType::QASYMM8:
@@ -833,7 +823,6 @@ NumPyBinLoader::NumPyBinLoader(std::string filename, DataLayout file_layout)
 
 bool NumPyBinLoader::access_tensor(ITensor &tensor)
 {
-    std::cout << "npy bin" << std::endl;
     if (!_already_loaded)
     {
         utils::NPYLoader loader;
