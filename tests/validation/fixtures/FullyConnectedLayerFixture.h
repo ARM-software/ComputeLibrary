@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -414,7 +414,7 @@ private:
 
     void validate_with_tolerance(TensorType &target, SimpleTensor<int8_t> &ref)
     {
-        constexpr AbsoluteTolerance<uint32_t> tolerance_qasymm8_signed(1);
+        constexpr AbsoluteTolerance<int32_t> tolerance_qasymm8_signed(1);
         validate(AccessorType(target), ref, tolerance_qasymm8_signed);
     }
 
