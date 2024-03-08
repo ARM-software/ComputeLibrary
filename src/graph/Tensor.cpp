@@ -77,7 +77,6 @@ std::unique_ptr<ITensorAccessor> Tensor::extract_accessor()
 
 bool Tensor::call_accessor()
 {
-    std::cout << "Tensor call_accessor" << std::endl;
     // Early exit guard
     if (!_accessor || !_handle)
     {
@@ -86,8 +85,6 @@ bool Tensor::call_accessor()
     
     const bool access_data = _accessor->access_tensor_data();
     
-    std::cout << typeid(_accessor).name() << std::endl;
-
     if (access_data)
     {
         // Map tensor
