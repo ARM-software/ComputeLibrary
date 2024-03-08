@@ -203,6 +203,7 @@ void call_all_const_node_accessors(Graph &g)
 
     for (auto &node : nodes)
     {
+        std::cout << node.get()->name() << std::endl;
         if (node != nullptr && node->type() == NodeType::Const && node->num_outputs())
         {
             if (!node->output(0)->bound_edges().empty())
