@@ -214,6 +214,7 @@ bool call_all_input_node_accessors(ExecutionWorkload &workload)
                   [&](Tensor *input_tensor)
                   {
                       bool valid_input = (input_tensor != nullptr) && input_tensor->call_accessor();
+                      std::cout << "Ecection call input accessor" << std::endl;
                       is_valid         = is_valid && valid_input;
                   });
     return is_valid;
