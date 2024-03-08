@@ -45,6 +45,10 @@ v24.04 Public major release
  - Optimize start-up time of @ref NEConvolutionLayer for some input configurations where GeMM is selected as the convolution algorithm
  - Optimize @ref NEConvolutionLayer for input tensor size > 1e7 bytes and weight tensor height > 7
 
+v24.02.1 Public patch release
+ - Fix performance regression in fixed-format kernels
+ - Fix compile and runtime errors in arm_compute_validation for Windows on Arm(WoA)
+
 v24.02 Public major release
  - Replace template writer with compute kernel writer in dynamic fusion.
  - Performance optimizations:
