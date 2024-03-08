@@ -78,6 +78,7 @@ std::unique_ptr<ITensorAccessor> Tensor::extract_accessor()
 
 bool Tensor::call_accessor()
 {
+    std::cout << "Tensor call_accessor" << std::endl
     // Early exit guard
     if (!_accessor || !_handle)
     {
