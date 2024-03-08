@@ -100,6 +100,7 @@ bool Tensor::call_accessor()
     std::cout << typeid(_accessor).name() << std::endl;
     // Call accessor
     bool retval = _accessor->access_tensor(_handle->tensor());
+    std::cout << retval  << std::endl;
     if (access_data)
     {
         // Unmap tensor
