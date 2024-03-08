@@ -90,10 +90,14 @@ void allocate_all_output_tensors(INode &node)
     for (unsigned int i = 0; i < node.num_outputs(); ++i)
     {
         Tensor *tensor = node.output(i);
+        std::cout << tensor << std::endl;
+        std::cout << tensor->bound_edges() << std::endl;
         if (tensor != nullptr && !tensor->bound_edges().empty())
         {
+            std::cout << " about to allocate" <<std::endl;
             ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
             tensor->handle()->allocate();
+            std::cout << " Allocated " <<std::endl;
         }
     }
 }
