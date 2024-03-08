@@ -216,6 +216,7 @@ void call_all_const_node_accessors(Graph &g)
 
 bool call_all_input_node_accessors(ExecutionWorkload &workload)
 {
+    std::cout << "Calling call_all_input_node_accessors" << std::endl;
     bool is_valid = true;
     std::for_each(std::begin(workload.inputs), std::end(workload.inputs),
                   [&](Tensor *input_tensor)
@@ -223,6 +224,8 @@ bool call_all_input_node_accessors(ExecutionWorkload &workload)
                       bool valid_input = (input_tensor != nullptr) && input_tensor->call_accessor();
                       is_valid         = is_valid && valid_input;
                   });
+    std::cout << "in put is_valid" << std::endl;
+    return is_valid;
     return is_valid;
 }
 
@@ -277,8 +280,7 @@ bool call_all_output_node_accessors(ExecutionWorkload &workload)
                   });
 
     sync_backends();
-    std::cout << "is_valid" << std::endl;
-    std::cout << is_valid << std::endl;
+    std::cout << "out put is_valid" << std::endl;
     return is_valid;
 }
 } // namespace detail
