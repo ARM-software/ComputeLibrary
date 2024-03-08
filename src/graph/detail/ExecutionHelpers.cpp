@@ -267,6 +267,7 @@ void call_all_tasks(ExecutionWorkload &workload)
 
 bool call_all_output_node_accessors(ExecutionWorkload &workload)
 {
+    std::cout << "Calling call_all_output_node_accessors" << std::endl;
     bool is_valid = true;
     std::for_each(std::begin(workload.outputs), std::end(workload.outputs),
                   [&](Tensor *output_tensor)
@@ -276,7 +277,8 @@ bool call_all_output_node_accessors(ExecutionWorkload &workload)
                   });
 
     sync_backends();
-
+    std::cout << "is_valid" << std::endl;
+    std::cout << is_valid << std::endl;
     return is_valid;
 }
 } // namespace detail
