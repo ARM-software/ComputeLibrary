@@ -216,11 +216,12 @@ void call_all_const_node_accessors(Graph &g)
 
 bool call_all_input_node_accessors(ExecutionWorkload &workload)
 {
-    std::cout << "Calling call_all_input_node_accessors" << std::endl;
+    std::cout << "Calling call_all_input_node_accessors   " ;
     bool is_valid = true;
     std::for_each(std::begin(workload.inputs), std::end(workload.inputs),
                   [&](Tensor *input_tensor)
                   {
+                    std::cout << typeid(input_tensor->accessor()).name() << std::endl;
                       bool valid_input = (input_tensor != nullptr) && input_tensor->call_accessor();
                       is_valid         = is_valid && valid_input;
                   });
@@ -270,11 +271,13 @@ void call_all_tasks(ExecutionWorkload &workload)
 
 bool call_all_output_node_accessors(ExecutionWorkload &workload)
 {
-    std::cout << "Calling call_all_output_node_accessors" << std::endl;
+    std::cout << "Calling call_all_output_node_accessors   " ;
     bool is_valid = true;
     std::for_each(std::begin(workload.outputs), std::end(workload.outputs),
                   [&](Tensor *output_tensor)
                   {
+
+                    std::cout << typeid(output_tensor->accessor()).name() << std::endl;
                       bool valid_output = (output_tensor != nullptr) && output_tensor->call_accessor();
                       is_valid          = is_valid && valid_output;
                   });
