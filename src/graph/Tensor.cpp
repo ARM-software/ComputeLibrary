@@ -80,7 +80,8 @@ bool Tensor::call_accessor()
     {
         return false;
     }
-
+    std::cout << "Tensor Call Accessor" << std::endl;
+    std::cout << _desc.shape.total_size() << std::endl;
     const bool access_data = _accessor->access_tensor_data();
     
     if (access_data)
