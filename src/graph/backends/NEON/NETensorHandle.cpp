@@ -40,8 +40,6 @@ NETensorHandle::NETensorHandle(const ITensorInfo &info) : _tensor()
 
 void NETensorHandle::allocate()
 {
-    std::cout << "NETensorHandle  ";
-    std::cout << _tensor.info()->tensor_shape().total_size() << std::endl;
     _tensor.allocator()->allocate();
 }
 

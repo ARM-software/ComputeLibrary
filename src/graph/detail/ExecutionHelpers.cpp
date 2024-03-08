@@ -77,8 +77,10 @@ void allocate_all_input_tensors(INode &node)
         Tensor *tensor = node.input(i);
         if (tensor != nullptr && !tensor->bound_edges().empty())
         {
+            std::cout << "About to allocate input" <<std::endl;
             ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
             tensor->handle()->allocate();
+            std::cout << " Allocated " <<std::endl;
         }
     }
 }
@@ -90,12 +92,9 @@ void allocate_all_output_tensors(INode &node)
     for (unsigned int i = 0; i < node.num_outputs(); ++i)
     {
         Tensor *tensor = node.output(i);
-
-        std::cout << tensor << std::endl;
-        tensor->bound_edges().empty() ? std::cout << "empty" << std::endl : std::cout << "not empty" << std::endl;
         if (tensor != nullptr && !tensor->bound_edges().empty())
         {
-            std::cout << " about to allocate" <<std::endl;
+            std::cout << "About to allocate output" <<std::endl;
             ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
             tensor->handle()->allocate();
             std::cout << " Allocated " <<std::endl;
