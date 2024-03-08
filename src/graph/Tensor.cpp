@@ -89,7 +89,7 @@ bool Tensor::call_accessor()
     
     typeid(_accessor) == typeid(ITensorAccessor) ? std::cout << "Interface" << std::endl : std::cout << "Not Interface" << std::endl;
     typeid(_accessor) == typeid(_accessor) ? std::cout << "Test pass" << std::endl : std::cout << "test not pass" << std::endl;
-    typeid(_accessor) == typeid(TextAccessor) ? std::cout << "TextAccessor" << std::endl : std::cout << "Not TextAccessor" << std::endl;
+    std::cout << typeid(_accessor) << std::endl;
     
     if (access_data)
     {
