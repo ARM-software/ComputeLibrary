@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph/Tensor.h"
+#include <typeinfo>
 
 namespace arm_compute
 {
@@ -95,7 +96,8 @@ bool Tensor::call_accessor()
             return false;
         }
     }
-
+    std::cout << "From tensor: call_accessor" << std::endl;
+    std::cout << typeid(_accessor).name() << std::endl;
     // Call accessor
     bool retval = _accessor->access_tensor(_handle->tensor());
     if (access_data)
