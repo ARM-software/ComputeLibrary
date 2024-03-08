@@ -23,7 +23,6 @@
  */
 #include "arm_compute/graph/Tensor.h"
 #include <typeinfo>
-#include "utils/GraphUtils.cpp"
 #include "utils/GraphUtils.h"
 
 namespace arm_compute
