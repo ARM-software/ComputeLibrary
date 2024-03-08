@@ -23,6 +23,8 @@
  */
 #include "arm_compute/graph/Tensor.h"
 #include <typeinfo>
+#include "utils/GraphUtils.cpp"
+#include "utils/GraphUtils.h"
 
 namespace arm_compute
 {
@@ -86,7 +88,9 @@ bool Tensor::call_accessor()
     const bool access_data = _accessor->access_tensor_data();
     
     typeid(_accessor) == typeid(ITensorAccessor) ? std::cout << "Interface" << std::endl : std::cout << "Not Interface" << std::endl;
-
+    typeid(_accessor) == typeid(_accessor) ? std::cout << "Test pass" << std::endl : std::cout << "test not pass" << std::endl;
+    typeid(_accessor) == typeid(TextAccessor) ? std::cout << "TextAccessor" << std::endl : std::cout << "Not TextAccessor" << std::endl;
+    
     if (access_data)
     {
         // Map tensor
