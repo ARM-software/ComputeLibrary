@@ -131,13 +131,10 @@ void GraphManager::execute_graph(Graph &graph)
     
     std::cout << "total nodes: ";
     std::cout << it->second.graph->nodes().size() <<std::endl;
-    std::for_each(it->second.graph->nodes().begin(),it->second.graph->nodes().end(),
-        [&](std::unique_ptr<INode> node){std::cout<< node.get()->id() << std::endl;});
 
     std::cout << "total edges: ";
     std::cout << it->second.graph->edges().size() <<std::endl;
-    std::for_each(it->second.graph->edges().begin(),it->second.graph->edges().end(),
-        [&](std::unique_ptr<Edge> edge){std::cout<< edge.get()->id() << std::endl;});
+    
     while (true)
     {
         // Call input accessors
