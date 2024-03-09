@@ -128,7 +128,7 @@ void GraphManager::execute_graph(Graph &graph)
     // Check if graph is finalized
     auto it = _workloads.find(graph.id());
     ARM_COMPUTE_ERROR_ON_MSG(it == std::end(_workloads), "Graph is not registered!");
-
+    
     while (true)
     {
         // Call input accessors

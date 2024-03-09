@@ -216,14 +216,9 @@ void call_all_const_node_accessors(Graph &g)
 bool call_all_input_node_accessors(ExecutionWorkload &workload)
 {
     bool is_valid = true;
-    std::cout << "input size: ";
-    std::cout << workload.inputs.size() << std::endl;
-    std::cout << "output size: ";
-    std::cout << workload.outputs.size() << std::endl;
     std::for_each(std::begin(workload.inputs), std::end(workload.inputs),
                   [&](Tensor *input_tensor)
                   {
-                    std::cout << input_tensor->desc().shape.total_size() << std::endl;
                       bool valid_input = (input_tensor != nullptr) && input_tensor->call_accessor();
                       is_valid         = is_valid && valid_input;
                   });
@@ -275,8 +270,6 @@ bool call_all_output_node_accessors(ExecutionWorkload &workload)
     std::for_each(std::begin(workload.outputs), std::end(workload.outputs),
                   [&](Tensor *output_tensor)
                   {
-                    std::cout << "output ";
-                    std::cout << output_tensor->desc().shape.total_size() << std::endl;
                       bool valid_output = (output_tensor != nullptr) && output_tensor->call_accessor();
                       is_valid          = is_valid && valid_output;
                   });
