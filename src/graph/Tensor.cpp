@@ -82,7 +82,8 @@ bool Tensor::call_accessor()
     {
         return false;
     }
-    std::cout<< "calling " << std::endl;
+    std::cout<< "calling, total :";
+    std::cout<< _bound_edges.size() << std::endl;
     std::for_each(_bound_edges.begin(),_bound_edges.end(),
         [&](EdgeID id){std::cout<< id << std::endl;});
     const bool access_data = _accessor->access_tensor_data();
