@@ -216,6 +216,10 @@ void call_all_const_node_accessors(Graph &g)
 bool call_all_input_node_accessors(ExecutionWorkload &workload)
 {
     bool is_valid = true;
+    std::cout << "input size: ";
+    std::cout << workload.inputs.size() << std::endl;
+    std::cout << "output size: ";
+    std::cout << workload.outputs.size() << std::endl;
     std::for_each(std::begin(workload.inputs), std::end(workload.inputs),
                   [&](Tensor *input_tensor)
                   {
