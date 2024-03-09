@@ -271,6 +271,8 @@ bool call_all_output_node_accessors(ExecutionWorkload &workload)
     std::for_each(std::begin(workload.outputs), std::end(workload.outputs),
                   [&](Tensor *output_tensor)
                   {
+                    std::cout << "output ";
+                    std::cout << output_tensor->desc().shape.total_size() << std::endl;
                       bool valid_output = (output_tensor != nullptr) && output_tensor->call_accessor();
                       is_valid          = is_valid && valid_output;
                   });
