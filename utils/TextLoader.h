@@ -121,9 +121,10 @@ public:
         /* read input from text data feeder */
         try
         {
+            std::cout << "_length ";
             std::cout << _length <<std::endl;
             //c = _feeder->get_count();
-            std::cout << "Word conuts";
+            std::cout << "Word conuts ";
             std::cout << _feeder->get_count() <<std::endl;
         }
         catch (const std::ifstream::failure &e)
@@ -159,6 +160,8 @@ public:
         {
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(filename, std::ios::in | std::ios::binary);
+
+            std::tie(_length)  = parse_txt_header(_fs);
 
             _feeder = std::make_unique<FileTextFeeder>(_fs);
         }
