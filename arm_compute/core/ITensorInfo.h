@@ -235,6 +235,11 @@ public:
      * @return Colour format of the image
      */
     virtual Format format() const = 0;
+    /** Text format of the image
+     *
+     * @return Text format of the image
+     */
+    virtual TextFormat text_format() const = 0;
     /** Returns the total size of the tensor in bytes.
      *
      * @return Total size of the tensor in bytes.

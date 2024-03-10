@@ -281,6 +281,10 @@ public:
     {
         return _format;
     }
+    TextFormat text_format() const override
+    {
+        return _text_format;
+    }
     size_t total_size() const override
     {
         return _total_size;

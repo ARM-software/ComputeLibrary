@@ -26,6 +26,8 @@ public:
     virtual ~ITextDataFeeder() = default;
     /** Gets a character from an image feed */
     virtual uint8_t get() = 0;
+    /** Gets character count from the file*/
+    virtual uint8_t get_count() = 0;
     /** Feed a whole chuck to a destination pointer
      *
      * @param[out] dst      Destination pointer
@@ -48,6 +50,10 @@ public:
     uint8_t get() override
     {
         return _fs.get();
+    }
+    uint8_t get_count() override
+    {
+        return _fs.gcount();
     }
     void get_chuck(uint8_t *dst, size_t chuck_size) override
     {
@@ -116,7 +122,7 @@ public:
         try
         {
             std::cout << _length <<std::endl;
-            c = _feeder->get();
+            c = _feeder->get_count();
             std::cout << c <<std::endl;
         }
         catch (const std::ifstream::failure &e)
