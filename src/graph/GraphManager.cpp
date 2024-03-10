@@ -135,7 +135,7 @@ void GraphManager::execute_graph(Graph &graph)
      std::cout <<it->second.graph->nodes()[0].get()->id() <<std::endl;
      std::cout <<it->second.graph->nodes()[0].get()->type() <<std::endl;
      std::cout << it->second.graph->nodes()[1].get()->id() <<std::endl;
-     std::cout <<it->second.graph->nodes()[0].get()->type() <<std::endl;
+     std::cout <<it->second.graph->nodes()[1].get()->type() <<std::endl;
 
     std::cout << "total edges: ";
     std::cout << it->second.graph->edges().size() <<std::endl;
