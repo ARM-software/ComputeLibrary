@@ -61,7 +61,7 @@ ITensorHandle *Tensor::handle()
 void Tensor::set_accessor(std::unique_ptr<ITensorAccessor> accessor)
 {
     _accessor = std::move(accessor);
-    std::cout << "Set tensor accessor" ;
+    std::cout << "Set tensor accessor " ;
     std::cout << _accessor.get() << std::endl;
 }
 
@@ -82,7 +82,8 @@ bool Tensor::call_accessor()
     {
         return false;
     }
-
+    std::cout << _accessor.get();
+    std::cout << " Got called " << std::endl;
     const bool access_data = _accessor->access_tensor_data();
     
     if (access_data)
