@@ -123,7 +123,8 @@ public:
         {
             std::cout << _length <<std::endl;
             c = _feeder->get_count();
-            std::cout << c <<std::endl;
+            std::cout << "Word conuts";
+            std::cout << _feeder->get_count() <<std::endl;
         }
         catch (const std::ifstream::failure &e)
         {
