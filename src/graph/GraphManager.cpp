@@ -154,11 +154,9 @@ void GraphManager::execute_graph(Graph &graph)
         {
             return;
         }
-        std::cout << " After Calling Input" << std::endl;
+        
         // Run graph
         detail::call_all_tasks(it->second);
-
-        std::cout << " After Calling Task" << std::endl;
 
         // Call output accessors
         if (!detail::call_all_output_node_accessors(it->second))
@@ -166,7 +164,6 @@ void GraphManager::execute_graph(Graph &graph)
             return;
         }
 
-        std::cout << " After Calling Output" << std::endl;
     }
 }
 
