@@ -111,7 +111,8 @@ public:
 
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params)).set_name("in1")
-              << OutputLayer(get_output_accessor(common_params)).set_name("out1");
+              << OutputLayer(get_output_accessor(common_params)).set_name("out1") 
+              << InputLayer(input_descriptor, get_input_accessor(common_params)).set_name("in2");
             //<< TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),get_weights_accessor(data_path,"data/npy/token_embedding.npy"));
 
         // Decode Input
