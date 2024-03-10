@@ -176,6 +176,11 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->format();
     }
+    TextFormat text_format() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _parent->text_format();
+    }
     size_t total_size() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
