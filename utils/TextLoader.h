@@ -97,7 +97,6 @@ public:
         // Use the size of the input text
         TensorInfo text_info(_length, format);
         text.allocator()->init(text_info);
-        std::cout << "Textloader init text" <<std::endl;
     }
     /** Fill an text tensor with the content of the currently open text file.
      *
@@ -116,6 +115,7 @@ public:
         /* read input from text data feeder */
         try
         {
+            std::cout << _length <<std::endl;
             c = _feeder->get();
             std::cout << c <<std::endl;
         }
@@ -147,16 +147,13 @@ public:
     }
     void open(const std::string &filename) override
     {
-        std::cout << "open start" <<std::endl;
         ARM_COMPUTE_ERROR_ON(is_open());
         try
         {
-            std::cout << "opening" <<std::endl;
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(filename, std::ios::in | std::ios::binary);
 
             _feeder = std::make_unique<FileTextFeeder>(_fs);
-            std::cout << "open end" <<std::endl;
         }
         catch (std::runtime_error &e)
         {
