@@ -140,6 +140,13 @@ void GraphManager::execute_graph(Graph &graph)
     std::cout << "total edges: ";
     std::cout << it->second.graph->edges().size() <<std::endl;
 
+
+    std::cout << "input number: ";
+    std::cout << it->second.inputs.size() <<std::endl;
+
+    std::cout << "output number: ";
+    std::cout << it->second.outputs.size() <<std::endl;
+
     while (true)
     {
         // Call input accessors

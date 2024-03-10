@@ -221,6 +221,8 @@ bool call_all_input_node_accessors(ExecutionWorkload &workload)
                   {
                       bool valid_input = (input_tensor != nullptr) && input_tensor->call_accessor();
                       is_valid         = is_valid && valid_input;
+                      std::cout << " call_all_input_node:  " ;
+                      std::cout << is_valid <<std::endl;
                   });
     return is_valid;
 }
@@ -272,6 +274,8 @@ bool call_all_output_node_accessors(ExecutionWorkload &workload)
                   {
                       bool valid_output = (output_tensor != nullptr) && output_tensor->call_accessor();
                       is_valid          = is_valid && valid_output;
+                      std::cout << " call_all_input_node:  " ;
+                      std::cout << is_valid <<std::endl;
                   });
 
     sync_backends();
