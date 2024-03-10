@@ -278,7 +278,6 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
 
         // Open image file
         image_loader->open(_filename);
-        std::cout << "image accessor opened " << std::endl;
         // Get permutated shape and permutation parameters
         TensorShape                    permuted_shape = tensor.info()->tensor_shape();
         arm_compute::PermutationVector perm;
