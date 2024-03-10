@@ -62,7 +62,7 @@ void Tensor::set_accessor(std::unique_ptr<ITensorAccessor> accessor)
 {
     _accessor = std::move(accessor);
     std::cout << "Set tensor accessor" ;
-    std::cout << accessor.get() << std::endl;
+    std::cout << _accessor.get() << std::endl;
 }
 
 ITensorAccessor *Tensor::accessor()
