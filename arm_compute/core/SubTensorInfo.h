@@ -96,6 +96,12 @@ public:
         _parent->set_format(format);
         return *this;
     };
+    ITensorInfo &set_text_format(TextFormat format) override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->set_text_format(format);
+        return *this;
+    };
     ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
     ITensorInfo &set_tensor_dims_state(const TensorDimsState &state) override;
     ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override
