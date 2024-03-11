@@ -109,8 +109,11 @@ public:
         // Set graph hints
         graph << common_params.target << common_params.fast_math_hint;
 
+        // Text preprocessor
+        std::unique_ptr<IPreprocessor> preproccessor = std::make_unique<WordPiecePreprocessor>();
+
         // Encode Input
-        graph << InputLayer(input_descriptor, get_input_accessor(common_params)).set_name("in1")
+        graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))).set_name("in1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu4")
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             //<< TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),get_weights_accessor(data_path,"data/npy/token_embedding.npy"));

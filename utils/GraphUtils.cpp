@@ -102,6 +102,11 @@ void TFPreproccessor::preprocess_typed(ITensor &tensor)
                         });
 }
 
+void WordPiecePreprocessor::preprocess(ITensor &tensor)
+{
+    std::cout << tensor.info()->tensor_shape() << std::endl;
+}
+
 CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, float scale)
     : _mean(mean), _bgr(bgr), _scale(scale)
 {

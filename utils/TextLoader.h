@@ -121,8 +121,6 @@ public:
         /* read input from text data feeder */
         try
         {
-            std::cout << "_length ";
-            std::cout << _length <<std::endl;
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
             Iterator out(&text,window);
@@ -132,11 +130,11 @@ public:
                 [&](const Coordinates &)
                 {
                     c = _feeder->get();
-                    std::cout << c << std::endl;
                     *out.ptr() = c;
                 },
                 out
             );
+            
         }
         catch (const std::ifstream::failure &e)
         {
