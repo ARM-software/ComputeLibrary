@@ -108,7 +108,10 @@ WordPiecePreprocessor::WordPiecePreprocessor()
 
 void WordPiecePreprocessor::preprocess(ITensor &tensor)
 {
+
     std::cout << tensor.info()->tensor_shape() << std::endl;
+    std::cout << "data type";
+    std::cout << tensor.info()->data_type() << std::endl;
 }
 
 CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, float scale)
