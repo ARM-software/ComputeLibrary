@@ -102,6 +102,10 @@ void TFPreproccessor::preprocess_typed(ITensor &tensor)
                         });
 }
 
+WordPiecePreprocessor::WordPiecePreprocessor()
+{
+}
+
 void WordPiecePreprocessor::preprocess(ITensor &tensor)
 {
     std::cout << tensor.info()->tensor_shape() << std::endl;
