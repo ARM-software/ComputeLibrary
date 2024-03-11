@@ -108,13 +108,39 @@ WordPiecePreprocessor::WordPiecePreprocessor()
 
 void WordPiecePreprocessor::preprocess(ITensor &tensor)
 {
+    if (tensor.info()->data_type() == DataType::F32)
+    {
+        preprocess_typed<float>(tensor);
+    }
+    else if (tensor.info()->data_type() == DataType::F16)
+    {
+        preprocess_typed<half>(tensor);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+    }
+}
+
+template <typename T>
+void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
+{
     std::cout << "tensor shape ";
     std::cout << tensor.info()->tensor_shape() << std::endl;
     std::cout << "dimeson(0) ";
     std::cout << tensor.info()->dimension(0) << std::endl;
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
+
+    Window window;
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+    execute_window_loop(window,
+                        [&](const Coordinates id){
+                            std::cout << tensor.ptr_to_element(id);
+                        })
 }
+
 
 CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, float scale)
     : _mean(mean), _bgr(bgr), _scale(scale)

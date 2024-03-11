@@ -66,7 +66,8 @@ public:
     WordPiecePreprocessor();
     void preprocess(ITensor &tensor) override;
 private:
-
+    template <typename T>
+    void preprocess_typed(ITensor &tensor);
 };
 
 /** Caffe preproccessor */
