@@ -65,6 +65,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info) : TensorInfo()
     _dims_state                    = info.tensor_dims_state();
     _data_type                     = info.data_type();
     _format                        = info.format();
+    _text_format                   = info.text_format();
     _is_resizable                  = info.is_resizable();
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
@@ -85,6 +86,7 @@ TensorInfo::TensorInfo(const TensorInfo &info) : TensorInfo()
     _dims_state                    = info.tensor_dims_state();
     _data_type                     = info.data_type();
     _format                        = info.format();
+    _text_format                   = info.text_format();
     _is_resizable                  = info.is_resizable();
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
@@ -394,6 +396,14 @@ ITensorInfo &TensorInfo::set_format(Format format)
         ARM_COMPUTE_ERROR_ON(num_channels_from_format(format) != _num_channels);
         ARM_COMPUTE_ERROR_ON(data_type_from_format(format) != _data_type);
     }
+    return *this;
+}
+
+
+ITensorInfo &TensorInfo::set_text_format(TextFormat text_format)
+{
+    _text_format = text_format;
+
     return *this;
 }
 

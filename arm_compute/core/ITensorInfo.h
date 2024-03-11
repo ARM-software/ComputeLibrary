@@ -99,6 +99,15 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_format(Format format) = 0;
+    /** Set the format of an already initialized tensor.
+     *
+     * @note For future text encoding purpose
+     *
+     * @param[in] text_format Text format of the tensor.
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_text_format(TextFormat text_format) = 0;
     /** Set the shape of an already initialized tensor.
      *
      * @warning Changing the shape requires to recompute the strides and is
