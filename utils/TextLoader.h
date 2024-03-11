@@ -133,6 +133,7 @@ public:
                 {
                     c = _feeder->get();
                     std::cout << c << std::endl;
+                    *out.ptr() = c;
                 },
                 out
             );
