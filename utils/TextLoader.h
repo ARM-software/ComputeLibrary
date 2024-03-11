@@ -133,8 +133,9 @@ public:
                 {
                     c = _feeder->get();
                     std::cout << c << std::endl;
-                }
-            )
+                },
+                out
+            );
         }
         catch (const std::ifstream::failure &e)
         {
