@@ -116,16 +116,25 @@ public:
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&text, TextFormat::UTF8);
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
 
-        //unsigned char c = 0;
+        unsigned char c = 0;
 
         /* read input from text data feeder */
         try
         {
             std::cout << "_length ";
             std::cout << _length <<std::endl;
-            //c = _feeder->get_count();
-            std::cout << "Word conuts ";
-            std::cout << _feeder->get_count() <<std::endl;
+            Window window;
+            window.set(Window::DimX, Window::Dimension(0,_length,1));
+            Iterator out(&text,window);
+
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    c = _feeder->get();
+                    std::cout << c << std::endl;
+                }
+            )
         }
         catch (const std::ifstream::failure &e)
         {
