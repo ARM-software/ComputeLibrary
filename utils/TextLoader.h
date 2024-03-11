@@ -100,8 +100,6 @@ public:
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(format != TextFormat::UTF8);
 
-        _length = text.info()->dimension(0);
-        
         // Use the size of the input text
         TensorInfo text_info(_length, format);
         text.allocator()->init(text_info);
@@ -170,6 +168,8 @@ public:
         {
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(filename, std::ios::in | std::ios::binary);
+
+            std::tie(_length)  = parse_txt_header(_fs);
 
             _feeder = std::make_unique<FileTextFeeder>(_fs);
         }

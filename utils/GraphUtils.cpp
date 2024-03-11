@@ -110,6 +110,8 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
 {
     std::cout << "tensor shape ";
     std::cout << tensor.info()->tensor_shape() << std::endl;
+    std::cout << "dimeson(0) ";
+    std::cout << tensor.info()->dimension(0) << std::endl;
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 }
@@ -339,8 +341,6 @@ bool TextAccessor::access_tensor(ITensor &tensor)
     {
         auto textloader = utils::TextLoaderFactory::create(_filename);
         ARM_COMPUTE_EXIT_ON_MSG(textloader == nullptr, "Unsupported Text type");
-
-        textloader->init_text(tensor,tensor.info()->text_format());
 
         // Open a text feeder from file (ifstream)
         textloader->open(_filename);
