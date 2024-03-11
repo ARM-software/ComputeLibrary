@@ -138,7 +138,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << tensor.ptr_to_element(id);
-                        })
+                        });
 }
 
 
