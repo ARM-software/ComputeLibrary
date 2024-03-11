@@ -112,6 +112,8 @@ public:
     void fill_text(T &text)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
+        std::cout << "fill text dim ";
+        std::cout << text.info()->dimension(0) << std::endl;
         ARM_COMPUTE_ERROR_ON(text.info()->dimension(0) != _length );
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&text, TextFormat::UTF8);
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
