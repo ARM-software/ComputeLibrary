@@ -278,7 +278,6 @@ bool SaveNumPyAccessor::access_tensor(ITensor &tensor)
 ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
     : _already_loaded(false), _filename(std::move(filename)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
-    std::cout << "image accessor created " << std::endl;
 }
 
 bool ImageAccessor::access_tensor(ITensor &tensor)
@@ -340,6 +339,8 @@ bool TextAccessor::access_tensor(ITensor &tensor)
     {
         auto textloader = utils::TextLoaderFactory::create(_filename);
         ARM_COMPUTE_EXIT_ON_MSG(textloader == nullptr, "Unsupported Text type");
+
+        textloader->init_text(tensor,tensor.info()->text_format());
 
         // Open a text feeder from file (ifstream)
         textloader->open(_filename);
