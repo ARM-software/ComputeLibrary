@@ -121,8 +121,6 @@ public:
         /* read input from text data feeder */
         try
         {
-            std::cout << " Textloader, _length: ";
-            std::cout << _length << std::endl;
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
             Iterator out(&text,window);
