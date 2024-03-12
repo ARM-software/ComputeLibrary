@@ -199,15 +199,14 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     buffer.append(divide_helper);
     buffer.append(end_token);
-    std::cout <<buffer[21] <<std::endl;
+    std::cout <<buffer <<std::endl;
     /** Write back */
     /** Read in */
     int i(0);
     execute_window_loop(window,
                         [&](const Coordinates id){
                             i++;
-                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]]; //Using dimesion x
-                            std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                            std::cout <<buffer[id[0]]<<std::endl;
                         });
                         std::cout<< i <<std::endl;
 
