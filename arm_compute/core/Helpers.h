@@ -300,9 +300,9 @@ inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
  *
  * @return the n-th element
  */
-template <typename... Ts>
-decltype(auto) get_nth_elm(int i, Ts&&... ts) {
-  return std::get<0>(std::forward_as_tuple(ts...));
+template <int I, typename... Ts>
+decltype(auto) get_nth_elm(Ts&&... ts) {
+  return std::get<I>(std::forward_as_tuple(ts...));
 }
 
 /** Unpack the parameter pack into tuple
