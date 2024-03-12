@@ -137,9 +137,9 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 
-    const T pad_token[6]   = reinterpret_cast<T*>("[PAD]");
-    const T start_token[6] = reinterpret_cast<T*>("[CLS]");
-    const T end_token[6]   = reinterpret_cast<T*>("[SEP]");
+    const T const pad_token[6]   = reinterpret_cast<T*>("[PAD]");
+    const T const start_token[6] = reinterpret_cast<T*>("[CLS]");
+    const T const end_token[6]   = reinterpret_cast<T*>("[SEP]");
 
     //T* const buffer = pad_token;
 
