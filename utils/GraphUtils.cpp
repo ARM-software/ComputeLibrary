@@ -194,7 +194,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     /** Read in */
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                             buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
 
@@ -203,9 +202,11 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     /** Write back */
     /** Read in */
+    int i(0);
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]];
+                            i++;
+                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]]; //Using dimesion x
                             std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
 
