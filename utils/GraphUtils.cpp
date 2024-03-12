@@ -113,7 +113,7 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         //const char32_t pad_token[] =   U"[PAD]";
         //const char32_t start_token[] = U"[CLS]";
         //const char32_t end_token[] =   U"[SEP]";
-        preprocess_typed<char32_t,float16_t>(tensor,1.0);
+        preprocess_typed<char32_t,float16_t,float16_t>(tensor,1.0,2.0);
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
@@ -143,7 +143,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
-    auto token = get_nth_elm(0,tokens...);
+    auto token = get_nth_elm<0>(tokens...);
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << tensor.ptr_to_element(id);
