@@ -114,13 +114,16 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         const char pad_token[]          = u8"[PAD]";
         const char start_token[]        = u8"[CLS]";
         const char end_token[]          = u8"[SEP]";
-        preprocess_typed<char,const char *,const char *>(tensor,std::move(pad_token),
-                                                                std::move(start_token),
-                                                                std::move(end_token));
+        const char divide_helper        = u8' ';
+        preprocess_typed<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
+                                                                    std::move(start_token),
+                                                                    std::move(end_token),
+                                                                    std::move(&divide_helper));
         /*
         const char32_t pad_token[]      = U"[PAD]";
         const char32_t start_token[]    = U"[CLS]";
         const char32_t end_token[]      = U"[SEP]";
+        char divide_helper              = U8' ';
         preprocess_typed<char32_t,const char32_t *,const char32_t *>(tensor,std::move(pad_token),
                                                                             std::move(start_token),
                                                                             std::move(end_token));
@@ -131,13 +134,16 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         const char pad_token[]          = u8"[PAD]";
         const char start_token[]        = u8"[CLS]";
         const char end_token[]          = u8"[SEP]";
-        preprocess_typed<char,const char *,const char *>(tensor,std::move(pad_token),
-                                                                std::move(start_token),
-                                                                std::move(end_token));
+        const char divide_helper        = u8' ';
+        preprocess_typed<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
+                                                                    std::move(start_token),
+                                                                    std::move(end_token),
+                                                                    std::move(&divide_helper));
         /*
         const char16_t pad_token[]      = u"[PAD]";
         const char16_t start_token[]    = u"[CLS]";
         const char16_t end_token[]      = u"[SEP]";
+        char divide_helper              = u' ';
         preprocess_typed<char16_t,const char16_t *,const char16_t *>(tensor,std::move(pad_token),
                                                                             std::move(start_token),
                                                                             std::move(end_token));
@@ -148,9 +154,11 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         const char pad_token[]          = u8"[PAD]";
         const char start_token[]        = u8"[CLS]";
         const char end_token[]          = u8"[SEP]";
-        preprocess_typed<char,const char *,const char *>(tensor,std::move(pad_token),
-                                                                std::move(start_token),
-                                                                std::move(end_token));
+        const char divide_helper        = u8' ';
+        preprocess_typed<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
+                                                                    std::move(start_token),
+                                                                    std::move(end_token),
+                                                                    std::move(&divide_helper));
     }
     else
     {
@@ -172,17 +180,21 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
+
+    //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
     const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
+    const T divide_helper   = reinterpret_cast<const T >(get_nth_elm<3>(tokens...));
 
     std::basic_string<T> buffer;
     buffer.append(start_token);
+    buffer+=divide_helper;
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                             buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
-    
+    buffer+=divide_helper;
     buffer.append(end_token);
     std::cout << buffer;
 }
