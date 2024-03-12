@@ -145,6 +145,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << tensor.ptr_to_element(id);
+                            std::cout << sizeof...(tokens);
                         });
 }
 
