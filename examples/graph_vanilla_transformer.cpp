@@ -98,7 +98,7 @@ public:
        //const auto operation_layout = common_params.data_layout;
 
        // Create input tensor
-       const TensorShape src_tensor = TensorShape(13U+6U+6U+2U);
+       const TensorShape src_tensor = TensorShape(13U);
 
        // Maybe permute input data layout to target operation layout  
 
