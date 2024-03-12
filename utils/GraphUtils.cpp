@@ -205,7 +205,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     /** Read in */
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id];
+                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]];
                             std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
 
