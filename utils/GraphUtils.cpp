@@ -148,7 +148,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     const T * token = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
-    std::cout << (T)*(token);
+    std::cout << (char)*(token);
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << tensor.ptr_to_element(id);
