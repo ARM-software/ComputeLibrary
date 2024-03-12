@@ -117,11 +117,11 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
-        preprocess_typed<char16_t>(tensor);
+        preprocess_typed<char16_t,float16_t,float16_t>(tensor,1.0,2.0);
     }
     else if (tensor.info()->data_type() == DataType::U8)
     {
-        preprocess_typed<char>(tensor);
+        preprocess_typed<char,float16_t,float16_t>(tensor,1.0,2.0);
     }
     else
     {
