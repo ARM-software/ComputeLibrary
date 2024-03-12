@@ -172,7 +172,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
-    const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
     const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
 
@@ -180,8 +179,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer.append(start_token);
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            std::cout << *reinterpret_cast<const T *>(tensor.ptr_to_element(id));
-                            buffer.append(*reinterpret_cast<const T *>(tensor.ptr_to_element(id)))
+                            std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                            buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
     
     buffer.append(end_token);
