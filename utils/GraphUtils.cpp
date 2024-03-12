@@ -155,6 +155,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     std::string buffer;
     buffer+=start_token;
+    buffer+=pad_token;
+    buffer+=end_token;
     std::cout << string;
     execute_window_loop(window,
                         [&](const Coordinates id){
