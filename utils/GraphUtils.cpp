@@ -198,8 +198,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
                         });
 
     std::cout <<buffer <<std::endl;
-    buffer.append(divide_helper);
-    buffer.append(end_token);
+    buffer+=divide_helper;
+    buffer+=end_token;
     std::cout <<buffer <<std::endl;
     /** Write back */
     /** Read in */
