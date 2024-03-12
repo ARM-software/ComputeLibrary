@@ -137,17 +137,17 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 
-    const T pad_token[6]    {"[PAD]"};
-    const T start_token[6]  {"[CLS]"};
-    const T end_token[6]    {"[SEP]"};
+    const T pad_token[6]   = {"[PAD]"};
+    const T start_token[6] = {"[CLS]"};
+    const T end_token[6]   = {"[SEP]"};
 
-    T* const buffer = pad_token;
+    //T* const buffer = pad_token;
 
     std::cout << pad_token[1] <<std::endl;
     std::cout << start_token[1] <<std::endl;
     std::cout << end_token[1] <<std::endl;
 
-    std::cout << buffer[1] <<std::endl;
+    //std::cout << buffer[1] <<std::endl;
     
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
@@ -155,7 +155,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << reinterpret_cast<T *>(tensor.ptr_to_element(id));
-                            tensor.copy_from()
                         });
 }
 
