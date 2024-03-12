@@ -137,11 +137,17 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 
-    const std::basic_string<T> pad_token{"[PAD]"};
-    const std::basic_string<T> start_token{"[CLS]"};
-    const std::basic_string<T> end_token{"[SEP]"};
+    const T pad_token[6]    {"[PAD]"};
+    const T start_token[6]  {"[CLS]"};
+    const T end_token[6]    {"[SEP]"};
 
-    std::basic_string<T> buffer_str = pad_token;
+    T* const buffer = pad_token;
+
+    std::cout << pad_token[1] <<std::endl;
+    std::cout << start_token[1] <<std::endl;
+    std::cout << end_token[1] <<std::endl;
+
+    std::cout << buffer[1] <<std::endl;
     
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
