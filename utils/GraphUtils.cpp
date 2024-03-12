@@ -160,9 +160,9 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
 
     std::string buffer;
-    buffer+=start_token;
-    buffer+=pad_token;
-    buffer+=end_token;
+    buffer.append(start_token);
+    buffer.append(pad_token);
+    buffer.append(end_token);
     std::cout << string;
     execute_window_loop(window,
                         [&](const Coordinates id){
