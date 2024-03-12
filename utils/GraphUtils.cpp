@@ -209,6 +209,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
                             *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]]; //Using dimesion x
                             std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
+                        std::cout<< i <<std::endl;
 
 }
 
