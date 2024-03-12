@@ -292,11 +292,6 @@ inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
     }
     return coords;
 }
-} // namespace arm_compute
-
-#include "arm_compute/core/Helpers.inl"
-#endif /*ARM_COMPUTE_HELPERS_H */
-
 
 /** Get n-th element of the parameter pack
  *
@@ -309,3 +304,8 @@ template <int I, typename... Ts>
 decltype(auto) get_nth_elm(Ts&&... ts) {
   return std::get<I>(std::forward_as_tuple(ts...));
 }
+
+} // namespace arm_compute
+
+#include "arm_compute/core/Helpers.inl"
+#endif /*ARM_COMPUTE_HELPERS_H */
