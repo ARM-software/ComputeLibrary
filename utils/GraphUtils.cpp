@@ -110,11 +110,15 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
 {
     if (tensor.info()->data_type() == DataType::F32)
     {
-        preprocess_typed<float>(tensor);
+        preprocess_typed<char32_t>(tensor);
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
-        preprocess_typed<half>(tensor);
+        preprocess_typed<char16_t>(tensor);
+    }
+    else if (tensor.info()->data_type() == DataType::U8)
+    {
+        preprocess_typed<char>(tensor);
     }
     else
     {
@@ -132,12 +136,19 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 
+    const std::basic_string<T> pad_token{"[PAD]"};
+    const std::basic_string<T> start_token{"[CLS]"};
+    const std::basic_string<T> end_token{"[SEP]"};
+
+    std::basic_string<T> buffer_str = pad_token;
+    
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            std::cout << tensor.ptr_to_element(id);
+                            std::cout << reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                            tensor.copy_from()
                         });
 }
 

@@ -84,7 +84,8 @@ Vanilla_Transformer
          |                          |-> TextAccessor
          |                          |-> get_input_accessor : add txt reader
          |                          |-> WordPiecePreprocessor: constructor, preprcessor, preprocessor_typed     
-         |                              TODO: Currenting read file in using unsigned char, but processing using F32
+         |                              TODO: Currenting read file in using unsigned char, but processing using F32.
+         |                                      Datatype mismatch.
          |
          |
          |------------------> utils/TextLoader.h
