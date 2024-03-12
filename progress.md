@@ -86,7 +86,8 @@ Vanilla_Transformer
          |                          |-> WordPiecePreprocessor: constructor, preprcessor, preprocessor_typed     
          |                              TODO: Currenting read file in using unsigned char, but processing using F32.
          |                                      Datatype mismatch.
-         |                              TODO: Implement maximum input length(throughout), and implement padding
+         |                              TODO: Implement maximum input length(throughout), and implement padding. 
+         |                                  Currently manual add space.
          |
          |
          |------------------> utils/TextLoader.h
