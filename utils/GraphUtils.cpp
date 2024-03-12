@@ -129,7 +129,7 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     }
 }
 
-template <typename... Args>
+template <typename T, typename... Args>
 void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 {
     std::cout << "tensor shape ";
@@ -139,12 +139,15 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 
+    T pad_token;
+
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << tensor.ptr_to_element(id);
+                            pad_token  = tensor.ptr_to_element(id);
                         });
 }
 
