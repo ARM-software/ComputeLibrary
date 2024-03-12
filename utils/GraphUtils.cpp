@@ -147,11 +147,11 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
-    const T * token = get_nth_elm<0>(tokens...);
+    const T token[] = get_nth_elm<0>(tokens...);
     execute_window_loop(window,
                         [&](const Coordinates id){
                             std::cout << tensor.ptr_to_element(id);
-                            std::cout << *token;
+                            std::cout << token;
                         });
 }
 
