@@ -110,7 +110,10 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
 {
     if (tensor.info()->data_type() == DataType::F32)
     {
-        preprocess_typed<char32_t>(tensor);
+        const char32_t pad_token[] =   U"[PAD]";
+        const char32_t start_token[] = U"[CLS]";
+        const char32_t end_token[] =   U"[SEP]";
+        preprocess_typed<char32_t,const char32_t*>(tensor,std::move(pad_token));
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
@@ -126,8 +129,8 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     }
 }
 
-template <typename T>
-void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
+template <typename T, typename... Args>
+void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 {
     std::cout << "tensor shape ";
     std::cout << tensor.info()->tensor_shape() << std::endl;
@@ -135,10 +138,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     std::cout << tensor.info()->dimension(0) << std::endl;
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
-
-    const T pad_token[] = "[PAD]";
-    const T start_token[] = "[CLS]";
-    const T end_token[] = "[SEP]";
 
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
