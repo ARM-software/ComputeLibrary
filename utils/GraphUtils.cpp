@@ -186,7 +186,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
     const T * divide_helper = reinterpret_cast<const T *>(get_nth_elm<3>(tokens...));
 
-    int buffer_size(0);
     std::basic_string<T> buffer;
 
     buffer.append(start_token);
@@ -206,7 +205,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     /** Read in */
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[i];
+                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id];
                             std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
 
