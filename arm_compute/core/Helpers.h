@@ -293,6 +293,18 @@ inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
     return coords;
 }
 
+/** Get n-th element of the parameter pack
+ *
+ * @param[in] i Element index
+ * @param[in] Ts Target parameter pack
+ *
+ * @return the n-th element
+ */
+template <int I, typename... Ts>
+decltype(auto) get_nth_elm(Ts&&... ts) {
+  return std::get<I>(std::forward_as_tuple(ts...));
+}
+
 /** Unpack the parameter pack into tuple
  *
  * @param[in] Ts Target parameter pack
