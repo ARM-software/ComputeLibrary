@@ -1,0 +1,143 @@
+///
+/// Copyright (c) 2017-2021 Arm Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/** @page implementation_topic Implementation Topics
+
+@section implementation_topic_windows Windows
+
+A @ref Window represents a workload to execute, it can handle up to @ref Coordinates::num_max_dimensions dimensions.
+Each dimension is defined by a start, end and step.
+
+It can split into subwindows as long as *all* the following rules remain true for all the dimensions:
+
+- max[n].start() <= sub[n].start() < max[n].end()
+- sub[n].start() < sub[n].end() <= max[n].end()
+- max[n].step() == sub[n].step()
+- (sub[n].start() - max[n].start()) % max[n].step() == 0
+- (sub[n].end() - sub[n].start()) % max[n].step() == 0
+
+@section implementation_topic_kernels Kernels
+
+Each implementation of the @ref IKernel interface (base class of all the kernels in the core library) works in the same way:
+
+OpenCL kernels:
+
+@code{.cpp}
+// Initialize the CLScheduler with the default context and default command queue
+// Implicitly initializes the CLKernelLibrary to use ./cl_kernels as location for OpenCL kernels files and sets a default device for which OpenCL programs are built.
+CLScheduler::get().default_init();
+
+cl::CommandQueue q = CLScheduler::get().queue();
+//Create a kernel object:
+MyKernel kernel;
+// Initialize the kernel with the input/output and options you want to use:
+kernel.configure( input, output, option0, option1);
+// Retrieve the execution window of the kernel:
+const Window& max_window = kernel.window();
+// Run the whole kernel in the current thread:
+kernel.run( q, max_window ); // Enqueue the kernel to process the full window on the default queue
+
+// Wait for the processing to complete:
+q.finish();
+@endcode
+
+Neon / CPP kernels:
+
+@code{.cpp}
+//Create a kernel object:
+MyKernel kernel;
+// Initialize the kernel with the input/output and options you want to use:
+kernel.configure( input, output, option0, option1);
+// Retrieve the execution window of the kernel:
+const Window& max_window = kernel.window();
+// Run the whole kernel in the current thread:
+kernel.run( max_window ); // Run the kernel on the full window
+@endcode
+
+@section implementation_topic_multithreading Multi-threading
+
+The previous section shows how to run a Arm® Neon™ / CPP kernel in the current thread, however if your system has several CPU cores, you will probably want the kernel to use several cores. Here is how this can be done:
+
+@code{.cpp}
+    ThreadInfo info;
+    info.cpu_info = &_cpu_info;
+
+    const Window      &max_window     = kernel->window();
+    const unsigned int num_iterations = max_window.num_iterations(split_dimension);
+    info.num_threads                  = std::min(num_iterations, _num_threads);
+
+    if(num_iterations == 0)
+    {
+        return;
+    }
+
+    if(!kernel->is_parallelisable() || info.num_threads == 1)
+    {
+        kernel->run(max_window, info);
+    }
+    else
+    {
+        int  t         = 0;
+        auto thread_it = _threads.begin();
+
+        for(; t < info.num_threads - 1; ++t, ++thread_it)
+        {
+            Window win     = max_window.split_window(split_dimension, t, info.num_threads);
+            info.thread_id = t;
+            thread_it->start(kernel, win, info);
+        }
+
+        // Run last part on main thread
+        Window win     = max_window.split_window(split_dimension, t, info.num_threads);
+        info.thread_id = t;
+        kernel->run(win, info);
+
+        try
+        {
+            for(auto &thread : _threads)
+            {
+                thread.wait();
+            }
+        }
+        catch(const std::system_error &e)
+        {
+            std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
+        }
+    }
+@endcode
+
+This is a very basic implementation which was originally used in the Arm® Neon™ runtime library by all the Arm® Neon™ functions.
+
+@sa CPPScheduler
+
+@note Some kernels need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and a unique thread_id between 0 and num_threads must be assigned to the @ref ThreadInfo object passed to the ```run``` function.
+
+
+@section implementation_topic_cl_scheduler OpenCL kernel library
+
+All OpenCL kernels used by the library are built and stored in @ref CLKernelLibrary.
+If the library is compiled with embed_kernels=0 the application can set the path to the OpenCL kernels by calling @ref CLKernelLibrary::init(), by default the path is set to "./cl_kernels"
+*/
+} // namespace arm_compute

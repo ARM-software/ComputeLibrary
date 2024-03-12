@@ -1,0 +1,149 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2017-2023 Arm Limited.
+#
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+import SCons
+import os.path
+
+Import('env')
+Import('install_bin')
+
+examples_env = env.Clone()
+
+examples_env.Append(CPPPATH = ["#"])
+
+# Build examples
+utils = examples_env.Object("../utils/Utils.cpp")
+
+if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+    Import('arm_compute_graph_a')
+    Import('arm_compute_a')
+    arm_compute_libs = [ arm_compute_a ]
+    arm_compute_graph_libs = arm_compute_libs # The graph library needs to be linked separately with --whole-archive
+    arm_compute_dependency = arm_compute_a
+    graph_dependency = [arm_compute_graph_a]
+else:
+    Import('arm_compute_graph_so')
+    Import('arm_compute_so')
+    arm_compute_libs = ["arm_compute"]
+    arm_compute_graph_libs = [ "arm_compute_graph" ] + arm_compute_libs
+    arm_compute_dependency = arm_compute_so
+    graph_dependency = [arm_compute_graph_so]
+
+extra_link_flags = []
+if env['os'] != 'bare_metal':
+    extra_link_flags += ['-fstack-protector-strong']
+
+load_whole_archive = '-Wl,--whole-archive'
+noload_whole_archive = '-Wl,--no-whole-archive'
+if 'macos' in examples_env['os']:
+    load_whole_archive = '-Wl,-force_load'
+    noload_whole_archive = ''
+
+# Build graph examples
+graph_utils = examples_env.Object("../utils/GraphUtils.cpp")
+graph_utils += examples_env.Object("../utils/CommonGraphOptions.cpp")
+examples_libs = examples_env.get("LIBS",[])
+for file in Glob("./graph_*.cpp"):
+    example = os.path.basename(os.path.splitext(str(file))[0])
+    prog = None
+    if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags)
+        Depends(prog, graph_dependency)
+        prog = install_bin(prog)
+    else:
+        #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+        Depends(prog, graph_dependency)
+        prog = install_bin(prog)
+    alias = examples_env.Alias(example, prog)
+    Default(alias)
+
+if env['opencl'] and env['neon']:
+    examples_env.Append(CPPDEFINES = ['ARM_COMPUTE_CL'])
+    for file in Glob("./neoncl_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = examples_libs + arm_compute_libs)
+        Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)
+
+if env['opencl']:
+    examples_env.Append(CPPDEFINES = ['ARM_COMPUTE_CL'])
+    for file in Glob("./cl_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = examples_libs + arm_compute_libs)
+        Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)
+
+if env['gemm_tuner'] and env['opencl']:
+    gemm_tuner_common_options = examples_env.Object("./gemm_tuner/CommonGemmExampleOptions.cpp")
+    for file in Glob("./gemm_tuner/cl_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+        example = os.path.join("gemm_tuner", example)
+        if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils, gemm_tuner_common_options],  LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive, '-fstack-protector-strong'] )
+            Depends(prog, graph_dependency)
+            prog = install_bin(prog)
+        else:
+            #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils, gemm_tuner_common_options],  LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+            Depends(prog, graph_dependency)
+            prog = install_bin(prog)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)
+
+if env['neon']:
+    for file in Glob("./neon_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+
+        prog = None
+        if env['os'] in ['bare_metal']:
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LINKFLAGS=examples_env["LINKFLAGS"], LIBS = examples_libs + arm_compute_libs)
+        else:
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = examples_libs + arm_compute_libs)
+
+        Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)
+
+if env['external_tests_dir']:
+    for file in Glob(env['external_tests_dir'] + "/examples/graph_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+        prog = None
+
+        if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+            prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags)
+            Depends(prog, graph_dependency)
+            prog = install_bin(prog)
+        else:
+            #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
+            prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+            Depends(prog, graph_dependency)
+            prog = install_bin(prog)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)

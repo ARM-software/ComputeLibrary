@@ -1,0 +1,197 @@
+/*
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
+
+#include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/StringUtils.h"
+
+#include "src/core/CL/CLValidate.h"
+#include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "support/StringSupport.h"
+
+using namespace arm_compute::misc::shape_calculator;
+
+namespace arm_compute
+{
+namespace
+{
+Status validate_arguments(const ITensorInfo         *input,
+                          const ITensorInfo         *rois,
+                          ITensorInfo               *output,
+                          const ROIPoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
+    ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC, DataLayout::NCHW);
+    ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
+
+    if (output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(compute_roi_align_shape(*input, *rois, pool_info),
+                                                           output->tensor_shape());
+    }
+
+    if (is_data_type_quantized_asymmetric(input->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(rois, 1, DataType::QASYMM16);
+
+        const UniformQuantizationInfo rois_qinfo = rois->quantization_info().uniform();
+        ARM_COMPUTE_RETURN_ERROR_ON(rois_qinfo.scale != 0.125f);
+        ARM_COMPUTE_RETURN_ERROR_ON(rois_qinfo.offset != 0);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, rois);
+    }
+    return Status{};
+}
+
+} // namespace
+
+CLROIAlignLayerKernel::CLROIAlignLayerKernel()
+    : _input(nullptr), _output(nullptr), _rois(nullptr), _pool_info(0, 0, 0.f)
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
+void CLROIAlignLayerKernel::configure(const ICLTensor           *input,
+                                      const ICLTensor           *rois,
+                                      ICLTensor                 *output,
+                                      const ROIPoolingLayerInfo &pool_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
+}
+
+void CLROIAlignLayerKernel::configure(const CLCompileContext    &compile_context,
+                                      const ICLTensor           *input,
+                                      const ICLTensor           *rois,
+                                      ICLTensor                 *output,
+                                      const ROIPoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));
+
+    // Output auto inizialitation if not yet initialized
+    const TensorShape output_shape = compute_roi_align_shape(*input->info(), *rois->info(), pool_info);
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    output->info()->set_data_layout(input->info()->data_layout());
+
+    auto padding_info = get_padding_info({input, rois, output});
+
+    _input     = input;
+    _output    = output;
+    _rois      = rois;
+    _pool_info = pool_info;
+
+    const DataType data_type = input->info()->data_type();
+    const bool     is_qasymm = is_data_type_quantized_asymmetric(data_type);
+
+    // Set build options
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DMAX_DIM_X=" +
+                          support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(
+                              input->info()->data_layout(), DataLayoutDimension::WIDTH))));
+    build_opts.add_option("-DMAX_DIM_Y=" +
+                          support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(
+                              input->info()->data_layout(), DataLayoutDimension::HEIGHT))));
+    build_opts.add_option("-DMAX_DIM_Z=" +
+                          support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(
+                              input->info()->data_layout(), DataLayoutDimension::CHANNEL))));
+    build_opts.add_option("-DPOOLED_DIM_X=" + support::cpp11::to_string(pool_info.pooled_width()));
+    build_opts.add_option("-DPOOLED_DIM_Y=" + support::cpp11::to_string(pool_info.pooled_height()));
+    build_opts.add_option("-DSPATIAL_SCALE=" + float_to_string_with_full_precision(pool_info.spatial_scale()));
+    build_opts.add_option_if(input->info()->data_layout() == DataLayout::NHWC, "-DNHWC");
+    build_opts.add_option_if(pool_info.sampling_ratio() > 0,
+                             "-DSAMPLING_RATIO=" + support::cpp11::to_string(pool_info.sampling_ratio()));
+
+    if (is_qasymm)
+    {
+        const UniformQuantizationInfo iq_info    = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo roisq_info = rois->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info    = output->info()->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN=" + float_to_string_with_full_precision(iq_info.offset));
+        build_opts.add_option("-DSCALE_IN=" + float_to_string_with_full_precision(iq_info.scale));
+        build_opts.add_option("-DOFFSET_ROIS=" + float_to_string_with_full_precision(roisq_info.offset));
+        build_opts.add_option("-DSCALE_ROIS=" + float_to_string_with_full_precision(roisq_info.scale));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oq_info.scale));
+    }
+
+    // Create kernel
+    const std::string kernel_name = (is_qasymm) ? "roi_align_layer_quantized" : "roi_align_layer";
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts.options());
+
+    // Configure kernel window
+    Window win = calculate_max_window(*output->info(), Steps());
+    ICLKernel::configure_internal(win);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
+}
+
+Status CLROIAlignLayerKernel::validate(const ITensorInfo         *input,
+                                       const ITensorInfo         *rois,
+                                       ITensorInfo               *output,
+                                       const ROIPoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, rois, output, pool_info));
+    return Status{};
+}
+
+void CLROIAlignLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+
+    Window slice      = window.first_slice_window_3D();
+    Window slice_rois = slice;
+    // Parallelize spatially and across the fourth dimension of the output tensor (also across ROITensor)
+    slice_rois.set_dimension_step(Window::DimX, _rois->info()->dimension(0));
+    slice.set(get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::CHANNEL), window[3]);
+
+    // Set arguments
+    unsigned int idx = 0;
+    add_3D_tensor_argument(idx, _input, slice);
+    add_2D_tensor_argument(idx, _rois, slice_rois);
+    add_3D_tensor_argument(idx, _output, slice);
+    add_argument<cl_uint>(idx, _input->info()->strides_in_bytes()[3]);
+    add_argument<cl_uint>(idx, _output->info()->strides_in_bytes()[3]);
+
+    enqueue(queue, *this, slice, lws_hint());
+}
+} // namespace arm_compute
