@@ -184,7 +184,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
     const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
-    const T * divide_helper   = reinterpret_cast<const T >(get_nth_elm<3>(tokens...));
+    const T * divide_helper = reinterpret_cast<const T *>(get_nth_elm<3>(tokens...));
 
     std::basic_string<T> buffer;
     buffer.append(start_token);
