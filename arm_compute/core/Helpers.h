@@ -302,8 +302,7 @@ inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
  */
 template <int I, typename... Ts>
 decltype(auto) get_nth_elm(Ts&&... ts) {
-    auto t = std::make_tuple(1, "Foo", 3.14);
-  return std::get<I>(t);
+  return std::get<I>(std::forward_as_tuple(ts...));
 }
 
 } // namespace arm_compute
