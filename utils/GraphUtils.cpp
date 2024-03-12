@@ -114,11 +114,11 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         const char pad_token[]          = u8"[PAD]";
         const char start_token[]        = u8"[CLS]";
         const char end_token[]          = u8"[SEP]";
-        const char divide_helper        = u8' ';
+        const char divide_helper[]      = u8" ";
         preprocess_typed<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
                                                                     std::move(start_token),
                                                                     std::move(end_token),
-                                                                    std::move(&divide_helper));
+                                                                    std::move(divide_helper));
         /*
         const char32_t pad_token[]      = U"[PAD]";
         const char32_t start_token[]    = U"[CLS]";
@@ -134,11 +134,11 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         const char pad_token[]          = u8"[PAD]";
         const char start_token[]        = u8"[CLS]";
         const char end_token[]          = u8"[SEP]";
-        const char divide_helper        = u8' ';
+        const char divide_helper[]      = u8" ";
         preprocess_typed<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
                                                                     std::move(start_token),
                                                                     std::move(end_token),
-                                                                    std::move(&divide_helper));
+                                                                    std::move(divide_helper));
         /*
         const char16_t pad_token[]      = u"[PAD]";
         const char16_t start_token[]    = u"[CLS]";
@@ -154,11 +154,11 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         const char pad_token[]          = u8"[PAD]";
         const char start_token[]        = u8"[CLS]";
         const char end_token[]          = u8"[SEP]";
-        const char divide_helper        = u8' ';
+        const char divide_helper[]      = u8" ";
         preprocess_typed<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
                                                                     std::move(start_token),
                                                                     std::move(end_token),
-                                                                    std::move(&divide_helper));
+                                                                    std::move(divide_helper));
     }
     else
     {
