@@ -113,7 +113,7 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
         const char32_t pad_token[] =   U"[PAD]";
         const char32_t start_token[] = U"[CLS]";
         //const char32_t end_token[] =   U"[SEP]";
-        preprocess_typed<char32_t,const char32_t *,const char32_t *>(tensor,pad_token,start_token);
+        preprocess_typed<char32_t,const char32_t *,const char32_t *>(tensor,std::move(pad_token),std::move(start_token));
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
