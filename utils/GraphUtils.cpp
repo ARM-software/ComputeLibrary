@@ -39,7 +39,6 @@
 #include <inttypes.h>
 #include <iomanip>
 #include <limits>
-#include <string>
 
 using namespace arm_compute::graph_utils;
 
@@ -137,24 +136,19 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor)
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 
-    const T pad_token[6]    {reinterpret_cast<const T>("[PAD]")};
-    const T start_token[6]  {reinterpret_cast<const T>("[CLS]")};
-    const T end_token[6]    {reinterpret_cast<const T>("[SEP]")};
+    const std::basic_string<T> pad_token{"[PAD]"};
+    const std::basic_string<T> start_token{"[CLS]"};
+    const std::basic_string<T> end_token{"[SEP]"};
 
-    //T* const buffer = pad_token;
-
-    std::cout << pad_token[1] <<std::endl;
-    std::cout << start_token[1] <<std::endl;
-    std::cout << end_token[1] <<std::endl;
-
-    //std::cout << buffer[1] <<std::endl;
+    std::basic_string<T> buffer_str = pad_token;
     
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            std::cout << reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                            std::cout << tensor.ptr_to_element(id);
+                            tensor.copy_from()
                         });
 }
 
