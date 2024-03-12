@@ -117,11 +117,15 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
-        preprocess_typed<char16_t,float16_t,float16_t>(tensor,1.0,2.0);
+        const char16_t pad_token[] =   u"[PAD]";
+        const char16_t start_token[] = u"[CLS]";
+        preprocess_typed<char16_t,const char16_t *,const char16_t *>(tensor,std::move(pad_token),std::move(start_token));
     }
     else if (tensor.info()->data_type() == DataType::U8)
     {
-        preprocess_typed<char,float16_t,float16_t>(tensor,1.0,2.0);
+        const char pad_token[] =   u8"[PAD]";
+        const char start_token[] = u8"[CLS]";
+        preprocess_typed<char,const char *,const char *>(tensor,std::move(pad_token),std::move(start_token));
     }
     else
     {
