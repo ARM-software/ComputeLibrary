@@ -155,9 +155,9 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
-    const char * pad_token     = reinterpret_cast<const char *>(get_nth_elm<0>(tokens...));
-    const char * start_token   = reinterpret_cast<const char *>(get_nth_elm<1>(tokens...));
-    const char * end_token     = reinterpret_cast<const char *>(get_nth_elm<2>(tokens...));
+    const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
+    const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
+    const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
 
     std::string buffer;
     buffer.append(start_token);
