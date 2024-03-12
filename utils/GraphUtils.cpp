@@ -110,21 +110,21 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
 {
     if (tensor.info()->data_type() == DataType::F32)
     {
-        const char pad_token[]          = u8"[PAD]";
-        const char start_token[]        = u8"[CLS]";
-        const char end_token[]          = u8"[SEP]";
-        preprocess_typed<char,const char *,const char *>(tensor,std::move(pad_token),
-                                                                std::move(start_token),
-                                                                std::move(end_token));
+        const char32_t pad_token[]      = U"[PAD]";
+        const char32_t start_token[]    = U"[CLS]";
+        const char32_t end_token[]      = U"[SEP]";
+        preprocess_typed<char32_t,const char32_t *,const char32_t *>(tensor,std::move(pad_token),
+                                                                            std::move(start_token),
+                                                                            std::move(end_token));
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
-        const char pad_token[]          = u8"[PAD]";
-        const char start_token[]        = u8"[CLS]";
-        const char end_token[]          = u8"[SEP]";
-        preprocess_typed<char,const char *,const char *>(tensor,std::move(pad_token),
-                                                                std::move(start_token),
-                                                                std::move(end_token));
+        const char16_t pad_token[]      = u"[PAD]";
+        const char16_t start_token[]    = u"[CLS]";
+        const char16_t end_token[]      = u"[SEP]";
+        preprocess_typed<char16_t,const char16_t *,const char16_t *>(tensor,std::move(pad_token),
+                                                                            std::move(start_token),
+                                                                            std::move(end_token));
     }
     else if (tensor.info()->data_type() == DataType::U8)
     {
@@ -155,9 +155,9 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
-    const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
-    const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
-    const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
+    const char * pad_token     = reinterpret_cast<const char *>(get_nth_elm<0>(tokens...));
+    const char * start_token   = reinterpret_cast<const char *>(get_nth_elm<1>(tokens...));
+    const char * end_token     = reinterpret_cast<const char *>(get_nth_elm<2>(tokens...));
 
     std::string buffer;
     buffer.append(start_token);
