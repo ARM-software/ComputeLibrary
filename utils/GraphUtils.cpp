@@ -129,7 +129,7 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     }
 }
 
-template <typename T, typename... Args>
+template <typename... Args>
 void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 {
     std::cout << "tensor shape ";
