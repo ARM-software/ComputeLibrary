@@ -300,9 +300,10 @@ inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
  *
  * @return the n-th element
  */
-template <typename... Ts>
+template <int I, typename... Ts>
 decltype(auto) get_nth_elm(Ts&&... ts) {
-  return std::get<0>(std::forward_as_tuple(ts...));
+    auto t = std::make_tuple(1, "Foo", 3.14);
+  return std::get<I>(t);
 }
 
 } // namespace arm_compute
