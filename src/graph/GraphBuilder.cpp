@@ -850,7 +850,10 @@ NodeID GraphBuilder::add_tkemb_node(Graph &g,
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
     // Create weights node
-    TensorDescriptor w_desc = TokenEmbeddingLayerNode::compute_weights_descriptor(input_tensor_desc, tkemb_info);
+    TensorDescriptor w_desc = input_tensor_desc;
+    // Reshape tensor to store weight with d_model depth.
+    w_desc.shape = TensorShape(input_tensor_desc.shape.x(),tkemb_info.d_model());
+
     NodeID           w_nid  = add_const_node_with_name(g, params, "token_weights", w_desc, std::move(weights_accessor));
 
     // Create token embedding node and connect

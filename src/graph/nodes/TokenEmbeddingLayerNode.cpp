@@ -21,21 +21,22 @@ TokenEmbeddingLayerInfo TokenEmbeddingLayerNode::token_embedding_info() const
 }
 
 TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                   TokenEmbeddingLayerInfo info)
+                                                                   TokenEmbeddingLayerInfo tkemb_info)
 {
     TensorDescriptor output_descriptor = input_descriptor;
-    const unsigned int seq_len  = info.d_model();
+    const unsigned int seq_len  = tkemb_info.d_model();
     output_descriptor.shape.set(1,seq_len);
     return output_descriptor;
 }
 
 TensorDescriptor TokenEmbeddingLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,
-                                                                    TokenEmbeddingLayerInfo info)
+                                                                    TokenEmbeddingLayerInfo tkemb_info)
 {
     TensorDescriptor weight_descriptor = input_descriptor;
-    if(info.d_model()!=512)std::cout << "768" << std::endl;
-    std::cout << "TokenEmbeddingLayerNode::compute_weights_descriptor" << std::endl;
-    std::cout << input_descriptor.shape.x() << std::endl;
+    
+    // Reshape tensor to store weight with d_model depth.
+    weight_descriptor.shape = TensorShape(input_descriptor.shape.x(),tkemb_info.d_model());
+
     return weight_descriptor;
 }
 

@@ -21,6 +21,7 @@ Vanilla_Transformer
 |- Nodes ------------------> arm_compute/graph/nodes/nodes.h: Include all nodes 
 |        |
 |        | ----------------> arm_compute/graph/nodes/TokenEmbeddingLayerNode.h
+|        |                                     |     |-> compute_weights_descriptor: CAN BE DELETED
 |        |                                     |--> /PositionalEncodingNode.h
 |        |                                     |--> /MultiHeadAttentionNode.h
 |        |                                     |--> /ScaleDotProductionAttentionNode.h
@@ -29,6 +30,7 @@ Vanilla_Transformer
 |        |
 |        |
 |        |-----------------> src/graph/nodes/TokenEmbeddingNode.cpp
+|                                      |     |-> compute_weights_descriptor: CAN BE DELETED    
 |                                      |--> /PositionalEncodingNode.cpp
 |                                      |--> /MultiHeadAttentionNode.cpp
 |                                      |--> /ScaleDotProductionAttentionNode.cpp

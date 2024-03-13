@@ -319,6 +319,8 @@ void NumPyAccessor::access_numpy_tensor(ITensor &tensor, T tolerance)
 
 bool NumPyAccessor::access_tensor(ITensor &tensor)
 {
+
+    std::cout << "NumPy Accessor called" << std::endl;
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON(_npy_tensor.info()->dimension(0) != tensor.info()->dimension(0));
 
@@ -417,13 +419,10 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
 TextAccessor::TextAccessor(std::string filename, std::unique_ptr<IPreprocessor> preprocessor)
     : _already_loaded(false), _filename(std::move(filename)), _preprocessor(std::move(preprocessor))
 {
-    std::cout << "text accessor created " << std::endl;
 }
 
 bool TextAccessor::access_tensor(ITensor &tensor)
 {
-    std::cout << "text accessor called" << std::endl;
-    std::cout << _already_loaded <<std::endl;
     if (!_already_loaded)
     {
         auto textloader = utils::TextLoaderFactory::create(_filename);
