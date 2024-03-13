@@ -16,7 +16,7 @@ public:
      * 
      * @param[in] TokenEmbeddingLayerInfo Token embedding layer information
      */
-    TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info);
+    TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info, ITensorAccessorUPtr weights = nullptr);
     /** Token embedding Info Accessor
      * 
      * @return Token embedding Info
@@ -38,6 +38,7 @@ public:
 
 private:
     TokenEmbeddingLayerInfo _info;
+    ITensorAccessorUPtr     _weights;
 };
 } // namespace graph
 } // namespace arm_compute
