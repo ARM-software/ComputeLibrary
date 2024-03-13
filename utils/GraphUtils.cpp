@@ -179,7 +179,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     Window window;
     window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0)-5U-5U-2U,1));
-    window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
 
     //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
