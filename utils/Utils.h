@@ -330,7 +330,6 @@ public:
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _file_layout = file_layout;
 
-            std::cout << "NPYLoader::open" <<std::endl;
             npy::header_t header = parse_npy_header(_fs);
             _shape               = header.shape;
             _fortran_order       = header.fortran_order;
@@ -395,7 +394,6 @@ public:
                                               arm_compute::DataType::F32, arm_compute::DataType::F16);
         try
         {
-            std::cout << "NPYLoader::fill_tensor" <<std::endl;
             // Map buffer if creating a CLTensor
             map(tensor, true);
 
@@ -469,6 +467,9 @@ public:
                 ARM_COMPUTE_ERROR_ON_MSG(permuted_shape[i] != _shape[i], "Tensor dimensions mismatch");
             }
 
+            
+            std::cout << "NPYLoader::fill_tensor" <<std::endl;
+            std::cout << tensor.info()->data_type() <<std::endl;
             switch (tensor.info()->data_type())
             {
                 case arm_compute::DataType::QASYMM8:
