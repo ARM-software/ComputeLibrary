@@ -177,9 +177,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     std::cout << "data type ";
     std::cout << tensor.info()->data_type() << std::endl;
 
-    Window window;
-    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0)-5U-5U-2U,1));
-
+    
 
     //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
     const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
@@ -192,7 +190,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer+=divide_helper;
 
     /** Read in */
-    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+    Window window;
+    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0)-5U-5U-2U,1)); // Padding offset
     execute_window_loop(window,
                         [&](const Coordinates id){
                             buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
@@ -202,6 +201,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer+=end_token;
 
     /** Write back */
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,
                         [&](const Coordinates id){
                             *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]]; //Using dimesion x
