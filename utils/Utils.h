@@ -483,7 +483,7 @@ public:
                     {
                         // If tensor has no padding read directly from stream.
                         _fs.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
-                        std::cout << *(reinterpret_cast<float *>(tensor.buffer())[1]) <<std::endl;
+                        std::cout << reinterpret_cast<float *>(tensor.buffer())[1] <<std::endl;
                     }
                     else
                     {
