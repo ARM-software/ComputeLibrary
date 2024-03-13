@@ -48,6 +48,7 @@ namespace utils
  * --fast-math        : Toggle option to enable the fast math option.
  * --data             : Path that contains the trainable parameter files of graph layers.
  * --image            : Image to load and operate on. Image types supported: PPM, JPEG, NPY.
+ * --text             : Text to load and operate on. Text types supported: TXT.
  * --labels           : File that contains the labels that classify upon.
  * --validation-file  : File that contains a list of image names with their corresponding label id (e.g. image0.jpg 5).
  *                      This is used to run the graph over a number of images and report top-1 and top-5 metrics.

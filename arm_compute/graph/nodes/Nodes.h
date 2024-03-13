@@ -67,5 +67,6 @@
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
 #include "arm_compute/graph/nodes/StackLayerNode.h"
 #include "arm_compute/graph/nodes/StridedSliceLayerNode.h"
+#include "arm_compute/graph/nodes/TokenEmbeddingLayerNode.h"
 
 #endif // ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H

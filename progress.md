@@ -18,7 +18,9 @@ Vanilla_Transformer
 |                                              |-> add_tkemb_node
 |
 |
-|- Nodes ------------------> arm_compute/graph/nodes/TokenEmbeddingLayerNode.h
+|- Nodes ------------------> arm_compute/graph/nodes/nodes.h: Include all nodes 
+|        |
+|        | ----------------> arm_compute/graph/nodes/TokenEmbeddingLayerNode.h
 |        |                                     |--> /PositionalEncodingNode.h
 |        |                                     |--> /MultiHeadAttentionNode.h
 |        |                                     |--> /ScaleDotProductionAttentionNode.h

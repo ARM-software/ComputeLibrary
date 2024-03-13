@@ -10,6 +10,7 @@ namespace graph
 {
 TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info) : _info(std::move(info))
 {
+    std::cout << "Token embedding created " << std::endl;
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }

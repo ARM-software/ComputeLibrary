@@ -114,6 +114,7 @@ public:
 
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))).set_name("in1")
+              << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(768),get_weights_accessor(data_path, "/token_embedding.npy")).set_name("tkemb1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu4")
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             //<< TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),get_weights_accessor(data_path,"data/npy/token_embedding.npy"));

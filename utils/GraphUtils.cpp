@@ -190,7 +190,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     buffer+=divide_helper;
     buffer+=end_token;
-
+    
     /** Write back */
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,

@@ -836,16 +836,16 @@ NodeID GraphBuilder::add_stack_node(Graph &g, NodeParams params, const std::vect
     return create_simple_multiple_input_single_output_node<StackLayerNode>(g, params, inputs, inputs.size(), axis);
 }
 
-/*
+
 NodeID GraphBuilder::add_tkemb_node(Graph &g,
                                  NodeParams params, 
                                  NodeIdxPair input, 
                                  TokenEmbeddingLayerInfo tkemb_info,
                                  ITensorAccessorUPtr     weights = nullptr)
 {
-    return create_simple_single_input_output_node<DummyNode>(g, params, input);
+    return create_simple_single_input_output_node<TokenEmbeddingLayerNode>(g, params, input, tkemb_info,weights);
 }
-*/
+
 NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info)
 {
     check_nodeidx_pair(input, g);
