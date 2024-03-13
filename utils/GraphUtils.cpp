@@ -189,7 +189,9 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     std::basic_string<T> buffer;
 
     buffer+=start_token;
+    std::cout <<buffer.size() << std::endl;
     buffer+=divide_helper;
+    std::cout <<buffer.size() << std::endl;
 
     /** Read in */
     execute_window_loop(window,
@@ -198,7 +200,9 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
                         });
 
     buffer+=divide_helper;
+    std::cout <<buffer.size() << std::endl;
     buffer+=end_token;
+    std::cout <<buffer.size() << std::endl;
 
     /** Write back */
     execute_window_loop(window,
