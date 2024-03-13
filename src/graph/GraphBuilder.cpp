@@ -841,9 +841,27 @@ NodeID GraphBuilder::add_tkemb_node(Graph &g,
                                     NodeParams params, 
                                     NodeIdxPair input, 
                                     TokenEmbeddingLayerInfo tkemb_info,
-                                    ITensorAccessorUPtr     weights)
+                                    ITensorAccessorUPtr     weights_accessor)
 {
-    return create_simple_single_input_output_node<TokenEmbeddingLayerNode>(g, params, input, tkemb_info);
+    check_nodeidx_pair(input, g);
+    ARM_COMPUTE_ERROR_ON(num_outputs == 0);
+
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+
+    // Create weights node
+    TensorDescriptor w_desc = TokenEmbeddingLayerNode::compute_weights_descriptor(input_tensor_desc, tkemb_info);
+    NodeID           w_nid  = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
+
+
+    // Create token embedding node and connect
+    NodeID t_nid = g.add_node<TokenEmbeddingLayerNode>(tkemb_info);
+    g.add_connection(input.node_id, input.index, t_nid, 0);
+    g.add_connection(w_nid, 0, t_nid, 1);
+
+    set_node_params(g, t_nid, params);
+
+    return t_nid;
 }
 
 NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info)

@@ -29,6 +29,14 @@ TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const Tensor
     return output_descriptor;
 }
 
+TensorDescriptor TokenEmbeddingLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,
+                                                                    TokenEmbeddingLayerInfo fc_info)
+{
+    TensorDescriptor weight_descriptor = input_descriptor;
+    std::cout << "TokenEmbeddingLayerNode::compute_weights_descriptor" << std::endl;
+    return weight_descriptor;
+}
+
 bool TokenEmbeddingLayerNode::forward_descriptors()
 {
     if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))

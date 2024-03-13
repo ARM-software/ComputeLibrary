@@ -29,6 +29,15 @@ public:
      * @return Output descriptor
      */
     static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, TokenEmbeddingLayerInfo info);
+    /** Computes weights descriptor
+     *
+     * @param[in] input_descriptor   Input descriptor
+     * @param[in] info            (Optional) Additional information about the fully connected layer
+     *
+     * @return Weights descriptor
+     */
+    static TensorDescriptor compute_weights_descriptor(const TensorDescriptor &input_descriptor,
+                                                       TokenEmbeddingLayerInfo fc_info = TokenEmbeddingLayerInfo());
 
     // Inherited overridden methods:
     NodeType         type() const override;
