@@ -14,9 +14,10 @@ class TokenEmbeddingLayerNode final : public INode
 public:
     /** Constructor 
      * 
-     * @param[in] TokenEmbeddingLayerInfo Token embedding layer information
+     * @param[in] info Token embedding layer information
+     * @param[in] weights Token embedding layer weight accessor
      */
-    TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info, ITensorAccessorUPtr weights = nullptr);
+    TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info, ITensorAccessorUPtr weights);
     /** Token embedding Info Accessor
      * 
      * @return Token embedding Info
