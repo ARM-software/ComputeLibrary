@@ -395,6 +395,7 @@ public:
                                               arm_compute::DataType::F32, arm_compute::DataType::F16);
         try
         {
+            std::cout << "NPYLoader::fill_tensor" <<std::endl;
             // Map buffer if creating a CLTensor
             map(tensor, true);
 
