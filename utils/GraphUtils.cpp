@@ -178,6 +178,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     std::cout << tensor.info()->data_type() << std::endl;
 
     Window window;
+    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0)-5U-5U-2U,1));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
 
@@ -188,8 +189,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     std::basic_string<T> buffer;
 
-    buffer.append(start_token);
-    buffer.append(divide_helper);
+    buffer+=start_token;
+    buffer+=divide_helper;
 
     /** Read in */
     execute_window_loop(window,
