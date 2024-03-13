@@ -1263,8 +1263,8 @@ public:
      *
      * @param[in] d_model   Model dimesion
      */
-    TokenEmbeddingLayerInfo(unsigned int d_model = 512)
-        : _d_model(d_model)
+    TokenEmbeddingLayerInfo(unsigned int d_model = 512U, unsigned int d_vocab = 30522U)
+        : _d_model(d_model), _d_vocab(d_vocab)
     {
     }
 
@@ -1273,9 +1273,16 @@ public:
     {
         return _d_model;
     }
+
+    /* Get vocabulary size */
+    unsigned int d_vocab() const
+    {
+        return _d_vocab;
+    }
     
 private:
     unsigned int _d_model;
+    unsigned int _d_vocab;
 };
 
 /** Positional Encoding Layer Information Class */

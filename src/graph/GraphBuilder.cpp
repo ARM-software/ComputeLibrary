@@ -851,8 +851,8 @@ NodeID GraphBuilder::add_tkemb_node(Graph &g,
 
     // Create weights node
     TensorDescriptor w_desc = input_tensor_desc;
-    // Reshape tensor to store weight with d_model depth.
-    w_desc.shape = TensorShape(input_tensor_desc.shape.x(),tkemb_info.d_model());
+    // Reshape tensor to store weight with size of vocabulary and depth of d_model.
+    w_desc.shape = TensorShape(tkemb_info.d_vocab(),tkemb_info.d_model());
 
     NodeID           w_nid  = add_const_node_with_name(g, params, "token_weights", w_desc, std::move(weights_accessor));
 

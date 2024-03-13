@@ -29,17 +29,6 @@ TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const Tensor
     return output_descriptor;
 }
 
-TensorDescriptor TokenEmbeddingLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,
-                                                                    TokenEmbeddingLayerInfo tkemb_info)
-{
-    TensorDescriptor weight_descriptor = input_descriptor;
-    
-    // Reshape tensor to store weight with d_model depth.
-    weight_descriptor.shape = TensorShape(input_descriptor.shape.x(),tkemb_info.d_model());
-
-    return weight_descriptor;
-}
-
 bool TokenEmbeddingLayerNode::forward_descriptors()
 {
     if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))

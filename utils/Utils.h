@@ -469,6 +469,7 @@ public:
 
             
             std::cout << "NPYLoader::fill_tensor" <<std::endl;
+            std::cout << tensor.info()->tensor_shape().total_size() << std::endl;
             switch (tensor.info()->data_type())
             {
                 case arm_compute::DataType::QASYMM8:
@@ -480,9 +481,9 @@ public:
                     if (!are_layouts_different && !_fortran_order && tensor.info()->padding().empty() &&
                         !enable_f32_to_f16_conversion)
                     {
-                        std::cout << "NPYLoader::fill_tensor:   No Padding" <<std::endl;
                         // If tensor has no padding read directly from stream.
                         _fs.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
+                        std::cout << reinterpret_cast<char *>(tensor.buffer()) <<std::endl;
                     }
                     else
                     {

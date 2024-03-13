@@ -81,18 +81,19 @@ public:
                     bias. Default: ``True``.
         */
        // Model parameters
-       constexpr unsigned int d_model   = 768U;     // Dim layer output 
-       /*constexpr unsigned int h         = 8U;       // Parallel attention (Heads)
-       constexpr unsigned int d_ff      = 2024U;    // Dim feedforward
-       constexpr unsigned int d_q       = 64U;      // Dim query, 512U/8U
-       constexpr unsigned int d_k       = 64U;      // Dim key, 512U/8U
-       constexpr unsigned int d_v       = 64U;      // Dim value, 512U/8U
-       constexpr float        P_drop    = 0.1f;     // Dropout rate
+       constexpr unsigned int d_model       = 768U;     // Dim layer output 
+       constexpr unsigned int vocab_size    = 30522U; // Vocaboary size
+       /*constexpr unsigned int h           = 8U;       // Parallel attention (Heads)
+       constexpr unsigned int d_ff          = 2024U;    // Dim feedforward
+       constexpr unsigned int d_q           = 64U;      // Dim query, 512U/8U
+       constexpr unsigned int d_k           = 64U;      // Dim key, 512U/8U
+       constexpr unsigned int d_v           = 64U;      // Dim value, 512U/8U
+       constexpr float        P_drop        = 0.1f;     // Dropout rate
 
        
-       constexpr unsigned int seq_src   = 25000U;   // Input token sequence
-       constexpr unsigned int seq_tgt   = 25000U;   // Output token sequence.
-       constexpr unsigned int bs        = 1U;       // Batch size*/
+       constexpr unsigned int seq_src       = 25000U;   // Input token sequence
+       constexpr unsigned int seq_tgt       = 25000U;   // Output token sequence.
+       constexpr unsigned int bs            = 1U;       // Batch size*/
 
        // Compute library best operate on NHWC(default) layout
        //const auto operation_layout = common_params.data_layout;
