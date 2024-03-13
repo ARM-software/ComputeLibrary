@@ -82,7 +82,7 @@ public:
         */
        // Model parameters
        constexpr unsigned int d_model       = 768U;     // Dim layer output 
-       constexpr unsigned int vocab_size    = 30522U; // Vocaboary size
+       constexpr unsigned int d_vocab       = 30522U; // Vocaboary size
        /*constexpr unsigned int h           = 8U;       // Parallel attention (Heads)
        constexpr unsigned int d_ff          = 2024U;    // Dim feedforward
        constexpr unsigned int d_q           = 64U;      // Dim query, 512U/8U
@@ -115,7 +115,7 @@ public:
 
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))).set_name("in1")
-              << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),get_weights_accessor(data_path, "/token_embedding.npy")).set_name("tkemb1")
+              << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),get_weights_accessor(data_path, "/token_embedding.npy")).set_name("tkemb1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu4")
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             //<< TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model),get_weights_accessor(data_path,"data/npy/token_embedding.npy"));
