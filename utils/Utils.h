@@ -548,6 +548,8 @@ public:
         {
             ARM_COMPUTE_ERROR_VAR("Loading NPY file: %s", e.what());
         }
+        
+        std::cout << "NPYLoader::fill_tensor:   Finished" <<std::endl;
     }
 
 private:
