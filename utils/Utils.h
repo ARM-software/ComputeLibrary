@@ -330,6 +330,7 @@ public:
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _file_layout = file_layout;
 
+            std::cout << "NPYLoader::open" <<std::endl;
             npy::header_t header = parse_npy_header(_fs);
             _shape               = header.shape;
             _fortran_order       = header.fortran_order;

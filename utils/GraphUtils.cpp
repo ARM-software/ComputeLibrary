@@ -265,7 +265,6 @@ bool PPMWriter::access_tensor(ITensor &tensor)
 
 DummyAccessor::DummyAccessor(unsigned int maximum) : _iterator(0), _maximum(maximum)
 {
-    std::cout << "Dummy created " <<std::endl;
 }
 
 bool DummyAccessor::access_tensor_data()
