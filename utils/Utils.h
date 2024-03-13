@@ -468,8 +468,8 @@ public:
             }
 
             
-            std::cout << "NPYLoader::fill_tensor" <<std::endl;
-            std::cout << tensor.info()->data_type() <<std::endl;
+            std::cout << "NPYLoader::fill_tensor, enable_f32_to_f16_conversion" <<std::endl;
+            std::cout << enable_f32_to_f16_conversion <<std::endl;
             switch (tensor.info()->data_type())
             {
                 case arm_compute::DataType::QASYMM8:
