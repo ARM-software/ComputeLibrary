@@ -30,9 +30,10 @@ TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const Tensor
 }
 
 TensorDescriptor TokenEmbeddingLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,
-                                                                    TokenEmbeddingLayerInfo fc_info)
+                                                                    TokenEmbeddingLayerInfo info)
 {
     TensorDescriptor weight_descriptor = input_descriptor;
+    if(info.d_model()!=512)std::cout << "768" << std::endl;
     std::cout << "TokenEmbeddingLayerNode::compute_weights_descriptor" << std::endl;
     return weight_descriptor;
 }
