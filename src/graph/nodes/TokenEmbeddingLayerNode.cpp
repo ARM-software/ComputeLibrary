@@ -8,8 +8,7 @@ namespace arm_compute
 {
 namespace graph
 {
-TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info, ITensorAccessorUPtr weights) 
-                        : _info(std::move(info)), _weights(std::move(weights))
+TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info): _info(std::move(info))
 {
     std::cout << "Token embedding created " << std::endl;
     _input_edges.resize(1, EmptyEdgeID);

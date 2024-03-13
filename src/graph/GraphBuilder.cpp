@@ -838,10 +838,10 @@ NodeID GraphBuilder::add_stack_node(Graph &g, NodeParams params, const std::vect
 
 
 NodeID GraphBuilder::add_tkemb_node(Graph &g,
-                                 NodeParams params, 
-                                 NodeIdxPair input, 
-                                 TokenEmbeddingLayerInfo tkemb_info,
-                                 ITensorAccessorUPtr     weights)
+                                    NodeParams params, 
+                                    NodeIdxPair input, 
+                                    TokenEmbeddingLayerInfo tkemb_info,
+                                    ITensorAccessorUPtr     weights)
 {
     return create_simple_single_input_output_node<TokenEmbeddingLayerNode>(g, params, input, tkemb_info, weights);
 }

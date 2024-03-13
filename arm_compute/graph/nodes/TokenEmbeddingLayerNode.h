@@ -15,9 +15,8 @@ public:
     /** Constructor 
      * 
      * @param[in] info Token embedding layer information
-     * @param[in] weights Token embedding layer weight accessor
      */
-    TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info, ITensorAccessorUPtr weights);
+    TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info);
     /** Token embedding Info Accessor
      * 
      * @return Token embedding Info
@@ -39,7 +38,6 @@ public:
 
 private:
     TokenEmbeddingLayerInfo _info;
-    ITensorAccessorUPtr     _weights;
 };
 } // namespace graph
 } // namespace arm_compute
