@@ -170,15 +170,6 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
 template <typename T, typename... Args>
 void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 {
-    std::cout << "tensor shape ";
-    std::cout << tensor.info()->tensor_shape() << std::endl;
-    std::cout << "dimeson(0) ";
-    std::cout << tensor.info()->dimension(0) << std::endl;
-    std::cout << "data type ";
-    std::cout << tensor.info()->data_type() << std::endl;
-
-    
-
     //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
     const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
@@ -205,7 +196,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     execute_window_loop(window,
                         [&](const Coordinates id){
                             *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]]; //Using dimesion x
-                            std::cout << *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
     
 
