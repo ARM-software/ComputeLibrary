@@ -35,7 +35,7 @@ TensorDescriptor TokenEmbeddingLayerNode::compute_weights_descriptor(const Tenso
     TensorDescriptor weight_descriptor = input_descriptor;
     if(info.d_model()!=512)std::cout << "768" << std::endl;
     std::cout << "TokenEmbeddingLayerNode::compute_weights_descriptor" << std::endl;
-    std::cout << input_descriptor.shape.total_size() << std::endl;
+    std::cout << input_descriptor.shape.x() << std::endl;
     return weight_descriptor;
 }
 
