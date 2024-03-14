@@ -1691,7 +1691,8 @@ template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
 {
 
-    std::cout << node.name()<< std::endl;
+    std::cout << "create_token_embedding_layer(TokenEmbeddingLayerNode &node)" << std::endl;
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
     /*
@@ -1699,6 +1700,7 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
     const TokenEmbeddingLayerInfo tkemb_info  = node.token_embedding_info();
     */
+
     // Create function
     auto func = std::make_unique<TokenEmbeddingLayerFunction>();
 
