@@ -1691,10 +1691,20 @@ template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
 {
 
+    std::cout << node.name()<< std::endl;
+
+    // Extract IO and info
+    /*
+    typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
+    const TokenEmbeddingLayerInfo tkemb_info  = node.token_embedding_info();
+    */
+    // Create function
     auto func = std::make_unique<TokenEmbeddingLayerFunction>();
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
-        "Instantiated " << node.name()  << std::endl);
+        "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
+                        << " Data Type: " << input->info()->data_type() << " Shape: " << input->info()->tensor_shape() << std::endl);
 
     return func;
 }
