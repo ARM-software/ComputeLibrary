@@ -1693,6 +1693,9 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
 
     auto func = std::make_unique<TokenEmbeddingLayerFunction>();
 
+    ARM_COMPUTE_LOG_GRAPH_INFO(
+        "Instantiated " << node.name()  << std::endl);
+
     return func;
 }
 
