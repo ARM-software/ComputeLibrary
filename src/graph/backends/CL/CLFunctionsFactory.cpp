@@ -345,9 +345,6 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
         case NodeType::StridedSliceLayer:
             return detail::create_strided_slice_layer<CLStridedSlice, CLTargetInfo>(
                 *polymorphic_downcast<StridedSliceLayerNode *>(node));
-        case NodeType::TokenEmbeddingLayer:
-            return detail::create_token_embedding_layer<CLTokenEmbeddingLayer, CLTargetInfo>(
-                *polymorphic_downcast<TokenEmbeddingLayerNode *>(node));
         default:
             return nullptr;
     }
