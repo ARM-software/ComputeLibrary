@@ -1668,7 +1668,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
     // Create and configure function
     auto func = std::make_unique<StridedSliceLayerFunction>();
     func->configure(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(), info.shrink_axis_mask());
-    
+
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.name() << " Type: " << node.type() << " Target: "
                                                << TargetInfo::TargetType << " Data Type: " << input->info()->data_type()
@@ -1702,7 +1702,7 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     */
 
     // Create function
-    auto func = new TokenEmbeddingLayerFunction();
+    auto func = std::unique_ptr<TokenEmbeddingLayerFunction>(new TokenEmbeddingLayerFunction());
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
