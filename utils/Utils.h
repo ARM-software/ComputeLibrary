@@ -482,8 +482,7 @@ public:
                         !enable_f32_to_f16_conversion)
                     {
                         // If tensor has no padding read directly from stream.
-                        _fs.read(reinterpret_cast<double *>(tensor.buffer()), tensor.info()->total_size());
-                        std::cout << reinterpret_cast<double *>(tensor.buffer())[1] <<std::endl;
+                        _fs.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
                     }
                     else
                     {

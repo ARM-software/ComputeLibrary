@@ -106,6 +106,7 @@ Vanilla_Transformer
          |                          |-> TextType
          |                          |-> parse_txt_header: TO BE USE?
          |                          |-> get_text_type_from_file
+         |                              Note: NPY loader reinterpert char
          |------------------> utils/Utils.cpp
                                     |-> parse_txt_header: TO BE USE?
                                     |-> get_text_type_from_file: TODO: now just return Default UTF-8
