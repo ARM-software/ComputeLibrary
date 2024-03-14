@@ -440,7 +440,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
 
     if (is_quantized)
     {
-        biases->info()->set_data_type(DataType::S32);
+        biases->info()->set_data_type(DataType::S32); 
     }
 
     const PadStrideInfo       conv_info      = node.convolution_info();
@@ -1697,11 +1697,10 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     // Extract IO and info
     typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
-    const TokenEmbeddingLayerInfo tkemb_info  = node.token_embedding_info();
 
     // Create function
     auto func = std::make_unique<TokenEmbeddingLayerFunction>();
-    func->configure(input, output, tkemb_info);
+    func->configure(input, output, node.token_embedding_info());
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
