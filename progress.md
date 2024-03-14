@@ -113,8 +113,11 @@ Vanilla_Transformer
 
 
 
-
+Compatability:
+            1: All function only support NEON right now.
 
 Functionality:
             1. Segment token:
             2. Token vectorize
+
+
