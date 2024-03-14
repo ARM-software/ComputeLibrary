@@ -1687,7 +1687,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
  *
  * @return Backend token embedding layer function
  */
-template <typename TargetInfo>
+template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
 {
 
@@ -1702,7 +1702,7 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     */
 
     // Create function
-    auto func = std::make_unique<NETokenEmbeddingLayer>();
+    auto func = std::make_unique<TokenEmbeddingLayerFunction>();
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
