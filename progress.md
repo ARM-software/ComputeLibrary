@@ -37,7 +37,7 @@ Vanilla_Transformer
 |
 |
 |- Function ----------------> src/graph/backends/NEON/NEFunctionFactory.cpp
-|           |                                         |-> TBA
+|           |                                         |-> NodeType::TokenEmbeddingLayer
 |           |
 |           |
 |           |---------------> arm_compute/runtime/NEON/functions/NETokenEmbeddingLayer.h

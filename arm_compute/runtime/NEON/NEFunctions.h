@@ -108,6 +108,7 @@
 #include "arm_compute/runtime/NEON/functions/NEStridedSlice.h"
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
+#include "arm_compute/runtime/NEON/functions/NETokenEmbeddingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEUnstack.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
