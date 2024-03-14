@@ -1667,7 +1667,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
 
     // Create and configure function
     auto func = std::make_unique<StridedSliceLayerFunction>();
-    auto fu = std::make_unique<NEStridedSlice>();
+    auto fu = std::make_unique<arm_compute::NEStridedSlice>();
     func->configure(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(), info.shrink_axis_mask());
     fu->run();
     // Log info
