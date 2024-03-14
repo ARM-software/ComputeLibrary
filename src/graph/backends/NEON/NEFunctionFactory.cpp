@@ -228,7 +228,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_strided_slice_layer<NEStridedSlice, NETargetInfo>(
                 *polymorphic_downcast<StridedSliceLayerNode *>(node));
         case NodeType::TokenEmbeddingLayer:
-            return detail::create_token_embedding_layer<NETokenEmbeddingLayer, NETargetInfo>();
+            return detail::create_token_embedding_layer<NETargetInfo>(
+                *polymorphic_downcast<TokenEmbeddingLayerNode *>(node));
         default:
             return nullptr;
     }
