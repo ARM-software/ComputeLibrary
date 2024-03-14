@@ -2307,6 +2307,14 @@
         "files": {
           "common": [ "src/runtime/NEON/functions/NEUnstack.cpp" ]
         }
+      },
+
+      "TKEMB": {
+        "files": {
+          "common": [
+            "src/runtime/NEON/functions/NETokenEmbeddingLayer.cpp"
+          ]
+        }
       }
     }
   },
