@@ -2,7 +2,6 @@
 
 #include "arm_compute/core/Validate.h"
 
-#include "src/cpu/operators/CpuTokenEmbed.h"
 // operator to be added 
 
 namespace arm_compute
