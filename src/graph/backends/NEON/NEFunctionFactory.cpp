@@ -113,7 +113,40 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
 
     return func;
 }
+/** Creates a backend token embedding layer function
+ *
+ * @tparam TokenEmbeddingLayerFunction  Backend token embedding function
+ * @tparam TargetInfo                   Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend token embedding layer function
+ */
+template <typename TargetInfo>
+std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
+{
+
+    std::cout << "create_token_embedding_layer(TokenEmbeddingLayerNode &node)" << std::endl;
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    /*
+    typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
+    const TokenEmbeddingLayerInfo tkemb_info  = node.token_embedding_info();
+    */
+
+    // Create function
+    auto func = std::make_unique<NETokenEmbeddingLayer>();
+
+    ARM_COMPUTE_LOG_GRAPH_INFO(
+        "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
+                        << " Data Type: " << input->info()->data_type() << " Shape: " << input->info()->tensor_shape() << std::endl);
+
+    return func;
+}
 } // namespace detail
+
 
 std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &ctx)
 {
