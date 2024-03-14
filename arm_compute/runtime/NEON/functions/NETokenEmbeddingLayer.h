@@ -44,7 +44,7 @@ public:
      * @param[out]     output          Destination tensor. Data type supported: same as @p input
      * @param[in]      activation_info Token embedding layer parameters.
      */
-    void configure();
+    void configure(ITensor *input, ITensor *output, TokenEmbeddingLayerInfo tkemb_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NETokenEmbeddingLayer
      *
      * @param[in] input  Source tensor info. Data types supported: TBA
@@ -53,7 +53,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const unsigned int d_model, ITensor *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info);
 
     // Inherited methods overridden:
     void run() override;
