@@ -106,7 +106,7 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
     const ActivationLayerInfo        act_info = node.activation_info();
 
     // Create function
-    auto func = std::make_unique<ActivationLayerFunction>();
+    auto func = std::make_unique<NEActivationLayer>();
     func->configure(input, output, act_info);
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
