@@ -182,6 +182,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::StridedSliceLayer:
             os << "StridedSliceLayer";
             break;
+        case NodeType::TokenEmbeddingLayer:
+            os << "TokenEmbeddingLayer";
+            break;
         case NodeType::UpsampleLayer:
             os << "UpsampleLayer";
             break;
