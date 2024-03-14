@@ -1694,12 +1694,8 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     std::cout << "create_token_embedding_layer(TokenEmbeddingLayerNode &node)" << std::endl;
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
-    // Extract IO and info
-    typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
-
     // Create function
-    auto func = std::make_unique<ActivationLayerFunction>();
+    auto func = std::make_unique<TokenEmbeddingLayerFunction>();
 
     return func;
 }
