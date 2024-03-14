@@ -1678,14 +1678,14 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
     return func;
 }
 
-/** Creates a backend activation layer function
+/** Creates a backend token embedding layer function
  *
- * @tparam ActivationLayerFunction Backend activation function
- * @tparam TargetInfo              Target-specific information
+ * @tparam TokenEmbeddingLayerFunction  Backend token embedding function
+ * @tparam TargetInfo                   Target-specific information
  *
  * @param[in] node Node to create the backend function for
  *
- * @return Backend activation layer function
+ * @return Backend token embedding layer function
  */
 template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
@@ -1700,7 +1700,7 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     const TokenEmbeddingLayerInfo tkemb_info  = node.token_embedding_info();
 
     // Create function
-    auto func = std::make_unique<TokenEmbeddingLayerFunction>();
+    auto func = std::make_unique<NETokenEmbeddingLayer>();
     func->configure(input, output, tkemb_info);
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
