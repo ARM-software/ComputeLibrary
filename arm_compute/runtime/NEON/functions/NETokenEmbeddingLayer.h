@@ -19,6 +19,10 @@ public:
     NETokenEmbeddingLayer();
     /** Default Destructor */
     ~NETokenEmbeddingLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NETokenEmbeddingLayer(const NETokenEmbeddingLayer &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NETokenEmbeddingLayer &operator=(const NETokenEmbeddingLayer &) = delete;
 
     // Inherited methods overridden:
     void run() override;
