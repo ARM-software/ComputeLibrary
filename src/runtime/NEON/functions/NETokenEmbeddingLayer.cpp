@@ -27,6 +27,7 @@ void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *output, TokenEmbe
     std::cout << " NETokenEmbeddingLayer::configure!!!!!!!!!!!!!!!  " << std::endl;
     std::cout << input->info()->tensor_shape().total_size() << std::endl;
     std::cout << output->info()->tensor_shape().total_size() << std::endl;
+    std::cout << tkemb_info.d_vocab() << std::endl;
 }
 
 
