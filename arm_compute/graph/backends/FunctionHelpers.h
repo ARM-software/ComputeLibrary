@@ -36,7 +36,7 @@
 #include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/graph/Utils.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NETokenEmbeddingLayer.h"
 
 #include "support/Cast.h"
 
