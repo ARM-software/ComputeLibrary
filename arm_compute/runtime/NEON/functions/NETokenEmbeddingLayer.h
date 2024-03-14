@@ -39,10 +39,12 @@ public:
      * |TBA            |TBA            |
      * |TBA            |TBA            |
      *
-     * @param[in]  d_model  Model dimension. Data types supported: TBA
-     * @param[out] output   Output tensor, shape (seq_len,d_model). Data type supported: TBA
+     * @param[in, out] input           Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
+     *                                 of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
+     * @param[out]     output          Destination tensor. Data type supported: same as @p input
+     * @param[in]      activation_info Token embedding layer parameters.
      */
-    void configure(const unsigned int d_model, ITensor *output);
+    void configure(ITensor *input, ITensor *output, TokenEmbeddingLayerInfo tkemb_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NETokenEmbeddingLayer
      *
      * @param[in] input  Source tensor info. Data types supported: TBA
