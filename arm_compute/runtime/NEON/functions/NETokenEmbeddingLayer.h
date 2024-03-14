@@ -16,7 +16,7 @@ class NETokenEmbeddingLayer : public IFunction
 {
 public:
     /** Default Constructor */
-    NETokenEmbeddingLayer();
+    NETokenEmbeddingLayer(IRuntimeContext *ctx = nullptr);
     /** Default Destructor */
     ~NETokenEmbeddingLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

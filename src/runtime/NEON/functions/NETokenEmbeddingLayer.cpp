@@ -15,8 +15,9 @@ struct NETokenEmbeddingLayer::Impl
 };
 
 
-NETokenEmbeddingLayer::NETokenEmbeddingLayer()
+NETokenEmbeddingLayer::NETokenEmbeddingLayer(IRuntimeContext *ctx) : _impl(std::make_unique<Impl>())
 {
+    _impl->ctx = ctx;
 }
 
 NETokenEmbeddingLayer::~NETokenEmbeddingLayer() = default;
