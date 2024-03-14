@@ -8,8 +8,15 @@
 namespace arm_compute
 {
 
+struct NETokenEmbeddingLayer::Impl
+{
+    const ITensor                      *src{nullptr};
+    ITensor                            *dst{nullptr};
+    IRuntimeContext                    *ctx{nullptr};
+    std::unique_ptr<cpu::CpuTokenEmbed> op{nullptr};
+};
 
-NETokenEmbeddingLayer::NETokenEmbeddingLayer()
+NETokenEmbeddingLayer::NETokenEmbeddingLayer(): _impl(std::make_unique<Impl>())
 {
 }
 

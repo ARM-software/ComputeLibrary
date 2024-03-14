@@ -3,6 +3,8 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IRuntimeContext.h"
+
 
 #include <memory>
 
