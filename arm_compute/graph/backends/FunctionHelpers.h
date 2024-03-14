@@ -1678,7 +1678,23 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
     return func;
 }
 
+/** Creates a backend token embedding layer function
+ *
+ * @tparam TokenEmbeddingLayerFunction  Backend token embedding function
+ * @tparam TargetInfo                   Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend token embedding layer function
+ */
+template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
+{
 
+    auto func = std::make_unique<ActivationFunction>();
+
+    return func;
+}
 
 } // namespace detail
 } // namespace backends
