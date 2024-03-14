@@ -1691,7 +1691,7 @@ template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
 {
 
-    auto func = std::make_unique<ActivationFunction>();
+    auto func = std::make_unique<TokenEmbeddingLayerFunction>();
 
     return func;
 }
