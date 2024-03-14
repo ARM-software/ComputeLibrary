@@ -1697,17 +1697,9 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     // Extract IO and info
     typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
-    const ActivationLayerInfo        act_info = node.activation_info();
 
     // Create function
     auto func = std::make_unique<ActivationLayerFunction>();
-    func->configure(input, output, act_info);
-
-    ARM_COMPUTE_LOG_GRAPH_INFO(
-        "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
-                        << " Data Type: " << input->info()->data_type() << " Shape: " << input->info()->tensor_shape()
-                        << " Activation function: " << act_info.activation() << " a: " << act_info.a() << " b: "
-                        << act_info.b() << " InPlace : " << is_in_place_operation(input, output) << std::endl);
 
     return func;
 }
