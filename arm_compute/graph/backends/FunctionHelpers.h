@@ -19,7 +19,7 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.ActivationLayerInfo
+ * SOFTWARE.
  */
 #ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUNCTIONHELPERS_H
 #define ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUNCTIONHELPERS_H
@@ -440,7 +440,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
 
     if (is_quantized)
     {
-        biases->info()->set_data_type(DataType::S32); 
+        biases->info()->set_data_type(DataType::S32);
     }
 
     const PadStrideInfo       conv_info      = node.convolution_info();
@@ -1700,7 +1700,7 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
 
     // Create function
     auto func = std::make_unique<TokenEmbeddingLayerFunction>();
-    func->configure(input, output, node.token_embedding_info());
+    func->configure();
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType

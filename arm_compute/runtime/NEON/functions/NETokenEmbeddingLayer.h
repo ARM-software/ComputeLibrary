@@ -44,7 +44,7 @@ public:
      * @param[out]     output          Destination tensor. Data type supported: same as @p input
      * @param[in]      activation_info Token embedding layer parameters.
      */
-    void configure(ITensor *input, ITensor *output, TokenEmbeddingLayerInfo tkemb_info);
+    void configure();
     /** Static function to check if given info will lead to a valid configuration of @ref NETokenEmbeddingLayer
      *
      * @param[in] input  Source tensor info. Data types supported: TBA

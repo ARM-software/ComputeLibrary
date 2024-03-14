@@ -12,7 +12,7 @@ NETokenEmbeddingLayer::NETokenEmbeddingLayer()
 }
 NETokenEmbeddingLayer::~NETokenEmbeddingLayer() = default;
 
-void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *output, TokenEmbeddingLayerInfo tkemb_info)
+void NETokenEmbeddingLayer::configure()
 {
         std::cout << " NETokenEmbeddingLayer::configure!!!!!!!!!!!!!!!  " << std::endl;
 }
