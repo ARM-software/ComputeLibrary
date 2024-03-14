@@ -7,6 +7,13 @@
 
 namespace arm_compute
 {
+struct NETokenEmbeddingLayer::Impl
+{
+    const ITensor                      *src{nullptr};
+    ITensor                            *dst{nullptr};
+    IRuntimeContext                    *ctx{nullptr};
+};
+
 
 NETokenEmbeddingLayer::NETokenEmbeddingLayer()
 {
@@ -19,17 +26,17 @@ void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *output, TokenEmbe
         std::cout << " NETokenEmbeddingLayer::configure!!!!!!!!!!!!!!!  " << std::endl;
 }
 
-void NETokenEmbeddingLayer::run()
-{
-    std::cout << " NETokenEmbeddingLayer::run!!!!!!!!!!!!!!!  " << std::endl;
-}
-
 Status
 NETokenEmbeddingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
 {
     std::cout << "NETokenEmbeddingLayer::validate" << std::endl;
     std::cout << tkemb_info.d_model() << std::endl;
     return cpu::CpuTokenEmbed::validate(input, output);
+}
+
+void NETokenEmbeddingLayer::run()
+{
+    std::cout << " NETokenEmbeddingLayer::run!!!!!!!!!!!!!!!  " << std::endl;
 }
 
 } // namespace arm_compute
