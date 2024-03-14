@@ -54,7 +54,6 @@ using arm_compute::PixelValue;
 using arm_compute::Size2D;
 using arm_compute::TensorShape;
 
-using arm_compute::ActivationLayerInfo;
 using arm_compute::DetectionOutputLayerInfo;
 using arm_compute::DetectionPostProcessLayerInfo;
 using arm_compute::DimensionRoundingType;
