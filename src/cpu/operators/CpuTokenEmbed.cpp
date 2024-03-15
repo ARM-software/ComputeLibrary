@@ -11,7 +11,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-void CpuTokenEmbed::configure(const ITensorInfo *input, ITensorInfo *output)
+void CpuTokenEmbed::configure(const ITensorInfo *input, ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
 {
     std::cout<< "CpuTokenEmbed::configure" << std::endl;
     std::cout<< input->tensor_shape().total_size() << std::endl;
@@ -20,7 +20,7 @@ void CpuTokenEmbed::configure(const ITensorInfo *input, ITensorInfo *output)
 }
 
 Status
-CpuTokenEmbed::validate(const ITensorInfo *input, const ITensorInfo *output)
+CpuTokenEmbed::validate(const ITensorInfo *input, const ITensorInfo *output,const TokenEmbeddingLayerInfo &tkemb_info)
 {
     return Status{};
 }
