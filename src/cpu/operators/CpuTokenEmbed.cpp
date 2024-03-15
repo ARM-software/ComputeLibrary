@@ -16,12 +16,17 @@ void CpuTokenEmbed::configure(const ITensorInfo *input, ITensorInfo *output, con
     std::cout<< "CpuTokenEmbed::configure" << std::endl;
     std::cout<< input->tensor_shape().total_size() << std::endl;
     std::cout<< output->tensor_shape().total_size()  << std::endl;
+    std::cout<< tkemb_info.d_vocab()  << std::endl;
     
 }
 
 Status
 CpuTokenEmbed::validate(const ITensorInfo *input, const ITensorInfo *output,const TokenEmbeddingLayerInfo &tkemb_info)
 {
+
+    std::cout << input->id() << std::endl;
+    std::cout << output->id() << std::endl;
+    std::cout << tkemb_info.d_vocab() << std::endl;
     return Status{};
 }
 
