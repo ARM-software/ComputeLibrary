@@ -38,6 +38,12 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, ITensorInfo *dst, To
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, tkemb_info));
 
+    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: neon_token_embed_char_2_float32" << std::endl;
+
+    std::cout << src->id() << std::endl;
+    std::cout << dst->id() << std::endl;
+    std::cout << tkemb_info.d_vocab() << std::endl;
+
 }
 
 } // namespace kernels
