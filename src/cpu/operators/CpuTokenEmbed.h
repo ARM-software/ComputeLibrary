@@ -7,19 +7,20 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref kernels::CpuActivationKernel */
+/** Basic function to run @ref kernels::CpuTokenEmbedKernel */
 class CpuTokenEmbed : public ICpuOperator
 {
 public:
     /** Configure operator for a given list of arguments
      *
-     * @param[in]  input           Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
+     * @param[in]  input           Source tensor info. Data types supported: U8.
      * @param[out] output          Destination tensor info. Data type supported: same as @p src
+     * @param[in]  tkemb_info      Token embed layer parameters.
      */
     void configure(const ITensorInfo *input, ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info);
     /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to @ref CpuActivation::configure()
+     * Similar to @ref CpuTokenEmbed::configure()
      *
      * @return a status
      */

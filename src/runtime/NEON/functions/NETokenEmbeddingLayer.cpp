@@ -34,8 +34,10 @@ void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *output, TokenEmbe
 void NETokenEmbeddingLayer::run()
 {
     std::cout << " NETokenEmbeddingLayer::run!!!!!!!!!!!!!!!  " << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().total_size() << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().total_size() << std::endl;
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+    _impl->op->run(pack);
 }
 
 } // namespace arm_compute

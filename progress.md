@@ -121,6 +121,7 @@ Vanilla_Transformer
 
 Compatability:
             1: All function only support NEON right now.
+            2. Only support UTF-8 encoding (U8)
 
 Functionality:
             1. Segment token:
