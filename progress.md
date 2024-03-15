@@ -84,7 +84,8 @@ Vanilla_Transformer
 |- Kernel ------------------> src/cpu/kernels/CpuTokenEmbedKernel.h.cpp
 |         |
 |         |-----------------> src/cpu/kernels/CpuKernelSelectionTypes.h:
-|                                             |->TokenEmbedKernelDataTypeISASelectorData: For selecting kernel implmentation
+|                                             |->TokenEmbedKernelDataTypeISASelectorData & Ptr: 
+|                                                For selecting kernel implmentation
 |
 |
 |- Utils -------------------> utils/GraphUtils.h

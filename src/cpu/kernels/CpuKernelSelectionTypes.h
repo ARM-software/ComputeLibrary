@@ -122,6 +122,8 @@ using DepthwiseConv2dNativeDataTypeISASelectorPtr =
 using CastDataTypeISASelectorDataPtr = std::add_pointer<bool(const CastDataTypeISASelectorData &data)>::type;
 using ActivationDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const ActivationDataTypeISASelectorData &data)>::type;
+using TokenEmbedKernelDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const TokenEmbedKernelDataTypeISASelectorData &data)>::type;
 using CpuAddKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const CpuAddKernelDataTypeISASelectorData &data)>::type;
 using ScaleKernelDataTypeISASelectorDataPtr =

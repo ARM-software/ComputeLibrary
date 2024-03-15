@@ -61,9 +61,9 @@ public:
 
     struct TKEMBKernel
     {
-        const char                                 *name;
-        const ActivationDataTypeISASelectorDataPtr is_selected;
-        TKEMBKernelPtr                             ukernel;
+        const char                                          *name;
+        const TokenEmbedKernelDataTypeISASelectorDataPtr    is_selected;
+        TKEMBKernelPtr                                      ukernel;
     };
 
     static const std::vector<TKEMBKernel> &get_available_kernels();
