@@ -5,6 +5,7 @@
 #include "arm_compute/core/Utils.h"
 
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/cpu/kernels/tokenembed/list.h"
 
 namespace arm_compute
@@ -16,7 +17,7 @@ namespace kernels
 
 namespace
 {
-static const std::vector<CpuTokenEmbedKernel::TKEMBKernel> avaiable_kernels = {
+static const std::vector<CpuTokenEmbedKernel::TKEMBKernel> available_kernels = {
     /*
 #ifdef ARM_COMPUTE_ENABLE_SVE
     // TBA
@@ -44,6 +45,59 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, ITensorInfo *dst, To
     std::cout << dst->id() << std::endl;
     std::cout << tkemb_info.d_vocab() << std::endl;
 
+}
+
+Status CpuTokenEmbedKernel::validate(const ITensorInfo *src, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info)
+{
+    ARM_COMPUTE_UNUSED(tkemb_info);
+
+    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: nvalidate" << std::endl;
+    std::cout << src->id() << std::endl;
+    std::cout << dst->id() << std::endl;
+    std::cout << tkemb_info.d_vocab() << std::endl;
+
+    return Status{};
+}
+
+
+size_t CpuTokenEmbedKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(thread_count);
+    ARM_COMPUTE_UNUSED(platform);
+
+    if (_split_dimension == Window::DimX)
+    {
+        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+        // This number is loosely chosen as threading overhead in each platform varies wildly.
+        return 1536;
+    }
+    return default_mws;
+}
+
+void CpuTokenEmbedKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+{
+
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+
+    ARM_COMPUTE_ERROR_ON(tensors.empty());
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
+
+    const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    _run_method(src, dst, _tkemb_info, window);
+}
+
+const char *CpuTokenEmbedKernel::name() const
+{
+    return _name.c_str();
+}
+
+const std::vector<CpuTokenEmbedKernel::TKEMBKernel> &CpuTokenEmbedKernel::get_available_kernels()
+{
+    return available_kernels ;
 }
 
 } // namespace kernels

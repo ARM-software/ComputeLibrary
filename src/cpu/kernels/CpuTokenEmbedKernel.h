@@ -11,7 +11,6 @@ namespace cpu
 {
 namespace kernels
 {
-
 /** Interface for the token embedding kernel */
 class CpuTokenEmbedKernel : public ICpuKernel<CpuTokenEmbedKernel>
 {

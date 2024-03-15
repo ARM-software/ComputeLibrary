@@ -101,6 +101,7 @@ private:
     size_t              _split_dimension{Window::DimY};
     std::string         _name{};
 };
+
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
