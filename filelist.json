@@ -2311,7 +2311,6 @@
         "files": {
           "common": [
             "src/cpu/operators/CpuTokenEmbed.cpp",
-            "src/cpu/kernels/CpuTokenEmbedKernel.cpp",
             "src/runtime/NEON/functions/NETokenEmbeddingLayer.cpp"
           ],
           "neon": {
