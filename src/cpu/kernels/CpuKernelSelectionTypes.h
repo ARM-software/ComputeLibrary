@@ -110,7 +110,7 @@ struct TokenEmbedKernelDataTypeISASelectorData
 {
     DataType            dt;
     cpuinfo::CpuIsaInfo isa;
-}
+};
 
 // Selector pointer types
 using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
