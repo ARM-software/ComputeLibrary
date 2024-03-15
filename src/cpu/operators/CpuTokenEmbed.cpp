@@ -6,6 +6,7 @@
 #include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
+#include "src/cpu/kernels/CpuTokenEmbedKernel.h"
 
 namespace arm_compute
 {
@@ -13,10 +14,10 @@ namespace cpu
 {
 void CpuTokenEmbed::configure(const ITensorInfo *input, ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
 {
-    std::cout<< "CpuTokenEmbed::configure" << std::endl;
-    std::cout<< input->tensor_shape().total_size() << std::endl;
-    std::cout<< output->tensor_shape().total_size()  << std::endl;
-    std::cout<< tkemb_info.d_vocab()  << std::endl;
+    ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
+    auto k = std::make_unique<kernels::CpuTokenEmbedKernel>();
+    k->configure(input, output, tkemb_info);
+    _kernel = std::move(k);
     
 }
 

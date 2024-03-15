@@ -106,6 +106,12 @@ struct SoftmaxKernelDataTypeISASelectorData
     bool                is_log;
 };
 
+struct TokenEmbedKernelDataTypeISASelectorData
+{
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
+}
+
 // Selector pointer types
 using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
 using DataTypeDataLayoutSelectorPtr     = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;

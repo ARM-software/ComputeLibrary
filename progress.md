@@ -78,10 +78,13 @@ Vanilla_Transformer
 |                                                    |-> data_type_from_format: configure tensor data type
 |
 |
-|- Operator ----------------> src/cpu/operators/CpuTokenEmbed.h.cppp
+|- Operator ----------------> src/cpu/operators/CpuTokenEmbed.h.cpp
 |
 |
-|- Kernel ------------------> 
+|- Kernel ------------------> src/cpu/kernels/CpuTokenEmbedKernel.h.cpp
+|         |
+|         |-----------------> src/cpu/kernels/CpuKernelSelectionTypes.h:
+|                                             |->TokenEmbedKernelDataTypeISASelectorData: For selecting kernel implmentation
 |
 |
 |- Utils -------------------> utils/GraphUtils.h
@@ -121,10 +124,13 @@ Vanilla_Transformer
 
 Compatability:
             1: All function only support NEON right now.
-            2. Only support UTF-8 encoding (U8)
+            2. Only support UTF-8 encoding (U8) input
 
 Functionality:
             1. Segment token:
             2. Token vectorize
 
-
+Input           char U8
+  |  
+  |
+Token Embed     U8 -> FP32
