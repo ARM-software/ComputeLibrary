@@ -36,8 +36,8 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, ITensorInfo *dst, To
 {
     ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
-    
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, tkemb_info));
+
 }
 
 } // namespace kernels
