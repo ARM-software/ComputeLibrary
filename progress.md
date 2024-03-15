@@ -78,6 +78,12 @@ Vanilla_Transformer
 |                                                    |-> data_type_from_format: configure tensor data type
 |
 |
+|- Operator ----------------> src/cpu/operators/CpuTokenEmbed.h.cppp
+|
+|
+|- Kernel ------------------> 
+|
+|
 |- Utils -------------------> utils/GraphUtils.h
          |                          |-> TextAccessor
          |                          |-> get_input_accessor : add txt reader

@@ -16,7 +16,7 @@ public:
      * @param[in]  input           Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
      * @param[out] output          Destination tensor info. Data type supported: same as @p src
      */
-    void configure(const ITensorInfo *input, ITensorInfo *output);
+    void configure(const ITensorInfo *input, ITensorInfo *output, const TokenEmbeddingLayerInfo tkemb_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuActivation::configure()
