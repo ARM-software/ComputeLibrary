@@ -190,10 +190,19 @@ void kernel_and_merge<false, false, Requantize32>::run(
     auto p=prof.ScopedProfiler(PROFILE_KERNEL, (m_max - m_0) * (n_max - n_0) * kern_k);
 #endif
 
+    // Offset C pointer in a similar way to non-quantized case above.
+    Tri *offset_c_ptr;
+
+    if (c_ptr == nullptr) {
+        offset_c_ptr = nullptr;
+    } else {
+        offset_c_ptr = c_ptr + m_0 * ldc + n_0;
+    }
+
     strat.kernel(// A and B pointers are just the packed panels.
                  a_ptr, b_panel,
                  // Provide relevant part of output array and row stride.
-                 c_ptr + m_0 * ldc + n_0, ldc,
+                 offset_c_ptr, ldc,
                  // M, N, K sizes
                  m_max-m_0, n_max - n_0, kern_k,
                  // Bias, activation, accumulation.  Need to offset the bias as needed.
@@ -663,15 +672,27 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
             return roundup(args._cfg->inner_block_size, strategy::k_unroll());
         }
 
-        // K blocking not supported if we are requantizing.
-        if (std::is_same<OutputStage, Requantize32>::value) {
+        // K blocking not supported if we are requantizing with the merging
+        // kernels.
+        if (std::is_same<OutputStage, Requantize32>::value && MergeStep) {
             return get_ktotal(args);
         }
 
+        const unsigned int L1_size = args._ci->get_L1_cache_size();
+
         // Special blocking for SME
         if (is_sme<strategy>::value) {
-            // Don't bother to block below this size threshold, experimentally determined to be 320 for FP32
-            unsigned int scaling_threshold = 1280 / sizeof(Toi);
+            // Target 512 bytes for 64kB L1, or 1024 bytes for 128kB L1.
+            unsigned int target_bytes_per_block = L1_size / 128;
+
+            // Default cache size in gemm-linux is 32kB though - so make
+            // sure minimum is 512
+            if (target_bytes_per_block < 512) {
+                target_bytes_per_block = 512;
+            }
+
+            // Don't bother to block below this size threshold (1.25X target size)
+            unsigned int scaling_threshold = ((target_bytes_per_block * 5) / 4) / sizeof(Toi);
 
             if (get_ktotal(args) <= scaling_threshold) {
                 return get_ktotal(args);
@@ -679,7 +700,7 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
 
             // Once we are blocking, this (lower) threshold determines when we should use more blocks
             // NOTE: Could be that some factor-based solution would work better here.
-            unsigned int max_block_size = 1024 / sizeof(Toi);
+            unsigned int max_block_size = target_bytes_per_block / sizeof(Toi);
 
             unsigned int num_k_blocks = iceildiv(get_ktotal(args), max_block_size);
 
@@ -688,7 +709,6 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
             return k_block;
         }
 
-        const unsigned int L1_size = args._ci->get_L1_cache_size();
         unsigned int k_block;
 
         // k_block: Find out how much of the larger array can be loaded into half the cache.
@@ -721,6 +741,17 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
 
         if (args._cfg && args._cfg->outer_block_size) {
             return roundup(args._cfg->outer_block_size, strategy::out_width());
+        }
+
+        // Special blocking for SME
+        if (is_sme<strategy>::value) {
+            // If total width is less than 4x kernel width, return the entire width.
+            if (args._Nsize < strategy::out_width()*4) {
+                return roundup(args._Nsize, strategy::out_width());
+            }
+
+            // Otherwise block to single kernel width.
+            return strategy::out_width();
         }
 
         unsigned int x_block;
