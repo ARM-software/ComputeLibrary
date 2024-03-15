@@ -1,8 +1,0 @@
-<map id="CommonGemmExampleOptions" name="CommonGemmExampleOptions">
-<area shape="rect" id="node1" title="Common command line options used to configure the gemm examples." alt="" coords="115,368,344,395"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_toggle_option.xhtml" title="Implementation of an option that can be either true or false." alt="" coords="107,263,211,289"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="5,171,171,197"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1utils_1_1_option.xhtml" title="Abstract base class for a command line option." alt="" coords="153,5,217,32"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title="Implementation of an option that accepts a single value." alt="" coords="113,81,258,108"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="195,171,370,197"/>
-</map>
