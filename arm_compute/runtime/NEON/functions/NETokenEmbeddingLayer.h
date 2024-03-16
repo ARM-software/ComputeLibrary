@@ -43,6 +43,7 @@ public:
      */
     static Status validate(ITensor *output, TokenEmbeddingLayerInfo &activation_info);
 
+    void prepare() override;
     // Inherited methods overridden:
     void run() override;
 private:

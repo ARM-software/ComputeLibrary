@@ -32,6 +32,10 @@ void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *o
     _impl->op->configure(_impl->src->info(), _impl->vocab->info(), _impl->dst->info(), tkemb_info);
 }
 
+void NETokenEmbeddingLayer::prepare()
+{
+    std::cout << "NETokenEmbeddingLayer::prepare()" << std::endl;
+}
 
 void NETokenEmbeddingLayer::run()
 {

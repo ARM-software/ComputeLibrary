@@ -128,24 +128,6 @@ void GraphManager::execute_graph(Graph &graph)
     // Check if graph is finalized
     auto it = _workloads.find(graph.id());
     ARM_COMPUTE_ERROR_ON_MSG(it == std::end(_workloads), "Graph is not registered!");
-    
-    std::cout << "total nodes: ";
-    std::cout << it->second.graph->nodes().size() <<std::endl;
-
-     std::cout <<it->second.graph->nodes()[0].get()->id() <<std::endl;
-     std::cout <<it->second.graph->nodes()[0].get()->type() <<std::endl;
-     std::cout << it->second.graph->nodes()[1].get()->id() <<std::endl;
-     std::cout <<it->second.graph->nodes()[1].get()->type() <<std::endl;
-
-    std::cout << "total edges: ";
-    std::cout << it->second.graph->edges().size() <<std::endl;
-
-
-    std::cout << "input number: ";
-    std::cout << it->second.inputs.size() <<std::endl;
-
-    std::cout << "output number: ";
-    std::cout << it->second.outputs.size() <<std::endl;
 
     while (true)
     {
