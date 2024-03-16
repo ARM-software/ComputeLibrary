@@ -27,10 +27,8 @@ static const std::vector<CpuTokenEmbedKernel::TKEMBKernel> available_kernels = {
     // TBA
 #endif // __aarch64__
 */
-    {"neon_fp32_token_embedding", [](const TokenEmbedKernelDataTypeISASelectorData &data) { return data.dt == DataType::F16; },
-     REGISTER_FP32_NEON(arm_compute::cpu::neon_token_embed_char_2_float32)},
     {"neon_fp32_token_embedding", [](const TokenEmbedKernelDataTypeISASelectorData &data) { return data.dt == DataType::F32; },
-     REGISTER_FP32_NEON(arm_compute::cpu::neon_token_embed_char_2_float32)}
+     REGISTER_FP32_NEON(arm_compute::cpu::neon_token_embed_char_2_float32)},
 
 };
 }
