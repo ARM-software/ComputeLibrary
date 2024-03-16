@@ -11,6 +11,7 @@ namespace arm_compute
 struct NETokenEmbeddingLayer::Impl
 {
     const ITensor                      *src{nullptr};
+    const ITensor                      *vocab{nullptr};
     ITensor                            *dst{nullptr};
     IRuntimeContext                    *ctx{nullptr};
     std::unique_ptr<cpu::CpuTokenEmbed> op{nullptr};
@@ -22,18 +23,18 @@ NETokenEmbeddingLayer::NETokenEmbeddingLayer(): _impl(std::make_unique<Impl>())
 
 NETokenEmbeddingLayer::~NETokenEmbeddingLayer() = default;
 
-void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *output, TokenEmbeddingLayerInfo tkemb_info)
+void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *output, TokenEmbeddingLayerInfo tkemb_info)
 {
-    _impl->src = input;
+    _impl->src      = input;
+    _impl->vocab    = vocab;
     _impl->dst = output == nullptr ? input : output;
     _impl->op  = std::make_unique<cpu::CpuTokenEmbed>();
-    _impl->op->configure(_impl->src->info(), _impl->dst->info(),tkemb_info);
+    _impl->op->configure(_impl->src->info(), _impl->vocab->info(), _impl->dst->info(), tkemb_info);
 }
 
 
 void NETokenEmbeddingLayer::run()
 {
-    std::cout << " NETokenEmbeddingLayer::run!!!!!!!!!!!!!!!  " << std::endl;
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);

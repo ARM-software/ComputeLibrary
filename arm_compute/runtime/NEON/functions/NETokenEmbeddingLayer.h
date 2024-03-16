@@ -26,34 +26,22 @@ public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NETokenEmbeddingLayer &operator=(const NETokenEmbeddingLayer &) = delete;
 
-
-    /** TODO: Move able ?*/
-
-    
     /** Set the input and output tensor.
-     *
-     * Valid data layouts:
-     * - All
-     *
-     * Valid data type configurations:
-     * |src            |dst            |
-     * |:--------------|:--------------|
-     * |TBA            |TBA            |
-     * |TBA            |TBA            |
-     *
-     * @param[in]  d_model  Model dimension. Data types supported: TBA
-     * @param[out] output   Output tensor, shape (seq_len,d_model). Data type supported: TBA
+     * 
+     * @param[in]  input        Input tensor of char text, Data type supported: U8
+     * @param[in]  vocab        Const tenser of char 2 vec, Data type supported: F32
+     * @param[in]  tkemb_info   Token Embedding Layer Info.
+     * @param[out] output       Output tensor, shape (seq_len,d_model). Data type supported: F32
      */
-    void configure(ITensor *input, ITensor *output, TokenEmbeddingLayerInfo activation_info);
+    void configure(ITensor *input, ITensor *vocab, ITensor *output, TokenEmbeddingLayerInfo tkemb_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NETokenEmbeddingLayer
      *
-     * @param[in] input  Source tensor info. Data types supported: TBA
-     * @param[in] alpha  Source alpha tensor info. Data types supported: same of @p input.
      * @param[in] output Destination tensor info. Data type supported: same as @p input
+     * @param[in] tkemb_info Token Embedding Layer Info.
      *
      * @return a status
      */
-    static Status validate(const unsigned int d_model, ITensor *output);
+    static Status validate(ITensor *output, TokenEmbeddingLayerInfo &activation_info);
 
     // Inherited methods overridden:
     void run() override;

@@ -49,6 +49,7 @@ Vanilla_Transformer
 |           |
 |           |
 |           |---------------> src/runtime/NEON/functions/NETokenEmbeddingLayer.cpp
+|                                              |         |-> TODO: validate
 |                                              |------> /NEPositionalEncodingLayer.cpp
 |                                              |------> /NEMultiHeadAttentionLayer.cpp
 |                                              |------> /NEScaleDotProductionAttentionLayer.cpp
@@ -125,7 +126,8 @@ Vanilla_Transformer
 
 Compatability:
             1: All function only support NEON right now.
-            2. Only support UTF-8 encoding (U8) input
+            2. Input only support UTF-8 encoding (U8) input
+            3. Interpret token_embedding npy in float right now 
 
 Functionality:
             1. Segment token:

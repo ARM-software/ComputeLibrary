@@ -23,11 +23,12 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuTokenEmbedKernel);
     /** Configure kernel for a given list of arguments
      *
-     * @param[in, out] src             Source tensor info. Data types supported: U8.
-     * @param[out]     dst             Destination tensor info. Data type supported: same as @p src
-     * @param[in]      tkemb_info      Token embedding layer information.
+     * @param[in]   src             Source tensor info. Data types supported: U8.
+     * @param[in]   vocab           Char 2 Vec const tensor info, Data type supported: F32
+     * @param[out]  dst             Destination tensor info. Data type supported: F32
+     * @param[in]   tkemb_info      Token embedding layer information.
      */
-    void configure(const ITensorInfo *src, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info);
+    void configure(const ITensorInfo *src, const ITensorInfo *vocab, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuTokenEmbedKernel::configure()
