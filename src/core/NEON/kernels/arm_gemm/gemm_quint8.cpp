@@ -67,7 +67,7 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
 #ifdef ARM_COMPUTE_ENABLE_SME2
 // SME kernels
 {
-    GemmMethod::GEMM_HYBRID,
+    GemmMethod::GEMV_PRETRANSPOSED,
     "sme2_gemv_u8qa_dot_16VL",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && quant_hybrid_asymmetric(qp) && args._Msize == 1 && !args._indirect_input && args._nbatches == 1;  },
     nullptr,

@@ -71,7 +71,7 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 #ifdef ARM_COMPUTE_ENABLE_SVE
 #ifdef ARM_COMPUTE_ENABLE_SME2
 {
-    GemmMethod::GEMM_HYBRID,
+    GemmMethod::GEMV_PRETRANSPOSED,
     "sme2_gemv_s8qa_dot_16VL",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && quant_hybrid_asymmetric(qp) && args._Msize == 1 && !args._indirect_input && args._nbatches == 1;  },
     nullptr,

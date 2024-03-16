@@ -215,6 +215,15 @@ public:
         }
     }
 
+    void set_quantized_bias(const int32_t *bias, size_t bias_multi_stride) override {
+        if (std::is_same<OutputStage, Requantize32>::value) {
+            Requantize32 *qp = reinterpret_cast<Requantize32 *>(&_os);
+
+            qp->bias = bias;
+            qp->bias_multi_stride = bias_multi_stride;
+        }
+    }
+
     void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
         assert(!transposed);
 
