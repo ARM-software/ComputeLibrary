@@ -58,8 +58,6 @@ void SingleThreadScheduler::schedule_op(ICPPKernel   *kernel,
                                         const Window &window,
                                         ITensorPack  &tensors)
 {
-    std::cout << "src/runtime/CPP/SingleThreadScheduler.cpp" << std::endl;
-    std::cout << kernel->name() << std::endl;
     ARM_COMPUTE_UNUSED(hints);
     ThreadInfo info;
     info.cpu_info = &cpu_info();

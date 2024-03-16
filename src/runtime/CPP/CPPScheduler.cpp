@@ -546,6 +546,8 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 
 void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
 {
+    std::cout << "src/runtime/CPP/CPPScheduler.cpp" << std::endl;
+    std::cout << kernel->name() << std::endl;
     schedule_common(kernel, hints, window, tensors);
 }
 
