@@ -34,7 +34,7 @@ void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *o
 
 void NETokenEmbeddingLayer::prepare()
 {
-    std::cout << "NETokenEmbeddingLayer::prepare()" << std::endl;
+    std::cout << "src/runtime/NEON/functions/NETokenEmbeddingLayer.cpp: NETokenEmbeddingLayer::prepare()" << std::endl;
 }
 
 void NETokenEmbeddingLayer::run()

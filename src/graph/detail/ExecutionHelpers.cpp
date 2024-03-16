@@ -252,6 +252,7 @@ void call_all_tasks(ExecutionWorkload &workload)
     // Execute tasks
     for (auto &task : workload.tasks)
     {
+        task.task.get()->run();
         task();
     }
 
