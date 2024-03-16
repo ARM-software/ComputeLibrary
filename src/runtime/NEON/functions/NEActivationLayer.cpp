@@ -64,6 +64,7 @@ NEActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
 
 void NEActivationLayer::run()
 {
+    std::cout << "src/runtime/NEON/functions/NEActivationLayer.cpp" << std::endl;
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
