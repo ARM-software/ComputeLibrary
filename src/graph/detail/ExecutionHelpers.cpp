@@ -253,7 +253,7 @@ void call_all_tasks(ExecutionWorkload &workload)
     for (auto &task : workload.tasks)
     {
         std::cout << "src/graph/detail/ExecutionHelpers.cpp" << std::endl;
-        task.task.get()->run();
+        std::cout << task.node->name() << std::endl;
         task();
     }
 
