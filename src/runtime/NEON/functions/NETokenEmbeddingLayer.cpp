@@ -36,7 +36,8 @@ void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *o
 void NETokenEmbeddingLayer::run()
 {
     ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->vocab);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
     _impl->op->run(pack);
 }

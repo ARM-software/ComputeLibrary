@@ -83,6 +83,8 @@ Vanilla_Transformer
 |
 |
 |- Kernel ------------------> src/cpu/kernels/CpuTokenEmbedKernel.h.cpp
+|         |                                   |-> using dst::datatype for kernel selection.
+|         |                                       #TODO: data compability
 |         |
 |         |-----------------> src/cpu/kernels/CpuKernelSelectionTypes.h:
 |                                             |->TokenEmbedKernelDataTypeISASelectorData & Ptr: 

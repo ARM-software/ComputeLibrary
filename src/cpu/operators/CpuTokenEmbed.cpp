@@ -34,8 +34,9 @@ CpuTokenEmbed::validate(const ITensorInfo *input, const ITensorInfo *vocab, cons
 
 void CpuTokenEmbed::run(ITensorPack &tensors)
 {
-    std::cout<< "CpuTokenEmbed::run" << std::endl;
-    std::cout<< tensors.size() << std::endl;
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
+    auto split_dimension = static_cast<kernels::CpuTokenEmbedKernel *>(_kernel.get())->get_split_dimension_hint();
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
 

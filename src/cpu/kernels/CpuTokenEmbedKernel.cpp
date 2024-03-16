@@ -37,7 +37,16 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *v
 {
     ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, tkemb_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, vocab, dst, tkemb_info));
+    
+    const auto uk = CpuTokenEmbedKernel::get_implementation(
+        TokenEmbedKernelDataTypeISASelectorData{dst->data_type(), CPUInfo::get().get_isa()}
+    );
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
+
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuTokenEmbedKernel").append("/").append(uk->name);
 
     std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: neon_token_embed_char_2_float32" << std::endl;
 
@@ -85,10 +94,13 @@ void CpuTokenEmbedKernel::run_op(ITensorPack &tensors, const Window &window, con
     ARM_COMPUTE_ERROR_ON(tensors.empty());
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
-    const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
-    ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
+    const ITensor *src   = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    const ITensor *vocab = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    ITensor       *dst   = tensors.get_tensor(TensorType::ACL_DST);
 
-    _run_method(src, dst, _tkemb_info, window);
+    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: run_op()!!!! " << std::endl;
+
+    _run_method(src, vocab, dst, _tkemb_info, window);
 }
 
 const char *CpuTokenEmbedKernel::name() const

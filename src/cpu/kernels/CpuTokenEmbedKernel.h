@@ -16,7 +16,7 @@ class CpuTokenEmbedKernel : public ICpuKernel<CpuTokenEmbedKernel>
 {
 private:
     using TKEMBKernelPtr =
-        std::add_pointer<void(const ITensor *, ITensor *, const TokenEmbeddingLayerInfo &, const Window &)>::type;
+        std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const TokenEmbeddingLayerInfo &, const Window &)>::type;
 public:
     /* Default Constructor */
     CpuTokenEmbedKernel() = default;
