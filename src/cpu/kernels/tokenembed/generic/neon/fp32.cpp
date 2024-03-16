@@ -7,11 +7,12 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_token_embed_char_2_float32(const ITensor *src, ITensor *dst, const TokenEmbeddingLayerInfo &tkemb_info, const Window &window)
+void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, ITensor *dst, const TokenEmbeddingLayerInfo &tkemb_info, const Window &window)
 {
     std::cout << "src/cpu/kernels/tokenembed/generic/neon/fp32.cpp: neon_token_embed_char_2_float32" << std::endl;
 
     std::cout << src->info()->id() << std::endl;
+    std::cout << vocab->info()->id() << std::endl;
     std::cout << dst->info()->id() << std::endl;
     std::cout << tkemb_info.d_vocab() << std::endl;
     std::cout << window.DimX << std::endl;

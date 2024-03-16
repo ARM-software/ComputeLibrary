@@ -6,7 +6,7 @@ namespace arm_compute
 namespace cpu
 {
 #define DECLARE_TOKEN_EMBED_KERNEL(func_name) \
-    void func_name(const ITensor *src, ITensor *dst, const TokenEmbeddingLayerInfo &tkemb_info, const Window &window)
+    void func_name(const ITensor *src, const ITensor *vocab, ITensor *dst, const TokenEmbeddingLayerInfo &tkemb_info, const Window &window)
 
 #ifdef __aarch64__
 DECLARE_TOKEN_EMBED_KERNEL(neon_token_embed_char_2_float32);
