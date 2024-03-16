@@ -40,6 +40,7 @@ void NETokenEmbeddingLayer::prepare()
 void NETokenEmbeddingLayer::run()
 {
     ITensorPack pack;
+    std::cout << "src/runtime/NEON/functions/NETokenEmbeddingLayer.cpp" << std::endl;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->vocab);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
