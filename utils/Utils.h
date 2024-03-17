@@ -428,10 +428,7 @@ public:
             }
 
             bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
-            
-            std::cout << "utils/Utils.h: fill tensor :" <<std::endl;
-            std::cout << tensor.info()->tensor_shape().num_dimensions() <<std::endl;
-            for(auto shape:tensor.info()->tensor_shape())std::cout << shape <<std::endl;
+
             // Correct dimensions (Needs to match TensorShape dimension corrections)
             if (_shape.size() != tensor.info()->tensor_shape().num_dimensions())
             {
@@ -482,6 +479,9 @@ public:
                     if (!are_layouts_different && !_fortran_order && tensor.info()->padding().empty() &&
                         !enable_f32_to_f16_conversion)
                     {
+
+                        std::cout << "utils/Utils.h: fill tensor :" <<std::endl;
+                        std::cout << "no padding" << std::endl;
                         // If tensor has no padding read directly from stream.
                         _fs.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
                     }
