@@ -6,6 +6,7 @@
 
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/tokenembed/list.h"
 
@@ -44,6 +45,9 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *v
         TokenEmbedKernelDataTypeISASelectorData{dst->data_type(), CPUInfo::get().get_isa()}
     );
 
+    // Configure output tensor info.
+    auto_init_if_empty(*dst, TensorInfo(*src->clone()).set_num_channels(vocab->num_channels()));
+    
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _run_method = uk->ukernel;
