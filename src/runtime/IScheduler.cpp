@@ -117,10 +117,12 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
             info.cpu_info = &cpu_info();
             if (tensors.empty())
             {
+                std::cout << "src/runtime/IScheduler.cpp  empty() : run";
                 kernel->run(max_window, info);
             }
             else
             {
+                std::cout << "src/runtime/IScheduler.cpp  empty() : run_op";
                 kernel->run_op(tensors, max_window, info);
             }
         }
