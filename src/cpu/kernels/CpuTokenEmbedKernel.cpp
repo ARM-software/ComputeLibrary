@@ -49,31 +49,16 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *v
     _run_method = uk->ukernel;
     _name       = std::string("CpuTokenEmbedKernel").append("/").append(uk->name);
 
-
     Window win;
 
     // Use squashed window
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
     ICPPKernel::configure(win);
-
-    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: neon_token_embed_char_2_float32" << std::endl;
-
-    std::cout << src->id() << std::endl;
-    std::cout << vocab->id() << std::endl;
-    std::cout << dst->id() << std::endl;
-    std::cout << tkemb_info.d_vocab() << std::endl;
-
 }
 
 Status CpuTokenEmbedKernel::validate(const ITensorInfo *src, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info)
 {
     ARM_COMPUTE_UNUSED(tkemb_info);
-
-    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: nvalidate" << std::endl;
-    std::cout << src->id() << std::endl;
-    std::cout << dst->id() << std::endl;
-    std::cout << tkemb_info.d_vocab() << std::endl;
-
     return Status{};
 }
 
@@ -105,8 +90,6 @@ void CpuTokenEmbedKernel::run_op(ITensorPack &tensors, const Window &window, con
     const ITensor *src   = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     const ITensor *vocab = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst   = tensors.get_tensor(TensorType::ACL_DST);
-
-    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: run_op()!!!! " << std::endl;
 
     _run_method(src, vocab, dst, _tkemb_info, window);
 }
