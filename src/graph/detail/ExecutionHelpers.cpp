@@ -77,27 +77,21 @@ void allocate_all_input_tensors(INode &node)
         Tensor *tensor = node.input(i);
         if (tensor != nullptr && !tensor->bound_edges().empty())
         {
-            std::cout << "About to allocate input" <<std::endl;
             ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
             tensor->handle()->allocate();
-            std::cout << " Allocated " <<std::endl;
         }
     }
 }
 
 void allocate_all_output_tensors(INode &node)
 {
-    std::cout << "Execution Helper ";
-    std::cout << node.name() << std::endl;
     for (unsigned int i = 0; i < node.num_outputs(); ++i)
     {
         Tensor *tensor = node.output(i);
         if (tensor != nullptr && !tensor->bound_edges().empty())
         {
-            std::cout << "About to allocate output" <<std::endl;
             ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
             tensor->handle()->allocate();
-            std::cout << " Allocated " <<std::endl;
         }
     }
 }
@@ -252,8 +246,6 @@ void call_all_tasks(ExecutionWorkload &workload)
     // Execute tasks
     for (auto &task : workload.tasks)
     {
-        std::cout << "src/graph/detail/ExecutionHelpers.cpp" << std::endl;
-        std::cout << task.node->name() << std::endl;
         task();
     }
 

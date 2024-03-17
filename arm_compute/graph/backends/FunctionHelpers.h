@@ -1690,8 +1690,6 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
 template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
 {
-
-    std::cout << "create_token_embedding_layer(TokenEmbeddingLayerNode &node)" << std::endl;
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
