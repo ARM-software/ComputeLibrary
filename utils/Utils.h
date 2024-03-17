@@ -334,6 +334,10 @@ public:
             _shape               = header.shape;
             _fortran_order       = header.fortran_order;
             _typestring          = header.dtype.str();
+            std::cout << "utils/Utils.h: open npy:" <<std::endl;
+            for(auto shape:_shape)std::cout << shape <<std::endl;
+            std::cout << _fortran_order <<std::endl;
+            std::cout << _typestring <<std::endl;
         }
         catch (const std::ifstream::failure &e)
         {
