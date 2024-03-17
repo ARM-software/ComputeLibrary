@@ -35,7 +35,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *vocab, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info);
 
     /** Return minimum workload size of the relevant kernel
      *

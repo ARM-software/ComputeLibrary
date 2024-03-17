@@ -60,8 +60,12 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *v
     ICPPKernel::configure(win);
 }
 
-Status CpuTokenEmbedKernel::validate(const ITensorInfo *src, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info)
+Status CpuTokenEmbedKernel::validate(const ITensorInfo *src,  const ITensorInfo *vocab, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info)
 {
+    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp" << std::endl;
+    std::cout << src->num_channels() << std::endl;
+    std::cout << vocab->num_channels() << std::endl;
+    std::cout << dst->num_channels() << std::endl;
     ARM_COMPUTE_UNUSED(tkemb_info);
     return Status{};
 }
