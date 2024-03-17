@@ -6,6 +6,7 @@
 
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/tokenembed/list.h"
 
 namespace arm_compute
@@ -47,6 +48,13 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *v
 
     _run_method = uk->ukernel;
     _name       = std::string("CpuTokenEmbedKernel").append("/").append(uk->name);
+
+
+    Window win;
+
+    // Use squashed window
+    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
+    ICPPKernel::configure(win);
 
     std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp: neon_token_embed_char_2_float32" << std::endl;
 
