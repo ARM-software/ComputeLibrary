@@ -96,7 +96,6 @@ public:
 
     void schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors) override
     {
-        std::cout << "tests/framework/instruments/SchedulerTimer.cpp" << std::endl;
         _timer.start();
         _real_scheduler.schedule_op(kernel, hints, window, tensors);
         _timer.stop();

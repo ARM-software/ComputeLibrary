@@ -104,6 +104,8 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
         const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
         const unsigned int num_threads    = std::min(num_iterations, this->num_threads());
 
+        std::cout << "src/runtime/IScheduler.cpp num_iterations: ";
+        std::cout << num_iterations << std::endl;
         if (num_iterations == 0)
         {
             return;
