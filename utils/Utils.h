@@ -334,10 +334,6 @@ public:
             _shape               = header.shape;
             _fortran_order       = header.fortran_order;
             _typestring          = header.dtype.str();
-            std::cout << "utils/Utils.h: open npy:" <<std::endl;
-            for(auto shape:_shape)std::cout << shape <<std::endl;
-            std::cout << _fortran_order <<std::endl;
-            std::cout << _typestring <<std::endl;
         }
         catch (const std::ifstream::failure &e)
         {
@@ -432,6 +428,9 @@ public:
             }
 
             bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
+            
+            std::cout << "utils/Utils.h: fill tensor :" <<std::endl;
+            for(auto shape:tensor.info()->tensor_shape())std::cout << shape <<std::endl;
             // Correct dimensions (Needs to match TensorShape dimension corrections)
             if (_shape.size() != tensor.info()->tensor_shape().num_dimensions())
             {
@@ -471,9 +470,6 @@ public:
                 ARM_COMPUTE_ERROR_ON_MSG(permuted_shape[i] != _shape[i], "Tensor dimensions mismatch");
             }
 
-            
-            std::cout << "NPYLoader::fill_tensor" <<std::endl;
-            std::cout << tensor.info()->tensor_shape().total_size() << std::endl;
             switch (tensor.info()->data_type())
             {
                 case arm_compute::DataType::QASYMM8:
@@ -552,8 +548,7 @@ public:
         {
             ARM_COMPUTE_ERROR_VAR("Loading NPY file: %s", e.what());
         }
-        
-        std::cout << "NPYLoader::fill_tensor:   Finished" <<std::endl;
+
     }
 
 private:

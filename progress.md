@@ -130,6 +130,7 @@ Compatability:
             1: All function only support NEON right now.
             2. Input only support UTF-8 encoding (U8) input
             3. Interpret token_embedding npy in float right now 
+            4. data layout ND
 
 Functionality:
             1. Segment token:
