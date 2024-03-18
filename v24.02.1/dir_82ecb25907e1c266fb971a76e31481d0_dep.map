@@ -1,0 +1,11 @@
+<map id="src/cpu/kernels/norm_layer" name="src/cpu/kernels/norm_layer">
+<area shape="rect" id="node2" href="dir_a2940d759dc7eb1a1e217f9ea9904505.xhtml" title="generic" alt="" coords="37,92,109,140"/>
+<area shape="rect" id="node3" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="129,188,241,236"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000402_000000.xhtml" title="6" alt="" coords="140,162,150,177"/>
+<area shape="rect" id="node4" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml" title="core" alt="" coords="261,92,333,140"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000402_000017.xhtml" title="5" alt="" coords="284,64,294,79"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000017_000402.xhtml" title="2" alt="" coords="91,71,100,86"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000017_000000.xhtml" title="686" alt="" coords="220,175,246,190"/>
+<area shape="rect" id="clust2" href="dir_82ecb25907e1c266fb971a76e31481d0.xhtml" alt="" coords="27,81,240,151"/>
+<area shape="rect" id="clust1" href="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml" title="kernels" alt="" coords="16,45,251,161"/>
+</map>

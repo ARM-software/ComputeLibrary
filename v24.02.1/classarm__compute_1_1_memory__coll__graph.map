@@ -1,0 +1,4 @@
+<map id="Memory" name="Memory">
+<area shape="rect" id="node1" title="CPU implementation of memory object." alt="" coords="7,80,83,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_memory.xhtml" title="Memory interface." alt="" coords="5,5,85,32"/>
+</map>
