@@ -244,7 +244,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
                 {
                     text_ids.push_back(it->second);
                     left = right;
-                    token_map = &vocab.subword_token_to_id;
                     goto loop;
                 }
                 --right;
