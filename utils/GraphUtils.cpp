@@ -220,8 +220,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     
     std::vector<int> text_ids;
 
-    const char * chars = buffer.c_str();
-    char * token = std::strtok(const_cast<char*>(chars)," ");
 
     std::vector<std::string> tokens_vec;
     /* Split the text into words */
