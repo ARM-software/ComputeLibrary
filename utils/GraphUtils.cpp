@@ -222,19 +222,16 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     
     std::vector<int> text_ids;
-    //int v_size = 0;
+    int v_size = 0;
     const char * chars = buffer.c_str();
     char * token = std::strtok(const_cast<char*>(chars)," ");
     std::cout << token << std::endl;
-    /*
+    
     while(token != NULL)
     {
         text_ids[v_size++] = token2id[token];
         token = std::strtok(nullptr, " ");
     }
-    
-    std::cout << static_cast<int>(chars[0]) <<std::endl;*/
-    std::cout << buffer <<std::endl;
 
     /** Write back */
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
