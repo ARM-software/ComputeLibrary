@@ -222,13 +222,32 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     const char * chars = buffer.c_str();
     char * token = std::strtok(const_cast<char*>(chars)," ");
-    
-    unsigned int token_len;
-    unsigned int left,right;
+
+    std::vector<std::string> tokens;
+    /* Split the text into words */
+    {
+        std::string pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
+
+        std::regex re(pat);
+        std::smatch m;
+
+        while (std::regex_search(buffer, m, re))
+        {
+            for (std::string x : m)
+            {
+                tokens.push_back(x);
+            }
+            buffer = m.suffix();
+        }
+
+    }
+    for(auto t:tokens) std::cout << t << std::endl;
+    //unsigned int token_len;
+    //unsigned int left,right;
     /*  left    right
      *   0 1 2 3 4   
      */
-    /** Find longest matching string in vocabulary list */
+    /** Find longest matching string in vocabulary list 
     while(token != NULL)
     {
         token_len = std::strlen(token);
@@ -244,6 +263,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
                 {
                     text_ids.push_back(it->second);
                     left = right;
+                    token_map = &vocab.subword_token_to_id;
                     goto loop;
                 }
                 --right;
@@ -255,7 +275,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
         token = std::strtok(nullptr, " ");
     }
 
-    for (auto &v : text_ids)std::cout << v << std::endl;
+    for (auto &v : text_ids)std::cout << v << std::endl;*/
 
     /** Write back */
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
