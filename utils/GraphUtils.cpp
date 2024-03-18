@@ -230,7 +230,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     while(token != NULL)
     {
         std::cout << token << std::endl;
-        text_ids[v_size++] = token2id[token];
+        text_ids.push_back(token2id[token]);
         token = std::strtok(nullptr, " ");
     }
 
