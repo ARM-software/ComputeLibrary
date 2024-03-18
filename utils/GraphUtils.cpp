@@ -192,6 +192,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer+=end_token;
     
     std::cout << reinterpret_cast<int>buffer[0] <<std::endl;
+    std::cout << buffer <<std::endl;
 
     /** Write back */
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
