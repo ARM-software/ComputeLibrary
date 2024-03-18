@@ -136,6 +136,10 @@ Functionality:
             1. Segment token:
             2. Token vectorize
 
+Optimization: 
+            1. window collapse
+
+
 Input           char U8
   |  
   |
