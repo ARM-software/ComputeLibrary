@@ -237,7 +237,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     }
     for(auto t:tokens_vec) std::cout << t << std::endl;
     text_ids.push_back(token2id[start_token]);
-    text_ids.push_back(token2id[end_token]);
     //unsigned int token_len;
     //unsigned int left,right;
     /*  left    right
@@ -271,7 +270,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
         token = std::strtok(nullptr, " ");
     }
 
-    for (auto &v : text_ids)std::cout << v << std::endl;*/
+    text_ids.push_back(token2id[end_token]);*/
+    for (auto &v : text_ids)std::cout << v << std::endl;
 
     /** Write back */
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
