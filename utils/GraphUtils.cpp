@@ -225,10 +225,11 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     
     while(token != NULL)
     {
-        std::cout << token << std::endl;
         text_ids.push_back(token2id[token]);
         token = std::strtok(nullptr, " ");
     }
+
+    for (auto &v : text_ids)std::cout << v << std::endl;
 
     /** Write back */
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
