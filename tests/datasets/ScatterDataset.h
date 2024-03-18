@@ -113,12 +113,13 @@ private:
     std::vector<TensorShape> _dst_shapes{};
 };
 
-class SmallScatterDataset final : public ScatterDataset
+class Small1DScatterDataset final : public ScatterDataset
 {
 public:
-    SmallScatterDataset()
+    Small1DScatterDataset()
     {
         add_config(TensorShape(6U), TensorShape(6U), TensorShape(6U), TensorShape(6U));
+        add_config(TensorShape(10U), TensorShape(2U), TensorShape(2U), TensorShape(10U));
     }
 };
 } // namespace datasets

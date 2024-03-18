@@ -59,7 +59,7 @@ void ClScatter::configure(const CLCompileContext &compile_context,
                           ITensorInfo            *dst,
                           const ScatterInfo      &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, indices, dst);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(updates, indices, dst);
     ARM_COMPUTE_LOG_PARAMS(src, indices, dst, info);
     ARM_COMPUTE_UNUSED(src);
     ARM_COMPUTE_UNUSED(updates);

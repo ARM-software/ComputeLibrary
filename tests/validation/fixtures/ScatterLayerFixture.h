@@ -25,13 +25,16 @@
 #define ACL_TESTS_VALIDATION_FIXTURES_SCATTERLAYERFIXTURE_H
 
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h" // Required for ARM_COMPUTE_ASSERT
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/reference/ScatterLayer.h"
 #include "tests/SimpleTensor.h"
+
 #include <random>
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -68,6 +71,16 @@ protected:
         }
     }
 
+    // This is used to fill indices tensor with U32 datatype.
+    // Used to prevent ONLY having values that are out of bounds.
+    template <typename U>
+    void fill_indices(U &&tensor, int i, const TensorShape &shape)
+    {
+        // Calculate max indices the shape should contain. Add an arbitrary constant to allow testing for some out of bounds values.
+        const uint32_t max = std::max({shape[0] , shape[1], shape[2]}) + 5;
+        library->fill_tensor_uniform(tensor, i, static_cast<uint32_t>(0), static_cast<uint32_t>(max));
+    }
+
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &out_shape, DataType data_type, const ScatterInfo info, QuantizationInfo a_qinfo, QuantizationInfo o_qinfo)
     {
         // 1. Create relevant tensors using ScatterInfo data structure.
@@ -81,7 +94,15 @@ protected:
         FunctionType scatter;
 
         // Configure operator
-        scatter.configure(&src, &updates, &indices, &dst, info);
+        // When scatter_info.zero_initialization is true, pass nullptr to scatter function.
+        if(info.zero_initialization)
+        {
+            scatter.configure(nullptr, &updates, &indices, &dst, info);
+        }
+        else
+        {
+            scatter.configure(&src, &updates, &indices, &dst, info);
+        }
 
         // Assertions
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
@@ -103,7 +124,7 @@ protected:
         // Fill update (a) and indices (b) tensors.
         fill(AccessorType(src), 0);
         fill(AccessorType(updates), 1);
-        fill(AccessorType(indices), 2);
+        fill_indices(AccessorType(indices), 2, out_shape);
 
         scatter.run();
 
@@ -124,7 +145,7 @@ protected:
         // Fill reference
         fill(src, 0);
         fill(updates, 1);
-        fill(indices, 2);
+        fill_indices(indices, 2, out_shape);
 
         // Calculate individual reference.
         auto result = reference::scatter_layer<T>(src, updates, indices, out_shape, info);
@@ -141,9 +162,9 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScatterValidationFixture : public ScatterGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape src_shape, TensorShape indices_shape,  TensorShape out_shape, DataType data_type, ScatterFunction func, bool zero_init)
+    void setup(TensorShape src_shape, TensorShape update_shape, TensorShape indices_shape,  TensorShape out_shape, DataType data_type, ScatterFunction func, bool zero_init)
     {
-        ScatterGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, indices_shape, indices_shape, out_shape, data_type, ScatterInfo(func, zero_init), QuantizationInfo(), QuantizationInfo());
+        ScatterGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, update_shape, indices_shape, out_shape, data_type, ScatterInfo(func, zero_init), QuantizationInfo(), QuantizationInfo());
     }
 };
 

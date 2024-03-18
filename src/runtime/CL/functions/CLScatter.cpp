@@ -62,10 +62,17 @@ void CLScatter::configure(const CLCompileContext &compile_context,
                           ICLTensor              *output,
                           const ScatterInfo      &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, indices, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(updates, indices, output);
 
     _impl->op = std::make_unique<OperatorType>();
-    _impl->op->configure(compile_context, src->info(), updates->info(), indices->info(), output->info(), info);
+    if (src)
+    { // Src not nullptr.
+        _impl->op->configure(compile_context, src->info(), updates->info(), indices->info(), output->info(), info);
+    }
+    else
+    {
+        _impl->op->configure(compile_context, nullptr, updates->info(), indices->info(), output->info(), info);
+    }
     _impl->run_pack = {{ACL_SRC_0, src}, {ACL_SRC_1, updates}, {ACL_SRC_2, indices}, {ACL_DST, output}};
 }
 
