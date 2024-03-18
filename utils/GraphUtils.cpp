@@ -185,6 +185,8 @@ std::map<std::string,int> get_token2id(std::string path_vocab)
         char *token     = strtok(const_cast<char*>(line.c_str()), " ");
         char *token_id  = strtok(nullptr, " "); // Continues previous str invocation
         token2id[token] = std::stoi(token_id);
+
+        std::cout << std::stoi(token_id) << std::endl;
     }
     fstream_vocab.close();
 
