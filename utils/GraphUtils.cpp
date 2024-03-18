@@ -166,6 +166,32 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     }
 }
 
+/** Helper function for converting token to id, id to token
+ * 
+ * @param[in] path_vocab    String path to vocab list txt file
+ * 
+ * @return A map pair, containing 2 maps, token to id, id to token
+*/
+std::pair<std::map<std::string,int>, std::map<int,std::string> > get_vocab_list(std::string path_vocab)
+{
+    std::map<std::string,int> token2id;
+    std::map<int,std::string> id2token;
+    
+    std::fstream fstream_vocab;
+    fstream_vocab.open(path_vocab,std::ios::in);
+    
+    std::string line;
+    while (getline(fstream_vocab,line))
+    {   
+        char *token     = strtok(const_cast<char*>(line.c_str()), " ");
+        char *token_id  = strtok(nullptr, " "); // Continues previous str invocation
+        token2id[token] = std::stoi(token_id);
+        id2token[std::stoi(token_id)] = token;
+    }
+    fstream_vocab.close();
+
+    return std::make_pair(token2id, id2token);
+}
 
 template <typename T, typename... Args>
 void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
@@ -191,8 +217,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer+=divide_helper;
     buffer+=end_token;
     
+    /** Sepreate into tokens and look up vocab list */
     const char * chars = buffer.c_str();
-
     std::cout << static_cast<int>(chars[0]) <<std::endl;
     std::cout << buffer <<std::endl;
 
