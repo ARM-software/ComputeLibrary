@@ -213,21 +213,21 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     //buffer+=end_token;
     
     /** Sepreate into tokens and look up vocab list */
-    std::map<std::string,int> token2id = get_token2id(_vocab_file);
+    std::map<std::basic_string<T>,int> token2id = get_token2id(_vocab_file);
     
     std::vector<int> text_ids;
 
-    std::vector<std::string> tokens_vec;
+    std::vector<std::basic_string<T>> tokens_vec;
     /* Split the text into words */
     {
-        std::string pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
+        std::basic_string<T> pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
 
         std::regex re(pat);
         std::smatch m;
 
         while (std::regex_search(buffer, m, re))
         {
-            for (std::string x : m)
+            for (std::basic_string<T> x : m)
             {
                 tokens_vec.push_back(x);
             }
@@ -236,17 +236,20 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     }
     for(auto t:tokens_vec) std::cout << t << std::endl;
+    
     text_ids.push_back(token2id[start_token]);
-    //unsigned int token_len;
-    //unsigned int left,right;
+
+    unsigned int token_len;
+    unsigned int left,right;
     /*  left    right
      *   0 1 2 3 4   
      */
-    /** Find longest matching string in vocabulary list 
-    while(token != NULL)
+    /** Find longest matching string in vocabulary list */
+   for(const auto &token : tokens_vec)
     {
-        token_len = std::strlen(token);
+        token_len = token.size();
         left = 0;
+        token
     loop:
         while (left < token_len)
         {
@@ -269,8 +272,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
         text_ids.push_back(token2id[token]);
         token = std::strtok(nullptr, " ");
     }
-    */
-   
+    
+
     text_ids.push_back(token2id[end_token]);
     for (auto &v : text_ids)std::cout << v << std::endl;
 
