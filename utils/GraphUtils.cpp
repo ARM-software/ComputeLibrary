@@ -195,8 +195,8 @@ template <typename T, typename... Args>
 void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 {
     //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
-    //const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
-    //const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
+    const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
+    const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
 
     std::basic_string<T> buffer;
 
@@ -236,6 +236,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     }
     for(auto t:tokens_vec) std::cout << t << std::endl;
+    text_ids.push_back(token2id[start_token]);
+    text_ids.push_back(token2id[end_token]);
     //unsigned int token_len;
     //unsigned int left,right;
     /*  left    right
