@@ -219,12 +219,15 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     std::map<std::string,int> token2id = get_token2id(_vocab_file);
     
     std::vector<int> text_ids;
-    //int v_size = 0;
+
     const char * chars = buffer.c_str();
     char * token = std::strtok(const_cast<char*>(chars)," ");
     
+    /** Find longest matching string in vocabulary list */
     while(token != NULL)
     {
+        std::cout << token.size() << std::endl;
+
         text_ids.push_back(token2id[token]);
         token = std::strtok(nullptr, " ");
     }
