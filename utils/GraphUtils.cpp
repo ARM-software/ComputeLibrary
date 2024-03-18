@@ -269,9 +269,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
             }
             ARM_COMPUTE_ERROR_ON_MSG(right == left, token_buffer.append(" unkown in vocabulary list"));
         }
-
-        text_ids.push_back(token2id[token]);
-        token = std::strtok(nullptr, " ");
     }
     
 
