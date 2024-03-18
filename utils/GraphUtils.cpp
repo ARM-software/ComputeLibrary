@@ -102,7 +102,7 @@ void TFPreproccessor::preprocess_typed(ITensor &tensor)
                         });
 }
 
-WordPiecePreprocessor::WordPiecePreprocessor()
+WordPiecePreprocessor::WordPiecePreprocessor(const std::string &vocab_file): _vocab_file(vocab_file)
 {
 }
 
@@ -166,16 +166,15 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     }
 }
 
-/** Helper function for converting token to id, id to token
+/** Helper function for converting token to id
  * 
  * @param[in] path_vocab    String path to vocab list txt file
  * 
- * @return A map pair, containing 2 maps, token to id, id to token
+ * @return A map containing token, id
 */
-std::pair<std::map<std::string,int>, std::map<int,std::string> > get_vocab_list(std::string path_vocab)
+std::map<std::string,int> get_token2id(std::string path_vocab)
 {
     std::map<std::string,int> token2id;
-    std::map<int,std::string> id2token;
     
     std::fstream fstream_vocab;
     fstream_vocab.open(path_vocab,std::ios::in);
@@ -186,11 +185,10 @@ std::pair<std::map<std::string,int>, std::map<int,std::string> > get_vocab_list(
         char *token     = strtok(const_cast<char*>(line.c_str()), " ");
         char *token_id  = strtok(nullptr, " "); // Continues previous str invocation
         token2id[token] = std::stoi(token_id);
-        id2token[std::stoi(token_id)] = token;
     }
     fstream_vocab.close();
 
-    return std::make_pair(token2id, id2token);
+    return token2id;
 }
 
 template <typename T, typename... Args>
@@ -218,7 +216,17 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer+=end_token;
     
     /** Sepreate into tokens and look up vocab list */
+    std::map<std::string,int> token2id = get_token2id(_vocab_file);
+    int v_size = 0;
     const char * chars = buffer.c_str();
+    char * token = std::strtok(const_cast<char*>(chars)," ");
+    
+    while(token != NULL)
+    {
+        text_ids[v_size++] = token2id[token];
+        token = std::strtok(nullptr, " ");
+    }
+
     std::cout << static_cast<int>(chars[0]) <<std::endl;
     std::cout << buffer <<std::endl;
 

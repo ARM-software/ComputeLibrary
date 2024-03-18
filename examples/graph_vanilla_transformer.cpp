@@ -110,7 +110,7 @@ public:
         graph << common_params.target << common_params.fast_math_hint;
 
         // Text preprocessor
-        std::unique_ptr<IPreprocessor> preproccessor = std::make_unique<WordPiecePreprocessor>();
+        std::unique_ptr<IPreprocessor> preproccessor = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
 
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))).set_name("in1")

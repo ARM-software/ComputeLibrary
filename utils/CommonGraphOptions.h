@@ -49,6 +49,7 @@ namespace utils
  * --data             : Path that contains the trainable parameter files of graph layers.
  * --image            : Image to load and operate on. Image types supported: PPM, JPEG, NPY.
  * --text             : Text to load and operate on. Text types supported: TXT.
+ * --vocabulary       : Vocabulary list for text tokenization
  * --labels           : File that contains the labels that classify upon.
  * --validation-file  : File that contains a list of image names with their corresponding label id (e.g. image0.jpg 5).
  *                      This is used to run the graph over a number of images and report top-1 and top-5 metrics.
@@ -106,6 +107,7 @@ struct CommonGraphParams
     std::string                      data_path{};
     std::string                      image{};
     std::string                      text{};
+    std::string                      vocabulary{};
     std::string                      labels{};
     std::string                      validation_file{};
     std::string                      validation_path{};
@@ -165,6 +167,7 @@ public:
     SimpleOption<std::string>              *data_path;        /**< Trainable parameters path */
     SimpleOption<std::string>              *image;            /**< Image */
     SimpleOption<std::string>              *text;             /**< Text */
+    SimpleOption<std::string>              *vocabulary;       /**< Vocabulary */
     SimpleOption<std::string>              *labels;           /**< Labels */
     SimpleOption<std::string>              *validation_file;  /**< Validation file */
     SimpleOption<std::string>              *validation_path;  /**< Validation data path */

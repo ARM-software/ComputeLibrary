@@ -61,15 +61,17 @@ class WordPiecePreprocessor : public IPreprocessor
 {
 public:
     /** Default Constructor
-     *
+     * 
+     * @param[in] vocab_file Path to vocab list txt file
      */
-    WordPiecePreprocessor();
+    WordPiecePreprocessor(const std::string &vocab_file);
     void preprocess(ITensor &tensor) override;
 
 private:
     template <typename T, typename... Args>
     void preprocess_typed(ITensor &tensor,Args &&... tokens);
-    
+
+    std::string _vocab_file;
 };
 
 /** Caffe preproccessor */
