@@ -29,6 +29,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     execute_window_loop(win,
         [&](const Coordinates &){
             std::cout << *(src_ptr) << std::endl;
+            std::cout << *(vocab_ptr) << std::endl;
         },vocab_iter);
 
 }
