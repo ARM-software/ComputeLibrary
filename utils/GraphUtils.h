@@ -64,7 +64,7 @@ public:
      * 
      * @param[in] vocab_file Path to vocab list txt file
      */
-    WordPiecePreprocessor(const std::string &vocab_file);
+    WordPiecePreprocessor(const std::string vocab_file);
     void preprocess(ITensor &tensor) override;
 
 private:

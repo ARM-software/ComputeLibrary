@@ -102,7 +102,7 @@ void TFPreproccessor::preprocess_typed(ITensor &tensor)
                         });
 }
 
-WordPiecePreprocessor::WordPiecePreprocessor(const std::string &vocab_file): _vocab_file(vocab_file)
+WordPiecePreprocessor::WordPiecePreprocessor(const std::string vocab_file): _vocab_file(vocab_file)
 {
 }
 
