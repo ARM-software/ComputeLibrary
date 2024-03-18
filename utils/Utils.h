@@ -429,12 +429,6 @@ public:
 
             bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
             
-            std::cout << "utils/Utils.h: fill tensor :" <<std::endl;
-            std::cout << tensor.info()->tensor_shape().num_dimensions() <<std::endl;
-            for(auto shape: tensor.info()->tensor_shape() )std::cout << shape <<std::endl;
-            std::cout << tensor.info()->tensor_shape().x() <<std::endl;
-            std::cout << tensor.info()->tensor_shape().y() <<std::endl;
-            std::cout << tensor.info()->tensor_shape().z() <<std::endl;
             // Correct dimensions (Needs to match TensorShape dimension corrections)
             if (_shape.size() != tensor.info()->tensor_shape().num_dimensions())
             {
