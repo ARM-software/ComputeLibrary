@@ -269,8 +269,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
         text_ids.push_back(token2id[token]);
         token = std::strtok(nullptr, " ");
     }
-
-    text_ids.push_back(token2id[end_token]);*/
+    */
+    text_ids.push_back(token2id[end_token]);
     for (auto &v : text_ids)std::cout << v << std::endl;
 
     /** Write back */
