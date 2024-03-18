@@ -241,6 +241,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     unsigned int token_len;
     unsigned int left,right;
+    std::basic_string<T> token_buffer;
     /*  left    right
      *   0 1 2 3 4   
      */
@@ -249,7 +250,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     {
         token_len = token.size();
         left = 0;
-        token
     loop:
         while (left < token_len)
         {
