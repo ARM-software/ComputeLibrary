@@ -83,13 +83,14 @@ Vanilla_Transformer
 |
 |
 |- Kernel ------------------> src/cpu/kernels/CpuTokenEmbedKernel.h.cpp
-|         |                                   |-> using dst::datatype for kernel selection.
-|         |                                       #TODO: data compability
+|         |                   |               |-> using dst::datatype for kernel selection.
+|         |                   |                  #TODO: data compability
+|         |                   src/cpu/kernels/tokenembed/generic/neon/fp32.cpp
 |         |
 |         |-----------------> src/cpu/kernels/CpuKernelSelectionTypes.h:
 |                                             |->TokenEmbedKernelDataTypeISASelectorData & Ptr: 
 |                                                For selecting kernel implmentation
-|
+|           
 |
 |- Utils -------------------> utils/GraphUtils.h
          |                          |-> TextAccessor
