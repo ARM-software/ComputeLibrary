@@ -185,8 +185,6 @@ std::map<std::string,int> get_token2id(std::string path_vocab)
         char *token     = strtok(const_cast<char*>(line.c_str()), " ");
         char *token_id  = strtok(nullptr, " "); // Continues previous str invocation
         token2id[token] = std::stoi(token_id);
-
-        std::cout << std::stoi(token_id) << std::endl;
     }
     fstream_vocab.close();
 
@@ -219,9 +217,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     
     /** Sepreate into tokens and look up vocab list */
     std::map<std::string,int> token2id = get_token2id(_vocab_file);
-    std::cout << token2id.size() << std::endl;
 
-    /*
     std::vector<int> text_ids;
     int v_size = 0;
     const char * chars = buffer.c_str();
@@ -233,7 +229,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
         token = std::strtok(nullptr, " ");
     }
     
-    std::cout << static_cast<int>(chars[0]) <<std::endl;*/
+    for(auto v : text_ids)std::cout << v << std::endl;
+
     std::cout << buffer <<std::endl;
 
     /** Write back */
@@ -363,8 +360,6 @@ void NumPyAccessor::access_numpy_tensor(ITensor &tensor, T tolerance)
 
 bool NumPyAccessor::access_tensor(ITensor &tensor)
 {
-
-    std::cout << "NumPy Accessor called" << std::endl;
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON(_npy_tensor.info()->dimension(0) != tensor.info()->dimension(0));
 
