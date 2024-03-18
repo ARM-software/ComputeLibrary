@@ -218,7 +218,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     
     /** Sepreate into tokens and look up vocab list */
     std::map<std::string,int> token2id = get_token2id(_vocab_file);
-    std::cout << token2id["[PAD]"] << std::endl;
+    std::cout << token2id["[unused12]"] << std::endl;
     /*
     std::vector<int> text_ids;
     int v_size = 0;
