@@ -224,13 +224,12 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     char * token = std::strtok(const_cast<char*>(chars)," ");
     
     unsigned int token_len;
-    unsigned int i;
     /** Find longest matching string in vocabulary list */
     while(token != NULL)
     {
         token_len = std::strlen(token);
         std::cout << token_len << std::endl;
-        
+
         text_ids.push_back(token2id[token]);
         token = std::strtok(nullptr, " ");
     }
