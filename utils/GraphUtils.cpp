@@ -191,7 +191,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer+=divide_helper;
     buffer+=end_token;
     
-    std::cout << reinterpret_cast<int>(buffer[0]) <<std::endl;
+    const char * chars = text.c_str();
+    std::cout << reinterpret_cast<int>(chars[0]) <<std::endl;
     std::cout << buffer <<std::endl;
 
     /** Write back */
