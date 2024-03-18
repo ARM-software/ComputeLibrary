@@ -248,7 +248,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     /** Find longest matching string in vocabulary list */
    for(const auto &token : tokens_vec)
     {
-        token_len = token.size();
+        token_buffer = token;
+        token_len = token_buffer.size();
         left = 0;
     loop:
         while (left < token_len)
@@ -256,17 +257,17 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
             right = token_len;
             while (right > left)
             {
-                auto it = token2id.find(token.substr(left, right - left));
-                if (it != token_map.end())
+                auto it = token2id.find(token_buffer.substr(left, right - left));
+                if (it != token2id.end())
                 {
                     text_ids.push_back(it->second);
                     left = right;
-                    token_map = &vocab.subword_token_to_id;
+                    token_buffer = "##" + token_buffer.substr(left, token_len);
                     goto loop;
                 }
-                --right;
+                right--;
             }
-            ARM_COMPUTE_ERROR_ON_MSG(right == left,token.append(" unkown in vocabulary list"));
+            ARM_COMPUTE_ERROR_ON_MSG(right == left, token_buffer.append(" unkown in vocabulary list"));
         }
 
         text_ids.push_back(token2id[token]);
