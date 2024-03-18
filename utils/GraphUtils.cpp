@@ -268,6 +268,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
                 right--;
             }
             ARM_COMPUTE_ERROR_ON_MSG(right == left, token_buffer.append(" unkown in vocabulary list"));
+            left++;
         }
     }
     
