@@ -220,12 +220,13 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     std::cout << token2id["[unused12]"] << std::endl;
 
-    /*
+    
     std::vector<int> text_ids;
     int v_size = 0;
     const char * chars = buffer.c_str();
     char * token = std::strtok(const_cast<char*>(chars)," ");
-    
+    std::cout << token << std::endl;
+    /*
     while(token != NULL)
     {
         text_ids[v_size++] = token2id[token];
