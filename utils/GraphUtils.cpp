@@ -223,7 +223,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     const char * chars = buffer.c_str();
     char * token = std::strtok(const_cast<char*>(chars)," ");
 
-    std::vector<std::string> tokens;
+    std::vector<std::string> tokens_vec;
     /* Split the text into words */
     {
         std::string pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
@@ -235,13 +235,13 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
         {
             for (std::string x : m)
             {
-                tokens.push_back(x);
+                tokens_vec.push_back(x);
             }
             buffer = m.suffix();
         }
 
     }
-    for(auto t:tokens) std::cout << t << std::endl;
+    for(auto t:tokens_vec) std::cout << t << std::endl;
     //unsigned int token_len;
     //unsigned int left,right;
     /*  left    right
