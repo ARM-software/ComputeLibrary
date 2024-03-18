@@ -174,6 +174,7 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
 */
 std::map<std::string,int> get_token2id(std::string path_vocab)
 {
+    std::cout << path_vocab << std::endl;
     std::map<std::string,int> token2id;
     
     std::fstream fstream_vocab;
@@ -216,7 +217,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     buffer+=end_token;
     
     /** Sepreate into tokens and look up vocab list */
-    std::map<std::string,int> token2id = get_token2id(_vocab_file);
+    get_token2id(_vocab_file);
+    /*
     std::vector<int> text_ids;
     int v_size = 0;
     const char * chars = buffer.c_str();
@@ -227,7 +229,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
         text_ids[v_size++] = token2id[token];
         token = std::strtok(nullptr, " ");
     }
-
+    */
     std::cout << static_cast<int>(chars[0]) <<std::endl;
     std::cout << buffer <<std::endl;
 
