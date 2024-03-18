@@ -17,8 +17,8 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     std::cout << tkemb_info.d_vocab() << std::endl;
     
 
-    const auto  window_start_x = static_cast<int>(window.x().start());
-    const auto  window_end_x   = static_cast<int>(window.x().end());
+    //const auto  window_start_x = static_cast<int>(window.x().start());
+    //const auto  window_end_x   = static_cast<int>(window.x().end());
 
     std::cout << reinterpret_cast<float *>(vocab->buffer())  << std::endl;
 
