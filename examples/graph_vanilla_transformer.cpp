@@ -99,7 +99,7 @@ public:
        //const auto operation_layout = common_params.data_layout;
 
        // Create input tensor
-       const TensorShape src_tensor = TensorShape(13U+5U+5U+2U);
+       const TensorShape src_tensor = TensorShape(13U);
 
         // Data layout
         const DataLayout operation_layout = DataLayout::NDHWC;

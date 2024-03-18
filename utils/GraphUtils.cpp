@@ -197,29 +197,25 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
     const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
-    const T * divide_helper = reinterpret_cast<const T *>(get_nth_elm<3>(tokens...));
 
     std::basic_string<T> buffer;
 
-    buffer+=start_token;
-    buffer+=divide_helper;
+    //buffer+=start_token;
 
     /** Read in */
     Window window;
-    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0)-5U-5U-2U,1)); // Padding offset
+    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0),1)); // Padding offset
     execute_window_loop(window,
                         [&](const Coordinates id){
                             buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
                         });
 
-    buffer+=divide_helper;
-    buffer+=end_token;
+    //buffer+=end_token;
     
     /** Sepreate into tokens and look up vocab list */
     std::map<std::string,int> token2id = get_token2id(_vocab_file);
     
     std::vector<int> text_ids;
-
 
     std::vector<std::string> tokens_vec;
     /* Split the text into words */
