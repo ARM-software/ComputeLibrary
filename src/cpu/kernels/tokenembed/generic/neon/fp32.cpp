@@ -24,7 +24,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
 
     const auto vocab_ptr = reinterpret_cast<float *>(vocab_iter.ptr());
     std::cout << "YeaHhhhhhhhhhhh " << std::endl;
-    execute_window_loop(win,
+    execute_window_loop(window,
         [&](const Coordinates &){
             std::cout << *(vocab_ptr) << std::endl;
         },vocab_iter);
