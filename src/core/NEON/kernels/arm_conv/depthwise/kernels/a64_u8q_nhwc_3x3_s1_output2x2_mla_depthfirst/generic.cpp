@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ void a64_u8q_nhwc_3x3_s1_output2x2_mla_depthfirst_impl(
 {
   struct Params
   {
-    long unsigned int n_channels;
+    uint64_t n_channels;
     const void *weights;
     const int32_t *bias;
     const arm_gemm::Requantize32 *requant;

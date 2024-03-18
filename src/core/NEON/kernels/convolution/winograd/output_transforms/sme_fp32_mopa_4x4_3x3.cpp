@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,15 +31,15 @@ namespace winograd {
 namespace output_transform {
 
 void sme_fp32_mopa_4x4_3x3(
-  const unsigned int n_channels,
+  unsigned int n_channels,
   const float* inptr,
-  const size_t matrix_stride,
+  size_t matrix_stride,
   const float* bptr,
   float* const output,
-  const size_t output_row_stride,
-  const size_t output_col_stride,
-  const float output_min,
-  const float output_max
+  size_t output_row_stride,
+  size_t output_col_stride,
+  float output_min,
+  float output_max
 )
 {
   // The below assembler uses the Kronecker product and the "vec trick" to
