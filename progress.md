@@ -143,7 +143,8 @@ Optimization:
             1. window collapse
 
 
-Input           char U8
-  |  
+Input                                                           char U8
+  |             
+utils/GraphUtils.cpp                                        U8 -> unsigned int
   |
-Token Embed     U8 -> FP32
+src/cpu/kernels/tokenembed/generic/neon/fp32.cpp           unsigned int -> FP32
