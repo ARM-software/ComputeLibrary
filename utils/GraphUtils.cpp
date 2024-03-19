@@ -274,12 +274,10 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     // [CLS]
     text_ids.push_back(token2id[start_token]);
 
-    find_longest_matching(tokens_vec, token2id, text_ids);
+    find_longest_matching<T>(tokens_vec, token2id, text_ids);
 
     // [SEP]
     text_ids.push_back(token2id[end_token]);
-
-    for (auto &v : text_ids)std::cout << v << std::endl;
 
     /** Write back */
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
@@ -290,7 +288,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     
 
 }
-
 
 
 CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, float scale)

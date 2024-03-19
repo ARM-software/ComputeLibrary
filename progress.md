@@ -126,6 +126,8 @@ Vanilla_Transformer
                                     |-> get_text_type_from_file: TODO: now just return Default UTF-8
 
 
+Potential problem:
+            1.utils/GraphUtils.cpp: Text Preprocess input/output tensor shape may mis match
 
 Compatability:
             1: All function only support NEON right now.
