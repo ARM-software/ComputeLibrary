@@ -22,7 +22,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
     //unsigned int       y                = dst_start_y;
 
-    unsigned int offset;
+    unsigned int offset_src, offset_dst;
 
     std::cout << "Tensor shape" << std::endl;
     std::cout << src->info()->tensor_shape().x() << std::endl;
@@ -31,9 +31,11 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     std::cout << tkemb_info.d_model() << std::endl;
     
     Iterator src_iter(src,win);
+    Iterator dst_iter(dst,win);
     Iterator vocab_iter(vocab,win);
 
     const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
+    const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
     const auto vocab_ptr    = reinterpret_cast<float *>(vocab_iter.ptr());
 
     std::cout << "YeaHhhhhhhhhhhh " << std::endl;
@@ -45,11 +47,12 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
                 std::cout << *(src_ptr+x) << std::endl;
 
                 std::cout << *(vocab_ptr) << std::endl;
-                offset = dst_start_y+  0 * dst_end_y;
-                std::cout << *(vocab_ptr + offset) << std::endl;
-                offset = dst_start_y+  1 * dst_end_y;
-                std::cout << *(vocab_ptr + offset) << std::endl;
-            
+                offset_src = dst_start_y+  0 * dst_end_y - 1;
+                std::cout << *(vocab_ptr + offset_src) << std::endl;
+                offset_src = dst_start_y+  1 * dst_end_y - 1;
+                std::cout << *(vocab_ptr + offset_src) << std::endl;
+
+                //std::memcpy(dst_ptr, src_ptr, sizeof(dst_end_y ));
             }
 
             std::cout << *(vocab_ptr) << std::endl;
