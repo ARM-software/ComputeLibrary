@@ -10,15 +10,14 @@ namespace cpu
 void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, ITensor *dst, const TokenEmbeddingLayerInfo &tkemb_info, const Window &window)
 {
     std::cout << "src/cpu/kernels/tokenembed/generic/neon/fp32.cpp: neon_token_embed_char_2_float32" << std::endl;
-    std::cout << tkemb_info.d_model() << std::endl;
 
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
+    win.set(Window::DimY, Window::Dimension(0,1,1));
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = src->info()->tensor_shape().x();
     unsigned int       x                = window_start_x;
 
-    const unsigned int dst_start_y      = static_cast<unsigned int>(window.y().start());
     const unsigned int vector_depth     = tkemb_info.d_model();
 
     unsigned int id_src,offset_vocab, offset_dst;
@@ -40,15 +39,15 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
                 id_src = *(src_ptr+x);
                 std::cout << id_src << std::endl;
 
-                offset_dst      = x * vector_depth + dst_start_y;
+                offset_dst      = x * vector_depth;
                 offset_vocab    = id_src * vector_depth;
 
-                std::memcpy(dst_ptr + offset_dst, vocab_ptr + offset_vocab, vector_depth * sizeof(*vocab_ptr));
+                std::memcpy(dst_ptr + offset_dst, vocab_ptr + offset_vocab, (vector_depth-1) * sizeof(*vocab_ptr));
+
+                std::cout << *(dst_ptr + offset_dst) << std::endl;
 
             }
-
-            std::cout << *(vocab_ptr) << std::endl;
-        },vocab_iter);
+        },vocab_iter,src_iter,vocab_iter);
 
 }
 
