@@ -279,6 +279,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     // [SEP]
     text_ids.push_back(token2id[end_token]);
 
+    std::cout << "utils/GraphUtils.cpp" << std::endl;
     for (auto &v : text_ids)std::cout << v << std::endl;
 
     /** Write back */
