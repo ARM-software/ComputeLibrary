@@ -25,11 +25,7 @@ NETokenEmbeddingLayer::~NETokenEmbeddingLayer() = default;
 
 void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *output, TokenEmbeddingLayerInfo tkemb_info)
 {
-    std::cout << "src/runtime/NEON/functions/NETokenEmbeddingLayer.cpp" << std::endl;
     _impl->src      = input;
-    std::cout << _impl->src->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().z() << std::endl;
     _impl->vocab    = vocab;
     _impl->dst = output == nullptr ? input : output;
     _impl->op  = std::make_unique<cpu::CpuTokenEmbed>();
@@ -43,6 +39,8 @@ void NETokenEmbeddingLayer::prepare()
 void NETokenEmbeddingLayer::run()
 {
     ITensorPack pack;
+    std::cout << "src/runtime/NEON/functions/NETokenEmbeddingLayer.cpp" << std::endl;
+    std::cout << _impl->src->info()->tensor_shape().x() << std::endl;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->vocab);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
