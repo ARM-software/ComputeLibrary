@@ -18,8 +18,8 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const unsigned int window_end_x     = src->info()->tensor_shape().x();
     unsigned int       x                = window_start_x;
 
-    const unsigned int dst_start_y      = static_cast<unsigned int>(window.x().start());
-    const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
+    //const unsigned int dst_start_y      = static_cast<unsigned int>(window.x().start());
+    //const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
 
     std::cout << "Tensor shape" << std::endl;
     std::cout << dst->info()->tensor_shape().x() << std::endl;
