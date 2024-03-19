@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_ELEMENTWISE_IMPL_H
-#define SRC_CORE_NEON_KERNELS_ELEMENTWISE_IMPL_H
+#ifndef ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_NEON_IMPL_H
+#define ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_NEON_IMPL_H
 
 #include "src/core/NEON/NEAsymm.h"
 
@@ -198,14 +198,6 @@ inline ScalarType elementwise_arithm_op_scalar(const ScalarType &a, const Scalar
         case ArithmeticOperation::DIV:
         {
             res = a / b;
-            if (std::is_integral<ScalarType>::value)
-            {
-                res = (b == 0) ? 0 : res;
-                if (static_cast<int32_t>(a) % static_cast<int32_t>(b) != 0 && ((a < 0) != (b < 0)))
-                {
-                    --res;
-                }
-            }
             break;
         }
         case ArithmeticOperation::POWER:
@@ -224,7 +216,15 @@ inline int32x4_t
 elementwise_arithm_op<ArithmeticOperation::DIV, typename wrapper::traits::neon_vector<int32_t, 4>>(const int32x4_t &a,
                                                                                                    const int32x4_t &b)
 {
-    return vcvtq_s32_f32(vfloorq_f32(wrapper::vdiv(vcvtq_f32_s32(a), vcvtq_f32_s32(b))));
+    int32x4_t result;
+
+    // Neon(TM) does not have vector integer division
+    result[0] = a[0] / b[0];
+    result[1] = a[1] / b[1];
+    result[2] = a[2] / b[2];
+    result[3] = a[3] / b[3];
+
+    return result;
 }
 
 template <>
@@ -1313,4 +1313,4 @@ void elementwise_comp_op_quantized_signed(const ITensor *in1, const ITensor *in2
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* SRC_CORE_NEON_KERNELS_ELEMENTWISE_IMPL_H */
+#endif // ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_NEON_IMPL_H
