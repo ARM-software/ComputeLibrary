@@ -191,61 +191,23 @@ std::map<std::string,int> get_token2id(std::string path_vocab)
     return token2id;
 }
 
-template <typename T, typename... Args>
-void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
+/** Find longest matching string in vocabulary list and convert it into vector
+ *  
+ * @note left    right
+ *         0 1 2 3 4  
+ * 
+ * @param[in] tokens_vec    Input text seperated into tokens stored in a vector
+ * @param[in] token2id      Token to id vocabulary map
+ * @param[in,out] text_ids  Vector stroing converted text id
+*/
+template<typename T>
+void find_longest_matching(std::vector<std::basic_string<T>> &tokens_vec,
+                           std::map<std::basic_string<T>,int> &token2id,
+                           std::vector<unsigned int> &text_ids)
 {
-    //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
-    const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
-    const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
-
-    std::basic_string<T> buffer;
-
-    //buffer+=start_token;
-
-    /** Read in */
-    Window window;
-    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0),1)); // Padding offset
-    execute_window_loop(window,
-                        [&](const Coordinates id){
-                            buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
-                        });
-
-    //buffer+=end_token;
-    
-    /** Sepreate into tokens and look up vocab list */
-    std::map<std::basic_string<T>,int> token2id = get_token2id(_vocab_file);
-    
-    std::vector<int> text_ids;
-
-    std::vector<std::basic_string<T>> tokens_vec;
-    /* Split the text into words */
-    {
-        std::basic_string<T> pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
-
-        std::regex re(pat);
-        std::smatch m;
-
-        while (std::regex_search(buffer, m, re))
-        {
-            for (std::basic_string<T> x : m)
-            {
-                tokens_vec.push_back(x);
-            }
-            buffer = m.suffix();
-        }
-
-    }
-    for(auto t:tokens_vec) std::cout << t << std::endl;
-    
-    text_ids.push_back(token2id[start_token]);
-
     unsigned int token_len;
     unsigned int left,right;
     std::basic_string<T> token_buffer;
-    /*  left    right
-     *   0 1 2 3 4   
-     */
-    /** Find longest matching string in vocabulary list */
    for(const auto &token : tokens_vec)
     {
         token_buffer = token;
@@ -271,9 +233,52 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
             left++;
         }
     }
-    
+}
 
+
+template <typename T, typename... Args>
+void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
+{
+    //const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
+    const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
+    const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
+
+    /** Read in */
+    std::basic_string<T> buffer;
+    Window window;
+    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0),1)); // Padding offset
+    execute_window_loop(window,
+                        [&](const Coordinates id){
+                            buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                        });
+    
+    /** Sepreate into tokens and look up vocab list */
+    std::map<std::basic_string<T>,int> token2id = get_token2id(_vocab_file);
+    std::vector<unsigned int> text_ids;
+    std::vector<std::basic_string<T>> tokens_vec;
+
+    /* Split the text into words */
+    std::basic_string<T> pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
+    std::regex re(pat);
+    std::smatch m;
+
+    while (std::regex_search(buffer, m, re))
+    {
+        for (std::basic_string<T> x : m)
+        {
+            tokens_vec.push_back(x);
+        }
+        buffer = m.suffix();
+    }
+
+    // [CLS]
+    text_ids.push_back(token2id[start_token]);
+
+    find_longest_matching(tokens_vec, token2id, text_ids);
+
+    // [SEP]
     text_ids.push_back(token2id[end_token]);
+
     for (auto &v : text_ids)std::cout << v << std::endl;
 
     /** Write back */
