@@ -21,16 +21,13 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     win.set(Window::DimX, Window::Dimension(0,1,1 ));
     //win.set(Window::DimY, Window::Dimension(0,tkemb_info.d_model(),1 ));
     
-    Iterator src_iter(src,win);
     Iterator vocab_iter(vocab,win);
 
-    const auto src_ptr      = reinterpret_cast<int *>(src_iter.ptr());
     const auto vocab_ptr    = reinterpret_cast<float *>(vocab_iter.ptr());
 
     std::cout << "YeaHhhhhhhhhhhh " << std::endl;
     execute_window_loop(win,
         [&](const Coordinates &){
-            std::cout << *(src_ptr) << std::endl;
             std::cout << *(vocab_ptr) << std::endl;
         },vocab_iter);
 
