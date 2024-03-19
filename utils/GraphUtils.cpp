@@ -289,11 +289,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
                         [&](const Coordinates id){
                             *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
                         });
-    
-    execute_window_loop(window,
-                        [&](const Coordinates id){
-                            std::cout << *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) << std::endl;
-                        });
 
 }
 

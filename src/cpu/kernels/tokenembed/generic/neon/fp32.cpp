@@ -15,22 +15,25 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     std::cout << vocab->info()->id() << std::endl;
     std::cout << dst->info()->id() << std::endl;
     std::cout << tkemb_info.d_vocab() << std::endl;
+    
+    std::cout << "Window" << std::endl;
     std::cout << window.DimX << std::endl;
+    std::cout << window.DimY << std::endl;
+    std::cout << window.DimZ << std::endl;
 
     Window win = window;
-    win.use_tensor_dimensions(src->info()->tensor_shape());
-    //win.set(Window::DimY, Window::Dimension(0,tkemb_info.d_model(),1 ));
+    win.set(Window::DimX, Window::Dimension(0,1,1));
+    const auto window_start_x = static_cast<unsigned int>(window.x().start());
     
     Iterator src_iter(src,win);
     Iterator vocab_iter(vocab,win);
 
-    const auto src_ptr      = reinterpret_cast<int *>(src_iter.ptr());
+    const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
     const auto vocab_ptr    = reinterpret_cast<float *>(vocab_iter.ptr());
 
     std::cout << "YeaHhhhhhhhhhhh " << std::endl;
     execute_window_loop(win,
-        [&](const Coordinates &id){
-            std::cout << *reinterpret_cast<unsigned int *>(src->ptr_to_element(id)) << std::endl;
+        [&](const Coordinates &){
             std::cout << *(src_ptr) << std::endl;
             std::cout << *(vocab_ptr) << std::endl;
         },vocab_iter);
