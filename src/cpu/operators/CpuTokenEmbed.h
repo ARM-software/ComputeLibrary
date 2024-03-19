@@ -18,7 +18,7 @@ public:
      * @param[out] output          Destination tensor info. Data type supported: F32
      * @param[in]  tkemb_info      Token embed layer parameters.
      */
-    void configure(const ITensorInfo *input, const ITensorInfo *vocab, ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info);
+    void configure(const ITensorInfo *input, ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuTokenEmbed::configure()

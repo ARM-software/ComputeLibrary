@@ -35,7 +35,7 @@ static const std::vector<CpuTokenEmbedKernel::TKEMBKernel> available_kernels = {
 };
 }
 
-void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *vocab, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info)
+void CpuTokenEmbedKernel::configure(const ITensorInfo *src,ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info)
 {
     ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
