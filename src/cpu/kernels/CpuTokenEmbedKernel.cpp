@@ -47,8 +47,6 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, ITensorInfo *dst, To
 
     // Configure output tensor info.
     auto_init_if_empty(*dst, TensorInfo(*src->clone()).set_num_channels(tkemb_info.d_model()));
-
-    std::cout<< dst->tensor_shape().x() << std::endl;
     
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 

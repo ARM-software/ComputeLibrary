@@ -18,18 +18,18 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const unsigned int window_end_x     = src->info()->tensor_shape().x();
     unsigned int       x                = window_start_x;
 
-    const unsigned int vector_depth     = tkemb_info.d_model();
     const unsigned int dst_start_y      = static_cast<unsigned int>(window.y().start());
-    //unsigned int       y                = dst_start_y;
+    const unsigned int vector_depth     = tkemb_info.d_model();
+    unsigned int       y                = dst_start_y;
 
-    unsigned int offset_src, offset_dst;
-
+    unsigned int id_src,offset_vocab, offset_dst;
+    
     Iterator src_iter(src,win);
     Iterator dst_iter(dst,win);
     Iterator vocab_iter(vocab,win);
 
     const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
-    //const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
+    const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
     const auto vocab_ptr    = reinterpret_cast<float *>(vocab_iter.ptr());
 
     std::cout << "YeaHhhhhhhhhhhh " << std::endl;
@@ -38,10 +38,14 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
         {
             for(; x < window_end_x; x++)
             {
-                std::cout << *(src_ptr+x) << std::endl;
+                id_src = *(src_ptr+x);
+                std::cout << id_src << std::endl;
 
+                offset_dst      = x * vector_depth;
+                offset_vocab    = id_src * vector_depth;
 
-                //std::memcpy(dst_ptr, src_ptr, sizeof( *src_ptr));
+                std::memcpy(dst_ptr + offset_dst, vocab_ptr + offset_vocab, vector_depth * sizeof(*vocab_ptr));
+
             }
 
             std::cout << *(vocab_ptr) << std::endl;
