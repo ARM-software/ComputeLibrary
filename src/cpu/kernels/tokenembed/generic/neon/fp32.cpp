@@ -20,7 +20,6 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
 
     const unsigned int dst_start_y      = static_cast<unsigned int>(window.y().start());
     const unsigned int vector_depth     = tkemb_info.d_model();
-    unsigned int       y                = dst_start_y;
 
     unsigned int id_src,offset_vocab, offset_dst;
     
