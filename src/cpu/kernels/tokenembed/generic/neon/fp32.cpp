@@ -22,7 +22,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
     //unsigned int       y                = dst_start_y;
 
-    unsigned int offset_src, offset_dst;
+    unsigned int offset_src;
 
     std::cout << "Tensor shape" << std::endl;
     std::cout << src->info()->tensor_shape().x() << std::endl;
@@ -53,9 +53,9 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
                 offset_src = dst_start_y+  1 * dst_end_y - 1;
                 std::cout << *(vocab_ptr + offset_src) << std::endl;
                 
-                offset_dst = x * dst_end_y - 1;
+                //offset_dst = x * dst_end_y - 1;
 
-                std::memcpy(dst_ptr + offset_dst, src_ptr, dst_end_y * sizeof( *src_ptr));
+                //std::memcpy(dst_ptr + offset_dst, src_ptr, dst_end_y * sizeof( *src_ptr));
             }
 
             std::cout << *(vocab_ptr) << std::endl;
