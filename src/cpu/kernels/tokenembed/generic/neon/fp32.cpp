@@ -18,19 +18,12 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const unsigned int window_end_x     = src->info()->tensor_shape().x();
     unsigned int       x                = window_start_x;
 
+    const unsigned int vector_depth     = tkemb_info.d_model();
     const unsigned int dst_start_y      = static_cast<unsigned int>(window.y().start());
-    const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
     //unsigned int       y                = dst_start_y;
 
     unsigned int offset_src, offset_dst;
 
-    std::cout << "Tensor shape" << std::endl;
-    std::cout << src->info()->tensor_shape().x() << std::endl;
-    std::cout << dst->info()->tensor_shape().x() << std::endl;
-    std::cout << dst->info()->tensor_shape().y() << std::endl;
-    std::cout << tkemb_info.d_model() << std::endl;
-    std::cout << tkemb_info.d_vocab() << std::endl;
-    
     Iterator src_iter(src,win);
     Iterator dst_iter(dst,win);
     Iterator vocab_iter(vocab,win);
@@ -47,14 +40,6 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
             {
                 std::cout << *(src_ptr+x) << std::endl;
 
-                std::cout << *(vocab_ptr) << std::endl;
-                offset_src = dst_start_y+  0 * dst_end_y;
-                std::cout << *(vocab_ptr + offset_src) << std::endl;
-                offset_src = dst_start_y+  1 * dst_end_y;
-                std::cout << *(vocab_ptr + offset_src) << std::endl;
-                
-                offset_dst = x * dst_end_y;
-                std::cout << offset_dst << std::endl;
 
                 //std::memcpy(dst_ptr, src_ptr, sizeof( *src_ptr));
             }
