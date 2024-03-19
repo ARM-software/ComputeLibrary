@@ -20,7 +20,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
 
     const unsigned int dst_start_y      = static_cast<unsigned int>(window.y().start());
     const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
-    unsigned int       y                = dst_start_y;
+    //unsigned int       y                = dst_start_y;
 
     unsigned int offset;
 
