@@ -1263,7 +1263,7 @@ public:
      *
      * @param[in] d_model   Model dimesion
      */
-    TokenEmbeddingLayerInfo(unsigned int d_model = 512U, unsigned int d_vocab = 30522U)
+    TokenEmbeddingLayerInfo(unsigned int d_model, unsigned int d_vocab = 30522U)
         : _d_model(d_model), _d_vocab(d_vocab)
     {
     }
