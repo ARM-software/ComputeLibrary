@@ -20,6 +20,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     std::cout << "Tensor shape" << std::endl;
     std::cout << dst->info()->tensor_shape().x() << std::endl;
     std::cout << dst->info()->tensor_shape().y() << std::endl;
+    std::cout << tkemb_info.d_model() << std::endl;
     
     Iterator src_iter(src,win);
     Iterator vocab_iter(vocab,win);
