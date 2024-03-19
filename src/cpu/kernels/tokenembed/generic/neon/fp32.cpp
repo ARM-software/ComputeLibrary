@@ -52,8 +52,10 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
                 std::cout << *(vocab_ptr + offset_src) << std::endl;
                 offset_src = dst_start_y+  1 * dst_end_y - 1;
                 std::cout << *(vocab_ptr + offset_src) << std::endl;
+                
+                offset_dst = x * dst_end_y - 1;
 
-                std::memcpy(dst_ptr, src_ptr, sizeof(dst_end_y * (*src_ptr)));
+                std::memcpy(dst_ptr+offset_dst, src_ptr, sizeof(dst_end_y * (*src_ptr)));
             }
 
             std::cout << *(vocab_ptr) << std::endl;
