@@ -286,7 +286,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,
                         [&](const Coordinates id){
-                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = buffer[id[0]]; //Using dimesion x
+                            *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
                         });
 
     execute_window_loop(window,
