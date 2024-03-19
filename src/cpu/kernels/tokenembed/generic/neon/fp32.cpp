@@ -27,6 +27,8 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const auto src_ptr      = reinterpret_cast<int *>(src_iter.ptr());
     const auto vocab_ptr    = reinterpret_cast<float *>(vocab_iter.ptr());
 
+
+    std::cout << "Manual" << std::endl;
     std::cout << *(src_ptr+0) << std::endl;
     std::cout << *(src_ptr+1) << std::endl;
     std::cout << *(src_ptr+2) << std::endl;
