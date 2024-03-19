@@ -23,7 +23,8 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
 
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
-    const auto window_start_x = static_cast<unsigned int>(window.x().start());
+
+    //const auto window_start_x = static_cast<unsigned int>(window.x().start());
     
     Iterator src_iter(src,win);
     Iterator vocab_iter(vocab,win);
