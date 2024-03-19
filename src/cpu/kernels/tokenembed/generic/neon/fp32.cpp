@@ -23,8 +23,12 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
 
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
+    const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
+    const unsigned int window_end_x     = src->info()->tensor_shape().x();
 
-    //const auto window_start_x = static_cast<unsigned int>(window.x().start());
+    std::cout << "Tensor shape" << std::endl;
+    std::cout << window_start_x << std::endl;
+    std::cout << window_end_x << std::endl;
     
     Iterator src_iter(src,win);
     Iterator vocab_iter(vocab,win);
