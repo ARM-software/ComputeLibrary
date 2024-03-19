@@ -12,7 +12,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-void CpuTokenEmbed::configure(const ITensorInfo *input, ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
+void CpuTokenEmbed::configure(const ITensorInfo *input,  ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
     auto k = std::make_unique<kernels::CpuTokenEmbedKernel>();
