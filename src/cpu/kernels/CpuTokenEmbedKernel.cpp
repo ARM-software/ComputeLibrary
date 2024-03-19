@@ -53,6 +53,7 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, ITensorInfo *dst, To
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _run_method = uk->ukernel;
+    _tkemb_info = tkemb_info;
     _name       = std::string("CpuTokenEmbedKernel").append("/").append(uk->name);
 
     Window win;
