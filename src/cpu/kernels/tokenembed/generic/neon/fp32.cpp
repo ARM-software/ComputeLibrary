@@ -18,8 +18,11 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const unsigned int window_end_x     = src->info()->tensor_shape().x();
     unsigned int       x                = window_start_x;
 
-    //const unsigned int dst_start_y      = static_cast<unsigned int>(window.x().start());
-    //const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
+    const unsigned int dst_start_y      = static_cast<unsigned int>(window.y().start());
+    const unsigned int dst_end_y        = dst->info()->tensor_shape().y();
+    unsigned int       y                = dst_start_y;
+
+    unsigned int offset;
 
     std::cout << "Tensor shape" << std::endl;
     std::cout << src->info()->tensor_shape().x() << std::endl;
@@ -35,10 +38,18 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
 
     std::cout << "YeaHhhhhhhhhhhh " << std::endl;
     execute_window_loop(win,
-        [&](const Coordinates &){
-            for(; x < window_end_x; x++){
+        [&](const Coordinates &)
+        {
+            for(; x < window_end_x; x++)
+            {
                 std::cout << *(src_ptr+x) << std::endl;
+
+                std::cout << *(vocab_ptr) << std::endl;
+                offset = dst_start_y+  0 * dst_end_y;
+                std::cout << *(vocab_ptr + offset) << std::endl;
+            
             }
+
             std::cout << *(vocab_ptr) << std::endl;
         },vocab_iter);
 

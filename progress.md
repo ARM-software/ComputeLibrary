@@ -82,10 +82,12 @@ Vanilla_Transformer
 |- Operator ----------------> src/cpu/operators/CpuTokenEmbed.h.cpp
 |
 |
-|- Kernel ------------------> src/cpu/kernels/CpuTokenEmbedKernel.h.cpp
-|         |                   |               |-> using dst::datatype for kernel selection.
-|         |                   |                  #TODO: data compability
-|         |                   src/cpu/kernels/tokenembed/generic/neon/fp32.cpp
+|- Kernel ------------------> Token Embedding
+|         |                   |-src/cpu/kernels/CpuTokenEmbedKernel.h.cpp
+|         |                   |                 |-> using dst::datatype for kernel selection.
+|         |                   |                     #TODO: data compability
+|         |                   |-src/cpu/kernels/tokenembed/generic/neon/fp32.cpp
+|         |                                                             |-> Improve kernel using intrinsics
 |         |
 |         |-----------------> src/cpu/kernels/CpuKernelSelectionTypes.h:
 |                                             |->TokenEmbedKernelDataTypeISASelectorData & Ptr: 
@@ -127,8 +129,8 @@ Vanilla_Transformer
 
 
 Potential problem:
-            1.utils/GraphUtils.cpp: Text Preprocess input/output tensor shape may mis match
-
+            1.utils/GraphUtils.cpp: Text Preprocess input/output, configure, runtime tensor shape may mismatch
+          
 Compatability:
             1: All function only support NEON right now.
             2. Input only support UTF-8 encoding (U8) input
@@ -141,6 +143,7 @@ Functionality:
 
 Optimization: 
             1. window collapse
+            2. Every kernel
 
 
 Input                                                           char U8

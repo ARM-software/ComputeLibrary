@@ -45,9 +45,6 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, ITensorInfo *dst, To
         TokenEmbedKernelDataTypeISASelectorData{dst->data_type(), CPUInfo::get().get_isa()}
     );
 
-    std::cout<< "src/cpu/kernels/CpuTokenEmbedKernel.cpp" << std::endl;
-    std::cout<< src->tensor_shape().x() << std::endl;
-
     // Configure output tensor info.
     auto_init_if_empty(*dst, TensorInfo(*src->clone()).set_num_channels(tkemb_info.d_model()));
 
