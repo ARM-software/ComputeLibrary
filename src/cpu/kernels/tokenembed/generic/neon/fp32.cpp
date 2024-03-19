@@ -25,6 +25,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     win.set(Window::DimX, Window::Dimension(0,1,1));
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = src->info()->tensor_shape().x();
+    unsigned int       x                = window_start_x;
 
     std::cout << "Tensor shape" << std::endl;
     std::cout << window_start_x << std::endl;
@@ -39,7 +40,9 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     std::cout << "YeaHhhhhhhhhhhh " << std::endl;
     execute_window_loop(win,
         [&](const Coordinates &){
-            std::cout << *(src_ptr) << std::endl;
+            for(; x < window_end_x; x++){
+                std::cout << *(src_ptr+x) << std::endl;
+            }
             std::cout << *(vocab_ptr) << std::endl;
         },vocab_iter);
 
