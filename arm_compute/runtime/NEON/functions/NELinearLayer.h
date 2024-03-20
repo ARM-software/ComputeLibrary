@@ -4,6 +4,8 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
 
+#include <memory>
+
 namespace arm_compute
 {
 // Forward declarations
