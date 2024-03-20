@@ -940,7 +940,6 @@ public:
 
 private:
     MultiHeadAttentionLayerInfo _mha_info;
-    TensorShape _shape;
 };
 
 /** Normalization Layer */
