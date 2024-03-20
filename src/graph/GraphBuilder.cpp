@@ -633,7 +633,6 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 {
     check_nodeidx_pair(input, g);
 
-
     /* Value, Key, Query Linear Layers */
 
     /* Scale dot production Layer */
@@ -642,23 +641,6 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     /* Concate */
 
     /* Linear */
-
-    // Get input tensor descriptor
-    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
-    std::cout << "src/graph/GraphBuilder.cpp" << std::endl;
-
-    std::cout << input_tensor_desc.shape.x() << std::endl;
-    std::cout << input_tensor_desc.shape.y() << std::endl;
-    // Create weights node
-    //TensorDescriptor w_desc = input_tensor_desc;
-    // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-   // w_desc.shape = TensorShape(tkemb_info.d_vocab(),tkemb_info.d_model());
-
-    //NodeID           w_nid  = add_const_node_with_name(g, params, "token_weights", w_desc, std::move(weights_accessor));
-
-    // Create token embedding node and connect
-    //g.add_connection(input.node_id, input.index, sdp_nid, 0);
-    //g.add_connection(w_nid, 0, t_nid, 1);
 
     set_node_params(g, sdp_nid, params);
 

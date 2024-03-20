@@ -927,7 +927,7 @@ public:
      *
      * 
      */
-    MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo mha_info) : _mha_info(mha_info)
+    MultiHeadAttentionLayer(const MultiHeadAttentionLayerInfo &mha_info) : _mha_info(mha_info)
     {
     }
 
@@ -939,7 +939,7 @@ public:
     }
 
 private:
-    MultiHeadAttentionLayerInfo _mha_info;
+    const MultiHeadAttentionLayerInfo &_mha_info;
 };
 
 /** Normalization Layer */
@@ -1581,7 +1581,7 @@ public:
      *
      * @param[in] tkemb_info Token embedding layer info
      */
-    TokenEmbeddingLayer(TokenEmbeddingLayerInfo tkemb_info,
+    TokenEmbeddingLayer(const TokenEmbeddingLayerInfo &tkemb_info,
                         ITensorAccessorUPtr     weights) : _tkemb_info(tkemb_info), _weights(std::move(weights))
     {
     }
@@ -1594,7 +1594,7 @@ public:
     }
 
 private:
-    TokenEmbeddingLayerInfo _tkemb_info;
+    const TokenEmbeddingLayerInfo &_tkemb_info;
     ITensorAccessorUPtr     _weights;
 };
 

@@ -115,7 +115,7 @@ public:
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))).set_name("in1")
               << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),get_weights_accessor(data_path, "/token_embedding.npy", operation_layout)).set_name("tkemb1")
-              << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
+              //<< MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu4")
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
