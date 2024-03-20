@@ -1,6 +1,6 @@
-#include "arm_compute/graph/nodes/ScaleDotProductionAttentionNode.h"
 
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/graph/nodes/LinearLayerNode.h"
+
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
 
@@ -8,18 +8,18 @@ namespace arm_compute
 {
 namespace graph
 {
-ScaleDotProductionAttentionNode::ScaleDotProductionAttentionNode(ScaleDotProductionAttentionLayerInfo sdpa_info) : _sdpa_info(sdpa_info)
+LinearLayerNode::LinearLayerNode(LinearLayerInfo info): _linear_info(std::move(info))
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
-const ScaleDotProductionAttentionLayerInfo& ScaleDotProductionAttentionNode::sdpa_info() const
+const LinearLayerInfo& LinearLayerNode::linear_info() const
 {
-    return _sdpa_info;
+    return _linear_info;
 }
 
-bool ScaleDotProductionAttentionNode::forward_descriptors()
+bool LinearLayerNode::forward_descriptors()
 {
     if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
@@ -31,7 +31,8 @@ bool ScaleDotProductionAttentionNode::forward_descriptors()
     return false;
 }
 
-TensorDescriptor ScaleDotProductionAttentionNode::configure_output(size_t idx) const
+
+TensorDescriptor LinearLayerNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
@@ -43,12 +44,13 @@ TensorDescriptor ScaleDotProductionAttentionNode::configure_output(size_t idx) c
     return src->desc();
 }
 
-NodeType ScaleDotProductionAttentionNode::type() const
+
+NodeType LinearLayerNode::type() const
 {
-    return NodeType::ScaleDotProductionAttentionLayer;
+    return NodeType::LinearLayer;
 }
 
-void ScaleDotProductionAttentionNode::accept(INodeVisitor &v)
+void LinearLayerNode::accept(INodeVisitor &v)
 {
     v.visit(*this);
 }

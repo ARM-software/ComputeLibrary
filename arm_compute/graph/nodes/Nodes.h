@@ -69,5 +69,6 @@
 #include "arm_compute/graph/nodes/StridedSliceLayerNode.h"
 #include "arm_compute/graph/nodes/TokenEmbeddingLayerNode.h"
 #include "arm_compute/graph/nodes/ScaleDotProductionAttentionNode.h"
+#include "arm_compute/graph/nodes/LinearLayerNode.h"
 
 #endif // ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H

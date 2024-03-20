@@ -1388,6 +1388,45 @@ private:
     unsigned int _h;
 };
 
+/** Linear Layer Information Class*/
+class LinearLayerInfo final
+{
+public:
+    /** Constructor
+     *
+     * @param[in] d_model   Model dimesion
+     * @param[in] h         Parallel attention dimesion
+     */
+    LinearLayerInfo(unsigned int d_model = 512, unsigned int h = 8) : _d_model(d_model),_h(h)
+    {
+    }
+
+    /** Constructor using Multi-head attention layer info
+     *
+     * @param[in] mha_info   MultiHeadAttentionLayerInfo
+     */
+    LinearLayerInfo(MultiHeadAttentionLayerInfo mha_info) : _d_model(mha_info.d_model()),_h(mha_info.h())
+    {
+    }
+    
+
+    /* Get Model dimesion */
+    unsigned int d_model() const
+    {
+        return _d_model;
+    }
+
+    /* Get Parallel attention dimesion */
+    unsigned int h() const
+    {
+        return _h;
+    }
+
+private:
+    unsigned int _d_model;
+    unsigned int _h;
+};
+
 /** Layer Normalization Layer Information Class */
 class LayerNormLayerInfo final
 {

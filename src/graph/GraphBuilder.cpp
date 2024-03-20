@@ -633,21 +633,18 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 {
     check_nodeidx_pair(input, g);
 
-    // Get input tensor descriptor
-    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
-
-    // Calculate Common Descriptor
-    TensorDescriptor common_desc = input_tensor_desc;
-
     /* Value, Key, Query Linear Layers */
-
+    NodeID value_nid = g.add_node<LinearLayerNode>(LinearLayerInfo(mha_info));
     /* Scale dot production Layer */
     NodeID sdp_nid = g.add_node<ScaleDotProductionAttentionNode>(ScaleDotProductionAttentionLayerInfo(mha_info));
     /* Concate */
 
     /* Linear */
 
-    g.add_connection(input.node_id, input.index, sdp_nid, 0);
+    g.add_connection(input.node_id, input.index, value_nid, 0);
+    g.add_connection(value_nid, 0, sdp_nid, 0);
+
+    set_node_params(g, value_nid, params);
     set_node_params(g, sdp_nid, params);
 
     return sdp_nid;
