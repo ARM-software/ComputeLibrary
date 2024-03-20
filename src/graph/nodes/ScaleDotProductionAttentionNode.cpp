@@ -21,7 +21,7 @@ const ScaleDotProductionAttentionLayerInfo &ScaleDotProductionAttentionNode::sdp
 
 bool ScaleDotProductionAttentionNode::forward_descriptors()
 {
-    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
