@@ -1356,7 +1356,8 @@ public:
      * @param[in] d_model   Model dimesion
      * @param[in] h         Parallel attention dimesion
      */
-    ScaleDotProductionAttentionLayerInfo(unsigned int d_model = 512, unsigned int h = 8) : _d_model(d_model), _h(h)
+    ScaleDotProductionAttentionLayerInfo(unsigned int d_model = 512, unsigned int h = 8) : _d_model(d_model), 
+                                                                                           _h(h)
     {
     }
 
@@ -1364,10 +1365,9 @@ public:
      *
      * @param[in] mha_info   MultiHeadAttentionLayerInfo
      */
-    ScaleDotProductionAttentionLayerInfo(const MultiHeadAttentionLayerInfo &mha_info)
+    ScaleDotProductionAttentionLayerInfo(const MultiHeadAttentionLayerInfo &mha_info) : _d_model(mha_info.d_model()),
+                                                                                        _h(mha_info.h())
     {
-        _d_model    = mha_info.d_model();
-        _h          = mha_info.h();
     }
     
 
