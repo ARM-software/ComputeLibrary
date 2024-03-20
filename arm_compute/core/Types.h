@@ -1322,14 +1322,29 @@ class MultiHeadAttentionLayerInfo final
 {
 public:
     /** Constructor
-     * 
+     *
+     * @param[in] d_model   Model dimesion
+     * @param[in] h         Parallel attention dimesion
      */
-    MultiHeadAttentionLayerInfo()
+    MultiHeadAttentionLayerInfo(unsigned int d_model = 512, unsigned int h = 8) : _d_model(d_model), _h(h)
     {
     }
-    
-private:
 
+    /* Get Model dimesion */
+    unsigned int d_model() const
+    {
+        return _d_model;
+    }
+
+    /* Get Parallel attention dimesion */
+    unsigned int h() const
+    {
+        return _h;
+    }
+
+private:
+    unsigned int _d_model;
+    unsigned int _h;
 };
 
 /** Scale Dot Production Attention Layer Information Class*/

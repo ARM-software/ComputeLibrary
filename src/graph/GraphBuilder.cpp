@@ -629,6 +629,42 @@ NodeID GraphBuilder::add_generate_proposals_node(Graph                &g,
     return nid;
 }
 
+NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, NodeIdxPair input, MultiHeadAttentionLayerInfo mha_info)
+{
+    check_nodeidx_pair(input, g);
+
+
+    /* Value, Key, Query Linear Layers */
+
+    /* Scaled dot production Layer */
+
+    /* Concate */
+
+    /* Linear */
+
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+    std::cout << "src/graph/GraphBuilder.cpp" << std::endl;
+
+    std::cout << input_tensor_desc.shape.x() << std::endl;
+    std::cout << input_tensor_desc.shape.y() << std::endl;
+    // Create weights node
+    //TensorDescriptor w_desc = input_tensor_desc;
+    // Reshape tensor to store weight with size of vocabulary and depth of d_model.
+   // w_desc.shape = TensorShape(tkemb_info.d_vocab(),tkemb_info.d_model());
+
+    //NodeID           w_nid  = add_const_node_with_name(g, params, "token_weights", w_desc, std::move(weights_accessor));
+
+    // Create token embedding node and connect
+    NodeID t_nid = g.add_node<DummyNode>();
+    //g.add_connection(input.node_id, input.index, t_nid, 0);
+    //g.add_connection(w_nid, 0, t_nid, 1);
+
+    set_node_params(g, t_nid, params);
+
+    return t_nid;
+}
+
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
 {
     return create_simple_single_input_output_node<L2NormalizeLayerNode>(g, params, input, axis, epsilon);
@@ -844,7 +880,6 @@ NodeID GraphBuilder::add_tkemb_node(Graph &g,
                                     ITensorAccessorUPtr     weights_accessor)
 {
     check_nodeidx_pair(input, g);
-    ARM_COMPUTE_ERROR_ON(num_outputs == 0);
 
     // Get input tensor descriptor
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);

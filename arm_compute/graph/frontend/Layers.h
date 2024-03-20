@@ -918,6 +918,7 @@ private:
     float _epsilon;
 };
 
+
 /** MultiHeadAttentionLayer */
 class MultiHeadAttentionLayer final: public ILayer
 {
@@ -926,7 +927,7 @@ public:
      *
      * 
      */
-    MultiHeadAttentionLayer(TensorShape shape) : _shape(shape)
+    MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo mha_info) : _mha_info(mha_info)
     {
     }
 
@@ -934,10 +935,11 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
+        return GraphBuilder::add_multi_head_attention_node(s.graph(), common_params, input, _mha_info);
     }
 
 private:
+    MultiHeadAttentionLayerInfo _mha_info;
     TensorShape _shape;
 };
 

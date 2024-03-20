@@ -398,6 +398,16 @@ public:
                                               NodeIdxPair           deltas,
                                               NodeIdxPair           anchors,
                                               GenerateProposalsInfo info);
+    /** Adds a multi-head attention layer to the graph
+     *
+     * @param[in] g         Graph to add the node to
+     * @param[in] params    Common node parameters
+     * @param[in] input     Input to the normalization layer node as a NodeID-Index pair
+     * @param[in] mha_info  Multi-head attention layer info
+     * 
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_multi_head_attention_node(Graph &g, NodeParams params, NodeIdxPair input, MultiHeadAttentionLayerInfo mha_info);
     /** Adds a L2 Normalize layer node to the graph
      *
      * @param[in] g       Graph to add the node to
