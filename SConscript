@@ -30,6 +30,7 @@ import subprocess
 import zlib
 import json
 import codecs
+import platform
 
 VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 35
@@ -40,6 +41,13 @@ SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) +
 Import('env')
 Import('vars')
 Import('install_lib')
+
+# Workaround to enable cross-compiling from macOS® to Android™ using the Android NDK.
+if platform.system() == 'Darwin' and env['os'] == 'android':
+    # SCons incorrectly assumes that we always want to build a dynamic library on a macOS host.
+    # When targeting Android, we overwrite the following construction variables to build a shared library instead.
+    env.Replace(SHLIBSUFFIX = '.so')                      # overwrites .dylib
+    env.Replace(SHLINKFLAGS = ['$LINKFLAGS', '-shared'])  # overwrites -dynamiclib
 
 def build_bootcode_objs(sources):
     arm_compute_env.Append(ASFLAGS = "-I bootcode/")
