@@ -642,7 +642,8 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     /* Value, Key, Query Linear Layers */
 
     /* Scale dot production Layer */
-    //std::unique_ptr<ScaleDotProductionAttentionLayerInfo> sdpa_info = std::make_unique<ScaleDotProductionAttentionLayerInfo>(mha_info);
+    std::unique_ptr<ScaleDotProductionAttentionLayerInfo> sdpa_info = std::make_unique<ScaleDotProductionAttentionLayerInfo>(mha_info);
+    std::cout << sdpa_info->d_model();
     NodeID sdp_nid = g.add_node<ScaleDotProductionAttentionNode>(ScaleDotProductionAttentionLayerInfo(768U,12U));
     /* Concate */
 
