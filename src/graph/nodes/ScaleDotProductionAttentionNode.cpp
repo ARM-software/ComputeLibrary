@@ -39,6 +39,9 @@ TensorDescriptor ScaleDotProductionAttentionNode::configure_output(size_t idx) c
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
+    std::cout << "src/graph/nodes/ScaleDotProductionAttentionNode.cpp" << std::endl;
+    std::cout << _sdpa_info.d_model() << std::endl;
+
     return src->desc();
 }
 
