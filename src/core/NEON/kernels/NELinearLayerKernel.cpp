@@ -68,9 +68,12 @@ void NELinearLayerKernel::run_op(ITensorPack &tensors, const Window &window, con
     const ITensor *src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
+    std::cout << "src/core/NEON/kernels/NELinearLayerKernel.cpp" <<std::endl; 
+    std::cout << src0->info()->tensor_shape().x() <<std::endl; 
+    std::cout << dst->info()->tensor_shape().x()  <<std::endl; 
+    std::cout << window.DimX  <<std::endl; 
 }
 
 }
-
 } // namespace kernels
 } // namespace arm_compute
