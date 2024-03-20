@@ -72,5 +72,10 @@ void NELinearLayerKernel::run_op(ITensorPack &tensors, const Window &window, con
     std::cout << window.DimX  <<std::endl; 
 }
 
+const char *NELinearLayerKernel::name() const
+{
+    return "NELinearLayerKernel";
+}
+
 } // namespace kernels
 } // namespace arm_compute
