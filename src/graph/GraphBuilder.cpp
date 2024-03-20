@@ -636,8 +636,8 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 
     /* Value, Key, Query Linear Layers */
 
-    /* Scaled dot production Layer */
-
+    /* Scale dot production Layer */
+    NodeID sdp_nid = g.add_node<ScaleDotProductionAttentionNode>(mha_info);
     /* Concate */
 
     /* Linear */
@@ -656,13 +656,12 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     //NodeID           w_nid  = add_const_node_with_name(g, params, "token_weights", w_desc, std::move(weights_accessor));
 
     // Create token embedding node and connect
-    NodeID t_nid = g.add_node<DummyNode>();
-    //g.add_connection(input.node_id, input.index, t_nid, 0);
+    g.add_connection(input.node_id, input.index, sdp_nid, 0);
     //g.add_connection(w_nid, 0, t_nid, 1);
 
-    set_node_params(g, t_nid, params);
+    set_node_params(g, sdp_nid, params);
 
-    return t_nid;
+    return sdp_nid;
 }
 
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
