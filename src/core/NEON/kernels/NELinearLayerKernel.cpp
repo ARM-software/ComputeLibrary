@@ -11,8 +11,6 @@ namespace arm_compute
 {
 namespace kernels
 {
-namespace
-{
 
 void NELinearLayerKernel::configure(const ITensorInfo *input1,
                                     ITensorInfo       *output,
@@ -74,6 +72,5 @@ void NELinearLayerKernel::run_op(ITensorPack &tensors, const Window &window, con
     std::cout << window.DimX  <<std::endl; 
 }
 
-}
 } // namespace kernels
 } // namespace arm_compute
