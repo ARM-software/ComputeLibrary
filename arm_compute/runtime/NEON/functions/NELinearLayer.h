@@ -1,6 +1,7 @@
 #ifndef ARM_COMPUTE_LINEAR_LAYER_H
 #define ARM_COMPUTE_LINEAR_LAYER_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -42,7 +43,7 @@ public:
      * @param[in]  input1 First tensor input. Data type supported: F32.
      * @param[out] output Output tensor. Data type supported: F32.
      */
-    void configure(const ITensor *input1, ITensor *output);
+    void configure(const ITensor *input1, ITensor *output, LinearLayerInfo linear_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NELinearLayer
      *
      * @param[in] input1 First input tensor info. Data types supported: F32.

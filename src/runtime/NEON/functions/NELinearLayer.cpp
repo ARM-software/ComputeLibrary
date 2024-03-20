@@ -22,10 +22,10 @@ NELinearLayer::NELinearLayer() : _impl(std::make_unique<Impl>())
 }
 NELinearLayer::~NELinearLayer() = default;
 
-void NELinearLayer::configure(const ITensor *input1, ITensor *output)
+void NELinearLayer::configure(const ITensor *input1, ITensor *output, LinearLayerInfo linear_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, output);
+    ARM_COMPUTE_LOG_PARAMS(input1, output);
 
     _impl->kernel = std::make_unique<kernels::NELinearLayerKernel>();
     _impl->kernel->configure(input1->info(), output->info(), LinearAttentionOperation::Key);
@@ -33,6 +33,9 @@ void NELinearLayer::configure(const ITensor *input1, ITensor *output)
     _impl->pack = ITensorPack();
     _impl->pack.add_tensor(TensorType::ACL_SRC_0, input1);
     _impl->pack.add_tensor(TensorType::ACL_DST, output);
+
+    std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
+    std::cout << linear_info.d_model() << std::endl;
 }
 
 Status NELinearLayer::validate(const ITensorInfo *input1, const ITensorInfo *output)
