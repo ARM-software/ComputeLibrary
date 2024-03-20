@@ -660,7 +660,7 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     //g.add_connection(input.node_id, input.index, sdp_nid, 0);
     //g.add_connection(w_nid, 0, t_nid, 1);
 
-    //set_node_params(g, sdp_nid, params);
+    set_node_params(g, sdp_nid, params);
 
     return sdp_nid;
 }
