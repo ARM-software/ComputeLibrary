@@ -2318,6 +2318,13 @@
             "fp32":["src/cpu/kernels/tokenembed/generic/neon/fp32.cpp"]
           }
         }
+      },
+      "Linear": {
+        "files": {
+          "common": [
+            "src/runtime/NEON/functions/NELinearLayer.cpp"
+          ]
+        }
       }
     }
   },

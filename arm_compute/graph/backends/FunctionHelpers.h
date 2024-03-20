@@ -1690,7 +1690,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
 template <typename TokenEmbeddingLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode &node)
 {
-    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+    validate_node<TargetInfo>(node, 2 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
     
@@ -1702,6 +1702,37 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     // Create function
     auto func = std::make_unique<TokenEmbeddingLayerFunction>();
     func->configure(input,vocab,output,tkemb_info);
+
+    ARM_COMPUTE_LOG_GRAPH_INFO(
+        "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
+                        << " Data Type: " << input->info()->data_type() << "Input Shape: " << input->info()->tensor_shape() << std::endl);
+
+    return func;
+}
+
+/** Creates a backend linear layer function
+ *
+ * @tparam LinearLayerFunction  Backend linear layer function
+ * @tparam TargetInfo           Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend token linear layer function
+ */
+template <typename LinearLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    
+    typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
+    const LinearLayerInfo linear_info         = node.linear_info();
+
+    // Create function
+    auto func = std::make_unique<LinearLayerFunction>();
+    func->configure(input,output,linear_info);
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType

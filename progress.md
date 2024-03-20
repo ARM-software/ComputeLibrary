@@ -94,6 +94,11 @@ Vanilla_Transformer
 |         |                   |-src/cpu/kernels/tokenembed/generic/neon/fp32.cpp
 |         |                                                             |-> Improve kernel using intrinsics
 |         |
+|         |-----------------> Linear Layer
+|         |                   |-src/core/NEON/kernels/NELinearLayer.h.cpp
+|         |                                           |-> Interface for the kernel to perform linear operation 
+|         |                   
+|         |
 |         |-----------------> src/cpu/kernels/CpuKernelSelectionTypes.h:
 |                                             |->TokenEmbedKernelDataTypeISASelectorData & Ptr: 
 |                                                For selecting kernel implmentation

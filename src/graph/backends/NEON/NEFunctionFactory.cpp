@@ -230,6 +230,9 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
         case NodeType::TokenEmbeddingLayer:
             return detail::create_token_embedding_layer<NETokenEmbeddingLayer, NETargetInfo>(
                 *polymorphic_downcast<TokenEmbeddingLayerNode *>(node));
+        case NodeType::LinearLayer:
+            return detail::create_linear_layer<NELinearLayer, NETargetInfo>(
+                *polymorphic_downcast<LinearLayerNode *>(node));
         default:
             return nullptr;
     }
