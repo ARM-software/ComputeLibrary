@@ -8,7 +8,7 @@ namespace arm_compute
 {
 namespace graph
 {
-ScaleDotProductionAttentionNode::ScaleDotProductionAttentionNode(ScaleDotProductionAttentionLayerInfo &sdpa_info) : _sdpa_info(sdpa_info)
+ScaleDotProductionAttentionNode::ScaleDotProductionAttentionNode(ScaleDotProductionAttentionLayerInfo sdpa_info) : _sdpa_info(sdpa_info)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);

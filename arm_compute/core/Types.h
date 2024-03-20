@@ -1365,7 +1365,7 @@ public:
      *
      * @param[in] mha_info   MultiHeadAttentionLayerInfo
      */
-    ScaleDotProductionAttentionLayerInfo(const MultiHeadAttentionLayerInfo &mha_info) : _d_model(mha_info.d_model()),
+    ScaleDotProductionAttentionLayerInfo(MultiHeadAttentionLayerInfo mha_info) : _d_model(mha_info.d_model()),
                                                                                         _h(mha_info.h())
     {
     }

@@ -16,7 +16,7 @@ public:
      *
      * @param[in] sdpa_info Contains information described in @ref ScaleDotProductionAttentionLayerInfo.
      */
-    ScaleDotProductionAttentionNode(ScaleDotProductionAttentionLayerInfo &sdpa_info);
+    ScaleDotProductionAttentionNode(ScaleDotProductionAttentionLayerInfo sdpa_info);
     /** Prevent instances of this class from being copy constructed */
     ScaleDotProductionAttentionNode(const ScaleDotProductionAttentionNode &) = delete;
     /** Prevent instances of this class from being copied */

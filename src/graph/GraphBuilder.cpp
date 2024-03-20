@@ -633,6 +633,12 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 {
     check_nodeidx_pair(input, g);
 
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+
+    // Calculate Common Descriptor
+    TensorDescriptor common_desc = input_tensor_desc;
+
     /* Value, Key, Query Linear Layers */
 
     /* Scale dot production Layer */
