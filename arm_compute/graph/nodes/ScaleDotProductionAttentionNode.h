@@ -8,7 +8,7 @@ namespace arm_compute
 {
 namespace graph
 {
-/** ROI Align node */
+/** Scale Dot Production Attention node */
 class ScaleDotProductionAttentionNode final : public INode
 {
 public:

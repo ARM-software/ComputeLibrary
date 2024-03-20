@@ -32,6 +32,8 @@ Vanilla_Transformer
 |                                      |--> /PositionalEncodingNode.cpp
 |                                      |--> /MultiHeadAttentionNode.cpp
 |                                      |--> /ScaleDotProductionAttentionNode.cpp
+|                                            _input_edges.resize(1, EmptyEdgeID);
+|                                            _outputs.resize(1, NullTensorID);
 |                                      |--> /LayerNormNode.cpp
 |                                      |--> /FeedForwardNode.cpp
 |
