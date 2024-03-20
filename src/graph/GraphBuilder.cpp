@@ -649,6 +649,7 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 
     /* Linear */
 
+    g.add_connection(input.node_id, input.index, sdp_nid, 0);
     set_node_params(g, sdp_nid, params);
 
     return sdp_nid;
