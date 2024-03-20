@@ -95,6 +95,7 @@ Vanilla_Transformer
 |         |                                                             |-> Improve kernel using intrinsics
 |         |
 |         |-----------------> Linear Layer
+|         |                   | Now only have "src/core/NEON/kernels" implementation
 |         |                   |-src/core/NEON/kernels/NELinearLayer.h.cpp
 |         |                                           |-> Interface for the kernel to perform linear operation 
 |         |                   
@@ -146,6 +147,7 @@ Compatability:
             2. Input only support UTF-8 encoding (U8) input
             3. Interpret token_embedding npy in float right now 
             4. data layout ND
+            5. Linear Layer Now only have "src/core/NEON/kernels" implementation
 
 Functionality:
             1. Segment token:

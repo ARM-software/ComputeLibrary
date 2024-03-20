@@ -2322,6 +2322,7 @@
       "Linear": {
         "files": {
           "common": [
+            "src/core/NEON/kernels/NELinearLayerKernel.cpp",
             "src/runtime/NEON/functions/NELinearLayer.cpp"
           ]
         }
