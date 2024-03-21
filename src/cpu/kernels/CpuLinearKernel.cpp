@@ -23,7 +23,11 @@ void CpuLinearKernel::configure(const ITensorInfo *input1,
 
     _info = info;
 
-    Window      win       = calculate_max_window(*input1, Steps());
+    Window win;
+    size_t size;
+    std::tie(win,size)      = calculate_squashed_or_max_window(*input1);
+    std::cout <<"src/cpu/kernels/CpuLinearKernel.cpp" << std::endl;
+    std::cout << size << std::endl;
     TensorShape out_shape = input1->tensor_shape();
 
     ICPPKernel::configure(win);
