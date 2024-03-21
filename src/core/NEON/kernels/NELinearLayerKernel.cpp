@@ -73,10 +73,11 @@ void NELinearLayerKernel::run_op(ITensorPack &tensors, const Window &window, con
     const auto src_ptr      = reinterpret_cast<float *>(src_iter.ptr());
 
     std::cout << "src/core/NEON/kernels/NELinearLayerKernel.cpp" <<std::endl; 
+    int x =0;
     execute_window_loop(win,
     [&](const Coordinates &){
         std::cout << *(src_ptr) << std::endl;
-        
+        std::cout << x++ << std::endl;
     },src_iter);
     
 }
