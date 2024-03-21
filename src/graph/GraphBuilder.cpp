@@ -636,18 +636,18 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     /* Value, Key, Query Linear Layers */
     NodeID value_nid = g.add_node<LinearLayerNode>(LinearLayerInfo(mha_info));
     /* Scale dot production Layer */
-    NodeID sdp_nid = g.add_node<ScaleDotProductionAttentionNode>(ScaleDotProductionAttentionLayerInfo(mha_info));
+    //NodeID sdp_nid = g.add_node<ScaleDotProductionAttentionNode>(ScaleDotProductionAttentionLayerInfo(mha_info));
     /* Concate */
 
     /* Linear */
 
     g.add_connection(input.node_id, input.index, value_nid, 0);
-    g.add_connection(value_nid, 0, sdp_nid, 0);
+    //g.add_connection(value_nid, 0, sdp_nid, 0);
 
     set_node_params(g, value_nid, params);
-    set_node_params(g, sdp_nid, params);
+    //set_node_params(g, sdp_nid, params);
 
-    return sdp_nid;
+    return value_nid;
 }
 
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
