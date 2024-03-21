@@ -88,7 +88,7 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     int x =0;
     execute_window_loop(win,
     [&](const Coordinates &){
-        std::cout << *(src_ptr + x) << std::endl;
+         *(src_ptr + x) = *(src_ptr + x);
     },src_iter);
     
 }
