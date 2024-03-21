@@ -79,8 +79,6 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     std::cout << window_end_x << std::endl;
 
     Window win = window;
-    size_t split_dimension;
-    std::tie(win,split_dimension) = calculate_squashed_or_max_window(*(src->info()));
 
     Iterator src_iter(src,win);
     const auto src_ptr      = reinterpret_cast<float *>(src_iter.ptr());
