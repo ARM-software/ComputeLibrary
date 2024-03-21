@@ -18,6 +18,7 @@ void CpuLinear::configure(const ITensorInfo *input,  ITensorInfo *output, const 
     auto k = std::make_unique<kernels::CpuLinearKernel>();
     k->configure(input, output, linear_info);
     _kernel = std::move(k);
+    
 }
 
 Status
