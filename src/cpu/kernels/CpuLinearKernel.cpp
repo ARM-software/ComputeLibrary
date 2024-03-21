@@ -83,10 +83,9 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     Iterator src_iter(src,win);
     const auto src_ptr      = reinterpret_cast<float *>(src_iter.ptr());
 
-    int x =0;
     execute_window_loop(win,
     [&](const Coordinates &){
-        for(unsigned int x = window_start_x; x< window_end_x; x++)
+        for(int x = window_start_x; x < window_end_x; x++)
         {
             std::cout << *(src_ptr + x) << std::endl;
         }
