@@ -41,7 +41,6 @@ void NELinearLayer::run()
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
     
-    std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp run" << std::endl;
     _impl->kernel->run(pack);
 }
 

@@ -33,6 +33,7 @@ CpuLinear::validate(const ITensorInfo *input, const ITensorInfo *output, const L
 
 void CpuLinear::run(ITensorPack &tensors)
 {
+    std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp run" << std::endl;
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }
