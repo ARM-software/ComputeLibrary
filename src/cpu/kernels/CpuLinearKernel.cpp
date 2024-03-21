@@ -63,11 +63,6 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
 {
 
     std::cout << "src/cpu/kernels/CpuLinearKernel.cpp" <<std::endl; 
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(tensors.empty());
-
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     //ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
