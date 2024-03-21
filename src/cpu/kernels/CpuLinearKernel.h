@@ -63,7 +63,7 @@ public:
 
     
 private:
-    LinearLayerInfo         _info;
+    LinearLayerInfo         _info{};
     LinearKernelPtr         _run_method{nullptr};
     size_t                  _split_dimension{Window::DimY};
     std::string             _name{};
