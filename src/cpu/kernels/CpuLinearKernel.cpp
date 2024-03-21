@@ -78,9 +78,6 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     std::cout << window_start_x << std::endl;
     std::cout << window_end_x << std::endl;
 
-    //const auto window_start_y = static_cast<unsigned int>(window.y().start());
-    const auto window_end_y   = static_cast<unsigned int>(window.y().end());
-
     Window win = window;
     size_t split_dimension;
     std::tie(win,split_dimension) = calculate_squashed_or_max_window(*(src->info()));
