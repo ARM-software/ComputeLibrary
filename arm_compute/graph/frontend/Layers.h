@@ -893,6 +893,52 @@ private:
     TensorShape _shape;
 };
 
+/** Linear Layer */
+class LinearLayer final : public ILayer
+{
+public:
+    /** Construct a linear layer computing Key, Value, Query
+     *
+     */
+    LinearLayer(LinearLayerInfo info,
+                ITensorAccessorUPtr           query_weights,
+                ITensorAccessorUPtr           query_bias,
+                ITensorAccessorUPtr           key_weights,
+                ITensorAccessorUPtr           key_bias,
+                ITensorAccessorUPtr           value_weights,
+                ITensorAccessorUPtr           value_bias) : _info(info),
+                                                            _query_weights(std::move(query_weights)),
+                                                            _query_bias(std::move(query_bias)),
+                                                            _key_weights(std::move(key_weights)),
+                                                            _key_bias(std::move(key_bias)),
+                                                            _value_weights(std::move(value_weights)),
+                                                            _value_bias(std::move(value_bias))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = {name(), s.hints().target_hint};
+        NodeIdxPair input         = {s.tail_node(), 0};
+        return GraphBuilder::add_linear_node(s.graph(), common_params, input, _info,
+                                                                             std::move(_query_weights),
+                                                                             std::move(_query_bias),
+                                                                             std::move(_key_weights),
+                                                                             std::move(_key_bias),
+                                                                             std::move(_value_weights),
+                                                                             std::move(_value_bias));
+    }
+
+private:
+    LinearLayerInfo _info;
+    ITensorAccessorUPtr _query_weights;
+    ITensorAccessorUPtr _query_bias;        
+    ITensorAccessorUPtr _key_weights;
+    ITensorAccessorUPtr _key_bias;        
+    ITensorAccessorUPtr _value_weights;
+    ITensorAccessorUPtr _value_bias;   
+};
+
 /** L2 Normalize Layer */
 class L2NormalizeLayer final : public ILayer
 {
@@ -925,6 +971,9 @@ class MultiHeadAttentionLayer final: public ILayer
 public:
     /** Construct a multi-head attention layer.
      *
+     * @param[in] mha_info      Multi head attention layer information
+     * @param[in] weight...     Query, Key, Value weight tensor accessor pointer
+     * @param[in] bias...       Query, Key, Value bias tensor accessor pointer
      * 
      */
     MultiHeadAttentionLayer(const MultiHeadAttentionLayerInfo &mha_info) : _mha_info(mha_info)
@@ -940,6 +989,7 @@ public:
 
 private:
     const MultiHeadAttentionLayerInfo &_mha_info;
+
 };
 
 /** Normalization Layer */

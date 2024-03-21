@@ -14,10 +14,12 @@ namespace kernels
 {
 /** Interface for the kernel to perform linear operation for Value, Key, Query
  *
- * Supported logical operations:
+ * Supported attention operations:
  *  - Key
  *  - Value
  *  - Query
+ * 
+ *  @note math:`y = xA^T + b`.
  */
 class CpuLinearKernel : public ICpuKernel<CpuLinearKernel>
 {
@@ -65,7 +67,6 @@ public:
 private:
     LinearLayerInfo         _info{};
     LinearKernelPtr         _run_method{nullptr};
-    size_t                  _split_dimension{Window::DimY};
     std::string             _name{};
 };
 

@@ -650,6 +650,28 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     return value_nid;
 }
 
+NodeID GraphBuilder::add_linear_node(Graph &g, NodeParams params, NodeIdxPair input, 
+                                                                  LinearLayerInfo linear_info,
+                                                                  ITensorAccessorUPtr query_weights,
+                                                                  ITensorAccessorUPtr query_bias,
+                                                                  ITensorAccessorUPtr key_weights,
+                                                                  ITensorAccessorUPtr key_bias,
+                                                                  ITensorAccessorUPtr value_weights,
+                                                                  ITensorAccessorUPtr value_bias)
+{
+    check_nodeidx_pair(input, g);
+
+    /* Value, Key, Query Linear Layers */
+    NodeID value_nid = g.add_node<LinearLayerNode>(linear_info);
+
+    g.add_connection(input.node_id, input.index, value_nid, 0);
+    //g.add_connection(value_nid, 0, sdp_nid, 0);
+
+    set_node_params(g, value_nid, params);
+
+    return value_nid;
+}
+
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
 {
     return create_simple_single_input_output_node<L2NormalizeLayerNode>(g, params, input, axis, epsilon);

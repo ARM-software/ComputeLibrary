@@ -158,8 +158,19 @@ Optimization:
             2. Every kernel
 
 
-Input                                                           char U8
+Input                                                           char U8                          (Len_seq,...)
   |             
-utils/GraphUtils.cpp                                        U8 -> unsigned int
+utils/GraphUtils.cpp(preprocess)                            U8 -> unsigned int                  (Len_seq*,...) *Maybe reshape
   |
-src/cpu/kernels/tokenembed/generic/neon/fp32.cpp           unsigned int -> FP32
+Token Embedding                                            unsigned int -> FP32                 (Len_seq*,d_model)
+  |
+Query,Key,Value
+
+
+
+Tensor Shape
+
+Input                               (Len_seq, ...)
+Vocabulary                          (d_vocab, d_model, ...)
+Query,Key,Value Weight              (d_model, d_model, ...)
+Query,Key,Value Bias                (d_model, ...)

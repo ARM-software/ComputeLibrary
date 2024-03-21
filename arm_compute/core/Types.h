@@ -1406,7 +1406,10 @@ public:
      * @param[in] d_model   Model dimesion
      * @param[in] h         Parallel attention dimesion
      */
-    LinearLayerInfo(unsigned int d_model = 512, unsigned int h = 8) : _d_model(d_model), _h(h), _op(LinearAttentionOperation::Unknown)
+    LinearLayerInfo(unsigned int d_model = 512, unsigned int h = 8, 
+                    LinearAttentionOperation op=LinearAttentionOperation::Unknown ) : _d_model(d_model),
+                                                                                      _h(h), 
+                                                                                      _op(op)
     {
     }
 
