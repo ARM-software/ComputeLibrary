@@ -31,6 +31,10 @@ void CpuLinearKernel::configure(const ITensorInfo *input1,
     // Auto initialize if empty
     set_shape_if_empty(*output, out_shape);
     set_data_type_if_unknown(*output, input1->data_type());
+
+        // Use squashed window
+    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*input1);
+    ICPPKernel::configure(win);
 }
 
 Status CpuLinearKernel::validate(const ITensorInfo *input1,
