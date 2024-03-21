@@ -76,7 +76,7 @@ void NELinearLayerKernel::run_op(ITensorPack &tensors, const Window &window, con
     int x =0;
     execute_window_loop(win,
     [&](const Coordinates &){
-        std::cout << *(src_ptr) << std::endl;
+        std::cout << *(src_ptr + x) << std::endl;
         std::cout << x++ << std::endl;
     },src_iter);
     
