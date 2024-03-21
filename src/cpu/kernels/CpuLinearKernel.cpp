@@ -31,10 +31,6 @@ void CpuLinearKernel::configure(const ITensorInfo *input1,
     // Auto initialize if empty
     set_shape_if_empty(*output, out_shape);
     set_data_type_if_unknown(*output, input1->data_type());
-
-        // Use squashed window
-    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*input1);
-    ICPPKernel::configure(win);
 }
 
 Status CpuLinearKernel::validate(const ITensorInfo *input1,
@@ -66,9 +62,7 @@ Status CpuLinearKernel::validate(const ITensorInfo *input1,
 void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     std::cout << "src/cpu/kernels/CpuLinearKernel.cpp" <<std::endl; 
-    std::cout << window.DimX << std::endl;
-    std::cout << window.DimY << std::endl;
-    std::cout << window.DimZ << std::endl;
+    std::cout << window.num_iterations_total() << std::endl;
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
