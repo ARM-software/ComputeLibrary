@@ -139,6 +139,15 @@ enum class ComparisonOperation
     LessEqual     /**< Less equal comparison ( \f$ x <= y \f$ ) */
 };
 
+/** List of linear attention operations */
+enum class LinearAttentionOperation
+{
+    Unknown, /**< Unknown */
+    Key,
+    Value,
+    Query
+};
+
 /** Container for valid region of a window */
 struct ValidRegion
 {
@@ -1397,7 +1406,7 @@ public:
      * @param[in] d_model   Model dimesion
      * @param[in] h         Parallel attention dimesion
      */
-    LinearLayerInfo(unsigned int d_model = 512, unsigned int h = 8) : _d_model(d_model),_h(h)
+    LinearLayerInfo(unsigned int d_model = 512, unsigned int h = 8) : _d_model(d_model), _h(h), _op(LinearAttentionOperation::Unknown)
     {
     }
 
@@ -1405,26 +1414,35 @@ public:
      *
      * @param[in] mha_info   MultiHeadAttentionLayerInfo
      */
-    LinearLayerInfo(MultiHeadAttentionLayerInfo mha_info) : _d_model(mha_info.d_model()),_h(mha_info.h())
+    LinearLayerInfo(MultiHeadAttentionLayerInfo mha_info, LinearAttentionOperation op) : _d_model(mha_info.d_model()),
+                                                                                         _h(mha_info.h()),
+                                                                                         _op(op)
     {
     }
     
 
-    /* Get Model dimesion */
+    /* Get model dimesion */
     unsigned int d_model() const
     {
         return _d_model;
     }
 
-    /* Get Parallel attention dimesion */
+    /* Get parallel attention dimesion */
     unsigned int h() const
     {
         return _h;
     }
 
+    /* Get linear attention operation */
+    LinearAttentionOperation op() const
+    {
+        return _op;
+    }
+
 private:
     unsigned int _d_model;
     unsigned int _h;
+    LinearAttentionOperation _op{};
 };
 
 /** Layer Normalization Layer Information Class */

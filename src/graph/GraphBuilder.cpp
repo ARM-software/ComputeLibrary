@@ -634,7 +634,7 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     check_nodeidx_pair(input, g);
 
     /* Value, Key, Query Linear Layers */
-    NodeID value_nid = g.add_node<LinearLayerNode>(LinearLayerInfo(mha_info));
+    NodeID value_nid = g.add_node<LinearLayerNode>(LinearLayerInfo(mha_info,LinearAttentionOperation::Key));
     /* Scale dot production Layer */
     //NodeID sdp_nid = g.add_node<ScaleDotProductionAttentionNode>(ScaleDotProductionAttentionLayerInfo(mha_info));
     /* Concate */

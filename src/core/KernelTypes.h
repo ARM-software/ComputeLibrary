@@ -34,14 +34,6 @@ enum class LogicalOperation
     Or,      /**< Logical Or || */
     Not,     /**< Logical Not ! */
 };
-/** List of linear attention operations */
-enum class LinearAttentionOperation
-{
-    Unknown, /**< Unknown */
-    Key,
-    Value,
-    Query
-};
 
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_KERNEL_TYPES_H */
