@@ -69,18 +69,16 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     //ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
-    Window win;
-    size_t size;
-    std::tie(win,size)      = calculate_squashed_or_max_window(*(src->info()));
-    std::cout <<"src/cpu/kernels/CpuLinearKernel.cpp" << std::endl;
-    std::cout << size << std::endl;
 
     const auto window_start_y = static_cast<unsigned int>(window.y().start());
     const auto window_end_y   = static_cast<unsigned int>(window.y().end());
 
-    win = window;
+    Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
 
+
+    std::cout << window.x().start() << std::endl;
+    std::cout << window.x().end() << std::endl;
     std::cout << window_start_y << std::endl;
     std::cout << window_end_y << std::endl;
 
