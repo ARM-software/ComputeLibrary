@@ -86,8 +86,10 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     int x =0;
     execute_window_loop(win,
     [&](const Coordinates &){
-          sdt::cout << *(src_ptr + x) << std::endl;
-         x++;
+        for(unsigned int x = window_start_x; x< window_end_x; x++)
+        {
+            std::cout << *(src_ptr + x) << std::endl;
+        }
     },src_iter);
     
 }
