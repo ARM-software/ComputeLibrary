@@ -70,6 +70,7 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
 
     std::cout << "src/cpu/kernels/CpuLinearKernel.cpp" <<std::endl; 
     std::cout << src->info()->id() << std::endl;
+    std::cout << window.num_iterations_total() << std::endl;
     //ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
     /*
