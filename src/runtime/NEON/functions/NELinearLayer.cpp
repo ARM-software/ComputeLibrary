@@ -33,7 +33,9 @@ void NELinearLayer::configure(const ITensor *input1, ITensor *output, LinearLaye
     _impl->pack = ITensorPack();
     _impl->pack.add_tensor(TensorType::ACL_SRC_0, input1);
     _impl->pack.add_tensor(TensorType::ACL_DST, output);
-    
+
+    std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
+    std::cout << linear_info.d_model() << std::endl;
 }
 
 Status NELinearLayer::validate(const ITensorInfo *input1, const ITensorInfo *output)
