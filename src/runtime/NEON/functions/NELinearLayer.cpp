@@ -36,6 +36,10 @@ void NELinearLayer::configure(const ITensor *input1, ITensor *output, LinearLaye
 
     std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
     std::cout << linear_info.d_model() << std::endl;
+    std::cout << input1->info()->tensor_shape().x() << std::endl;
+    std::cout << input1->info()->tensor_shape().y() << std::endl;
+    std::cout << output->info()->tensor_shape().x() << std::endl;
+    std::cout << output->info()->tensor_shape().y() << std::endl;
 }
 
 Status NELinearLayer::validate(const ITensorInfo *input1, const ITensorInfo *output)
