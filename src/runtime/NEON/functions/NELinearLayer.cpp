@@ -25,6 +25,9 @@ void NELinearLayer::configure(const ITensor *input1, ITensor *output, const Line
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, output);
     ARM_COMPUTE_LOG_PARAMS(input1, output);
+    
+    _impl->src      = input1;
+    _impl->dst      = output;
 
     _impl->kernel = std::make_unique<cpu::CpuLinear>();
     _impl->kernel->configure(input1->info(), output->info(), linear_info);

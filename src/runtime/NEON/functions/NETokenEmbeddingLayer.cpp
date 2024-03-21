@@ -23,7 +23,7 @@ NETokenEmbeddingLayer::NETokenEmbeddingLayer(): _impl(std::make_unique<Impl>())
 
 NETokenEmbeddingLayer::~NETokenEmbeddingLayer() = default;
 
-void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *output, TokenEmbeddingLayerInfo tkemb_info)
+void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *output, const TokenEmbeddingLayerInfo& tkemb_info)
 {
     _impl->src      = input;
     _impl->vocab    = vocab;
