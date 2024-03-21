@@ -70,7 +70,7 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     //ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
 
-    const auto window_start_y = static_cast<unsigned int>(window.y().start());
+    //const auto window_start_y = static_cast<unsigned int>(window.y().start());
     const auto window_end_y   = static_cast<unsigned int>(window.y().end());
 
     Window win = window;
