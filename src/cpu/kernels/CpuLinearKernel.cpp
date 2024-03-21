@@ -77,18 +77,14 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     size_t split_dimension;
     std::tie(win,split_dimension) = calculate_squashed_or_max_window(*(src->info()));
 
-
-    std::cout << win.shape().x() << std::endl;
-    std::cout << win.shape().y() << std::endl;
-    std::cout << window_end_y << std::endl;
-
     Iterator src_iter(src,win);
     const auto src_ptr      = reinterpret_cast<float *>(src_iter.ptr());
 
     int x =0;
     execute_window_loop(win,
     [&](const Coordinates &){
-         *(src_ptr + x) = *(src_ptr + x);
+         std::cout << *(src_ptr + x) << std::endl;
+         x++;
     },src_iter);
     
 }
