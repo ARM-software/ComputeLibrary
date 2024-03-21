@@ -64,7 +64,7 @@ void NELinearLayerKernel::run_op(ITensorPack &tensors, const Window &window, con
     ARM_COMPUTE_ERROR_ON(tensors.empty());
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
-    ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
+    //ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
     Window win = window;
     win.use_tensor_dimensions(src);
@@ -75,7 +75,8 @@ void NELinearLayerKernel::run_op(ITensorPack &tensors, const Window &window, con
     std::cout << "src/core/NEON/kernels/NELinearLayerKernel.cpp" <<std::endl; 
     execute_window_loop(win,
     [&](const Coordinates &id){
-        std::cout << src->ptr_to_element(id) << std::endl;
+        std::cout << *(src_ptr + id[0]) << std::endl;
+        
 
     },src_iter);
     
