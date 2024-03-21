@@ -62,9 +62,6 @@ Status CpuLinearKernel::validate(const ITensorInfo *input1,
 void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(tensors.empty());
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
 
