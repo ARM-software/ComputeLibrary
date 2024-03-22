@@ -106,9 +106,7 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Setup tensor memory (Allocate all tensors or setup transition manager)
     if (ctx.config().use_transition_memory_manager)
     {
-        std::cout << "src/graph/GraphManager.cpp configure_transition_manager Start" << std::endl;
         detail::configure_transition_manager(graph, ctx, workload);
-        std::cout << "src/graph/GraphManager.cpp configure_transition_manager End" << std::endl;
     }
     else
     {
@@ -134,19 +132,13 @@ void GraphManager::execute_graph(Graph &graph)
     while (true)
     {
         // Call input accessors
-        std::cout << "src/graph/GraphManager.cpp call_all_input_node_accessors Start" << std::endl;
         if (!detail::call_all_input_node_accessors(it->second))
         {
             return;
         }
-        
-        std::cout << "src/graph/GraphManager.cpp call_all_input_node_accessors End" << std::endl;
 
-        std::cout << "src/graph/GraphManager.cpp call_all_tasks Start" << std::endl;
         // Run graph
         detail::call_all_tasks(it->second);
-
-        std::cout << "src/graph/GraphManager.cpp call_all_tasks End" << std::endl;
 
         // Call output accessors
         if (!detail::call_all_output_node_accessors(it->second))
