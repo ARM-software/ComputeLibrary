@@ -672,11 +672,11 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     
 
     // Create weight and bias const node with npy tensor accessor
-    //NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", w_desc, std::move(query_weights));
-    //NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", b_desc, std::move(query_bias));
+    NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", w_desc, std::move(query_weights));
+    NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", b_desc, std::move(query_bias));
 
-    //NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", w_desc, std::move(key_weights));
-    //NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", b_desc, std::move(key_bias));
+    NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", w_desc, std::move(key_weights));
+    NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", b_desc, std::move(key_bias));
 
     NodeID          v_w_nid  = add_const_node_with_name(g, params, "Value Weights", w_desc, std::move(value_weights));
     NodeID          v_b_nid  = add_const_node_with_name(g, params, "Value Bias", b_desc, std::move(value_bias));
@@ -695,26 +695,24 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     NodeID k_nid    = g.add_node<LinearLayerNode>(k_linear_info);
     NodeID v_nid    = g.add_node<LinearLayerNode>(v_linear_info);
     
-    std::cout << q_nid << std::endl;
-    std::cout << k_nid << std::endl;
     // Connect input
-    //g.add_connection(input.node_id, input.index, q_nid, 0);
-    //g.add_connection(input.node_id, input.index, k_nid, 0);
+    g.add_connection(input.node_id, input.index, q_nid, 0);
+    g.add_connection(input.node_id, input.index, k_nid, 0);
     g.add_connection(input.node_id, input.index, v_nid, 0);
 
     // Connect weights and bias
-    //g.add_connection(q_w_nid, 0, q_nid, 1);
-    //g.add_connection(q_b_nid, 0, q_nid, 2);
-    //g.add_connection(k_w_nid, 0, k_nid, 1);
-    //g.add_connection(k_b_nid, 0, k_nid, 2);
+    g.add_connection(q_w_nid, 0, q_nid, 1);
+    g.add_connection(q_b_nid, 0, q_nid, 2);
+    g.add_connection(k_w_nid, 0, k_nid, 1);
+    g.add_connection(k_b_nid, 0, k_nid, 2);
     g.add_connection(v_w_nid, 0, v_nid, 1);
     g.add_connection(v_b_nid, 0, v_nid, 2);
 
-    //set_node_params(g, q_nid, params);
-    //set_node_params(g, k_nid, params);
+    set_node_params(g, q_nid, params);
+    set_node_params(g, k_nid, params);
     set_node_params(g, v_nid, params);
 
-    return v_nid;
+    return v_b_nid;
 }
 
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
