@@ -325,6 +325,7 @@ public:
         ARM_COMPUTE_ERROR_ON(is_open());
         try
         {
+            std::cout << "utils/Utils.h open" << std::endl;
             _fs.open(npy_filename, std::ios::in | std::ios::binary);
             ARM_COMPUTE_EXIT_ON_MSG_VAR(!_fs.good(), "Failed to load binary data from %s", npy_filename.c_str());
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -334,6 +335,10 @@ public:
             _shape               = header.shape;
             _fortran_order       = header.fortran_order;
             _typestring          = header.dtype.str();
+
+            std::cout <<  npy_filename;
+            std::cout <<  _shape[0] << std::endl;
+            std::cout <<  _shape[1] << std::endl;
         }
         catch (const std::ifstream::failure &e)
         {
@@ -389,6 +394,7 @@ public:
     template <typename T>
     void fill_tensor(T &tensor)
     {
+        std::cout << "utils/Utils.h fill_tensor" << std::endl;
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32,
                                               arm_compute::DataType::F32, arm_compute::DataType::F16);
@@ -546,7 +552,6 @@ public:
         {
             ARM_COMPUTE_ERROR_VAR("Loading NPY file: %s", e.what());
         }
-        std::cout << "utils/Utils.h" << std::endl;
         std::cout << tensor.info()->total_size()<< std::endl;
 
     }
