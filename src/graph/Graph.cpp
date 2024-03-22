@@ -107,6 +107,7 @@ EdgeID Graph::add_connection(NodeID source, size_t source_idx, NodeID sink, size
     source_node->_output_edges.insert(eid);
     sink_node->_input_edges[sink_idx] = eid;
 
+    std::cout << sink_node->_input_edges[sink_idx] << std::endl;
     // Set tensor output node
     source_node->_outputs[source_idx] = tid;
 

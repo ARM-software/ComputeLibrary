@@ -13,27 +13,16 @@ ParallelTensorHoldingNode::ParallelTensorHoldingNode(unsigned int total_nodes) :
     _outputs.resize(_total_nodes, NullTensorID);
 }
 
-/* Map input to output */
 bool ParallelTensorHoldingNode::forward_descriptors()
 {
-    for(unsigned int idx = 0; idx < _total_nodes; idx++)
+    if (output_id(0) != NullTensorID)
     {
-        std::cout << idx << std::endl;
-        std::cout << _input_edges[idx] << std::endl;
-        std::cout << input_id(idx) << std::endl;
-        _outputs[idx] = input_id(idx);
-
-        std::cout << _outputs[idx] << std::endl;
-        
-        Tensor *dst = output(idx);
-        ARM_COMPUTE_ERROR_ON(dst == nullptr);
-        dst->desc() = configure_output(idx);
-        if ((input_id(idx) == NullTensorID))
-        {
-            return false;
-        }
+        Tensor *t = output(0);
+        ARM_COMPUTE_ERROR_ON(t == nullptr);
+        t->desc() = configure_output(0);
+        return true;
     }
-    return true;
+    return false;
 }
 
 TensorDescriptor ParallelTensorHoldingNode::configure_output(size_t idx) const
