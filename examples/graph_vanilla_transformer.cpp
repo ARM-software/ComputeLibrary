@@ -83,7 +83,7 @@ public:
        // Model parameters
        constexpr unsigned int d_model       = 768U;     // Dim layer output 
        constexpr unsigned int d_vocab       = 30522U;   // Vocaboary size
-       //constexpr unsigned int h             = 12U;       // Parallel attention (Heads)
+       constexpr unsigned int h             = 12U;       // Parallel attention (Heads)
        /*constexpr unsigned int d_ff          = 2024U;    // Dim feedforward
        constexpr unsigned int d_q           = 64U;      // Dim query, 512U/8U
        constexpr unsigned int d_k           = 64U;      // Dim key, 512U/8U
@@ -117,13 +117,13 @@ public:
               << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),get_weights_accessor(data_path, "/token_embedding.npy", operation_layout)).set_name("tkemb1")
               
               // Encoder
-              /*<< LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
+              << LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
                                                                 get_weights_accessor(data_path, "/query_weight.npy"),
                                                                 get_weights_accessor(data_path, "/query_bias.npy"),
                                                                 get_weights_accessor(data_path, "/key_weight.npy"),
                                                                 get_weights_accessor(data_path, "/key_bias.npy"),
                                                                 get_weights_accessor(data_path, "/value_weight.npy"),
-                                                                get_weights_accessor(data_path, "/value_bias.npy"))*/
+                                                                get_weights_accessor(data_path, "/value_bias.npy"))
               //<< MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
 
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
