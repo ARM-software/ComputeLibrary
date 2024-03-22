@@ -19,6 +19,7 @@ bool ParallelTensorHoldingNode::forward_descriptors()
     for(unsigned int idx = 0; idx < _total_nodes; idx++)
     {
         std::cout << idx << std::endl;
+        std::cout << _input_edges[idx] << std::endl;
         std::cout << input_id(idx) << std::endl;
         _outputs[idx] = input_id(idx);
 

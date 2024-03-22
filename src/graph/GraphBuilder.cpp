@@ -715,7 +715,7 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     g.add_connection(v_b_nid, 0, v_nid, 2);
 
     // Connect all linear node to single node
-    g.add_connection(v_nid,0,p_nid,0);
+    g.add_connection(v_nid, 0, p_nid, 0);
 
     //set_node_params(g, q_nid, params);
     //set_node_params(g, k_nid, params);
