@@ -19,6 +19,9 @@ bool ParallelTensorHoldingNode::forward_descriptors()
     for(unsigned int idx = 0; idx < _total_nodes; idx++)
     {
         _outputs[idx] = input_id(idx);
+        Tensor *dst = output(0);
+        ARM_COMPUTE_ERROR_ON(dst == nullptr);
+        dst->desc() = configure_output(idx);
         if ((input_id(idx) == NullTensorID))
         {
             return false;
@@ -30,7 +33,7 @@ bool ParallelTensorHoldingNode::forward_descriptors()
 TensorDescriptor ParallelTensorHoldingNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
-    return output(idx)->desc();
+    return input(idx)->desc();
 }
 
 NodeType ParallelTensorHoldingNode::type() const
