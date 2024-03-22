@@ -100,7 +100,6 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     detail::allocate_const_tensors(graph);
     std::cout << "src/graph/GraphManager.cpp call_all_const_node_accessors Start" << std::endl;
     detail::call_all_const_node_accessors(graph);
-    std::cout << "src/graph/GraphManager.cpp call_all_const_node_accessors End" << std::endl;
 
     // Prepare graph
     detail::prepare_all_tasks(workload);
@@ -121,6 +120,8 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Register graph
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id() << std::endl);
+
+    std::cout << "src/graph/GraphManager.cpp End" << std::endl;
 }
 
 void GraphManager::execute_graph(Graph &graph)
