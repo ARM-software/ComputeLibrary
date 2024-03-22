@@ -123,6 +123,9 @@ void allocate_all_tensors(Graph &g)
 
     for (auto &tensor : tensors)
     {
+        std::cout << "src/graph/detail/ExecutionHelpers.cpp" << std::endl;
+        std::cout << tensor->desc().shape[0] << std::endl;
+        std::cout << tensor->desc().shape[1] << std::endl;
         if (tensor && !tensor->bound_edges().empty() && tensor->handle() != nullptr &&
             tensor->handle()->tensor().info()->is_resizable() && tensor->handle()->tensor().is_used())
         {
