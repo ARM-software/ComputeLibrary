@@ -243,6 +243,8 @@ void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload
     TargetHandleCounter      target_handle_count;
 
     // Count handles
+
+    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp 1" << std::endl;
     for (auto &task : workload.tasks)
     {
         // Populates IO handles
@@ -252,6 +254,7 @@ void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload
         count_input_handles_per_target(tasks_handles.back(), target_handle_count);
     }
 
+    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp 2" << std::endl;
     // Setup memory managers
     for (auto &hc : target_handle_count)
     {
@@ -265,6 +268,8 @@ void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload
             }
         }
     }
+
+    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp 3" << std::endl;
 }
 } // namespace detail
 } // namespace graph
