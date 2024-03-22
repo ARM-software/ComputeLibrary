@@ -221,6 +221,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     validate(Accessor(_target), _reference, tolerance_bf16);
 }
 
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 FIXTURE_DATA_TEST_CASE(RunTinyFixedFormat,
                        NEMatMulFixedFormatFixture<bfloat16>,
                        framework::DatasetMode::PRECOMMIT,
@@ -241,6 +242,7 @@ FIXTURE_DATA_TEST_CASE(RunTinyFixedFormat,
         validate(Accessor(_target), _reference, tolerance_bf16);
     }
 }
+#endif /* ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS */
 
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEMatMulFastMathFixture<float>,
