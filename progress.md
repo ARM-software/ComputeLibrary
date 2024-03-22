@@ -25,6 +25,7 @@ Vanilla_Transformer
 |        |                                     |--> /MultiHeadAttentionNode.h
 |        |                                     |--> /ScaleDotProductionAttentionNode.h
 |        |                                     |--> /LinearLayerNode.h
+|        |                                     |--> /ParallelTensorHoldingNode.h
 |        |                                     |--> /LayerNormNode.h
 |        |                                     |--> /FeedForwardNode.h
 |        |
@@ -36,6 +37,7 @@ Vanilla_Transformer
 |                                      |     _input_edges.resize(1, EmptyEdgeID);
 |                                      |     _outputs.resize(1, NullTensorID);
 |                                      |
+|                                      |--> /ParallelTensorHoldingNode.cpp
 |                                      |--> /LinearLayerNode.cpp
 |                                      |--> /LayerNormNode.cpp
 |                                      |--> /FeedForwardNode.cpp
@@ -147,6 +149,7 @@ Compatability:
             3. Interpret token_embedding npy in float right now 
             4. data layout ND
             5. Linear Layer Now only have "src/core/NEON/kernels" implementation
+            6. Update arm_compute/graph/nodes/NodesFwd.h
 
 Functionality:
             1. Segment token:

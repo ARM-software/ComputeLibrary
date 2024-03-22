@@ -206,7 +206,8 @@ enum class NodeType
     Output,
     Const,
 
-    Dummy
+    Dummy,
+    ParallelTensorHoldingLayer
 };
 
 /** Backend Memory Manager affinity **/

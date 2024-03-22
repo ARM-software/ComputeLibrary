@@ -13,7 +13,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to perform logical AND */
+/** Perform basic linear function */
 class NELinearLayer : public IFunction
 {
 public:
