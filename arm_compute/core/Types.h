@@ -1407,19 +1407,9 @@ public:
      * @param[in] h         Parallel attention dimesion
      */
     LinearLayerInfo(unsigned int d_model = 512, unsigned int h = 8, 
-                    LinearAttentionOperation op=LinearAttentionOperation::Unknown ) : _d_model(d_model),
-                                                                                      _h(h), 
-                                                                                      _op(op)
-    {
-    }
-
-    /** Constructor using Multi-head attention layer info
-     *
-     * @param[in] mha_info   MultiHeadAttentionLayerInfo
-     */
-    LinearLayerInfo(MultiHeadAttentionLayerInfo mha_info, LinearAttentionOperation op) : _d_model(mha_info.d_model()),
-                                                                                         _h(mha_info.h()),
-                                                                                         _op(op)
+                    LinearAttentionOperation op = LinearAttentionOperation::Unknown ) : _d_model(d_model),
+                                                                                        _h(h), 
+                                                                                        _op(op)
     {
     }
     
@@ -1436,6 +1426,12 @@ public:
         return _h;
     }
 
+    /* Set linear attention operation */
+    void set_op(LinearAttentionOperation op)
+    {
+        _op = op;
+    }
+
     /* Get linear attention operation */
     LinearAttentionOperation op() const
     {
@@ -1445,7 +1441,7 @@ public:
 private:
     unsigned int _d_model;
     unsigned int _h;
-    LinearAttentionOperation _op{};
+    LinearAttentionOperation _op;
 };
 
 /** Layer Normalization Layer Information Class */

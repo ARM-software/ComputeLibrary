@@ -423,7 +423,7 @@ public:
      * 
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_linear_node(Graph &g, NodeParams params, NodeIdxPair input, 
+    static NodeID add_linear_layer(Graph &g, NodeParams params, NodeIdxPair input, 
                                                                LinearLayerInfo linear_info,
                                                                ITensorAccessorUPtr query_weights,
                                                                ITensorAccessorUPtr query_bias,
