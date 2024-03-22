@@ -98,7 +98,9 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
 
     // Allocate const tensors and call accessors
     detail::allocate_const_tensors(graph);
+    std::cout << "src/graph/GraphManager.cpp call_all_const_node_accessors Start" << std::endl;
     detail::call_all_const_node_accessors(graph);
+    std::cout << "src/graph/GraphManager.cpp call_all_const_node_accessors End" << std::endl;
 
     // Prepare graph
     detail::prepare_all_tasks(workload);
