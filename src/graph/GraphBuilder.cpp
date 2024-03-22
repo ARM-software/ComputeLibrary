@@ -695,21 +695,23 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     NodeID k_nid    = g.add_node<LinearLayerNode>(k_linear_info);
     NodeID v_nid    = g.add_node<LinearLayerNode>(v_linear_info);
     
+    std::cout << q_nid << std::endl;
+    std::cout << k_nid << std::endl;
     // Connect input
-    g.add_connection(input.node_id, input.index, q_nid, 0);
-    g.add_connection(input.node_id, input.index, k_nid, 0);
+    //g.add_connection(input.node_id, input.index, q_nid, 0);
+    //g.add_connection(input.node_id, input.index, k_nid, 0);
     g.add_connection(input.node_id, input.index, v_nid, 0);
 
     // Connect weights and bias
-    g.add_connection(q_w_nid, 0, q_nid, 1);
-    g.add_connection(q_b_nid, 0, q_nid, 2);
-    g.add_connection(k_w_nid, 0, k_nid, 1);
-    g.add_connection(k_b_nid, 0, k_nid, 2);
+    //g.add_connection(q_w_nid, 0, q_nid, 1);
+    //g.add_connection(q_b_nid, 0, q_nid, 2);
+    //g.add_connection(k_w_nid, 0, k_nid, 1);
+    //g.add_connection(k_b_nid, 0, k_nid, 2);
     g.add_connection(v_w_nid, 0, v_nid, 1);
     g.add_connection(v_b_nid, 0, v_nid, 2);
 
-    set_node_params(g, q_nid, params);
-    set_node_params(g, k_nid, params);
+    //set_node_params(g, q_nid, params);
+    //set_node_params(g, k_nid, params);
     set_node_params(g, v_nid, params);
 
     return v_nid;
