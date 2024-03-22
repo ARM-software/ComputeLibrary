@@ -18,13 +18,13 @@ bool ParallelTensorHoldingNode::forward_descriptors()
 {
     for(unsigned int idx = 0; idx < _total_nodes; idx++)
     {
-        if ((input_id(idx) != NullTensorID))
+        _outputs[idx] = input_id(idx);
+        if ((input_id(idx) == NullTensorID))
         {
-            _outputs[idx] = input_id(idx);
-            return true;
+            return false;
         }
-        return false;
     }
+    return true;
 }
 
 TensorDescriptor ParallelTensorHoldingNode::configure_output(size_t idx) const
