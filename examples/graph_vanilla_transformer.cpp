@@ -117,13 +117,13 @@ public:
               << TokenEmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),get_weights_accessor(data_path, "/token_embedding.npy", operation_layout)).set_name("tkemb1")
               
               // Encoder
-              << LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
+              /*<< LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
                                                                 get_weights_accessor(data_path, "/query_weight.npy"),
                                                                 get_weights_accessor(data_path, "/query_bias.npy"),
                                                                 get_weights_accessor(data_path, "/key_weight.npy"),
                                                                 get_weights_accessor(data_path, "/key_bias.npy"),
                                                                 get_weights_accessor(data_path, "/value_weight.npy"),
-                                                                get_weights_accessor(data_path, "/value_bias.npy"))
+                                                                get_weights_accessor(data_path, "/value_bias.npy"))*/
               //<< MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
 
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");

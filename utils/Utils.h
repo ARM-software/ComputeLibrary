@@ -336,7 +336,7 @@ public:
             _fortran_order       = header.fortran_order;
             _typestring          = header.dtype.str();
 
-            std::cout <<  npy_filename;
+            std::cout <<  npy_filename << std::endl;
             std::cout <<  _shape[0] << std::endl;
             std::cout <<  _shape[1] << std::endl;
         }
