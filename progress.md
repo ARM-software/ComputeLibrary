@@ -158,14 +158,15 @@ Optimization:
             2. Every kernel
 
 
-Input                                                           char U8                          (Len_seq,...)
+Input                                                           char U8                          (Len_seq, ...)
   |             
-utils/GraphUtils.cpp(preprocess)                            U8 -> unsigned int                  (Len_seq*,...) *Maybe reshape
+utils/GraphUtils.cpp(preprocess)                            U8 -> unsigned int                  (Len_seq*, ...) *Maybe reshape
   |
-Token Embedding                                            unsigned int -> FP32                 (Len_seq*,d_model)
+Token Embedding                                            unsigned int -> FP32                 (Len_seq*, d_model, ...)
   |
-Query,Key,Value
-
+Query,Key,Value                                               FP32 -> FP32                      (d_model, d_model, ...)
+  |
+Scale Dot Production
 
 
 Tensor Shape

@@ -972,9 +972,6 @@ public:
     /** Construct a multi-head attention layer.
      *
      * @param[in] mha_info      Multi head attention layer information
-     * @param[in] weight...     Query, Key, Value weight tensor accessor pointer
-     * @param[in] bias...       Query, Key, Value bias tensor accessor pointer
-     * 
      */
     MultiHeadAttentionLayer(const MultiHeadAttentionLayerInfo &mha_info) : _mha_info(mha_info)
     {
