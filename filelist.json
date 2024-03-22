@@ -2327,6 +2327,15 @@
             "src/runtime/NEON/functions/NELinearLayer.cpp"
           ]
         }
+      },
+      "SimpleForward": {
+        "files": {
+          "common": [
+            "src/cpu/kernels/CpuSimpleForwardKernel.cpp",
+            "src/cpu/operators/CpuSimpleForward.cpp",
+            "src/runtime/NEON/functions/NESimpleForwardLayer.cpp"
+          ]
+        }
       }
     }
   },

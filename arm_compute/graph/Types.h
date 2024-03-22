@@ -194,6 +194,7 @@ enum class NodeType
     ROIAlignLayer,
     ScaleDotProductionAttentionLayer,
     SoftmaxLayer,
+    SimpleForwardLayer,
     SliceLayer,
     SplitLayer,
     StackLayer,
@@ -207,7 +208,6 @@ enum class NodeType
     Const,
 
     Dummy,
-    ParallelTensorHoldingLayer
 };
 
 /** Backend Memory Manager affinity **/

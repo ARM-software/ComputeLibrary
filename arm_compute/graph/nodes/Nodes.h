@@ -51,7 +51,6 @@
 #include "arm_compute/graph/nodes/NormalizePlanarYUVLayerNode.h"
 #include "arm_compute/graph/nodes/OutputNode.h"
 #include "arm_compute/graph/nodes/PadLayerNode.h"
-#include "arm_compute/graph/nodes/ParallelTensorHoldingNode.h"
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"
 #include "arm_compute/graph/nodes/PReluLayerNode.h"
@@ -71,5 +70,6 @@
 #include "arm_compute/graph/nodes/TokenEmbeddingLayerNode.h"
 #include "arm_compute/graph/nodes/ScaleDotProductionAttentionNode.h"
 #include "arm_compute/graph/nodes/LinearLayerNode.h"
+#include "arm_compute/graph/nodes/SimpleForwardLayerNode.h"
 
 #endif // ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H

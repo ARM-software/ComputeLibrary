@@ -25,7 +25,7 @@ Vanilla_Transformer
 |        |                                     |--> /MultiHeadAttentionNode.h
 |        |                                     |--> /ScaleDotProductionAttentionNode.h
 |        |                                     |--> /LinearLayerNode.h
-|        |                                     |--> /ParallelTensorHoldingNode.h
+|        |                                     |--> /SimpleForwardLayerNode.h: TODO forward_descriptors
 |        |                                     |--> /LayerNormNode.h
 |        |                                     |--> /FeedForwardNode.h
 |        |
@@ -37,7 +37,7 @@ Vanilla_Transformer
 |                                      |     _input_edges.resize(1, EmptyEdgeID);
 |                                      |     _outputs.resize(1, NullTensorID);
 |                                      |
-|                                      |--> /ParallelTensorHoldingNode.cpp
+|                                      |--> /SimpleForwardLayerNode.cpp
 |                                      |--> /LinearLayerNode.cpp
 |                                      |--> /LayerNormNode.cpp
 |                                      |--> /FeedForwardNode.cpp

@@ -1717,7 +1717,7 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
  *
  * @param[in] node Node to create the backend function for
  *
- * @return Backend token linear layer function
+ * @return Backend linear layer function
  */
 template <typename LinearLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
@@ -1737,6 +1737,32 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
                         << " Data Type: " << input->info()->data_type() << "Input Shape: " << input->info()->tensor_shape() << std::endl);
+
+    return func;
+}
+
+/** Creates a backend simple forward layer function
+ *
+ * @tparam ForwardLayerFunction  Backend simple forward function
+ * @tparam TargetInfo           Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend simple forwardlayer function
+ */
+template <typename ForwardLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &node)
+{
+    
+    ITensorPack input_pack,output_pack;
+    for(unsigned int idx = 0; idx < node._total_nodes; idx++){
+        input_pack.add_tensor(TensorType::ACL_SRC_0+idx, node.input(idx));
+        output_pack.add_tensor(TensorType::ACL_DST_0+idx, node.output(idx));
+    }
+
+    // Create function
+    auto func = std::make_unique<ForwardLayerFunction>();
+    func->configure(input_pack,output_pack);
 
     return func;
 }

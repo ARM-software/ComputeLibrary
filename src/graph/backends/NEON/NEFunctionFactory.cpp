@@ -233,6 +233,9 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
         case NodeType::LinearLayer:
             return detail::create_linear_layer<NELinearLayer, NETargetInfo>(
                 *polymorphic_downcast<LinearLayerNode *>(node));
+        case NodeType::SimpleForwardLayer:
+            return detail::create_simple_forward_layer<NESimpleForwardLayer, NETargetInfo>(
+                *polymorphic_downcast<SimpleForwardLayerNode *>(node));
         default:
             return nullptr;
     }

@@ -1,5 +1,5 @@
-#ifndef ARM_COMPUTE_GRAPH_PARALLEL_TENSOR_HOLDING_NODE_H
-#define ARM_COMPUTE_GRAPH_PARALLEL_TENSOR_HOLDING_NODE_H
+#ifndef ARM_COMPUTE_GRAPH_SIMPLE_FORWARD_LAYER_NODE_H
+#define ARM_COMPUTE_GRAPH_SIMPLE_FORWARD_LAYER_NODE_H
 
 #include "arm_compute/graph/INode.h"
 
@@ -7,15 +7,17 @@ namespace arm_compute
 {
 namespace graph
 {
-/** A helper node to hold multiple input, output in one node*/
-class ParallelTensorHoldingNode final : public INode
+/** A helper node to hold multiple input, output in one node
+ *  by simply forward input to ouput
+*/
+class SimpleForwardLayerNode final : public INode
 {
 public:
     /** Constructor
      *
      * @param[in] desc Tensor descriptor
      */
-    ParallelTensorHoldingNode(unsigned int total_nodes);
+    SimpleForwardLayerNode(unsigned int total_nodes);
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -28,4 +30,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_PARALLEL_TENSOR_HOLDING_NODE_H */
+#endif /* ARM_COMPUTE_GRAPH_SIMPLE_FORWARD_LAYER_NODE_H */
