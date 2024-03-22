@@ -75,9 +75,6 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     const auto window_start_x    = static_cast<int>(window.x().start());
     const auto window_end_x      = static_cast<int>(window.x().end());
 
-    std::cout << window_start_x << std::endl;
-    std::cout << window_end_x << std::endl;
-
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     Iterator src_iter(src,win);
