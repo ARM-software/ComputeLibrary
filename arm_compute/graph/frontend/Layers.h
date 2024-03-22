@@ -920,7 +920,7 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_linear_node(s.graph(), common_params, input, _info,
+        return GraphBuilder::add_linear_layer(s.graph(), common_params, input, _info,
                                                                              std::move(_query_weights),
                                                                              std::move(_query_bias),
                                                                              std::move(_key_weights),
