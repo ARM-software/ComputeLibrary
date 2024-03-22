@@ -10,7 +10,7 @@ namespace graph
 {
 LinearLayerNode::LinearLayerNode(LinearLayerInfo info): _linear_info(std::move(info))
 {
-    _input_edges.resize(1, EmptyEdgeID);
+    _input_edges.resize(3, EmptyEdgeID); // Input, weight, bias
     _outputs.resize(1, NullTensorID);
 }
 
