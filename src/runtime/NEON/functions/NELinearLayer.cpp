@@ -41,7 +41,6 @@ Status NELinearLayer::validate(const ITensorInfo *input1, const ITensorInfo *out
 void NELinearLayer::run()
 {
     ITensorPack pack;
-    std::cout << " Linear Runn" << std::endl;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
     
