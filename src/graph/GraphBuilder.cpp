@@ -699,7 +699,7 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     NodeID v_nid    = g.add_node<LinearLayerNode>(v_linear_info);
 
     // A node to hold all the output
-    NodeID p_nid    = g.add_node<ParallelTensorHoldingNode>(1);
+    //NodeID p_nid    = g.add_node<ParallelTensorHoldingNode>(1);
     
     // Connect input
     //g.add_connection(input.node_id, input.index, q_nid, 0);
@@ -715,14 +715,14 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     g.add_connection(v_b_nid, 0, v_nid, 2);
 
     // Connect all linear node to single node
-    g.add_connection(v_b_nid,0,p_nid,0);
+    //g.add_connection(v_nid, 0, p_nid,0);
 
     //set_node_params(g, q_nid, params);
     //set_node_params(g, k_nid, params);
     set_node_params(g, v_nid, params);
-    set_node_params(g, p_nid, params);
+    //set_node_params(g, p_nid, params);
 
-    return p_nid;
+    return v_nid;
 }
 
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
