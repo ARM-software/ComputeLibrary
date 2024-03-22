@@ -699,7 +699,7 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     NodeID v_nid    = g.add_node<LinearLayerNode>(v_linear_info);
 
     // A node to hold all the output
-    NodeID p_nid    = g.add_node<ParallelTensorHoldingNode>(3);
+    NodeID p_nid    = g.add_node<ParallelTensorHoldingNode>(1);
     
     // Connect input
     //g.add_connection(input.node_id, input.index, q_nid, 0);

@@ -19,7 +19,7 @@ bool ParallelTensorHoldingNode::forward_descriptors()
     for(unsigned int idx = 0; idx < _total_nodes; idx++)
     {
         _outputs[idx] = input_id(idx);
-        Tensor *dst = output(0);
+        Tensor *dst = output(idx);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
         dst->desc() = configure_output(idx);
         if ((input_id(idx) == NullTensorID))
