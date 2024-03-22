@@ -547,7 +547,7 @@ public:
             ARM_COMPUTE_ERROR_VAR("Loading NPY file: %s", e.what());
         }
         std::cout << "utils/Utils.h" << std::endl;
-        std::cout << tensor.info()->total_size();
+        std::cout << tensor.info()->total_size()<< std::endl;
 
     }
 

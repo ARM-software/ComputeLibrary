@@ -95,8 +95,7 @@ Vanilla_Transformer
 |         |                                                             |-> Improve kernel using intrinsics
 |         |
 |         |-----------------> Linear Layer
-|         |                   | Now only have "src/core/NEON/kernels" implementation
-|         |                   |-src/core/NEON/kernels/NELinearLayer.h.cpp
+|         |                   |-src/cpu/kernels/CpuLinearKernel.h.cpp
 |         |                                           |-> Interface for the kernel to perform linear operation 
 |         |                   
 |         |
