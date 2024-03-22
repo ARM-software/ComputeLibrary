@@ -672,11 +672,11 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     
 
     // Create weight and bias const node with npy tensor accessor
-    NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", w_desc, std::move(query_weights));
-    NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", b_desc, std::move(query_bias));
+    //NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", w_desc, std::move(query_weights));
+    //NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", b_desc, std::move(query_bias));
 
-    NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", w_desc, std::move(key_weights));
-    NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", b_desc, std::move(key_bias));
+    //NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", w_desc, std::move(key_weights));
+    //NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", b_desc, std::move(key_bias));
 
     NodeID          v_w_nid  = add_const_node_with_name(g, params, "Value Weights", w_desc, std::move(value_weights));
     NodeID          v_b_nid  = add_const_node_with_name(g, params, "Value Bias", b_desc, std::move(value_bias));
