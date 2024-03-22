@@ -25,7 +25,6 @@ void NELinearLayer::configure(const ITensor *input1, ITensor *output, const Line
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, output);
     ARM_COMPUTE_LOG_PARAMS(input1, output);
-    std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
     _impl->src      = input1;
     _impl->dst      = output;
 
@@ -40,7 +39,6 @@ Status NELinearLayer::validate(const ITensorInfo *input1, const ITensorInfo *out
 
 void NELinearLayer::run()
 {
-    std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
