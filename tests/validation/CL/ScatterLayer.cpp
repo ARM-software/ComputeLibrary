@@ -33,13 +33,6 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f);  /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
-constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);   /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
-constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit signed asymmetric type */
-} // namespace
 
 template <typename T>
 using CLScatterLayerFixture = ScatterValidationFixture<CLTensor, CLAccessor, CLScatter, T>;
