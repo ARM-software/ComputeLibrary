@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
+#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/graph/backends/FusedConvolutionBatchNormalizationFunction.h"
 #include "arm_compute/graph/backends/FusedDepthwiseConvolutionBatchNormalizationFunction.h"
 #include "arm_compute/graph/backends/Utils.h"
