@@ -27,7 +27,6 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/graph/backends/FusedConvolutionBatchNormalizationFunction.h"
 #include "arm_compute/graph/backends/FusedDepthwiseConvolutionBatchNormalizationFunction.h"
 #include "arm_compute/graph/backends/Utils.h"
@@ -1754,17 +1753,14 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
 template <typename ForwardLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &node)
 {
-    
-    ITensorPack tensor_pack;
-    int total_tensors = node.total_tensors();
-    for(int idx = 0; idx < total_tensors; idx++){
-        tensor_pack.add_tensor(TensorType::ACL_SRC_0+idx, node.input(idx));
-        tensor_pack.add_tensor(TensorType::ACL_DST_0+idx, node.output(idx));
-    }
+    std::cout << "arm_compute/graph/backends/FunctionHelpers.h" << std::endl;
+    std::cout << "input" << std::endl;
+    for(auto i:node.inputs())std::cout << i << std::endl;
+    std::cout << "output" << std::endl;
+    for(auto i:node.outputs())std::cout << i << std::endl;
 
     // Create function
     auto func = std::make_unique<ForwardLayerFunction>();
-    func->configure(tensor_pack,total_tensors);
 
     return func;
 }
