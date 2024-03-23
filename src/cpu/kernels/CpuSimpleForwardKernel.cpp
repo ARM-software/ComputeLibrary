@@ -38,8 +38,8 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
 {
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp" << std::endl;
     for(unsigned int idx = 0; idx < _total_nodes; idx++){
-        ITensor *src = tensors.get_tensor(TensorType::ACL_SRC_0+idx);
-        ITensor *dst = tensors.get_tensor(TensorType::ACL_DST_0+idx);
+        tensors.get_tensor(TensorType::ACL_SRC_0+idx);
+        tensors.get_tensor(TensorType::ACL_DST_0+idx);
     }
 }
 
