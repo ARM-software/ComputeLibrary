@@ -70,7 +70,7 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     ARM_COMPUTE_ERROR_ON(tensors.empty());
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
-    ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
+    //ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
 
     const auto window_start_x    = static_cast<int>(window.x().start());
