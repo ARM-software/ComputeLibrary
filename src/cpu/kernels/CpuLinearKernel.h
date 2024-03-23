@@ -53,16 +53,6 @@ public:
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
-
-    struct LinearKernel
-    {
-        const char                                          *name;
-        const LinearaKernelDataTypeISASelectorDataPtr    is_selected;
-        LinearKernelPtr                                      ukernel;
-    };
-
-    static const std::vector<LinearKernel> &get_available_kernels();
-
     
 private:
     LinearLayerInfo         _info{};
