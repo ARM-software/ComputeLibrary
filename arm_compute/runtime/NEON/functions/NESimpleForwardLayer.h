@@ -1,5 +1,5 @@
-#ifndef ARM_COMPUTE_LINEAR_LAYER_H
-#define ARM_COMPUTE_LINEAR_LAYER_H
+#ifndef ARM_COMPUTE_NESIMPLEFORWARDLAYER_H
+#define ARM_COMPUTE_NESIMPLEFORWARDLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Error.h"
@@ -52,4 +52,4 @@ private:
 
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_LINEAR_LAYER_H */
+#endif /* ARM_COMPUTE_NESIMPLEFORWARDLAYER_H */
