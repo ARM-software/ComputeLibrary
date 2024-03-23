@@ -84,10 +84,8 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
 
     execute_window_loop(win,
     [&](const Coordinates &){
-        for(int x = window_start_x; x < window_end_x; x++)
-        {
-            *dst_ptr =  *(src_ptr + x);
-        }
+        std::memcpy(dst_ptr, src_ptr, (window_end_x-window_start_x) * sizeof(*src_ptr));
+        
     },src_iter,dst_ptr);
     
 }
