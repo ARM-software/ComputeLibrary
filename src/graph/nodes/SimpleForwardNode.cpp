@@ -20,13 +20,6 @@ int SimpleForwardLayerNode::total_tensors()
 
 bool SimpleForwardLayerNode::forward_descriptors()
 {
-    if (output_id(0) != NullTensorID)
-    {
-        Tensor *t = output(0);
-        ARM_COMPUTE_ERROR_ON(t == nullptr);
-        t->desc() = configure_output(0);
-        return true;
-    }
     return false;
 }
 
