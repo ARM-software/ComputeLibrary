@@ -12,7 +12,6 @@ void CpuSimpleForward::configure(unsigned int total_nodes)
     ARM_COMPUTE_LOG_PARAMS(total_nodes);
     auto k = std::make_unique<cpu::CpuSimpleForward>();
     k->configure(total_nodes);
-    _kernel = std::move(k);
 }
 
 } // namespace cpu
