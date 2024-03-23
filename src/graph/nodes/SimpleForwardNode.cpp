@@ -20,11 +20,11 @@ int SimpleForwardLayerNode::total_tensors()
 
 bool SimpleForwardLayerNode::forward_descriptors()
 {
-    if (output_id(0) != NullTensorID)
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
-        Tensor *t = output(0);
-        ARM_COMPUTE_ERROR_ON(t == nullptr);
-        t->desc() = configure_output(0);
+        Tensor *dst = output(0);
+        ARM_COMPUTE_ERROR_ON(dst == nullptr);
+        dst->desc() = configure_output(0);
         return true;
     }
     return false;
@@ -33,7 +33,13 @@ bool SimpleForwardLayerNode::forward_descriptors()
 TensorDescriptor SimpleForwardLayerNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
-    return input(idx)->desc();
+    ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
+
+    const Tensor *src = input(0);
+    ARM_COMPUTE_ERROR_ON(src == nullptr);
+
+    TensorDescriptor output_desc = src->desc();
+    return src->desc();
 }
 
 NodeType SimpleForwardLayerNode::type() const
