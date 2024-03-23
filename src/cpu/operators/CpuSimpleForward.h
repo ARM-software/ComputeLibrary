@@ -16,11 +16,7 @@ public:
      * @param[in]  tensors Tensor packs contains input and output. Data type supported: All.
      */
     void configure(unsigned int total_nodes);
-
-private:
-
 };
 } // namespace cpu
 } // namespace arm_compute
-
 #endif /* ARM_COMPUTE_CPU_SIMPLE_FORWARD_H */

@@ -1,11 +1,6 @@
 #include "src/cpu/operators/CpuSimpleForward.h"
 
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-
-#include "src/common/IOperator.h"
-#include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
-#include "src/cpu/CpuContext.h"
 #include "src/cpu/kernels/CpuSimpleForwardKernel.h"
 
 namespace arm_compute
