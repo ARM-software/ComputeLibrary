@@ -1755,9 +1755,9 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
 {
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h" << std::endl;
     std::cout << "input" << std::endl;
-    for(auto i:node.inputs())std::cout << i << std::endl;
+    std::cout << node.num_inputs() << std::endl;
     std::cout << "output" << std::endl;
-    for(auto i:node.outputs())std::cout << i << std::endl;
+    std::cout << node.num_outputs() << std::endl;
 
     // Create function
     auto func = std::make_unique<ForwardLayerFunction>();
