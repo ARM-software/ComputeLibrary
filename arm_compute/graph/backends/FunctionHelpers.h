@@ -1757,7 +1757,7 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
     
     ITensorPack tensor_pack;
     int total_tensors = node.total_tensors();
-    for(int idx = 0; idx < node._total_nodes; idx++){
+    for(int idx = 0; idx < total_tensors; idx++){
         tensor_pack.add_tensor(TensorType::ACL_SRC_0+idx, node.input(idx));
         tensor_pack.add_tensor(TensorType::ACL_DST_0+idx, node.output(idx));
     }

@@ -29,7 +29,7 @@ public:
     void             accept(INodeVisitor &v) override;
 
 private:
-    int     _total_tensors;
+    int _total_tensors;
 };
 } // namespace graph
 } // namespace arm_compute
