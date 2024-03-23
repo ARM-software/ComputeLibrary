@@ -69,7 +69,7 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     ARM_COMPUTE_ERROR_ON(tensors.empty());
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
-    //ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
+    ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
 
     const auto window_start_x    = static_cast<int>(window.x().start());
@@ -78,15 +78,17 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     Iterator src_iter(src,win);
+    Iterator dst_iter(dst,win);
     const auto src_ptr      = reinterpret_cast<float *>(src_iter.ptr());
+    const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
 
     execute_window_loop(win,
     [&](const Coordinates &){
         for(int x = window_start_x; x < window_end_x; x++)
         {
-            *(src_ptr + x) = *(src_ptr + x);
+            *dst_ptr =  *(src_ptr + x);
         }
-    },src_iter);
+    },src_iter,dst_ptr);
     
 }
 
