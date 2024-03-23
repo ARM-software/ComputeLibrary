@@ -698,8 +698,11 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     //NodeID k_nid    = g.add_node<LinearLayerNode>(k_linear_info);
     NodeID v_nid    = g.add_node<LinearLayerNode>(v_linear_info);
 
+    std::cout << "1" << std::endl;
     // A node to hold all the output
     NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(1);
+
+    std::cout << "2" << std::endl;
     ARM_COMPUTE_UNUSED(f_nid);
     // Connect input
     //g.add_connection(input.node_id, input.index, q_nid, 0);
