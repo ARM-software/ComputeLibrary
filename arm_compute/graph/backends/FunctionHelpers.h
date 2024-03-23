@@ -1751,7 +1751,7 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
  * @return Backend simple forwardlayer function
  */
 template <typename ForwardLayerFunction, typename TargetInfo>
-std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &node)
+void create_simple_forward_layer(SimpleForwardLayerNode &node)
 {
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h" << std::endl;
     std::cout << "input" << std::endl;
@@ -1761,16 +1761,13 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
     std::cout << node.num_outputs() << std::endl;
     std::cout << node.output(0)->id() << std::endl;
     // Update accessor
-    //node.input(0)->set_accessor(node.output(0)->extract_accessor());
+    node.input(0)->set_accessor(node.output(0)->extract_accessor());
     // Update output
     node.set_output_tensor(node.input(0)->id(), 0);
 
-    //et_new_output_and_inherit_accessor(*polymorphic_downcast<INode*>(node),node.output(0),node.input(0));
+    //set_new_output_and_inherit_accessor(*polymorphic_downcast<INode*>(node),node.output(0),node.input(0));
 
-    // Create function
-    auto func = std::make_unique<ForwardLayerFunction>();
-
-    return func;
+    return nullptr;
 }
 
 } // namespace detail
