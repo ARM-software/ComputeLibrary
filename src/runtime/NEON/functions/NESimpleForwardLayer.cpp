@@ -11,7 +11,7 @@ namespace arm_compute
 
 struct  NESimpleForwardLayer::Impl
 {
-    ITensorPack                                         tensors{};
+    ITensorPack                                tensors{};
     std::unique_ptr<cpu::CpuSimpleForward>     kernel{nullptr};
 };
 
@@ -20,7 +20,7 @@ NESimpleForwardLayer::NESimpleForwardLayer() : _impl(std::make_unique<Impl>())
 }
 NESimpleForwardLayer::~NESimpleForwardLayer() = default;
 
-void NESimpleForwardLayer::configure(ITensorPack& tensors, unsigned int total_nodes)
+void NESimpleForwardLayer::configure(ITensorPack& tensors, unsigned int total_tensors)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensors);
     ARM_COMPUTE_LOG_PARAMS(tensors);
@@ -28,7 +28,7 @@ void NESimpleForwardLayer::configure(ITensorPack& tensors, unsigned int total_no
     _impl->tensors      = tensors;
 
     _impl->kernel = std::make_unique<cpu::CpuSimpleForward>();
-    _impl->kernel->configure(total_nodes);
+    _impl->kernel->configure(total_tensors);
 }
 
 void NESimpleForwardLayer::run()

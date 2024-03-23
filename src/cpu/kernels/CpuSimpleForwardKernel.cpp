@@ -36,6 +36,10 @@ void CpuSimpleForwardKernel::configure(unsigned int total_nodes)
 
 void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp" << std::endl;
     for(unsigned int idx = 0; idx < _total_nodes; idx++){
         tensors.get_tensor(TensorType::ACL_SRC_0+idx);
