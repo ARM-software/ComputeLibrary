@@ -722,7 +722,7 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     set_node_params(g, v_nid, params);
     set_node_params(g, f_nid, params);
 
-    return v_nid;
+    return f_nid;
 }
 
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
