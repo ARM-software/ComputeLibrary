@@ -43,7 +43,7 @@ public:
      * @param[in]  input1 First tensor input. Data type supported: F32.
      * @param[out] output Output tensor. Data type supported: F32.
      */
-    void configure(const ITensor *input1, ITensor *output, const LinearLayerInfo& linear_info);
+    void configure(const ITensor *input1, const ITensor *weight, const ITensor *bias, ITensor *output, const LinearLayerInfo& linear_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NELinearLayer
      *
      * @param[in] input1 First input tensor info. Data types supported: F32.

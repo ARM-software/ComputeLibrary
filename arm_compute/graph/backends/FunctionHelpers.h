@@ -1732,14 +1732,9 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
     const LinearLayerInfo linear_info         = node.linear_info();
 
-    std::cout << weight->desc().shape.x() << std::endl;
-    std::cout << weight->desc().shape.y() << std::endl;
-    std::cout << bias->desc().shape.x() << std::endl;
-    std::cout << bias->desc().shape.y() << std::endl;
-
     // Create function
     auto func = std::make_unique<LinearLayerFunction>();
-    func->configure(input,output,linear_info);
+    func->configure(input,weight,bias,linear_info);
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
