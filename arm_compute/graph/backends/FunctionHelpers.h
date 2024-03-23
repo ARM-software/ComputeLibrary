@@ -1755,15 +1755,16 @@ template <typename ForwardLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &node)
 {
     
-    ITensorPack input_pack,output_pack;
-    for(unsigned int idx = 0; idx < node._total_nodes; idx++){
-        input_pack.add_tensor(TensorType::ACL_SRC_0+idx, node.input(idx));
-        output_pack.add_tensor(TensorType::ACL_DST_0+idx, node.output(idx));
+    ITensorPack tensor_pack;
+    int total_tensors = node.total_tensors();
+    for(nt idx = 0; idx < node._total_nodes; idx++){
+        tensor_pack.add_tensor(TensorType::ACL_SRC_0+idx, node.input(idx));
+        tensor_pack.add_tensor(TensorType::ACL_DST_0+idx, node.output(idx));
     }
 
     // Create function
     auto func = std::make_unique<ForwardLayerFunction>();
-    func->configure(input_pack,output_pack);
+    func->configure(tensor_pack,total_tensors);
 
     return func;
 }

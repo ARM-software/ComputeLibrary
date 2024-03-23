@@ -7,10 +7,15 @@ namespace arm_compute
 {
 namespace graph
 {
-SimpleForwardLayerNode::SimpleForwardLayerNode(unsigned int total_nodes) : _total_nodes(total_nodes)
+SimpleForwardLayerNode::SimpleForwardLayerNode(int total_tensors) : _total_tensors(total_tensors)
 {
-    _input_edges.resize(_total_nodes, EmptyEdgeID);
-    _outputs.resize(_total_nodes, NullTensorID);
+    _input_edges.resize(_total_tensors, EmptyEdgeID);
+    _outputs.resize(_total_tensors, NullTensorID);
+}
+
+int SimpleForwardLayerNode::total_tensors()
+{
+    return _total_tensors;
 }
 
 bool SimpleForwardLayerNode::forward_descriptors()

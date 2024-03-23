@@ -17,7 +17,10 @@ public:
      *
      * @param[in] desc Tensor descriptor
      */
-    SimpleForwardLayerNode(unsigned int total_nodes);
+    SimpleForwardLayerNode(int total_tensors);
+
+    // Return _total_tensors
+    int total_tensors();
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -26,7 +29,7 @@ public:
     void             accept(INodeVisitor &v) override;
 
 private:
-    unsigned int     _total_nodes;
+    int     _total_tensors;
 };
 } // namespace graph
 } // namespace arm_compute
