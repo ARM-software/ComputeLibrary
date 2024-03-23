@@ -30,6 +30,7 @@ void NELinearLayer::configure(const ITensor *input1,
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, output);
     ARM_COMPUTE_LOG_PARAMS(input1, output);
 
+    sta::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
     std::cout << weight->info()->tensor_shape().x() << std::endl;
     std::cout << weight->info()->tensor_shape().y() << std::endl;
     std::cout << bias->info()->tensor_shape().x() << std::endl;
