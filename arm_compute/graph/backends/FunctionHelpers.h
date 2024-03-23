@@ -1734,7 +1734,7 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
 
     // Create function
     auto func = std::make_unique<LinearLayerFunction>();
-    func->configure(input,weight,bias,linear_info);
+    func->configure(input, weight, bias, output, linear_info);
 
     ARM_COMPUTE_LOG_GRAPH_INFO(
         "Instantiated " << node.name() << " Type: " << node.type() << " Target: " << TargetInfo::TargetType
