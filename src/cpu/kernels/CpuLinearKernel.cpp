@@ -74,7 +74,7 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
 
 
     const auto window_start_x    = static_cast<int>(window.x().start());
-    const auto window_end_x      = static_cast<int>(window.x().end());
+    const auto window_end_x      = static_cast<int>(768U);
 
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -85,13 +85,9 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
     [&](const Coordinates &){
         for(int x = window_start_x; x < window_end_x; x++)
         {
-            *(src_ptr + x) = *(src_ptr + x);
+            std::cout << *(src_ptr + x) << std::endl;
         }
     },src_iter);
-    
-    std::cout << "src/cpu/kernels/CpuLinearKernel.cpp End" << std::endl;
-    std::cout << window_start_x << std::endl;
-    std::cout << window_end_x << std::endl;
 }
 
 const char *CpuLinearKernel::name() const
