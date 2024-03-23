@@ -9,8 +9,8 @@ namespace graph
 {
 SimpleForwardLayerNode::SimpleForwardLayerNode(int total_tensors) : _total_tensors(total_tensors)
 {
-    _input_edges.resize(_total_tensors, EmptyEdgeID);
-    _outputs.resize(_total_tensors, NullTensorID);
+    _input_edges.resize(total_tensors, EmptyEdgeID);
+    _outputs.resize(total_tensors, NullTensorID);
 }
 
 int SimpleForwardLayerNode::total_tensors()
@@ -20,6 +20,13 @@ int SimpleForwardLayerNode::total_tensors()
 
 bool SimpleForwardLayerNode::forward_descriptors()
 {
+    if (output_id(0) != NullTensorID)
+    {
+        Tensor *t = output(0);
+        ARM_COMPUTE_ERROR_ON(t == nullptr);
+        t->desc() = configure_output(0);
+        return true;
+    }
     return false;
 }
 
