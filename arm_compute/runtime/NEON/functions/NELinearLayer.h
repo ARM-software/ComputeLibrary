@@ -51,7 +51,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *output, const LinearLayerInfo& linear_info);
+    static Status validate(const ITensor *input, const ITensor *weight, const ITensor *bias, ITensor *output, const LinearLayerInfo& linear_info);
 
     // Inherited methods overridden
     void run() override;

@@ -4,7 +4,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/common/utils/Log.h"
-#include "src/cpu/operators/CpuLinear.h"
+#include "src/cpu/operators/CpuGemm.h"
 
 namespace arm_compute
 {
@@ -15,7 +15,7 @@ struct  NELinearLayer::Impl
     const ITensor                      *weight{nullptr};
     const ITensor                      *bias{nullptr};
     ITensor                            *dst{nullptr};
-    std::unique_ptr<cpu::CpuLinear>    kernel{nullptr};
+    std::unique_ptr<cpu::CpuGemm>    kernel{nullptr};
 };
 
 NELinearLayer::NELinearLayer() : _impl(std::make_unique<Impl>())
@@ -23,12 +23,13 @@ NELinearLayer::NELinearLayer() : _impl(std::make_unique<Impl>())
 }
 NELinearLayer::~NELinearLayer() = default;
 
-void NELinearLayer::configure(const ITensor *input1, 
+void NELinearLayer::configure(const ITensor *input, 
                               const ITensor *weight, 
                               const ITensor *bias, ITensor *output, const LinearLayerInfo& linear_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, output);
-    ARM_COMPUTE_LOG_PARAMS(input1, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output);
+    ARM_COMPUTE_UNUSED(linear_info);
 
     std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
     std::cout << weight->info()->tensor_shape().x() << std::endl;
@@ -36,18 +37,21 @@ void NELinearLayer::configure(const ITensor *input1,
     std::cout << bias->info()->tensor_shape().x() << std::endl;
     std::cout << bias->info()->tensor_shape().y() << std::endl;
 
-    _impl->src      = input1;
+    _impl->src      = input;
     _impl->weight   = weight;
     _impl->bias     = bias;
     _impl->dst      = output;
 
-    _impl->kernel = std::make_unique<cpu::CpuLinear>();
-    _impl->kernel->configure(input1->info(), output->info(), linear_info);
+    _impl->kernel = std::make_unique<cpu::CpuGemm>();
+    _impl->kernel->configure(input->info(), weight->info(), bias->info(), output->info(), 1.0f, 1.0f);
 }
 
-Status NELinearLayer::validate(const ITensorInfo *input1, const ITensorInfo *output, const LinearLayerInfo& linear_info)
+Status NELinearLayer::validate(const ITensor *input, 
+                              const ITensor *weight, 
+                              const ITensor *bias, ITensor *output, const LinearLayerInfo& linear_info)
 {
-    return cpu::CpuLinear::validate(input1,output,linear_info);
+    ARM_COMPUTE_UNUSED(linear_info);
+    return cpu::CpuGemm::validate(input->info(), weight->info(), bias->info(), output->info(), 1.0f, 1.0f);
 }
 
 void NELinearLayer::run()
