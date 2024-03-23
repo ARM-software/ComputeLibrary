@@ -63,6 +63,7 @@ Status CpuLinearKernel::validate(const ITensorInfo *input1,
 
 void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    std::cout << "src/cpu/kernels/CpuLinearKernel.cpp" << std::endl;
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
@@ -88,6 +89,9 @@ void CpuLinearKernel::run_op(ITensorPack &tensors, const Window &window, const T
         }
     },src_iter);
     
+    std::cout << "src/cpu/kernels/CpuLinearKernel.cpp End" << std::endl;
+    std::cout << window_start_x << std::endl;
+    std::cout << window_end_x << std::endl;
 }
 
 const char *CpuLinearKernel::name() const
