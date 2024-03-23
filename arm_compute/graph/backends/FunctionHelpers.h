@@ -1763,7 +1763,7 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
     // Update accessor
     node.input(0)->set_accessor(node.output(0)->extract_accessor());
     // Update output
-    node->set_output_tensor(node.input(0)->id(), 0);
+    node.set_output_tensor(node.input(0)->id(), 0);
 
     //et_new_output_and_inherit_accessor(*polymorphic_downcast<INode*>(node),node.output(0),node.input(0));
 
