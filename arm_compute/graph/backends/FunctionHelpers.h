@@ -1760,7 +1760,7 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
     std::cout << "output" << std::endl;
     std::cout << node.num_outputs() << std::endl;
     std::cout << node.output(0)->id() << std::endl;
-    set_new_output_and_inherit_accessor(node,node.output(0),node.input(0));
+    set_new_output_and_inherit_accessor(*polymorphic_downcast<INode*>(node),node.output(0),node.input(0));
 
     // Create function
     auto func = std::make_unique<ForwardLayerFunction>();
