@@ -17,8 +17,6 @@ public:
      */
     void configure(unsigned int total_nodes);
 
-    // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
 private:
 
 };

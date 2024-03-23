@@ -45,7 +45,7 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
 
 const char *CpuSimpleForwardKernel::name() const
 {
-    return _name.c_str();
+    return "CpuSimpleForwardKernel";
 }
 
 } // namespace kernels

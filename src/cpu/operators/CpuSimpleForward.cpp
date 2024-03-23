@@ -20,12 +20,5 @@ void CpuSimpleForward::configure(unsigned int total_nodes)
     _kernel = std::move(k);
 }
 
-void CpuSimpleForward::run(ITensorPack &tensors)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
-}
-
-
 } // namespace cpu
 } // namespace arm_compute

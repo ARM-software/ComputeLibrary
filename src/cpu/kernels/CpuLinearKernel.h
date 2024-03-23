@@ -57,7 +57,7 @@ public:
     struct LinearKernel
     {
         const char                                          *name;
-        const TokenEmbedKernelDataTypeISASelectorDataPtr    is_selected;
+        const LinearaKernelDataTypeISASelectorDataPtr    is_selected;
         LinearKernelPtr                                      ukernel;
     };
 
