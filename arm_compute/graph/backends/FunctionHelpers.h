@@ -1727,8 +1727,15 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
     // Extract IO and info
     
     typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *weight   = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *bias     = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
     const LinearLayerInfo linear_info         = node.linear_info();
+
+    std::cout << node.input(1)->desc().shape.x() << std::endl;
+    std::cout << node.input(1)->desc().shape.y() << std::endl;
+    std::cout << node.input(2)->desc().shape.x() << std::endl;
+    std::cout << node.input(2)->desc().shape.y() << std::endl;
 
     // Create function
     auto func = std::make_unique<LinearLayerFunction>();
