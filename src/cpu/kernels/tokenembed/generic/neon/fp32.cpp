@@ -18,6 +18,10 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
     const unsigned int window_end_x     = src->info()->tensor_shape().x();
     unsigned int       x                = window_start_x;
 
+    std::cout << window_start_x << std::endl;
+    std::cout << window_end_x << std::endl;
+    std::cout << window.x().end() << std::endl;
+
     const unsigned int vector_depth     = tkemb_info.d_model();
 
     unsigned int id_src, offset_vocab, offset_dst;

@@ -21,7 +21,7 @@ namespace kernels
 namespace
 {
 template <typename T>
-void run_positional_encoding(const Window &window, const ITensor *src, const ITensor *dst, const unsigned int d_model)
+void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, const unsigned int d_model)
 {
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(src);
@@ -29,6 +29,8 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
 
     std::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
 
+
+    /*
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
     win.set(Window::DimY, Window::Dimension(0,1,1));
@@ -61,7 +63,7 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
 
             }
         },src_iter);
-
+*/
 
 }
 
@@ -95,8 +97,8 @@ void CpuPositionalEncodingKernel::run_op(ITensorPack &tensors, const Window &win
 {
     ARM_COMPUTE_UNUSED(info);
 
-    const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
-    auto       dst = tensors.get_tensor(TensorType::ACL_DST);
+    auto src = tensors.get_tensor(TensorType::ACL_DST);
+    auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
     run_positional_encoding<float>(window, src, dst, _d_model);
 }
