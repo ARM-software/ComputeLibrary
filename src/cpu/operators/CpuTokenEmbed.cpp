@@ -18,13 +18,13 @@ namespace arm_compute
 {
 namespace cpu
 {
-void CpuTokenEmbed::configure(const ITensorInfo *input,  ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
+void CpuTokenEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab,  ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
 
     std::cout << "src/cpu/operators/CpuTokenEmbed.cpp 0  " << std::endl;
     auto k = std::make_unique<kernels::CpuTokenEmbedKernel>();
-    k->configure(input, &_tmp_t2p, tkemb_info);
+    k->configure(input, vocab, &_tmp_t2p, tkemb_info);
     _kernel = std::move(k);
 
     std::cout << "src/cpu/operators/CpuTokenEmbed.cpp -1  " << std::endl;
