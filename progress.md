@@ -152,10 +152,12 @@ Compatability:
             4. data layout ND
             5. Linear Layer Now only have "src/core/NEON/kernels" implementation
             6. Update arm_compute/graph/nodes/NodesFwd.h
+            7. Only support lower case input eg. "I, i" 1045 
 
 Functionality:
             1. Segment token:
             2. Token vectorize
+            3. Pytorch positional embdding is implemented using pretrained model, but this calcualtes.
 
 Optimization: 
             1. window collapse
