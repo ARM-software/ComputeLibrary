@@ -50,7 +50,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
                 for(unsigned int i = 0; i < d_model/2 ; i++){
                     std::cout<<i << " ";
                 }
-                std::cout << << std::endl << pos << std::endl;
+                std::cout << std::endl << pos << std::endl;
                 token_offset = pos * d_model;
 
                 std::cout << *(src_ptr + token_offset) << std::endl;
