@@ -2,6 +2,7 @@
 #define ARM_COMPUTE_CPU_TOKEN_EMBED_H
 
 #include "src/cpu/ICpuOperator.h"
+#include "src/cpu/kernels/CpuPositionalEncodingKernel.h"
 
 namespace arm_compute
 {
@@ -29,6 +30,8 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
+private: 
+    std::unique_ptr<kernels::CpuPositionalEncodingKernel> _PE_kernel{nullptr};
 };
 } // namespace cpu
 } // namespace arm_compute

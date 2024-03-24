@@ -2308,6 +2308,7 @@
         }
       },
       "TKEMB": {
+        "deps":["PositionalEncoding"],
         "files": {
           "common": [
             "src/cpu/kernels/CpuTokenEmbedKernel.cpp",
@@ -2334,6 +2335,13 @@
             "src/cpu/kernels/CpuSimpleForwardKernel.cpp",
             "src/cpu/operators/CpuSimpleForward.cpp",
             "src/runtime/NEON/functions/NESimpleForwardLayer.cpp"
+          ]
+        }
+      },
+      "PositionalEncoding": {
+        "files":{
+          "common":[
+            "src/cpu/kernels/CpuPositionalEncodingKernel.cpp"
           ]
         }
       }
