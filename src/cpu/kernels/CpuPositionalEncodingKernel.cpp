@@ -37,15 +37,23 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
 
+    unsigned int token_offset;
+
     Iterator src_iter(src,win);
+    const auto src_ptr  = reinterpret_cast<float *>(src_iter.ptr());
     execute_window_loop(win,
         [&](const Coordinates &)
         {
             for(unsigned int x = window_start_x; x < window_end_x; x++)
             {
                 std::cout << x << std::endl;
+                token_offset = x * d_model;
+
+                std::cout << *(src_ptr + token_offset) << std::endl;
+                std::cout << *(src_ptr + token_offset + dst->info()->tensor_shape().y()-1) << std::endl;
             }
-    },src_iter);
+        }
+    ,src_iter);
 
     /*
     Window win = window;
