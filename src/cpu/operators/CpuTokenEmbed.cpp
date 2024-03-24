@@ -7,6 +7,11 @@
 #include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
 #include "src/cpu/kernels/CpuTokenEmbedKernel.h"
+#include "src/cpu/utils/CpuAuxTensorHandler.h"
+#include "src/core/helpers/MemoryHelpers.h"
+
+
+using namespace arm_compute::experimental;
 
 namespace arm_compute
 {
@@ -16,11 +21,14 @@ void CpuTokenEmbed::configure(const ITensorInfo *input,  ITensorInfo *output, co
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
     auto k = std::make_unique<kernels::CpuTokenEmbedKernel>();
-    k->configure(input, output, tkemb_info);
+    k->configure(input, &_tmp_t2p, tkemb_info);
     _kernel = std::move(k);
 
     _PE_kernel = std::make_unique<kernels::CpuPositionalEncodingKernel>();
-    _PE_kernel->configure(input,output,tkemb_info.d_model());
+    _PE_kernel->configure(&_tmp_t2p,output,tkemb_info.d_model());
+
+    _aux_mem[Token2PositionalAuxTensorIdx] =
+        MemoryInfo(offset_int_vec(Token2PositionalAuxTensorIdx), MemoryLifetime::Temporary, _tmp_t2p.total_size());
 }
 
 Status
@@ -37,8 +45,17 @@ void CpuTokenEmbed::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto split_dimension = static_cast<kernels::CpuTokenEmbedKernel *>(_kernel.get())->get_split_dimension_hint();
-    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
-    NEScheduler::get().schedule_op(_PE_kernel.get(),Window::DimY,_PE_kernel->window(),tensors);
+
+    const ITensor *src   = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    const ITensor *vocab = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    ITensor       *dst   = tensors.get_tensor(TensorType::ACL_DST);
+
+    CpuAuxTensorHandler Token2PositionalTensorHandler(offset_int_vec(Token2PositionalAuxTensorIdx), _tmp_t2p, tensors, true);
+    
+    ITensorPack token_pack{{ACL_SRC_0, src}, {ACL_SRC_1, vocab}, {ACL_DST, Token2PositionalTensorHandler.get()}};
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), token_pack);
+    ITensorPack positional_pack{{ACL_SRC_0, Token2PositionalTensorHandler.get()}, {ACL_DST, dst}};
+    NEScheduler::get().schedule_op(_PE_kernel.get(),Window::DimY,_PE_kernel->window(), positional_pack);
 }
 
 

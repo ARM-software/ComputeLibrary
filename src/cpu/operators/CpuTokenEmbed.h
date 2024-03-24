@@ -2,7 +2,9 @@
 #define ARM_COMPUTE_CPU_TOKEN_EMBED_H
 
 #include "src/cpu/ICpuOperator.h"
+#include "arm_compute/core/Types.h"
 #include "src/cpu/kernels/CpuPositionalEncodingKernel.h"
+
 
 namespace arm_compute
 {
@@ -31,7 +33,17 @@ public:
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 private: 
+    enum AuxTensorIdx
+    {
+        Token2PositionalAuxTensorIdx = 0,
+        AuxTensorCount
+    };
+
+    TensorInfo _tmp_t2p{};
+    
     std::unique_ptr<kernels::CpuPositionalEncodingKernel> _PE_kernel{nullptr};
+
+    experimental::MemoryRequirements _aux_mem{AuxTensorCount};
 };
 } // namespace cpu
 } // namespace arm_compute

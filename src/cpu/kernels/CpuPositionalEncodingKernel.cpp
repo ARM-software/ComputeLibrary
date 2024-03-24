@@ -33,10 +33,10 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
     win.set(Window::DimX, Window::Dimension(0,1,1));
     win.set(Window::DimY, Window::Dimension(0,1,1));
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
-    const unsigned int window_end_x     = src->info()->tensor_shape().x();
+    const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
     unsigned int       x                = window_start_x;
 
-    const unsigned int vector_depth     = tkemb_info.d_model();
+    const unsigned int vector_depth     = d_model;
 
     unsigned int id_src, offset_dst;
     
@@ -44,7 +44,7 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
     Iterator dst_iter(dst,win);
 
     const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
-    const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
+    //const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
 
     execute_window_loop(win,
         [&](const Coordinates &)
