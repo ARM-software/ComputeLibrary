@@ -12,7 +12,7 @@ class SegmentEmbeddingLayerNode final : public INode
 {
 public:
     /** Constructor  */
-    SegmentEmbeddingLayerNode() = default;
+    SegmentEmbeddingLayerNode();
 
     // Inherited overridden methods:
     NodeType         type() const override;

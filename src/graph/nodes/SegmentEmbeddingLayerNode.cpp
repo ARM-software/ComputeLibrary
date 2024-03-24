@@ -7,6 +7,13 @@ namespace arm_compute
 {
 namespace graph
 {
+
+SegmentEmbeddingLayerNode::SegmentEmbeddingLayerNode()
+{
+    _input_edges.resize(2, EmptyEdgeID);
+    _outputs.resize(1, NullTensorID);
+}
+
 bool SegmentEmbeddingLayerNode::forward_descriptors()
 {
     if ((input_id(0) != NullTensorID) && input_id(1) != NullTensorID && (output_id(0) != NullTensorID))
