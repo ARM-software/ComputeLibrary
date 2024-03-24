@@ -30,10 +30,6 @@ namespace
 template <typename T>
 void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, const unsigned int d_model)
 {
-    ARM_COMPUTE_UNUSED(window);
-    ARM_COMPUTE_UNUSED(src);
-    ARM_COMPUTE_UNUSED(dst);
-    ARM_COMPUTE_UNUSED(d_model);
     ARM_COMPUTE_ERROR_ON_MSG(d_model%2!=0, "Model depth (d_model) must be dividable by 2");
 
     std::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
@@ -58,30 +54,16 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
         {
             for(unsigned int pos = window_start_x; pos < window_end_x; pos++)
             {
-                std::cout << std::endl << pos << std::endl;
                 token_offset = pos * d_model;
                 for(unsigned int i = 0; i < d_model ; i+=2)
                 {
-                    std::cout<<i << " ";
                     double div_term = exp(i * -log(10000.0) / d_model);
                     PE_2i   = sin(pos * div_term);
                     PE_2i1  = cos(pos * div_term);
-                    //PE_2i     = sin( pos / pow(10000, 2*i / d_model) );
-                    //PE_2i1    = cos( pos / pow(10000, 2*i / d_model) );
 
-                    std::cout<<  PE_2i  << " ";
-                    std::cout<<  *(src_ptr + token_offset + i) << " + " << PE_2i << " = ";
-                    //std::cout<<  *(src_ptr + token_offset + 2*i+1) << " + " << PE_2i1 << " = ";
                     *(dst_ptr + token_offset + i)       = *(src_ptr + token_offset + i)   + PE_2i;
                     *(dst_ptr + token_offset + i+1)     = *(src_ptr + token_offset + i+1) + PE_2i1;
-
-                    std::cout<<  *(dst_ptr + token_offset + i) << std::endl;
-                    //std::cout<<  *(dst_ptr + token_offset + 2*i+1) << std::endl;
-
                 }
-
-                std::cout << *(src_ptr + token_offset) << std::endl;
-                std::cout << *(src_ptr + token_offset + dst->info()->tensor_shape().y()-1) << std::endl;
             }
         }
     ,src_iter);
