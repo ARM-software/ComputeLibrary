@@ -48,23 +48,28 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
     unsigned int token_offset;
 
     Iterator src_iter(src,win);
-    const auto src_ptr  = reinterpret_cast<float *>(src_iter.ptr());
+    Iterator dst_iter(dst,win);
+    const auto src_ptr  = reinterpret_cast<T *>(src_iter.ptr());
+    const auto dst_ptr  = reinterpret_cast<T *>(dst_iter.ptr());
     execute_window_loop(win,
         [&](const Coordinates &)
         {
             for(unsigned int pos = window_start_x; pos < window_end_x; pos++)
             {
-                for(unsigned int i = 0; i < d_model/2 ; i++)
-                {
-                    float div_term = exp(i*2 * -log(10000.0) / d_model);
-                    T PE_2i = sin(pos * div_term);
-                    T PE_2i1 = cos(pos * div_term);
-                    std::cout<<i << " ";
-                    std::cout<<PE_2i << " ";
-                    std::cout<<PE_2i1 << " ";
-                }
                 std::cout << std::endl << pos << std::endl;
                 token_offset = pos * d_model;
+                for(unsigned int i = 0; i < d_model ; i+=2)
+                {
+                    std::cout<<i << " ";
+                    T PE_2i     = sin( pos / pow(10000, i / d_model) );
+                    T PE_2i1    = cos( pos / pow(10000, i / d_model) );
+        
+                    *(src_ptr + token_offset + i) = PE_2i;
+                    *(src_ptr + token_offset + i + 1) = PE_2i;
+
+                    std::cout<<*(src_ptr + token_offset + i) << " ";
+                    std::cout<<*(src_ptr + token_offset + i + 1) << " ";
+                }
 
                 std::cout << *(src_ptr + token_offset) << std::endl;
                 std::cout << *(src_ptr + token_offset + dst->info()->tensor_shape().y()-1) << std::endl;
