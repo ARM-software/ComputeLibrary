@@ -26,6 +26,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(src);
     ARM_COMPUTE_UNUSED(dst);
+    ARM_COMPUTE_UNUSED(d_model);
 
     std::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
 
