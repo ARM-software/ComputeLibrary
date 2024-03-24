@@ -142,6 +142,8 @@ Vanilla_Transformer
 
 Potential problem:
             1.utils/GraphUtils.cpp: Text Preprocess input/output, configure, runtime tensor shape may mismatch
+              src/cpu/kernels/tokenembed/generic/neon/fp32.cpp: neon_token_embed_char_2_float32:
+                  (const unsigned int window_end_x     = src->info()->tensor_shape().x();)
           
 Compatability:
             1: All function only support NEON right now.

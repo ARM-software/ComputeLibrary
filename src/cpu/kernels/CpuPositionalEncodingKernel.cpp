@@ -30,6 +30,22 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
 
     std::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
 
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0,1,1));
+    win.set(Window::DimY, Window::Dimension(0,1,1));
+    /* token sequence */
+    const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
+    const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
+
+    Iterator src_iter(src,win);
+    execute_window_loop(win,
+        [&](const Coordinates &)
+        {
+            for(unsigned int x = window_start_x; x < window_end_x; x++)
+            {
+                std::cout << x << std::endl;;
+            }
+    },src_iter);
 
     /*
     Window win = window;
