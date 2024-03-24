@@ -62,7 +62,6 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
                 token_offset = pos * d_model;
                 for(unsigned int i = 0; i < d_model ; i+=2)
                 {
-                    std::cout<<i << " ";
                     double div_term = exp(i * -log(10000.0) / d_model);
                     PE_2i   = sin(pos * div_term);
                     PE_2i1  = cos(pos * div_term);
