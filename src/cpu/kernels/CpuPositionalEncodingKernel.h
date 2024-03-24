@@ -41,7 +41,7 @@ public:
     const char *name() const override;
 
 private:
-    unsigned int _d_model;
+    unsigned int _d_model{512U};
 };
 } // namespace kernels
 } // namespace cpu
