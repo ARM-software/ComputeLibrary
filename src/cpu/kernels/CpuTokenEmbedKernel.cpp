@@ -57,8 +57,9 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, ITensorInfo *dst, To
     Window win;
 
     // Use squashed window
-    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
+    win = calculate_max_window(*src, Steps());
     ICPPKernel::configure(win);
+    
 }
 
 Status CpuTokenEmbedKernel::validate(const ITensorInfo *src,  const ITensorInfo *vocab, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info)

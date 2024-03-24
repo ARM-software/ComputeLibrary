@@ -27,13 +27,14 @@ void CpuTokenEmbed::configure(const ITensorInfo *input,  ITensorInfo *output, co
     k->configure(input, &_tmp_t2p, tkemb_info);
     _kernel = std::move(k);
 
+    std::cout << "src/cpu/operators/CpuTokenEmbed.cpp -1  " << std::endl;
     _PE_kernel = std::make_unique<kernels::CpuPositionalEncodingKernel>();
     _PE_kernel->configure(&_tmp_t2p,output,tkemb_info.d_model());
 
-    std::cout << "src/cpu/operators/CpuTokenEmbed.cpp -1  " << std::endl;
+    std::cout << "src/cpu/operators/CpuTokenEmbed.cpp -2  " << std::endl;
     _aux_mem[Token2PositionalAuxTensorIdx] =
         MemoryInfo(offset_int_vec(Token2PositionalAuxTensorIdx), MemoryLifetime::Temporary, _tmp_t2p.total_size());
-    std::cout << "src/cpu/operators/CpuTokenEmbed.cpp -2  " << std::endl;
+    std::cout << "src/cpu/operators/CpuTokenEmbed.cpp -3  " << std::endl;
 }
 
 Status
