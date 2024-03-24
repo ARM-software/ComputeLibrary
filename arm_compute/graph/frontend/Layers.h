@@ -1620,15 +1620,15 @@ private:
 };
 
 
-/** Token Embedding Layer */
-class TokenEmbeddingLayer final : public ILayer
+/** Embedding Layer */
+class EmbeddingLayer final : public ILayer
 {
 public:
     /** Construct a token embedding  layer.
      *
-     * @param[in] tkemb_info Token embedding layer info
+     * @param[in] tkemb_info  Embedding layer info
      */
-    TokenEmbeddingLayer(const TokenEmbeddingLayerInfo &tkemb_info,
+    EmbeddingLayer(const EmbeddingLayerInfo &tkemb_info,
                         ITensorAccessorUPtr     weights) : _tkemb_info(tkemb_info), _weights(std::move(weights))
     {
     }
@@ -1637,11 +1637,11 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_tkemb_node(s.graph(), common_params, input, _tkemb_info, std::move(_weights));
+        return GraphBuilder::add_embedding_node(s.graph(), common_params, input, _tkemb_info, std::move(_weights));
     }
 
 private:
-    const TokenEmbeddingLayerInfo &_tkemb_info;
+    const EmbeddingLayerInfo &_tkemb_info;
     ITensorAccessorUPtr     _weights;
 };
 

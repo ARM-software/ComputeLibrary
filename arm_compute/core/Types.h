@@ -1264,15 +1264,15 @@ struct Pooling3dLayerInfo
     DimensionRoundingType round_type;
 };
 
-/** Token Embedding Layer Information Class */
-class TokenEmbeddingLayerInfo final
+/** Embedding Layer Information Class */
+class EmbeddingLayerInfo final
 {
 public:
     /** Constructor
      *
      * @param[in] d_model   Model dimesion
      */
-    TokenEmbeddingLayerInfo(unsigned int d_model = 512U, unsigned int d_vocab = 30522U)
+    EmbeddingLayerInfo(unsigned int d_model = 512U, unsigned int d_vocab = 30522U)
         : _d_model(d_model), _d_vocab(d_vocab)
     {
     }

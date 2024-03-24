@@ -932,10 +932,10 @@ NodeID GraphBuilder::add_stack_node(Graph &g, NodeParams params, const std::vect
 }
 
 
-NodeID GraphBuilder::add_tkemb_node(Graph &g,
+NodeID GraphBuilder::add_embedding_node(Graph &g,
                                     NodeParams params, 
                                     NodeIdxPair input, 
-                                    TokenEmbeddingLayerInfo tkemb_info,
+                                    EmbeddingLayerInfo tkemb_info,
                                     ITensorAccessorUPtr     weights_accessor)
 {
     check_nodeidx_pair(input, g);
