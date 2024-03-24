@@ -48,8 +48,11 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
     unsigned int token_offset;
 
     Iterator src_iter(src,win);
-    
+    Iterator dst_iter(dst,win);
     const auto src_ptr  = reinterpret_cast<T *>(src_iter.ptr());
+    const auto dst_ptr  = reinterpret_cast<T *>(dst_iter.ptr());
+
+    T PE_2i,PE_2i1;
     execute_window_loop(win,
         [&](const Coordinates &)
         {
@@ -60,11 +63,17 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
                 for(unsigned int i = 0; i < d_model/2 ; i++)
                 {
                     std::cout<<i << " ";
-                    T PE_2i     = sin( pos / pow(10000, 2*i / d_model) );
-                    T PE_2i1    = cos( pos / pow(10000, 2*i / d_model) );
+                    double div_term = exp(i*2.0 * -log(10000.0) / d_model);
+                    PE_2i   = sin(pos * div_term);
+                    PE_2i1  = cos(pos * div_term);
+                    //PE_2i     = sin( pos / pow(10000, 2*i / d_model) );
+                    //PE_2i1    = cos( pos / pow(10000, 2*i / d_model) );
 
                     std:: cout << PE_2i << " ";
                     std:: cout << PE_2i1 << " ";
+
+                    *(dst_ptr + token_offset + i)       = *(src_ptr + token_offset + i)     + PE_2i;
+                    *(dst_ptr + token_offset + i+1)     = *(src_ptr + token_offset + i+1)   + PE_2i1;
 
                     //std::cout<<  *(src_ptr + token_offset + i) << " + " << PE_2i << " = " <<  *(dst_ptr + token_offset + i) << std::endl;
                     //std::cout<<  *(src_ptr + token_offset + i+1) << " + " << PE_2i1 << " = " <<  *(dst_ptr + token_offset + i+1) << std::endl;
