@@ -57,8 +57,8 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
                 for(unsigned int i = 0; i < d_model/2 ; i++)
                 {
                     float div_term = exp(i*2 * -log(10000.0) / d_model);
-                    T PE_2i = sin(i * div_term);
-                    T PE_2i1 = cos(i * div_term);
+                    T PE_2i = sin(pos * div_term);
+                    T PE_2i1 = cos(pos * div_term);
                     std::cout<<i << " ";
                     std::cout<<PE_2i << " ";
                     std::cout<<PE_2i1 << " ";
