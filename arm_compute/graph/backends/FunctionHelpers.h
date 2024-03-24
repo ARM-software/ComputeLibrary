@@ -1732,7 +1732,7 @@ std::unique_ptr<IFunction> create_segment_embedding_layer(SegmentEmbeddingLayerN
 
     // Create function
     auto func = std::make_unique<SegmentEmbeddingLayerFunction>();
-    func->configure(input,vocab,output,tkemb_info);
+    func->configure(input,segment,output);
 
     return func;
 }
