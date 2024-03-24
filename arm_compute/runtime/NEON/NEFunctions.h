@@ -100,6 +100,7 @@
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
+#include "arm_compute/runtime/NEON/functions/NESegmentEmbeddingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NESlice.h"
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NESpaceToBatchLayer.h"
