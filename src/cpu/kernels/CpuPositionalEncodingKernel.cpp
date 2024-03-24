@@ -11,6 +11,8 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
+#include <cmath>
+
 namespace arm_compute
 {
 namespace cpu
@@ -20,6 +22,11 @@ namespace kernels
 
 namespace
 {
+/**  Compute Transformer positional encoding
+ *
+ *  @note math: PE(pos,2i)   = sin(pos/10000^(2i/dmodel))
+ *              PE(pos,2i+1) = cos(pos/10000^(2i/dmodel))
+ */
 template <typename T>
 void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, const unsigned int d_model)
 {
@@ -47,8 +54,13 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
         {
             for(unsigned int pos = window_start_x; pos < window_end_x; pos++)
             {
-                for(unsigned int i = 0; i < d_model/2 ; i++){
+                for(unsigned int i = 0; i < d_model/2 ; i++)
+                {
                     std::cout<<i << " ";
+                    T PE_2i     = sin( pos / pow(10000, 2*i / d_model) );
+                    T PE_2i1    = cos( pos / pow(10000, 2*i / d_model) );
+                    std::cout<<PE_2i << " ";
+                    std::cout<<PE_2i1 << " ";
                 }
                 std::cout << std::endl << pos << std::endl;
                 token_offset = pos * d_model;
