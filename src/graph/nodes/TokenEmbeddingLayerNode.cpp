@@ -10,7 +10,7 @@ namespace graph
 {
 TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info): _info(std::move(info))
 {
-    _input_edges.resize(1, EmptyEdgeID);
+    _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
