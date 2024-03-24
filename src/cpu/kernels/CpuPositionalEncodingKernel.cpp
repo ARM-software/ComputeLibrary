@@ -43,7 +43,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
         {
             for(unsigned int x = window_start_x; x < window_end_x; x++)
             {
-                std::cout << x << std::endl;;
+                std::cout << x << std::endl;
             }
     },src_iter);
 
@@ -114,7 +114,7 @@ void CpuPositionalEncodingKernel::run_op(ITensorPack &tensors, const Window &win
 {
     ARM_COMPUTE_UNUSED(info);
 
-    auto src = tensors.get_tensor(TensorType::ACL_DST);
+    auto src = tensors.get_tensor(TensorType::ACL_SRC);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
     run_positional_encoding<float>(window, src, dst, _d_model);
