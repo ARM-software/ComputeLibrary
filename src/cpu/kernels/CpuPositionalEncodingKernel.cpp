@@ -62,14 +62,21 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
                 token_offset = pos * d_model;
                 for(unsigned int i = 0; i < d_model ; i+=2)
                 {
+                    std::cout<<i << " ";
                     double div_term = exp(i * -log(10000.0) / d_model);
                     PE_2i   = sin(pos * div_term);
                     PE_2i1  = cos(pos * div_term);
                     //PE_2i     = sin( pos / pow(10000, 2*i / d_model) );
                     //PE_2i1    = cos( pos / pow(10000, 2*i / d_model) );
 
-                    *(dst_ptr + token_offset + i)       += PE_2i;
-                    *(dst_ptr + token_offset + i+1)     += PE_2i1;
+                    std::cout<<  PE_2i  << " ";
+                    std::cout<<  *(src_ptr + token_offset + i) << " + " << PE_2i << " = ";
+                    //std::cout<<  *(src_ptr + token_offset + 2*i+1) << " + " << PE_2i1 << " = ";
+                    *(dst_ptr + token_offset + i)       = *(src_ptr + token_offset + i)   + PE_2i;
+                    *(dst_ptr + token_offset + i+1)     = *(src_ptr + token_offset + i+1) + PE_2i1;
+
+                    std::cout<<  *(dst_ptr + token_offset + i) << std::endl;
+                    //std::cout<<  *(dst_ptr + token_offset + 2*i+1) << std::endl;
 
                 }
 
@@ -78,41 +85,6 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
             }
         }
     ,src_iter);
-
-    /*
-    Window win = window;
-    win.set(Window::DimX, Window::Dimension(0,1,1));
-    win.set(Window::DimY, Window::Dimension(0,1,1));
-    const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
-    const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
-    unsigned int       x                = window_start_x;
-
-    const unsigned int vector_depth     = d_model;
-
-    unsigned int id_src, offset_dst;
-    
-    Iterator src_iter(src,win);
-    Iterator dst_iter(dst,win);
-
-    const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
-    //const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
-
-    execute_window_loop(win,
-        [&](const Coordinates &)
-        {
-            for(; x < window_end_x; x++)
-            {
-                id_src = *(src_ptr+x);
-                std::cout << id_src << std::endl;
-
-                offset_dst      = x * vector_depth;
-
-                std::cout << *(src_ptr + offset_dst) << std::endl;
-                std::cout << *(src_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << std::endl;
-
-            }
-        },src_iter);
-*/
 
 }
 
