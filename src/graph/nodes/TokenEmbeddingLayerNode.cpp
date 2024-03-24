@@ -10,7 +10,7 @@ namespace graph
 {
 TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info): _info(std::move(info))
 {
-    _input_edges.resize(1, EmptyEdgeID);
+    _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
@@ -23,14 +23,13 @@ TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const Tensor
                                                                    TokenEmbeddingLayerInfo tkemb_info)
 {
     TensorDescriptor output_descriptor = input_descriptor;
-    const unsigned int seq_len  = tkemb_info.d_model();
-    output_descriptor.shape.set(1,seq_len);
+    output_descriptor.shape.set(input_descriptor.shape.x(),tkemb_info.d_model());
     return output_descriptor;
 }
 
 bool TokenEmbeddingLayerNode::forward_descriptors()
 {
-    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
