@@ -44,10 +44,23 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *v
         TokenEmbedKernelDataTypeISASelectorData{dst->data_type(), CPUInfo::get().get_isa()}
     );
 
-    const TensorShape dst_shape(src->tensor_shape().x(),dst->tensor_shape().y());
+    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp" << std::endl;
+    std::cout << src->tensor_shape().x() <<std ::endl;
+    std::cout << src->tensor_shape().y() <<std ::endl;
+    std::cout << vocab->tensor_shape().x() <<std ::endl;
+    std::cout << vocab->tensor_shape().x() <<std ::endl;
+    std::cout << dst->tensor_shape().x() <<std ::endl;
+    std::cout << dst->tensor_shape().x() <<std ::endl;
+    const TensorShape dst_shape(src->tensor_shape().x(),vocab->tensor_shape().y());
     // Configure output tensor info.
     auto_init_if_empty(*dst, TensorInfo(*vocab->clone()).set_tensor_shape(dst_shape));
-    
+    std::cout << "*****" << std::endl;
+    std::cout << src->tensor_shape().x() <<std ::endl;
+    std::cout << src->tensor_shape().y() <<std ::endl;
+    std::cout << vocab->tensor_shape().x() <<std ::endl;
+    std::cout << vocab->tensor_shape().x() <<std ::endl;
+    std::cout << dst->tensor_shape().x() <<std ::endl;
+    std::cout << dst->tensor_shape().x() <<std ::endl;
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _run_method = uk->ukernel;

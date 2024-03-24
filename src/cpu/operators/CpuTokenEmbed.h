@@ -34,17 +34,7 @@ public:
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 private: 
-    enum AuxTensorIdx
-    {
-        Token2PositionalAuxTensorIdx = 0,
-        AuxTensorCount
-    };
-
-    TensorInfo _tmp_t2p{};
-    
     std::unique_ptr<kernels::CpuPositionalEncodingKernel> _PE_kernel{nullptr};
-
-    experimental::MemoryRequirements _aux_mem{AuxTensorCount};
 };
 } // namespace cpu
 } // namespace arm_compute

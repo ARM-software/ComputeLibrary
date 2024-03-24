@@ -7,12 +7,7 @@
 #include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
 #include "src/cpu/kernels/CpuTokenEmbedKernel.h"
-#include "src/cpu/utils/CpuAuxTensorHandler.h"
-#include "src/core/helpers/MemoryHelpers.h"
 
-#include <memory>
-
-using namespace arm_compute::experimental;
 
 namespace arm_compute
 {
