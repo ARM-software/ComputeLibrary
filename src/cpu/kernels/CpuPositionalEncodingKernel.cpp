@@ -47,7 +47,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
         {
             for(unsigned int pos = window_start_x; pos < window_end_x; pos++)
             {
-                for(unsigned int i = 0, i < d_model/2 ; i++){
+                for(unsigned int i = 0; i < d_model/2 ; i++){
                     std::cout<<i << " ";
                 }
                 std::cout << << std::endl << pos << std::endl;
