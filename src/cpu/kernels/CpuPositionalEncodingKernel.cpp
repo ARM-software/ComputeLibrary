@@ -27,6 +27,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
     ARM_COMPUTE_UNUSED(src);
     ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_UNUSED(d_model);
+    ARM_COMPUTE_ERROR_ON_MSG(d_model%2!=0, "Model depth (d_model) must be dividable by 2");
 
     std::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
 
@@ -44,10 +45,13 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
     execute_window_loop(win,
         [&](const Coordinates &)
         {
-            for(unsigned int x = window_start_x; x < window_end_x; x++)
+            for(unsigned int pos = window_start_x; pos < window_end_x; pos++)
             {
-                std::cout << x << std::endl;
-                token_offset = x * d_model;
+                for(unsigned int i = 0, i < d_model/2 ; i++){
+                    std::cout<<i << " ";
+                }
+                std::cout << << std::endl << pos << std::endl;
+                token_offset = pos * d_model;
 
                 std::cout << *(src_ptr + token_offset) << std::endl;
                 std::cout << *(src_ptr + token_offset + dst->info()->tensor_shape().y()-1) << std::endl;
