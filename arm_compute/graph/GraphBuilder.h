@@ -705,17 +705,17 @@ public:
                                          StridedSliceLayerInfo info);
     /** Adds an embedding layer to the graph
      *
-     * @param[in] g        Graph to add the node to
-     * @param[in] params   Common node parameters
-     * @param[in] input    Input to the embedding layer node as a NodeID-Index pair
-     * @param[in] emb_info Embedding layer parameters
+     * @param[in] g          Graph to add the node to
+     * @param[in] params     Common node parameters
+     * @param[in] input      Input to the token embedding layer node as a NodeID-Index pair
+     * @param[in] tkemb_info Token embedding layer parameters
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_embedding_node(Graph &g,
                                  NodeParams params, 
                                  NodeIdxPair input, 
-                                 EmbeddingLayerInfo emb_info,
+                                 TokenEmbeddingLayerInfo tkemb_info,
                                  ITensorAccessorUPtr     weights = nullptr);
     /** Adds a yolo layer to the graph
      *

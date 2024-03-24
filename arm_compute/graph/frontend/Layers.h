@@ -1628,7 +1628,7 @@ public:
      *
      * @param[in] tkemb_info  Embedding layer info
      */
-    EmbeddingLayer(const EmbeddingLayerInfo &tkemb_info,
+    EmbeddingLayer(const TokenEmbeddingLayerInfo &tkemb_info,
                         ITensorAccessorUPtr     weights) : _tkemb_info(tkemb_info), _weights(std::move(weights))
     {
     }
@@ -1641,7 +1641,7 @@ public:
     }
 
 private:
-    const EmbeddingLayerInfo &_tkemb_info;
+    const TokenEmbeddingLayerInfo &_tkemb_info;
     ITensorAccessorUPtr     _weights;
 };
 
