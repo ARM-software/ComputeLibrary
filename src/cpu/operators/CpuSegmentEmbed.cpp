@@ -44,6 +44,7 @@ void CpuSegmentEmbed::run(ITensorPack &tensors)
     const unsigned int window_start_x   = static_cast<unsigned int>(_kernel->window().x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(_kernel->window().x().end());
     ARM_COMPUTE_UNUSED(split_dimension);
+    ARM_COMPUTE_UNUSED(tensors);
     std::cout << " src/cpu/operators/CpuSegmentEmbed.cpp" << std::endl;
     std::cout << window_end_x- window_start_x << std::endl;
 
