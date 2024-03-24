@@ -23,7 +23,7 @@ namespace
 template <typename T>
 void run_positional_encoding(const Window &window, const ITensor *src, const ITensor *dst, const unsigned int d_model)
 {
-    sdt::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
+    std::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
     std::cout << "d_model" << std::endl;
 }
 
