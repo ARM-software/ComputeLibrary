@@ -48,9 +48,8 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *dst, c
     unsigned int token_offset;
 
     Iterator src_iter(src,win);
-    Iterator dst_iter(dst,win);
+    
     const auto src_ptr  = reinterpret_cast<T *>(src_iter.ptr());
-    const auto dst_ptr  = reinterpret_cast<T *>(dst_iter.ptr());
     execute_window_loop(win,
         [&](const Coordinates &)
         {
