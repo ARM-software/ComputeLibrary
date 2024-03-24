@@ -20,7 +20,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
 
     const unsigned int vector_depth     = tkemb_info.d_model();
 
-    unsigned int id_src,offset_vocab, offset_dst;
+    unsigned int id_src, offset_vocab, offset_dst;
     
     Iterator src_iter(src,win);
     Iterator dst_iter(dst,win);
@@ -47,7 +47,7 @@ void neon_token_embed_char_2_float32(const ITensor *src, const ITensor *vocab, I
                 std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << std::endl;
 
             }
-        },vocab_iter,src_iter,vocab_iter);
+        },vocab_iter,src_iter);
 
 }
 
