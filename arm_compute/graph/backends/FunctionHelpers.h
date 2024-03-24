@@ -1710,6 +1710,33 @@ std::unique_ptr<IFunction> create_token_embedding_layer(TokenEmbeddingLayerNode 
     return func;
 }
 
+/** Creates a backend segment embedding layer function
+ *
+ * @tparam SegmentEmbeddingLayerFunction  Backend segment embedding function
+ * @tparam TargetInfo                     Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend segment embedding layer function
+ */
+template <typename SegmentEmbeddingLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_segment_embedding_layer(SegmentEmbeddingLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 2 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    
+    typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *segment  = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
+
+    // Create function
+    auto func = std::make_unique<SegmentEmbeddingLayerFunction>();
+    func->configure(input,vocab,output,tkemb_info);
+
+    return func;
+}
+
 /** Creates a backend linear layer function
  *
  * @tparam LinearLayerFunction  Backend linear layer function

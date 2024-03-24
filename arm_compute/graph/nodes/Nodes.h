@@ -71,5 +71,6 @@
 #include "arm_compute/graph/nodes/ScaleDotProductionAttentionNode.h"
 #include "arm_compute/graph/nodes/LinearLayerNode.h"
 #include "arm_compute/graph/nodes/SimpleForwardLayerNode.h"
+#include "arm_compute/graph/nodes/SegmentEmbeddingLayerNode.h"
 
 #endif // ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H

@@ -153,6 +153,7 @@ Compatability:
             5. Linear Layer Now only have "src/core/NEON/kernels" implementation
             6. Update arm_compute/graph/nodes/NodesFwd.h
             7. Only support lower case input eg. "I, i" 1045 
+            8. Add ARM_COMPUTE_LOG_GRAPH_INFO to FunctionHelpers.h
 
 Functionality:
             1. Segment token, currently only support 1 sentence input

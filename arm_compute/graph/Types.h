@@ -200,6 +200,7 @@ enum class NodeType
     StackLayer,
     StridedSliceLayer,
     TokenEmbeddingLayer,
+    SegmentEmbeddingLayer,
     UpsampleLayer,
     UnaryEltwiseLayer,
 

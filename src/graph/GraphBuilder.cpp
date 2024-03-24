@@ -936,28 +936,49 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
                                     NodeParams params, 
                                     NodeIdxPair input, 
                                     TokenEmbeddingLayerInfo tkemb_info,
-                                    ITensorAccessorUPtr     weights_accessor)
+                                    ITensorAccessorUPtr     vocabs_accessor,
+                                    ITensorAccessorUPtr     segemnts_accessor)
 {
     check_nodeidx_pair(input, g);
 
     // Get input tensor descriptor
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
-    // Create weights node
-    TensorDescriptor w_desc = input_tensor_desc;
+    // Vocabulary const node output tensor descriptor
+    TensorDescriptor v_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-    w_desc.shape = TensorShape(tkemb_info.d_vocab(),tkemb_info.d_model());
+    v_desc.shape = TensorShape(tkemb_info.d_vocab(),tkemb_info.d_model());
 
-    NodeID           w_nid  = add_const_node_with_name(g, params, "token_weights", w_desc, std::move(weights_accessor));
+    // Segment const node output tensor descriptor
+    TensorDescriptor s_desc = input_tensor_desc;
+    // Reshape tensor to store weight with size of vocabulary and depth of d_model.
+    s_desc.shape = TensorShape(2 /* Segment 0,1 */,tkemb_info.d_model());
+
+
+    NodeID v_c_nid  = add_const_node_with_name(g, params, "vocabs", v_desc,    std::move(vocabs_accessor));
+    NodeID s_c_nid  = add_const_node_with_name(g, params, "segements", s_desc, std::move(segemnts_accessor));
 
     // Create token embedding node and connect
     NodeID t_nid = g.add_node<TokenEmbeddingLayerNode>(tkemb_info);
     g.add_connection(input.node_id, input.index, t_nid, 0);
-    g.add_connection(w_nid, 0, t_nid, 1);
+    g.add_connection(v_c_nid, 0, t_nid, 1);
+
+    // Create segment embedding node
+    NodeID s_nid = g.add_node<SegmentEmbeddingLayerNode>();
+    g.add_connection(input.node_id, input.index, s_nid, 0);
+    g.add_connection(s_c_nid, 0, s_nid, 1);
+
+    // Sum token embedding vector and segment embedding vector
+    NodeID add_nid = g.add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{EltwiseOperation::Add});
+
+    g.add_connection(t_nid, 0, add_nid, 0);
+    g.add_connection(s_nid, 0, add_nid, 1);
 
     set_node_params(g, t_nid, params);
+    set_node_params(g, s_nid, params);
+    set_node_params(g, add_nid, params);
 
-    return t_nid;
+    return add_nid;
 }
 
 NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info)

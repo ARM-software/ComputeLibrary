@@ -709,14 +709,17 @@ public:
      * @param[in] params     Common node parameters
      * @param[in] input      Input to the token embedding layer node as a NodeID-Index pair
      * @param[in] tkemb_info Token embedding layer parameters
-     *
+     * @param[in] vocabs     Pretrained vocabulary vector accessor
+     * @param[in] segments   Pretrained segments vector accessor
+     * 
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_embedding_node(Graph &g,
                                  NodeParams params, 
                                  NodeIdxPair input, 
                                  TokenEmbeddingLayerInfo tkemb_info,
-                                 ITensorAccessorUPtr     weights = nullptr);
+                                 ITensorAccessorUPtr vocabs     = nullptr,
+                                 ITensorAccessorUPtr segments   = nullptr);
     /** Adds a yolo layer to the graph
      *
      * @param[in] g        Graph to add the node to
