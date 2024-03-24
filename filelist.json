@@ -2307,7 +2307,7 @@
           "common": [ "src/runtime/NEON/functions/NEUnstack.cpp" ]
         }
       },
-      "TKEMB": {
+      "TokenEmbedding": {
         "deps":["PositionalEncoding"],
         "files": {
           "common": [
@@ -2318,6 +2318,14 @@
           "neon": {
             "fp32":["src/cpu/kernels/tokenembed/generic/neon/fp32.cpp"]
           }
+        }
+      },
+      "SegmentEmbedding":{
+        "files":{
+          "common":[
+            "src/cpu/operators/CpuSegmentEmbed.cpp",
+            "src/runtime/NEON/functions/NESegmentEmbeddingLayer.cpp"
+          ]
         }
       },
       "Linear": {
