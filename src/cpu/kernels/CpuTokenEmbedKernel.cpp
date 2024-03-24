@@ -45,8 +45,9 @@ void CpuTokenEmbedKernel::configure(const ITensorInfo *src, const ITensorInfo *v
         TokenEmbedKernelDataTypeISASelectorData{dst->data_type(), CPUInfo::get().get_isa()}
     );
 
+    const TensorShape dst_shape(src->tensor_shape().x(),dst->tensor_shape().y());
     // Configure output tensor info.
-    auto_init_if_empty(*dst, TensorInfo(*src->clone()).set_num_channels(tkemb_info.d_model()));
+    auto_init_if_empty(*dst, TensorInfo(*vocab->clone()).set_tensor_shape(dst_shape));
     
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
