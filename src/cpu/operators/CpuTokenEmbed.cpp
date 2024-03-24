@@ -10,6 +10,7 @@
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
 #include "src/core/helpers/MemoryHelpers.h"
 
+#include <memory>
 
 using namespace arm_compute::experimental;
 
