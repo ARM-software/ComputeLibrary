@@ -26,7 +26,16 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(src);
     ARM_COMPUTE_UNUSED(dst);
+
     std::cout << "src/cpu/kernels/CpuPositionalEncodingKernel.cpp" << std::endl;
+
+    const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
+    const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
+    std::cout << src->info()->tensor_shape().x() << std::endl;
+    std::cout << src->info()->tensor_shape().y() << std::endl;
+
+    std::cout << window_start_x << std::endl;
+    std::cout << window_end_x << std::endl;
     std::cout << d_model << std::endl;
 }
 
