@@ -53,9 +53,6 @@ public:
     InputLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor1, Ts &&...more_accessor) : _desc(desc), _accessors()
     {
         _accessors.push_back(std::move(accessor1));
-        utility::for_each([&](ITensorAccessorUPtr &&accessor)
-                          { _accessors.push_back(std::move(accessor)); },
-                          std::move(more_accessor)...);
     }
     NodeID create_layer(IStream &s) override
     {
