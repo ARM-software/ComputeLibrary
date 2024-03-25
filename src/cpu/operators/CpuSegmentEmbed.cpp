@@ -42,10 +42,10 @@ void CpuSegmentEmbed::run(ITensorPack &tensors)
 
     ARM_COMPUTE_UNUSED(split_dimension);
     ARM_COMPUTE_UNUSED(tensors);
-    std::cout << " src/cpu/operators/CpuSegmentEmbed.cpp" << std::endl;
+    std::cout << "src/cpu/operators/CpuSegmentEmbed.cpp" << std::endl;
 
 
-   //NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
+   NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
 
