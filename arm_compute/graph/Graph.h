@@ -244,14 +244,15 @@ inline NodeID Graph::add_node(Ts &&...args)
     // Keep track of input nodes
     _tagged_nodes[node->type()].push_back(nid);
 
-    if(node->type() == NodeType::Input)
-        std::cout << "input" << std::endl;
     // Associate a new tensor with each output
     for (auto &output : node->_outputs)
     {
         output = create_tensor();
+        if(node->type() == NodeType::Input)
+        std::cout << "input" ;
         std::cout << output << std::endl;
     }
+    
 
     // Propagate node shape if possible
     node->forward_descriptors();
