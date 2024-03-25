@@ -30,6 +30,12 @@ namespace arm_compute
 {
 namespace graph
 {
+
+InputNode::InputNode(TensorDescriptor desc) : _desc(std::move(desc))
+{
+    _outputs.resize(1, NullTensorID);
+}
+
 InputNode::InputNode(TensorDescriptor desc, size_t size) : _desc(std::move(desc))
 {
     _outputs.resize(size, NullTensorID);

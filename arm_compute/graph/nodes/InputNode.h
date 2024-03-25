@@ -34,9 +34,16 @@ namespace graph
 class InputNode final : public INode
 {
 public:
+
     /** Constructor
      *
      * @param[in] desc Tensor descriptor
+     */
+    InputNode(TensorDescriptor desc);
+    /** Constructor
+     *
+     * @param[in] desc Tensor descriptor
+     * @param[in] size Number of inputs
      */
     InputNode(TensorDescriptor desc, size_t size);
 
