@@ -299,8 +299,8 @@ void atoiPreprocessor::preprocess(ITensor &tensor)
     execute_window_loop(window,
                         [&](const Coordinates &id)
                         {
-
                             std::cout << tensor.ptr_to_element(id) << std::endl;
+                            *tensor.ptr_to_element(id) = std::atoi(reinterpret_cast<char *>(tensor.ptr_to_element(id)));
                             std::cout << *reinterpret_cast<int *>(tensor.ptr_to_element(id)) << std::endl;
                         });
 }
