@@ -65,7 +65,7 @@ public:
 
 private:
     TensorDescriptor    _desc;
-    std::vector<ITensorAccessorUPtr> __accessors;
+    std::vector<ITensorAccessorUPtr> _accessors;
     ITensorAccessorUPtr _accessor;
 };
 
