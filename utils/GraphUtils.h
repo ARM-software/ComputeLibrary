@@ -560,8 +560,6 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
         const std::string &image_file_lower     = lower_string(image_file);
         const std::string &text_file            = graph_parameters.text;
         const std::string &text_file_lower      = lower_string(text_file);
-        const std::string &segment_file         = graph_parameters.segment;
-        const std::string &segment_file_lower   = lower_string(segment_file);
         if (arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
             return std::make_unique<NumPyBinLoader>(image_file, graph_parameters.data_layout);
@@ -574,12 +572,7 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
         }
         else if (arm_compute::utility::endswith(text_file_lower, ".txt"))
         {
-            std::cout << "txt" << std::endl;
             return std::make_unique<TextAccessor>(text_file, std::move(preprocessor));
-        }else if (arm_compute::utility::endswith(segment_file_lower, ".seg"))
-        {
-            std::cout << "seg" << std::endl;
-            return std::make_unique<TextAccessor>(segment_file, std::move(preprocessor));
         }
         else 
         {
@@ -588,11 +581,10 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
     }
 }
 
-/** Generates appropriate input accessor according to the specified graph parameters
+/** Generates appropriate segmentation file accessor according to the specified graph parameters
  *
- * @param[in] graph_parameters Graph parameters
+ * @param[in] path_to_file     Path to input sentence segmentation file
  * @param[in] preprocessor     (Optional) Preproccessor object
- * @param[in] bgr              (Optional) Fill the first plane with blue channel (default = true)
  *
  * @return An appropriate tensor accessor
  */
@@ -607,9 +599,9 @@ get_segment_accessor(const std::string &path_to_file,
     else
     {
         const std::string &segment_file_lower   = lower_string(path_to_file);
+        std::cout << "Seg" << std::endl;
         return std::make_unique<TextAccessor>(path_to_file, std::move(preprocessor));
     }
-
 }
 
 /** Generates appropriate output accessor according to the specified graph parameters
