@@ -111,7 +111,7 @@ public:
 
         // Text preprocessor
         std::unique_ptr<IPreprocessor> WP_preproccessor     = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
-        std::unique_ptr<IPreprocessor> at2_preproccessor    = std::make_unique<atoiPreprocessor>(common_params.vocabulary);
+        std::unique_ptr<IPreprocessor> at2_preproccessor    = std::make_unique<atoiPreprocessor>();
 
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor))
