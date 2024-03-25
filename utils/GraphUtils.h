@@ -556,10 +556,12 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
     }
     else
     {
-        const std::string &image_file       = graph_parameters.image;
-        const std::string &image_file_lower = lower_string(image_file);
-        const std::string &text_file        = graph_parameters.text;
-        const std::string &text_file_lower  = lower_string(text_file);
+        const std::string &image_file           = graph_parameters.image;
+        const std::string &image_file_lower     = lower_string(image_file);
+        const std::string &text_file            = graph_parameters.text;
+        const std::string &text_file_lower      = lower_string(text_file);
+        const std::string &segment_file         = graph_parameters.segment;
+        const std::string &segment_file_lower   = lower_string(segment_file);
         if (arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
             return std::make_unique<NumPyBinLoader>(image_file, graph_parameters.data_layout);
@@ -573,6 +575,9 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
         else if (arm_compute::utility::endswith(text_file_lower, ".txt"))
         {
             return std::make_unique<TextAccessor>(text_file, std::move(preprocessor));
+        }else if (arm_compute::utility::endswith(segment_file_lower, ".txt"))
+        {
+            return std::make_unique<TextAccessor>(segment_file, std::move(preprocessor));
         }
         else 
         {

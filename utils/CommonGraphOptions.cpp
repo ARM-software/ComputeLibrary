@@ -102,6 +102,10 @@ namespace utils
     {
         os << "Text file : " << common_params.text << std::endl;
     }
+    if (!common_params.segment.empty())
+    {
+        os << "Segment file : " << common_params.text << std::endl;
+    }
     if (!common_params.vocabulary.empty())
     {
         os << "Vocabulary file : " << common_params.vocabulary << std::endl;
@@ -138,6 +142,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
       data_path(parser.add_option<SimpleOption<std::string>>("data")),
       image(parser.add_option<SimpleOption<std::string>>("image")),
       text(parser.add_option<SimpleOption<std::string>>("text")),
+      segment(parser.add_option<SimpleOption<std::string>>("segment")),
       vocabulary(parser.add_option<SimpleOption<std::string>>("vocabulary")),
       labels(parser.add_option<SimpleOption<std::string>>("labels")),
       validation_file(parser.add_option<SimpleOption<std::string>>("validation-file")),
@@ -187,6 +192,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     data_path->set_help("Path where graph parameters reside");
     image->set_help("Input image for the graph");
     text->set_help("Input text for the graph");
+    segment->set_help("Input sentence segmentation");
     vocabulary->set_help("Path to vocabulary file for tex tokenization");
     labels->set_help("File containing the output labels");
     validation_file->set_help("File used to validate the graph");
@@ -221,6 +227,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.data_path       = options.data_path->value();
     common_params.image           = options.image->value();
     common_params.text            = options.text->value();
+    common_params.segment         = options.segment->value();
     common_params.vocabulary      = options.vocabulary->value();
     common_params.labels          = options.labels->value();
     common_params.validation_file = options.validation_file->value();

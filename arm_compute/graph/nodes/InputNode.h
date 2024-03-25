@@ -38,7 +38,7 @@ public:
      *
      * @param[in] desc Tensor descriptor
      */
-    InputNode(TensorDescriptor desc);
+    InputNode(TensorDescriptor desc, unsigned int size);
 
     // Inherited overridden methods:
     NodeType         type() const override;
