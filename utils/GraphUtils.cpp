@@ -291,6 +291,19 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
 }
 
+void atoiPreprocessor::preprocess(ITensor &tensor)
+{
+    Window window;
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+    execute_window_loop(window,
+                        [&](const Coordinates &id)
+                        {
+
+                            std::cout << tensor.ptr_to_element(id) << std::endl;
+                            std::cout << *reinterpret_cast<int *>(tensor.ptr_to_element(id)) << std::endl;
+                        });
+}
 
 CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, float scale)
     : _mean(mean), _bgr(bgr), _scale(scale)

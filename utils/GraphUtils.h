@@ -74,6 +74,15 @@ private:
     std::string _vocab_file;
 };
 
+/** Convert input text to Int preprocessor */
+class atoiPreprocessor : public IPreprocessor
+{
+public:
+    /** Default Constructor */
+    atoiPreprocessor();
+    void preprocess(ITensor &tensor) override;
+};
+
 /** Caffe preproccessor */
 class CaffePreproccessor : public IPreprocessor
 {

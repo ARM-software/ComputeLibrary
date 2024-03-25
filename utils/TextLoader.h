@@ -131,7 +131,7 @@ public:
                 {
                     c = _feeder->get();
                     *out.ptr() = c;
-                    std::cout << (int)*out.ptr();
+                    std::cout << *out.ptr();
                 },
                 out
             );
