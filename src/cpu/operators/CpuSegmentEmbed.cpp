@@ -39,17 +39,7 @@ void CpuSegmentEmbed::run(ITensorPack &tensors)
     auto split_dimension = static_cast<kernels::CpuTokenEmbedKernel *>(_kernel.get())->get_split_dimension_hint();
 
     /* Now manully set segment */
-
-    
-    const unsigned int window_start_x   = static_cast<unsigned int>(_kernel->window().x().start());
-    const unsigned int window_end_x     = static_cast<unsigned int>(_kernel->window().x().end());
-    ARM_COMPUTE_UNUSED(split_dimension);
-    ARM_COMPUTE_UNUSED(tensors);
-    std::cout << " src/cpu/operators/CpuSegmentEmbed.cpp" << std::endl;
-    std::cout << window_end_x- window_start_x << std::endl;
-
-
-   //NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
+   NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
 

@@ -968,7 +968,7 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
 
     // Create segment embedding node
     NodeID s_nid = g.add_node<SegmentEmbeddingLayerNode>();
-    g.add_connection(input.node_id, input.index, s_nid, 0);
+    g.add_connection(input.node_id, 1, s_nid, 0);
     g.add_connection(s_c_nid, 0, s_nid, 1);
 
     

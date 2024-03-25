@@ -45,7 +45,6 @@ bool InputNode::forward_descriptors()
 {
     for(auto idx : outputs())
     {   
-        std::cout << idx << std::endl;
         if(output_id(idx) == NullTensorID) return false;
         Tensor *t = output(idx);
         ARM_COMPUTE_ERROR_ON(t == nullptr);
