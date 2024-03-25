@@ -126,11 +126,11 @@ public:
             Iterator out(&text,window);
 
             execute_window_loop(
-                window,
                 [&](const Coordinates &)
                 {
                     c = _feeder->get();
                     *out.ptr() = c;
+                    std::cout << *out.ptr() << std::endl;
                 },
                 out
             );
