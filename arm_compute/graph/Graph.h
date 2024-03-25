@@ -248,9 +248,6 @@ inline NodeID Graph::add_node(Ts &&...args)
     for (auto &output : node->_outputs)
     {
         output = create_tensor();
-        if(node->type() == NodeType::Input)
-        std::cout << "input" ;
-        std::cout << output << std::endl;
     }
     
 
