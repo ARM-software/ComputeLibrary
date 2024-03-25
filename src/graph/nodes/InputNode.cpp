@@ -44,23 +44,14 @@ InputNode::InputNode(TensorDescriptor desc, size_t size) : _desc(std::move(desc)
 bool InputNode::forward_descriptors()
 {
     for(auto idx : outputs())
-    {
+    {   
+        std::cout << idx << std::endl;
         if(output_id(idx) == NullTensorID) return false;
         Tensor *t = output(idx);
         ARM_COMPUTE_ERROR_ON(t == nullptr);
         t->desc() = configure_output(idx);
     }
     return true;
-
-    /*
-    if (output_id(0) != NullTensorID)
-    {
-        Tensor *t = output(0);
-        ARM_COMPUTE_ERROR_ON(t == nullptr);
-        t->desc() = configure_output(0);
-        return true;
-    }
-    return false;*/
 }
 
 TensorDescriptor InputNode::configure_output(size_t idx) const
