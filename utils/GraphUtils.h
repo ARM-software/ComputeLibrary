@@ -578,8 +578,7 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
             return std::make_unique<TextAccessor>(text_file, std::move(preprocessor));
         }else if (arm_compute::utility::endswith(segment_file_lower, ".seg"))
         {
-
-            std::cout << "sqg" << std::endl;
+            std::cout << "seg" << std::endl;
             return std::make_unique<TextAccessor>(segment_file, std::move(preprocessor));
         }
         else 
