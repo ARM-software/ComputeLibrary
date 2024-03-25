@@ -38,6 +38,7 @@ InputNode::InputNode(TensorDescriptor desc) : _desc(std::move(desc))
 
 InputNode::InputNode(TensorDescriptor desc, size_t size) : _desc(std::move(desc))
 {
+    std::cout << "input node size " << size  << std::endl;
     _outputs.resize(size, NullTensorID);
 }
 
