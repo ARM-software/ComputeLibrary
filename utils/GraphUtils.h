@@ -599,7 +599,6 @@ get_segment_accessor(const std::string &path_to_file,
     else
     {
         const std::string &segment_file_lower   = lower_string(path_to_file);
-        std::cout << "Seg" << std::endl;
         return std::make_unique<TextAccessor>(path_to_file, std::move(preprocessor));
     }
 }

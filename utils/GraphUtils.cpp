@@ -527,7 +527,7 @@ bool TextAccessor::access_tensor(ITensor &tensor)
         {
             _preprocessor->preprocess(tensor);
         }
-
+        std::cout << _filename << std::endl;
     }
 
     _already_loaded = !_already_loaded;
