@@ -79,7 +79,7 @@ class atoiPreprocessor : public IPreprocessor
 {
 public:
     /** Default Constructor */
-    atoiPreprocessor();
+    atoiPreprocessor() = default;
     void preprocess(ITensor &tensor) override;
 };
 
