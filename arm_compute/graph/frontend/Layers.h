@@ -52,6 +52,7 @@ public:
     template <typename... Ts>
     InputLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor1, Ts &&...more_accessor) : _desc(desc), _accessors()
     {
+        _accessors.resize(1);
         _accessors.push_back(accessor1);
     }
     NodeID create_layer(IStream &s) override
