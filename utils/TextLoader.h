@@ -124,13 +124,14 @@ public:
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
             Iterator out(&text,window);
-
+            std::cout << "utils/TextLoader.h" << std::endl;
             execute_window_loop(
                 window,
                 [&](const Coordinates &)
                 {
                     c = _feeder->get();
                     *out.ptr() = c;
+                    std::cout << *out.ptr() <<"  ";
                 },
                 out
             );
