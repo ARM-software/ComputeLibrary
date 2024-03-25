@@ -588,6 +588,30 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
     }
 }
 
+/** Generates appropriate input accessor according to the specified graph parameters
+ *
+ * @param[in] graph_parameters Graph parameters
+ * @param[in] preprocessor     (Optional) Preproccessor object
+ * @param[in] bgr              (Optional) Fill the first plane with blue channel (default = true)
+ *
+ * @return An appropriate tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor>
+get_segment_accessor(const std::string &path_to_file,
+                   std::unique_ptr<IPreprocessor> preprocessor = nullptr)
+{
+     if (path_to_file.empty())
+    {
+        return std::make_unique<DummyAccessor>();
+    }
+    else
+    {
+        const std::string &segment_file_lower   = lower_string(path_to_file);
+        return std::make_unique<TextAccessor>(path_to_file, std::move(preprocessor));
+    }
+
+}
+
 /** Generates appropriate output accessor according to the specified graph parameters
  *
  * @note If the output accessor is requested to validate the graph then ValidationOutputAccessor is generated
