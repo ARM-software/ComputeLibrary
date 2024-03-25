@@ -121,9 +121,9 @@ GraphBuilder::add_const_node(Graph &g, NodeParams params, const TensorDescriptor
 }
 
 NodeID
-GraphBuilder::add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, std::vector<ITensorAccessorUPtr> accessors)
+GraphBuilder::add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, std::vector<ITensorAccessorUPtr> &accessors)
 {
-    auto nid = g.add_node<InputNode>(desc,accessors.size());
+    auto nid = g.add_node<InputNode>(desc, accessors.size());
     set_node_params(g, nid, params);
     for(size_t idx = 0;idx < accessors.size(); idx++)
     {

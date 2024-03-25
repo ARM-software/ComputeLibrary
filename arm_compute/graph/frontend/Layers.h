@@ -50,10 +50,10 @@ public:
      * @param[in] accessor Accessor to get input tensor data from.
      */
     template <typename... Ts>
-    InputLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor1, Ts ...more_accessor) : _desc(desc), _accessors()
+    InputLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor1, Ts &&...more_accessor) : _desc(desc), _accessors()
     {
         _accessors.push_back(std::move(accessor1));
-        utility::for_each([&](ITensorAccessorUPtr accessor)
+        utility::for_each([&](ITensorAccessorUPtr &&accessor)
                           { _accessors.push_back(std::move(accessor)); },
                           std::move(more_accessor)...);
     }

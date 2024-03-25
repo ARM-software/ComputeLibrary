@@ -63,7 +63,7 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID
-    add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, std::vector<ITensorAccessorUPtr> accessors);
+    add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, std::vector<ITensorAccessorUPtr> &accessors);
     /** Adds an output layer node to the graph
      *
      * @param[in] g        Graph to add the node to
