@@ -128,7 +128,6 @@ GraphBuilder::add_input_node(Graph &g, NodeParams params, const TensorDescriptor
     for(size_t idx = 0;idx < accessors.size(); idx++)
     {
         set_accessor_on_node(g, nid, true, idx, std::move(accessors[idx]));
-        std::cout << idx << std::endl;
     }
     return nid;
 }

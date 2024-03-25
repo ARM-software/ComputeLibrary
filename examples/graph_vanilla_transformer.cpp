@@ -113,8 +113,7 @@ public:
         std::unique_ptr<IPreprocessor> preproccessor = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
 
         // Encode Input
-        graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))
-                                            , get_input_accessor(common_params)).set_name("in1")
+        graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))).set_name("in1")
               << EmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout)).set_name("tkemb1")
