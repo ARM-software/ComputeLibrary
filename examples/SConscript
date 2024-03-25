@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2023 Arm Limited.
+# Copyright (c) 2017-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -51,11 +51,18 @@ else:
     graph_dependency = [arm_compute_graph_so]
 
 extra_link_flags = []
-if env['os'] != 'bare_metal':
+
+if not env['os'] in ['windows','bare_metal'] :
     extra_link_flags += ['-fstack-protector-strong']
 
-load_whole_archive = '-Wl,--whole-archive'
-noload_whole_archive = '-Wl,--no-whole-archive'
+
+if env['os'] != 'windows' :
+    load_whole_archive = '-Wl,--whole-archive'
+    noload_whole_archive = '-Wl,--no-whole-archive'
+else:
+    load_whole_archive = '/wholearchive'
+    noload_whole_archive = ''
+
 if 'macos' in examples_env['os']:
     load_whole_archive = '-Wl,-force_load'
     noload_whole_archive = ''
@@ -67,7 +74,7 @@ examples_libs = examples_env.get("LIBS",[])
 for file in Glob("./graph_*.cpp"):
     example = os.path.basename(os.path.splitext(str(file))[0])
     prog = None
-    if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
+    if env['os'] in ['android','windows', 'macos', 'bare_metal'] or env['standalone']:
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+[load_whole_archive, graph_dependency, noload_whole_archive] + extra_link_flags)
         Depends(prog, graph_dependency)
         prog = install_bin(prog)
