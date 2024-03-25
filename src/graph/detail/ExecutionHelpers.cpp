@@ -145,7 +145,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     {
         auto node = g.node(node_id);
         if(node->type() == NodeType::Input)
-        std::cout << "input" << std::endl;
+        std::cout << "input!!!!!!!!!!!!!!" << std::endl;
         if (node != nullptr)
         {
             Target                     assigned_target = node->assigned_target();
