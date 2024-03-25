@@ -110,10 +110,10 @@ public:
         graph << common_params.target << common_params.fast_math_hint;
 
         // Text preprocessor
-        std::unique_ptr<IPreprocessor> preproccessor = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
+        std::unique_ptr<IPreprocessor> WP_preproccessor = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
 
         // Encode Input
-        graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(preproccessor))
+        graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor))
                                             , get_segment_accessor(common_params.segment)).set_name("in1")
               << EmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
