@@ -281,9 +281,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     // [SEP]
     text_ids.push_back(token2id[end_token]);
 
-    std::cout << "utils/GraphUtils.cpp" << std::endl;
-    for (auto &v : text_ids)std::cout << v << std::endl;
-
     /** Write back */
     tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
@@ -527,7 +524,6 @@ bool TextAccessor::access_tensor(ITensor &tensor)
         {
             _preprocessor->preprocess(tensor);
         }
-        std::cout << _filename << std::endl;
     }
 
     _already_loaded = !_already_loaded;
