@@ -54,12 +54,7 @@ public:
     {
         _accessors.push_back(std::move(accessor1));
     }
-    NodeID create_layer(IStream &s) override
-    {
-        NodeParams common_params = {name(), s.hints().target_hint};
-        return GraphBuilder::add_input_node(s.graph(), common_params, _desc, _accessors);
-    }
-
+    
 private:
     TensorDescriptor    _desc;
     std::vector<ITensorAccessorUPtr> _accessors;
