@@ -45,7 +45,7 @@ void CpuSegmentEmbed::run(ITensorPack &tensors)
     std::cout << "src/cpu/operators/CpuSegmentEmbed.cpp" << std::endl;
 
 
-    //NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
 
