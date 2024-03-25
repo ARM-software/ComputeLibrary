@@ -104,7 +104,7 @@ namespace utils
     }
     if (!common_params.segment.empty())
     {
-        os << "Segment file : " << common_params.text << std::endl;
+        os << "Segment file : " << common_params.segment << std::endl;
     }
     if (!common_params.vocabulary.empty())
     {
