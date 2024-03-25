@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -441,6 +441,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map = 
     {"reorg_layer_nhwc", "nhwc/reorg_layer.cl"},
     {"scale_nearest_neighbour_nhwc", "nhwc/scale.cl"},
     {"scale_bilinear_nhwc", "nhwc/scale.cl"},
+    {"scatter1D", "common/scatter.cl"},
     {"space_to_batch_nhwc", "nhwc/space_to_batch.cl"},
     {"space_to_batch_static_nhwc", "nhwc/space_to_batch.cl"},
     {"space_to_depth_nhwc", "nhwc/space_to_depth.cl"},
@@ -589,6 +590,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map = 
     {
         "common/gather.cl",
 #include "./cl_kernels/common/gather.clembed"
+    },
+    {
+        "common/scatter.cl",
+#include "./cl_kernels/common/scatter.clembed"
     },
     {
         "common/gemm.cl",

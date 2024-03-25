@@ -38,6 +38,10 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for fp32 data type */
+} // namespace
 
 template <typename T>
 using CLScatterLayerFixture = ScatterValidationFixture<CLTensor, CLAccessor, CLScatter, T>;
@@ -46,7 +50,7 @@ using framework::dataset::make;
 
 TEST_SUITE(CL)
 TEST_SUITE(Scatter)
-DATA_TEST_CASE(Validate, framework::DatasetMode::DISABLED, zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     make("InputInfo", { TensorInfo(TensorShape(9U), 1, DataType::F32),    // Mismatching data types
                                             TensorInfo(TensorShape(15U), 1, DataType::F32), // Valid
                                             TensorInfo(TensorShape(8U), 1, DataType::F32),
@@ -61,12 +65,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::DISABLED, zip(
                                              TensorInfo(TensorShape(217U, 3U), 1, DataType::F32),
                                              TensorInfo(TensorShape(2U), 1, DataType::F32),
                                           }),
-    make("IndicesInfo",{                  TensorInfo(TensorShape(3U), 1, DataType::U32),
-                                          TensorInfo(TensorShape(15U), 1, DataType::U32),
-                                          TensorInfo(TensorShape(2U), 1, DataType::U32),
-                                          TensorInfo(TensorShape(271U), 1, DataType::U32),
-                                          TensorInfo(TensorShape(271U), 1, DataType::U32),
-                                          TensorInfo(TensorShape(2U), 1 , DataType::S32)
+    make("IndicesInfo",{                  TensorInfo(TensorShape(1U, 3U), 1, DataType::S32),
+                                          TensorInfo(TensorShape(1U, 15U), 1, DataType::S32),
+                                          TensorInfo(TensorShape(1U, 2U), 1, DataType::S32),
+                                          TensorInfo(TensorShape(1U, 271U), 1, DataType::S32),
+                                          TensorInfo(TensorShape(1U, 271U), 1, DataType::S32),
+                                          TensorInfo(TensorShape(1U, 2U), 1 , DataType::F32)
                                           }),
     make("OutputInfo",{                     TensorInfo(TensorShape(9U), 1, DataType::F16),
                                             TensorInfo(TensorShape(15U), 1, DataType::F32),
@@ -76,27 +80,27 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::DISABLED, zip(
                                             TensorInfo(TensorShape(12U), 1, DataType::F32)
                                            }),
     make("ScatterInfo",{ ScatterInfo(ScatterFunction::Add, false),
+                         ScatterInfo(ScatterFunction::Max, false),
+                         ScatterInfo(ScatterFunction::Min, false),
+                         ScatterInfo(ScatterFunction::Add, false),
+                         ScatterInfo(ScatterFunction::Update, false),
+                         ScatterInfo(ScatterFunction::Sub, false),
                                            }),
     make("Expected", { false, true, true, false, false, false })),
     input_info, updates_info, indices_info, output_info, scatter_info, expected)
 {
-    // TODO: Enable validation tests.
-    ARM_COMPUTE_UNUSED(input_info);
-    ARM_COMPUTE_UNUSED(updates_info);
-    ARM_COMPUTE_UNUSED(indices_info);
-    ARM_COMPUTE_UNUSED(output_info);
-    ARM_COMPUTE_UNUSED(scatter_info);
-    ARM_COMPUTE_UNUSED(expected);
+    const Status status = CLScatter::validate(&input_info.clone()->set_is_resizable(true), &updates_info.clone()->set_is_resizable(true), &indices_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), scatter_info);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small1DScatterDataset(),
                                                                                                                     make("DataType", {DataType::F32}),
-                                                                                                                    make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add, ScatterFunction::Sub, ScatterFunction::Min, ScatterFunction::Max}),
+                                                                                                                    make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add, ScatterFunction::Sub, ScatterFunction::Min, ScatterFunction::Max }),
                                                                                                                     make("ZeroInit", {false})))
 {
-    // TODO: Add validate() here.
+    validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 // With this test, src should be passed as nullptr.
@@ -105,7 +109,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, CLScatterLayerFixture<float>, framework
                                                                                                                     make("ScatterFunction", {ScatterFunction::Add}),
                                                                                                                     make("ZeroInit", {true})))
 {
-    // TODO: Add validate() here
+    validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float

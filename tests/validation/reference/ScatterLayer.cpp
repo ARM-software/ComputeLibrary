@@ -66,7 +66,7 @@ template float reduce_op(const float &current,const float &update,const ScatterF
 
 // Note : This function currently only supports 1D src, 1D updates, 2D indices, 1D output tensors.
 template <typename T>
-SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<uint32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
+SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
 {
     SimpleTensor<T> dst{ out_shape, src.data_type(), 1 };
 
@@ -84,14 +84,14 @@ SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T> &src, const SimpleT
     }
 
     // 2. Get max index of output tensor, then iterate over index tensor.
-    const auto x_bound = dst.shape().x();
+    const int x_bound = static_cast<int>(dst.shape().x());
 
 
     for(int i = 0; i < indices.num_elements(); ++i)
     {
         // 3. Check whether index is out of bounds for dst, if not then apply reduce op.
         const auto index = indices[i];
-        if (index < x_bound) // Note : index is always >= 0 as datatype is unsigned.
+        if (index < x_bound && index >= 0) // Note : we ignore negative index values.
         {
             dst[index] = reduce_op(dst[index], updates[i], info.func);
         }
@@ -100,12 +100,12 @@ SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T> &src, const SimpleT
 }
 
 template <typename T>
-SimpleTensor<T> scatter_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<uint32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
+SimpleTensor<T> scatter_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
 {
     return scatter_layer_internal<T>(src, updates, indices, out_shape, info);
 }
 
-template SimpleTensor<float> scatter_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &updates, const SimpleTensor<uint32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<float> scatter_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
 
 } // namespace reference
 } // namespace validation

@@ -27,7 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "tests/Globals.h"
-#include "tests/framework/Asserts.h" // Required for ARM_COMPUTE_ASSERT
+#include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/reference/ScatterLayer.h"
@@ -71,14 +71,14 @@ protected:
         }
     }
 
-    // This is used to fill indices tensor with U32 datatype.
+    // This is used to fill indices tensor with S32 datatype.
     // Used to prevent ONLY having values that are out of bounds.
     template <typename U>
     void fill_indices(U &&tensor, int i, const TensorShape &shape)
     {
-        // Calculate max indices the shape should contain. Add an arbitrary constant to allow testing for some out of bounds values.
-        const uint32_t max = std::max({shape[0] , shape[1], shape[2]}) + 5;
-        library->fill_tensor_uniform(tensor, i, static_cast<uint32_t>(0), static_cast<uint32_t>(max));
+        // Calculate max indices the shape should contain. Add an arbitrary value to allow testing for some out of bounds values (In this case min dimension)
+        const int32_t max = std::max({shape[0] , shape[1], shape[2]});
+        library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(-2), static_cast<int32_t>(max));
     }
 
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &out_shape, DataType data_type, const ScatterInfo info, QuantizationInfo a_qinfo, QuantizationInfo o_qinfo)
@@ -88,7 +88,7 @@ protected:
         // In order - src, updates, indices, output.
         TensorType src   = create_tensor<TensorType>(shape_a, data_type, 1, a_qinfo);
         TensorType updates   = create_tensor<TensorType>(shape_b, data_type, 1, a_qinfo);
-        TensorType indices   = create_tensor<TensorType>(shape_c, DataType::U32, 1, QuantizationInfo());
+        TensorType indices   = create_tensor<TensorType>(shape_c, DataType::S32, 1, QuantizationInfo());
         TensorType dst = create_tensor<TensorType>(out_shape, data_type, 1, o_qinfo);
 
         FunctionType scatter;
@@ -127,7 +127,6 @@ protected:
         fill_indices(AccessorType(indices), 2, out_shape);
 
         scatter.run();
-
         return dst;
     }
 
@@ -140,7 +139,7 @@ protected:
         // Create reference tensors
         SimpleTensor<T> src{ a_shape, data_type, 1, a_qinfo };
         SimpleTensor<T> updates{b_shape, data_type, 1, QuantizationInfo() };
-        SimpleTensor<uint32_t> indices{ c_shape, DataType::U32, 1, QuantizationInfo() };
+        SimpleTensor<int32_t> indices{ c_shape, DataType::S32, 1, QuantizationInfo() };
 
         // Fill reference
         fill(src, 0);
@@ -148,9 +147,7 @@ protected:
         fill_indices(indices, 2, out_shape);
 
         // Calculate individual reference.
-        auto result = reference::scatter_layer<T>(src, updates, indices, out_shape, info);
-
-        return result;
+        return reference::scatter_layer<T>(src, updates, indices, out_shape, info);
     }
 
     TensorType      _target{};

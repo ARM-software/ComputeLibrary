@@ -55,14 +55,15 @@ public:
     ~CLScatter();
     /** Initialise the kernel's inputs and outputs
      *
+     * @note Negative indices are treated as out of bounds.
+     *
      * Valid data layouts:
      * - All
-     *
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  src             Source tensor. Values used to fill output. Can be nullptr when zero initialization is true.
      * @param[in]  updates         Tensor containing values used to update output tensor. Data types supported: same as @p src
-     * @param[in]  indices         Tensor containing Indices to change in the output Tensor. Data types supported : U32
+     * @param[in]  indices         Tensor containing Indices to change in the output Tensor. Data types supported : S32
      * @param[out] output          Destination tensor. Data types supported: same as @p src.
      * @param[in]  info            Scatter info object.
      */
@@ -85,7 +86,7 @@ public:
      *
      * @param[in] src     Source tensor.
      * @param[in] updates Tensor containing values used for updating the output Tensor. Data types supported : same as @p src
-     * @param[in] indices Tensor containing Indices to change in the output Tensor. Data types supported : U32
+     * @param[in] indices Tensor containing Indices to change in the output Tensor. Data types supported : S32
      * @param[in] output  Destination tensor. Data types supported: same as @p src.
      * @param[in] info    Scatter info containing type of scatter.
      *

@@ -429,6 +429,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/fill_border.cl',
                        'src/core/CL/cl_kernels/common/floor.cl',
                        'src/core/CL/cl_kernels/common/gather.cl',
+                       'src/core/CL/cl_kernels/common/scatter.cl',
                        'src/core/CL/cl_kernels/common/gemm.cl',
                        'src/core/CL/cl_kernels/common/gemm_reshaped_only_rhs_mmul.cl',
                        'src/core/CL/cl_kernels/common/gemm_utils.cl',

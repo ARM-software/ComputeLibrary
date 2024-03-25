@@ -44,15 +44,15 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClScatterKernel);
     /** Initialise the kernel's input and output.
      *
+     * @note Negative indices are treated as out of bounds.
+     *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src             Input tensor info for the source matrix.
      * @param[in]  updates         Input tensor info for the Update matrix. Data type supported: same as @p src
-     * @param[in]  indices         Input tensor info for the Indices matrix. Data type supported: U32.
+     * @param[in]  indices         Input tensor info for the Indices matrix. Data type supported: S32.
      * @param[out] dst             Output tensor info. Data type supported: same as @p src
      * @param[in]  info            Attributes for Scatter Kernel
      */
     void configure(const ClCompileContext &compile_context,
-                   const ITensorInfo      *src,
                    const ITensorInfo      *updates,
                    const ITensorInfo      *indices,
                    ITensorInfo            *dst,
@@ -63,11 +63,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src,
-                           const ITensorInfo *updates,
-                           const ITensorInfo *indices,
-                           const ITensorInfo *dst,
-                           const ScatterInfo &info);
+    static Status
+    validate(const ITensorInfo *updates, const ITensorInfo *indices, const ITensorInfo *dst, const ScatterInfo &info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
