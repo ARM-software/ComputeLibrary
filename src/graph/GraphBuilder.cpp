@@ -964,12 +964,12 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
 
     // Create token embedding node and connect
     NodeID t_nid = g.add_node<TokenEmbeddingLayerNode>(tkemb_info);
-    g.add_connection(input.node_id, input.index, t_nid, 0);
+    g.add_connection(input.node_id, 0 /* text input*/, t_nid, 0);
     g.add_connection(v_c_nid, 0, t_nid, 1);
 
     // Create segment embedding node
     NodeID s_nid = g.add_node<SegmentEmbeddingLayerNode>();
-    g.add_connection(input.node_id, 1, s_nid, 0);
+    g.add_connection(input.node_id, 1 /* segment input*/, s_nid, 0);
     g.add_connection(s_c_nid, 0, s_nid, 1);
 
     // Sum token embedding vector and segment embedding vector
