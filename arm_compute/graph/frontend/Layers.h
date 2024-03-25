@@ -49,10 +49,14 @@ public:
      * @param[in] desc     Description of input tensor.
      * @param[in] accessor Accessor to get input tensor data from.
      */
-    InputLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor) : _desc(desc), _accessor(std::move(accessor))
+    template <typename... Ts>
+    InputLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor1, Ts &&...more_accessor) : _desc(desc), _accessors()
     {
+        _accessors.push_back(std::move(accessor1));
+        utility::for_each([&](ITensorAccessorUPtr &&accessor)
+                          { _accessors.push_back(std::move(accessor)); },
+                          std::move(more_accessor)...);
     }
-
     NodeID create_layer(IStream &s) override
     {
         NodeParams common_params = {name(), s.hints().target_hint};
@@ -61,6 +65,7 @@ public:
 
 private:
     TensorDescriptor    _desc;
+    std::vector<ITensorAccessorUPtr> __accessors;
     ITensorAccessorUPtr _accessor;
 };
 
@@ -1641,7 +1646,7 @@ public:
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
         return GraphBuilder::add_embedding_node(s.graph(), common_params, input, _tkemb_info, std::move(_vocabs),
-                                                                                              std::move(_segments));
+                                                                                              std::move(_vocabs));
     }
 
 private:

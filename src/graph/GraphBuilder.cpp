@@ -963,14 +963,12 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     g.add_connection(input.node_id, input.index, t_nid, 0);
     g.add_connection(v_c_nid, 0, t_nid, 1);
 
-    std::cout << "src/graph/GraphBuilder.cpp 1" << std::endl;
     // Create segment embedding node
     NodeID s_nid = g.add_node<SegmentEmbeddingLayerNode>();
-    std::cout << "src/graph/GraphBuilder.cpp 2" << std::endl;
     g.add_connection(input.node_id, input.index, s_nid, 0);
-    std::cout << "src/graph/GraphBuilder.cpp 3" << std::endl;
     g.add_connection(s_c_nid, 0, s_nid, 1);
-    std::cout << "src/graph/GraphBuilder.cpp 4" << std::endl;
+
+    
 
     // Sum token embedding vector and segment embedding vector
     NodeID add_nid = g.add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{EltwiseOperation::Add});

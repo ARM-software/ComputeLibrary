@@ -710,7 +710,7 @@ public:
      * @param[in] input      Input to the token embedding layer node as a NodeID-Index pair
      * @param[in] tkemb_info Token embedding layer parameters
      * @param[in] vocabs     Pretrained vocabulary vector accessor
-     * @param[in] segments   Pretrained segments vector accessor
+     * @param[in] segments   segments vector accessor
      * 
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
