@@ -202,10 +202,8 @@ void call_all_const_node_accessors(Graph &g)
     {
         if (node != nullptr && node->type() == NodeType::Const && node->num_outputs())
         {
-            std::cout << node->name() <<"has utput :" <<  node->num_outputs() << std::endl;
             for(size_t idx=0; idx <node->num_outputs(); idx++)
             {   
-                std::cout << idx << std::endl;
                 if (!node->output(idx)->bound_edges().empty())
                 {
                     call_tensor_accessor(node->output(idx));
