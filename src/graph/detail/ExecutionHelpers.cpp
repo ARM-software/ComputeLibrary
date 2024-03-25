@@ -144,8 +144,6 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     for (auto &node_id : node_order)
     {
         auto node = g.node(node_id);
-        if(node->type() == NodeType::Input)
-        std::cout << "input!!!!!!!!!!!!!!" << std::endl;
         if (node != nullptr)
         {
             Target                     assigned_target = node->assigned_target();
@@ -163,7 +161,10 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     {
         if (node != nullptr && node->type() == NodeType::Input)
         {
-            workload.inputs.push_back(node->output(0));
+            for(size_t idx=0; idx <node->num_outputs(); idx++)
+            {   
+                workload.inputs.push_back(node->output(idx));
+            }
         }
 
         if (node != nullptr && node->type() == NodeType::Output)
@@ -201,7 +202,7 @@ void call_all_const_node_accessors(Graph &g)
     {
         if (node != nullptr && node->type() == NodeType::Const && node->num_outputs())
         {
-            std::cout << node->name() <<"has output :" <<  node->num_outputs() << std::endl;
+            std::cout << node->name() <<"has utput :" <<  node->num_outputs() << std::endl;
             for(size_t idx=0; idx <node->num_outputs(); idx++)
             {   
                 std::cout << idx << std::endl;
