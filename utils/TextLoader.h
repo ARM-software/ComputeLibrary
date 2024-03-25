@@ -135,7 +135,7 @@ public:
                 },
                 out
             );
-            std::cout << std::endl
+            std::cout << std::endl;
         }
         catch (const std::ifstream::failure &e)
         {
