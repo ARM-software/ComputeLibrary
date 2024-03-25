@@ -201,6 +201,7 @@ void call_all_const_node_accessors(Graph &g)
         {
             for(auto idx : node->outputs())
             {   
+                std::cout << idx << std::endl;
                 if (!node->output(idx)->bound_edges().empty())
                 call_tensor_accessor(node->output(idx));
             }
