@@ -1,0 +1,136 @@
+///
+/// Copyright (c) 2019-2023 Arm Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/**
+@page errata Errata
+
+@tableofcontents
+
+@section S7_1_errata Errata
+
+- (COMPMID-6493) Crash when running Arm Compute Library compiled for SVE2 on a computer that support SVE only.
+    - Versions: >= v21.02 && <=v23.08
+    - OSs: Linux, Android.
+    - Conditions:
+        - Compile the latest Arm Compute Library for SVE2 (arch=armv8.6-a-sve2).
+        - multi_isa = 0
+        - Device with SVE but without SVE2 support.
+    - Result:
+        - Crash due to illegal instruction.
+        - To run SVE only, build with arch="armv8.2-a-sve", arch="armv8.6-a-sve", or with multi_isa=1.
+
+- (COMPMID-6404) Under certain conditions, CLTile may produce incorrect result.
+    - Versions: >= v19.02 && < v23.08
+    - OSs: Linux, Android.
+    - Conditions:
+        - The size of the lowest dimension of the input tensor is greater than 16 bytes.
+        - The size of the lowest dimension of the input tensor is not a multiple of 16.
+    - Result:
+        - Incorrect result is produced.
+
+- (COMPMID-6271) Under certain conditions, CLArgMinMaxLayer validation tests may fail
+    - Versions Affected: >= v20.02 && < v23.08
+    - OSs Affected: Linux
+    - Conditions:
+        - Backend: OpenCL
+        - Axis == 0
+    - Result:
+        - Sporadic mismatches only on certain devices
+
+- (COMPMID-5324) Issue identified with direct and depthwise convolutions for certain Arm® Mali™ DDK versions.
+    - Versions Affected: < v22.08
+    - Conditions:
+        - Arm® Mali™ DDK Versions : >= r23p0 && <= r38p0
+        - Mali™ GPUs: Bifrost GPU family with the exception of G71
+        - Backend: OpenCL
+        - Build options Include : "cl-fast-relaxed-math"
+    - Result: Reduced accuracy issue, while using direct and depthwise convolutions fused with LU_BOUNDED_RELU activation.
+
+- (COMPMID-5134) An issue has been identified when running the graph_deepspeech_v0_4_1 graph example.
+    - Versions Affected: >= v21.08
+    - Conditions:
+        - Data type input: F32
+        - Backend: OpenCL
+    - Result: The execution of the graph_deepspeech_v0_4_1 could fail on OpenCL backend for systems with a small RAM. The issue is due to the extra temporary memory required to reshape the network weights
+
+- (COMPMID-4013) Experimented performance regressions for some networks on OpenCL when using Arm® Mali™ DDK r8p0
+    - Versions Affected: v21.05
+    - OSs Affected: All
+    - Conditions:
+        - Arm® Mali™ DDK r8p0
+
+- (COMPMID-5146) Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
+    - Versions Affected: v21.02
+    - OSs Affected: Linux
+    - Conditions:
+        - armv7a architecture
+        - release mode
+        - asserts enabled
+
+- (COMPMID-4367) Performance regression in Convolution Layer OpenCL backend on Mali™ G77 when QSYMM8_PER_CHANNEL is used as weights' data type.
+    - Versions Affected: >= v20.11 && < v21.08
+    - OSs Affected: All
+    - Conditions:
+        - Mali™ G77
+        - Convolution Layer in use
+        - OpenCL backend
+        - Convolution Layer uses QSYMM8_PER_CHANNEL as the data type of its weight
+
+- (COMPMID-4306) A wrong test configuration has been found in CLGEMMMatrixMultiplyReshapedOnlyRHS set of tests.
+    - Versions Affected: >= v20.11 && < v21.05
+    - Conditions:
+        - Data type input: F32/F16
+        - Fused bounded relu activation with coefficient 'a' being negative
+
+- (COMPMID-5135) Under certain conditions, the validation test case 'CL/DirectConvolutionLayer/Float/FP32/RunSmall9x9\@InputShape=32x37x3x4:StrideX=1:StrideY=1:PadX=0:PadY=0:KernelSize=9:NumKernels=1:DataType=F32:ActivationInfo=LU_BOUNDED_RELU:DataLayout=NHWC' may fail.
+    - Versions Affected: >= v20.08
+    - Conditions:
+        - The validation suite has to run in nightly mode and execute 40k+ test cases before the test mentioned above
+
+- (COMPMID-5136) Under certain conditions, benchmark examples can hang when OpenCL profiling queues are enabled.
+    - Versions Affected: >= v19.11
+    - OSs Affected: Linux
+    - Conditions:
+        - Arm® Mali™ DDK r1p0 - r8p0, and
+        - Linux kernel >= 4.4
+
+- (COMPMID-5137) On Android with armv8a/armv8.2-a architecture, Arm® Neon™ validation tests can fail when compiled using Android Ndk
+  >= r18b in debug mode (https://github.com/android/ndk/issues/1135).
+    - Versions Affected: >= v19.11
+    - OSs Affected: Android
+    - Conditions:
+        - armv8a/armv8.2-a architecture, and
+        - Compiled using Android NDK >= r18b in debug mode.
+
+- (COMPMID-4288) An issue has been identified with CLCast.
+    - Versions Affected: >= v18.11 && < v21.05
+    - Conditions:
+        - Data type input: F32
+        - Data type output: All integer types
+        - Conversion policy: SATURATE
+    - Result: OpenCL backend will always wrap around instead of saturating for out-of-range inputs
+
+*/
+} // namespace
