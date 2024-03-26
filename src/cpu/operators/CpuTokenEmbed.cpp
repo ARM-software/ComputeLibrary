@@ -6,7 +6,7 @@
 #include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
-#include "src/cpu/kernels/CpuTokenEmbedKernel.h"
+#include "src/cpu/kernels/CpuVectorizeKernel.h"
 
 
 namespace arm_compute
@@ -17,8 +17,8 @@ void CpuTokenEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
 
-    auto k = std::make_unique<kernels::CpuTokenEmbedKernel>();
-    k->configure(input, vocab, output, tkemb_info);
+    auto k = std::make_unique<kernels::CpuVectorizeKernel>();
+    k->configure(input, vocab, output);
     _kernel = std::move(k);
 
     _PE_kernel = std::make_unique<kernels::CpuPositionalEncodingKernel>();
@@ -39,7 +39,7 @@ CpuTokenEmbed::validate(const ITensorInfo *input, const ITensorInfo *vocab, cons
 void CpuTokenEmbed::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    auto split_dimension = static_cast<kernels::CpuTokenEmbedKernel *>(_kernel.get())->get_split_dimension_hint();
+    auto split_dimension = static_cast<kernels::CpuVectorizeKernel *>(_kernel.get())->get_split_dimension_hint();
 
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
     ITensorPack PE_tensors{ {ACL_SRC,tensors.get_tensor(ACL_DST)} /* Use output from token embedding as input*/,

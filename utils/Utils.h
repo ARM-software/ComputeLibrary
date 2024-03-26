@@ -339,7 +339,6 @@ public:
         {
             ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", npy_filename.c_str(), e.what());
         }
-        std::cout << npy_filename << std::endl;
     }
     /** Return true if a NPY file is currently open */
     bool is_open()
