@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/a64_ffhybrid_fp32_mla_6x16.hpp"
 #include "kernels/a64_ffhybrid_fp32bf16fp32_mmla_4x24.hpp"
+#include "kernels/a64_ffhybrid_fp32bf16fp32_mmla_6x16.hpp"
 #include "kernels/a64_ffinterleaved_bf16fp32_mmla_8x12.hpp"
 #include "kernels/a64_ffinterleaved_fp32_mla_8x12.hpp"
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
@@ -349,6 +350,14 @@ GemmImplementation<float, float>::with_estimate(
     [](const GemmArgs &args) { return args._fast_mode && args._ci->has_bf16(); },
     [](const GemmArgs &args) { return GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_fp32bf16fp32_mmla_4x24, float, float>::estimate_cycles<float>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_fp32bf16fp32_mmla_4x24, float, float>(args); }
+),
+GemmImplementation<float, float>::with_estimate(
+    GemmMethod::GEMM_HYBRID,
+    "a64_ffhybrid_fp32bf16fp32_mmla_6x16",
+    KernelWeightFormat::VL256_BL64_BF16,
+    [](const GemmArgs &args) { return args._fast_mode && args._ci->has_bf16(); },
+    [](const GemmArgs &args) { return GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_fp32bf16fp32_mmla_6x16, float, float>::estimate_cycles<float>(args); },
+    [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_fp32bf16fp32_mmla_6x16, float, float>(args); }
 ),
 #endif // BF16
 GemmImplementation<float, float>::with_estimate(

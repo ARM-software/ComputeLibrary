@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,18 +30,24 @@
 #include "../performance_parameters.hpp"
 
 #define ARGLIST  \
-    const bfloat16 *, const bfloat16 *, size_t, \
-    float *, int, size_t, int
+    unsigned int, const unsigned int *, \
+    IndirectInputArg<float>, \
+    size_t, size_t, \
+    const bfloat16 *, \
+    size_t, \
+    IndirectOutputArg<float>, \
+    const float *, Activation, bool
 
 namespace arm_gemm
 {
 // Actual kernel implementations
-void a64_ffinterleaved_bf16fp32_mmla_8x12( ARGLIST );
+void a64_ffhybrid_fp32bf16fp32_mmla_6x16( ARGLIST );
 
-class cls_a64_ffinterleaved_bf16fp32_mmla_8x12
+class cls_a64_ffhybrid_fp32bf16fp32_mmla_6x16
 {
 public:
-    typedef bfloat16 operand_type;
+    typedef float lhs_operand_type;
+    typedef bfloat16 rhs_operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -49,12 +55,7 @@ public:
     /* Kernel blocking parameters */
     static constexpr unsigned int out_height()
     {
-        return 8;
-    }
-
-    static unsigned int out_width()
-    {
-        return 12;
+        return 6;
     }
     static unsigned int stripe_width()
     {
@@ -63,7 +64,12 @@ public:
 
     static KernelWeightFormat kernel_weight_format()
     {
-        return KernelWeightFormat::VL256_BL64;
+        return KernelWeightFormat::VL256_BL64_BF16;
+    }
+
+    static unsigned int out_width()
+    {
+        return 16;
     }
 
     static constexpr unsigned int k_unroll()
@@ -71,27 +77,21 @@ public:
         return 4;
     }
 
+    static constexpr bool supports_accumulate()
+    {
+        return true;
+    }
 
-    StdTransformsFixed<operand_type, result_type, 8, 12, 4> transforms = {};
-    StdTransformsFixed<operand_type, result_type, 8, 12, 4, true> transforms_quantized = {};
+    StdTransformsFixed<rhs_operand_type, result_type, 6, 16, 4> transforms = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {
-
-        if (std::is_same<T, bfloat16>::value) {
-            switch (ci->get_cpu_model()) {
-                default:
-                    return { 31.62, 9.07, 3.23 };
-            }
-        }
-
-
         if (std::is_same<T, float>::value) {
             switch (ci->get_cpu_model()) {
                 case CPUModel::V1:
-                    return { 45.25, 4.29, 4.80 };
+                    return { 21.05 };
                 default:
-                    return { 29.85, 2.60, 5.49 };
+                    return { 15.27 };
             }
         }
 
@@ -99,8 +99,8 @@ public:
     }
 
     // Default to the generic kernel
-    kern_type kernel=a64_ffinterleaved_bf16fp32_mmla_8x12;
-    cls_a64_ffinterleaved_bf16fp32_mmla_8x12(const CPUInfo *)
+    kern_type kernel=a64_ffhybrid_fp32bf16fp32_mmla_6x16;
+    cls_a64_ffhybrid_fp32bf16fp32_mmla_6x16(const CPUInfo *)
     {
     }
 };
