@@ -29,8 +29,8 @@ static const std::vector<CpuVectorizeKernel::VectorizeKernel> available_kernels 
     // TBA
 #endif // __aarch64__
 */
-    {"neon_fp32_token_embedding", [](const VectorizeKernelDataTypeISASelectorData &data) { return data.dt == DataType::F32; },
-     REGISTER_FP32_NEON(arm_compute::cpu::neon_token_embed_char_2_float32)},
+    {"neon_vectorize_int_2_float32", [](const VectorizeKernelDataTypeISASelectorData &data) { return data.dt == DataType::F32; },
+     REGISTER_FP32_NEON(arm_compute::cpu::neon_vectorize_int_2_float32)},
 
 };
 }
