@@ -41,6 +41,7 @@ void CpuTokenEmbed::run(ITensorPack &tensors)
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto split_dimension = static_cast<kernels::CpuVectorizeKernel *>(_kernel.get())->get_split_dimension_hint();
 
+    std::cout << "src/cpu/operators/CpuTokenEmbed.cpp" << std::endl;
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
     ITensorPack PE_tensors{ {ACL_SRC,tensors.get_tensor(ACL_DST)} /* Use output from token embedding as input*/,
                             {ACL_DST,tensors.get_tensor(ACL_DST)} /* Same self output/input*/ };

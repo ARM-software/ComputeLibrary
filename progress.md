@@ -90,7 +90,7 @@ Vanilla_Transformer
 |
 |
 |- Kernel ------------------> Token Embedding
-|         |                   |-src/cpu/kernels/CpuTokenEmbedKernel.h.cpp
+|         |                   |-src/cpu/kernels/CpuTokenEmbedKernel.h.cpp -> Have been replaced by CpuVectorizeKernel.h.cpp
 |         |                   |                 |-> using dst::datatype for kernel selection.
 |         |                   |                     #TODO: data compability
 |         |                   |-src/cpu/kernels/tokenembed/generic/neon/fp32.cpp
