@@ -32,18 +32,25 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     unsigned int offset_vector,offset_dst;
 
     Iterator src_iter(src,win);
+    Iterator dst_iter(dst,win);
+    Iterator vector_iter(vector,win);
 
     const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
+    const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
+    const auto vector_ptr    = reinterpret_cast<float *>(vector_iter.ptr());
 
     execute_window_loop(win,
         [&](const Coordinates &)
         {
             for(unsigned int x = window_start_x; x < window_end_x; x++)
             {
-                std::cout << *(src_ptr+x) << std::endl;
                 offset_dst     = x * vector_depth;
                 offset_vector  = *(src_ptr+x) * vector_depth;
-
+                std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));
+                std::cout << *(src_ptr+x) << "  ";
+                std::cout << *(dst_ptr + offset_dst) << "  ";
+                std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << "  ";
+                
             }
         }, src_iter);
     /*
