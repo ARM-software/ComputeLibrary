@@ -15,7 +15,7 @@ namespace cpu
 {
 void CpuSegmentEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab,  ITensorInfo *output)
 {
-    ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
+    ARM_COMPUTE_LOG_PARAMS(input, output);
 
     auto k = std::make_unique<kernels::CpuVectorizeKernel>();
     k->configure(input, vocab, output);
