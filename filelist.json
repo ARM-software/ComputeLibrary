@@ -2326,7 +2326,10 @@
             "src/cpu/kernels/CpuVectorizeKernel.cpp",
             "src/cpu/operators/CpuSegmentEmbed.cpp",
             "src/runtime/NEON/functions/NESegmentEmbeddingLayer.cpp"
-          ]
+          ],
+          "neon": {
+            "fp32":["src/cpu/kernels/vectorize/generic/neon/fp32.cpp"]
+          }
         }
       },
       "Linear": {
