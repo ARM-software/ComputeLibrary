@@ -112,6 +112,12 @@ struct TokenEmbedKernelDataTypeISASelectorData
     cpuinfo::CpuIsaInfo isa;
 };
 
+struct VectorizeKernelDataTypeISASelectorData
+{
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
+};
+
 // Selector pointer types
 using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
 using DataTypeDataLayoutSelectorPtr     = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
@@ -124,6 +130,8 @@ using ActivationDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const ActivationDataTypeISASelectorData &data)>::type;
 using TokenEmbedKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const TokenEmbedKernelDataTypeISASelectorData &data)>::type;
+using VectorizeKernelDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const VectorizeKernelDataTypeISASelectorData &data)>::type;
 using CpuAddKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const CpuAddKernelDataTypeISASelectorData &data)>::type;
 using ScaleKernelDataTypeISASelectorDataPtr =

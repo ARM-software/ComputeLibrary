@@ -2323,6 +2323,7 @@
       "SegmentEmbedding":{
         "files":{
           "common":[
+            "src/cpu/kernels/CpuVectorizeKernel.cpp",
             "src/cpu/operators/CpuSegmentEmbed.cpp",
             "src/runtime/NEON/functions/NESegmentEmbeddingLayer.cpp"
           ]
