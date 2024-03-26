@@ -43,7 +43,7 @@ void CpuTokenEmbed::run(ITensorPack &tensors)
 
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
     //ITensorPack PE_tensors{ {ACL_SRC,tensors.get_tensor(ACL_DST)} /* Use output from token embedding as input*/,
-                            {ACL_DST,tensors.get_tensor(ACL_DST)} /* Same self output/input*/ };
+                            //{ACL_DST,tensors.get_tensor(ACL_DST)} /* Same self output/input*/ };
     //NEScheduler::get().schedule_op(_PE_kernel.get(),Window::DimY,_PE_kernel->window(), PE_tensors);
 }
 
