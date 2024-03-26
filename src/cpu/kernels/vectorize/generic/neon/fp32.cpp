@@ -26,7 +26,10 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
     std::cout << "src " << src->info()->tensor_shape().x()  << " " <<   src->info()->tensor_shape().y()  << std::endl;
     std::cout << "vector " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().y()  << std::endl;
+    std::cout << "dst " << dst->info()->tensor_shape().x()  << " " <<   dst->info()->tensor_shape().y()  << std::endl;
     std::cout << vector_depth << std::endl;
+
+    unsigned int offset_vector,offset_dst;
 
     Iterator src_iter(src,win);
 
@@ -38,6 +41,9 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
             for(unsigned int x = window_start_x; x < window_end_x; x++)
             {
                 std::cout << *(src_ptr+x) << std::endl;
+                offset_dst     = x * vector_depth;
+                offset_vector  = *(src_ptr+x) * vector_depth;
+
             }
         }, src_iter);
     /*
