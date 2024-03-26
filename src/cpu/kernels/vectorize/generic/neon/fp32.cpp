@@ -49,7 +49,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
                 std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));
                 std::cout << *(src_ptr+x) << "  ";
                 std::cout << *(dst_ptr + offset_dst) << "  ";
-                std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << "  ";
+                std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << std::endl;;
                 
             }
         }, src_iter);
