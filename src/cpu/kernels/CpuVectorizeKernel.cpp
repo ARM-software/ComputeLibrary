@@ -47,6 +47,7 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
     std::cout << src->tensor_shape().x() << "  " << vector->tensor_shape().y() << std::endl;
     const TensorShape dst_shape(src->tensor_shape().x(),vector->tensor_shape().y());
     // Configure output tensor info.
+    std::cout << " .tensor_shape().total_size() " << dst->tensor_shape().total_size() << std::endl;
     auto_init_if_empty(*dst, TensorInfo(*vector->clone()).set_tensor_shape(dst_shape));
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
