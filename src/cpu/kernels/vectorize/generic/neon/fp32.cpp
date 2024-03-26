@@ -14,12 +14,16 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
     win.set(Window::DimY, Window::Dimension(0,1,1));
+    ARM_COMPUTE_UNUSED(win);
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
-    unsigned int       x                = window_start_x;
 
     const unsigned int vector_depth     = vector->info()->tensor_shape().y();
 
+    std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
+    std::cout << "src " << src->info()->tensor_shape().x()  << " " <<   src->info()->tensor_shape().y()  << std::endl;
+    std::cout << "window " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().x()  << std::endl;
+    /*
     unsigned int id_src, offset_vector, offset_dst;
     
     Iterator src_iter(src,win);
@@ -33,7 +37,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     execute_window_loop(win,
         [&](const Coordinates &)
         {
-            for(; x < window_end_x; x++)
+            for(unsigned int x = window_start_x; x < window_end_x; x++)
             {
                 id_src = *(src_ptr+x);
                 std::cout << id_src << std::endl;
@@ -48,7 +52,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
 
             }
         },vector_iter,src_iter);
-
+    */
 }
 
 } // namespace cpu
