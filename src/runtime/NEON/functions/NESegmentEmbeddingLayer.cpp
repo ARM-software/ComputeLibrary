@@ -29,7 +29,7 @@ void NESegmentEmbeddingLayer::configure(ITensor *input, ITensor *segment, ITenso
     _impl->dst      = output;
 
     _impl->op  = std::make_unique<cpu::CpuSegmentEmbed>();
-    _impl->op->configure(_impl->src->info(),_impl->segment->info(), _impl->dst->info(),TokenEmbeddingLayerInfo(768U,2U));
+    _impl->op->configure(_impl->src->info(),_impl->segment->info(), _impl->dst->info());
 }
 
 void NESegmentEmbeddingLayer::prepare()
