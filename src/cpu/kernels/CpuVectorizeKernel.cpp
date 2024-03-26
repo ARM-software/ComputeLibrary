@@ -44,11 +44,15 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
         VectorizeKernelDataTypeISASelectorData{dst->data_type(), CPUInfo::get().get_isa()}
     );
     std::cout << "src/cpu/kernels/CpuVectorizeKernel.cpp" << std::endl;
-    std::cout << src->tensor_shape().x() << "  " << vector->tensor_shape().y() << std::endl;
+    std::cout << src->tensor_shape().x() << "  " << src->tensor_shape().y() << std::endl;
+    std::cout << dst->tensor_shape().x() << "  " << dst->tensor_shape().y() << std::endl;
+
     const TensorShape dst_shape(src->tensor_shape().x(),vector->tensor_shape().y());
     // Configure output tensor info.
-    std::cout << " .tensor_shape().total_size() " << dst->tensor_shape().total_size() << std::endl;
+    dst->set_tensor_shape(dst_shape);
     auto_init_if_empty(*dst, TensorInfo(*vector->clone()).set_tensor_shape(dst_shape));
+
+    std::cout << dst->tensor_shape().x() << "  " << dst->tensor_shape().y() << std::endl;
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
