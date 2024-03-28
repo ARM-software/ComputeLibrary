@@ -62,5 +62,6 @@ void NELinearLayer::run()
     
     _impl->kernel->run(pack);
 
+}
 
 } // namespace arm_compute
