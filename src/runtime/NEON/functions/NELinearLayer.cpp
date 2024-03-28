@@ -53,25 +53,6 @@ void NELinearLayer::run()
     ITensorPack pack;
 
     std::cout << "src/runtime/NEON/functions/NELinearLayer.cpp" << std::endl;
-    std::cout << "src " << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().z() << std::endl;
-    
-    std::cout << "weight " << std::endl;
-    std::cout << _impl->weight->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->weight->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->weight->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "bias " << std::endl;
-    std::cout << _impl->bias->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->bias->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->bias->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "dst " << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().z() << std::endl;
 
 
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
@@ -81,27 +62,5 @@ void NELinearLayer::run()
     
     _impl->kernel->run(pack);
 
-    std::cout << "*******    " << std::endl;
-    std::cout << "*******    " << std::endl;
-    std::cout << "src " << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->src->info()->tensor_shape().z() << std::endl;
-    
-    std::cout << "weight " << std::endl;
-    std::cout << _impl->weight->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->weight->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->weight->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "bias " << std::endl;
-    std::cout << _impl->bias->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->bias->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->bias->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "dst " << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().y() << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().z() << std::endl;
-}
 
 } // namespace arm_compute

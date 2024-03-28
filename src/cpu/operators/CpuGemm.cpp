@@ -72,6 +72,9 @@ void CpuGemm::configure(const ITensorInfo *a,
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemm::validate(a, b, c, d, alpha, beta, gemm_info));
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, gemm_info);
 
+
+    std::cout << "src/cpu/operators/CpuGemm.cpp" << std::endl;
+
     const cpu::AsmGemmInfo asm_info  = init_assembly_metadata(gemm_info);
     const bool             is_c_bias = beta == 1 && c != nullptr;
     const bool             run_optimised =
@@ -198,6 +201,7 @@ void CpuGemm::configure(const ITensorInfo *a,
     // Configure matrix addition kernel
     if (_run_addition)
     {
+        std::cout << "Running addition" << std::endl;
         _ma_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixAdditionKernel>();
         _ma_kernel->configure(c, d, beta);
     }
