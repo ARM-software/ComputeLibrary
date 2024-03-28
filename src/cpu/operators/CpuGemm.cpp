@@ -411,12 +411,20 @@ void CpuGemm::run(ITensorPack &tensors)
 
     std::cout << "src/cpu/operators/CpuGemm.cpp Run" << std::endl;
 
+    Iterator a_iter(a, _interleave_kernel->window());
+    Iterator b_iter(a, _interleave_kernel->window());
+    Iterator c_iter(a, _interleave_kernel->window());
+
+    const auto a_ptr      = reinterpret_cast<float *>(a_iter.ptr());
+    const auto b_ptr      = reinterpret_cast<float *>(b_iter.ptr());
+    const auto c_ptr   = reinterpret_cast<float *>(c_iter.ptr());
+
     std::cout << "Input:  ";
-    std::cout << *reinterpret_cast<float *>(a->buffer()) << " " << *reinterpret_cast<float *>(a->buffer()+ 1) << std::endl;
+    std::cout << *a_ptr << " " << *(a_ptr+1) << std::endl;
     std::cout << "Weight:  ";
-    std::cout << *reinterpret_cast<float *>(b->buffer()) << " " << *reinterpret_cast<float *>(b->buffer()+ 1) << std::endl;
+    std::cout << *b_ptr << " " << *(b_ptr+1) << std::endl;
     std::cout << "Bias:  ";
-    std::cout << *reinterpret_cast<float *>(c->buffer()) << " " << *reinterpret_cast<float *>(c->buffer()+ 1) << std::endl;
+    std::cout << *c_ptr << " " << *(c_ptr+1) << std::endl;
 
     if (_asm_glue && _asm_glue->is_configured())
     {
