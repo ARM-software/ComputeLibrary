@@ -809,9 +809,16 @@ void CpuGemmConv2d::run(ITensorPack &tensors)
     if (!_skip_im2col)
     {
         // Run input reshaping
-        unsigned int y_dim = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-        ITensorPack  pack  = {{TensorType::ACL_SRC, src}, {TensorType::ACL_DST, im2col_output.get()}};
-        NEScheduler::get().schedule_op(_im2col_kernel.get(), y_dim, _im2col_kernel->window(), pack);
+        unsigned int hint_dim            = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+        unsigned int x_dim               = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+        unsigned int hint_dim_iterations = _im2col_kernel->window().num_iterations(hint_dim);
+        unsigned int x_dim_iterations    = _im2col_kernel->window().num_iterations(x_dim);
+        if (hint_dim_iterations < NEScheduler::get().num_threads() && x_dim_iterations > hint_dim_iterations)
+        {
+            hint_dim = x_dim;
+        }
+        ITensorPack pack = {{TensorType::ACL_SRC, src}, {TensorType::ACL_DST, im2col_output.get()}};
+        NEScheduler::get().schedule_op(_im2col_kernel.get(), hint_dim, _im2col_kernel->window(), pack);
         gemm_input_to_use = im2col_output.get();
     }
 
