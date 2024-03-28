@@ -1782,7 +1782,7 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
 template <typename ForwardLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &node)
 {
-    std::cout << "arm_compute/graph/backends/FunctionHelpers.h" << std::endl;
+    std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward" << std::endl;
     std::cout << "input" << std::endl;
     std::cout << node.num_inputs() << std::endl;
     std::cout << node.input(0)->id() << std::endl;

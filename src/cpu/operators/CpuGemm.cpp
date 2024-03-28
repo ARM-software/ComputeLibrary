@@ -72,9 +72,6 @@ void CpuGemm::configure(const ITensorInfo *a,
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemm::validate(a, b, c, d, alpha, beta, gemm_info));
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, gemm_info);
 
-
-    std::cout << "src/cpu/operators/CpuGemm.cpp" << std::endl;
-
     const cpu::AsmGemmInfo asm_info  = init_assembly_metadata(gemm_info);
     const bool             is_c_bias = beta == 1 && c != nullptr;
     const bool             run_optimised =
@@ -201,7 +198,6 @@ void CpuGemm::configure(const ITensorInfo *a,
     // Configure matrix addition kernel
     if (_run_addition)
     {
-        std::cout << "Running addition" << std::endl;
         _ma_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixAdditionKernel>();
         _ma_kernel->configure(c, d, beta);
     }
@@ -412,6 +408,15 @@ void CpuGemm::run(ITensorPack &tensors)
     auto b = tensors.get_const_tensor(ACL_SRC_1);
     auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
+
+    std::cout << "src/cpu/operators/CpuGemm.cpp Run" << std::endl;
+
+    std::cout << "Input:  ";
+    std::cout << *reinterpret_cast<float *>(a->buffer()) << " " << *reinterpret_cast<float *>(a->buffer()+ 768 -1) << std::endl;
+    std::cout << "Weight:  ";
+    std::cout << *reinterpret_cast<float *>(b->buffer()) << " " << *reinterpret_cast<float *>(b->buffer()+ 768 -1) << std::endl;
+    std::cout << "Bias:  ";
+    std::cout << *reinterpret_cast<float *>(c->buffer()) << " " << *reinterpret_cast<float *>(c->buffer()+ 768 -1) << std::endl;
 
     if (_asm_glue && _asm_glue->is_configured())
     {
