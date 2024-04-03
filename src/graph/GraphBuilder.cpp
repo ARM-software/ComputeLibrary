@@ -141,7 +141,6 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
     g.add_connection(input.node_id, input.index, nid, 0);
     set_node_params(g, nid, params);
     set_accessor_on_node(g, nid, false, 0, std::move(accessor));
-    std::cout << "src/graph/GraphBuilder.cpp" << std::endl;
 
     return nid;
 }
@@ -670,24 +669,30 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
     // Create weight and bias tensor shape
-    TensorDescriptor w_desc         = input_tensor_desc;
-    w_desc.shape                    = TensorShape(linear_info.d_model(), linear_info.d_model());
-    TensorDescriptor b_desc         = input_tensor_desc;
-    b_desc.shape                    = TensorShape(linear_info.d_model());
+    TensorDescriptor q_w_desc         = input_tensor_desc;
+    q_w_desc.shape                    = TensorShape(linear_info.d_model(), linear_info.d_model());
+    TensorDescriptor q_b_desc         = input_tensor_desc;
+    q_b_desc.shape                    = TensorShape(linear_info.d_model());
+
+    TensorDescriptor k_w_desc         = input_tensor_desc;
+    k_w_desc.shape                    = TensorShape(linear_info.d_model(), linear_info.d_model());
+    TensorDescriptor k_b_desc         = input_tensor_desc;
+    k_b_desc.shape                    = TensorShape(linear_info.d_model());
+
+    TensorDescriptor v_w_desc         = input_tensor_desc;
+    v_w_desc.shape                    = TensorShape(linear_info.d_model(), linear_info.d_model());
+    TensorDescriptor v_b_desc         = input_tensor_desc;
+    v_b_desc.shape                    = TensorShape(linear_info.d_model());
     
-    query_weights.get();
-    query_bias.get();
-    key_weights.get();
-    key_bias.get();
     // Create weight and bias const node with npy tensor accessor
-    NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", w_desc, std::move(query_weights));
-    NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", b_desc, std::move(query_bias));
+    NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", q_w_desc, std::move(query_weights));
+    NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", q_b_desc, std::move(query_bias));
 
-    NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", w_desc, std::move(key_weights));
-    NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", b_desc, std::move(key_bias));
+    NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", k_w_desc, std::move(key_weights));
+    NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", k_b_desc, std::move(key_bias));
 
-    NodeID          v_w_nid  = add_const_node_with_name(g, params, "Value Weights", w_desc, std::move(value_weights));
-    NodeID          v_b_nid  = add_const_node_with_name(g, params, "Value Bias", b_desc, std::move(value_bias));
+    NodeID          v_w_nid  = add_const_node_with_name(g, params, "Value Weights", v_w_desc, std::move(value_weights));
+    NodeID          v_b_nid  = add_const_node_with_name(g, params, "Value Bias", v_b_desc, std::move(value_bias));
 
     
     // Specific Linear attention operation
