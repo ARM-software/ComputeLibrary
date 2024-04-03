@@ -674,7 +674,10 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     TensorDescriptor q_b_desc         = input_tensor_desc;
     q_b_desc.shape                    = TensorShape(linear_info.d_model());
 
-    
+    ARM_COMPUTE_UNUSED(key_weights);
+    ARM_COMPUTE_UNUSED(key_bias);
+    ARM_COMPUTE_UNUSED(value_weights);
+    ARM_COMPUTE_UNUSED(value_bias);
     // Create weight and bias const node with npy tensor accessor
     NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", q_w_desc, std::move(query_weights));
     NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", q_b_desc, std::move(query_bias));
