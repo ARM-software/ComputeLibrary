@@ -126,6 +126,7 @@ get_transition_handles(GraphContext &ctx, ExecutionTask &task, const std::set<IT
 
     TaskHandles transition_handles;
 
+    std::cout << " get_transition_handles Input size: " <<node.input_edges().size() << std::endl;
     // Add input handles
     for (unsigned int i = 0; i < node.input_edges().size(); ++i)
     {
@@ -141,6 +142,8 @@ get_transition_handles(GraphContext &ctx, ExecutionTask &task, const std::set<IT
         }
     }
 
+
+    std::cout << " get_transition_handles Output size: " <<node.num_outputs().size() << std::endl;
     // Add output handles
     for (unsigned int i = 0; i < node.num_outputs(); ++i)
     {
