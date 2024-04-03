@@ -120,7 +120,6 @@ public:
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout)).set_name("tkemb1")
               
-              // Encoder
               << LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
                                                                 get_weights_accessor(data_path, "/query_weight.npy"),
                                                                 get_weights_accessor(data_path, "/query_bias.npy"),
