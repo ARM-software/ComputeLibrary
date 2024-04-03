@@ -1789,10 +1789,18 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
     std::cout << "output" << std::endl;
     std::cout << node.num_outputs() << std::endl;
     std::cout << node.output(0)->id() << std::endl;
+
+    for(size_t idx=0; idx <num_inputs(); idx++)
+    {       
+        // Update accessor
+        node.input(idx)->set_accessor(node.output(idx)->extract_accessor());
+        // Update output
+        node.set_output_tensor(node.input(idx)->id(), idx);
+    }
     // Update accessor
-    node.input(0)->set_accessor(node.output(0)->extract_accessor());
+    //node.input(0)->set_accessor(node.output(0)->extract_accessor());
     // Update output
-    node.set_output_tensor(node.input(0)->id(), 0);
+    //node.set_output_tensor(node.input(0)->id(), 0);
 
     //set_new_output_and_inherit_accessor(*polymorphic_downcast<INode*>(node),node.output(0),node.input(0));
 
