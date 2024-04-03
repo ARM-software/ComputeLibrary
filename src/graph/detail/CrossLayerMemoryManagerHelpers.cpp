@@ -191,7 +191,6 @@ void configure_handle_lifetime(std::vector<TaskHandles> &tasks_handles, const Ha
     // Identify max number of tensors in flight
     HandleCounter tensors_in_flight;
 
-    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp configure_handle_lifetime 1 " << std::endl;
 
     // Acquires the given handles and sets them as in flight if they aren't already
     auto acquire = [&](std::vector<std::pair<ITensorHandle *, IMemoryGroup *>> &handles)
@@ -212,7 +211,7 @@ void configure_handle_lifetime(std::vector<TaskHandles> &tasks_handles, const Ha
         }
     };
 
-    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp configure_handle_lifetime 2 " << std::endl;
+    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp configure_handle_lifetime 1 " << std::endl;
 
     for (auto &task_handle : tasks_handles)
     {
@@ -226,6 +225,7 @@ void configure_handle_lifetime(std::vector<TaskHandles> &tasks_handles, const Ha
             ITensorHandle *ihandle = input_handle.first;
             ARM_COMPUTE_ERROR_ON(ihandle == nullptr);
             ARM_COMPUTE_ERROR_ON(tensors_in_flight.find(ihandle) == std::end(tensors_in_flight));
+            std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp configure_handle_lifetime Handle count:  " << tensors_in_flight[ihandle] << std::endl;
             --tensors_in_flight[ihandle];
             if (tensors_in_flight[ihandle] <= 0)
             {
@@ -237,7 +237,7 @@ void configure_handle_lifetime(std::vector<TaskHandles> &tasks_handles, const Ha
         }
     }
 
-    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp configure_handle_lifetime 3 " << std::endl;
+    std::cout << "src/graph/detail/CrossLayerMemoryManagerHelpers.cpp configure_handle_lifetime 2" << std::endl;
 }
 } // namespace
 
