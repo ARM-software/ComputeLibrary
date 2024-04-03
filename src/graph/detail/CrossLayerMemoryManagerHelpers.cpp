@@ -143,7 +143,7 @@ get_transition_handles(GraphContext &ctx, ExecutionTask &task, const std::set<IT
     }
 
 
-    std::cout << " get_transition_handles Output size: " << node.num_outputs().size() << std::endl;
+    std::cout << " get_transition_handles Output size: " << node.num_outputs() << std::endl;
     // Add output handles
     for (unsigned int i = 0; i < node.num_outputs(); ++i)
     {
