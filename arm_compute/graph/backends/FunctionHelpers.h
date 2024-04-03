@@ -1790,7 +1790,7 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
     std::cout << node.num_outputs() << std::endl;
     std::cout << node.output(0)->id() << std::endl;
 
-    for(size_t idx=0; idx <num_inputs(); idx++)
+    for(size_t idx=0; idx <node.num_inputs(); idx++)
     {       
         // Update accessor
         node.input(idx)->set_accessor(node.output(idx)->extract_accessor());
