@@ -692,7 +692,7 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     NodeID q_nid    = g.add_node<LinearLayerNode>(q_linear_info);
 
     // A node to hold all the output
-    NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(3);
+    NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(1);
     
     // Connect input
     g.add_connection(input.node_id, input.index, q_nid, 0);
