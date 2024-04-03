@@ -1783,15 +1783,15 @@ template <typename ForwardLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &node)
 {
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward" << std::endl;
-    std::cout << "input" << std::endl;
-    std::cout << node.num_inputs() << std::endl;
-    std::cout << node.input(0)->id() << std::endl;
-    std::cout << "output" << std::endl;
-    std::cout << node.num_outputs() << std::endl;
-    std::cout << node.output(0)->id() << std::endl;
 
     for(size_t idx=0; idx <node.num_inputs(); idx++)
     {       
+
+        std::cout << "input" << std::endl;
+        std::cout << node.input(idx)->id() << std::endl;
+        std::cout << "output" << std::endl;
+        std::cout << node.output(idx)->id() << std::endl;
+
         // Update accessor
         node.input(idx)->set_accessor(node.output(idx)->extract_accessor());
         // Update output
