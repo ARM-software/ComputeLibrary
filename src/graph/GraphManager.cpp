@@ -116,9 +116,13 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     }
     else
     {
+
+        std::cout << "4.1" << std::endl;
         detail::allocate_all_tensors(graph);
+        std::cout << "4.2" << std::endl;
     }
 
+    std::cout << "5" << std::endl;
     // Finalize Graph context
     ctx.finalize();
 
