@@ -679,49 +679,49 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     key_weights.get();
     key_bias.get();
     // Create weight and bias const node with npy tensor accessor
-    //NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", w_desc, std::move(query_weights));
-    //NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", b_desc, std::move(query_bias));
+    NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", w_desc, std::move(query_weights));
+    NodeID          q_b_nid  = add_const_node_with_name(g, params, "Query Bias", b_desc, std::move(query_bias));
 
-    //NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", w_desc, std::move(key_weights));
-    //NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", b_desc, std::move(key_bias));
+    NodeID          k_w_nid  = add_const_node_with_name(g, params, "Key Weights", w_desc, std::move(key_weights));
+    NodeID          k_b_nid  = add_const_node_with_name(g, params, "Key Bias", b_desc, std::move(key_bias));
 
     NodeID          v_w_nid  = add_const_node_with_name(g, params, "Value Weights", w_desc, std::move(value_weights));
     NodeID          v_b_nid  = add_const_node_with_name(g, params, "Value Bias", b_desc, std::move(value_bias));
 
     
     // Specific Linear attention operation
-    //LinearLayerInfo  q_linear_info = linear_info;
-    //q_linear_info.set_op(LinearAttentionOperation::Query);
-    //LinearLayerInfo  k_linear_info = linear_info;
-    //k_linear_info.set_op(LinearAttentionOperation::Key);
+    LinearLayerInfo  q_linear_info = linear_info;
+    q_linear_info.set_op(LinearAttentionOperation::Query);
+    LinearLayerInfo  k_linear_info = linear_info;
+    k_linear_info.set_op(LinearAttentionOperation::Key);
     LinearLayerInfo  v_linear_info = linear_info;
     v_linear_info.set_op(LinearAttentionOperation::Value);
 
     // Value, Key, Query Linear Nodes
-    //NodeID q_nid    = g.add_node<LinearLayerNode>(q_linear_info);
-    //NodeID k_nid    = g.add_node<LinearLayerNode>(k_linear_info);
+    NodeID q_nid    = g.add_node<LinearLayerNode>(q_linear_info);
+    NodeID k_nid    = g.add_node<LinearLayerNode>(k_linear_info);
     NodeID v_nid    = g.add_node<LinearLayerNode>(v_linear_info);
 
     // A node to hold all the output
-    NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(1);
+    NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(3);
     // Connect input
-    //g.add_connection(input.node_id, input.index, q_nid, 0);
-    //g.add_connection(input.node_id, input.index, k_nid, 0);
+    g.add_connection(input.node_id, input.index, q_nid, 0);
+    g.add_connection(input.node_id, input.index, k_nid, 0);
     g.add_connection(input.node_id, input.index, v_nid, 0);
 
     // Connect weights and bias
-    //g.add_connection(q_w_nid, 0, q_nid, 1);
-    //g.add_connection(q_b_nid, 0, q_nid, 2);
-    //g.add_connection(k_w_nid, 0, k_nid, 1);
-    //g.add_connection(k_b_nid, 0, k_nid, 2);
+    g.add_connection(q_w_nid, 0, q_nid, 1);
+    g.add_connection(q_b_nid, 0, q_nid, 2);
+    g.add_connection(k_w_nid, 0, k_nid, 1);
+    g.add_connection(k_b_nid, 0, k_nid, 2);
     g.add_connection(v_w_nid, 0, v_nid, 1);
     g.add_connection(v_b_nid, 0, v_nid, 2);
 
     // Connect all linear node to single node
     g.add_connection(v_nid, 0, f_nid,0);
 
-    //set_node_params(g, q_nid, params);
-    //set_node_params(g, k_nid, params);
+    set_node_params(g, q_nid, params);
+    set_node_params(g, k_nid, params);
     set_node_params(g, v_nid, params);
     set_node_params(g, f_nid, params);
 
