@@ -707,9 +707,6 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     NodeID q_nid    = g.add_node<LinearLayerNode>(q_linear_info);
     NodeID k_nid    = g.add_node<LinearLayerNode>(k_linear_info);
     NodeID v_nid    = g.add_node<LinearLayerNode>(v_linear_info);
-
-    // A node to hold all the output
-    NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(3);
     
     // Connect input
     g.add_connection(input.node_id, input.index, q_nid, 0);
@@ -724,10 +721,16 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     g.add_connection(v_w_nid, 0, v_nid, 1);
     g.add_connection(v_b_nid, 0, v_nid, 2);
 
+
+    // A node to hold all the output
+    NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(3);
+
     // Connect all linear node to single node
     g.add_connection(q_nid, 0, f_nid,0);
     g.add_connection(k_nid, 0, f_nid,1);
     g.add_connection(v_nid, 0, f_nid,2);
+
+
 
     set_node_params(g, q_nid, params);
     set_node_params(g, k_nid, params);
