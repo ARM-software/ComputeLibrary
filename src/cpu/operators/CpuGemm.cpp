@@ -412,7 +412,7 @@ void CpuGemm::run(ITensorPack &tensors)
     std::cout << "src/cpu/operators/CpuGemm.cpp Run" << std::endl;
 
     std::cout << "Input:  ";
-    std::cout << *reinterpret_cast<float *>(a->ptr_to_element()) << " " << *reinterpret_cast<float *>(a->ptr_to_element(0)) << std::endl;
+    std::cout << *reinterpret_cast<float *>(a->ptr_to_element(0)) << " " << *reinterpret_cast<float *>(a->ptr_to_element(0)) << std::endl;
     std::cout << "Weight:  ";
     std::cout << *reinterpret_cast<float *>(b->ptr_to_element(0)) << " " << *reinterpret_cast<float *>(b->ptr_to_element(0)) << std::endl;
     std::cout << "Bias:  ";
