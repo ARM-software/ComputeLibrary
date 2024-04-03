@@ -20,6 +20,19 @@ int SimpleForwardLayerNode::total_tensors()
 
 bool SimpleForwardLayerNode::forward_descriptors()
 {
+    for(size_t idx=0; idx <num_inputs(); idx++)
+    {   
+        if ((input_id(idx) == NullTensorID) || (output_id(idx) == NullTensorID))
+        {
+            return false;
+        }
+        Tensor *dst = output(idx);
+        ARM_COMPUTE_ERROR_ON(dst == nullptr);
+        dst->desc() = configure_output(idx);
+    }
+    return true;
+
+    /*
     if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
@@ -28,6 +41,7 @@ bool SimpleForwardLayerNode::forward_descriptors()
         return true;
     }
     return false;
+    */
 }
 
 TensorDescriptor SimpleForwardLayerNode::configure_output(size_t idx) const
@@ -35,7 +49,7 @@ TensorDescriptor SimpleForwardLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_UNUSED(idx);
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
 
-    const Tensor *src = input(0);
+    const Tensor *src = input(idx);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
     TensorDescriptor output_desc = src->desc();

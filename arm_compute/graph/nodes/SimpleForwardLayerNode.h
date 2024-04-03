@@ -15,7 +15,7 @@ class SimpleForwardLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] desc Tensor descriptor
+     * @param[in] total_tensors Amount of input/output tensor
      */
     SimpleForwardLayerNode(int total_tensors);
 
