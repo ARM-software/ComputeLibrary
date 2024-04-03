@@ -1797,6 +1797,7 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
         // Update output
         node.set_output_tensor(node.input(idx)->id(), idx);
     }
+    std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward Finished" << std::endl;
     // Update accessor
     //node.input(0)->set_accessor(node.output(0)->extract_accessor());
     // Update output
