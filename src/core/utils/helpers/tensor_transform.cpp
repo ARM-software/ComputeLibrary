@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,7 +117,10 @@ int calculate_end_on_index(TensorShape input_shape,
     }
 
     // Final clamp
-    stop = (stride > 0) ? utility::clamp(stop, 0, dim_size) : utility::clamp(stop, -1, dim_size - 1);
+    if (stride > 0)
+        stop = utility::clamp(stop, 0, dim_size);
+    else
+        stop = utility::clamp(stop, -1, dim_size - 1);
 
     return stop;
 }
