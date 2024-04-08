@@ -111,6 +111,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, CLScatterLayerFixture<float>, framework
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // Scatter
