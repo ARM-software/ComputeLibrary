@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,18 +39,14 @@ namespace cpu
 //   * Regularize: dst[i] = exp(src[i] - max_value)
 //                 sum_value = sum(dst)
 //   * Normalize:  dst[i] = dst[i] / sum_value
-void sme2_f32_softmax_kernel( //
-    const float    *src,
-    float          *dst,
-    float           beta,
-    const uintptr_t shape[4],
-    const uintptr_t src_strides[4],
-    const uintptr_t dst_strides[4])
+void sme2_f16_softmax_kernel( //
+    const float16_t *src,
+    float16_t       *dst,
+    float            beta,
+    const uintptr_t  shape[4],
+    const uintptr_t  src_strides[4],
+    const uintptr_t  dst_strides[4])
 {
-    // Precondition:
-    //   * src_strides[0] == sizeof(float)
-    //   * dst_strides[0] == sizeof(float)
-
     __asm__ volatile(
         R"(
             .inst 0xd503477f  // smstart
@@ -85,19 +81,22 @@ void sme2_f32_softmax_kernel( //
             //   *  z9: min_input
             //   * z10: 23, 0
             //   * z11: max_value
-            //   * z12-z15: x, r_hi, r, r2
+            //   * z12-z15: x, x_fp32_lower_halves, r_hi, r, r2
             //   * z16-z19: max_value, shift, z, scale, poly
             //   * z20-z21: n, p1, p12345
             //   * z22-z23: n, p23, p2345
             //   * z24-z25: p45
             //   * z26: beta
-            //   * z28-z31: sum_value
+            //   * z28-z31: sum_value, x_fp32_upper_halves
             //
             //   * za0-za3: sum_value
             //
             //   * p0: all-true
-            //   * p1: left-over predicate
-            //   * p4-p7: underflow
+            //   * p1: left-over predicate for find-max & normalize loops
+            //   * p2-p4: left-over predicates for regularize loop
+            //   * p4-p7: underflow in vector loop
+            //   * p5-p6: underflow in leftover loop
+            //   *
             //   * pn9: all-true
 
             // Prepares all constant values
@@ -142,14 +141,15 @@ void sme2_f32_softmax_kernel( //
             dup z9.s, w13  // min_input
 
             dup z26.s, %w[beta]  // beta
+            fcvt h26, s26
+            dup z26.h, z26.h[0]
 
-            mov w10, #0x0000  // -inf: 0xff800000
-            movk w10, #0xff80  // -inf: 0xff800000
+            mov w10, #0xfc00  // -inf: 0xfc00 for fp16
 
             mov w11, #0  // 0
 
             // ---------------------------------------------------------------- x13: body_length = (length / vl) * vl
-            cntw x13, ALL, MUL #4
+            cnth x13, ALL, MUL #4
             udiv x9, %x[length], x13
             mul x13, x13, x9
 
@@ -191,52 +191,52 @@ loop_1_start%=:
             // Step 1: Find max
             // ==================================================
 
+            // ---------------------------------------------------------------- z16-z19: max_value = -inf
+            dup z16.h, w10
+            dup z17.h, w10
+            dup z18.h, w10
+            dup z19.h, w10
+
             // Loop for processing 4 vectors per iteration.
             mov x9, #0                                                         // x9: index
-            dup z11.s, w10                                                     // z11: max_value = -inf
-
-            // ---------------------------------------------------------------- z16-z19: max_value = -inf
-            mov z16.d, z11.d
-            mov z17.d, z11.d
-            mov z18.d, z11.d
-            mov z19.d, z11.d
+            dup z11.h, w10                                                     // z11: max_value = -inf
 
 find_max_body_start%=:
             cmp x9, x13
             b.eq find_max_body_end%=
 
-            .inst 0xa009c76c  // ld1w {z12.s-z15.s}, pn9/z, [x27, x9, LSL #2]      // z12-z15: x
-            .inst 0xc1acb910  // fmax {z16.s-z19.s}, {z16.s-z19.s}, {z12.s-z15.s}  // z16-z19: max_value = max(max_value, x)
+            .inst 0xa009a76c  // ld1h {z12.h-z15.h}, pn9/z, [x27, x9, LSL #1]      // z12-z15: x
+            .inst 0xc16cb910  // fmax {z16.h-z19.h}, {z16.h-z19.h}, {z12.h-z15.h}  // z16-z19: max_value = max(max_value, x)
 
-            incw x9, ALL, MUL #4
+            inch x9, ALL, MUL #4
             b find_max_body_start%=
 find_max_body_end%=:
 
             // Loop for processing the leftover part.
 find_max_leftover_start%=:
-            whilelo p1.s, x9, %x[length]
+            whilelo p1.h, x9, %x[length]
             b.none find_max_leftover_end%=
 
-            ld1w z12.s, p1/z, [x27, x9, LSL #2]                                // z12: x
-            fmax z16.s, p1/m, z16.s, z12.s                                     // z16: max_value = max(max_value, x)
+            ld1h z12.h, p1/z, [x27, x9, LSL #1]                                // z12: x
+            fmax z16.h, p1/m, z16.h, z12.h                                     // z16: max_value = max(max_value, x)
 
-            incw x9
+            inch x9
             b find_max_leftover_start%=
 find_max_leftover_end%=:
 
             // ---------------------------------------------------------------- z16: max_value
-            .inst 0xc1b2b110  // fmax {z16.s-z17.s}, {z16.s-z17.s}, {z18.s-z19.s}
-            fmax z16.s, p0/m, z16.s, z17.s
-            fmaxv s16, p0, z16.s
+            .inst 0xc172b110  // fmax {z16.h-z17.h}, {z16.h-z17.h}, {z18.s-z19.h}
+            fmax z16.h, p0/m, z16.h, z17.h
+            fmaxv h16, p0, z16.h
 
             // ---------------------------------------------------------------- z11: max_value
-            dup z11.s, z16.s[0]
+            dup z11.h, z16.h[0]
 
             // ==================================================
-            // Step 2: Regularize
+            // Step 2: Regularize, i.e. Calculate exp(x - max(x)
             // ==================================================
 
-            .inst 0xc00800ff  // zero {za0.s, za1.s, za2.s, za3.s}              za0-za3: sum_value
+            .inst 0xc00800ff  // zero {za0.s, za1.s, za2.s, za3.s}              za0-za3: sum_value (in fp32)
 
             // Loop for processing 4 vectors per iteration.
             mov x9, #0  // ---------------------------------------------------- x9: index
@@ -246,20 +246,41 @@ regularize_body_start%=:
             b.eq regularize_body_end%=
 
             // Loads the input data to 4 consecutive registers ---------------- z12-z15: input_data
-            .inst 0xa009c76c  // ld1w {z12.s-z15.s}, pn9/z, [x27, x9, LSL #2]
+            .inst 0xa009a76c  // ld1h {z12.h-z15.h}, pn9/z, [x27, x9, LSL #1]      // z12-z15: x
 
             // ---------------------------------------------------------------- z12-z15: x = input_data - max_value
-            fsub z12.s, z12.s, z11.s
-            fsub z13.s, z13.s, z11.s
-            fsub z14.s, z14.s, z11.s
-            fsub z15.s, z15.s, z11.s
+            fsub z12.h, z12.h, z11.h
+            fsub z13.h, z13.h, z11.h
+            fsub z14.h, z14.h, z11.h
+            fsub z15.h, z15.h, z11.h
 
             // ---------------------------------------------------------------- z12-z15: x = (input_data - max_value) * beta
-            fmul z12.s, z12.s, z26.s
-            fmul z13.s, z13.s, z26.s
-            fmul z14.s, z14.s, z26.s
-            fmul z15.s, z15.s, z26.s
+            fmul z12.h, z12.h, z26.h
+            fmul z13.h, z13.h, z26.h
+            fmul z14.h, z14.h, z26.h
+            fmul z15.h, z15.h, z26.h
 
+            // ----------------------------------------------------------------
+            // Convert fp16 values to fp32. This results in four more registers.
+            // z12 --> z12, z28
+            fcvtlt z28.s, p0/m, z12.h
+            fcvt z12.s, p0/m, z12.h
+
+            // z13 --> z13, z29
+            fcvtlt z29.s, p0/m, z13.h
+            fcvt z13.s, p0/m, z13.h
+
+            // z14 --> z14, z30
+            fcvtlt z30.s, p0/m, z14.h
+            fcvt z14.s, p0/m, z14.h
+
+            // z15 --> z15, z31
+            fcvtlt z31.s, p0/m, z15.h
+            fcvt z15.s, p0/m, z15.h
+
+            // ----------------------------------------------------------------
+            //                         Process z12-z15
+            // ----------------------------------------------------------------
             // ---------------------------------------------------------------- z16-z19: shift
             mov z16.d, z5.d
             mov z17.d, z5.d
@@ -303,7 +324,7 @@ regularize_body_start%=:
             urshl z18.s, p0/m, z18.s, z10.s
             urshl z19.s, p0/m, z19.s, z10.s
 
-            // Processes the first 2 vectors.
+            // Processes the first 2 vectors. (z12-z13)
 
             // ---------------------------------------------------------------- z20-z21: p1 = r * c1
             fmul z20.s, z12.s, z0.s
@@ -341,7 +362,7 @@ regularize_body_start%=:
             fmla z16.s, p0/m, z20.s, z16.s
             fmla z17.s, p0/m, z21.s, z17.s
 
-            // Processes the last 2 vectors
+            // Processes the last 2 vectors (z14-z15)
 
             // ---------------------------------------------------------------- z20-z21: p1 = r * c1
             fmul z20.s, z14.s, z0.s
@@ -381,17 +402,162 @@ regularize_body_start%=:
 
             // ---------------------------------------------------------------- z16-z19: poly = underflow ? 0 : poly
             dup z10.s, #0
-            sel z16.s, p4, z10.s, z16.s
-            sel z17.s, p5, z10.s, z17.s
-            sel z18.s, p6, z10.s, z18.s
-            sel z19.s, p7, z10.s, z19.s
+            sel z12.s, p4, z10.s, z16.s
+            sel z13.s, p5, z10.s, z17.s
+            sel z14.s, p6, z10.s, z18.s
+            sel z15.s, p7, z10.s, z19.s
+
+            // ---------------------------------------------------------------- sum in fp32
+            .inst 0xc1a17d80  // fadd za.s[w11, #0, VGx4], {z12.s-z15.s}        za0-za3: sum_value = sum_value + poly
+
+            // ----------------------------------------------------------------
+            //                         Process z28-z31
+            // ----------------------------------------------------------------
+            // ---------------------------------------------------------------- z16-z19: shift
+            mov z16.d, z5.d
+            mov z17.d, z5.d
+            mov z18.d, z5.d
+            mov z19.d, z5.d
+
+            // ---------------------------------------------------------------- p4-p7: underflow = x < min_input
+            fcmlt p4.s, p0/z, z28.s, z9.s
+            fcmlt p5.s, p0/z, z29.s, z9.s
+            fcmlt p6.s, p0/z, z30.s, z9.s
+            fcmlt p7.s, p0/z, z31.s, z9.s
+
+            // ---------------------------------------------------------------- z16-z19: z = shift + x * inv_ln2
+            fmla z16.s, p0/m, z28.s, z6.s
+            fmla z17.s, p0/m, z29.s, z6.s
+            fmla z18.s, p0/m, z30.s, z6.s
+            fmla z19.s, p0/m, z31.s, z6.s
+
+            // ---------------------------------------------------------------- z20-z23: n = z - shift
+            fsub z20.s, z16.s, z5.s
+            fsub z21.s, z17.s, z5.s
+            fsub z22.s, z18.s, z5.s
+            fsub z23.s, z19.s, z5.s
+
+            // ---------------------------------------------------------------- z24-z27: r_hi = x + n * neg_ln2_hi
+            fmla z28.s, p0/m, z20.s, z7.s
+            fmla z29.s, p0/m, z21.s, z7.s
+            fmla z30.s, p0/m, z22.s, z7.s
+            fmla z31.s, p0/m, z23.s, z7.s
+
+            // ---------------------------------------------------------------- z27-z30: r = r_hi + n * neg_ln2_lo
+            fmla z28.s, p0/m, z20.s, z8.s
+            fmla z29.s, p0/m, z21.s, z8.s
+            fmla z30.s, p0/m, z22.s, z8.s
+            fmla z31.s, p0/m, z23.s, z8.s
+
+            // ---------------------------------------------------------------- z16-z19: scale = z << 23 (2^n)
+            dup z10.s, #23
+            urshl z16.s, p0/m, z16.s, z10.s
+            urshl z17.s, p0/m, z17.s, z10.s
+            urshl z18.s, p0/m, z18.s, z10.s
+            urshl z19.s, p0/m, z19.s, z10.s
+
+            // Processes the first 2 vectors. (z28-z29)
+
+            // ---------------------------------------------------------------- z20-z21: p1 = r * c1
+            fmul z20.s, z28.s, z0.s
+            fmul z21.s, z29.s, z0.s
+
+            // ---------------------------------------------------------------- z22-z23: p23 = c2
+            mov z22.d, z1.d
+            mov z23.d, z1.d
+
+            // ---------------------------------------------------------------- z22-z23: p23 = c2 + r * c3
+            fmla z22.s, p0/m, z28.s, z2.s
+            fmla z23.s, p0/m, z29.s, z2.s
+
+            // ---------------------------------------------------------------- z24-z25: c4
+            mov z24.d, z3.d
+            mov z25.d, z3.d
+
+            // ---------------------------------------------------------------- z24-z25: p45 = c4 + r * c5
+            fmla z24.s, p0/m, z28.s, z4.s
+            fmla z25.s, p0/m, z29.s, z4.s
+
+            // ---------------------------------------------------------------- z28-z29: r2 = r * r
+            fmul z28.s, z28.s, z28.s
+            fmul z29.s, z29.s, z29.s
+
+            // ---------------------------------------------------------------- z22-z23: p2345 = p23 + r2 * p45
+            fmla z22.s, p0/m, z28.s, z24.s
+            fmla z23.s, p0/m, z29.s, z25.s
+
+            // ---------------------------------------------------------------- z20-z21: p12345 = p1 + r2 * p2345
+            fmla z20.s, p0/m, z28.s, z22.s
+            fmla z21.s, p0/m, z29.s, z23.s
+
+            // ---------------------------------------------------------------- z16-z17: poly = scale + p12345 * scale
+            fmla z16.s, p0/m, z20.s, z16.s
+            fmla z17.s, p0/m, z21.s, z17.s
+
+            // Processes the last 2 vectors (z30-z31)
+
+            // ---------------------------------------------------------------- z20-z21: p1 = r * c1
+            fmul z20.s, z30.s, z0.s
+            fmul z21.s, z31.s, z0.s
+
+            // ---------------------------------------------------------------- z22-z23: p23 = c2
+            mov z22.d, z1.d
+            mov z23.d, z1.d
+
+            // ---------------------------------------------------------------- z22-z23: p23 = c2 + r * c3
+            fmla z22.s, p0/m, z30.s, z2.s
+            fmla z23.s, p0/m, z31.s, z2.s
+
+            // ---------------------------------------------------------------- z24-z35: c4
+            mov z24.d, z3.d
+            mov z25.d, z3.d
+
+            // ---------------------------------------------------------------- z24-z25: p45 = c4 + r * c5
+            fmla z24.s, p0/m, z30.s, z4.s
+            fmla z25.s, p0/m, z31.s, z4.s
+
+            // ---------------------------------------------------------------- z30-z31: r2 = r * r
+            fmul z30.s, z30.s, z30.s
+            fmul z31.s, z31.s, z31.s
+
+            // ---------------------------------------------------------------- z22-z23: p2345 = p23 + r2 * p45
+            fmla z22.s, p0/m, z30.s, z24.s
+            fmla z23.s, p0/m, z31.s, z25.s
+
+            // ---------------------------------------------------------------- z20-z21: p12345 = p1 + r2 * p2345
+            fmla z20.s, p0/m, z30.s, z22.s
+            fmla z21.s, p0/m, z31.s, z23.s
+
+            // ---------------------------------------------------------------- z18-z19: poly = scale + p12345 * scale
+            fmla z18.s, p0/m, z20.s, z18.s
+            fmla z19.s, p0/m, z21.s, z19.s
+
+            // ---------------------------------------------------------------- z16-z19: poly = underflow ? 0 : poly
+            dup z10.s, #0
+            sel z28.s, p4, z10.s, z16.s
+            sel z29.s, p5, z10.s, z17.s
+            sel z30.s, p6, z10.s, z18.s
+            sel z31.s, p7, z10.s, z19.s
+
+            // ---------------------------------------------------------------- sum in fp32
+            .inst 0xc1a17f80  // fadd za.s[w11, #0, VGx4], {z28.s-z31.s}        za0-za3: sum_value = sum_value + poly
+
+            fcvt z12.h, p0/m, z12.s
+            fcvtnt z12.h, p0/m, z28.s
+
+            fcvt z13.h, p0/m, z13.s
+            fcvtnt z13.h, p0/m, z29.s
+
+            fcvt z14.h, p0/m, z14.s
+            fcvtnt z14.h, p0/m, z30.s
+
+            fcvt z15.h, p0/m, z15.s
+            fcvtnt z15.h, p0/m, z31.s
 
             // Stores 4 consecutive registers to the output
-            .inst 0xa029c790  // st1w {z16.s-z19.s}, pn9, [x28, x9, LSL #2]
+            .inst 0xa029a78c  // st1h {z12.h-z15.h}, pn9, [x28, x9, LSL #1]
 
-            .inst 0xc1a17e00  // fadd za.s[w11, #0, VGx4], {z16.s-z19.s}        za0-za3: sum_value = sum_value + poly
-
-            incw x9, ALL, MUL #4
+            inch x9, ALL, MUL #4
             b regularize_body_start%=
 regularize_body_end%=:
 
@@ -403,39 +569,67 @@ regularize_body_end%=:
 
             // Loop for processing the leftover part.
 regularize_leftover_start%=:
-            whilelo p1.s, x9, %x[length]
+            whilelo p2.h, x9, %x[length]
             b.none regularize_leftover_end%=
 
-            ld1w z12.s, p1/z, [x27, x9, LSL #2]                                // x12: input_data
+            ld1h z12.h, p2/z, [x27, x9, LSL #1]                                // x12: input_data
 
-            fsub z12.s, z12.s, z11.s                                           // z12: x = input_data - max_value
-            fmul z12.s, z12.s, z26.s                                           // z12: x = (input_data - max_value) * beta
+            fsub z12.h, z12.h, z11.h                                           // z12: x = input_data - max_value
+            fmul z12.h, z12.h, z26.h                                           // z12: x = (input_data - max_value) * beta
+
+            // ---------------------------------------------------------------- z12.h --> z12.s, z13.s
+            fcvtlt z13.s, p2/m, z12.h
+            fcvt z12.s, p2/m, z12.h
+
+            // ---------------------------------------------------------------- p3, p4: predicates for z12, z14
+            pfalse p1.b
+            trn1 p3.h, p2.h, p1.h       // for z12
+            trn2 p4.h, p2.h, p1.h       // for z13
 
             mov z16.d, z5.d                                                    // z16: shift
-            fcmlt p4.s, p1/z, z12.s, z9.s                                      // p4: underflow = x < min_input
-            fmla z16.s, p1/m, z12.s, z6.s                                      // z16: z = shift + x * inv_ln2
+            mov z17.d, z5.d                                                    // z17: shift
+            fcmlt p5.s, p3/z, z12.s, z9.s                                      // p5: underflow = x < min_input
+            fcmlt p6.s, p4/z, z13.s, z9.s                                      // p6: underflow = x < min_input
+            fmla z16.s, p3/m, z12.s, z6.s                                      // z16: z = shift + x * inv_ln2
+            fmla z17.s, p4/m, z13.s, z6.s                                      // z17: z = shift + x * inv_ln2
             fsub z20.s, z16.s, z5.s                                            // z20: n = z - shift
-            fmla z12.s, p1/m, z20.s, z7.s                                      // z12: r_hi = x + n * neg_ln2_hi
-            fmla z12.s, p1/m, z20.s, z8.s                                      // z12: r = r_hi + n * neg_ln2_lo
+            fsub z21.s, z17.s, z5.s                                            // z21: n = z - shift
+            fmla z12.s, p3/m, z20.s, z7.s                                      // z12: r_hi = x + n * neg_ln2_hi
+            fmla z13.s, p4/m, z21.s, z7.s                                      // z13: r_hi = x + n * neg_ln2_hi
+            fmla z12.s, p3/m, z20.s, z8.s                                      // z12: r = r_hi + n * neg_ln2_lo
+            fmla z13.s, p4/m, z21.s, z8.s                                      // z13: r = r_hi + n * neg_ln2_lo
             dup z10.s, #23                                                     // z10: 23
-            urshl z16.s, p1/m, z16.s, z10.s                                    // z16: scale = z << 23 (2^n)
+            urshl z16.s, p3/m, z16.s, z10.s                                    // z16: scale = z << 23 (2^n)
+            urshl z17.s, p4/m, z17.s, z10.s                                    // z17: scale = z << 23 (2^n)
             fmul z20.s, z12.s, z0.s                                            // z20: p1 = r * c1
+            fmul z21.s, z13.s, z0.s                                            // z21: p1 = r * c1
             mov z22.d, z1.d                                                    // z22: p23 = c2
-            fmla z22.s, p1/m, z12.s, z2.s                                      // z22: p23 = c2 + r * c3
+            mov z23.d, z1.d                                                    // z23: p23 = c2
+            fmla z22.s, p3/m, z12.s, z2.s                                      // z22: p23 = c2 + r * c3
+            fmla z23.s, p4/m, z13.s, z2.s                                      // z23: p23 = c2 + r * c3
             mov z24.d, z3.d                                                    // z24: c4
-            fmla z24.s, p1/m, z12.s, z4.s                                      // z24: p45 = c4 + r * c5
+            mov z25.d, z3.d                                                    // z25: c4
+            fmla z24.s, p3/m, z12.s, z4.s                                      // z24: p45 = c4 + r * c5
+            fmla z25.s, p4/m, z13.s, z4.s                                      // z25: p45 = c4 + r * c5
             fmul z12.s, z12.s, z12.s                                           // z12: r2 = r * r
-            fmla z22.s, p1/m, z12.s, z24.s                                     // z22: p2345 = p23 + r2 * p45
-            fmla z20.s, p1/m, z12.s, z22.s                                     // z20: p12345 = p1 + r2 * p2345
-            fmla z16.s, p1/m, z20.s, z16.s                                     // z16: poly = scale + p12345 * scale
+            fmul z13.s, z13.s, z13.s                                           // z13: r2 = r * r
+            fmla z22.s, p3/m, z12.s, z24.s                                     // z22: p2345 = p23 + r2 * p45
+            fmla z23.s, p4/m, z13.s, z25.s                                     // z23: p2345 = p23 + r2 * p45
+            fmla z20.s, p3/m, z12.s, z22.s                                     // z20: p12345 = p1 + r2 * p2345
+            fmla z21.s, p4/m, z13.s, z23.s                                     // z21: p12345 = p1 + r2 * p2345
+            fmla z16.s, p3/m, z20.s, z16.s                                     // z16: poly = scale + p12345 * scale
+            fmla z17.s, p4/m, z21.s, z17.s                                     // z17: poly = scale + p12345 * scale
             dup z10.s, #0                                                      // z10: 0
-            sel z16.s, p4, z10.s, z16.s                                        // z16: poly = underflow ? 0 : poly
+            sel z16.s, p5, z10.s, z16.s                                        // z16: poly = underflow ? 0 : poly
+            sel z17.s, p6, z10.s, z17.s                                        // z17: poly = underflow ? 0 : poly
+            fadd z28.s, p3/m, z28.s, z16.s                                     // z28: sum_value = sum_value + poly
+            fadd z28.s, p4/m, z28.s, z17.s                                     // z28: sum_value = sum_value + poly
 
-            st1w z16.s, p1, [x28, x9, LSL #2]
+            fcvt z16.h, p3/m, z16.s
+            fcvtnt z16.h, p4/m, z17.s
+            st1h z16.h, p2, [x28, x9, LSL #1]
 
-            fadd z28.s, p1/m, z28.s, z16.s                                     // z28: sum_value = sum_value + poly
-
-            incw x9
+            inch x9
             b regularize_leftover_start%=
 regularize_leftover_end%=:
 
@@ -444,10 +638,12 @@ regularize_leftover_end%=:
             // ==================================================
 
             // ---------------------------------------------------------------- z28: inv_sum_value = 1 / sum_value
-            fmov s29, #1.0  // 1.0f
             faddv s28, p0, z28.s
+            fmov s29, #1.0  // 1.0f
             fdiv s28, s29, s28
-            dup z28.s, z28.s[0]
+            fcvt h28, s28
+
+            dup z28.h, z28.h[0]
 
             // Loop for processing 4 vectors per iteration.
             mov x9, #0                                                         // x9: index
@@ -456,31 +652,31 @@ normalize_body_start%=:
             cmp x9, x13
             b.eq normalize_body_end%=
 
-            .inst 0xa009c78c  // ld1w {z12.s-z15.s}, pn9/z, [x28, x9, LSL #2]  // z12-z15: x
+            .inst 0xa009a78c  // ld1h {z12.h-z15.h}, pn9/z, [x28, x9, LSL #1]
 
             // ---------------------------------------------------------------- z12-z15: result = x * inv_sum_value
-            fmul z12.s, z12.s, z28.s
-            fmul z13.s, z13.s, z28.s
-            fmul z14.s, z14.s, z28.s
-            fmul z15.s, z15.s, z28.s
+            fmul z12.h, z12.h, z28.h
+            fmul z13.h, z13.h, z28.h
+            fmul z14.h, z14.h, z28.h
+            fmul z15.h, z15.h, z28.h
 
-            .inst 0xa029c78c  // st1w {z12.s-z15.s}, pn9, [x28, x9, LSL #2]
+            .inst 0xa029a78c  // st1h {z12.h-z15.h}, pn9, [x28, x9, LSL #1]
 
-            incw x9, ALL, MUL #4
+            inch x9, ALL, MUL #4
             b normalize_body_start%=
 normalize_body_end%=:
 
             // Loop for processing the leftover part.
 normalize_leftover_start%=:
-            whilelo p1.s, x9, %x[length]
+            whilelo p1.h, x9, %x[length]
             b.none normalize_leftover_end%=
 
-            ld1w z12.s, p1/z, [x28, x9, LSL #2]                                // z12: x
-            fmul z12.s, z12.s, z28.s                                           // z12: result = x * inv_sum_value
+            ld1h z12.h, p1/z, [x28, x9, LSL #1]                                // z12: x
+            fmul z12.h, z12.h, z28.h                                           // z12: result = x * inv_sum_value
 
-            st1w z12.s, p1, [x28, x9, LSL #2]
+            st1h z12.h, p1, [x28, x9, LSL #1]
 
-            incw x9
+            inch x9
             b normalize_leftover_start%=
 normalize_leftover_end%=:
 
@@ -514,8 +710,8 @@ loop_3_end%=:
           [dst_stride_3] "r"(dst_strides[3]),                            //
           [length] "r"(shape[0])                                         //
         : "cc", "memory",                                                //
-          "p0", "p4", "p5", "p6", "p7", "p9",                            //
-          "x9", "x10", "x11", "x12", "x13",                              //
+          "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p9",          //
+          "x9", "x10", "x11", "x12", "x13", "x14",                       //
           "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", //
           "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7",                //
           "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15",          //
@@ -524,7 +720,7 @@ loop_3_end%=:
     );
 }
 
-void sme2_fp32_softmax(const ITensor *in, void *const, ITensor *out, const float beta, int axis, const Window &window)
+void sme2_fp16_softmax(const ITensor *in, void *const, ITensor *out, const float beta, int axis, const Window &window)
 {
     ARM_COMPUTE_UNUSED(axis);
 
@@ -566,10 +762,10 @@ void sme2_fp32_softmax(const ITensor *in, void *const, ITensor *out, const float
                                    window[2].start() * dst_strides[2] + //
                                    window[3].start() * dst_strides[3];
 
-    const auto *k_src = reinterpret_cast<const float *>(in->buffer() + k_src_offset);
-    auto       *k_dst = reinterpret_cast<float *>(out->buffer() + k_dst_offset);
+    const auto *k_src = reinterpret_cast<const float16_t *>(in->buffer() + k_src_offset);
+    auto       *k_dst = reinterpret_cast<float16_t *>(out->buffer() + k_dst_offset);
 
-    sme2_f32_softmax_kernel(k_src, k_dst, beta, k_shape, k_src_strides, k_dst_strides);
+    sme2_f16_softmax_kernel(k_src, k_dst, beta, k_shape, k_src_strides, k_dst_strides);
 }
 
 } // namespace cpu
