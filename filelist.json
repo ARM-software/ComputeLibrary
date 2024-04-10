@@ -2350,6 +2350,13 @@
           ]
         }
       },
+      "ScaleDotProduction":{
+        "files":{
+          "common":[
+            "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp"
+          ]
+        }
+      },
       "PositionalEncoding": {
         "files":{
           "common":[
