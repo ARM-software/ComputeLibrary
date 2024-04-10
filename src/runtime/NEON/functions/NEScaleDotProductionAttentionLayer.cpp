@@ -34,9 +34,6 @@ void NEScaleDotProductionAttentionLayer::configure(ITensor *key, ITensor *value,
     std::cout << "B" << std::endl;
     _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
     std::cout << _impl->key->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->value->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->query->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().x() << std::endl;
 
 
     std::cout << "C" << std::endl;
