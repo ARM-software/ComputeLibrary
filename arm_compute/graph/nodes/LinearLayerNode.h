@@ -14,9 +14,9 @@ class LinearLayerNode final : public INode
     public:
     /** Constructor
      *
-     * @param[in] sdpa_info Contains information described in @ref LinearLayerLayerInfo.
+     * @param[in] linear_info Contains information described in @ref LinearLayerLayerInfo.
      */
-    LinearLayerNode(LinearLayerInfo sdpa_info);
+    LinearLayerNode(LinearLayerInfo linear_info);
     /** Prevent instances of this class from being copy constructed */
     LinearLayerNode(const LinearLayerNode &) = delete;
     /** Prevent instances of this class from being copied */

@@ -140,6 +140,32 @@ Vanilla_Transformer
                                     |-> get_text_type_from_file: TODO: now just return Default UTF-8
 
 
+Program structure
+
+Input
+  |-->WordPiecePreprocessor: Word token to numerical representation
+  |-->atoiPreprocessor: Get sentence segmentation and convert into numerical
+  |
+Embedding
+  |-->TokenEmbeddingLayerNode --> cpu::CpuTokenEmbed --> kernels::CpuVectorizeKernel : Numerical token into pretrained vector
+  |                                                  |-> kernels::CpuPositionalEncodingKernel : Compute positional encoding 
+  |
+  |-->SegmentEmbeddingLayerNode --> cpu::CpuSegmentEmbed --> kernels::CpuVectorizeKernel : Segemnt token into pretrained vector
+  |
+  |-->EltwiseLayerNode --> EltwiseOperation::Add: Sum all three token embedding, segemnt embedding and positional embedding
+  |
+Linear
+  |--> LinearLayerNode: Input vector * value weight(pre-trained) + value bias(pre-trained)
+  |--> LinearLayerNode: Input vector * key weight(pre-trained) + key bias(pre-trained)
+  |--> LinearLayerNode: Input vector * query weight(pre-trained) + query bias(pre-trained)
+  |
+  |--> SimpleForwardLayerNode : hold all three above output tensor in one node
+  |
+Attention
+  |
+  |
+
+
 Potential problem:
             1.utils/GraphUtils.cpp: Text Preprocess input/output, configure, runtime tensor shape may mismatch
               src/cpu/kernels/tokenembed/generic/neon/fp32.cpp: neon_token_embed_char_2_float32:
