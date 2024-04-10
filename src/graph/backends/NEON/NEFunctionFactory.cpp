@@ -239,6 +239,9 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
         case NodeType::SimpleForwardLayer:
             return detail::create_simple_forward_layer<NESimpleForwardLayer, NETargetInfo>(
                 *polymorphic_downcast<SimpleForwardLayerNode *>(node));
+        case NodeType::ScaleDotProductionAttentionLayer:
+            return detail::create_scale_dot_production_layer<NEScaleDotProductionAttentionLayer,NETargetInfo>(
+                *polymorphic_downcast<ScaleDotProductionAttentionNode *>(node));
         default:
             return nullptr;
     }

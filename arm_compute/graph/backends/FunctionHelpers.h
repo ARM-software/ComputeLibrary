@@ -1811,6 +1811,42 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
     return func;
 }
 
+/** Creates a backend scale dot production function
+ *
+ * @tparam ScaleDotProductionLayerFunction  Backend scale dot production function
+ * @tparam TargetInfo                       Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend simple forwardlayer function
+ */
+template <typename ScaleDotProductionLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionAttentionNode &node)
+{
+    validate_node<TargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *query   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *key     = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *value   = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = std::make_unique<ScaleDotProductionLayerFunction>();
+    func->configure(query,key,value,output);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.name() << " Type: " << node.type() << " Target: "
+                                               << TargetInfo::TargetType << " Data Type: " << input->info()->data_type()
+                                               << " Input shape: " << input->info()->tensor_shape()
+                                               << " Output shape: " << output->info()->tensor_shape() << std::endl);
+
+    return func;
+}
+
 } // namespace detail
 } // namespace backends
 } // namespace graph

@@ -199,7 +199,7 @@ Token Embedding                                            unsigned int -> FP32 
   |
 Query,Key,Value                                               FP32 -> FP32                      (d_model, d_model, ...)
   |
-Scale Dot Production
+Scale Dot Production                                          FP32 -> FP32
 
 
 Tensor Shape
