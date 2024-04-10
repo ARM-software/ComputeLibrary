@@ -2,7 +2,7 @@
 
 #include "arm_compute/core/Validate.h"
 
-#include "src/cpu/operators/CpuSegmentEmbed.h"
+#include "src/cpu/operators/CpuScaleDotProduction.h"
 
 namespace arm_compute
 {
@@ -14,7 +14,7 @@ struct NEScaleDotProductionAttentionLayer::Impl
     const ITensor                      *query{nullptr};
     ITensor                            *dst{nullptr};
     IRuntimeContext                    *ctx{nullptr};
-    std::unique_ptr<cpu::CpuSegmentEmbed> op{nullptr};
+    std::unique_ptr<cpu::CpuScaleDotProduction> op{nullptr};
 };
 
 NEScaleDotProductionAttentionLayer::NEScaleDotProductionAttentionLayer(): _impl(std::make_unique<Impl>())
@@ -30,7 +30,8 @@ void NEScaleDotProductionAttentionLayer::configure(ITensor *key, ITensor *value,
     _impl->query    = query;
     _impl->dst      = output;
 
-    _impl->op  = std::make_unique<cpu::CpuSegmentEmbed>();
+    _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
+    _impl->op->configure(_impl->key->info(),_impl->value->info(),_impl->query->info(),_impl->dst->info());
 }
 
 void NEScaleDotProductionAttentionLayer::prepare()
