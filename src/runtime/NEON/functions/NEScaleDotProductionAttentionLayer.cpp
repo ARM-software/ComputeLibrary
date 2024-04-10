@@ -38,7 +38,6 @@ void NEScaleDotProductionAttentionLayer::configure(ITensor *key, ITensor *value,
     std::cout << _impl->query->info()->tensor_shape().x() << std::endl;
     std::cout << _impl->dst->info()->tensor_shape().x() << std::endl;
 
-    _impl->op->configure(_impl->key->info(),_impl->value->info(),_impl->query->info(),_impl->dst->info());
 
     std::cout << "C" << std::endl;
 }
