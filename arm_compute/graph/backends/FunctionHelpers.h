@@ -1784,7 +1784,23 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
 {
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward" << std::endl;
 
-    
+    for(size_t idx=0; idx <node.num_inputs(); idx++)
+    {       
+
+        std::cout << "input" << std::endl;
+        std::cout << node.input(idx)->id() << std::endl;
+        std::cout << "output" << std::endl;
+        std::cout << node.output(idx)->id() << std::endl;
+        std::cout << "After:  " << idx <<std::endl;
+
+        
+        std::cout << "input" << std::endl;
+        std::cout << node.input(idx)->id() << std::endl;
+        std::cout << "output" << std::endl;
+        std::cout << node.output(idx)->id() << std::endl;
+
+
+    }
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward Finished" << std::endl;
     auto func = std::make_unique<ForwardLayerFunction>();
     // Update accessor
@@ -1814,7 +1830,7 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     validate_node<TargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
 
     std::cout << "1" << std::endl;
-    // Extract IO and info
+     // Extract IO and info
     typename TargetInfo::TensorType *query   = get_backing_tensor<TargetInfo>(node.input(0));
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h" << std::endl;
     std::cout << node.input(0)->desc().shape.x() << std::endl;
