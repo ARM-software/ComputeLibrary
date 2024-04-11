@@ -144,7 +144,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     for (auto &node_id : node_order)
     {
         auto node = g.node(node_id);
-        std::cout << node->id() << std::endl;
+        std::cout << "node id:   " <<node->id() << std::endl;
         if(node->type() == NodeType::ScaleDotProductionAttentionLayer)
         {
             std::cout << "caonima" << node->id() << std::endl;
