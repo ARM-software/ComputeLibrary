@@ -11,7 +11,7 @@ namespace graph
 ScaleDotProductionAttentionNode::ScaleDotProductionAttentionNode(ScaleDotProductionAttentionLayerInfo sdpa_info) : _sdpa_info(sdpa_info)
 {
     _input_edges.resize(3, EmptyEdgeID);
-    _outputs.resize(1, NullTensorID);
+    _outputs.resize(3, NullTensorID);
 }
 
 const ScaleDotProductionAttentionLayerInfo& ScaleDotProductionAttentionNode::sdpa_info() const
