@@ -165,6 +165,11 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     // Add inputs and outputs
     for (auto &node : g.nodes())
     {
+        if(node->type() == NodeType::ScaleDotProductionAttentionLayer)
+        {
+            std::cout << node->id() << std::endl;
+        }
+
         if (node != nullptr && node->type() == NodeType::Input)
         {
             for(size_t idx=0; idx <node->num_outputs(); idx++)
