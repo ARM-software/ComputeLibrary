@@ -154,7 +154,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
         {
             std::cout << "caonima" << node->id() << std::endl;
         }
-        if (node != nullptr)
+        if (node != nullptr&&!node->configured())
         {
             Target                     assigned_target = node->assigned_target();
             backends::IDeviceBackend  &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
@@ -162,6 +162,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
             if (func != nullptr || is_utility_node(node))
             {
                 workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
+                node->set_configured(true);
             }
         }
     }

@@ -99,6 +99,17 @@ void INode::set_output_tensor(TensorID tid, size_t idx)
     }
 }
 
+
+bool INode::configured() const
+{
+    return _configured;
+}
+
+void INode::set_configured(bool state)
+{
+    _configured = state;
+}
+
 NodeID INode::id() const
 {
     return _id;

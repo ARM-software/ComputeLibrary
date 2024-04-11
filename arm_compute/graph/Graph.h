@@ -238,6 +238,7 @@ inline NodeID Graph::add_node(Ts &&...args)
     // Create node
     NodeID nid  = _nodes.size();
     auto   node = std::make_unique<NT>(std::forward<Ts>(args)...);
+    node->set_configured(false);
     node->set_graph(this);
     node->set_id(nid);
 

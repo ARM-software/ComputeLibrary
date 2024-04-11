@@ -85,6 +85,16 @@ public:
      * @return Output descriptor configuration
      */
     virtual TensorDescriptor configure_output(size_t idx) const = 0;
+    /** Returns if node has been configured
+     *
+     * @return If node has been configured
+     */
+    bool configured() const;
+    /** Set the node to configured
+     *
+     * @param[in] state State if the node has been configured
+     */
+    void set_configured(bool state);
     /** Returns node's name
      *
      * @return Node name
@@ -246,6 +256,7 @@ protected:
     friend class Graph;
 
 protected:
+    bool                  _configured;      /**< If the node has been created */
     Graph                *_graph;           /**< Backward reference to graph owning the node */
     NodeID                _id;              /**< Node ID */
     NodeParams            _common_params;   /**< Node common params */
