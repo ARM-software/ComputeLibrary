@@ -34,7 +34,6 @@ void NESimpleForwardLayer::configure(ITensorPack& tensors, unsigned int total_te
 void NESimpleForwardLayer::run()
 {
     std::cout << "src/runtime/NEON/functions/NESimpleForwardLayer.cpp" << std::endl;
-    std::cout << "src/runtime/NEON/functions/NESimpleForwardLayer.cpp" << std::endl;
 }
 
 } // namespace arm_compute
