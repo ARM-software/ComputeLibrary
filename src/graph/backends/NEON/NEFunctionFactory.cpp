@@ -240,7 +240,6 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_simple_forward_layer<NESimpleForwardLayer, NETargetInfo>(
                 *polymorphic_downcast<SimpleForwardLayerNode *>(node));
         case NodeType::ScaleDotProductionAttentionLayer:
-            std::cout << "src/graph/backends/NEON/NEFunctionFactory.cpp NodeType::ScaleDotProductionAttentionLayer" << std::endl;
             return detail::create_scale_dot_production_layer<NEScaleDotProductionAttentionLayer,NETargetInfo>(
                 *polymorphic_downcast<ScaleDotProductionAttentionNode *>(node));
         default:
