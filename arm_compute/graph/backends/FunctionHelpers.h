@@ -1835,6 +1835,8 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     std::cout << "1" << std::endl;
     // Extract IO and info
     typename TargetInfo::TensorType *query   = get_backing_tensor<TargetInfo>(node.input(0));
+    std::cout << "arm_compute/graph/backends/FunctionHelpers.h" << std::endl;
+    std::cout << query->info().x() << std::endl;
     typename TargetInfo::TensorType *key     = get_backing_tensor<TargetInfo>(node.input(1));
     typename TargetInfo::TensorType *value   = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
