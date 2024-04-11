@@ -35,7 +35,7 @@ namespace graph
 // *INDENT-OFF*
 // clang-format off
 INode::INode()
-    : _graph(nullptr), _id(EmptyNodeID), _common_params({ "", Target::UNSPECIFIED}), _configured(false),
+    : _configured(false), _graph(nullptr), _id(EmptyNodeID), _common_params({ "", Target::UNSPECIFIED}),
       _outputs(), _input_edges(), _output_edges(), _assigned_target(Target::UNSPECIFIED)
 {
 }
