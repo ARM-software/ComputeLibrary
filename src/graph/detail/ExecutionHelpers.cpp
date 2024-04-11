@@ -144,11 +144,6 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     for (auto &node_id : node_order)
     {
         auto node = g.node(node_id);
-        std::cout << node_id <<" "<<node->id() << std::endl;
-        if(node->type() == NodeType::ScaleDotProductionAttentionLayer)
-        {
-            std::cout << node_id << std::endl;
-        }
 
         if (node != nullptr)
         {
@@ -165,6 +160,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     // Add inputs and outputs
     for (auto &node : g.nodes())
     {
+        std::cout << node->id() << std::endl;
         if(node->type() == NodeType::ScaleDotProductionAttentionLayer)
         {
             std::cout << node->id() << std::endl;
