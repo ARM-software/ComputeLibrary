@@ -20,7 +20,6 @@ int SimpleForwardLayerNode::total_tensors()
 
 bool SimpleForwardLayerNode::forward_descriptors()
 {
-    std::cout << " src/graph/nodes/SimpleForwardNode.cpp" << std::endl;
     for(size_t idx=0; idx <num_inputs(); idx++)
     {   
         if ((input_id(idx) == NullTensorID) || (output_id(idx) == NullTensorID))
