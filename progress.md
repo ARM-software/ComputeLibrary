@@ -185,6 +185,7 @@ Functionality:
             1. Segment token, currently only support 1 sentence input
             2. Token vectorize
             3. Pytorch positional embdding is implemented using pretrained model, but this calcualtes.
+            4. Deallocate Simple forward original output tensor
 
 Optimization: 
             1. window collapse
