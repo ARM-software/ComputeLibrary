@@ -22,6 +22,7 @@ const ScaleDotProductionAttentionLayerInfo& ScaleDotProductionAttentionNode::sdp
 bool ScaleDotProductionAttentionNode::forward_descriptors()
 {
     std::cout << "src/graph/nodes/ScaleDotProductionAttentionNode.cpp " <<std::endl;
+    std::cout << id() << std::endl;
     if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
