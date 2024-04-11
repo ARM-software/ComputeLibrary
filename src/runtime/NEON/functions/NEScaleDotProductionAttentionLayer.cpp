@@ -25,22 +25,14 @@ NEScaleDotProductionAttentionLayer::~NEScaleDotProductionAttentionLayer() = defa
 
 void NEScaleDotProductionAttentionLayer::configure(ITensor *key, ITensor *value, ITensor *query, ITensor *output)
 {
-    std::cout << "A" << std::endl;
     _impl->key      = key;
     _impl->value    = value;
     _impl->query    = query;
     _impl->dst      = output;
 
-    std::cout << "B" << std::endl;
     _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
-    std::cout << _impl->key->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->value->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->query->info()->tensor_shape().x() << std::endl;
-    std::cout << _impl->dst->info()->tensor_shape().x() << std::endl;
-    
     //_impl->op->configure(_impl->key->info(),_impl->value->info(),_impl->query->info(),_impl->dst->info());
 
-    std::cout << "C" << std::endl;
 }
 
 void NEScaleDotProductionAttentionLayer::prepare()

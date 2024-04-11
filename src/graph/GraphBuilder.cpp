@@ -645,7 +645,6 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 
     g.add_connection(input.node_id, 0 /*query*/ , sdp_nid, 0);
     g.add_connection(input.node_id, 1 /*key*/   , sdp_nid, 1);
-    g.add_connection(input.node_id, 2 /*value*/ , sdp_nid, 2);
 
     set_node_params(g, sdp_nid, params);
 
