@@ -1791,8 +1791,14 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
         std::cout << node.input(idx)->id() << std::endl;
         std::cout << "output" << std::endl;
         std::cout << node.output(idx)->id() << std::endl;
+        std::cout << "X" << std::endl;
+        std::cout << node.output(idx)->desc().shape.x() << std::endl; 
+
         std::cout << "After:  " << idx <<std::endl;
 
+        // Update accessor
+        node.input(idx)->set_accessor(node.output(idx)->extract_accessor());
+        // Update output
         
         std::cout << "input" << std::endl;
         std::cout << node.input(idx)->id() << std::endl;

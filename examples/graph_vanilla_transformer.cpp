@@ -129,7 +129,7 @@ public:
                                                                 get_weights_accessor(data_path, "/value_weight.npy"),
                                                                 get_weights_accessor(data_path, "/value_bias.npy"))
 
-              << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
+              //<< MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
 
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
