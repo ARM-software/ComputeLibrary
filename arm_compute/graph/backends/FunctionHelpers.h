@@ -1784,26 +1784,7 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
 {
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward" << std::endl;
 
-    for(size_t idx=0; idx <node.num_inputs(); idx++)
-    {       
-
-        std::cout << "input" << std::endl;
-        std::cout << node.input(idx)->id() << std::endl;
-        std::cout << "output" << std::endl;
-        std::cout << node.output(idx)->id() << std::endl;
-        std::cout << "After:  " << idx <<std::endl;
-
-        // Update accessor
-        node.input(idx)->set_accessor(node.output(idx)->extract_accessor());
-        // Update output
-        
-        std::cout << "input" << std::endl;
-        std::cout << node.input(idx)->id() << std::endl;
-        std::cout << "output" << std::endl;
-        std::cout << node.output(idx)->id() << std::endl;
-
-
-    }
+    
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward Finished" << std::endl;
     auto func = std::make_unique<ForwardLayerFunction>();
     // Update accessor
