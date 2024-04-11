@@ -243,6 +243,8 @@ inline NodeID Graph::add_node(Ts &&...args)
 
     // Keep track of input nodes
     _tagged_nodes[node->type()].push_back(nid);
+    std::cout << "arm_compute/graph/Graph.h add_node" << std::endl; 
+    std::cout << node->type() <<std::endl;
 
     // Associate a new tensor with each output
     for (auto &output : node->_outputs)
