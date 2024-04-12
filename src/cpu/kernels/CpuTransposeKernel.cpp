@@ -437,7 +437,7 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                 for (; x <= (window_end_x - window_step_x); x += window_step_x)
                 {
                     std::cout << "transpose_32bit_elements load 0 " << x <<std::endl;
-                    std::cout << *reinterpret_cast<float *>(input.ptr()+0) <<std::endl;
+                    std::cout << *reinterpret_cast<float *>(output.ptr()) <<std::endl;
                     std::cout << "transpose_32bit_elements load 1 " << x <<std::endl;
                     // Load
                     const uint32x4x2_t row0 =
