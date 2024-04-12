@@ -48,10 +48,10 @@ private:
         KeyTransposeBuffer = 0,
         Count
     };
-    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel> _mm_kernel;
-    std::unique_ptr<CpuTranspose>                         _t_func;
-    std::unique_ptr<kernels::CpuScaleKernel>              _s_kernel;
-    std::unique_ptr<kernels::CpuSoftmaxKernel>            _sm_kernel;
+    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel> _mm_kernel{nullptr};
+    std::unique_ptr<CpuTranspose>                         _t_func{nullptr};
+    std::unique_ptr<kernels::CpuScaleKernel>              _s_kernel{nullptr};
+    std::unique_ptr<kernels::CpuSoftmaxKernel>            _sm_kernel{nullptr};
 
     TensorInfo _buffer_t_info{};
     bool _is_prepared{false};

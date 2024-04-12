@@ -28,7 +28,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo 
     /* Matrix multiply Query adn Key, QK */
     //_mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
     _mm_kernel->configure(query,key,output,1.0,false);
-
+    ARM_COMPUTE_UNUSED(value);
 
 }
 
@@ -46,7 +46,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     prepare(tensors);
-    
+
     //auto split_dimension = static_cast<kernels::CpuVectorizeKernel *>(_kernel.get())->get_split_dimension_hint();
 
     ARM_COMPUTE_UNUSED(tensors);
