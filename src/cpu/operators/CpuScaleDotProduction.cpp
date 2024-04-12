@@ -44,13 +44,15 @@ CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value
 
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
+
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     prepare(tensors);
+    std::cout << "1" << std::endl;
 
     //auto split_dimension = static_cast<kernels::CpuVectorizeKernel *>(_kernel.get())->get_split_dimension_hint();
 
     ARM_COMPUTE_UNUSED(tensors);
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
 
 
     //NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
