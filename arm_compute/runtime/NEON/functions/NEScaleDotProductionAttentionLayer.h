@@ -33,7 +33,7 @@ public:
      * @param[in]  query      Input tenser of Attention Query, Data type supported: F32
      * @param[out] output     Output tensor, shape (d_model,d_model). Data type supported: F32
      */
-    void configure(ITensor *key, ITensor *value, ITensor *query, ITensor *output);
+    void configure(const ITensor *key,const ITensor *value,const ITensor *query, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEScaleDotProductionAttentionLayer
      *
      * @param[in] output Destination tensor info. Data type supported: same as @p input
