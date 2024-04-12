@@ -738,6 +738,10 @@ void CpuTransposeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
 
     std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
+    std::cout << src->tensor_shape().x() <<std::endl;
+    std::cout << src->tensor_shape().y() <<std::endl;
+    std::cout << src->tensor_shape().z() <<std::endl;
+    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
     std::cout << dst_shape.x() <<std::endl;
     std::cout << dst_shape.y() <<std::endl;
     std::cout << dst_shape.z() <<std::endl;
