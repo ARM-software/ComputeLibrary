@@ -20,16 +20,16 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo 
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
     /* Pretranspose Key, K=K^T*/
-    //const ITensorInfo *key_to_use = key;
+    const ITensorInfo *key_to_use = key;
     //_t_func  = std::make_unique<CpuTranspose>();
     //_t_func->configure(key_to_use,&_buffer_t_info);
     
-    /*
+    
     experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
     _aux_mem[KeyTransposeBuffer] =
         experimental::MemoryInfo(offset_int_vec(KeyTransposeBuffer), lifetime, _buffer_t_info.total_size());
 
-    key_to_use = &_buffer_t_info;*/
+    key_to_use = &_buffer_t_info;
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2" << std::endl;
 
