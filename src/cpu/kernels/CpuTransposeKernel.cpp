@@ -396,6 +396,9 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
     const int     window_end_y_multiple_of = ((window_end_y - window_start_y) / window_step_y) * window_step_y;
     const size_t  input_stride_in_bytes    = in->info()->strides_in_bytes()[1];
     const size_t  output_stride_in_bytes   = out->info()->strides_in_bytes()[1];
+    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
+    std::cout << "window_start_x: " << window_start_x << " window_end_x: "<<window_end_x <<std::endl;
+    std::cout << "window_start_y: " << window_start_y << " window_start_y: "<<window_start_y <<std::endl;
 
     // Check if we need a left-over loop for the y dimension
     bool left_over_loop_y = (((window_end_y - window_start_y) % window_step_y) != 0);
@@ -433,6 +436,8 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                 int x = window_start_x;
                 for (; x <= (window_end_x - window_step_x); x += window_step_x)
                 {
+                    
+                    std::cout << "transpose_32bit_elements" << x <<std::endl;
                     // Load
                     const uint32x4x2_t row0 =
                         vld1q_u32_x2_(reinterpret_cast<const uint32_t *>(input.ptr() + 0 * input_stride_in_bytes) + x);
