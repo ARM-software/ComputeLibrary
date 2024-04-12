@@ -792,7 +792,9 @@ void CpuTransposeKernel::run_op(ITensorPack &tensors, const Window &window, cons
 
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto       dst = tensors.get_tensor(TensorType::ACL_DST);
-
+    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp Start" << std::endl;
+    std::cout << src->info()->tensor_shape().total_size() <<std::endl;
+    std::cout << dst->info()->tensor_shape().total_size() <<std::endl;
     switch (src->info()->element_size())
     {
         case 1:
@@ -808,6 +810,7 @@ void CpuTransposeKernel::run_op(ITensorPack &tensors, const Window &window, cons
             ARM_COMPUTE_ERROR("Element size not supported");
             break;
     }
+    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp End" << std::endl;
 }
 
 const char *CpuTransposeKernel::name() const
