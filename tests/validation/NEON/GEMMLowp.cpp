@@ -317,6 +317,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFi
 }
 TEST_SUITE_END() // FusedOffsetOutput
 
+// accumulation is not supported for Int8/UInt8 in aarch32
+#ifdef __aarch64__
 TEST_SUITE(ACCUMULATION)
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreAccumulateFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
@@ -331,6 +333,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreAccumulateFixture, 
 }
 TEST_SUITE_END() // S32
 TEST_SUITE_END() // ACCUMULATION
+#endif // __arch64__
 
 TEST_SUITE_END() // MatrixMultiplyCore
 TEST_SUITE_END() // GEMMLowp

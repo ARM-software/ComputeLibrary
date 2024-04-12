@@ -347,6 +347,9 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
     // When using accumulation(in place summation), for now, the only supported DataType for output is S32.
     if (gemm_info.accumulate())
     {
+#ifdef __arm__
+        ARM_COMPUTE_RETURN_ERROR_MSG("Accumulation is not supported for armv7");
+#endif /* __arm__ */
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE,
                                         "Accumulation is not supported for output QASYMM8/QASYMM8_SIGNED");
     }
