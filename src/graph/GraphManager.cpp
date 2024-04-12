@@ -92,16 +92,21 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Validate all nodes
     detail::validate_all_nodes(graph);
 
+    std::cout << "src/graph/GraphManager.cpp 1" << std::endl;
     // Configure all nodes
     auto workload = detail::configure_all_nodes(graph, ctx, topological_sorted_nodes);
     ARM_COMPUTE_ERROR_ON_MSG(workload.tasks.empty(), "Could not configure all nodes!");
 
+    std::cout << "src/graph/GraphManager.cpp 2" << std::endl;
     // Allocate const tensors and call accessors
     detail::allocate_const_tensors(graph);
     detail::call_all_const_node_accessors(graph);
 
+    std::cout << "src/graph/GraphManager.cpp 3" << std::endl;
     // Prepare graph
     detail::prepare_all_tasks(workload);
+
+    std::cout << "src/graph/GraphManager.cpp 4" << std::endl;
 
     // Setup tensor memory (Allocate all tensors or setup transition manager)
     if (ctx.config().use_transition_memory_manager)
@@ -112,6 +117,7 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
         detail::allocate_all_tensors(graph);
     }
 
+    std::cout << "src/graph/GraphManager.cpp 5" << std::endl;
     // Finalize Graph context
     ctx.finalize();
 
@@ -130,24 +136,20 @@ void GraphManager::execute_graph(Graph &graph)
 
     while (true)
     {
-        std::cout << "src/graph/GraphManager.cpp 1" << std::endl;
         // Call input accessors
         if (!detail::call_all_input_node_accessors(it->second))
         {
             return;
         }
 
-        std::cout << "src/graph/GraphManager.cpp 2" << std::endl;
         // Run graph
         detail::call_all_tasks(it->second);
-        std::cout << "src/graph/GraphManager.cpp 3" << std::endl;
 
         // Call output accessors
         if (!detail::call_all_output_node_accessors(it->second))
         {
             return;
         }
-        std::cout << "src/graph/GraphManager.cpp 4" << std::endl;
 
     }
 }
