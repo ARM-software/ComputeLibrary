@@ -437,7 +437,7 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                 for (; x <= (window_end_x - window_step_x); x += window_step_x)
                 {
                     
-                    std::cout << "transpose_32bit_elements" << x <<std::endl;
+                    std::cout << "transpose_32bit_elements load 1" << x <<std::endl;
                     // Load
                     const uint32x4x2_t row0 =
                         vld1q_u32_x2_(reinterpret_cast<const uint32_t *>(input.ptr() + 0 * input_stride_in_bytes) + x);
@@ -455,6 +455,8 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                         vld1q_u32_x2_(reinterpret_cast<const uint32_t *>(input.ptr() + 6 * input_stride_in_bytes) + x);
                     const uint32x4x2_t row7 =
                         vld1q_u32_x2_(reinterpret_cast<const uint32_t *>(input.ptr() + 7 * input_stride_in_bytes) + x);
+
+                    std::cout << "transpose_32bit_elements load 2" << x <<std::endl;
 
                     // Transpose 2x4
                     const uint32x4x2_t k0_u32 = {vtrn1q_u32(row0.val[0], row1.val[0]),
