@@ -11,6 +11,7 @@
 #include "src/cpu/operators/CpuTranspose.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 
+#include <memory>
 
 namespace arm_compute
 {
@@ -41,6 +42,7 @@ public:
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
     void prepare(ITensorPack &tensors) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
     enum AuxTensorIdx
@@ -55,6 +57,8 @@ private:
 
     TensorInfo _buffer_t_info{};
     bool _is_prepared{false};
+
+    experimental::MemoryRequirements _aux_mem{Count};
 
 };
 } // namespace cpu
