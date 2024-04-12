@@ -23,6 +23,11 @@ namespace cpu
 class CpuScaleDotProduction : public ICpuOperator
 {
 public:
+    /** Constructor */
+    CpuScaleDotProduction();
+    /** Destructor */
+    ~CpuScaleDotProduction();
+    
     /** Configure operator for a given list of arguments
      *
      * @param[in]  key             Attention key tensor info. Data types supported: U8.

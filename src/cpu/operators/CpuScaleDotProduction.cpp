@@ -15,14 +15,20 @@ namespace arm_compute
 {
 namespace cpu
 {
+CpuScaleDotProduction::CpuScaleDotProduction():_buffer_t_info()
+{
+}
+
+CpuScaleDotProduction::~CpuScaleDotProduction() = default;
+
 void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output)
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
     /* Pretranspose Key, K=K^T*/
     const ITensorInfo *key_to_use = key;
-    //_t_func  = std::make_unique<CpuTranspose>();
-    //_t_func->configure(key_to_use,&_buffer_t_info);
+    _t_func  = std::make_unique<CpuTranspose>();
+    _t_func->configure(key_to_use,&_buffer_t_info);
     
     
     experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
