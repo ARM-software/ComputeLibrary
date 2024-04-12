@@ -18,12 +18,15 @@ namespace cpu
 void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output)
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
-
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
     /* Pretranspose Key, K=K^T*/
     _t_func  = std::make_unique<CpuTranspose>();
     _t_func->configure(key,&_buffer_t_info);
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2" << std::endl;
 
     key = &_buffer_t_info;
+
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
 
     /* Matrix multiply Query adn Key, QK */
     //_mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
