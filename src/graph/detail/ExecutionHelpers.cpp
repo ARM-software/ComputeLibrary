@@ -139,21 +139,10 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
 
     // Reserve memory for tasks
     workload.tasks.reserve(node_order.size());
-    std::cout << "src/graph/detail/ExecutionHelpers.cpp" <<std::endl;
-    for (auto &node_id : node_order)
-    {
-        std:: cout << node_id  << std::endl;
-    }
-    std::cout << "src/graph/detail/ExecutionHelpers.cpp" <<std::endl;
     // Create tasks
     for (auto &node_id : node_order)
     {
         auto node = g.node(node_id);
-        std::cout << "node id:   " <<node->id() << std::endl;
-        if(node->type() == NodeType::ScaleDotProductionAttentionLayer)
-        {
-            std::cout << "caonima" << node->id() << std::endl;
-        }
         if (node != nullptr&&!node->configured())
         {
             Target                     assigned_target = node->assigned_target();
