@@ -31,7 +31,7 @@ void NEScaleDotProductionAttentionLayer::configure(ITensor *key, ITensor *value,
     _impl->dst      = output;
 
     _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
-    //_impl->op->configure(_impl->key->info(),_impl->value->info(),_impl->query->info(),_impl->dst->info());
+    _impl->op->configure(_impl->key->info(),_impl->value->info(),_impl->query->info(),_impl->dst->info());
 
 }
 
