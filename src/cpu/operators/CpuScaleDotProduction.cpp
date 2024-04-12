@@ -20,7 +20,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo 
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
     /* Pretranspose Key, K=K^T*/
-    const ITensorInfo *key_to_use = key;
+    //const ITensorInfo *key_to_use = key;
     //_t_func  = std::make_unique<CpuTranspose>();
     //_t_func->configure(key_to_use,&_buffer_t_info);
     
