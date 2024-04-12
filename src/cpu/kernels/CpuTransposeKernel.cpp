@@ -795,6 +795,7 @@ void CpuTransposeKernel::run_op(ITensorPack &tensors, const Window &window, cons
     std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp Start" << std::endl;
     std::cout << src->info()->tensor_shape().total_size() <<std::endl;
     std::cout << dst->info()->tensor_shape().total_size() <<std::endl;
+    std::cout << src->info()->element_size() << std::endl;
     switch (src->info()->element_size())
     {
         case 1:
