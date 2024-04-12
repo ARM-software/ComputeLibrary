@@ -21,8 +21,8 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
     /* Pretranspose Key, K=K^T*/
     const ITensorInfo *key_to_use = key;
-    _t_func  = std::make_unique<CpuTranspose>();
-    _t_func->configure(key_to_use,&_buffer_t_info);
+    //_t_func  = std::make_unique<CpuTranspose>();
+    //_t_func->configure(key_to_use,&_buffer_t_info);
     
     /*
     experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
