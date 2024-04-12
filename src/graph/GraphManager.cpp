@@ -130,20 +130,24 @@ void GraphManager::execute_graph(Graph &graph)
 
     while (true)
     {
+        std::cout << "src/graph/GraphManager.cpp 1" << std::endl;
         // Call input accessors
         if (!detail::call_all_input_node_accessors(it->second))
         {
             return;
         }
 
+        std::cout << "src/graph/GraphManager.cpp 2" << std::endl;
         // Run graph
         detail::call_all_tasks(it->second);
+        std::cout << "src/graph/GraphManager.cpp 3" << std::endl;
 
         // Call output accessors
         if (!detail::call_all_output_node_accessors(it->second))
         {
             return;
         }
+        std::cout << "src/graph/GraphManager.cpp 4" << std::endl;
 
     }
 }
