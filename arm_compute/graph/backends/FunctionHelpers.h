@@ -1844,7 +1844,6 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     typename TargetInfo::TensorType *value   = get_backing_tensor<TargetInfo>(node.input(2));
     std::cout << node.input(2)->desc().shape.x() << std::endl;
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
-    std::cout << "arm_compute/graph/backends/FunctionHelpers.h  "<< node.id() << "  End" << std::endl;
 
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -1853,6 +1852,7 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     auto func = std::make_unique<ScaleDotProductionLayerFunction>();
     func->configure(query,key,value,output);
 
+    std::cout << "arm_compute/graph/backends/FunctionHelpers.h  "<< node.id() << "  End" << std::endl;
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.name() << " Type: " << node.type() << " Target: "
                                                << TargetInfo::TargetType << " Data Type: " << input->info()->data_type()

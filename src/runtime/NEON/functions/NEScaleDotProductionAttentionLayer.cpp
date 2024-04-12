@@ -26,11 +26,17 @@ NEScaleDotProductionAttentionLayer::~NEScaleDotProductionAttentionLayer() = defa
 
 void NEScaleDotProductionAttentionLayer::configure(ITensor *key, ITensor *value, ITensor *query, ITensor *output)
 {
+    std::cout << " src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp 1 " <<std::endl;
     _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
 
+    std::cout << " src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp 2 " <<std::endl;
     _impl->run_pack = {{ACL_SRC_0, key}, {ACL_SRC_1, value}, {ACL_SRC_2, query}, {ACL_DST, output}};
 
+    std::cout << " src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp 3 " <<std::endl;
+
     _impl->op->configure(key->info(),value->info(),query->info(),output->info());
+
+    std::cout << " src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp 4 " <<std::endl;
 
 }
 
