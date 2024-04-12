@@ -9,12 +9,13 @@ namespace arm_compute
 
 struct NEScaleDotProductionAttentionLayer::Impl
 {
-    const ITensor                      *key{nullptr};
-    const ITensor                      *value{nullptr};
-    const ITensor                      *query{nullptr};
-    ITensor                            *dst{nullptr};
+
+    ITensorPack                         run_pack{};
     IRuntimeContext                    *ctx{nullptr};
+
     std::unique_ptr<cpu::CpuScaleDotProduction> op{nullptr};
+
+    bool is_prepared{false};
 };
 
 NEScaleDotProductionAttentionLayer::NEScaleDotProductionAttentionLayer(): _impl(std::make_unique<Impl>())
@@ -25,30 +26,30 @@ NEScaleDotProductionAttentionLayer::~NEScaleDotProductionAttentionLayer() = defa
 
 void NEScaleDotProductionAttentionLayer::configure(ITensor *key, ITensor *value, ITensor *query, ITensor *output)
 {
-    _impl->key      = key;
-    _impl->value    = value;
-    _impl->query    = query;
-    _impl->dst      = output;
-
     _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
-    _impl->op->configure(_impl->key->info(),_impl->value->info(),_impl->query->info(),_impl->dst->info());
+
+    _impl->run_pack = {{ACL_SRC_0, key}, {ACL_SRC_1, value}, {ACL_SRC_2, query}, {ACL_DST, output}};
+
+    _impl->op->configure(key->info(),value->info(),query->info(),output->info());
 
 }
 
 void NEScaleDotProductionAttentionLayer::prepare()
 {
+    if(!_impl->is_prepared)
+    {
+        _impl->op->prepare(_impl->run_pack);
+    }
 }
 
 void NEScaleDotProductionAttentionLayer::run()
 {
     ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC_0, _impl->key);
-    pack.add_tensor(TensorType::ACL_SRC_1, _impl->value);
-    pack.add_tensor(TensorType::ACL_SRC_2, _impl->query);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
+
+    prepare();
 
     std::cout << "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp RUNNNNNNNNN!!!!!!!!" << std::endl;
-    _impl->op->run(pack);
+    _impl->op->run(_impl->run_pack);
 }
 
 } // namespace arm_compute

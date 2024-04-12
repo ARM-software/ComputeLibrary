@@ -6,6 +6,10 @@
 #include "arm_compute/core/Types.h"
 
 #include "src/cpu/ICpuOperator.h"
+#include "src/cpu/kernels/CpuScaleKernel.h"
+#include "src/cpu/kernels/CpuSoftmaxKernel.h"
+#include "src/cpu/operators/CpuTranspose.h"
+#include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 
 
 namespace arm_compute
@@ -36,6 +40,22 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &tensors) override;
+
+private:
+    enum AuxTensorIdx
+    {
+        KeyTransposeBuffer = 0,
+        Count
+    };
+    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel> _mm_kernel;
+    std::unique_ptr<CpuTranspose>                         _t_func;
+    std::unique_ptr<kernels::CpuScaleKernel>              _s_kernel;
+    std::unique_ptr<kernels::CpuSoftmaxKernel>            _sm_kernel;
+
+    TensorInfo _buffer_t_info{};
+    bool _is_prepared{false};
+
 };
 } // namespace cpu
 } // namespace arm_compute
