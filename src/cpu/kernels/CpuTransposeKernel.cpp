@@ -521,6 +521,7 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                     // Compute destination address
                     const size_t dst_offset_in_bytes = id.y() * sizeof(uint32_t) + x * output_stride_in_bytes;
 
+                    std::cout << "transpose_32bit_elements store 1" << x <<std::endl;
                     // Store
                     vst1q_u32_x2_(
                         reinterpret_cast<uint32_t *>(output.ptr() + dst_offset_in_bytes + 0 * output_stride_in_bytes),
@@ -546,7 +547,10 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                     vst1q_u32_x2_(
                         reinterpret_cast<uint32_t *>(output.ptr() + dst_offset_in_bytes + 7 * output_stride_in_bytes),
                         col7);
+
+                    std::cout << "transpose_32bit_elements store 2" << x <<std::endl;
                 }
+
 
                 // Compute left-over elements (8x1)
                 for (; x < window_end_x; ++x)
