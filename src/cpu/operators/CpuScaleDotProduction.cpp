@@ -90,9 +90,13 @@ void CpuScaleDotProduction::prepare(ITensorPack &tensors)
         if (_t_func)
         {
             // Run pretranspose kernel
+            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.1" << std::endl;
             ITensorPack pretranspose_pack{{ACL_SRC, key_t}, {ACL_DST, pretransposed_key.get()}};
+            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.2" << std::endl;
             _t_func->run(pretranspose_pack);
+            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.3" << std::endl;
             key_t = pretransposed_key.get();
+            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.4" << std::endl;
         }
 
         std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
