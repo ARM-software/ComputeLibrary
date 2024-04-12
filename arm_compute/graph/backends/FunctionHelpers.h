@@ -1849,7 +1849,8 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = std::make_unique<ScaleDotProductionLayerFunction>();
+    auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
+    auto func = std::make_unique<ScaleDotProductionLayerFunction>(mm);
     func->configure(query,key,value,output);
 
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h  "<< node.id() << "  End" << std::endl;

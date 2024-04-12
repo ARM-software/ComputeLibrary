@@ -4,6 +4,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
+#include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
 
@@ -17,7 +18,7 @@ class NEScaleDotProductionAttentionLayer : public IFunction
 {
 public:
     /** Default Constructor */
-    NEScaleDotProductionAttentionLayer();
+    NEScaleDotProductionAttentionLayer(std::shared_ptr<IMemoryManager> memory_manager);
     /** Default Destructor */
     ~NEScaleDotProductionAttentionLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

@@ -93,5 +93,10 @@ void CpuScaleDotProduction::prepare(ITensorPack &tensors)
     }
 }
 
+experimental::MemoryRequirements CpuScaleDotProduction::workspace() const
+{
+    return _aux_mem;
+}
+
 } // namespace cpu
 } // namespace arm_compute
