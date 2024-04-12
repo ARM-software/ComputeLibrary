@@ -6,7 +6,9 @@
 #include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
-#include "src/cpu/kernels/CpuVectorizeKernel.h"
+#include "src/cpu/kernels/CpuScaleKernel.h"
+#include "src/cpu/kernels/CpuSoftmaxKernel.h"
+#include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 
 
 namespace arm_compute
@@ -21,7 +23,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo 
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
     ARM_COMPUTE_UNUSED(output);
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
+
 
 }
 
