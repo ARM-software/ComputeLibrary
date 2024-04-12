@@ -42,7 +42,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo 
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
     ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_UNUSED(key);
+    ARM_COMPUTE_UNUSED(key_to_use);
 
 }
 
