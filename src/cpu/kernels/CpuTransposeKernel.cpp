@@ -737,6 +737,12 @@ void CpuTransposeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     const TensorShape dst_shape = misc::shape_calculator::compute_transposed_shape(*src);
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
 
+    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
+    std::cout << dst_shape.x() <<std::endl;
+    std::cout << dst_shape.y() <<std::endl;
+    std::cout << dst_shape.z() <<std::endl;
+    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
+    
     // Explicitly set the tensor shape to preserve dimensions
     dst->set_tensor_shape(dst_shape);
 
