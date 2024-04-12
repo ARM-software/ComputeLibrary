@@ -29,7 +29,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
 
     /* Matrix multiply Query adn Key, QK */
-    //_mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
+    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
     _mm_kernel->configure(query,key,output,1.0,false);
     ARM_COMPUTE_UNUSED(value);
 
