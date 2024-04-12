@@ -1831,7 +1831,7 @@ std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &n
  * @return Backend simple forwardlayer function
  */
 template <typename ScaleDotProductionLayerFunction, typename TargetInfo>
-std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionAttentionNode &node)
+std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionAttentionNode &node, GraphContext &ctx)
 {
     validate_node<TargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
 
