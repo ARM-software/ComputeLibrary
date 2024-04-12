@@ -80,27 +80,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
 void CpuScaleDotProduction::prepare(ITensorPack &tensors)
 {
-    if(!_is_prepared)
-    {
-        const ITensor *key      = tensors.get_const_tensor(ACL_SRC_0);
-        const ITensor *key_t    = key;
-
-        CpuAuxTensorHandler pretransposed_key(
-            offset_int_vec(KeyTransposeBuffer), _buffer_t_info, tensors,
-            false /*pack_inject: no need to inject into tensors*/,
-            _t_func ==
-                nullptr /*bypass_alloc: no need to allocate if _t_kernel is not run*/);
-
-        if (_t_func)
-        {
-            // Run pretranspose kernel
-            ITensorPack pretranspose_pack{{ACL_SRC, key_t}, {ACL_DST, pretransposed_key.get()}};
-            _t_func->run(pretranspose_pack);
-            key_t = pretransposed_key.get();
-        }
-        
-        _is_prepared = true;
-    }
+    ARM_COMPUTE_UNUSED(tensors);
 }
 
 experimental::MemoryRequirements CpuScaleDotProduction::workspace() const
