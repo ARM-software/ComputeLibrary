@@ -118,7 +118,8 @@ public:
                                             , get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
               << EmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
-                                get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout)).set_name("tkemb1")
+                                get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout),
+                                get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1")
               
                  /* Value, Key, Query Linear Layers */
               << LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),

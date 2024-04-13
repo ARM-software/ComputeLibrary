@@ -21,8 +21,8 @@ void CpuTokenEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab
     k->configure(input, vocab, output);
     _kernel = std::move(k);
 
-    _PE_kernel = std::make_unique<kernels::CpuPositionalEncodingKernel>();
-    _PE_kernel->configure(input,output,tkemb_info.d_model());
+    //_PE_kernel = std::make_unique<kernels::CpuPositionalEncodingKernel>();
+    //_PE_kernel->configure(input,output,tkemb_info.d_model());
 
 }
 
@@ -43,9 +43,10 @@ void CpuTokenEmbed::run(ITensorPack &tensors)
 
     std::cout << "src/cpu/operators/CpuTokenEmbed.cpp" << std::endl;
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
-    ITensorPack PE_tensors{ {ACL_SRC,tensors.get_tensor(ACL_DST)} /* Use output from token embedding as input*/,
-                            {ACL_DST,tensors.get_tensor(ACL_DST)} /* Same self output/input*/ };
-    NEScheduler::get().schedule_op(_PE_kernel.get(),Window::DimY,_PE_kernel->window(), PE_tensors);
+
+    //ITensorPack PE_tensors{ {ACL_SRC,tensors.get_tensor(ACL_DST)} /* Use output from token embedding as input*/,
+    //                        {ACL_DST,tensors.get_tensor(ACL_DST)} /* Same self output/input*/ };
+    //NEScheduler::get().schedule_op(_PE_kernel.get(),Window::DimY,_PE_kernel->window(), PE_tensors);
 }
 
 

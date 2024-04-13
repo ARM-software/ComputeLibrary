@@ -2332,6 +2332,18 @@
           }
         }
       },
+      "PositionEmbedding":{
+        "files":{
+          "common":[
+            "src/cpu/kernels/CpuVectorizeKernel.cpp",
+            "src/cpu/operators/CpuPositionEmbed.cpp",
+            "src/runtime/NEON/functions/NEPositionEmbeddingLayer.cpp"
+          ],
+          "neon": {
+            "fp32":["src/cpu/kernels/vectorize/generic/neon/fp32.cpp"]
+          }
+        }
+      },
       "Linear": {
         "files": {
           "common": [

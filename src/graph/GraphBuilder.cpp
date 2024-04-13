@@ -951,7 +951,8 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
                                     NodeIdxPair input, 
                                     TokenEmbeddingLayerInfo tkemb_info,
                                     ITensorAccessorUPtr     vocabs_accessor,
-                                    ITensorAccessorUPtr     segemnts_accessor)
+                                    ITensorAccessorUPtr     segemnts_accessor,
+                                    ITensorAccessorUPtr     position_accessor)
 {
     check_nodeidx_pair(input, g);
 
@@ -971,6 +972,7 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
 
     NodeID v_c_nid  = add_const_node_with_name(g, params, "vocabs", v_desc,    std::move(vocabs_accessor));
     NodeID s_c_nid  = add_const_node_with_name(g, params, "segements", s_desc, std::move(segemnts_accessor));
+    NodeID p_c_nid  = add_const_node_with_name(g, params, "position", s_desc, std::move(segemnts_accessor));
 
     // Create token embedding node and connect
     NodeID t_nid = g.add_node<TokenEmbeddingLayerNode>(tkemb_info);
@@ -982,17 +984,27 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     g.add_connection(input.node_id, 1 /* segment input*/, s_nid, 0);
     g.add_connection(s_c_nid, 0, s_nid, 1);
 
-    // Sum token embedding vector and segment embedding vector
-    NodeID add_nid = g.add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{EltwiseOperation::Add});
+    NodeID p_nid = g.add_node<PositionEmbeddingLayerNode>();
+    g.add_connection(input.node_id, 0 /* text input*/, p_nid, 0);
+    g.add_connection(p_c_nid, 0, p_nid, 1);
 
-    g.add_connection(t_nid, 0, add_nid, 0);
-    g.add_connection(s_nid, 0, add_nid, 1);
+    // Sum token embedding vector and segment embedding vector
+    NodeID add_nid_1 = g.add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{EltwiseOperation::Add});
+    // Sum previous vector and positional embedding vector
+    NodeID add_nid_2 = g.add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{EltwiseOperation::Add});
+
+    g.add_connection(t_nid, 0, add_nid_1, 0);
+    g.add_connection(s_nid, 0, add_nid_1, 1);
+
+    g.add_connection(add_nid_1, 0, add_nid_2, 0);
+    g.add_connection(p_nid, 0, add_nid_2, 1);
 
     set_node_params(g, t_nid, params);
     set_node_params(g, s_nid, params);
-    set_node_params(g, add_nid, params);
+    set_node_params(g, add_nid_1, params);
+    set_node_params(g, add_nid_2, params);
 
-    return add_nid;
+    return add_nid_2;
 }
 
 NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info)

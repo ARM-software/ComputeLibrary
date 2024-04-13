@@ -85,6 +85,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPooling3dLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEPositionEmbeddingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPriorBoxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQLSTMLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"

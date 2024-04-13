@@ -1634,9 +1634,11 @@ public:
      */
     EmbeddingLayer(const TokenEmbeddingLayerInfo &tkemb_info,
                         ITensorAccessorUPtr     vocabs,
-                        ITensorAccessorUPtr     segments) : _tkemb_info(tkemb_info),
+                        ITensorAccessorUPtr     segments,
+                        ITensorAccessorUPtr     position_accessor) : _tkemb_info(tkemb_info),
                                                             _vocabs(std::move(vocabs)),
-                                                            _segments(std::move(segments))
+                                                            _segments(std::move(segments)),
+                                                            _position(std::move(position_accessor))
     {
     }
 
@@ -1645,13 +1647,15 @@ public:
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
         return GraphBuilder::add_embedding_node(s.graph(), common_params, input, _tkemb_info, std::move(_vocabs),
-                                                                                              std::move(_segments));
+                                                                                              std::move(_segments),
+                                                                                              std::move(_position));
     }
 
 private:
     const TokenEmbeddingLayerInfo &_tkemb_info;
     ITensorAccessorUPtr     _vocabs;
     ITensorAccessorUPtr     _segments;
+    ITensorAccessorUPtr     _position;
 };
 
 /** YOLO Layer */

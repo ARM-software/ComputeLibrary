@@ -1738,6 +1738,32 @@ std::unique_ptr<IFunction> create_segment_embedding_layer(SegmentEmbeddingLayerN
     return func;
 }
 
+/** Creates a backend position embedding layer function
+ *
+ * @tparam PositionEmbeddingLayerFunction  Backend position embedding function
+ * @tparam TargetInfo                     Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend position embedding layer function
+ */
+template <typename PositionEmbeddingLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_position_embedding_layer(PositionEmbeddingLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 2 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    
+    typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *position  = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
+
+    // Create function
+    auto func = std::make_unique<PositionEmbeddingLayerFunction>();
+    func->configure(input,position,output);
+
+    return func;
+}
 /** Creates a backend linear layer function
  *
  * @tparam LinearLayerFunction  Backend linear layer function
