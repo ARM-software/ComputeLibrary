@@ -26,8 +26,8 @@ namespace
 template <typename T>
 void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector, ITensor *dst)
 {
-    std::cout << "src/cpu/kernels/CpuPositionEmbeddingKernel.cpp" << std::endl;
     ARM_COMPUTE_UNUSED(src);
+    std::cout << "src/cpu/kernels/CpuPositionEmbeddingKernel.cpp" << std::endl;
 
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
@@ -36,10 +36,6 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
 
     const unsigned int vector_depth     = vector->info()->tensor_shape().y();
-
-
-    ARM_COMPUTE_UNUSED(win);
-    ARM_COMPUTE_UNUSED(dst);
 
     std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
     std::cout << "vector " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().y()  << std::endl;
