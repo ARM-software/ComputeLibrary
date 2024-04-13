@@ -67,7 +67,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector
                 std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << std::endl;
                 
             }
-        },dst_iter);
+        },dst_iter,vector_iter);
 
 }
 
