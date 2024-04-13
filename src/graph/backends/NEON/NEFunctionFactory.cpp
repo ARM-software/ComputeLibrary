@@ -125,9 +125,6 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
     NodeType type = node->type();
     switch (type)
     {
-        case NodeType::Output:
-            std::cout << "Output" << std::endl;
-            return nullptr;
         case NodeType::ActivationLayer:
             return detail::create_activation_layer<NEActivationLayer, NETargetInfo>(
                 *polymorphic_downcast<ActivationLayerNode *>(node));

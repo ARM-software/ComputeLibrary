@@ -59,10 +59,8 @@ CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
 
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     transpose(tensors);
-    std::cout << "1" << std::endl;
 
     //auto split_dimension = static_cast<kernels::CpuVectorizeKernel *>(_kernel.get())->get_split_dimension_hint();
 
@@ -79,27 +77,19 @@ void CpuScaleDotProduction::transpose(ITensorPack &tensors)
         const ITensor *key      = tensors.get_const_tensor(ACL_SRC_0);
         const ITensor *key_t    = key;
 
-        std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
         CpuAuxTensorHandler pretransposed_key(
             offset_int_vec(KeyTransposeBuffer), _buffer_t_info, tensors,
             false /*pack_inject: no need to inject into tensors*/,
             _t_func ==
                 nullptr /*bypass_alloc: no need to allocate if _t_kernel is not run*/);
 
-        std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2" << std::endl;
         if (_t_func)
         {
             // Run pretranspose kernel
-            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.1" << std::endl;
             ITensorPack pretranspose_pack{{ACL_SRC, key_t}, {ACL_DST, pretransposed_key.get()}};
-            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.2" << std::endl;
             _t_func->run(pretranspose_pack);
-            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.3" << std::endl;
             key_t = pretransposed_key.get();
-            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2.4" << std::endl;
         }
-
-        std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
         
         _is_prepared = true;
     }
