@@ -1761,10 +1761,10 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
     const LinearLayerInfo linear_info         = node.linear_info();
     std::cout << "create_linear_layer S " << std::endl;
 
-    std::cout << "a.id: " << node.input(0)->info()->id() 
-              << "b.id: " << node.input(1)->info()->id() 
-              << "c.id: " << node.input(2)->info()->id() 
-              << "d.id: " << node.output(0)->info()->id() << std::endl;
+    std::cout << "a.id: " << node.input(0)->id() 
+              << "b.id: " << node.input(1)->id() 
+              << "c.id: " << node.input(2)->id() 
+              << "d.id: " << node.output(0)->id() << std::endl;
 
     std::cout << "a.id: " << input->info()->id() 
               << "b.id: " << weight->info()->id() 
