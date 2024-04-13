@@ -61,7 +61,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    prepare(tensors);
+    transpose(tensors);
     std::cout << "1" << std::endl;
 
     //auto split_dimension = static_cast<kernels::CpuVectorizeKernel *>(_kernel.get())->get_split_dimension_hint();
@@ -72,7 +72,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     //NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
-void CpuScaleDotProduction::prepare(ITensorPack &tensors)
+void CpuScaleDotProduction::transpose(ITensorPack &tensors)
 {
     if(!_is_prepared)
     {

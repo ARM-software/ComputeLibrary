@@ -218,5 +218,4 @@ Query,Key,Value Bias                (d_model, ...)
 
 Current:
 
-Multi head attention layer passed in from simply forward layer is not working
-@src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp
+src/cpu/operators/CpuScaleDotProduction.cpp passed in tensor invalid

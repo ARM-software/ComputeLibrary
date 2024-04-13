@@ -44,9 +44,10 @@ public:
      */
     static Status validate(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output);
 
+    void transpose(ITensorPack &tensors);
+
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
