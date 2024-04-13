@@ -71,7 +71,7 @@ void vector_matrix_multiply_f32(
     const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
 
     const float32x4_t alpha_f32 = vdupq_n_f32(alpha);
-
+    std::cout << "GEMM MATRIX "<<std::endl; 
     execute_window_loop(
         win_out,
         [&](const Coordinates &)
@@ -92,6 +92,8 @@ void vector_matrix_multiply_f32(
                 float32x4_t acc3 = vdupq_n_f32(0.f);
 
                 auto vec_a    = reinterpret_cast<const float *>(ina.ptr());
+
+                std::cout << *vec_a << "  ";
                 auto matrix_b = reinterpret_cast<const float *>(inb.ptr()) + x;
 
 #if __arm__
@@ -312,7 +314,7 @@ void matrix_matrix_multiply_f32(
     const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
 
     const float32x4_t alpha_f32 = vdupq_n_f32(alpha);
-    std::cout << "GEMM Matrix multiply" << std::endl;
+
     // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with CpuGemmInterleave4x4 and CpuGemmTranspose1xW
     // The reshaping of the matrices helps to have a cache friendly implementation and helps to avoid the data re-arrangements needed for computing 16x4 elements per iteration
     // All the values needed for computing a single 4x4 block will be read from consecutive memory positions
@@ -321,7 +323,6 @@ void matrix_matrix_multiply_f32(
         [&](const Coordinates &id)
         {
             auto mtx_a0 = reinterpret_cast<const float *>(ina.ptr());
-            std::cout << *mtx_a0 << "  ";
             auto mtx_b0 = reinterpret_cast<const float *>(inb.ptr());
             auto mtx_b1 = mtx_b0 + in_b_stride;
 
