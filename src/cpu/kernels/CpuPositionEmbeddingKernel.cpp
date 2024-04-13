@@ -67,7 +67,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector
                 std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << std::endl;
                 
             }
-        },);
+        },dst_iter);
 
 }
 
@@ -76,7 +76,7 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector
 void CpuPositionEmbeddingKernel::configure(const ITensorInfo *src, const ITensorInfo *pos, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-
+    ARM_COMPUTE_UNUSED(src);
     // Configure output tensor info.
     auto_init_if_empty(*dst, TensorInfo(*pos->clone()));
 
