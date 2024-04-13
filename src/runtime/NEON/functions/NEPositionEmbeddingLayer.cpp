@@ -40,7 +40,7 @@ void NEPositionEmbeddingLayer::run()
 {
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
-    pack.add_tensor(TensorType::ACL_SRC_1, _impl->Position);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->position);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
     _impl->op->run(pack);
 }
