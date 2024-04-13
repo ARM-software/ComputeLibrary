@@ -42,7 +42,6 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector
     ARM_COMPUTE_UNUSED(dst);
 
     std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
-    std::cout << "src " << src->info()->tensor_shape().x()  << " " <<   src->info()->tensor_shape().y()  << std::endl;
     std::cout << "vector " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().y()  << std::endl;
     std::cout << "dst " << dst->info()->tensor_shape().x()  << " " <<   dst->info()->tensor_shape().y()  << std::endl;
     std::cout << vector_depth << std::endl;
