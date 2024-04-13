@@ -71,7 +71,7 @@ void vector_matrix_multiply_f32(
     const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
 
     const float32x4_t alpha_f32 = vdupq_n_f32(alpha);
-    std::cout << "GEMM MATRIX "<<std::endl; 
+
     execute_window_loop(
         win_out,
         [&](const Coordinates &)
@@ -92,8 +92,6 @@ void vector_matrix_multiply_f32(
                 float32x4_t acc3 = vdupq_n_f32(0.f);
 
                 auto vec_a    = reinterpret_cast<const float *>(ina.ptr());
-
-                std::cout << *vec_a << "  ";
                 auto matrix_b = reinterpret_cast<const float *>(inb.ptr()) + x;
 
 #if __arm__

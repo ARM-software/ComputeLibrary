@@ -492,10 +492,12 @@ void CpuGemm::run(ITensorPack &tensors)
         }
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
-
+        std::cout << "NEScheduler::get().schedule_op" << std::endl;
         NEScheduler::get().schedule_op(_mm_kernel.get(),
                                        _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                        _mm_kernel->window(), mm_pack);
+
+        std::cout << "NEScheduler::get().schedule_op" << std::endl;
 
         // Run bias addition kernel
         if (_run_bias_addition)
