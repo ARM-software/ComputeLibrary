@@ -35,8 +35,9 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
 
-
     std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
+    const unsigned int vector_depth     = vector->info()->tensor_shape().y();
+
     std::cout << "vector " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().y()  << std::endl;
     std::cout << "dst " << dst->info()->tensor_shape().x()  << " " <<   dst->info()->tensor_shape().y()  << std::endl;
     std::cout << vector_depth << std::endl;
