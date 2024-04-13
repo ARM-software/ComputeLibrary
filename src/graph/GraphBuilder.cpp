@@ -720,14 +720,22 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     g.add_connection(v_b_nid, 0, v_nid, 2);
 
 
-    
+    // A node to hold all the output
+    NodeID f_nid    = g.add_node<SimpleForwardLayerNode>(3);
+
+    // Connect all linear node to single node
+    g.add_connection(q_nid, 0, f_nid,0);
+    g.add_connection(k_nid, 0, f_nid,1);
+    g.add_connection(v_nid, 0, f_nid,2);
 
 
     set_node_params(g, q_nid, params);
     set_node_params(g, k_nid, params);
     set_node_params(g, v_nid, params);
 
-    return q_nid;
+    set_node_params(g, f_nid, params);
+
+    return f_nid;
 }
 
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
