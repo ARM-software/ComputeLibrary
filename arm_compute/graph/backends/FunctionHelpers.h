@@ -1730,6 +1730,16 @@ std::unique_ptr<IFunction> create_segment_embedding_layer(SegmentEmbeddingLayerN
     typename TargetInfo::TensorType *input    = get_backing_tensor<TargetInfo>(node.input(0));
     typename TargetInfo::TensorType *segment  = get_backing_tensor<TargetInfo>(node.input(1));
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
+    std::cout << "create_segment_embedding_layer S " << std::endl;
+
+    std::cout << " a.id: " << node.input(0)->id() 
+              << " b.id: " << node.input(1)->id() 
+              << " d.id: " << node.output(0)->id() << std::endl;
+
+    std::cout << " a.id: " << nput->info()->id() 
+              << " b.id: " << segment->info()->id() 
+              << " d.id: " << output->info()->id() << std::endl;
+    std::cout << "create_segment_embedding_layer E " << std::endl;
 
     // Create function
     auto func = std::make_unique<SegmentEmbeddingLayerFunction>();
