@@ -49,8 +49,8 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
                 std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));
             }
         }, src_iter);
-    std::cout << *(src->buffer()) << "  "  <<*(src->buffer()+1) << std::endl;
-    std::cout << *(dst->buffer()) << "  " <<*(dst->buffer()+1) <<std::endl;
+    std::cout << *reinterpret_cast<unsigned int *>(src->buffer()) << "  "  <<*reinterpret_cast<unsigned int *>(src->buffer()+1) << std::endl;
+    std::cout << *reinterpret_cast<float *>(dst->buffer()) << "  " <<*reinterpret_cast<float *>(dst->buffer()+1) <<std::endl;
     /*
     unsigned int id_src, offset_vector, offset_dst;
     
