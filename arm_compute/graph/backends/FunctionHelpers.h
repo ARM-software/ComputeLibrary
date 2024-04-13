@@ -1760,7 +1760,7 @@ std::unique_ptr<IFunction> create_position_embedding_layer(PositionEmbeddingLaye
 
     // Create function
     auto func = std::make_unique<PositionEmbeddingLayerFunction>();
-    func->configure(input,position,output);
+    func->configure(input,position,output,768);
 
     return func;
 }

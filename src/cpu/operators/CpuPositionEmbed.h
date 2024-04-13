@@ -22,14 +22,14 @@ public:
      * @param[in]  Position         Const Position vector, Data type supported: F32
      * @param[out] output          Destination tensor info. Data type supported: F32
      */
-    void configure(const ITensorInfo *input, const ITensorInfo *Position, ITensorInfo *output);
+    void configure(const ITensorInfo *input, const ITensorInfo *Position, ITensorInfo *output, const unsigned int d_model);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuPositionEmbed::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *Position, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *Position, const ITensorInfo *output, const unsigned int d_model);
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;

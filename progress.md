@@ -186,8 +186,11 @@ Functionality:
             2. Token vectorize
             3. Postion Embedding from pretained model dont really need src input :
                         src/cpu/kernels/CpuPositionEmbeddingKernel.cpp
-            3. Pytorch positional embdding is implemented using pretrained model, but this calcualtes.
-            4. Deallocate Simple forward original output tensor
+            4. Pytorch positional embdding is implemented using pretrained model, but this calcualtes.
+            5. Deallocate Simple forward original output tensor
+            6. Position Embedding needs passing info, currently manually set to 768 from :
+                        arm_compute/graph/backends/FunctionHelpers.h
+
 
 Optimization: 
             1. window collapse
