@@ -972,7 +972,7 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
 
     NodeID v_c_nid  = add_const_node_with_name(g, params, "vocabs", v_desc,    std::move(vocabs_accessor));
     NodeID s_c_nid  = add_const_node_with_name(g, params, "segements", s_desc, std::move(segemnts_accessor));
-    NodeID p_c_nid  = add_const_node_with_name(g, params, "position", s_desc, std::move(segemnts_accessor));
+    NodeID p_c_nid  = add_const_node_with_name(g, params, "position", s_desc, std::move(position_accessor));
 
     // Create token embedding node and connect
     NodeID t_nid = g.add_node<TokenEmbeddingLayerNode>(tkemb_info);
