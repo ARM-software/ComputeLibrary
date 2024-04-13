@@ -782,6 +782,10 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
               << "input2.id: " << input2->info()->id() 
               << "output.id: " << output->info()->id() << std::endl;
 
+    std::cout << "input1.id: " << node.input(0)->id()
+              << "input2.id: " << node.input(1)->id() 
+              << "output.id: " << node.output(0)->id() << std::endl;
+
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h create_eltwise_layer E" << std::endl;
     const EltwiseOperation           eltwise_op     = node.eltwise_operation();
     const ConvertPolicy              convert_policy = node.convert_policy();
