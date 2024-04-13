@@ -182,6 +182,7 @@ enum class NodeType
     PadLayer,
     PermuteLayer,
     PoolingLayer,
+    PositionalEncodingLayer,
     PositionEmbeddingLayer,
     PReluLayer,
     PrintLayer,
