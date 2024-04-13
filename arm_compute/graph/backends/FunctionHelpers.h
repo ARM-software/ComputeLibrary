@@ -1736,7 +1736,7 @@ std::unique_ptr<IFunction> create_segment_embedding_layer(SegmentEmbeddingLayerN
               << " b.id: " << node.input(1)->id() 
               << " d.id: " << node.output(0)->id() << std::endl;
 
-    std::cout << " a.id: " << nput->info()->id() 
+    std::cout << " a.id: " << input->info()->id() 
               << " b.id: " << segment->info()->id() 
               << " d.id: " << output->info()->id() << std::endl;
     std::cout << "create_segment_embedding_layer E " << std::endl;
