@@ -24,7 +24,7 @@ namespace
 {
 /**  Vectorize pretrained position embedding*/
 template <typename T>
-void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector, ITensor *dst, const unsigned int d_model)
+void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector, ITensor *dst)
 {
     std::cout << "src/cpu/kernels/CpuPositionEmbeddingKernel.cpp" << std::endl;
     ARM_COMPUTE_UNUSED(src);
@@ -63,22 +63,19 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector
                 offset_dst     = x * vector_depth;
                 offset_vector  = x * vector_depth;
                 std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));
-                std::cout << *(src->buffer()+x) << "  ";
                 std::cout << *(dst_ptr + offset_dst) << "  ";
                 std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << std::endl;
                 
             }
-        }, src_iter);
+        },);
 
 }
 
 }
 
-void CpuPositionEmbeddingKernel::configure(const ITensorInfo *src, const ITensorInfo *pos, ITensorInfo *dst, const unsigned int d_model)
+void CpuPositionEmbeddingKernel::configure(const ITensorInfo *src, const ITensorInfo *pos, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-
-    _d_model = d_model;
 
     // Configure output tensor info.
     auto_init_if_empty(*dst, TensorInfo(*pos->clone()));
@@ -89,12 +86,11 @@ void CpuPositionEmbeddingKernel::configure(const ITensorInfo *src, const ITensor
 }
 
 
-Status CpuPositionEmbeddingKernel::validate(const ITensorInfo *src, const ITensorInfo *pos, const ITensorInfo *dst, const unsigned int d_model)
+Status CpuPositionEmbeddingKernel::validate(const ITensorInfo *src, const ITensorInfo *pos, const ITensorInfo *dst)
 {
     ARM_COMPUTE_UNUSED(pos);
     ARM_COMPUTE_UNUSED(src);
     ARM_COMPUTE_UNUSED(dst);
-    ARM_COMPUTE_UNUSED(d_model);
 
     return Status{};
 }
@@ -107,7 +103,7 @@ void CpuPositionEmbeddingKernel::run_op(ITensorPack &tensors, const Window &wind
     auto pos = tensors.get_tensor(TensorType::ACL_SRC_1);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    run_positional_encoding<float>(window, src, pos, dst, _d_model);
+    run_positional_encoding<float>(window, src, pos, dst);
 }
 
 const char * CpuPositionEmbeddingKernel::name() const

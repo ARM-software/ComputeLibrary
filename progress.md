@@ -188,8 +188,6 @@ Functionality:
                         src/cpu/kernels/CpuPositionEmbeddingKernel.cpp
             4. Pytorch positional embdding is implemented using pretrained model, but this calcualtes.
             5. Deallocate Simple forward original output tensor
-            6. Position Embedding needs passing info, currently manually set to 768 from :
-                        arm_compute/graph/backends/FunctionHelpers.h
 
 
 Optimization: 

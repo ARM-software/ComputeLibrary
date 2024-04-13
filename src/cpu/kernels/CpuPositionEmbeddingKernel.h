@@ -28,14 +28,14 @@ public:
      * @param[out] dst  Destination tensor. Data types supported: Same as @p src
      * @param[in]  perm Permutation vector
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *pos, ITensorInfo *dst, const unsigned int d_model);
+    void configure(const ITensorInfo *src, const ITensorInfo *pos, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuPositionEmbeddingKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *pos, const ITensorInfo *dst, const unsigned int d_model);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *pos, const ITensorInfo *dst);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
