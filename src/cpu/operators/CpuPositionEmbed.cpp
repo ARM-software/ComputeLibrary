@@ -6,7 +6,7 @@
 #include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
-#include "src/cpu/kernels/CpuVectorizeKernel.h"
+#include "src/cpu/kernels/CpuPositionEmbeddingKernel.h"
 
 
 namespace arm_compute
@@ -17,7 +17,7 @@ void CpuPositionEmbed::configure(const ITensorInfo *input, const ITensorInfo *po
 {
     ARM_COMPUTE_LOG_PARAMS(input, output);
 
-    auto k = std::make_unique<kernels::CpuVectorizeKernel>();
+    auto k = std::make_unique<kernels::CpuPositionEmbeddingKernel>();
     k->configure(input, position, output);
     _kernel = std::move(k);
 

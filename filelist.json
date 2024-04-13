@@ -2335,7 +2335,7 @@
       "PositionEmbedding":{
         "files":{
           "common":[
-            "src/cpu/kernels/CpuVectorizeKernel.cpp",
+            "src/cpu/kernels/CpuPositionEmbeddingKernel.cpp",
             "src/cpu/operators/CpuPositionEmbed.cpp",
             "src/runtime/NEON/functions/NEPositionEmbeddingLayer.cpp"
           ],

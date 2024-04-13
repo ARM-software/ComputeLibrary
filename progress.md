@@ -184,6 +184,8 @@ Compatability:
 Functionality:
             1. Segment token, currently only support 1 sentence input
             2. Token vectorize
+            3. Postion Embedding from pretained model dont really need src input :
+                        src/cpu/kernels/CpuPositionEmbeddingKernel.cpp
             3. Pytorch positional embdding is implemented using pretrained model, but this calcualtes.
             4. Deallocate Simple forward original output tensor
 
