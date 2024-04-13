@@ -431,7 +431,7 @@ void CpuGemm::run(ITensorPack &tensors)
               << "d.id: " << d->info()->id() << std::endl;
 
     std::cout << "Input:  ";
-    std::cout << *reinterpret_cast<float *>(a->ptr_to_element(0)) << " " << *reinterpret_cast<float *>(a->ptr_to_element(0)) << std::endl;
+    std::cout << *reinterpret_cast<float *>(a->ptr_to_element(0)) << " " << *reinterpret_cast<float *>(a->ptr_to_element(0)+1) << std::endl;
     std::cout << "Weight:  ";
     std::cout << *reinterpret_cast<float *>(b->ptr_to_element(0)) << " " << *reinterpret_cast<float *>(b->ptr_to_element(0)) << std::endl;
     std::cout << "Bias:  ";
