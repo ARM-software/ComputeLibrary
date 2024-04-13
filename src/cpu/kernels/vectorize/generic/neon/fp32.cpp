@@ -55,7 +55,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
             }
         }, src_iter);
 
-    std::cout << *reinterpret_cast<unsigned int *>(src->buffer()) << "  "  <<*reinterpret_cast<unsigned int *>(src->buffer()+1) << std::endl;
+    std::cout << *reinterpret_cast<unsigned int *>(src->buffer()+src->info()->dimension(0)) << "  "  <<*reinterpret_cast<unsigned int *>(src->buffer()+1) << std::endl;
     std::cout << *reinterpret_cast<float *>(dst->buffer()) << "  " <<*reinterpret_cast<float *>(dst->buffer()+1) <<std::endl;
     /*
     unsigned int id_src, offset_vector, offset_dst;
