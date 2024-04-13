@@ -410,7 +410,11 @@ void CpuGemm::run(ITensorPack &tensors)
     auto d = tensors.get_tensor(ACL_DST);
 
     std::cout << "src/cpu/operators/CpuGemm.cpp Run" << std::endl;
-
+    std::cout << "a.id: " << a->info()->id() 
+              << "b.id: " << b->info()->id() 
+              << "c.id: " << c->info()->id() 
+              << "d.id: " << d->info()->id() << std::endl;
+              
     std::cout << "Input:  ";
     std::cout << *reinterpret_cast<float *>(a->ptr_to_element(0)) << " " << *reinterpret_cast<float *>(a->ptr_to_element(0)) << std::endl;
     std::cout << "Weight:  ";
