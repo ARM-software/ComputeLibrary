@@ -35,9 +35,9 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
 
-    std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
     const unsigned int vector_depth     = vector->info()->tensor_shape().y();
 
+    std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
     std::cout << "vector " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().y()  << std::endl;
     std::cout << "dst " << dst->info()->tensor_shape().x()  << " " <<   dst->info()->tensor_shape().y()  << std::endl;
     std::cout << vector_depth << std::endl;
@@ -73,10 +73,10 @@ void CpuPositionEmbeddingKernel::configure(const ITensorInfo *src, const ITensor
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_UNUSED(src);
     // Configure output tensor info.
-    auto_init_if_empty(*dst, TensorInfo(*pos->clone()));
+    auto_init_if_empty(*dst, TensorInfo(*src->clone()));
 
     // Configure kernel window
-    Window win = calculate_max_window(*pos, Steps());
+    Window win = calculate_max_window(*src, Steps());
     ICpuKernel::configure(win);
 }
 
