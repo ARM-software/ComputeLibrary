@@ -988,9 +988,7 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     g.add_connection(input.node_id, 1 /* segment input*/, s_nid, 0);
     g.add_connection(s_c_nid, 0, s_nid, 1);
 
-    NodeID p_nid = g.add_node<PositionEmbeddingLayerNode>();
-    g.add_connection(input.node_id, 0 /* text input*/, p_nid, 0);
-    g.add_connection(p_c_nid, 0, p_nid, 1);
+
 
     // Sum token embedding vector and segment embedding vector
     NodeID add_nid_1 = g.add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{EltwiseOperation::Add});
@@ -1001,7 +999,6 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     g.add_connection(s_nid, 0, add_nid_1, 1);
 
     g.add_connection(add_nid_1, 0, add_nid_2, 0);
-    g.add_connection(p_nid, 0, add_nid_2, 1);
 
     set_node_params(g, t_nid, params);
     set_node_params(g, s_nid, params);
