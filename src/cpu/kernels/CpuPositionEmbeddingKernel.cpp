@@ -24,7 +24,7 @@ namespace
 {
 /**  Vectorize pretrained position embedding*/
 template <typename T>
-void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector, ITensor *dst)
+void run_positional_encoding(const Window &window, const ITensor *src, const ITensor *vector, ITensor *dst)
 {
     ARM_COMPUTE_UNUSED(src);
     std::cout << "src/cpu/kernels/CpuPositionEmbeddingKernel.cpp" << std::endl;
@@ -35,7 +35,6 @@ void run_positional_encoding(const Window &window, ITensor *src, ITensor *vector
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
 
-    const unsigned int vector_depth     = vector->info()->tensor_shape().y();
 
     std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
     std::cout << "vector " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().y()  << std::endl;
@@ -94,8 +93,8 @@ void CpuPositionEmbeddingKernel::run_op(ITensorPack &tensors, const Window &wind
 {
     ARM_COMPUTE_UNUSED(info);
 
-    auto src = tensors.get_tensor(TensorType::ACL_SRC_0);
-    auto pos = tensors.get_tensor(TensorType::ACL_SRC_1);
+    const ITensor *src   = tensors.get_const_tensor(TensorType::ACL_SRC_0);
+    const ITensor *pos   = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
     run_positional_encoding<float>(window, src, pos, dst);
