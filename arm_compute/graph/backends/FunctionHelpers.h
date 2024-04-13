@@ -777,7 +777,7 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     typename TargetInfo::TensorType *input1         = get_backing_tensor<TargetInfo>(node.input(0));
     typename TargetInfo::TensorType *input2         = get_backing_tensor<TargetInfo>(node.input(1));
     typename TargetInfo::TensorType *output         = get_backing_tensor<TargetInfo>(node.output(0));
-    
+
     const EltwiseOperation           eltwise_op     = node.eltwise_operation();
     const ConvertPolicy              convert_policy = node.convert_policy();
     const ActivationLayerInfo        act_info       = node.fused_activation();
@@ -1759,7 +1759,18 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
     typename TargetInfo::TensorType *bias     = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
     const LinearLayerInfo linear_info         = node.linear_info();
+    std::cout << "create_linear_layer S " << std::endl;
 
+    std::cout << "a.id: " << node.input(0)->info()->id() 
+              << "b.id: " << node.input(1)->info()->id() 
+              << "c.id: " << node.input(2)->info()->id() 
+              << "d.id: " << node.output(0)->info()->id() << std::endl;
+
+    std::cout << "a.id: " << input->info()->id() 
+              << "b.id: " << weight->info()->id() 
+              << "c.id: " << bias->info()->id() 
+              << "d.id: " << output->info()->id() << std::endl;
+    std::cout << "create_linear_layer E " << std::endl;
     // Create function
     auto func = std::make_unique<LinearLayerFunction>();
     func->configure(input, weight, bias, output, linear_info);
