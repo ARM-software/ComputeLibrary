@@ -80,6 +80,14 @@ void CpuGemm::configure(const ITensorInfo *a,
         !(!b->are_values_constant() &&
           b->tensor_shape().z() > 1); // Disable batch matmul as optimized GeMM handles batching differently.
 
+    std::cout << "src/cpu/operators/CpuGemm.cpp configure S" << std::endl;
+    std::cout << "a.id: " << a->id() 
+              << "b.id: " << b->id() 
+              << "c.id: " << c->id() 
+              << "d.id: " << d->id() << std::endl;
+
+    std::cout << "src/cpu/operators/CpuGemm.cpp configure E" << std::endl;
+
     // Check if we need to reshape the matrix B only on the first run
     _is_prepared                      = false;
     _reshape_b_only_on_first_run      = b->are_values_constant();
@@ -410,11 +418,12 @@ void CpuGemm::run(ITensorPack &tensors)
     auto d = tensors.get_tensor(ACL_DST);
 
     std::cout << "src/cpu/operators/CpuGemm.cpp Run" << std::endl;
+
     std::cout << "a.id: " << a->info()->id() 
               << "b.id: " << b->info()->id() 
               << "c.id: " << c->info()->id() 
               << "d.id: " << d->info()->id() << std::endl;
-              
+
     std::cout << "Input:  ";
     std::cout << *reinterpret_cast<float *>(a->ptr_to_element(0)) << " " << *reinterpret_cast<float *>(a->ptr_to_element(0)) << std::endl;
     std::cout << "Weight:  ";
