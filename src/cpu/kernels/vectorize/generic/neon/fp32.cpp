@@ -39,7 +39,6 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
     const auto vector_ptr   = reinterpret_cast<float *>(vector_iter.ptr());
 
-    std::cout << *vector_ptr << " " << *(vector_ptr+ vector->info()->tensor_shape().y() -1) << std::endl;
     execute_window_loop(win,
         [&](const Coordinates &)
         {
