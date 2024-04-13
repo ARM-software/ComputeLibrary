@@ -71,7 +71,7 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
 void CpuPositionEmbeddingKernel::configure(const ITensorInfo *src, const ITensorInfo *pos, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_UNUSED(src);
+    ARM_COMPUTE_UNUSED(pos);
     // Configure output tensor info.
     auto_init_if_empty(*dst, TensorInfo(*src->clone()));
 
