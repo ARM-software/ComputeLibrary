@@ -777,6 +777,12 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     typename TargetInfo::TensorType *input1         = get_backing_tensor<TargetInfo>(node.input(0));
     typename TargetInfo::TensorType *input2         = get_backing_tensor<TargetInfo>(node.input(1));
     typename TargetInfo::TensorType *output         = get_backing_tensor<TargetInfo>(node.output(0));
+    std::cout << "arm_compute/graph/backends/FunctionHelpers.h create_eltwise_layer S" << std::endl;
+    std::cout << "input1.id: " << input1->id()
+              << "input2.id: " << input2->id() 
+              << "output.id: " << output->id() << std::endl;
+
+    std::cout << "arm_compute/graph/backends/FunctionHelpers.h create_eltwise_layer E" << std::endl;
     const EltwiseOperation           eltwise_op     = node.eltwise_operation();
     const ConvertPolicy              convert_policy = node.convert_policy();
     const ActivationLayerInfo        act_info       = node.fused_activation();
