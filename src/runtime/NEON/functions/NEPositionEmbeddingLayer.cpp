@@ -10,7 +10,7 @@ namespace arm_compute
 struct NEPositionEmbeddingLayer::Impl
 {
     const ITensor                      *src{nullptr};
-    const ITensor                      *Position{nullptr};
+    const ITensor                      *position{nullptr};
     ITensor                            *dst{nullptr};
     IRuntimeContext                    *ctx{nullptr};
     std::unique_ptr<cpu::CpuPositionEmbed> op{nullptr};
@@ -22,14 +22,14 @@ NEPositionEmbeddingLayer::NEPositionEmbeddingLayer(): _impl(std::make_unique<Imp
 
 NEPositionEmbeddingLayer::~NEPositionEmbeddingLayer() = default;
 
-void NEPositionEmbeddingLayer::configure(ITensor *input, ITensor *Position, ITensor *output)
+void NEPositionEmbeddingLayer::configure(ITensor *input, ITensor *position, ITensor *output)
 {
     _impl->src      = input;
-    _impl->Position    = Position;
+    _impl->position = position;
     _impl->dst      = output;
 
     _impl->op  = std::make_unique<cpu::CpuPositionEmbed>();
-    _impl->op->configure(_impl->src->info(),_impl->Position->info(), _impl->dst->info());
+    _impl->op->configure(_impl->src->info(),_impl->position->info(), _impl->dst->info());
 }
 
 void NEPositionEmbeddingLayer::prepare()

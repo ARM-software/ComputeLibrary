@@ -13,23 +13,22 @@ namespace arm_compute
 {
 namespace cpu
 {
-void CpuPositionEmbed::configure(const ITensorInfo *input, const ITensorInfo *position,  ITensorInfo *output, const unsigned int d_model)
+void CpuPositionEmbed::configure(const ITensorInfo *input, const ITensorInfo *position,  ITensorInfo *output)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output);
 
     auto k = std::make_unique<kernels::CpuPositionEmbeddingKernel>();
-    k->configure(input, position, output, d_model);
+    k->configure(input, position, output);
     _kernel = std::move(k);
 
 }
 
 Status
-CpuPositionEmbed::validate(const ITensorInfo *input, const ITensorInfo *position, const ITensorInfo *output, const unsigned int d_model)
+CpuPositionEmbed::validate(const ITensorInfo *input, const ITensorInfo *position, const ITensorInfo *output)
 {
     ARM_COMPUTE_UNUSED(input);
     ARM_COMPUTE_UNUSED(position);
     ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_UNUSED(d_model);
     return Status{};
 }
 

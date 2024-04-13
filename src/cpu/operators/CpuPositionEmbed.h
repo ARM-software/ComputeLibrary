@@ -19,17 +19,17 @@ public:
     /** Configure operator for a given list of arguments
      *
      * @param[in]  input           Source tensor info. Data types supported: U8.
-     * @param[in]  Position         Const Position vector, Data type supported: F32
+     * @param[in]  position         Const Position vector, Data type supported: F32
      * @param[out] output          Destination tensor info. Data type supported: F32
      */
-    void configure(const ITensorInfo *input, const ITensorInfo *Position, ITensorInfo *output, const unsigned int d_model);
+    void configure(const ITensorInfo *input, const ITensorInfo *position, ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuPositionEmbed::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *Position, const ITensorInfo *output, const unsigned int d_model);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *position, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
