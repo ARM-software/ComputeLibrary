@@ -32,7 +32,6 @@ public:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 private:
-    unsigned int _total_nodes;
 };
 
 } // namespace kernels
