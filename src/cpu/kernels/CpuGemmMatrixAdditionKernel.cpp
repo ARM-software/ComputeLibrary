@@ -66,7 +66,6 @@ void CpuGemmMatrixAdditionKernel::configure(const ITensorInfo *src, ITensorInfo 
     _func = uk->ukernel;
     // Configure kernel window
     Window win = calculate_max_window(*src, Steps());
-    std::cout << "src/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp: " << win.num_iterations_total() << std::endl;
     ICPPKernel::configure(win);
 }
 
