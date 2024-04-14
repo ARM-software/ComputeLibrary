@@ -11,12 +11,12 @@ namespace arm_compute
 
 struct  NESimpleForwardLayer::Impl
 {
-    const ITensor *src1;
-    const ITensor *src2;
-    const ITensor *src3;
-    ITensor *dst1;
-    ITensor *dst2;
-    ITensor *dst3;
+    const ITensor *src1{nullptr};
+    const ITensor *src2{nullptr};
+    const ITensor *src3{nullptr};
+    ITensor *dst1{nullptr};
+    ITensor *dst2{nullptr};
+    ITensor *dst3{nullptr};
     std::unique_ptr<cpu::CpuSimpleForward>     kernel{nullptr};
 };
 
