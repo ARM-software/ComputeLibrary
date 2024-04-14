@@ -39,10 +39,14 @@ public:
      * Valid data type configurations:
      * - All
      *
-     * @param[in]  tensors      Tensor pack. Data type supported: All.
-     * @param[in]  total_tensors  Amount of tensors will be forward.
+     * @param[in]  tensors        Tensors. Data type supported: All.
      */
-    void configure(ITensorPack& tensors, unsigned int total_tensors);
+    void configure(const ITensor *src1,
+                   const ITensor *src2,
+                   const ITensor *src3,
+                   ITensor *dst1,
+                   ITensor *dst2,
+                   ITensor *dst3);
 
     // Inherited methods overridden
     void run() override;

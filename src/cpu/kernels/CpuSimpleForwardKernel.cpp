@@ -28,9 +28,21 @@ namespace
 
 } // namespace
 
-void CpuSimpleForwardKernel::configure(unsigned int total_nodes)
+void CpuSimpleForwardKernel::configure(const ITensorInfo *src1,
+                                       const ITensorInfo *src2,
+                                       const ITensorInfo *src3,
+                                       ITensorInfo *dst1,
+                                       ITensorInfo *dst2,
+                                       ITensorInfo *dst3)
 {
-    _total_nodes = total_nodes;
+    auto_init_if_empty(*dst1, src1->clone()->set_tensor_shape(src1->tensor_shape()));
+    auto_init_if_empty(*dst2, src2->clone()->set_tensor_shape(src2->tensor_shape()));
+    auto_init_if_empty(*dst3, src3->clone()->set_tensor_shape(src3->tensor_shape()));
+
+    Window win;
+
+    win = calculate_max_window(*dst1, Steps());
+    ICPPKernel::configure(win);
 }
 
 
@@ -41,10 +53,7 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
 
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp" << std::endl;
-    for(unsigned int idx = 0; idx < _total_nodes; idx++){
-        tensors.get_tensor(TensorType::ACL_SRC_0+idx);
-        tensors.get_tensor(TensorType::ACL_DST_0+idx);
-    }
+    
 }
 
 const char *CpuSimpleForwardKernel::name() const

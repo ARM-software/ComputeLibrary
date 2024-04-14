@@ -21,7 +21,12 @@ public:
      *
      * @param[in]  total_nodes The amount of nodes input need to be forward
      */
-    void configure(unsigned int total_nodes);
+    void configure(const ITensorInfo *src1,
+                   const ITensorInfo *src2,
+                   const ITensorInfo *src3,
+                   ITensorInfo *dst1,
+                   ITensorInfo *dst2,
+                   ITensorInfo *dst3);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;

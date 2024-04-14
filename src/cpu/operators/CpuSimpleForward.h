@@ -11,11 +11,20 @@ namespace cpu
 class CpuSimpleForward : public ICpuOperator
 {
 public:
-    /** Initialise the kernel's inputs and output
+    /** Configure kernel for a given list of arguments
      *
-     * @param[in]  tensors Tensor packs contains input and output. Data type supported: All.
+     * @param[in]  src Srouce tensor to copy. Data types supported: All
+     * @param[out] dst Destination tensor. Data types supported: Same as @p src
      */
-    void configure(unsigned int total_nodes);
+    void configure(const ITensorInfo *src1,
+                   const ITensorInfo *src2,
+                   const ITensorInfo *src3,
+                   ITensorInfo *dst1,
+                   ITensorInfo *dst2,
+                   ITensorInfo *dst3);
+
+    // Inherited methods overridden:
+    void run(ITensorPack &tensors) override;
 };
 } // namespace cpu
 } // namespace arm_compute

@@ -1821,32 +1821,24 @@ template <typename ForwardLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_simple_forward_layer(SimpleForwardLayerNode &node)
 {
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward" << std::endl;
-    std::cout <<"id " << node.id() << std::endl;
+    typename TargetInfo::TensorType *src1   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *src2   = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *src3   = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *dst1   = get_backing_tensor<TargetInfo>(node.output(0));
+    typename TargetInfo::TensorType *dst2   = get_backing_tensor<TargetInfo>(node.output(1));
+    typename TargetInfo::TensorType *dst3   = get_backing_tensor<TargetInfo>(node.output(2));
+    /*
     for(size_t idx=0; idx <node.num_inputs(); idx++)
-    {       
-
-        std::cout << "input" << std::endl;
-        std::cout << node.input(idx)->id() << std::endl;
-        std::cout << "output" << std::endl;
-        std::cout << node.output(idx)->id() << std::endl;
-        std::cout << "X" << std::endl;
-        std::cout << node.output(idx)->desc().shape.x() << std::endl; 
-
+    {
         // Update accessor
         //node.input(idx)->set_accessor(node.output(idx)->extract_accessor());
         // Update output
         node.set_output_tensor(node.input(idx)->id(),idx);
-        
-        std::cout << "After:  " << idx <<std::endl;
-        std::cout << "input" << std::endl;
-        std::cout << node.input(idx)->id() << std::endl;
-        std::cout << "output" << std::endl;
-        std::cout << node.output(idx)->id() << std::endl;
-
-
     }
+    */
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h Simple forward Finished" << std::endl;
     auto func = std::make_unique<ForwardLayerFunction>();
+    func->configure(src1,src2,src3,dst1,dst2,dst3);
     // Update accessor
     //node.input(0)->set_accessor(node.output(0)->extract_accessor());
     // Update output
