@@ -88,6 +88,9 @@ void CpuGemm::configure(const ITensorInfo *a,
               << "b->tensor_shape().x(): " << b->tensor_shape().x() << std::endl
               << "b->tensor_shape().y(): " << b->tensor_shape().y() << std::endl
               << "b->tensor_shape().z(): " << b->tensor_shape().z() << std::endl
+              << "c->tensor_shape().x(): " << c->tensor_shape().x() << std::endl
+              << "c->tensor_shape().y(): " << c->tensor_shape().y() << std::endl
+              << "c->tensor_shape().z(): " << c->tensor_shape().z() << std::endl
               << "d->tensor_shape().x(): " << d->tensor_shape().x() << std::endl
               << "d->tensor_shape().y(): " << d->tensor_shape().y() << std::endl
               << "d->tensor_shape().z(): " << d->tensor_shape().z() << std::endl
@@ -95,6 +98,7 @@ void CpuGemm::configure(const ITensorInfo *a,
 
     std::cout << "a.id: " << a->id() 
               << "b.id: " << b->id() 
+              << "c.id: " << c->id() 
               << "d.id: " << d->id() << std::endl;
 
     std::cout << "src/cpu/operators/CpuGemm.cpp configure E" << std::endl;
@@ -432,12 +436,15 @@ void CpuGemm::run(ITensorPack &tensors)
 
     std::cout << "a.id: " << a->info()->id() 
               << "b.id: " << b->info()->id() 
+              << "c.id: " << c->info()->id() 
               << "d.id: " << d->info()->id() << std::endl;
 
     std::cout << "Input:  ";
     std::cout << *reinterpret_cast<float *>(a->buffer()) << " " << *reinterpret_cast<float *>(a->buffer()+1) << std::endl;
     std::cout << "Weight:  ";
     std::cout << *reinterpret_cast<float *>(b->buffer()) << " " << *reinterpret_cast<float *>(b->buffer()+1) << std::endl;
+    std::cout << "Bias:  ";
+    std::cout << *reinterpret_cast<float *>(c->buffer()) << " " << *reinterpret_cast<float *>(c->buffer()+1) << std::endl;
 
     if (_asm_glue && _asm_glue->is_configured())
     {
@@ -521,7 +528,7 @@ void CpuGemm::run(ITensorPack &tensors)
         _activation_func->run(pack);
     }
     std::cout << "src/cpu/operators/CpuGemm.cpp "
-              << "d->tensor_shape().x(): " << d->info()->tensor_shape().x() << std::endl
+              << "d->tensor_shape().x(): " << d->ptr_to_element(0) << std::endl
               << "d->tensor_shape().y(): " << d->info()->tensor_shape().y() << std::endl
               << "d->tensor_shape().z(): " << d->info()->tensor_shape().z() << std::endl;
     
