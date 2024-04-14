@@ -45,18 +45,14 @@ void CpuGemmInterleave4x4Kernel::configure(const ITensorInfo *src, ITensorInfo *
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 1" << std::endl;
     // dst auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_interleaved_shape(*src)));
 
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 2" << std::endl;
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmInterleave4x4Kernel::validate(src, dst));
 
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 3" << std::endl;
     Window win = calculate_max_window(*src, Steps(1, 4));
     ICPPKernel::configure(win);
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 4" << std::endl;
 }
 
 Status CpuGemmInterleave4x4Kernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
@@ -91,11 +87,9 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     *
     *         After this operation, the dst matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ]
     */
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 1" << std::endl;
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 2" << std::endl;
     const size_t window_start_x = window.x().start();
     const size_t window_end_x   = window.x().end();
 
@@ -118,7 +112,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     Iterator in(src, win);
     Iterator out(dst, win_out);
 
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 3" << std::endl;
     execute_window_loop(
         win,
         [&](const Coordinates &id)
@@ -127,8 +120,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
             {
                 for (size_t x = window_start_x; x < window_end_x; ++x)
                 {
-
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 4" << std::endl;
                     std::memcpy(out.ptr() + (x * 4 + 0) * element_size, (in.ptr() + 0 * in_stride) + x * element_size,
                                 element_size);
                     std::memcpy(out.ptr() + (x * 4 + 1) * element_size, (in.ptr() + 1 * in_stride) + x * element_size,
@@ -144,8 +135,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                 for (size_t x = window_start_x; x < window_end_x; ++x)
                 {
                     size_t y = 0;
-
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 4" << std::endl;
                     for (; y < partial_y; ++y)
                     {
                         std::memcpy(out.ptr() + (x * 4 + y) * element_size,

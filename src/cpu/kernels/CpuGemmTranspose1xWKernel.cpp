@@ -45,8 +45,6 @@ void CpuGemmTranspose1xWKernel::configure(const ITensorInfo *src, ITensorInfo *d
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-   std::cout << "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp 1" << std::endl;
-
     // Output tensor auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*src)));
 
