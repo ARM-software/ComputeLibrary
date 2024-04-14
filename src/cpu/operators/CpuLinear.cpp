@@ -51,7 +51,9 @@ void CpuLinear::configure(const ITensorInfo *a,
         {
             // Configure the matrix multiply kernel
             _mm_kernel->configure(a, b_to_use, gemm_output_to_use, alpha, false);
-
+        }
+        else
+        {
             // Configure interleave kernel
             _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
             _interleave_kernel->configure(a, &_tmp_a);
