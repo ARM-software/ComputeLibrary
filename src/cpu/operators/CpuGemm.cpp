@@ -95,7 +95,6 @@ void CpuGemm::configure(const ITensorInfo *a,
 
     std::cout << "a.id: " << a->id() 
               << "b.id: " << b->id() 
-              << "c.id: " << c->id() 
               << "d.id: " << d->id() << std::endl;
 
     std::cout << "src/cpu/operators/CpuGemm.cpp configure E" << std::endl;
