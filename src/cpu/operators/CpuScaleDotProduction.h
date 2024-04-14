@@ -24,9 +24,9 @@ class CpuScaleDotProduction : public ICpuOperator
 {
 public:
     /** Constructor */
-    CpuScaleDotProduction();
+    CpuScaleDotProduction() = default;
     /** Destructor */
-    ~CpuScaleDotProduction();
+    ~CpuScaleDotProduction() = default;
     
     /** Configure operator for a given list of arguments
      *
@@ -53,16 +53,23 @@ public:
 private:
     enum AuxTensorIdx
     {
-        KeyTransposeBuffer = 0,
+        /* Slots 0 - 2 reserved for CpuGemmAssemblyDispatch */
+        InterleavedLHS = 3,
+        PreTransposedRHS,
+        Transposed1xWRHS,
+        TempResult,
         Count
     };
+
     std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel> _mm_kernel{nullptr};
-    std::unique_ptr<CpuTranspose>                         _t_func{nullptr};
+    std::unique_ptr<CpuTranspose>                         _pretranspose_b_func{nullptr};
     std::unique_ptr<kernels::CpuScaleKernel>              _s_kernel{nullptr};
     std::unique_ptr<kernels::CpuSoftmaxKernel>            _sm_kernel{nullptr};
 
-    TensorInfo _buffer_t_info{};
+    TensorInfo _pretransposed_b{};
+
     bool _is_prepared{false};
+    bool _reshape_b_only_on_first_run{false};
 
     experimental::MemoryRequirements _aux_mem{Count};
 

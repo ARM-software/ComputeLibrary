@@ -15,34 +15,30 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuScaleDotProduction::CpuScaleDotProduction():_buffer_t_info()
-{
-}
-
-CpuScaleDotProduction::~CpuScaleDotProduction() = default;
 
 void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output)
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
-    /* Pretranspose Key, K=K^T*/
-    const ITensorInfo *key_to_use = key;
-    _t_func  = std::make_unique<CpuTranspose>();
-    _t_func->configure(key_to_use,&_buffer_t_info);
-    
-    
-    experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
-    _aux_mem[KeyTransposeBuffer] =
-        experimental::MemoryInfo(offset_int_vec(KeyTransposeBuffer), lifetime, _buffer_t_info.total_size());
 
-    key_to_use = &_buffer_t_info;
+    _reshape_b_only_on_first_run = key->are_values_constant();
+
+    /* Pretranspose Key, K=K^T*/
+    const ITensorInfo *b_to_use = key;
+    _pretranspose_b_func = std::make_unique<CpuTranspose>();
+    _pretranspose_b_func->configure(b_to_use, &_pretransposed_b);
+
+    experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
+
+    _aux_mem[PreTransposedRHS] =
+                experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), lifetime, _pretransposed_b.total_size());
+            b_to_use = &_pretransposed_b;
 
     /* Matrix multiply Query adn Key, QK */
     _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
-    _mm_kernel->configure(query,key_to_use,output,1.0,false);
+    _mm_kernel->configure(query,b_to_use,output,1.0,false);
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
     ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_UNUSED(key_to_use);
 
 }
 
@@ -59,38 +55,35 @@ CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
 
-    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    transpose(tensors);
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided"); 
+    auto a = tensors.get_const_tensor(ACL_SRC_0);
+    auto b = tensors.get_const_tensor(ACL_SRC_1);
+    auto c = tensors.get_const_tensor(ACL_SRC_2);
+    auto d = tensors.get_tensor(ACL_DST);
 
-    //auto split_dimension = static_cast<kernels::CpuVectorizeKernel *>(_kernel.get())->get_split_dimension_hint();
+    CpuAuxTensorHandler pretransposed_b(offset_int_vec(PreTransposedRHS), _pretransposed_b, tensors);
 
-    ARM_COMPUTE_UNUSED(tensors);
+    const ITensor *b_to_use = b;
+    if (_pretranspose_b_func)
+    {
+        if (!_reshape_b_only_on_first_run)
+        {
+            // Run pretranspose kernel
+            ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
+            _pretranspose_b_func->run(pretranspose_pack);
+        }
+        b_to_use = pretransposed_b.get();
+    }
 
-
-    //NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
+    ARM_COMPUTE_UNUSED(a);
+    ARM_COMPUTE_UNUSED(c);
+    ARM_COMPUTE_UNUSED(d);
 }
 
 void CpuScaleDotProduction::transpose(ITensorPack &tensors)
 {
     if(!_is_prepared)
     {
-        const ITensor *key      = tensors.get_const_tensor(ACL_SRC_0);
-        const ITensor *key_t    = key;
-
-        CpuAuxTensorHandler pretransposed_key(
-            offset_int_vec(KeyTransposeBuffer), _buffer_t_info, tensors,
-            false /*pack_inject: no need to inject into tensors*/,
-            _t_func ==
-                nullptr /*bypass_alloc: no need to allocate if _t_kernel is not run*/);
-
-        if (_t_func)
-        {
-            // Run pretranspose kernel
-            ITensorPack pretranspose_pack{{ACL_SRC, key_t}, {ACL_DST, pretransposed_key.get()}};
-            _t_func->run(pretranspose_pack);
-            key_t = pretransposed_key.get();
-        }
-        
         _is_prepared = true;
     }
 }
