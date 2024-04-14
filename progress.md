@@ -211,7 +211,7 @@ Tensor Shape
 Input                               (Len_seq, ...)
 Vocabulary                          (d_vocab, d_model, ...)
 Query,Key,Value Weight              (d_model, d_model, ...)
-Query,Key,Value Bias                (d_model, ...)
+Query,Key,Value Bias                (1, d_model, ...)
 
 
 
