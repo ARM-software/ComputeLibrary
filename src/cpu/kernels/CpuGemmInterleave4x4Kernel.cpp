@@ -45,14 +45,18 @@ void CpuGemmInterleave4x4Kernel::configure(const ITensorInfo *src, ITensorInfo *
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
+   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 1" << std::endl;
     // dst auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_interleaved_shape(*src)));
 
+   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 2" << std::endl;
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmInterleave4x4Kernel::validate(src, dst));
 
+   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 3" << std::endl;
     Window win = calculate_max_window(*src, Steps(1, 4));
     ICPPKernel::configure(win);
+   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 4" << std::endl;
 }
 
 Status CpuGemmInterleave4x4Kernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
