@@ -201,7 +201,7 @@ utils/GraphUtils.cpp(preprocess)                            U8 -> unsigned int  
   |
 Token Embedding                                            unsigned int -> FP32                 (Len_seq*, d_model, ...)
   |
-Query,Key,Value                                               FP32 -> FP32                      (d_model, d_model, ...)
+Query,Key,Value                                               FP32 -> FP32                      (Len_seq*, d_model, ...)
   |
 Scale Dot Production                                          FP32 -> FP32
 
