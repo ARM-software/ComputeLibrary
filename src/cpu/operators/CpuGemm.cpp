@@ -82,15 +82,15 @@ void CpuGemm::configure(const ITensorInfo *a,
 
     std::cout << "src/cpu/operators/CpuGemm.cpp configure S" << std::endl;
     std::cout << "run_optimised " << run_optimised <<std::endl;
-    std::cout << "a->tensor_shape().x(): " << a->tensor_shape().x()
-              << "a->tensor_shape().y(): " << a->tensor_shape().y()
-              << "a->tensor_shape().z(): " << a->tensor_shape().z()
-              << "b->tensor_shape().x(): " << b->tensor_shape().x()
-              << "b->tensor_shape().y(): " << b->tensor_shape().y()
-              << "b->tensor_shape().z(): " << b->tensor_shape().z()
-              << "c->tensor_shape().x(): " << c->tensor_shape().x()
-              << "c->tensor_shape().y(): " << c->tensor_shape().y()
-              << "c->tensor_shape().z(): " << c->tensor_shape().z()
+    std::cout << "a->tensor_shape().x(): " << a->tensor_shape().x() << std::endl
+              << "a->tensor_shape().y(): " << a->tensor_shape().y() << std::endl
+              << "a->tensor_shape().z(): " << a->tensor_shape().z() << std::endl
+              << "b->tensor_shape().x(): " << b->tensor_shape().x() << std::endl
+              << "b->tensor_shape().y(): " << b->tensor_shape().y() << std::endl
+              << "b->tensor_shape().z(): " << b->tensor_shape().z() << std::endl
+              << "c->tensor_shape().x(): " << c->tensor_shape().x() << std::endl
+              << "c->tensor_shape().y(): " << c->tensor_shape().y() << std::endl
+              << "c->tensor_shape().z(): " << c->tensor_shape().z() << std::endl
             << std::endl;
 
     std::cout << "a.id: " << a->id() 
