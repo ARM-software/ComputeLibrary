@@ -80,14 +80,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ARM_COMPUTE_UNUSED(d);
 }
 
-void CpuScaleDotProduction::transpose(ITensorPack &tensors)
-{
-    if(!_is_prepared)
-    {
-        _is_prepared = true;
-    }
-}
-
 experimental::MemoryRequirements CpuScaleDotProduction::workspace() const
 {
     return _aux_mem;
