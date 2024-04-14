@@ -91,6 +91,9 @@ void CpuGemm::configure(const ITensorInfo *a,
               << "c->tensor_shape().x(): " << c->tensor_shape().x() << std::endl
               << "c->tensor_shape().y(): " << c->tensor_shape().y() << std::endl
               << "c->tensor_shape().z(): " << c->tensor_shape().z() << std::endl
+              << "d->tensor_shape().x(): " << d->tensor_shape().x() << std::endl
+              << "d->tensor_shape().y(): " << d->tensor_shape().y() << std::endl
+              << "d->tensor_shape().z(): " << d->tensor_shape().z() << std::endl
             << std::endl;
 
     std::cout << "a.id: " << a->id() 
@@ -445,8 +448,6 @@ void CpuGemm::run(ITensorPack &tensors)
 
     if (_asm_glue && _asm_glue->is_configured())
     {
-
-        std::cout << "NEScheduler::get().schedule_op" << std::endl;
         // Pass c to asm dispatch only if it's the bias tensor
         ITensorPack asm_pack = tensors;
         asm_pack.add_const_tensor(ACL_SRC_2, _run_bias_addition ? c : nullptr);
@@ -456,8 +457,6 @@ void CpuGemm::run(ITensorPack &tensors)
             ITensorPack pack{{ACL_SRC, d}, {ACL_DST, d}};
             _alpha_scale_func->run(pack);
         }
-
-        std::cout << "NEScheduler::get().schedule_op" << std::endl;
     }
     else
     {
@@ -528,6 +527,12 @@ void CpuGemm::run(ITensorPack &tensors)
         ITensorPack pack{{ACL_SRC, d}, {ACL_DST, d}};
         _activation_func->run(pack);
     }
+    std::cout << "src/cpu/operators/CpuGemm.cpp "
+              << "d->tensor_shape().x(): " << d->info()->tensor_shape().x() << std::endl
+              << "d->tensor_shape().y(): " << d->info()->tensor_shape().y() << std::endl
+              << "d->tensor_shape().z(): " << d->info()->tensor_shape().z() << std::endl;
+    
+
 }
 
 void CpuGemm::prepare(ITensorPack &tensors)
