@@ -31,7 +31,7 @@ void CpuLinear::configure(const ITensorInfo *a,
     _run_vector_matrix_multiplication = a->dimension(1) < 2;
     _run_bias_addition                = is_c_bias;
     _reshape_b_only_on_first_run      = b->are_values_constant();
-
+    std::cout << "src/cpu/operators/CpuLinear.cpp  " << run_optimised << std::endl;
     if (run_optimised)
     {
         _run_interleave_transpose   = false;
