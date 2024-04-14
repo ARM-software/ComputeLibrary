@@ -69,6 +69,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         if (!_reshape_b_only_on_first_run)
         {
             // Run pretranspose kernel
+            std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp transpose " << std::endl; 
             ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
             _pretranspose_b_func->run(pretranspose_pack);
         }
