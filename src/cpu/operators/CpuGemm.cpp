@@ -488,6 +488,7 @@ void CpuGemm::run(ITensorPack &tensors)
             }
             b_to_use = pretransposed_b.get();
         }
+        
         if (_run_interleave_transpose)
         {
             if (!_reshape_b_only_on_first_run)

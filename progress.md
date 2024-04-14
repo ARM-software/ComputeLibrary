@@ -193,6 +193,7 @@ Functionality:
 Optimization: 
             1. window collapse
             2. Every kernel
+            3. GEMM run optimized
 
 
 Input                                                           char U8                          (Len_seq, ...)
