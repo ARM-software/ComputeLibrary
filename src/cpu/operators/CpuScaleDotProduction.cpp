@@ -64,6 +64,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler pretransposed_b(offset_int_vec(PreTransposedRHS), _pretransposed_b, tensors);
 
     const ITensor *b_to_use = b;
+    std::cout << " src/cpu/operators/CpuScaleDotProduction.cpp " << _reshape_b_only_on_first_run << "  " << std::endl;
     if (_pretranspose_b_func)
     {
         if (!_reshape_b_only_on_first_run)
