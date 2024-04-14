@@ -50,6 +50,7 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(window);
+    ARM_COMPUTE_UNUSED(tensors);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
 
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
