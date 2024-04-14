@@ -82,10 +82,16 @@ void CpuGemm::configure(const ITensorInfo *a,
 
     std::cout << "src/cpu/operators/CpuGemm.cpp configure S" << std::endl;
     std::cout << "run_optimised " << run_optimised <<std::endl;
-    std::cout << "a.id: " << a->has_valid_id()
-              << "b.id: " << b->has_valid_id()
-              << "c.id: " << c->has_valid_id() 
-              << "d.id: " << d->has_valid_id() << std::endl;
+    std::cout << "a->tensor_shape().x(): " << a->tensor_shape().x()
+              << "a->tensor_shape().y(): " << a->tensor_shape().y()
+              << "a->tensor_shape().z(): " << a->tensor_shape().z()
+              << "b->tensor_shape().x(): " << b->tensor_shape().x()
+              << "b->tensor_shape().y(): " << b->tensor_shape().y()
+              << "b->tensor_shape().z(): " << b->tensor_shape().z()
+              << "c->tensor_shape().x(): " << c->tensor_shape().x()
+              << "c->tensor_shape().y(): " << c->tensor_shape().y()
+              << "c->tensor_shape().z(): " << c->tensor_shape().z()
+            << std::endl;
 
     std::cout << "a.id: " << a->id() 
               << "b.id: " << b->id() 
