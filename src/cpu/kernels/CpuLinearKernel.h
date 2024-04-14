@@ -3,7 +3,6 @@
 
 #include "src/core/common/Macros.h"
 
-#include "arm_compute/core/TensorInfo.h"
 #include "src/core/KernelTypes.h"
 #include "src/cpu/ICpuKernel.h"
 

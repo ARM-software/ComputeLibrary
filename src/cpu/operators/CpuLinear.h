@@ -1,6 +1,8 @@
 #ifndef ARM_COMPUTE_CPU_LINEAR_H
 #define ARM_COMPUTE_CPU_LINEAR_H
 
+#include "arm_compute/core/TensorInfo.h"
+
 #include "src/cpu/ICpuOperator.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
