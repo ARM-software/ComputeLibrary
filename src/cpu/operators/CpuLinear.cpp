@@ -23,6 +23,7 @@ void CpuLinear::configure(const ITensorInfo *a,
                           float              beta, const LinearLayerInfo &linear_info)
 {
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, linear_info);
+    ARM_COMPUTE_UNUSED(linear_info);
 
     const bool is_c_bias = beta == 1 && c != nullptr;
     const bool run_optimised = false;
@@ -102,7 +103,7 @@ void CpuLinear::run(ITensorPack &tensors)
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto a = tensors.get_const_tensor(ACL_SRC_0);
     auto b = tensors.get_const_tensor(ACL_SRC_1);
-    auto c = tensors.get_const_tensor(ACL_SRC_2);
+    //auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
