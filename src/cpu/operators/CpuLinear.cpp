@@ -117,8 +117,10 @@ void CpuLinear::run(ITensorPack &tensors)
     {
         // Run interleave kernel
         ITensorPack interleave_pack{{ACL_SRC, a}, {ACL_DST, interleaved_a.get()}};
-        NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimX, _interleave_kernel->window(),
+    std::cout << "src/cpu/operators/CpuLinear.cpp 1.1 " << std::endl;
+        NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
                                         interleave_pack);
+    std::cout << "src/cpu/operators/CpuLinear.cpp 1.2 " << std::endl;
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_a.get());
     }
@@ -141,7 +143,6 @@ void CpuLinear::run(ITensorPack &tensors)
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
     
     std::cout << "src/cpu/operators/CpuLinear.cpp 3 " << std::endl;
-    
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
