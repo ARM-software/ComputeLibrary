@@ -56,7 +56,7 @@ void CpuLinear::configure(const ITensorInfo *a,
             _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
             _interleave_kernel->configure(a, &_tmp_a);
             _aux_mem[InterleavedLHS] =
-                experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Persistent, _tmp_a.total_size());
+                experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Temporary, _tmp_a.total_size());
             
             // Configure rhs transpose1xw kernel
             _transpose1xW_b_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
@@ -117,7 +117,7 @@ void CpuLinear::run(ITensorPack &tensors)
     {
         // Run interleave kernel
         ITensorPack interleave_pack{{ACL_SRC, a}, {ACL_DST, interleaved_a.get()}};
-        NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
+        NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimX, _interleave_kernel->window(),
                                         interleave_pack);
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_a.get());
