@@ -29,11 +29,9 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
     /* Pretranspose Key, K=K^T*/
     _pretranspose_key_func = std::make_unique<CpuTranspose>();
     _pretranspose_key_func->configure(key_to_use, &_pretransposed_key);
-    experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
 
     _aux_mem[PreTransposedRHS] =
-                experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), lifetime, _pretransposed_key.total_size());
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp key size " <<_pretransposed_key.total_size() << std::endl;
+                experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), experimental::MemoryLifetime::Persistent, _pretransposed_key.total_size());
     key_to_use = &_pretransposed_key;
 
     /* Matrix multiply Query adn Key, QK */
