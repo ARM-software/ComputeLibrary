@@ -35,17 +35,6 @@ namespace cpu
 void vector_matrix_multiply_f32(
     const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
-    std::cout<<" matrix_matrix_multiply " << std::endl;
-    std::cout << "lhs x: " << lhs->info()->tensor_shape().x() << std::endl;
-    std::cout << "lhs y: " << lhs->info()->tensor_shape().y() << std::endl;
-
-    std::cout << "rhs x: " << rhs->info()->tensor_shape().x() << std::endl;
-    std::cout << "rhs y: " << rhs->info()->tensor_shape().y() << std::endl;
-
-    std::cout << "dst x: " << dst->info()->tensor_shape().x() << std::endl;
-    std::cout << "dst y: " << dst->info()->tensor_shape().y() << std::endl;
-
-    std::cout<<" matrix_matrix_multiply " << std::endl;
     const auto width_matrix_b = static_cast<int>(dst->info()->dimension(0));
     const auto in_b_stride =
         static_cast<int>(rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type()));
@@ -298,17 +287,7 @@ void matrix_matrix_multiply_f32(
     const size_t out_stride2 = out_stride1 * 2;
     const size_t out_stride3 = out_stride1 * 3;
     const int    num_elems_matrix_b_x = rhs->info()->dimension(0);
-    std::cout<<" matrix_matrix_multiply " << std::endl;
-    std::cout << "lhs x: " << lhs->info()->tensor_shape().x() << std::endl;
-    std::cout << "lhs y: " << lhs->info()->tensor_shape().y() << std::endl;
 
-    std::cout << "rhs x: " << rhs->info()->tensor_shape().x() << std::endl;
-    std::cout << "rhs y: " << rhs->info()->tensor_shape().y() << std::endl;
-
-    std::cout << "dst x: " << dst->info()->tensor_shape().x() << std::endl;
-    std::cout << "dst y: " << dst->info()->tensor_shape().y() << std::endl;
-
-    std::cout<<" matrix_matrix_multiply " << std::endl;
     // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the dst matrix
     Window win_a(window);
     win_a.set(Window::DimX, Window::Dimension(0, 0, 0));
