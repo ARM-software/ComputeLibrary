@@ -70,6 +70,11 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
         const int n = key_to_use->dimension(0);
         const int k = query->dimension(0);
 
+        std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp MM run" << std::endl;
+        std::cout << "m " << m << std::endl;
+        std::cout << "n " << n << std::endl;
+        std::cout << "k " << k << std::endl;
+        std::cout << "_run_interleave_transpose " << _run_interleave_transpose << std::endl;
         // Configure matrix multiplication kernel
         _mm_kernel->configure(&_tmp_query, &_tmp_key, gemm_output_to_use, alpha, _run_interleave_transpose,
                                 GEMMReshapeInfo(m, n, k));
