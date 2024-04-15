@@ -106,6 +106,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
+    std::cout << "query->info()->tensor_shape().x() "<< query->info()->tensor_shape().x() << std::endl;
+    std::cout << "query->info()->tensor_shape().y() "<< query->info()->tensor_shape().y() << std::endl;
     if (_run_interleave_transpose)
     {
         // Run interleave kernel
@@ -115,6 +117,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_query.get());
     }
+    std::cout << "interleaved_query.x() "<< interleaved_query.get()->info()->tensor_shape().x() << std::endl;
+    std::cout << "interleaved_query.y() "<< interleaved_query.get()->info()->tensor_shape().y() << std::endl;
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2" << std::endl;
     if (_pretranspose_key_func)
