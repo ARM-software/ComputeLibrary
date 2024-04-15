@@ -10,6 +10,8 @@
 #include "src/cpu/kernels/CpuSoftmaxKernel.h"
 #include "src/cpu/operators/CpuTranspose.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
+#include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
+#include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 
 #include <memory>
 
@@ -60,9 +62,18 @@ private:
         Count
     };
 
-    std::unique_ptr<CpuTranspose>   _pretranspose_key_func{nullptr};
+    std::unique_ptr<kernels::CpuGemmInterleave4x4Kernel>    _interleave_kernel{nullptr};
+    std::unique_ptr<CpuTranspose>                           _pretranspose_key_func{nullptr};
+    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel{nullptr};
+    std::unique_ptr<kernels::CpuGemmTranspose1xWKernel>     _transpose1xW_key_kernel{nullptr};
 
+    TensorInfo _tmp_query{};
     TensorInfo _pretransposed_key{};
+    TensorInfo _tmp_key{};
+
+    bool _run_vector_matrix_multiplication{false};
+    bool _run_interleave_transpose{
+        true}; /**< If we run CpuGemmInterleave4x4Kernel on lhs and CpuGemmTranspose1xWKernel on rhs */
 
     experimental::MemoryRequirements _aux_mem{Count};
 

@@ -188,6 +188,7 @@ Functionality:
                         src/cpu/kernels/CpuPositionEmbeddingKernel.cpp
             4. Pytorch positional embdding is implemented using pretrained model, but this calcualtes.
             5. Deallocate Simple forward original output tensor
+            6. Potential: src/cpu/operators/CpuScaleDotProduction.cpp Run tensor pack re indexed
 
 
 Optimization: 
