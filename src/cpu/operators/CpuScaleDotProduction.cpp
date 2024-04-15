@@ -132,8 +132,10 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     }
     std::cout << "pretransposed_key.get().x() "<< pretransposed_key.get()->info()->tensor_shape().x() << std::endl;
     std::cout << "pretransposed_key.get().y() "<< pretransposed_key.get()->info()->tensor_shape().y() << std::endl;
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
 
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
+    std::cout << "key_to_use.x() "<< key_to_use->info()->tensor_shape().x() << std::endl;
+    std::cout << "key_to_use.y() "<< key_to_use->info()->tensor_shape().y() << std::endl;
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
@@ -142,6 +144,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                         _transpose1xW_key_kernel->window(), transpose_pack);
         key_to_use = transposed1xw_key.get();
     }
+    std::cout << "transposed1xw_key.get().x() "<< transposed1xw_key.get()->info()->tensor_shape().x() << std::endl;
+    std::cout << "transposed1xw_key.get().y() "<< transposed1xw_key.get()->info()->tensor_shape().y() << std::endl;
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 4" << std::endl;
     // Use reshaped matrices
