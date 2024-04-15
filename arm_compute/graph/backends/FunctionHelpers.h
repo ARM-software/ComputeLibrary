@@ -1785,18 +1785,7 @@ std::unique_ptr<IFunction> create_linear_layer(LinearLayerNode &node)
     typename TargetInfo::TensorType *bias     = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output   = get_backing_tensor<TargetInfo>(node.output(0));
     const LinearLayerInfo linear_info         = node.linear_info();
-    std::cout << "create_linear_layer S " << std::endl;
 
-    std::cout << "a.id: " << node.input(0)->id() 
-              << "b.id: " << node.input(1)->id() 
-              << "c.id: " << node.input(2)->id() 
-              << "d.id: " << node.output(0)->id() << std::endl;
-
-    std::cout << "a.id: " << input->info()->id() 
-              << "b.id: " << weight->info()->id() 
-              << "c.id: " << bias->info()->id() 
-              << "d.id: " << output->info()->id() << std::endl;
-    std::cout << "create_linear_layer E " << std::endl;
     // Create function
     auto func = std::make_unique<LinearLayerFunction>();
     func->configure(input, weight, bias, output, linear_info);
@@ -1868,13 +1857,13 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
      // Extract IO and info
     typename TargetInfo::TensorType *query   = get_backing_tensor<TargetInfo>(node.input(0));
     std::cout << "arm_compute/graph/backends/FunctionHelpers.h  "<< node.id() << "  Start" << std::endl;
-    std::cout << node.input(0)->desc().shape.x() << std::endl;
+    std::cout << query->desc().shape.y() << std::endl;
     typename TargetInfo::TensorType *key     = get_backing_tensor<TargetInfo>(node.input(1));
-    std::cout << node.input(1)->desc().shape.x() << std::endl;
+    std::cout << key->desc().shape.y() << std::endl;
     typename TargetInfo::TensorType *value   = get_backing_tensor<TargetInfo>(node.input(2));
-    std::cout << node.input(2)->desc().shape.x() << std::endl;
+    std::cout << value->desc().shape.y() << std::endl;
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
-    std::cout << node.output(0)->desc().shape.x() << std::endl;
+    std::cout << output->desc().shape.y() << std::endl;
 
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
