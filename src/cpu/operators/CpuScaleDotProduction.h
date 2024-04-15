@@ -71,6 +71,7 @@ private:
     TensorInfo _pretransposed_key{};
     TensorInfo _tmp_key{};
 
+    bool _run_pretranspose{false};
     bool _run_vector_matrix_multiplication{false};
     bool _run_interleave_transpose{
         true}; /**< If we run CpuGemmInterleave4x4Kernel on lhs and CpuGemmTranspose1xWKernel on rhs */

@@ -23,7 +23,9 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
 
-    _run_vector_matrix_multiplication = key->dimension(1) < 2;
+    _run_vector_matrix_multiplication   = key->dimension(1) < 2;
+    _run_pretranspose                   = false;
+    
     float   alpha = 1.0f;
 
     // Pick b tensor in case pretranspose should be performed
@@ -123,7 +125,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2" << std::endl;
     std::cout << "key_to_use.x() "<< key_to_use->info()->tensor_shape().x() << std::endl;
     std::cout << "key_to_use.y() "<< key_to_use->info()->tensor_shape().y() << std::endl;
-    if (_pretranspose_key_func)
+    if (_pretranspose_key_func && _run_pretranspose)
     {
         // Run pretranspose kernel
         ITensorPack pretranspose_pack{{ACL_SRC, key_to_use}, {ACL_DST, pretransposed_key.get()}};
