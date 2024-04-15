@@ -61,8 +61,12 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     auto query  = tensors.get_const_tensor(ACL_SRC_2);
     auto output = tensors.get_tensor(ACL_DST);
 
-    CpuAuxTensorHandler pretransposed_key(offset_int_vec(PreTransposedRHS), _pretransposed_key, tensors);
     const ITensor *key_to_use = key;
+    CpuAuxTensorHandler pretransposed_key(
+                offset_int_vec(PreTransposedRHS), _pretransposed_key, tensors,
+                false /*pack_inject: no need to inject into tensors*/,
+                _pretranspose_key_func ==
+                    nullptr /*bypass_alloc: no need to allocate if _pretranspose_b_func is not run*/);
     if (_pretranspose_key_func)
     {
         // Run pretranspose kernel
