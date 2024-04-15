@@ -27,6 +27,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/Scheduler.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/arm_gemm/transform.hpp"
@@ -233,13 +234,20 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
             }
         }
 
-        int ksize;
+        int ksize = 0;
         switch (output_wf)
         {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
             case WeightFormat::OHWIo8:
             {
-                ksize = 8;
+                if (Scheduler::get().cpu_info().has_sve() && arm_gemm::utils::get_vector_length<float>() == 8)
+                {
+                    ksize = 8;
+                }
+                else
+                {
+                    ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported weight format.");
+                }
                 break;
             }
 #endif /* ARM_COMPUTE_ENABLE_SVE */
