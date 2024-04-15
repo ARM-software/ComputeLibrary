@@ -35,6 +35,17 @@ namespace cpu
 void vector_matrix_multiply_f32(
     const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
+    std::cout<<" matrix_matrix_multiply " << std::endl;
+    std::cout << "lhs x: " << lhs->info()->tensor_shape().x() << std::endl;
+    std::cout << "lhs y: " << lhs->info()->tensor_shape().y() << std::endl;
+
+    std::cout << "rhs x: " << rhs->info()->tensor_shape().x() << std::endl;
+    std::cout << "rhs y: " << rhs->info()->tensor_shape().y() << std::endl;
+
+    std::cout << "dst x: " << dst->info()->tensor_shape().x() << std::endl;
+    std::cout << "dst y: " << dst->info()->tensor_shape().y() << std::endl;
+
+    std::cout<<" matrix_matrix_multiply " << std::endl;
     const auto width_matrix_b = static_cast<int>(dst->info()->dimension(0));
     const auto in_b_stride =
         static_cast<int>(rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type()));
