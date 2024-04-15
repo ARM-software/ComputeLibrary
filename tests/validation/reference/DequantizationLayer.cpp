@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,12 @@ TOut dequantize(int16_t val, const UniformQuantizationInfo qinfo, DataType dt)
     ARM_COMPUTE_UNUSED(dt);
     return static_cast<TOut>(dequantize_qsymm16(val, qinfo));
 }
+template <typename TOut>
+TOut dequantize(int32_t val, const UniformQuantizationInfo qinfo, DataType dt)
+{
+    ARM_COMPUTE_UNUSED(dt);
+    return static_cast<TOut>(dequantize_s32(val, qinfo));
+}
 } // namespace
 template <typename TOut, typename TIn>
 SimpleTensor<TOut> dequantization_layer(const SimpleTensor<TIn> &src)
@@ -115,6 +121,7 @@ template SimpleTensor<half> dequantization_layer(const SimpleTensor<int8_t> &src
 template SimpleTensor<float> dequantization_layer(const SimpleTensor<int8_t> &src);
 template SimpleTensor<half> dequantization_layer(const SimpleTensor<int16_t> &src);
 template SimpleTensor<float> dequantization_layer(const SimpleTensor<int16_t> &src);
+template SimpleTensor<float> dequantization_layer(const SimpleTensor<int32_t> &src);
 } // namespace reference
 } // namespace validation
 } // namespace test
