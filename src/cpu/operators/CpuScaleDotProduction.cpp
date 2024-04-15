@@ -36,6 +36,9 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
     key_to_use = &_pretransposed_key;
 
     /* Matrix multiply Query adn Key, QK */
+    ARM_COMPUTE_UNUSED(value);
+    ARM_COMPUTE_UNUSED(query);
+    ARM_COMPUTE_UNUSED(output);
 
 
 }
