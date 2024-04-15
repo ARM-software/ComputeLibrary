@@ -33,6 +33,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
 
     _aux_mem[PreTransposedRHS] =
                 experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), lifetime, _pretransposed_key.total_size());
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp key size " << std::endl;
     key_to_use = &_pretransposed_key;
 
     /* Matrix multiply Query adn Key, QK */
