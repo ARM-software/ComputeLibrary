@@ -66,7 +66,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     if (_pretranspose_key_func)
     {
         // Run pretranspose kernel
-        ITensorPack pretranspose_pack{{ACL_SRC, key_to_use}, {ACL_DST, output}};
+        ITensorPack pretranspose_pack{{ACL_SRC, key_to_use}, {ACL_DST, pretransposed_key.get()}};
         _pretranspose_key_func->run(pretranspose_pack);
         key_to_use = pretransposed_key.get();
     }
