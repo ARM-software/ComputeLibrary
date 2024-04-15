@@ -61,6 +61,14 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
     auto       dst3 = tensors.get_tensor(TensorType::ACL_DST_2);
 
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
+    std::cout << src1->info()->total_size() <<std::endl;
+    std::cout << src2->info()->total_size() <<std::endl;
+    std::cout << src3->info()->total_size() <<std::endl;
+
+    std::cout << dst1->info()->total_size() <<std::endl;
+    std::cout << dst2->info()->total_size() <<std::endl;
+    std::cout << dst3->info()->total_size() <<std::endl;
+    std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
     
 }
 
