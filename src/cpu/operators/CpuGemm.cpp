@@ -81,7 +81,6 @@ void CpuGemm::configure(const ITensorInfo *a,
           b->tensor_shape().z() > 1); // Disable batch matmul as optimized GeMM handles batching differently.
 
     std::cout << "src/cpu/operators/CpuGemm.cpp configure S" << std::endl;
-    std::cout << "run_optimised " << run_optimised <<std::endl;
     std::cout << "a->tensor_shape().x(): " << a->tensor_shape().x() << std::endl
               << "a->tensor_shape().y(): " << a->tensor_shape().y() << std::endl
               << "a->tensor_shape().z(): " << a->tensor_shape().z() << std::endl

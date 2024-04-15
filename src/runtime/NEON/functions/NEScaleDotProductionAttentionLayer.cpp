@@ -35,7 +35,6 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *key,const ITen
     _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
     _impl->is_prepared      = false;
 
-
     _impl->op->configure(key->info(),value->info(),query->info(),output->info());
 
     _impl->aux_mem_req = _impl->op->workspace();

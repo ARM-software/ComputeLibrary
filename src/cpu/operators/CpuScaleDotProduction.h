@@ -57,20 +57,9 @@ private:
         InterleavedLHS = 3,
         PreTransposedRHS,
         Transposed1xWRHS,
-        TempResult,
         Count
     };
-
-    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel> _mm_kernel{nullptr};
-    std::unique_ptr<CpuTranspose>                         _pretranspose_b_func{nullptr};
-    std::unique_ptr<kernels::CpuScaleKernel>              _s_kernel{nullptr};
-    std::unique_ptr<kernels::CpuSoftmaxKernel>            _sm_kernel{nullptr};
-
-    TensorInfo _pretransposed_b{};
-
-    bool _is_prepared{false};
-    bool _reshape_b_only_on_first_run{false};
-
+    
     experimental::MemoryRequirements _aux_mem{Count};
 
 };

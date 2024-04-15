@@ -16,29 +16,32 @@ namespace arm_compute
 namespace cpu
 {
 
-void CpuScaleDotProduction::configure(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output)
+void CpuScaleDotProduction::configure(const ITensorInfo *key,
+                                      const ITensorInfo *value,
+                                      const ITensorInfo *query,
+                                      ITensorInfo *output)
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
 
-    _reshape_b_only_on_first_run = key->are_values_constant();
-
     /* Pretranspose Key, K=K^T*/
-    const ITensorInfo *b_to_use = key;
-    _pretranspose_b_func = std::make_unique<CpuTranspose>();
-    _pretranspose_b_func->configure(b_to_use, &_pretransposed_b);
-
-    experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
-
-    _aux_mem[PreTransposedRHS] =
-                experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), lifetime, _pretransposed_b.total_size());
-            b_to_use = &_pretransposed_b;
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
+     std::cout << "->tensor_shape().x(): " << key->tensor_shape().x() << std::endl
+              << "a->tensor_shape().y(): " << key->tensor_shape().y() << std::endl
+              << "a->tensor_shape().z(): " << key->tensor_shape().z() << std::endl
+              << "b->tensor_shape().x(): " << value->tensor_shape().x() << std::endl
+              << "b->tensor_shape().y(): " << value->tensor_shape().y() << std::endl
+              << "b->tensor_shape().z(): " << value->tensor_shape().z() << std::endl
+              << "c->tensor_shape().x(): " << query->tensor_shape().x() << std::endl
+              << "c->tensor_shape().y(): " << query->tensor_shape().y() << std::endl
+              << "c->tensor_shape().z(): " << query->tensor_shape().z() << std::endl
+              << "d->tensor_shape().x(): " << output->tensor_shape().x() << std::endl
+              << "d->tensor_shape().y(): " << output->tensor_shape().y() << std::endl
+              << "d->tensor_shape().z(): " << output->tensor_shape().z() << std::endl
+            << std::endl;
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
 
     /* Matrix multiply Query adn Key, QK */
-    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
-    _mm_kernel->configure(query,b_to_use,output,1.0,false);
-    ARM_COMPUTE_UNUSED(value);
-    ARM_COMPUTE_UNUSED(query);
-    ARM_COMPUTE_UNUSED(output);
+
 
 }
 
@@ -55,29 +58,6 @@ CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
 
-    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided"); 
-    auto a = tensors.get_const_tensor(ACL_SRC_0);
-    auto b = tensors.get_const_tensor(ACL_SRC_1);
-    auto c = tensors.get_const_tensor(ACL_SRC_2);
-    auto d = tensors.get_tensor(ACL_DST);
-
-    CpuAuxTensorHandler pretransposed_b(offset_int_vec(PreTransposedRHS), _pretransposed_b, tensors);
-
-    const ITensor *b_to_use = b;
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp " << _reshape_b_only_on_first_run << "  " << std::endl;
-    if (_pretranspose_b_func)
-    {
-        // Run pretranspose kernel
-        std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp transpose " << std::endl; 
-        ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
-        _pretranspose_b_func->run(pretranspose_pack);
-
-        b_to_use = pretransposed_b.get();
-    }
-
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(c);
-    ARM_COMPUTE_UNUSED(d);
 }
 
 experimental::MemoryRequirements CpuScaleDotProduction::workspace() const
