@@ -101,7 +101,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     const ITensor *key_to_use = key;
 
     CpuAuxTensorHandler pretransposed_key(offset_int_vec(PreTransposedRHS), _pretransposed_key, tensors);
-
     CpuAuxTensorHandler interleaved_query(offset_int_vec(InterleavedLHS), _tmp_query, tensors, true);
     CpuAuxTensorHandler transposed1xw_key(offset_int_vec(Transposed1xWRHS), _tmp_key, tensors, true);
 
