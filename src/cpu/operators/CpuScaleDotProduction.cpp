@@ -57,7 +57,7 @@ CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value
 
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
-
+    ARM_COMPUTE_UNUSED(tensors);
 }
 
 experimental::MemoryRequirements CpuScaleDotProduction::workspace() const
