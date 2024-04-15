@@ -87,13 +87,13 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
     std::cout << src3->is_used() << "  " << dst3->is_used() << std::endl;
 
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
-    std::cout << src1->ptr_to_element(Coordinates(0,0)) <<std::endl;
-    std::cout << src2->ptr_to_element(Coordinates(0,0)) <<std::endl;
-    std::cout << src3->ptr_to_element(Coordinates(0,0)) <<std::endl;
+    std::cout << *reinterpret_cast<float*>(src1->ptr_to_element(Coordinates(0,0))) <<std::endl;
+    std::cout << *reinterpret_cast<float*>(src2->ptr_to_element(Coordinates(0,0))) <<std::endl;
+    std::cout << *reinterpret_cast<float*>(src3->ptr_to_element(Coordinates(0,0))) <<std::endl;
 
-    std::cout << dst1->ptr_to_element(Coordinates(0,0)) <<std::endl;
-    std::cout << dst2->ptr_to_element(Coordinates(0,0)) <<std::endl;
-    std::cout << dst3->ptr_to_element(Coordinates(0,0)) <<std::endl;
+    std::cout << *reinterpret_cast<float*>(dst1->ptr_to_element(Coordinates(0,0))) <<std::endl;
+    std::cout << *reinterpret_cast<float*>(dst2->ptr_to_element(Coordinates(0,0))) <<std::endl;
+    std::cout << *reinterpret_cast<float*>(dst3->ptr_to_element(Coordinates(0,0))) <<std::endl;
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
     
 }
