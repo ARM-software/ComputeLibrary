@@ -87,7 +87,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
     validate(b.info()->padding(), PaddingSize());
     validate(c.info()->padding(), PaddingSize());
 }
-
+// accumulation is not supported for Int8/UInt8 in aarch32
+#ifdef __aarch64__
 DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
                                                                     zip(
                                                                      make("In0",{ TensorShape(21U, 1U) }),
@@ -125,6 +126,7 @@ DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
 
     ARM_COMPUTE_EXPECT((expected ==  bool(status)), framework::LogLevel::ERRORS);
 }
+#endif // __arch64__
 
 // *INDENT-OFF*
 // clang-format off
