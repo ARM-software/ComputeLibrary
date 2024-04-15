@@ -55,7 +55,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
         _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
         _interleave_kernel->configure(query, &_tmp_query);
         _aux_mem[InterleavedLHS] =
-            experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Temporary, _tmp_query.total_size());
+            experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Persistent, _tmp_query.total_size());
 
         // Configure rhs transpose1xw kernel
         _transpose1xW_key_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
