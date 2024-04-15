@@ -437,7 +437,7 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                 for (; x <= (window_end_x - window_step_x); x += window_step_x)
                 {
                     std::cout << "transpose_32bit_elements load 0 " << x <<std::endl;
-                    std::cout << *reinterpret_cast<float *>(output.ptr()) <<std::endl;
+                    std::cout << *reinterpret_cast<float*>(in->ptr_to_element(Coordinates(0,0))) <<std::endl;
                     std::cout << "transpose_32bit_elements load 1 " << x <<std::endl;
                     // Load
                     const uint32x4x2_t row0 =
@@ -551,7 +551,6 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
                         reinterpret_cast<uint32_t *>(output.ptr() + dst_offset_in_bytes + 7 * output_stride_in_bytes),
                         col7);
 
-                    std::cout << "transpose_32bit_elements store 2" << x <<std::endl;
                 }
 
 
@@ -749,16 +748,6 @@ void CpuTransposeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     const TensorShape dst_shape = misc::shape_calculator::compute_transposed_shape(*src);
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
 
-    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
-    std::cout << src->tensor_shape().x() <<std::endl;
-    std::cout << src->tensor_shape().y() <<std::endl;
-    std::cout << src->tensor_shape().z() <<std::endl;
-    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
-    std::cout << dst_shape.x() <<std::endl;
-    std::cout << dst_shape.y() <<std::endl;
-    std::cout << dst_shape.z() <<std::endl;
-    std::cout << "src/cpu/kernels/CpuTransposeKernel.cpp" <<std::endl;
-    
     // Explicitly set the tensor shape to preserve dimensions
     dst->set_tensor_shape(dst_shape);
 
