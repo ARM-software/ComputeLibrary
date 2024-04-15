@@ -82,6 +82,10 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
     std::cout << dst1->info()->tensor_shape().y() <<std::endl;
     std::cout << dst1->info()->tensor_shape().z() <<std::endl;
 
+    std::cout << src1->is_used() << "  " << dst1->is_used() << std::endl;
+    std::cout << src2->is_used() << "  " << dst2->is_used() << std::endl;
+    std::cout << src3->is_used() << "  " << dst3->is_used() << std::endl;
+
     std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
     
 }
