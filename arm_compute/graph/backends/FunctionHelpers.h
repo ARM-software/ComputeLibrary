@@ -1874,6 +1874,7 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     typename TargetInfo::TensorType *value   = get_backing_tensor<TargetInfo>(node.input(2));
     std::cout << node.input(2)->desc().shape.x() << std::endl;
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+    std::cout << node.output(0)->desc().shape.x() << std::endl;
 
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
