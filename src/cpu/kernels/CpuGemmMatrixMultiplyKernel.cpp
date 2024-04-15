@@ -135,7 +135,9 @@ void CpuGemmMatrixMultiplyKernel::configure(const ITensorInfo     *lhs,
     TensorShape tensor_shape{lhs->tensor_shape()};
     tensor_shape.set(0, is_interleaved ? reshape_info.n() : rhs->dimension(0));
     tensor_shape.set(1, is_interleaved ? reshape_info.m() : lhs->dimension(1));
-
+    std::cout << "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp " <<std::endl;
+    std::cout << tensor_shape.x() <<std::endl;
+    std::cout << tensor_shape.y() <<std::endl;
     auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(tensor_shape));
 
     // Perform validate step
