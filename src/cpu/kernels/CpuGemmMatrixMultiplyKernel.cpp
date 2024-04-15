@@ -135,11 +135,17 @@ void CpuGemmMatrixMultiplyKernel::configure(const ITensorInfo     *lhs,
     TensorShape tensor_shape{lhs->tensor_shape()};
     tensor_shape.set(0, is_interleaved ? reshape_info.n() : rhs->dimension(0));
     tensor_shape.set(1, is_interleaved ? reshape_info.m() : lhs->dimension(1));
-    std::cout << "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp " <<std::endl;
-    std::cout << tensor_shape.x() <<std::endl;
-    std::cout << tensor_shape.y() <<std::endl;
     auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(tensor_shape));
 
+    std::cout << "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp " <<std::endl;
+    std::cout << "lhs x "<< tensor_shape.x() <<std::endl;
+    std::cout << "lhs y "<< tensor_shape.y() <<std::endl;
+
+    std::cout << "rhs x "<< rhs->tensor_shape().x() <<std::endl;
+    std::cout << "rhs y "<< rhs->tensor_shape().y() <<std::endl;
+
+    std::cout << "dst x "<< dst->tensor_shape().x() <<std::endl;
+    std::cout << "dst y "<< dst->tensor_shape().y() <<std::endl;
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(lhs, rhs, dst, alpha, is_interleaved, reshape_info));
 
