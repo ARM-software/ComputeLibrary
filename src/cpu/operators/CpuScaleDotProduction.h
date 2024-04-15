@@ -59,7 +59,11 @@ private:
         Transposed1xWRHS,
         Count
     };
-    
+
+    std::unique_ptr<CpuTranspose>   _pretranspose_key_func{nullptr};
+
+    TensorInfo _pretransposed_key{};
+
     experimental::MemoryRequirements _aux_mem{Count};
 
 };

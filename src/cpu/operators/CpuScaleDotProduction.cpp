@@ -23,22 +23,17 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
 
+    // Pick b tensor in case pretranspose should be performed
+    const ITensorInfo *key_to_use = key;
+
     /* Pretranspose Key, K=K^T*/
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
-     std::cout << "->tensor_shape().x(): " << key->tensor_shape().x() << std::endl
-              << "a->tensor_shape().y(): " << key->tensor_shape().y() << std::endl
-              << "a->tensor_shape().z(): " << key->tensor_shape().z() << std::endl
-              << "b->tensor_shape().x(): " << value->tensor_shape().x() << std::endl
-              << "b->tensor_shape().y(): " << value->tensor_shape().y() << std::endl
-              << "b->tensor_shape().z(): " << value->tensor_shape().z() << std::endl
-              << "c->tensor_shape().x(): " << query->tensor_shape().x() << std::endl
-              << "c->tensor_shape().y(): " << query->tensor_shape().y() << std::endl
-              << "c->tensor_shape().z(): " << query->tensor_shape().z() << std::endl
-              << "d->tensor_shape().x(): " << output->tensor_shape().x() << std::endl
-              << "d->tensor_shape().y(): " << output->tensor_shape().y() << std::endl
-              << "d->tensor_shape().z(): " << output->tensor_shape().z() << std::endl
-            << std::endl;
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp" << std::endl;
+    _pretranspose_key_func = std::make_unique<CpuTranspose>();
+    _pretranspose_key_func->configure(key_to_use, &_pretransposed_key);
+    experimental::MemoryLifetime lifetime = experimental::MemoryLifetime::Temporary;
+
+    _aux_mem[PreTransposedRHS] =
+                experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), lifetime, _pretransposed_key.total_size());
+    key_to_use = &_pretransposed_key;
 
     /* Matrix multiply Query adn Key, QK */
 
@@ -58,6 +53,25 @@ CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_UNUSED(tensors);
+    auto key    = tensors.get_const_tensor(ACL_SRC_0);
+    auto value  = tensors.get_const_tensor(ACL_SRC_1);
+    auto query  = tensors.get_const_tensor(ACL_SRC_2);
+    auto output = tensors.get_tensor(ACL_DST);
+
+    CpuAuxTensorHandler pretransposed_key(offset_int_vec(PreTransposedRHS), _pretransposed_key, tensors);
+    const ITensor *key_to_use = key;
+    if (_pretranspose_key_func)
+    {
+        // Run pretranspose kernel
+        ITensorPack pretranspose_pack{{ACL_SRC, key_to_use}, {ACL_DST, pretransposed_key.get()}};
+        _pretranspose_key_func->run(pretranspose_pack);
+        key_to_use = pretransposed_key.get();
+    }
+    
+    ARM_COMPUTE_UNUSED(value);
+    ARM_COMPUTE_UNUSED(query);
+    ARM_COMPUTE_UNUSED(output);
+
 }
 
 experimental::MemoryRequirements CpuScaleDotProduction::workspace() const

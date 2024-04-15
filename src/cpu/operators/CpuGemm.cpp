@@ -80,27 +80,6 @@ void CpuGemm::configure(const ITensorInfo *a,
         !(!b->are_values_constant() &&
           b->tensor_shape().z() > 1); // Disable batch matmul as optimized GeMM handles batching differently.
 
-    std::cout << "src/cpu/operators/CpuGemm.cpp configure S" << std::endl;
-    std::cout << "a->tensor_shape().x(): " << a->tensor_shape().x() << std::endl
-              << "a->tensor_shape().y(): " << a->tensor_shape().y() << std::endl
-              << "a->tensor_shape().z(): " << a->tensor_shape().z() << std::endl
-              << "b->tensor_shape().x(): " << b->tensor_shape().x() << std::endl
-              << "b->tensor_shape().y(): " << b->tensor_shape().y() << std::endl
-              << "b->tensor_shape().z(): " << b->tensor_shape().z() << std::endl
-              << "c->tensor_shape().x(): " << c->tensor_shape().x() << std::endl
-              << "c->tensor_shape().y(): " << c->tensor_shape().y() << std::endl
-              << "c->tensor_shape().z(): " << c->tensor_shape().z() << std::endl
-              << "d->tensor_shape().x(): " << d->tensor_shape().x() << std::endl
-              << "d->tensor_shape().y(): " << d->tensor_shape().y() << std::endl
-              << "d->tensor_shape().z(): " << d->tensor_shape().z() << std::endl
-            << std::endl;
-
-    std::cout << "a.id: " << a->id() 
-              << "b.id: " << b->id() 
-              << "c.id: " << c->id() 
-              << "d.id: " << d->id() << std::endl;
-
-    std::cout << "src/cpu/operators/CpuGemm.cpp configure E" << std::endl;
 
     // Check if we need to reshape the matrix B only on the first run
     _is_prepared                      = false;
@@ -430,20 +409,6 @@ void CpuGemm::run(ITensorPack &tensors)
     auto b = tensors.get_const_tensor(ACL_SRC_1);
     auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
-
-    std::cout << "src/cpu/operators/CpuGemm.cpp Run" << std::endl;
-
-    std::cout << "a.id: " << a->info()->id() 
-              << "b.id: " << b->info()->id() 
-              << "c.id: " << c->info()->id() 
-              << "d.id: " << d->info()->id() << std::endl;
-
-    std::cout << "Input:  ";
-    std::cout << *reinterpret_cast<float *>(a->buffer()) << " " << *reinterpret_cast<float *>(a->buffer()+1) << std::endl;
-    std::cout << "Weight:  ";
-    std::cout << *reinterpret_cast<float *>(b->buffer()) << " " << *reinterpret_cast<float *>(b->buffer()+1) << std::endl;
-    std::cout << "Bias:  ";
-    std::cout << *reinterpret_cast<float *>(c->buffer()) << " " << *reinterpret_cast<float *>(c->buffer()+1) << std::endl;
 
     if (_asm_glue && _asm_glue->is_configured())
     {
