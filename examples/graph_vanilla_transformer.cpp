@@ -131,7 +131,7 @@ public:
                                                                 get_weights_accessor(data_path, "/value_bias.npy"))
 
               << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
-
+              << DummyLayer(TensorShape(13,768))
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
         // Decode Input
