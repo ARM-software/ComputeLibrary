@@ -134,9 +134,11 @@ public:
               << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
 
               << LayerNormLayer(LayerNormLayerInfo(1/*Window::DimY*/, eps))
-              
+
               << FullyConnectedLayer(d_ff,get_weights_accessor(data_path, "/ff_weight.npy"),
                                           get_weights_accessor(data_path, "/ff_bias.npy"))
+            
+              << ActivationLayer(ActivationLayerInfo(ActivationFunction::RELU))
 
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
