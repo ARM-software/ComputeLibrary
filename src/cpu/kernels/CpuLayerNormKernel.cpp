@@ -60,16 +60,14 @@ void CpuLayerNormKernel::configure(const ITensorInfo *input,
 
     _info = info;
 
-    Window      win;
-    size_t      split_dimension;
-    std::tie(win,split_dimension) = calculate_squashed_or_max_window(*input);
     TensorShape out_shape = input->tensor_shape();
-
-    ICPPKernel::configure(win);
-
     // Auto initialize if empty
     set_shape_if_empty(*output, out_shape);
     set_data_type_if_unknown(*output, input->data_type());
+    
+    Window win = calculate_max_window(*input, Steps());
+    ICPPKernel::configure(win);
+
 }
 
 Status CpuLayerNormKernel::validate(const ITensorInfo *input,
