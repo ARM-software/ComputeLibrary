@@ -1453,7 +1453,7 @@ public:
      * @param[in] axis      Axix to perform normalization along
      * @param[in] epsilon   Lower bound value for the normalization
      */
-    LayerNormLayerInfo(int axis = Window::DimY, float epsilon = 1e-5): _axis(axis), _epsilon(epsilon)
+    LayerNormLayerInfo(int axis = 1/*Window::DimY*/, float epsilon = 1e-5): _axis(axis), _epsilon(epsilon)
     {
     }
 
