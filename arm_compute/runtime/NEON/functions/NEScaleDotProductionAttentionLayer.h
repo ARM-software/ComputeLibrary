@@ -42,7 +42,6 @@ public:
      */
     static Status validate(ITensor *output);
 
-    void prepare() override;
     // Inherited methods overridden:
     void run() override;
 private:
