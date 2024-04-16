@@ -714,7 +714,7 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _info);
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, TensorShape(0));
     }
 
 private:
