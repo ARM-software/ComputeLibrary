@@ -75,6 +75,8 @@ void NEScaleDotProductionAttentionLayer::run()
 
     _impl->scale_dot_production_op->run(_impl->scale_dot_pack);
     _impl->softmax_op->run(_impl->softmax_pack);
+
+    std::cout << "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp caonima" << std::endl;
     _impl->value_gemm_op->run(_impl->softmax_pack);
 
     std::cout << "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp RUNNNNNNNNN!!!!!!!!" << std::endl;
