@@ -39,9 +39,10 @@ namespace
             int x = window_start_x;
             for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                std::cout  <<x<<": Input: "<< *input_ptr << "Output: " << *output_ptr << std::endl;
-                std::cout << epsilon << std::endl;
+                
             }
+            ARM_COMPUTE_UNUSED(input_ptr);
+            ARM_COMPUTE_UNUSED(output_ptr);
 
             std::cout << window_end_x - window_step_x << std::endl;
         },
