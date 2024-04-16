@@ -32,14 +32,14 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
     const ITensorInfo *key_to_use = key;
     ITensorInfo *gemm_output_to_use = output;
 
-    /* Pretranspose Key, K=K^T
+    /* Pretranspose Key, K=K^T */
     _pretranspose_key_func = std::make_unique<CpuTranspose>();
     _pretranspose_key_func->configure(key_to_use, &_pretransposed_key);
 
     _aux_mem[PreTransposedRHS] =
                 experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), experimental::MemoryLifetime::Persistent, _pretransposed_key.total_size());
     key_to_use = &_pretransposed_key;
-    */
+    
 
     /* Matrix multiply Query adn Key, QK */
     _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
