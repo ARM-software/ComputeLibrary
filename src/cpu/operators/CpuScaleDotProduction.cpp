@@ -28,7 +28,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
     _run_pretranspose                   = false;
     
     float   scale = sqrt(info.d_model());
-    float   v_alpha = 1.f;
+    //float   v_alpha = 1.f;
     _run_scale = scale != 1.f;
 
     // Pick key tensor in case pretranspose should be performed
