@@ -83,4 +83,4 @@ private:
 
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_ACTIVATION_H */
+#endif /* ARM_COMPUTE_CPU_LINEAR_H */

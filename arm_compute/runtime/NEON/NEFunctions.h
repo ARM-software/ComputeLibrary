@@ -71,6 +71,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGenerateProposalsLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEL2NormalizeLayer.h"
+#include "arm_compute/runtime/NEON/functions/NELayerNormLayer.h"
 #include "arm_compute/runtime/NEON/functions/NELinearLayer.h"
 #include "arm_compute/runtime/NEON/functions/NELogical.h"
 #include "arm_compute/runtime/NEON/functions/NELSTMLayer.h"

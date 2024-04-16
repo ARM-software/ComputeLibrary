@@ -1878,6 +1878,40 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     return func;
 }
 
+/** Creates a backend layer normalization function
+ *
+ * @tparam LayerNormalizationLayerFunction  Backend layer normalization function
+ * @tparam TargetInfo                       Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend layer normalization function
+ */
+template <typename LayerNormLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_layer_norm_layer(LayerNormNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = std::make_unique<LayerNormLayerFunction>();
+    func->configure(input,output,node.layer_norm_info());
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.name() << " Type: " << node.type() << " Target: "
+                                               << TargetInfo::TargetType << " Data Type: " << input->info()->data_type()
+                                               << " Input shape: " << input->info()->tensor_shape()
+                                               << " Output shape: " << output->info()->tensor_shape() << std::endl);
+
+    return func;
+}
+
 } // namespace detail
 } // namespace backends
 } // namespace graph
