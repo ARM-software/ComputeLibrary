@@ -133,7 +133,7 @@ public:
 
               << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
 
-              << LayerNormLayer(LayerNormLayerInfo(Window::DimY, eps))
+              << LayerNormLayer(LayerNormLayerInfo(1/*Window::DimY*/, eps))
 
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
