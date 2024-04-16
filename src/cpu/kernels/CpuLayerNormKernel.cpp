@@ -43,7 +43,7 @@ namespace
                 std::cout << epsilon << std::endl;
             }
 
-            
+            std::cout << window_end_x - window_step_x << std::endl;
         },
         input, output);
 
@@ -64,7 +64,7 @@ void CpuLayerNormKernel::configure(const ITensorInfo *input,
     // Auto initialize if empty
     set_shape_if_empty(*output, out_shape);
     set_data_type_if_unknown(*output, input->data_type());
-    
+
     Window win = calculate_max_window(*input, Steps());
     ICPPKernel::configure(win);
 
