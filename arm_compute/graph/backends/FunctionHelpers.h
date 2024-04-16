@@ -1868,7 +1868,6 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
     auto func = std::make_unique<ScaleDotProductionLayerFunction>(mm);
     func->configure(query,key,value,output,node.sdpa_info());
 
-    std::cout << "arm_compute/graph/backends/FunctionHelpers.h  "<< node.id() << "  End" << std::endl;
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.name() << " Type: " << node.type() << " Target: "
                                                << TargetInfo::TargetType << " Data Type: " << input->info()->data_type()

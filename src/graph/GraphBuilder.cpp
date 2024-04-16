@@ -655,10 +655,13 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 NodeID GraphBuilder::add_layer_norm_node(Graph &g, NodeParams params, NodeIdxPair input, LayerNormLayerInfo info)
 {
     check_nodeidx_pair(input, g);
+    std::cout << " src/graph/GraphBuilder.cpp laynorm 1 " << std::endl;
     NodeID l_nid = g.add_node<LayerNormNode>(info);
 
+    std::cout << " src/graph/GraphBuilder.cpp laynorm 2 " << std::endl;
     g.add_connection(input.node_id, 0, l_nid, 0);
 
+    std::cout << " src/graph/GraphBuilder.cpp laynorm 3 " << std::endl;
     set_node_params(g, l_nid, params);
 
     return l_nid;
