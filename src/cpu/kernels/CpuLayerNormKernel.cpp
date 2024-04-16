@@ -14,6 +14,42 @@ namespace cpu
 namespace kernels
 {
 
+namespace
+{
+
+    void layer_norm_fp32(const ITensor *src, ITensor *dst, const Window &window,float epsilon)
+    {
+        const int  window_step_x  = 1;
+        const auto window_start_x = static_cast<int>(window.x().start());
+        const auto window_end_x   = static_cast<int>(window.x().end());
+
+        Window win = window.collapse_if_possible(window, Window::DimZ);
+        win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input(src, win);
+        Iterator output(dst, win);
+
+        execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+            const auto output_ptr = reinterpret_cast<float *>(output.ptr());
+
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                std::cout  <<x<<": Input: "<< *input_ptr << "Output: " << *output_ptr << std::endl;
+            }
+
+            
+        },
+        input, output);
+
+    }
+
+}
+
 void CpuLayerNormKernel::configure(const ITensorInfo *input,
                                     ITensorInfo       *output,
                                     LayerNormLayerInfo   info)

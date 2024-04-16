@@ -117,11 +117,12 @@ public:
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor))
                                             , get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
+              
+
               << EmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1")
-              
                  /* Value, Key, Query Linear Layers */
               << LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
                                                                 get_weights_accessor(data_path, "/query_weight.npy"),
@@ -130,15 +131,12 @@ public:
                                                                 get_weights_accessor(data_path, "/key_bias.npy"),
                                                                 get_weights_accessor(data_path, "/value_weight.npy"),
                                                                 get_weights_accessor(data_path, "/value_bias.npy"))
-
               << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
-
               << LayerNormLayer(LayerNormLayerInfo(1/*Window::DimY*/, eps))
-
               << FullyConnectedLayer(d_ff,get_weights_accessor(data_path, "/ff_weight.npy"),
                                           get_weights_accessor(data_path, "/ff_bias.npy"))
-            
               << ActivationLayer(ActivationLayerInfo(ActivationFunction::RELU))
+
 
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
