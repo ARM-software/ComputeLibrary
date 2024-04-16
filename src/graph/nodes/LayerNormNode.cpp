@@ -46,7 +46,7 @@ TensorDescriptor LayerNormNode::configure_output(size_t idx) const
 
 NodeType LayerNormNode::type() const
 {
-    return NodeType::LinearLayer;
+    return NodeType::LayerNormLayer;
 }
 
 void LayerNormNode::accept(INodeVisitor &v)
