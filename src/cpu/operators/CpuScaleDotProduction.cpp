@@ -76,7 +76,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
         const int k = query->dimension(0);
 
         // Configure matrix multiplication kernel
-        _mm_kernel1->configure(&_tmp_query, &_tmp_key, output, scale, _run_interleave_transpose,
+        _mm_kernel1->configure(&_tmp_query, &_tmp_key, &_tmp_scaled, scale, _run_interleave_transpose,
                                 GEMMReshapeInfo(m, n, k));
         _aux_mem[ScaledOutput] =
             experimental::MemoryInfo(offset_int_vec(ScaledOutput),experimental::MemoryLifetime::Persistent, _tmp_scaled.total_size());
@@ -85,7 +85,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
 
     /* Softmax function apply to scaled product */
     _softmax_func = std::make_unique<CpuSoftmaxGeneric>();
-    _softmax_func->configure(output,output_to_use);
+    _softmax_func->configure(&_tmp_scaled,output_to_use);
     
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
@@ -156,7 +156,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                     _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                     _mm_kernel1->window(), mm_pack);
 
-    ITensorPack softmax_pack{{ACL_SRC, output}, {ACL_DST, output}};
+    ITensorPack softmax_pack{{ACL_SRC, const_cast<const ITensor*>(scaled_output.get())}, {ACL_DST, output}};
     _softmax_func->run(softmax_pack);
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 6" << std::endl;
