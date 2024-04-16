@@ -40,6 +40,7 @@ namespace
             for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 std::cout  <<x<<": Input: "<< *input_ptr << "Output: " << *output_ptr << std::endl;
+                std::cout << epsilon << std::endl;
             }
 
             
@@ -84,9 +85,10 @@ Status CpuLayerNormKernel::validate(const ITensorInfo *input,
 void CpuLayerNormKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     std::cout << "src/cpu/kernels/CpuLayerNormKernel.cpp" << std::endl;
-    ARM_COMPUTE_UNUSED(tensors);
-    ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(info);
+    const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
+    layer_norm_fp32(src,dst,window,_info.epsilon());
 }
 
 const char *CpuLayerNormKernel::name() const
