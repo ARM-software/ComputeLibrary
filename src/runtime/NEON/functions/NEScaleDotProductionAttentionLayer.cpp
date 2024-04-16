@@ -30,12 +30,16 @@ NEScaleDotProductionAttentionLayer::NEScaleDotProductionAttentionLayer(std::shar
 
 NEScaleDotProductionAttentionLayer::~NEScaleDotProductionAttentionLayer() = default;
 
-void NEScaleDotProductionAttentionLayer::configure(const ITensor *key,const ITensor *value,const ITensor *query, ITensor *output)
+void NEScaleDotProductionAttentionLayer::configure(const ITensor *key,
+                                                   const ITensor *value,
+                                                   const ITensor *query,
+                                                   ITensor *output,
+                                                   const ScaleDotProductionAttentionLayerInfo& info)
 {
     _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
     _impl->is_prepared      = false;
 
-    _impl->op->configure(key->info(),value->info(),query->info(),output->info());
+    _impl->op->configure(key->info(),value->info(),query->info(),output->info(),info);
 
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack = {{ACL_SRC_0, key}, {ACL_SRC_1, value}, {ACL_SRC_2, query}, {ACL_DST, output}};

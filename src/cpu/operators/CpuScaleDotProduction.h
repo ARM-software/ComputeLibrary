@@ -12,6 +12,7 @@
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
+#include "src/cpu/operators/CpuSoftmax.h"
 
 #include <memory>
 
@@ -37,7 +38,7 @@ public:
      * @param[in]  query           Attention key tensor info. Data types supported: U8.
      * @param[out] output          Destination tensor info. Data type supported: F32
      */
-    void configure(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output);
+    void configure(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output, const ScaleDotProductionAttentionLayerInfo& info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuScaleDotProduction::configure()
@@ -59,19 +60,24 @@ private:
         InterleavedLHS = 3,
         PreTransposedRHS,
         Transposed1xWRHS,
+        ScaledOutput,
         Count
     };
 
     std::unique_ptr<kernels::CpuGemmInterleave4x4Kernel>    _interleave_kernel{nullptr};
     std::unique_ptr<CpuTranspose>                           _pretranspose_key_func{nullptr};
-    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel{nullptr};
+    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel1{nullptr};
+    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel2{nullptr};
     std::unique_ptr<kernels::CpuGemmTranspose1xWKernel>     _transpose1xW_key_kernel{nullptr};
+    std::unique_ptr<CpuSoftmaxGeneric>                      _softmax_func{nullptr};
 
     TensorInfo _tmp_query{};
     TensorInfo _pretransposed_key{};
     TensorInfo _tmp_key{};
+    TensorInfo _tmp_scaled{};
 
     bool _run_pretranspose{false};
+    bool _run_scale{false};
     bool _run_vector_matrix_multiplication{false};
     bool _run_interleave_transpose{
         true}; /**< If we run CpuGemmInterleave4x4Kernel on lhs and CpuGemmTranspose1xWKernel on rhs */
