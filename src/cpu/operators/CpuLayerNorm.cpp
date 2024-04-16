@@ -17,11 +17,10 @@ namespace cpu
 {
 void CpuLayerNorm::configure(const ITensorInfo *input,
                           ITensorInfo       *output,
-                          float              alpha,
-                          float              beta,
                           const LayerNormLayerInfo &info)
 {
-    
+    _layer_norm_kernel = std::make_unique<kernels::CpuLayerNormKernel>();
+    _layer_norm_kernel ->configure(input,output,info);
 }
 
 Status
@@ -37,7 +36,8 @@ CpuLayerNorm::validate(const ITensorInfo *input,
 
 void CpuLayerNorm::run(ITensorPack &tensors)
 {
-
+    NEScheduler::get().schedule_op(_layer_norm_kernel.get(), Window::DimY,
+                                            _layer_norm_kernel->window(), tensors);
 }
 
 

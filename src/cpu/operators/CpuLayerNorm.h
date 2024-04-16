@@ -4,9 +4,7 @@
 #include "arm_compute/core/TensorInfo.h"
 
 #include "src/cpu/ICpuOperator.h"
-#include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
-#include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
-#include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
+#include "src/cpu/kernels/CpuLayerNormKernel.h"
 
 namespace arm_compute
 {
@@ -42,7 +40,7 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    
+    std::unique_ptr<kernels::CpuLayerNormKernel> _layer_norm_kernel;
 };
 
 } // namespace cpu
