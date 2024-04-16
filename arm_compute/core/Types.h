@@ -1480,12 +1480,20 @@ class FeedForwardLayerInfo final
 public:
     /** Constructor
      * 
+     * @param[in] d_ff  Amount of feed forward fully connected layer node
      */
-    FeedForwardLayerInfo()
+    FeedForwardLayerInfo(unsigned int d_ff = 2048U): _d_ff(d_ff)
     {
     }
 
+    /** Get d_ff */
+    int d_ff() const
+    {
+        return  _d_ff;
+    }
+    
 private:
+    unsigned int _d_ff;
 
 };
 

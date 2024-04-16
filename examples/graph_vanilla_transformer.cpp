@@ -85,8 +85,8 @@ public:
        constexpr unsigned int d_vocab       = 30522U;   // Vocaboary size
        constexpr unsigned int h             = 12U;       // Parallel attention (Heads)
        constexpr float        eps           = 1e-5;
-       /*constexpr unsigned int d_ff          = 2024U;    // Dim feedforward
-       constexpr unsigned int d_q           = 64U;      // Dim query, 512U/8U
+       constexpr unsigned int d_ff          = 3072U;    // Dim feedforward
+       /*constexpr unsigned int d_q           = 64U;      // Dim query, 512U/8U
        constexpr unsigned int d_k           = 64U;      // Dim key, 512U/8U
        constexpr unsigned int d_v           = 64U;      // Dim value, 512U/8U
        constexpr float        P_drop        = 0.1f;     // Dropout rate
@@ -134,6 +134,9 @@ public:
               << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
 
               << LayerNormLayer(LayerNormLayerInfo(1/*Window::DimY*/, eps))
+
+              << FullyConnectedLayer(d_ff,get_weights_accessor(data_path, "/ff_weight.npy"),
+                                          get_weights_accessor(data_path, "/ff_bias.npy"))
 
               << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             

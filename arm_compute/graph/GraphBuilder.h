@@ -381,6 +381,19 @@ public:
                                             const QuantizationInfo       &weights_quant_info = QuantizationInfo(),
                                             const QuantizationInfo       &out_quant_info     = QuantizationInfo(),
                                             FastMathHint                  fast_math_hint     = FastMathHint::Disabled);
+    /** Adds a feed forward layer node to the graph
+     *
+     * @param[in] g                  Graph to add the layer to
+     * @param[in] params             Common node parameters
+     * @param[in] input              Input to the fully connected layer node as a NodeID-Index pair
+     * @param[in] info               Feed Forward layer information
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_feed_forward_layer(Graph                        &g,
+                                            NodeParams                    params,
+                                            NodeIdxPair                   input,
+                                            FeedForwardLayerInfo          info = FeedForwardLayerInfo());
     /** Adds a generate proposals layer node to the graph
      *
      * @param[in] g       Graph to add the layer to
