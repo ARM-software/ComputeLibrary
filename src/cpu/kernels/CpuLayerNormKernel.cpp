@@ -29,22 +29,22 @@ namespace
         Iterator input(src, win);
         Iterator output(dst, win);
 
+        int count = 0;
         execute_window_loop(
         win,
         [&](const Coordinates &)
         {
             const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
             const auto output_ptr = reinterpret_cast<float *>(output.ptr());
-
+            count ++;
             int x = window_start_x;
             for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                
+                std::cout  <<x<<": Input: "<< *input_ptr << "Output: " << *output_ptr << std::endl;
+                std::cout << epsilon << std::endl;
             }
-            ARM_COMPUTE_UNUSED(input_ptr);
-            ARM_COMPUTE_UNUSED(output_ptr);
 
-            std::cout << window_end_x - window_step_x << "   " << epsilon<< std::endl;
+            std::cout << window_end_x - window_step_x <<" " << count<< std::endl;
         },
         input, output);
 
