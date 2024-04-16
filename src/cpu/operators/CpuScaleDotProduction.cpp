@@ -173,6 +173,10 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                     _mm_kernel1->window(), mm_pack);
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 5" << std::endl;
+    ITensorPack softmax_pack{{ACL_SRC, scaled_output.get()}, {ACL_DST, output}};
+    _softmax_func->run(softmax_pack);
+
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 6" << std::endl;
 
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
