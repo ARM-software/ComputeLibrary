@@ -44,7 +44,7 @@ namespace
             ARM_COMPUTE_UNUSED(input_ptr);
             ARM_COMPUTE_UNUSED(output_ptr);
 
-            std::cout << window_end_x - window_step_x << std::endl;
+            std::cout << window_end_x - window_step_x << "   " << epsilon<< std::endl;
         },
         input, output);
 
