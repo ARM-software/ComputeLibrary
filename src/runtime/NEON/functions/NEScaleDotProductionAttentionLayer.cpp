@@ -50,10 +50,8 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *key,
     /* Scale dot production of key and query */
     _impl->scale_dot_production_op  = std::make_unique<cpu::CpuScaleDotProduction>();
     _impl->scale_dot_production_op->configure(key->info(),value->info(),query->info(),production_to_softmax->info(),info);
-    _impl->aux_mem_req = _impl->scale_dot_production_op->workspace();
     _impl->scale_dot_pack = {{ACL_SRC_0, key}, {ACL_SRC_1, value}, {ACL_SRC_2, query}, {ACL_DST, production_to_softmax}};
-    _impl->workspace =
-        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->scale_dot_pack, _impl->scale_dot_pack);
+    
     
     /*  Softmax of previous product */
     _impl->softmax_op = std::make_unique<cpu::CpuSoftmaxGeneric>();
@@ -76,8 +74,6 @@ void NEScaleDotProductionAttentionLayer::run()
     _impl->scale_dot_production_op->run(_impl->scale_dot_pack);
     _impl->softmax_op->run(_impl->softmax_pack);
 
-    std::cout << "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp caonima" << std::endl;
-    _impl->value_gemm_op->run(_impl->softmax_pack);
 
     std::cout << "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp RUNNNNNNNNN!!!!!!!!" << std::endl;
 }
