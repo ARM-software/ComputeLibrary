@@ -2376,6 +2376,15 @@
             "src/cpu/kernels/CpuPositionalEncodingKernel.cpp"
           ]
         }
+      },
+      "LayerNorm": {
+        "files":{
+          "common":[
+            "src/cpu/kernels/CpuLayerNormKernel.cpp",
+            "src/cpu/operators/CpuLayerNorm.cpp",
+            "src/runtime/NEON/functions/NELayerNormLayer.cpp"
+          ]
+        }
       }
     }
   },
