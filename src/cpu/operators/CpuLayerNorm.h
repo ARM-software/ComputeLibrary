@@ -40,7 +40,7 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<kernels::CpuLayerNormKernel> _layer_norm_kernel;
+    std::unique_ptr<kernels::CpuLayerNormKernel> _layer_norm_kernel{nullptr};
 };
 
 } // namespace cpu
