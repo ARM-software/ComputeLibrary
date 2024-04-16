@@ -17,14 +17,14 @@ namespace kernels
 namespace
 {
 
-    void layer_norm_fp32(const ITensor *src, ITensor *dst, const Window &window,float epsilon)
+    void layer_norm_fp32(const ITensor *src, ITensor *dst, const Window &window, float epsilon)
     {
-        const int  window_step_x  = 1;
-        const auto window_start_x = static_cast<int>(window.x().start());
-        const auto window_end_x   = static_cast<int>(window.x().end());
+        const int  window_step_y  = 1;
+        const auto window_start_y = static_cast<int>(window.y().start());
+        const auto window_end_y   = static_cast<int>(window.y().end());
 
         Window win = window.collapse_if_possible(window, Window::DimZ);
-        win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        win.set(Window::DimY, Window::Dimension(1, 0, 1));
 
         Iterator input(src, win);
         Iterator output(dst, win);
@@ -37,14 +37,14 @@ namespace
             const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
             const auto output_ptr = reinterpret_cast<float *>(output.ptr());
             count ++;
-            int x = window_start_x;
-            for (; x <= (window_end_x - window_step_x); x += window_step_x)
+            int y = window_start_y;
+            for (; y <= (window_end_y - window_step_y); y += window_step_y)
             {
-                std::cout  <<x<<": Input: "<< *input_ptr << "Output: " << *output_ptr << std::endl;
+                std::cout  <<y<<": Input: "<< *input_ptr << "Output: " << *output_ptr << std::endl;
                 std::cout << epsilon << std::endl;
             }
 
-            std::cout << window_end_x - window_step_x <<" " << count<< std::endl;
+            std::cout << window_end_y - window_step_y <<" " << count<< std::endl;
         },
         input, output);
 
