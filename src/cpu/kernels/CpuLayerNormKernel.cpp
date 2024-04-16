@@ -43,6 +43,8 @@ namespace
                 
             }
             ARM_COMPUTE_UNUSED(epsilon);
+            ARM_COMPUTE_UNUSED(input_ptr);
+            ARM_COMPUTE_UNUSED(output_ptr);
             std::cout << window_end_y - window_step_y <<" " << count<< std::endl;
         },
         input, output);
