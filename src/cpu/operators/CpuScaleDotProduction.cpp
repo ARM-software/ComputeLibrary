@@ -85,7 +85,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
 
     /* Softmax function apply to scaled product */
     _softmax_func = std::make_unique<CpuSoftmaxGeneric>();
-    _softmax_func->configure(&_tmp_scaled,output_to_use);
+    _softmax_func->configure(&_tmp_query,output_to_use);
     
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
@@ -173,7 +173,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                     _mm_kernel1->window(), mm_pack);
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 5" << std::endl;
-    ITensorPack softmax_pack{{ACL_SRC, scaled_output.get()}, {ACL_DST, output}};
+    ITensorPack softmax_pack{{ACL_SRC, query}, {ACL_DST, output}};
     _softmax_func->run(softmax_pack);
 
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 6" << std::endl;
