@@ -1891,7 +1891,7 @@ template <typename LayerNormLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_layer_norm_layer(LayerNormNode &node)
 {
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
-
+    std::cout << " arm_compute/graph/backends/FunctionHelpers.h 1 " << std::endl;
     // Extract IO and info
     typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
@@ -1899,10 +1899,12 @@ std::unique_ptr<IFunction> create_layer_norm_layer(LayerNormNode &node)
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
+    std::cout << " arm_compute/graph/backends/FunctionHelpers.h 2 " << std::endl;
     // Create and configure function
     auto func = std::make_unique<LayerNormLayerFunction>();
     func->configure(input,output,node.layer_norm_info());
 
+    std::cout << " arm_compute/graph/backends/FunctionHelpers.h 3 " << std::endl;
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.name() << " Type: " << node.type() << " Target: "
                                                << TargetInfo::TargetType << " Data Type: " << input->info()->data_type()
