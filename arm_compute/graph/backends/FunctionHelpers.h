@@ -1888,7 +1888,7 @@ std::unique_ptr<IFunction> create_scale_dot_production_layer(ScaleDotProductionA
  * @return Backend layer normalization function
  */
 template <typename LayerNormLayerFunction, typename TargetInfo>
-std::unique_ptr<IFunction> create_layer_norm_layer(LayerNormNode &node, GraphContext &ctx)
+std::unique_ptr<IFunction> create_layer_norm_layer(LayerNormNode &node)
 {
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
