@@ -882,7 +882,7 @@ public:
     /** Construct a layer norm layer.
      *
      */
-    LayerNormLayer(TensorShape shape) : _shape(shape)
+    LayerNormLayer(LayerNormLayerInfo info) : _info(info)
     {
     }
 
@@ -890,11 +890,11 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
+        return GraphBuilder::add_layer_norm_node(s.graph(), common_params, input, _info);
     }
 
 private:
-    TensorShape _shape;
+    LayerNormLayerInfo _info;
 };
 
 /** Linear Layer */

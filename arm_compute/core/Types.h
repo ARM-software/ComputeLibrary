@@ -1450,13 +1450,28 @@ class LayerNormLayerInfo final
 public:
     /** Constructor
      * 
+     * @param[in] axis      Axix to perform normalization along
+     * @param[in] epsilon   Lower bound value for the normalization
      */
-    LayerNormLayerInfo()
+    LayerNormLayerInfo(int axis = Window::DimY, float epsilon = 1e-5): _axis(axis), _epsilon(epsilon)
     {
     }
 
-private:
+    /** Get normalization axis */
+    int axis() const
+    {
+        return  _axis;
+    }
 
+    /** Get epsilon */
+    int epsilon() const
+    {
+        return  _epsilon;
+    }
+
+private:
+    int _axis; 
+    float _epsilon;
 };
 
 /** Feed Forward Layer Information Class */

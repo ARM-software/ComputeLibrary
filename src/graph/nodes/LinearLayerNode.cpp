@@ -1,4 +1,3 @@
-
 #include "arm_compute/graph/nodes/LinearLayerNode.h"
 
 #include "arm_compute/graph/Graph.h"

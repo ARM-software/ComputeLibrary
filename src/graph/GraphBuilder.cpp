@@ -652,6 +652,18 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
     return sdp_nid;
 }
 
+NodeID GraphBuilder::add_layer_norm_node(Graph &g, NodeParams params, NodeIdxPair input, LayerNormLayerInfo info)
+{
+    check_nodeidx_pair(input, g);
+    NodeID l_nid = g.add_node<LayerNormNode>(info);
+
+    g.add_connection(input.node_id, 0, l_nid, 0);
+
+    set_node_params(g, l_nid, params);
+
+    return l_nid;
+}
+
 NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair input, 
                                                                   LinearLayerInfo linear_info,
                                                                   ITensorAccessorUPtr query_weights,

@@ -69,6 +69,7 @@
 #include "arm_compute/graph/nodes/StridedSliceLayerNode.h"
 #include "arm_compute/graph/nodes/TokenEmbeddingLayerNode.h"
 #include "arm_compute/graph/nodes/ScaleDotProductionAttentionNode.h"
+#include "arm_compute/graph/nodes/LayerNormNode.h"
 #include "arm_compute/graph/nodes/LinearLayerNode.h"
 #include "arm_compute/graph/nodes/SimpleForwardLayerNode.h"
 #include "arm_compute/graph/nodes/SegmentEmbeddingLayerNode.h"

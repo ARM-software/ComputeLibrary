@@ -408,6 +408,16 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_multi_head_attention_node(Graph &g, NodeParams params, NodeIdxPair input, MultiHeadAttentionLayerInfo mha_info);
+    /** Adds a layer normalization layer node to the graph
+     *
+     * @param[in] g       Graph to add the node to
+     * @param[in] params  Common node parameters
+     * @param[in] input   Input to the normalization layer node as a NodeID-Index pair
+     * @param[in] info    Layer normalization infomation
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_layer_norm_node(Graph &g, NodeParams params, NodeIdxPair input, LayerNormLayerInfo info);
     /** Adds a linear layer computing Key, Value, Query to the graph
      *
      * @param[in] g             Graph to add the node to
