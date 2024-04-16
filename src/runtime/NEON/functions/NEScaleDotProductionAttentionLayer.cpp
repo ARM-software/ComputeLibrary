@@ -3,6 +3,7 @@
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuScaleDotProduction.h"
+#include "src/cpu/operators/CpuSoftmax.h"
 
 namespace arm_compute
 {
@@ -11,10 +12,12 @@ struct NEScaleDotProductionAttentionLayer::Impl
 {
 
     MemoryGroup                         memory_group{};
-    ITensorPack                         run_pack{};
+    ITensorPack                         scale_dot_pack{};
+    ITensorPack                         softmax_pack{};
     IRuntimeContext                    *ctx{nullptr};
 
-    std::unique_ptr<cpu::CpuScaleDotProduction> op{nullptr};
+    std::unique_ptr<cpu::CpuScaleDotProduction> scale_dot_production_op{nullptr};
+    std::unique_ptr<cpu::CpuSoftmaxGeneric>     softmax_op{nullptr};
 
     WorkspaceData<Tensor>            workspace{};
     experimental::MemoryRequirements aux_mem_req{};
@@ -36,34 +39,28 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *key,
                                                    ITensor *output,
                                                    const ScaleDotProductionAttentionLayerInfo& info)
 {
-    _impl->op  = std::make_unique<cpu::CpuScaleDotProduction>();
-    _impl->is_prepared      = false;
-
-    _impl->op->configure(key->info(),value->info(),query->info(),output->info(),info);
-
-    _impl->aux_mem_req = _impl->op->workspace();
-    _impl->run_pack = {{ACL_SRC_0, key}, {ACL_SRC_1, value}, {ACL_SRC_2, query}, {ACL_DST, output}};
+    ITensor * production_to_softmax = output;
+    _impl->scale_dot_production_op  = std::make_unique<cpu::CpuScaleDotProduction>();
+    _impl->scale_dot_production_op->configure(key->info(),value->info(),query->info(),production_to_softmax->info(),info);
+    _impl->aux_mem_req = _impl->scale_dot_production_op->workspace();
+    _impl->scale_dot_pack = {{ACL_SRC_0, key}, {ACL_SRC_1, value}, {ACL_SRC_2, query}, {ACL_DST, production_to_softmax}};
     _impl->workspace =
-        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
-
-}
-
-void NEScaleDotProductionAttentionLayer::prepare()
-{
-    if(!_impl->is_prepared)
-    {
-        _impl->op->prepare(_impl->run_pack);
-    }
+        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->scale_dot_pack, _impl->scale_dot_pack);
+    
+    _impl->softmax_op = std::make_unique<cpu::CpuSoftmaxGeneric>();
+    _impl->softmax_op->configure(production_to_softmax->info(),output->info());
+    _impl->softmax_pack = {{ACL_SRC, production_to_softmax}, {ACL_DST, output}};
 }
 
 void NEScaleDotProductionAttentionLayer::run()
 {
     ITensorPack pack;
     std::cout << "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp RUNNNNNNNNN!!!!!!!!" << std::endl;
-    prepare();
+
+    _impl->scale_dot_production_op->run(_impl->scale_dot_pack);
+    _impl->softmax_op->run(_impl->softmax_pack);
 
     std::cout << "src/runtime/NEON/functions/NEScaleDotProductionAttentionLayer.cpp RUNNNNNNNNN!!!!!!!!" << std::endl;
-    _impl->op->run(_impl->run_pack);
 }
 
 } // namespace arm_compute
