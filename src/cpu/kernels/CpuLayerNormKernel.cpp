@@ -40,10 +40,9 @@ namespace
             int y = window_start_y;
             for (; y <= (window_end_y - window_step_y); y += window_step_y)
             {
-                std::cout  <<": Input: "<< *input_ptr << "Output: " << *output_ptr << std::endl;
-                std::cout << epsilon << std::endl;
+                
             }
-
+            ARM_COMPUTE_UNUSED(epsilon);
             std::cout << window_end_y - window_step_y <<" " << count<< std::endl;
         },
         input, output);
