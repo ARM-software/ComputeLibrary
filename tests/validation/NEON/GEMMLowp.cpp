@@ -53,7 +53,6 @@ namespace
 {
     constexpr AbsoluteTolerance<float> tolerance_batched(1);
     constexpr AbsoluteTolerance<float> tolerance_quant(1);
-    constexpr AbsoluteTolerance<float> tolerance_dequantized(0.01f);
 } // namespace
 
 
@@ -357,7 +356,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreDynamicQuantization
 }
 TEST_SUITE_END() // DynamicQuantization
 
+#ifdef __aarch64__
+// Deqaunt tests involve returning F32 from the MatrixMultiplyCore kernels and is only implemented in aarch64
 TEST_SUITE(Dequant)
+constexpr AbsoluteTolerance<float> tolerance_dequantized(0.01f);
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {
     // Validate output
@@ -370,6 +372,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedMatrixMultiplyValidationFi
     validate(Accessor(_target), _reference, tolerance_dequantized);
 }
 TEST_SUITE_END() // Dequant
+#endif // __aarch64__
 
 TEST_SUITE_END() // MatrixMultiplyCore
 TEST_SUITE_END() // GEMMLowp
