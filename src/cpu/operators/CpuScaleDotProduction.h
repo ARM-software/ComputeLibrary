@@ -10,9 +10,9 @@
 #include "src/cpu/kernels/CpuSoftmaxKernel.h"
 #include "src/cpu/operators/CpuTranspose.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
+#include "src/cpu/operators/CpuActivation.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
-#include "src/cpu/operators/CpuSoftmax.h"
 
 #include <memory>
 
@@ -60,21 +60,18 @@ private:
         InterleavedLHS = 3,
         PreTransposedRHS,
         Transposed1xWRHS,
-        ScaledOutput,
         Count
     };
 
     std::unique_ptr<kernels::CpuGemmInterleave4x4Kernel>    _interleave_kernel{nullptr};
     std::unique_ptr<CpuTranspose>                           _pretranspose_key_func{nullptr};
-    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel1{nullptr};
-    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel2{nullptr};
+    std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel{nullptr};
     std::unique_ptr<kernels::CpuGemmTranspose1xWKernel>     _transpose1xW_key_kernel{nullptr};
-    std::unique_ptr<CpuSoftmaxGeneric>                      _softmax_func{nullptr};
+    std::unique_ptr<CpuActivation>                          _scale_func{nullptr};
 
     TensorInfo _tmp_query{};
     TensorInfo _pretransposed_key{};
     TensorInfo _tmp_key{};
-    TensorInfo _tmp_scaled{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};

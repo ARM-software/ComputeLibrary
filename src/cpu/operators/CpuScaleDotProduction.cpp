@@ -27,13 +27,12 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
     _run_vector_matrix_multiplication   = key->dimension(1) < 2;
     _run_pretranspose                   = false;
     
-    float   scale = sqrt(info.d_model());
-    //float   v_alpha = 1.f;
+    float scale = sqrt(info.d_model());
     _run_scale = scale != 1.f;
 
-    // Pick key tensor in case pretranspose should be performed
+    // Pick b tensor in case pretranspose should be performed
     const ITensorInfo *key_to_use = key;
-    ITensorInfo *output_to_use = output;
+    ITensorInfo *gemm_output_to_use = output;
 
     /* Pretranspose Key, K=K^T */
     _pretranspose_key_func = std::make_unique<CpuTranspose>();
@@ -44,16 +43,14 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
     key_to_use = &_pretransposed_key;
     
 
-    /* Matrix multiply query and key */
-    _mm_kernel1 = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
-    /* Matrix multiply of production and value */
-   // _mm_kernel2 = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
+    /* Matrix multiply Query adn Key, QK */
+    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
 
     // Select between GEMV and GEMM
     if (_run_vector_matrix_multiplication)
     {
         // Configure the matrix multiply kernel
-        _mm_kernel1->configure(query, key_to_use, output_to_use, scale, false);
+        _mm_kernel->configure(query, key_to_use, gemm_output_to_use, scale, false);
     }
     else
     {
@@ -75,17 +72,15 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
         const int n = key_to_use->dimension(0);
         const int k = query->dimension(0);
 
+        std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp MM run" << std::endl;
+        std::cout << "m " << m << std::endl;
+        std::cout << "n " << n << std::endl;
+        std::cout << "k " << k << std::endl;
+        std::cout << "_run_interleave_transpose " << _run_interleave_transpose << std::endl;
         // Configure matrix multiplication kernel
-        _mm_kernel1->configure(&_tmp_query, &_tmp_key, &_tmp_scaled, scale, _run_interleave_transpose,
+        _mm_kernel->configure(&_tmp_query, &_tmp_key, gemm_output_to_use, scale, _run_interleave_transpose,
                                 GEMMReshapeInfo(m, n, k));
-        _aux_mem[ScaledOutput] =
-            experimental::MemoryInfo(offset_int_vec(ScaledOutput),experimental::MemoryLifetime::Persistent, _tmp_scaled.total_size());
-
     }
-
-    /* Softmax function apply to scaled product */
-    _softmax_func = std::make_unique<CpuSoftmaxGeneric>();
-    _softmax_func->configure(&_tmp_scaled,output_to_use);
     
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
@@ -117,10 +112,11 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler pretransposed_key(offset_int_vec(PreTransposedRHS), _pretransposed_key, tensors);
     CpuAuxTensorHandler interleaved_query(offset_int_vec(InterleavedLHS), _tmp_query, tensors, true);
     CpuAuxTensorHandler transposed1xw_key(offset_int_vec(Transposed1xWRHS), _tmp_key, tensors, true);
-    CpuAuxTensorHandler scaled_output(offset_int_vec(ScaledOutput), _tmp_scaled, tensors, true);
 
     ITensorPack mm_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
-
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
+    std::cout << "query->info()->tensor_shape().x() "<< query->info()->tensor_shape().x() << std::endl;
+    std::cout << "query->info()->tensor_shape().y() "<< query->info()->tensor_shape().y() << std::endl;
     if (_run_interleave_transpose)
     {
         // Run interleave kernel
@@ -130,7 +126,12 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_query.get());
     }
+    std::cout << "interleaved_query.x() "<< interleaved_query.get()->info()->tensor_shape().x() << std::endl;
+    std::cout << "interleaved_query.y() "<< interleaved_query.get()->info()->tensor_shape().y() << std::endl;
 
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2" << std::endl;
+    std::cout << "key_to_use.x() "<< key_to_use->info()->tensor_shape().x() << std::endl;
+    std::cout << "key_to_use.y() "<< key_to_use->info()->tensor_shape().y() << std::endl;
     if (_pretranspose_key_func && _run_pretranspose)
     {
         // Run pretranspose kernel
@@ -138,7 +139,12 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         _pretranspose_key_func->run(pretranspose_pack);
         key_to_use = pretransposed_key.get();
     }
+    std::cout << "pretransposed_key.get().x() "<< pretransposed_key.get()->info()->tensor_shape().x() << std::endl;
+    std::cout << "pretransposed_key.get().y() "<< pretransposed_key.get()->info()->tensor_shape().y() << std::endl;
 
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
+    std::cout << "key_to_use.x() "<< key_to_use->info()->tensor_shape().x() << std::endl;
+    std::cout << "key_to_use.y() "<< key_to_use->info()->tensor_shape().y() << std::endl;
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
@@ -147,19 +153,18 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                         _transpose1xW_key_kernel->window(), transpose_pack);
         key_to_use = transposed1xw_key.get();
     }
+    std::cout << "transposed1xw_key.get().x() "<< transposed1xw_key.get()->info()->tensor_shape().x() << std::endl;
+    std::cout << "transposed1xw_key.get().y() "<< transposed1xw_key.get()->info()->tensor_shape().y() << std::endl;
 
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 4" << std::endl;
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, key_to_use);
-    mm_pack.add_tensor(ACL_DST, scaled_output.get());
 
-    NEScheduler::get().schedule_op(_mm_kernel1.get(),
+    NEScheduler::get().schedule_op(_mm_kernel.get(),
                                     _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
-                                    _mm_kernel1->window(), mm_pack);
+                                    _mm_kernel->window(), mm_pack);
 
-    ITensorPack softmax_pack{{ACL_SRC, const_cast<const ITensor*>(scaled_output.get())}, {ACL_DST, output}};
-    _softmax_func->run(softmax_pack);
-
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 6" << std::endl;
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 5" << std::endl;
 
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
