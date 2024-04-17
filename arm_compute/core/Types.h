@@ -1453,7 +1453,13 @@ public:
      * @param[in] axis      Axix to perform normalization along
      * @param[in] epsilon   Lower bound value for the normalization
      */
-    LayerNormLayerInfo(int axis = 1/*Window::DimY*/, float epsilon = 1e-5): _axis(axis), _epsilon(epsilon)
+    LayerNormLayerInfo(int axis = 1/*Window::DimY*/,
+                       float epsilon = 1e-5,
+                       float gamma = 1.0,
+                       float beta = 0): _axis(axis),
+                                        _epsilon(epsilon),
+                                        _gamma(gamma),
+                                        _beta(beta)
     {
     }
 
@@ -1464,14 +1470,28 @@ public:
     }
 
     /** Get epsilon */
-    int epsilon() const
+    float epsilon() const
     {
         return  _epsilon;
+    }
+    
+    /** Get gamma */
+    float gamma() const
+    {
+        return  _gamma;
+    }
+
+    /** Get beta */
+    float beta() const
+    {
+        return  _beta;
     }
 
 private:
     int _axis; 
     float _epsilon;
+    float _gamma;
+    float _beta;
 };
 
 /** Feed Forward Layer Information Class */

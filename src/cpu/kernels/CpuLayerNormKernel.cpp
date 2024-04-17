@@ -17,7 +17,9 @@ namespace kernels
 namespace
 {
 
-    void layer_norm_fp32(const ITensor *src, ITensor *dst, const Window &window, float epsilon)
+    void layer_norm_fp32(const ITensor *src, ITensor *dst, const Window &window,float epsilon,
+                                                                                float gamma,
+                                                                                float beta)
     {
         const int  window_step_y  = 1;
         const auto window_start_y = static_cast<int>(window.y().start());
@@ -82,13 +84,13 @@ Status CpuLayerNormKernel::validate(const ITensorInfo *input,
     return Status{};
 }
 
-void CpuLayerNormKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuLayerNormKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &thread_info)
 {
     std::cout << "src/cpu/kernels/CpuLayerNormKernel.cpp" << std::endl;
-    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_UNUSED(thread_info);
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
-    layer_norm_fp32(src,dst,window,_info.epsilon());
+    layer_norm_fp32(src,dst,window,_info.epsilon(),_info.gamma(),_info.beta());
 }
 
 const char *CpuLayerNormKernel::name() const
