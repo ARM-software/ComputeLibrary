@@ -41,6 +41,7 @@ namespace
             const auto output_ptr = reinterpret_cast<float *>(output.ptr());
             float mean = 0;
             float var = 0;
+            float res;
             count ++;
 
             const int y_len = window_end_y - window_step_y;
@@ -57,11 +58,18 @@ namespace
             for (; y <=  y_len; y += window_step_y)
             {
                 var += (*(input_ptr + y) - mean ) * (*(input_ptr + y) - mean );
-                std::cout << var << " ";
             }
             var = var /y_len;
+            
+            /* Calculate layer normalization */
+            y = window_start_y;
+            for (; y <=  y_len; y += window_step_y)
+            {
+                res = ( ( *(input_ptr + y)-mean ) / sqrt( var+epsilon ) ) * gamma + beta;
+                *reinterpret_cast<float *>(output_ptr + y) = res;
+                std::cout << *(output_ptr + y) << " ";
+            }
             std::cout << std::endl;
-
             
             ARM_COMPUTE_UNUSED(epsilon);
             ARM_COMPUTE_UNUSED(input_ptr);
