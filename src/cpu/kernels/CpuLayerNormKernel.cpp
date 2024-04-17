@@ -40,7 +40,7 @@ namespace
             const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
             const auto output_ptr = reinterpret_cast<float *>(output.ptr());
             float mean = 0;
-            float var = 0;
+            //float var = 0;
             count ++;
 
             int y = window_start_y;
@@ -50,6 +50,8 @@ namespace
                 std::cout << *(input_ptr + y) << " ";
             }
             std::cout << std::endl;
+
+            
             ARM_COMPUTE_UNUSED(epsilon);
             ARM_COMPUTE_UNUSED(input_ptr);
             ARM_COMPUTE_UNUSED(output_ptr);
