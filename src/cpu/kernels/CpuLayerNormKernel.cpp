@@ -40,15 +40,26 @@ namespace
             const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
             const auto output_ptr = reinterpret_cast<float *>(output.ptr());
             float mean = 0;
-            //float var = 0;
+            float var = 0;
             count ++;
 
+            const int y_len = window_end_y - window_step_y;
+            /* Calculate mean */
             int y = window_start_y;
-            for (; y <= (window_end_y - window_step_y); y += window_step_y)
+            for (; y <=  y_len; y += window_step_y)
             {
                 mean+= *(input_ptr + y);
-                std::cout << *(input_ptr + y) << " ";
             }
+            mean = mean /(y_len+1);
+
+            /* Calculate variance */
+            y = window_start_y;
+            for (; y <=  y_len; y += window_step_y)
+            {
+                var += (*(input_ptr + y) - mean ) * (*(input_ptr + y) - mean );
+                std::cout << var << " ";
+            }
+            var = var /y_len;
             std::cout << std::endl;
 
             
