@@ -54,6 +54,7 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
 
     // Configure output tensor info.
     const TensorShape dst_shape(src->tensor_shape().x(),vector->tensor_shape().y());
+    std::cout << dst->tensor_shape().total_size() << std::endl;
     if (dst->tensor_shape().total_size() == 0)
     {
         auto_init_if_empty(*dst, TensorInfo(*vector->clone()).set_tensor_shape(dst_shape));
