@@ -4,14 +4,13 @@
 #include "src/cpu/ICpuOperator.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "src/cpu/kernels/CpuPositionalEncodingKernel.h"
 
 
 namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref kernels::CpuTokenEmbedKernel */
+/** Basic function to run @ref kernels::CCpuVectorizeKernel */
 class CpuTokenEmbed : public ICpuOperator
 {
 public:
@@ -34,7 +33,6 @@ public:
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 private: 
-    std::unique_ptr<kernels::CpuPositionalEncodingKernel> _PE_kernel{nullptr};
 };
 } // namespace cpu
 } // namespace arm_compute

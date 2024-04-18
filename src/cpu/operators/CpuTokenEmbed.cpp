@@ -22,9 +22,6 @@ void CpuTokenEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab
     k->configure(input, vocab, output);
     _kernel = std::move(k);
 
-    //_PE_kernel = std::make_unique<kernels::CpuPositionalEncodingKernel>();
-    //_PE_kernel->configure(input,output,tkemb_info.d_model());
-
 }
 
 Status

@@ -8,19 +8,19 @@ namespace arm_compute
 {
 namespace graph
 {
-TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info): _info(std::move(info))
+TokenEmbeddingLayerNode::TokenEmbeddingLayerNode(EmbeddingLayerInfo info): _info(std::move(info))
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
-TokenEmbeddingLayerInfo TokenEmbeddingLayerNode::token_embedding_info() const
+EmbeddingLayerInfo TokenEmbeddingLayerNode::token_embedding_info() const
 {
     return _info;
 }
 
 TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                   TokenEmbeddingLayerInfo tkemb_info)
+                                                                   EmbeddingLayerInfo tkemb_info)
 {
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(1,tkemb_info.d_model());

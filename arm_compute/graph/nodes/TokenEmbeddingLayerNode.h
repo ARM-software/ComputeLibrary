@@ -15,19 +15,19 @@ public:
      * 
      * @param[in] info Token embedding layer information
      */
-    TokenEmbeddingLayerNode(TokenEmbeddingLayerInfo info);
+    TokenEmbeddingLayerNode(EmbeddingLayerInfo info);
     /** Token embedding Info Accessor
      * 
      * @return Token embedding Info
      */
-    TokenEmbeddingLayerInfo token_embedding_info() const;
+    EmbeddingLayerInfo token_embedding_info() const;
     /** Computes token embedding output descriptor
      *
-     * @param[in] TokenEmbeddingLayerInfo Token embedding layer information
+     * @param[in] EmbeddingLayerInfo Token embedding layer information
      * 
      * @return Output descriptor
      */
-    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, TokenEmbeddingLayerInfo info);
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, EmbeddingLayerInfo info);
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -36,7 +36,7 @@ public:
     void             accept(INodeVisitor &v) override;
 
 private:
-    TokenEmbeddingLayerInfo _info;
+    EmbeddingLayerInfo _info;
 };
 } // namespace graph
 } // namespace arm_compute
