@@ -83,6 +83,7 @@ bool TokenEmbeddingLayerNode::forward_descriptors()
 
 TensorDescriptor TokenEmbeddingLayerNode::configure_output(size_t idx) const
 {
+    ARM_COMPUTE_UNUSED(idx)
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
 
     const Tensor *src = input(0/*token id input*/);
