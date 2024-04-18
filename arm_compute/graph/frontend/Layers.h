@@ -1633,7 +1633,7 @@ public:
      *
      * @param[in] tkemb_info  Embedding layer info
      */
-    EmbeddingLayer(const TokenEmbeddingLayerInfo &tkemb_info,
+    EmbeddingLayer(const EmbeddingLayerInfo &tkemb_info,
                         ITensorAccessorUPtr     vocabs,
                         ITensorAccessorUPtr     segments,
                         ITensorAccessorUPtr     position_accessor) : _tkemb_info(tkemb_info),
@@ -1653,7 +1653,7 @@ public:
     }
 
 private:
-    const TokenEmbeddingLayerInfo &_tkemb_info;
+    const EmbeddingLayerInfo &_tkemb_info;
     ITensorAccessorUPtr     _vocabs;
     ITensorAccessorUPtr     _segments;
     ITensorAccessorUPtr     _position;

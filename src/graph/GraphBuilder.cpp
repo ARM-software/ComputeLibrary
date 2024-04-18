@@ -961,7 +961,7 @@ NodeID GraphBuilder::add_stack_node(Graph &g, NodeParams params, const std::vect
 NodeID GraphBuilder::add_embedding_node(Graph &g,
                                     NodeParams params, 
                                     NodeIdxPair input, 
-                                    TokenEmbeddingLayerInfo tkemb_info,
+                                    EmbeddingLayerInfo emb_info,
                                     ITensorAccessorUPtr     vocabs_accessor,
                                     ITensorAccessorUPtr     segemnts_accessor,
                                     ITensorAccessorUPtr     position_accessor)
@@ -974,24 +974,24 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     // Vocabulary const node output tensor descriptor
     TensorDescriptor v_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-    v_desc.shape = TensorShape(tkemb_info.d_vocab(),tkemb_info.d_model());
+    v_desc.shape = TensorShape(emb_info.d_vocab(),emb_info.d_model());
 
     // Segment const node output tensor descriptor
     TensorDescriptor s_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-    s_desc.shape = TensorShape(tkemb_info.d_segment(),tkemb_info.d_model());
+    s_desc.shape = TensorShape(emb_info.d_segment(),emb_info.d_model());
 
     // Position const node output tensor descriptor
     TensorDescriptor p_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-    p_desc.shape = TensorShape(tkemb_info.d_position(),tkemb_info.d_model());
+    p_desc.shape = TensorShape(emb_info.d_position(),emb_info.d_model());
 
     NodeID v_c_nid  = add_const_node_with_name(g, params, "vocabs", v_desc,    std::move(vocabs_accessor));
     NodeID s_c_nid  = add_const_node_with_name(g, params, "segements", s_desc, std::move(segemnts_accessor));
     NodeID p_c_nid  = add_const_node_with_name(g, params, "position", p_desc, std::move(position_accessor));
 
     // Create token embedding node and connect
-    NodeID t_nid = g.add_node<TokenEmbeddingLayerNode>(tkemb_info);
+    NodeID t_nid = g.add_node<TokenEmbeddingLayerNode>(emb_info);
     g.add_connection(input.node_id, 0 /* text input*/, t_nid, 0);
     g.add_connection(v_c_nid, 0, t_nid, 1);
 
@@ -999,7 +999,7 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     NodeID s_nid = g.add_node<SegmentEmbeddingLayerNode>();
     g.add_connection(input.node_id, 1 /* segment input*/, s_nid, 0);
     g.add_connection(s_c_nid, 0, s_nid, 1);
-
+    
     NodeID p_nid = g.add_node<PositionEmbeddingLayerNode>();
     g.add_connection(input.node_id, 0 /* text input*/, p_nid, 0);
     g.add_connection(p_c_nid, 0, p_nid, 1);

@@ -24,7 +24,7 @@ namespace
 {
 /**  Vectorize pretrained position embedding*/
 template <typename T>
-void run_positional_encoding(const Window &window, const ITensor *src, const ITensor *vector, ITensor *dst)
+void run_position_embedding(const Window &window, const ITensor *src, const ITensor *vector, ITensor *dst)
 {
     ARM_COMPUTE_UNUSED(src);
 
@@ -90,7 +90,7 @@ void CpuPositionEmbeddingKernel::run_op(ITensorPack &tensors, const Window &wind
     const ITensor *pos   = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    run_positional_encoding<float>(window, src, pos, dst);
+    run_position_embedding<float>(window, src, pos, dst);
 }
 
 const char * CpuPositionEmbeddingKernel::name() const

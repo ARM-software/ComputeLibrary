@@ -741,7 +741,7 @@ public:
     static NodeID add_embedding_node(Graph &g,
                                  NodeParams params, 
                                  NodeIdxPair input, 
-                                 TokenEmbeddingLayerInfo tkemb_info,
+                                 EmbeddingLayerInfo tkemb_info,
                                  ITensorAccessorUPtr vocabs     = nullptr,
                                  ITensorAccessorUPtr segments   = nullptr,
                                  ITensorAccessorUPtr position   = nullptr);

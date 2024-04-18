@@ -63,23 +63,6 @@ public:
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;
 
-
-        /*
-            Args:
-                d_model: the number of expected features in the input (required).
-                nhead: the number of heads in the multiheadattention models (required).
-                dim_feedforward: the dimension of the feedforward network model (default=2048).
-                dropout: the dropout value (default=0.1).
-                activation: the activation function of the intermediate layer, can be a string
-                    ("relu" or "gelu") or a unary callable. Default: relu
-                layer_norm_eps: the eps value in layer normalization components (default=1e-5).
-                batch_first: If ``True``, then the input and output tensors are provided
-                    as (batch, seq, feature). Default: ``False`` (seq, batch, feature).
-                norm_first: if ``True``, layer norm is done prior to attention and feedforward
-                    operations, respectively. Otherwise it's done after. Default: ``False`` (after).
-                bias: If set to ``False``, ``Linear`` and ``LayerNorm`` layers will not learn an additive
-                    bias. Default: ``True``.
-        */
        // Model parameters
        constexpr unsigned int d_model       = 768U;     // Dim layer output 
        constexpr unsigned int d_vocab       = 30522U;   // Vocaboary size
@@ -120,7 +103,7 @@ public:
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor))
                                             , get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
               
-              << EmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab,d_segemnt,d_position,true /*Use pretrained positional encoding*/),
+              << EmbeddingLayer(EmbeddingLayerInfo(d_model,d_vocab,d_segemnt,d_position,true /*Use pretrained positional encoding*/),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1")

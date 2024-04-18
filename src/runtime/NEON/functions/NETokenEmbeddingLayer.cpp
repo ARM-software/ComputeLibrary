@@ -23,14 +23,14 @@ NETokenEmbeddingLayer::NETokenEmbeddingLayer(): _impl(std::make_unique<Impl>())
 
 NETokenEmbeddingLayer::~NETokenEmbeddingLayer() = default;
 
-void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *output, const TokenEmbeddingLayerInfo& tkemb_info)
+void NETokenEmbeddingLayer::configure(ITensor *input, ITensor *vocab, ITensor *output, const EmbeddingLayerInfo& emb_info)
 {
     _impl->src      = input;
     _impl->vocab    = vocab;
     _impl->dst      = output;
 
     _impl->op  = std::make_unique<cpu::CpuTokenEmbed>();
-    _impl->op->configure(_impl->src->info(),_impl->vocab->info(), _impl->dst->info(), tkemb_info);
+    _impl->op->configure(_impl->src->info(),_impl->vocab->info(), _impl->dst->info(), emb_info);
 }
 
 void NETokenEmbeddingLayer::prepare()

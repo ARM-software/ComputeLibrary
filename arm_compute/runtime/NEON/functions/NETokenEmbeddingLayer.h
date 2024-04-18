@@ -30,10 +30,10 @@ public:
      * 
      * @param[in]  input        Input tensor of char text, Data type supported: U8
      * @param[in]  vocab        Const tenser of char 2 vec, Data type supported: F32
-     * @param[in]  tkemb_info   Token Embedding Layer Info.
+     * @param[in]  emb_info     Token Embedding Layer Info.
      * @param[out] output       Output tensor, shape (seq_len,d_model). Data type supported: F32
      */
-    void configure(ITensor *input, ITensor *vocab, ITensor *output, const TokenEmbeddingLayerInfo& tkemb_info);
+    void configure(ITensor *input, ITensor *vocab, ITensor *output, const EmbeddingLayerInfo& emb_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NETokenEmbeddingLayer
      *
      * @param[in] output Destination tensor info. Data type supported: same as @p input
@@ -41,7 +41,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(ITensor *output, const TokenEmbeddingLayerInfo& tkemb_info);
+    static Status validate(ITensor *output, const EmbeddingLayerInfo& tkemb_info);
 
     void prepare() override;
     // Inherited methods overridden:
