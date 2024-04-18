@@ -70,7 +70,7 @@ public:
 
     
 private:
-    EmbeddingLayerInfo _tkemb_info{};
+    EmbeddingLayerInfo      _tkemb_info{};
     TKEMBKernelPtr          _run_method{nullptr};
     size_t                  _split_dimension{Window::DimY};
     std::string             _name{};
