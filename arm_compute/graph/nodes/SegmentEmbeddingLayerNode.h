@@ -14,6 +14,15 @@ public:
     /** Constructor  */
     SegmentEmbeddingLayerNode();
 
+    /** Computes segment embedding output descriptor
+     *
+     * @param[in] input_descriptor      Text id input tensor descriptor
+     * @param[in] vector_descriptor     Vector input tensor descriptor
+     * 
+     * @return Output descriptor
+     */
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                      const TensorDescriptor &vector_descriptor);
     // Inherited overridden methods:
     NodeType         type() const override;
     bool             forward_descriptors() override;
