@@ -492,11 +492,6 @@ void CpuGemm::run(ITensorPack &tensors)
         ITensorPack pack{{ACL_SRC, d}, {ACL_DST, d}};
         _activation_func->run(pack);
     }
-    std::cout << "src/cpu/operators/CpuGemm.cpp "
-              << "d->tensor_shape().x(): " << d->info()->tensor_shape().x() << std::endl
-              << "d->tensor_shape().y(): " << d->info()->tensor_shape().y() << std::endl
-              << "d->tensor_shape().z(): " << d->info()->tensor_shape().z() << std::endl;
-    
 
 }
 
