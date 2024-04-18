@@ -16,7 +16,7 @@ class CpuTokenEmbedKernel : public ICpuKernel<CpuTokenEmbedKernel>
 {
 private:
     using TKEMBKernelPtr =
-        std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const TokenEmbeddingLayerInfo &, const Window &)>::type;
+        std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const EmbeddingLayerInfo &, const Window &)>::type;
 public:
     /* Default Constructor */
     CpuTokenEmbedKernel() = default;
@@ -28,14 +28,14 @@ public:
      * @param[out]  dst             Destination tensor info. Data type supported: F32
      * @param[in]   tkemb_info      Token embedding layer information.
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *vocab,  ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info);
+    void configure(const ITensorInfo *src, const ITensorInfo *vocab,  ITensorInfo *dst, EmbeddingLayerInfo tkemb_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuTokenEmbedKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *vocab, ITensorInfo *dst, TokenEmbeddingLayerInfo tkemb_info);
+    static Status validate(const ITensorInfo *src, const ITensorInfo *vocab, ITensorInfo *dst, EmbeddingLayerInfo tkemb_info);
 
     /** Return minimum workload size of the relevant kernel
      *
@@ -70,7 +70,7 @@ public:
 
     
 private:
-    TokenEmbeddingLayerInfo _tkemb_info{};
+    EmbeddingLayerInfo _tkemb_info{};
     TKEMBKernelPtr          _run_method{nullptr};
     size_t                  _split_dimension{Window::DimY};
     std::string             _name{};
