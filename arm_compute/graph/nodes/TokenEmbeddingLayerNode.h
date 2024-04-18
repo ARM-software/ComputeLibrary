@@ -23,11 +23,15 @@ public:
     EmbeddingLayerInfo token_embedding_info() const;
     /** Computes token embedding output descriptor
      *
-     * @param[in] EmbeddingLayerInfo Token embedding layer information
+     * @param[in] input_descriptor      Text id input tensor descriptor
+     * @param[in] vector_descriptor     Vector input tensor descriptor
+     * @param[in] EmbeddingLayerInfo    Embedding layer information
      * 
      * @return Output descriptor
      */
-    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, EmbeddingLayerInfo info);
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                      const TensorDescriptor &vector_descriptor,
+                                                      EmbeddingLayerInfo info);
 
     // Inherited overridden methods:
     NodeType         type() const override;
