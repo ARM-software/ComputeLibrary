@@ -67,14 +67,11 @@ namespace
             {
                 res = ( ( *(input_ptr + y)-mean ) / sqrt( var+epsilon ) ) * gamma + beta;
                 *reinterpret_cast<float *>(output_ptr + y) = res;
-                std::cout << *(output_ptr + y) << " ";
             }
-            std::cout << std::endl;
             
             ARM_COMPUTE_UNUSED(epsilon);
             ARM_COMPUTE_UNUSED(input_ptr);
             ARM_COMPUTE_UNUSED(output_ptr);
-            std::cout << window_end_y - window_step_y <<" " << count << " " << gamma << " " << beta<< std::endl;
         },
         input, output);
 
