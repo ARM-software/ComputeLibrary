@@ -211,7 +211,7 @@ void find_longest_matching(std::vector<std::basic_string<T>> &tokens_vec,
    for(const auto &token : tokens_vec)
     {
         token_buffer = token;
-        token_len = token_buffer.size();
+        token_len = token.size();
         left = 0;
     loop:
         while (left < token_len)
@@ -275,19 +275,24 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     // [CLS]
     text_ids.push_back(token2id[start_token]);
-    for(auto v:tokens_vec)std::cout << v <<std::endl;
+    
+    // Input content
     find_longest_matching<T>(tokens_vec, token2id, text_ids);
 
     // [SEP]
     text_ids.push_back(token2id[end_token]);
 
+    for(auto v:tokens_vec)std::cout << v << " ";
+    std::cout << std::endl;
     /** Write back */
     tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,
                         [&](const Coordinates id){
                             *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
+                            std::cout << *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) << " ";
                         });
+                        std::cout << std::endl;
 
 }
 
