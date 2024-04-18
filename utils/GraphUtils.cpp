@@ -282,17 +282,13 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     // [SEP]
     text_ids.push_back(token2id[end_token]);
 
-    for(auto v:tokens_vec)std::cout << v << " ";
-    std::cout << std::endl;
     /** Write back */
     tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,
                         [&](const Coordinates id){
                             *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
-                            std::cout << *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) << " ";
                         });
-                        std::cout << std::endl;
 
 }
 
