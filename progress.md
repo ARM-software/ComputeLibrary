@@ -202,7 +202,7 @@ Optimization:
 
 Input                                                           char U8                          (Len_seq, ...)
   |             
-utils/GraphUtils.cpp(preprocess)                            U8 -> unsigned int                  (Len_seq*, ...) *Maybe reshape
+utils/GraphUtils.cpp(preprocess)                            U8 -> unsigned int                  (Len_seq*, ...) *reshape
   |
 Token Embedding                                            unsigned int -> FP32                 (Len_seq*, d_model, ...)
   |
@@ -211,12 +211,17 @@ Query,Key,Value                                               FP32 -> FP32      
 Scale Dot Production                                          FP32 -> FP32
 
 
+output_descriptor shape:  13 768 1 1 1 1
+DataLayout: NCHW
+DataType::F32
+
 Tensor Shape
 
 Input                               (Len_seq, ...)
 Vocabulary                          (d_vocab, d_model, ...)
 Query,Key,Value Weight              (d_model, d_model, ...)
 Query,Key,Value Bias                (1, d_model, ...)
+
 
 
 

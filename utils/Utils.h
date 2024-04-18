@@ -339,8 +339,8 @@ public:
             std::cout<< "Shape: ";
                 for(auto n:_shape)std::cout<< n << " ";
             std::cout << std::endl;
+            
             std::cout<< "Typestr: " << _typestring << std::endl;
-
             switch (_file_layout)
             {
                 case DataLayout::NCHW :

@@ -54,7 +54,6 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
 
     // Configure output tensor info.
     const TensorShape dst_shape(src->tensor_shape().x(),vector->tensor_shape().y());
-    std::cout << dst->tensor_shape().total_size() << std::endl;
     if (dst->tensor_shape().total_size() == 0)
     {
         auto_init_if_empty(*dst, TensorInfo(*vector->clone()).set_tensor_shape(dst_shape));
@@ -72,6 +71,9 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
     Window win;
 
     win = calculate_max_window(*dst, Steps());
+    std::cout << "window.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
+    std::cout << "window.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
+    std::cout << "window.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
     ICPPKernel::configure(win);
     
 }
