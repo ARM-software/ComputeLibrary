@@ -334,6 +334,7 @@ public:
             _shape               = header.shape;
             _fortran_order       = header.fortran_order;
             _typestring          = header.dtype.str();
+            
             std::cout<< npy_filename << std::endl;
             std::cout<< "Shape: ";
                 for(auto n:_shape)std::cout<< n << " ";
@@ -359,7 +360,7 @@ public:
                     std::cout<< "DataLayout: Unknown" << std::endl;
                     break;
             }
-            
+
         }
         catch (const std::ifstream::failure &e)
         {

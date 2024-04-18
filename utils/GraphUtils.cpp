@@ -275,7 +275,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     // [CLS]
     text_ids.push_back(token2id[start_token]);
-
+    for(auto v:tokens_vec)std::cout << v <<std::endl;
     find_longest_matching<T>(tokens_vec, token2id, text_ids);
 
     // [SEP]
