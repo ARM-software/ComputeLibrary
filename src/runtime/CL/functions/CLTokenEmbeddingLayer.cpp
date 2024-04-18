@@ -12,7 +12,7 @@ CLTokenEmbeddingLayer::CLTokenEmbeddingLayer()
 }
 CLTokenEmbeddingLayer::~CLTokenEmbeddingLayer() = default;
 
-void CLTokenEmbeddingLayer::configure(ITensor *input, ITensor *output, TokenEmbeddingLayerInfo tkemb_info)
+void CLTokenEmbeddingLayer::configure(ITensor *input, ITensor *output, EmbeddingLayerInfo tkemb_info)
 {
         std::cout << " CLTokenEmbeddingLayer::configure!!!!!!!!!!!!!!!  " << std::endl;
 }
