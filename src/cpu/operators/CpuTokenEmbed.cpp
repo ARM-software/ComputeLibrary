@@ -13,7 +13,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-void CpuTokenEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab,  ITensorInfo *output, const TokenEmbeddingLayerInfo &tkemb_info)
+void CpuTokenEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab,  ITensorInfo *output, const EmbeddingLayerInfo &tkemb_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
     ARM_COMPUTE_UNUSED(tkemb_info);
@@ -28,7 +28,7 @@ void CpuTokenEmbed::configure(const ITensorInfo *input, const ITensorInfo *vocab
 }
 
 Status
-CpuTokenEmbed::validate(const ITensorInfo *input, const ITensorInfo *vocab, const ITensorInfo *output,const TokenEmbeddingLayerInfo &tkemb_info)
+CpuTokenEmbed::validate(const ITensorInfo *input, const ITensorInfo *vocab, const ITensorInfo *output,const EmbeddingLayerInfo &tkemb_info)
 {
     ARM_COMPUTE_UNUSED(input);
     ARM_COMPUTE_UNUSED(vocab);
