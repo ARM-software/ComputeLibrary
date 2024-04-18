@@ -48,6 +48,10 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
     for(auto v:src->tensor_shape())std::cout << v << " ";
     std::cout << std::endl;
 
+    std::cout << "vector:" << std::endl;
+    for(auto v:vector->tensor_shape())std::cout << v << " ";
+    std::cout << std::endl;
+
     // Configure output tensor info.
     const TensorShape dst_shape(src->tensor_shape().x(),vector->tensor_shape().y());
     if (dst->tensor_shape().total_size() == 0)
