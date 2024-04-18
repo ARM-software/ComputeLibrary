@@ -83,8 +83,10 @@ public:
        // Model parameters
        constexpr unsigned int d_model       = 768U;     // Dim layer output 
        constexpr unsigned int d_vocab       = 30522U;   // Vocaboary size
-       constexpr unsigned int h             = 12U;       // Parallel attention (Heads)
-       constexpr float        eps           = 1e-5;
+       constexpr unsigned int d_segemnt     = 2U;       // Sentence segmentation size
+       constexpr unsigned int d_position    = 512U;     // Pretrained positional encoding length
+       constexpr unsigned int h             = 12U;      // Parallel attention (Heads)
+       constexpr float        eps           = 1e-5;     // Layer normalization eplision
        constexpr unsigned int d_ff          = 3072U;    // Dim feedforward
        /*constexpr unsigned int d_q           = 64U;      // Dim query, 512U/8U
        constexpr unsigned int d_k           = 64U;      // Dim key, 512U/8U
@@ -118,7 +120,7 @@ public:
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor))
                                             , get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
               
-              << EmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab),
+              << EmbeddingLayer(TokenEmbeddingLayerInfo(d_model,d_vocab,d_segemnt,d_position,true /*Use pretrained positional encoding*/),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1")

@@ -1270,10 +1270,19 @@ class TokenEmbeddingLayerInfo final
 public:
     /** Constructor
      *
-     * @param[in] d_model   Model dimesion
+     * @param[in] d_model       Model dimesion
+     * @param[in] d_vocab       Vocabulary size
+     * @param[in] d_segment     Sentence segmentation size
+     * @param[in] d_position    Maximum sentence postion encoding length
+     * @param[in] pretrained    If use pretained positional encoding
+     * 
      */
-    TokenEmbeddingLayerInfo(unsigned int d_model = 512U, unsigned int d_vocab = 30522U)
-        : _d_model(d_model), _d_vocab(d_vocab)
+    TokenEmbeddingLayerInfo(unsigned int d_model = 512U,
+                            unsigned int d_vocab = 30522U,
+                            unsigned int d_segment = 2U,
+                            unsigned int d_position = 512U,
+                            bool pretrained = false)
+        : _d_model(d_model), _d_vocab(d_vocab), _d_segment(d_segment), _d_position(d_position), _pretrained(pretrained)
     {
     }
 
@@ -1288,10 +1297,25 @@ public:
     {
         return _d_vocab;
     }
+
+    /* Get sentence segmentation size */
+    unsigned int d_segment() const
+    {
+        return _d_segment;
+    }
+
+    /* Get maximium sentence postion encoding length */
+    unsigned int d_position() const
+    {
+        return _d_position;
+    }
     
 private:
     unsigned int _d_model;
     unsigned int _d_vocab;
+    unsigned int _d_segment;
+    unsigned int _d_position;
+    bool _pretrained;
 };
 
 /** Positional Encoding Layer Information Class */
