@@ -60,16 +60,6 @@ void NESimpleForwardLayer::run()
     pack.add_tensor(TensorType::ACL_DST_1, _impl->dst2);
     pack.add_tensor(TensorType::ACL_SRC_2, _impl->src3);
     pack.add_tensor(TensorType::ACL_DST_2, _impl->dst3);
-
-    std::cout << " src/runtime/NEON/functions/NESimpleForwardLayer.cpp" << std::endl;
-    std::cout << *reinterpret_cast<float*>(_impl->src1->ptr_to_element(Coordinates(0,1))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(_impl->src2->ptr_to_element(Coordinates(0,1))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(_impl->src3->ptr_to_element(Coordinates(0,1))) <<std::endl;
-
-    std::cout << *reinterpret_cast<float*>(_impl->dst1->ptr_to_element(Coordinates(0,1))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(_impl->dst2->ptr_to_element(Coordinates(0,1))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(_impl->dst3->ptr_to_element(Coordinates(0,1))) <<std::endl;
-    std::cout << " src/runtime/NEON/functions/NESimpleForwardLayer.cpp" << std::endl;
     
     _impl->kernel->run(pack);
 }

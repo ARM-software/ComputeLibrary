@@ -31,7 +31,7 @@ void CpuLinear::configure(const ITensorInfo *a,
     _run_vector_matrix_multiplication = a->dimension(1) < 2;
     _run_bias_addition                = is_c_bias;
     _reshape_b_only_on_first_run      = b->are_values_constant();
-    std::cout << "src/cpu/operators/CpuLinear.cpp  " << run_optimised << std::endl;
+    
     if (run_optimised)
     {
         _run_interleave_transpose   = false;
@@ -101,7 +101,6 @@ CpuLinear::validate(const ITensorInfo *a,
 void CpuLinear::run(ITensorPack &tensors)
 {
 
-    std::cout << "src/cpu/operators/CpuLinear.cpp Newww!!!!!!!!!!!!! " << std::endl;
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto a = tensors.get_const_tensor(ACL_SRC_0);
     auto b = tensors.get_const_tensor(ACL_SRC_1);
@@ -114,7 +113,6 @@ void CpuLinear::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
 
-    std::cout << "src/cpu/operators/CpuLinear.cpp 1 " << std::endl;
     if (_run_interleave_transpose)
     {
         // Run interleave kernel
@@ -124,8 +122,6 @@ void CpuLinear::run(ITensorPack &tensors)
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_a.get());
     }
-
-    std::cout << "src/cpu/operators/CpuLinear.cpp 2 " << std::endl;
 
     const ITensor *b_to_use = b;
     if (_run_interleave_transpose)
@@ -142,12 +138,9 @@ void CpuLinear::run(ITensorPack &tensors)
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
     
-    std::cout << "src/cpu/operators/CpuLinear.cpp 3 " << std::endl;
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
-
-    std::cout << "src/cpu/operators/CpuLinear.cpp Newww!!!!!!!!!!!!! " << std::endl;
 
 }
 

@@ -60,41 +60,9 @@ void CpuSimpleForwardKernel::run_op(ITensorPack &tensors, const Window &window, 
     const auto src3 = tensors.get_const_tensor(TensorType::ACL_SRC_2);
     auto       dst3 = tensors.get_tensor(TensorType::ACL_DST_2);
 
-    std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
-    std::cout << src1->info()->total_size() <<std::endl;
-    std::cout << src2->info()->total_size() <<std::endl;
-    std::cout << src3->info()->total_size() <<std::endl;
-
-    std::cout << dst1->info()->total_size() <<std::endl;
-    std::cout << dst2->info()->total_size() <<std::endl;
-    std::cout << dst3->info()->total_size() <<std::endl;
-
     dst1->copy_from(*src1);
     dst2->copy_from(*src2);
     dst3->copy_from(*src3);
-    std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
-
-    std::cout << src1->info()->tensor_shape().x() <<std::endl;
-    std::cout << src1->info()->tensor_shape().y() <<std::endl;
-    std::cout << src1->info()->tensor_shape().z() <<std::endl;
-
-    std::cout << dst1->info()->tensor_shape().x() <<std::endl;
-    std::cout << dst1->info()->tensor_shape().y() <<std::endl;
-    std::cout << dst1->info()->tensor_shape().z() <<std::endl;
-
-    std::cout << src1->is_used() << "  " << dst1->is_used() << std::endl;
-    std::cout << src2->is_used() << "  " << dst2->is_used() << std::endl;
-    std::cout << src3->is_used() << "  " << dst3->is_used() << std::endl;
-
-    std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
-    std::cout << *reinterpret_cast<float*>(src1->ptr_to_element(Coordinates(0,0))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(src2->ptr_to_element(Coordinates(0,0))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(src3->ptr_to_element(Coordinates(0,0))) <<std::endl;
-
-    std::cout << *reinterpret_cast<float*>(dst1->ptr_to_element(Coordinates(0,0))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(dst2->ptr_to_element(Coordinates(0,0))) <<std::endl;
-    std::cout << *reinterpret_cast<float*>(dst3->ptr_to_element(Coordinates(0,0))) <<std::endl;
-    std::cout << "src/cpu/kernels/CpuSimpleForwardKernel.cpp Runnnn" << std::endl;
     
 }
 

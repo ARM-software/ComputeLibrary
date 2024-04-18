@@ -72,11 +72,6 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
         const int n = key_to_use->dimension(0);
         const int k = query->dimension(0);
 
-        std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp MM run" << std::endl;
-        std::cout << "m " << m << std::endl;
-        std::cout << "n " << n << std::endl;
-        std::cout << "k " << k << std::endl;
-        std::cout << "_run_interleave_transpose " << _run_interleave_transpose << std::endl;
         // Configure matrix multiplication kernel
         _mm_kernel->configure(&_tmp_query, &_tmp_key, gemm_output_to_use, scale, _run_interleave_transpose,
                                 GEMMReshapeInfo(m, n, k));
@@ -114,9 +109,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler transposed1xw_key(offset_int_vec(Transposed1xWRHS), _tmp_key, tensors, true);
 
     ITensorPack mm_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 1" << std::endl;
-    std::cout << "query->info()->tensor_shape().x() "<< query->info()->tensor_shape().x() << std::endl;
-    std::cout << "query->info()->tensor_shape().y() "<< query->info()->tensor_shape().y() << std::endl;
+
     if (_run_interleave_transpose)
     {
         // Run interleave kernel
@@ -126,12 +119,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_query.get());
     }
-    std::cout << "interleaved_query.x() "<< interleaved_query.get()->info()->tensor_shape().x() << std::endl;
-    std::cout << "interleaved_query.y() "<< interleaved_query.get()->info()->tensor_shape().y() << std::endl;
 
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 2" << std::endl;
-    std::cout << "key_to_use.x() "<< key_to_use->info()->tensor_shape().x() << std::endl;
-    std::cout << "key_to_use.y() "<< key_to_use->info()->tensor_shape().y() << std::endl;
     if (_pretranspose_key_func && _run_pretranspose)
     {
         // Run pretranspose kernel
@@ -139,12 +127,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         _pretranspose_key_func->run(pretranspose_pack);
         key_to_use = pretransposed_key.get();
     }
-    std::cout << "pretransposed_key.get().x() "<< pretransposed_key.get()->info()->tensor_shape().x() << std::endl;
-    std::cout << "pretransposed_key.get().y() "<< pretransposed_key.get()->info()->tensor_shape().y() << std::endl;
 
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 3" << std::endl;
-    std::cout << "key_to_use.x() "<< key_to_use->info()->tensor_shape().x() << std::endl;
-    std::cout << "key_to_use.y() "<< key_to_use->info()->tensor_shape().y() << std::endl;
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
@@ -153,18 +136,13 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                         _transpose1xW_key_kernel->window(), transpose_pack);
         key_to_use = transposed1xw_key.get();
     }
-    std::cout << "transposed1xw_key.get().x() "<< transposed1xw_key.get()->info()->tensor_shape().x() << std::endl;
-    std::cout << "transposed1xw_key.get().y() "<< transposed1xw_key.get()->info()->tensor_shape().y() << std::endl;
 
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 4" << std::endl;
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, key_to_use);
 
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                     _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                     _mm_kernel->window(), mm_pack);
-
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp 5" << std::endl;
 
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);

@@ -37,7 +37,6 @@ void CpuPositionEmbed::run(ITensorPack &tensors)
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
 
     ARM_COMPUTE_UNUSED(tensors);
-    std::cout << "src/cpu/operators/CpuPositionEmbed.cpp" << std::endl;
 
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }

@@ -27,7 +27,6 @@ template <typename T>
 void run_positional_encoding(const Window &window, const ITensor *src, const ITensor *vector, ITensor *dst)
 {
     ARM_COMPUTE_UNUSED(src);
-    std::cout << "src/cpu/kernels/CpuPositionEmbeddingKernel.cpp" << std::endl;
 
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0,1,1));
@@ -36,11 +35,6 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
 
     const unsigned int vector_depth     = vector->info()->tensor_shape().y();
-
-    std::cout << "window " << window_start_x  << " " <<   window_end_x  << std::endl;
-    std::cout << "vector " << vector->info()->tensor_shape().x()  << " " <<   vector->info()->tensor_shape().y()  << std::endl;
-    std::cout << "dst " << dst->info()->tensor_shape().x()  << " " <<   dst->info()->tensor_shape().y()  << std::endl;
-    std::cout << vector_depth << std::endl;
 
     unsigned int offset_vector,offset_dst;
 
@@ -57,11 +51,9 @@ void run_positional_encoding(const Window &window, const ITensor *src, const ITe
             {
                 offset_dst     = x * vector_depth;
                 offset_vector  = x * vector_depth;
-                std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));
-                std::cout << *(dst_ptr + offset_dst) << "  ";
-                std::cout << *(dst_ptr + offset_dst + dst->info()->tensor_shape().y()-1) << std::endl;
-                
+                std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));            
             }
+            
         },dst_iter,vector_iter);
 
 }

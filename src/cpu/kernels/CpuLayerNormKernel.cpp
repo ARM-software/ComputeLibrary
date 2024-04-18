@@ -110,7 +110,6 @@ Status CpuLayerNormKernel::validate(const ITensorInfo *input,
 
 void CpuLayerNormKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &thread_info)
 {
-    std::cout << "src/cpu/kernels/CpuLayerNormKernel.cpp" << std::endl;
     ARM_COMPUTE_UNUSED(thread_info);
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
