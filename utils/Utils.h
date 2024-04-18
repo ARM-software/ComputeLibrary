@@ -334,7 +334,7 @@ public:
             _shape               = header.shape;
             _fortran_order       = header.fortran_order;
             _typestring          = header.dtype.str();
-            
+
             std::cout<< npy_filename << std::endl;
             std::cout<< "Shape: ";
                 for(auto n:_shape)std::cout<< n << " ";
@@ -403,7 +403,7 @@ public:
             shape.set(i, _shape.at(src));
         }
 
-        arm_compute::TensorInfo tensor_info(shape, 1, dt);
+        arm_compute::TensorInfo tensor_info(shape, 1/*num_channels*/, dt);
         tensor.allocator()->init(tensor_info);
     }
 
