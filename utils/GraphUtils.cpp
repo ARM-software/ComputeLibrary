@@ -281,7 +281,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     // [SEP]
     text_ids.push_back(token2id[end_token]);
-
+    std::cout<< "text_ids.size(): " <<  text_ids.size() << std::endl;
     /** Write back */
     tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
