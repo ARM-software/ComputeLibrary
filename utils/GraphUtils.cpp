@@ -285,7 +285,9 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     std::cout << " tensor x: "  << tensor.info()->dimension(0) << std::endl;
     std::cout << " tensor y: "  << tensor.info()->dimension(1) << std::endl;
     std::cout << " tensor z: "  << tensor.info()->dimension(2) << std::endl;
-    tensor.info()->valid_region().set(0,0,text_ids.size());
+
+    std::cout << "utils/GraphUtils.cpp preprocess_typed set: " << std::endl;
+    std::cout << " tensor x: "  << tensor.info()->valid_region().set(0,0,text_ids.size()).shape.x() << std::endl;
     std::cout << "utils/GraphUtils.cpp preprocess_typed valid region: " << std::endl;
     std::cout << " tensor x: "  << tensor.info()->valid_region().shape.x() << std::endl;
     std::cout << " tensor y: "  << tensor.info()->valid_region().shape.y() << std::endl;
