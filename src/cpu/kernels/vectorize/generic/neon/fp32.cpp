@@ -27,7 +27,11 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
     const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
     const auto vector_ptr   = reinterpret_cast<float *>(vector_iter.ptr());
-
+    std::cout << " src/cpu/kernels/vectorize/generic/neon/fp32.cpp " << std::endl;
+    std::cout << "window.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
+    std::cout << "window.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
+    std::cout << "window.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
+    
     execute_window_loop(win,
         [&](const Coordinates &)
         {
