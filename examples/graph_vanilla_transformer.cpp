@@ -83,9 +83,10 @@ public:
 
        // Compute library best operate on NHWC(default) layout
        //const auto operation_layout = common_params.data_layout;
+       unsigned int reshaped_input_len      = 13U;
 
        // Create input tensor
-       const TensorShape src_tensor = TensorShape(13U);
+       const TensorShape src_tensor = TensorShape(reshaped_input_len);
 
         // Data layout
         const DataLayout operation_layout = DataLayout::NCHW;
