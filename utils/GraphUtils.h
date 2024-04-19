@@ -64,7 +64,7 @@ public:
      * 
      * @param[in] vocab_file Path to vocab list txt file
      */
-    WordPiecePreprocessor(const std::string &vocab_file);
+    WordPiecePreprocessor(const std::string &vocab_file,unsigned int &reshaped_input_len);
     void preprocess(ITensor &tensor) override;
 
 private:
@@ -72,6 +72,7 @@ private:
     void preprocess_typed(ITensor &tensor,Args &&... tokens);
 
     std::string _vocab_file;
+    unsigned int &_reshaped_input_len;
 };
 
 /** Convert input text to Int preprocessor */

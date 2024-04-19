@@ -102,7 +102,9 @@ void TFPreproccessor::preprocess_typed(ITensor &tensor)
                         });
 }
 
-WordPiecePreprocessor::WordPiecePreprocessor(const std::string &vocab_file): _vocab_file(vocab_file)
+WordPiecePreprocessor::WordPiecePreprocessor(const std::string &vocab_file,
+                                             unsigned int &reshaped_input_len): _vocab_file(vocab_file),
+                                                                                _reshaped_input_len(reshaped_input_len)
 {
 }
 
@@ -242,7 +244,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
     const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
     const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
-
     ARM_COMPUTE_UNUSED(pad_token);
 
     /** Read in */
@@ -281,7 +282,11 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     // [SEP]
     text_ids.push_back(token2id[end_token]);
-    std::cout<< "text_ids.size(): " <<  text_ids.size() << std::endl;
+    _reshaped_input_len = text_ids.size();
+
+    std::cout <<"reshaped_input_len: "  << reshaped_input_len << std::endl;
+    std::cout <<"local reshaped_input_len: "  << _reshaped_input_len << std::endl;
+
     /** Write back */
     tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());

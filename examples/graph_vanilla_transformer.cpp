@@ -63,30 +63,32 @@ public:
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;
 
-       // Model parameters
-       constexpr unsigned int d_model       = 768U;     // Dim layer output 
-       constexpr unsigned int d_vocab       = 30522U;   // Vocaboary size
-       constexpr unsigned int d_segemnt     = 2U;       // Sentence segmentation size
-       constexpr unsigned int d_position    = 512U;     // Pretrained positional encoding length
-       constexpr unsigned int h             = 12U;      // Parallel attention (Heads)
-       constexpr float        eps           = 1e-5;     // Layer normalization eplision
-       constexpr unsigned int d_ff          = 3072U;    // Dim feedforward
-       /*constexpr unsigned int d_q         = 64U;      // Dim query, 512U/8U
-       constexpr unsigned int d_k           = 64U;      // Dim key, 512U/8U
-       constexpr unsigned int d_v           = 64U;      // Dim value, 512U/8U
-       constexpr float        P_drop        = 0.1f;     // Dropout rate
+        // Model parameters
+        constexpr unsigned int d_model       = 768U;     // Dim layer output 
+        constexpr unsigned int d_vocab       = 30522U;   // Vocaboary size
+        constexpr unsigned int d_segemnt     = 2U;       // Sentence segmentation size
+        constexpr unsigned int d_position    = 512U;     // Pretrained positional encoding length
+        constexpr unsigned int h             = 12U;      // Parallel attention (Heads)
+        constexpr float        eps           = 1e-5;     // Layer normalization eplision
+        constexpr unsigned int d_ff          = 3072U;    // Dim feedforward
+        /*constexpr unsigned int d_q         = 64U;      // Dim query, 512U/8U
+        constexpr unsigned int d_k           = 64U;      // Dim key, 512U/8U
+        constexpr unsigned int d_v           = 64U;      // Dim value, 512U/8U
+        constexpr float        P_drop        = 0.1f;     // Dropout rate
 
-       
-       constexpr unsigned int seq_src       = 25000U;   // Input token sequence
-       constexpr unsigned int seq_tgt       = 25000U;   // Output token sequence.
-       constexpr unsigned int bs            = 1U;       // Batch size*/
 
-       // Compute library best operate on NHWC(default) layout
-       //const auto operation_layout = common_params.data_layout;
-       unsigned int reshaped_input_len      = 13U;
+        constexpr unsigned int seq_src       = 25000U;   // Input token sequence
+        constexpr unsigned int seq_tgt       = 25000U;   // Output token sequence.
+        constexpr unsigned int bs            = 1U;       // Batch size*/
 
-       // Create input tensor
-       const TensorShape src_tensor = TensorShape(reshaped_input_len);
+        // Compute library best operate on NHWC(default) layout
+        //const auto operation_layout = common_params.data_layout;
+
+        // WordPiecePreprocessor potentially will reshape input token lens
+        static unsigned int reshaped_input_len      = 13U;
+
+        // Create input tensor
+        const TensorShape src_tensor = TensorShape(reshaped_input_len);
 
         // Data layout
         const DataLayout operation_layout = DataLayout::NCHW;
