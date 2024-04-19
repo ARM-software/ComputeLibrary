@@ -284,9 +284,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     text_ids.push_back(token2id[end_token]);
     _reshaped_input_len = text_ids.size();
 
-    std::cout <<"reshaped_input_len: "  << reshaped_input_len << std::endl;
-    std::cout <<"local reshaped_input_len: "  << _reshaped_input_len << std::endl;
-
     /** Write back */
     tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());

@@ -99,7 +99,7 @@ public:
         graph << common_params.target << common_params.fast_math_hint;
 
         // Text preprocessor
-        std::unique_ptr<IPreprocessor> WP_preproccessor     = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
+        std::unique_ptr<IPreprocessor> WP_preproccessor     = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary, reshaped_input_len);
         std::unique_ptr<IPreprocessor> at2_preproccessor    = std::make_unique<atoiPreprocessor>();
 
         // Encode Input
