@@ -112,6 +112,12 @@ void CpuVectorizeKernel::run_op(ITensorPack &tensors, const Window &window, cons
     const ITensor *vector   = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst      = tensors.get_tensor(TensorType::ACL_DST);
 
+
+    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp reshaped" << std::endl;
+    std::cout << "ori: "<< src->info()->tensor_shape().x() << std::endl;
+    std::cout << "valid region: "<< src->info()->valid_region().shape.x() << std::endl;
+    /* Runtime input reshape */
+
     _run_method(src, vector, dst, window);
 }
 
