@@ -17,6 +17,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     
     /* Runtime reshape valid tensor region if input has been reshaped during preprocess */
     size_t reshape_input_x = src->info()->valid_region().shape.x();
+    std::cout << "reshape_input_x " << reshape_input_x << std::endl;
     if(src->info()->tensor_shape().x() != reshape_input_x)
     {
         dst->info()->set_valid_region(dst->info()->valid_region().set(0,0,reshape_input_x));
@@ -30,7 +31,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     const unsigned int window_start_x   = static_cast<unsigned int>(win.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(win.x().end());
 
-    const unsigned int vector_depth     = vector->info()->tensor_shape().y();
+    const unsigned int vector_depth     = vector->info()->tensor_shape().y(); 
 
     unsigned int offset_vector,offset_dst;
 
