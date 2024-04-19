@@ -71,6 +71,7 @@
         "memory": "cpp",
         "concepts": "cpp",
         "numeric": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "version": "cpp"
     }
 }
