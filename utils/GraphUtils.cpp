@@ -281,19 +281,8 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     // [SEP]
     text_ids.push_back(token2id[end_token]);
 
-    std::cout << "utils/GraphUtils.cpp preprocess_typed: " << std::endl;
-    std::cout << " tensor x: "  << tensor.info()->dimension(0) << std::endl;
-    std::cout << " tensor y: "  << tensor.info()->dimension(1) << std::endl;
-    std::cout << " tensor z: "  << tensor.info()->dimension(2) << std::endl;
-
-    tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
-
-    std::cout << "utils/GraphUtils.cpp preprocess_typed valid region: " << std::endl;
-    std::cout << " tensor x: "  << tensor.info()->valid_region().shape.x() << std::endl;
-    std::cout << " tensor y: "  << tensor.info()->valid_region().shape.y() << std::endl;
-    std::cout << " tensor z: "  << tensor.info()->valid_region().shape.z() << std::endl;
     /** Write back */
-    tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
+    tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,
                         [&](const Coordinates id){
