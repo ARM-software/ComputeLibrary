@@ -280,7 +280,6 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     // [SEP]
     text_ids.push_back(token2id[end_token]);
-    _reshaped_input_len = text_ids.size();
 
     std::cout << "utils/GraphUtils.cpp preprocess_typed: " << std::endl;
     std::cout << " tensor x: "  << tensor.info()->dimension(0) << std::endl;
