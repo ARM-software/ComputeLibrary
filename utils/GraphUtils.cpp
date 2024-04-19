@@ -283,6 +283,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     /** Write back */
     tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
+    std::cout << "graph preprocess tensor id " << tensor.info()->id() << std::endl;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,
                         [&](const Coordinates id){
