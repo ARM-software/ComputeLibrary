@@ -84,11 +84,8 @@ public:
         // Compute library best operate on NHWC(default) layout
         //const auto operation_layout = common_params.data_layout;
 
-        // WordPiecePreprocessor potentially will reshape input token lens
-        static unsigned int reshaped_input_len      = 13U;
-
         // Create input tensor
-        const TensorShape src_tensor = TensorShape(reshaped_input_len);
+        const TensorShape src_tensor = TensorShape(13U);
 
         // Data layout
         const DataLayout operation_layout = DataLayout::NCHW;
@@ -99,7 +96,7 @@ public:
         graph << common_params.target << common_params.fast_math_hint;
 
         // Text preprocessor
-        std::unique_ptr<IPreprocessor> WP_preproccessor     = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary, reshaped_input_len);
+        std::unique_ptr<IPreprocessor> WP_preproccessor     = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
         std::unique_ptr<IPreprocessor> at2_preproccessor    = std::make_unique<atoiPreprocessor>();
 
         // Encode Input

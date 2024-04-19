@@ -102,9 +102,7 @@ void TFPreproccessor::preprocess_typed(ITensor &tensor)
                         });
 }
 
-WordPiecePreprocessor::WordPiecePreprocessor(const std::string &vocab_file,
-                                             unsigned int &reshaped_input_len): _vocab_file(vocab_file),
-                                                                                _reshaped_input_len(reshaped_input_len)
+WordPiecePreprocessor::WordPiecePreprocessor(const std::string &vocab_file): _vocab_file(vocab_file)
 {
 }
 
@@ -288,6 +286,11 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
     std::cout << " tensor x: "  << tensor.info()->dimension(0) << std::endl;
     std::cout << " tensor y: "  << tensor.info()->dimension(1) << std::endl;
     std::cout << " tensor z: "  << tensor.info()->dimension(2) << std::endl;
+
+    std::cout << "utils/GraphUtils.cpp preprocess_typed valid region: " << std::endl;
+    std::cout << " tensor x: "  << tensor.info()->valid_region().shape.x() << std::endl;
+    std::cout << " tensor y: "  << tensor.info()->valid_region().shape.y() << std::endl;
+    std::cout << " tensor z: "  << tensor.info()->valid_region().shape.z() << std::endl;
     /** Write back */
     tensor.info()->set_tensor_shape(TensorShape(text_ids.size()));
     window.use_tensor_dimensions(tensor.info()->tensor_shape());

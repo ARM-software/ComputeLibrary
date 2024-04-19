@@ -232,20 +232,3 @@ Query,Key,Value Bias                (1, d_model, ...)
 Current:
 
 Linear layer
-_asm_glue && _asm_glue->is_configured()
-
-src/cpu/operators/CpuGemm.cpp Run
-a.id: 0b.id: 0c.id: 0d.id: 0
-Input:  0.0140619 5.80552e-31
-Weight:  -0.0164057 -0.0164057
-Bias:  0.584885 0.584885
-src/cpu/operators/CpuGemm.cpp Run
-a.id: 0b.id: 0c.id: 0d.id: 0
-Input:  0.0140619 5.80552e-31
-Weight:  0.00807745 0.00807745
-Bias:  0.00104306 0.00104306
-src/cpu/operators/CpuGemm.cpp Run
-a.id: 0b.id: 0c.id: 0d.id: 0
-Input:  0.0140619 5.80552e-31
-Weight:  0.0114426 0.0114426
-Bias:  -0.0118462 -0.0118462
