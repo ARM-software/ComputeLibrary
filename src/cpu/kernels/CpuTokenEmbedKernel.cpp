@@ -99,11 +99,11 @@ void CpuTokenEmbedKernel::run_op(ITensorPack &tensors, const Window &window, con
     const ITensor *vocab = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst   = tensors.get_tensor(TensorType::ACL_DST);
 
+    std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp reshaped" << std::endl;
+    std::cout << "ori: "<< src->info()->tensor_shape().x() << std::endl;
+    std::cout << "valid region: "<< src->info()->valid_region().shape.x() << std::endl;
     /* Runtime input reshape */
-    if(src->info()->tensor_shape().x()!=src->info()->valid_region().shape.x())
-    {
-        std::cout << "src/cpu/kernels/CpuTokenEmbedKernel.cpp reshaped" << std::endl;
-    }
+    
     _run_method(src, vocab, dst, _tkemb_info, window);
 }
 
