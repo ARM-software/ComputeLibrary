@@ -51,7 +51,7 @@ TensorDescriptor EmbeddingSumLayerNode::configure_output(size_t idx) const
 
 NodeType EmbeddingSumLayerNode::type() const
 {
-    return NodeType::EmbeddingSumLayerNode;
+    return NodeType::EmbeddingSumLayer;
 }
 
 void EmbeddingSumLayerNode::accept(INodeVisitor &v)
