@@ -2385,6 +2385,13 @@
             "src/runtime/NEON/functions/NELayerNormLayer.cpp"
           ]
         }
+      },
+      "EmbeddingSum": {
+        "files":{
+          "common":[
+            "src/runtime/NEON/functions/NEEmbeddingSumLayer.cpp"
+          ]
+        }
       }
     }
   },
