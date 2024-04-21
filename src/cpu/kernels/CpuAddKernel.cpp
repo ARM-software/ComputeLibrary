@@ -145,9 +145,11 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
 void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy)
 {
 
-    std::cout << "src/cpu/kernels/CpuAddKernel.cpp" << std::endl;
+    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 1" << std::endl;
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
+
+    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 2" << std::endl;
 
     const auto can_use_fixedpoint = add_q8_neon_fixedpoint_possible(src0, src1, dst);
     const auto uk                 = CpuAddKernel::get_implementation<CpuAddKernelDataTypeISASelectorData>(
@@ -164,6 +166,7 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     set_shape_if_empty(*dst, out_shape);
     set_data_type_if_unknown(*dst, src0->data_type());
 
+    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 3" << std::endl;
     // Configure kernel window
     Window win;
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src0, *src1);
