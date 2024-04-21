@@ -161,12 +161,13 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     _run_method = uk->ukernel;
     _name       = std::string("CpuAddKernel").append("/").append(uk->name);
 
+    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 3" << std::endl;
     // Auto initialize dst if not initialized
     const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
     set_shape_if_empty(*dst, out_shape);
     set_data_type_if_unknown(*dst, src0->data_type());
 
-    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 3" << std::endl;
+    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 4" << std::endl;
     // Configure kernel window
     Window win;
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src0, *src1);
