@@ -1013,6 +1013,7 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
 
     set_node_params(g, t_nid, params);
     set_node_params(g, s_nid, params);
+    set_node_params(g, p_nid, params);
     set_node_params(g, add_nid, params);
 
     return add_nid;
