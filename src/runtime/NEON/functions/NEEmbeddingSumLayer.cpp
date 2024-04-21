@@ -28,7 +28,7 @@ void NEEmbeddingSumLayer::configure(ITensor *token, ITensor *segment, ITensor *p
 {
     _impl->token      = token;
     _impl->segment    = segment;
-    _impl->position   = segment;
+    _impl->position   = position;
     _impl->dst        = output;
 
     _impl->op  = std::make_unique<cpu::CpuTokenEmbed>();
