@@ -49,9 +49,49 @@ TensorDescriptor EmbeddingSumLayerNode::compute_output_descriptor(const TensorDe
                                                                   const TensorDescriptor &position_descriptor)
 {
     TensorDescriptor output_descriptor = token_descriptor;
+
+    std::cout << "src/graph/nodes/EmbeddingSumLayerNode.cpp compute_output_descriptor" << std::endl;
+    std::cout << "output_descriptor shape: " ;
+        for(auto v: output_descriptor.shape)std::cout << " "<<v;
+    std::cout << std::endl;
+
+    switch (output_descriptor.layout)
+    {
+        case DataLayout::NCHW :
+            std::cout<< "DataLayout: NCHW" << std::endl;
+            break;
+        case DataLayout::NCDHW:
+            std::cout<< "DataLayout: NCDHW" << std::endl;
+            break;
+        case DataLayout::NDHWC :
+            std::cout<< "DataLayout: NDHWC" << std::endl;
+            break;
+        case DataLayout::NHWC :
+            std::cout<< "DataLayout: NHWC" << std::endl;
+            break;
+        
+        default:
+            std::cout<< "DataLayout: Unknown" << std::endl;
+            break;
+    }
+
+    switch (output_descriptor.data_type)
+    {
+        case DataType::F32 :
+            std::cout<< "DataType::F32" << std::endl;
+            break;
+        case DataType::U8 :
+            std::cout<< "DataType::U8" << std::endl;
+            break;
+        
+        default:
+            std::cout<< "DataLayout: Unknown" << std::endl;
+            break;
+    }
+
     ARM_COMPUTE_UNUSED(segment_descriptor);
     ARM_COMPUTE_UNUSED(position_descriptor);
-    std::cout << "EmbeddingSumLayerNode::compute_output_descriptor  "<< (output_descriptor.data_type == DataType::F32) << std::endl;
+    
     return output_descriptor;
 }
 
