@@ -21,7 +21,7 @@ EmbeddingLayerInfo EmbeddingSumLayerNode::embedding_sum_info() const
 
 bool EmbeddingSumLayerNode::forward_descriptors()
 {
-    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -34,14 +34,21 @@ bool EmbeddingSumLayerNode::forward_descriptors()
 TensorDescriptor EmbeddingSumLayerNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
-    ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
 
-    const Tensor *token     = input(0);
-    const Tensor *segment   = input(1);
-    const Tensor *position  = input(2);
-    ARM_COMPUTE_ERROR_ON(src == nullptr);
+    const Tensor *src1 = input(0);
+    ARM_COMPUTE_ERROR_ON(src1 == nullptr);
 
-    return compute_output_descriptor(token->desc(), segment->desc(), position->desc());
+    const Tensor *src2 = input(1);
+    ARM_COMPUTE_ERROR_ON(src2 == nullptr);
+
+    auto output_info = src1->desc();
+
+    TensorShape out_shape = TensorShape::broadcast_shape(src1->desc().shape, src2->desc().shape);
+    ARM_COMPUTE_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
+
+    output_info.set_shape(out_shape);
+
+    return output_info;
 }
 
 TensorDescriptor EmbeddingSumLayerNode::compute_output_descriptor(const TensorDescriptor &token_descriptor,
