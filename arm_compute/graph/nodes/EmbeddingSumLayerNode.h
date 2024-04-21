@@ -32,6 +32,12 @@ public:
     static TensorDescriptor compute_output_descriptor(const TensorDescriptor &token_descriptor,
                                                       const TensorDescriptor &segment_descriptor,
                                                       const TensorDescriptor &position_descriptor);
+
+    /** Convert policy accessor
+     *
+     * @return Convert policy that is used in the node
+     */
+    ConvertPolicy convert_policy() const;
                                                       
     // Inherited overridden methods:
     NodeType         type() const override;

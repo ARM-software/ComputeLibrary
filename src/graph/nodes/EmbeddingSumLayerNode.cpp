@@ -56,6 +56,10 @@ TensorDescriptor EmbeddingSumLayerNode::configure_output(size_t idx) const
     return compute_output_descriptor(token->desc(), segment->desc(), position->desc());
 }
 
+ConvertPolicy EmbeddingSumLayerNode::convert_policy() const
+{
+    return _info.c_policy();
+}
 
 NodeType EmbeddingSumLayerNode::type() const
 {

@@ -1278,11 +1278,17 @@ public:
      * 
      */
     EmbeddingLayerInfo(unsigned int d_model = 512U,
-                            unsigned int d_vocab = 30522U,
-                            unsigned int d_segment = 2U,
-                            unsigned int d_position = 512U,
-                            bool pretrained = false)
-        : _d_model(d_model), _d_vocab(d_vocab), _d_segment(d_segment), _d_position(d_position), _pretrained(pretrained)
+                       unsigned int d_vocab = 30522U,
+                       unsigned int d_segment = 2U,
+                       unsigned int d_position = 512U,
+                       bool pretrained = false,
+                       ConvertPolicy c_policy = ConvertPolicy::SATURATE)
+        : _d_model(d_model),
+          _d_vocab(d_vocab), 
+          _d_segment(d_segment), 
+          _d_position(d_position), 
+          _pretrained(pretrained),
+          _c_policy(c_policy)
     {
     }
 
@@ -1309,6 +1315,12 @@ public:
     {
         return _d_position;
     }
+
+    /* Get convert policy */
+    ConvertPolicy c_policy() const
+    {
+        return _c_policy;
+    }
     
 private:
     unsigned int _d_model;
@@ -1316,6 +1328,7 @@ private:
     unsigned int _d_segment;
     unsigned int _d_position;
     bool _pretrained;
+    ConvertPolicy _c_policy;
 };
 
 /** Positional Encoding Layer Information Class */

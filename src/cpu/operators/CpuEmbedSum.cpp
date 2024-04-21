@@ -7,6 +7,9 @@
 #include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
 
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/cpu/utils/CpuAuxTensorHandler.h"
+
 
 namespace arm_compute
 {
@@ -18,13 +21,17 @@ void CpuEmbedSum::configure(const ITensorInfo *token,
                             ITensorInfo *output,
                             const EmbeddingLayerInfo &emb_info)
 {
-    ARM_COMPUTE_LOG_PARAMS(input, output, tkemb_info);
-    ARM_COMPUTE_UNUSED(emb_info);
-
     _add_kernel_1 = std::make_unique<kernels::CpuAddKernel>();
     _add_kernel_2 = std::make_unique<kernels::CpuAddKernel>();
 
+    _add_kernel_1->configure(token,segemnt,&_tmp_token_segment,emb_info.c_policy());
 
+    _aux_mem[TokenSegmentOutput] =
+                experimental::MemoryInfo(offset_int_vec(TokenSegmentOutput),
+                                         experimental::MemoryLifetime::Persistent,
+                                         _tmp_token_segment.total_size());
+    
+    _add_kernel_2->configure(&_tmp_token_segment,position,output,emb_info.c_policy());
 }
 
 Status

@@ -44,8 +44,19 @@ public:
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 private:
+
+    enum AuxTensorIdx
+    {
+        TokenSegmentOutput = 0,
+        Count
+    };
+
     std::unique_ptr<kernels::CpuAddKernel> _add_kernel_1{nullptr};
     std::unique_ptr<kernels::CpuAddKernel> _add_kernel_2{nullptr};
+
+    TensorInfo _tmp_token_segment{};
+
+    experimental::MemoryRequirements _aux_mem{Count};
 };
 } // namespace cpu
 } // namespace arm_compute

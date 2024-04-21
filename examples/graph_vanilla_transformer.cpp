@@ -103,7 +103,12 @@ public:
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor))
                                             , get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
               
-              << EmbeddingLayer(EmbeddingLayerInfo(d_model,d_vocab,d_segemnt,d_position,true /*Use pretrained positional encoding*/),
+              << EmbeddingLayer(EmbeddingLayerInfo(d_model,
+                                                   d_vocab,
+                                                   d_segemnt,
+                                                   d_position,
+                                                   true /*Use pretrained positional encoding*/,
+                                                   ConvertPolicy::SATURATE),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1")
