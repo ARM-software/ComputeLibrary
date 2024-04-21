@@ -8,7 +8,7 @@ namespace arm_compute
 {
 namespace graph
 {
-EmbeddingSumLayerNode::EmbeddingSumLayerNode(EmbeddingLayerInfo info = EmbeddingLayerInfo()): _info(info)
+EmbeddingSumLayerNode::EmbeddingSumLayerNode(EmbeddingLayerInfo info): _info(info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
