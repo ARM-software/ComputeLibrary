@@ -167,6 +167,7 @@ enum class NodeType
     DetectionOutputLayer,
     DetectionPostProcessLayer,
     EltwiseLayer,
+    EmbeddingSumLayerNode,
     FeedForwardLayer,
     FlattenLayer,
     FullyConnectedLayer,
