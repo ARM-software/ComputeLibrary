@@ -237,8 +237,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_position_embedding_layer<NEPositionEmbeddingLayer, NETargetInfo>(
                 *polymorphic_downcast<PositionEmbeddingLayerNode *>(node));
         case NodeType::EmbeddingSumLayer:
-            return detail::create_position_embedding_layer<NEPositionEmbeddingLayer, NETargetInfo>(
-                *polymorphic_downcast<PositionEmbeddingLayerNode *>(node));
+            return detail::create_embedding_sum_layer<NEEmbeddingSumLayer, NETargetInfo>(
+                *polymorphic_downcast<EmbeddingSumLayerNode *>(node));
         case NodeType::LinearLayer:
             return detail::create_linear_layer<NELinearLayer, NETargetInfo>(
                 *polymorphic_downcast<LinearLayerNode *>(node));

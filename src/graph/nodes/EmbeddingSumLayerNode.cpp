@@ -8,17 +8,20 @@ namespace arm_compute
 {
 namespace graph
 {
-EmbeddingSumLayerNode::EmbeddingSumLayerNode()
+EmbeddingSumLayerNode::EmbeddingSumLayerNode(EmbeddingLayerInfo info = EmbeddingLayerInfo()): _info(info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
 
-TensorDescriptor EmbeddingSumLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                      const TensorDescriptor &vector_descriptor)
+TensorDescriptor EmbeddingSumLayerNode::compute_output_descriptor(const TensorDescriptor &token_descriptor,
+                                                                  const TensorDescriptor &segment_descriptor,
+                                                                  const TensorDescriptor &position_descriptor)
 {
-    TensorDescriptor output_descriptor = input_descriptor;
+    TensorDescriptor output_descriptor = token_descriptor;
+    ARM_COMPUTE_UNUSED(segment_descriptor);
+    ARM_COMPUTE_UNUSED(position_descriptor);
 
     return output_descriptor;
 }
@@ -41,11 +44,12 @@ TensorDescriptor EmbeddingSumLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_UNUSED(idx);
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
 
-    const Tensor *src = input(0);
-    const Tensor *dst = input(1);
+    const Tensor *token     = input(0);
+    const Tensor *segment   = input(1);
+    const Tensor *position  = input(2);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
-    return compute_output_descriptor(src->desc(), dst->desc());
+    return compute_output_descriptor(token->desc(), segment->desc(), position->desc());
 }
 
 

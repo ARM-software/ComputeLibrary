@@ -11,18 +11,23 @@ namespace graph
 class EmbeddingSumLayerNode final : public INode
 {
 public:
-    /** Constructor  */
-    EmbeddingSumLayerNode();
+    /** Constructor 
+     * 
+     * @param[in] info (optional)Embedding layer information
+     */
+    EmbeddingSumLayerNode(EmbeddingLayerInfo info = EmbeddingLayerInfo());
 
-    /** Computes position embedding output descriptor
+    /** Computes embedding sum output descriptor
      *
-     * @param[in] input_descriptor      Text id input tensor descriptor
-     * @param[in] vector_descriptor     Vector input tensor descriptor
+     * @param[in] token_descriptor      Token embedding input tensor descriptor
+     * @param[in] segment_descriptor    Segment embedding input tensor descriptor
+     * @param[in] position_descriptor   Position embedding input tensor descriptor
      * 
      * @return Output descriptor
      */
-    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                      const TensorDescriptor &vector_descriptor);
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &token_descriptor,
+                                                      const TensorDescriptor &segment_descriptor,
+                                                      const TensorDescriptor &position_descriptor);
                                                       
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -31,6 +36,7 @@ public:
     void             accept(INodeVisitor &v) override;
 
 private:
+    EmbeddingLayerInfo _info;
 };
 } // namespace graph
 } // namespace arm_compute

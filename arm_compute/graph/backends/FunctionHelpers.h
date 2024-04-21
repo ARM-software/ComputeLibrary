@@ -1764,6 +1764,34 @@ std::unique_ptr<IFunction> create_position_embedding_layer(PositionEmbeddingLaye
 
     return func;
 }
+
+/** Creates a backend embedding summing layer function
+ *
+ * @tparam EmbeddingSumLayerFunction  Backend position embedding function
+ * @tparam TargetInfo                 Target-specific information
+ *
+ * @param[in] node Node to create the backend function for summing all three embedding layer output
+ *
+ * @return Backend embedding sum layer function
+ */
+template <typename EmbeddingSumLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_embedding_sum_layer(EmbeddingSumLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *token      = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *segment    = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *position   = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *output     = get_backing_tensor<TargetInfo>(node.output(0));
+
+    // Create function
+    auto func = std::make_unique<EmbeddingSumLayerFunction>();
+    func->configure(token,segment,position,output);
+
+    return func;
+}
+
 /** Creates a backend linear layer function
  *
  * @tparam LinearLayerFunction  Backend linear layer function

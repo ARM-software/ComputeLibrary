@@ -74,5 +74,6 @@
 #include "arm_compute/graph/nodes/SimpleForwardLayerNode.h"
 #include "arm_compute/graph/nodes/SegmentEmbeddingLayerNode.h"
 #include "arm_compute/graph/nodes/PositionEmbeddingLayerNode.h"
+#include "arm_compute/graph/nodes/EmbeddingSumLayerNode.h"
 
 #endif // ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H

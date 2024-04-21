@@ -53,6 +53,7 @@
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEEmbeddingSumLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFFT1D.h"
 #include "arm_compute/runtime/NEON/functions/NEFFT2D.h"
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
