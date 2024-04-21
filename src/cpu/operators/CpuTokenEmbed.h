@@ -10,7 +10,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Basic function to run @ref kernels::CCpuVectorizeKernel */
+/** Basic function to run @ref kernels::CpuVectorizeKernel */
 class CpuTokenEmbed : public ICpuOperator
 {
 public:

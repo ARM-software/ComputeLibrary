@@ -2389,6 +2389,7 @@
       "EmbeddingSum": {
         "files":{
           "common":[
+            "src/cpu/operators/CpuEmbedSum.cpp",
             "src/runtime/NEON/functions/NEEmbeddingSumLayer.cpp"
           ]
         }
