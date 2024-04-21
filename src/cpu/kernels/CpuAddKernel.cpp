@@ -166,9 +166,9 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
 
     std::cout << "src/cpu/kernels/CpuAddKernel.cpp 3.1" << std::endl;
-    set_shape_if_empty(*dst, out_shape);
-    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 3.2" << std::endl;
     set_data_type_if_unknown(*dst, src0->data_type());
+    std::cout << "src/cpu/kernels/CpuAddKernel.cpp 3.2" << std::endl;
+    set_shape_if_empty(*dst, out_shape);
 
     std::cout << "src/cpu/kernels/CpuAddKernel.cpp 4" << std::endl;
     // Configure kernel window
