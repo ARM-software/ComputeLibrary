@@ -16,7 +16,11 @@ public:
      * @param[in] info (optional)Embedding layer information
      */
     EmbeddingSumLayerNode(EmbeddingLayerInfo info = EmbeddingLayerInfo());
-
+    /** Embedding Layer Info Accessor
+     * 
+     * @return Embedding Layer Info
+     */
+    EmbeddingLayerInfo embedding_sum_info() const;
     /** Computes embedding sum output descriptor
      *
      * @param[in] token_descriptor      Token embedding input tensor descriptor

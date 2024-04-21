@@ -26,6 +26,10 @@ TensorDescriptor EmbeddingSumLayerNode::compute_output_descriptor(const TensorDe
     return output_descriptor;
 }
 
+EmbeddingLayerInfo EmbeddingSumLayerNode::embedding_sum_info() const
+{
+    return _info;
+}
 
 bool EmbeddingSumLayerNode::forward_descriptors()
 {
