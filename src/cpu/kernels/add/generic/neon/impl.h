@@ -40,7 +40,6 @@ void add_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
 
-    std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 1 " << std::endl;
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, wrapper::traits::BitWidth::W128>;
 
@@ -48,7 +47,6 @@ void add_same_neon(
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
     Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
-    std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 2 " << std::endl;
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -107,7 +105,6 @@ void add_same_neon(
     }
     else
     {
-        std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 3 " << std::endl;
         // Clear X Dimension on execution window as we handle manually
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -116,37 +113,25 @@ void add_same_neon(
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
 
-        std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 4 " << std::endl;
         execute_window_loop(
             win,
             [&](const Coordinates &)
             {
                 const auto input1_ptr = reinterpret_cast<const ScalarType *>(input1.ptr());
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 5 " << std::endl;
                 const auto input2_ptr = reinterpret_cast<const ScalarType *>(input2.ptr());
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 6 " << std::endl;
                 const auto output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7 " << std::endl;
 
                 // Compute S elements per iteration
                 int x = window_start_x;
                 for (; x <= (window_end_x - window_step_x); x += window_step_x)
                 {
-
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7.1 " << std::endl;
                     const auto val1 = wrapper::vloadq(input1_ptr + x);
-
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7.2 " << std::endl;
                     const auto val2 = wrapper::vloadq(input2_ptr + x);
                     const auto res =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
-
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7.3 " << std::endl;
                     wrapper::vstore(output_ptr + x, res);
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7.4 " << std::endl;
                 }
 
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 8 " << std::endl;
                 // Compute left-over elements
                 for (; x < window_end_x; ++x)
                 {
@@ -155,7 +140,6 @@ void add_same_neon(
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
                 }
-                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 9 " << std::endl;
             },
             input1, input2, output);
     }

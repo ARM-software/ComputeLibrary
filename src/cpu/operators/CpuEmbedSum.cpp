@@ -31,8 +31,6 @@ void CpuEmbedSum::configure(const ITensorInfo *token,
                                          experimental::MemoryLifetime::Persistent,
                                          _tmp_token_segment.total_size());
     
-    std::cout << "src/cpu/operators/CpuEmbedSum.cpp " << _tmp_token_segment.total_size() << std::endl;
-    
     _add_kernel_2->configure(&_tmp_token_segment,position,output,emb_info.c_policy());
 }
 
@@ -71,20 +69,14 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     reshaped_x = reshaped_x < position->info()->valid_region().shape.x() 
                         ? reshaped_x : position->info()->valid_region().shape.x();
 
-    std::cout << "reshaped_x " << reshaped_x << std::endl;
     win.set(Window::DimX, Window::Dimension(0,reshaped_x,1));
-    std::cout << aux_token_segemnt.get()->ptr_to_element(Coordinates(0,0)); 
-    std::cout << "src/cpu/operators/CpuEmbedSum.cpp 1" << std::endl;
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
-    std::cout << "src/cpu/operators/CpuEmbedSum.cpp 2" << std::endl;
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
     run_pack.add_const_tensor(ACL_SRC_1,position);
     run_pack.add_tensor(ACL_DST,output);
 
-    std::cout << "src/cpu/operators/CpuEmbedSum.cpp 3" << std::endl;
     NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
-    std::cout << "src/cpu/operators/CpuEmbedSum.cpp 4" << std::endl;
 }
 
 
