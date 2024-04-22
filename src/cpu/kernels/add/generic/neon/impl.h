@@ -48,6 +48,9 @@ void add_same_neon(
     Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
     // Clear X Dimension on execution window as we handle manually
+        std::cout << "win.DimX()" << window.x().end() << std::endl;
+        std::cout << "win.DimY()" << window.y().end() << std::endl;
+        std::cout << "win.DimZ()" << window.z().end() << std::endl;
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
