@@ -64,6 +64,14 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     std::cout << "token->info()->valid_region().shape.x() " << token->info()->valid_region().shape.x() << std::endl;
     std::cout << "token->info()->valid_region().shape.y() " << token->info()->valid_region().shape.y() << std::endl;
     std::cout << "token->info()->valid_region().shape.z() " << token->info()->valid_region().shape.z() << std::endl;
+
+    std::cout << "token->info()->valid_region().shape.x() " << segment->info()->valid_region().shape.x() << std::endl;
+    std::cout << "token->info()->valid_region().shape.y() " << segment->info()->valid_region().shape.y() << std::endl;
+    std::cout << "token->info()->valid_region().shape.z() " << segment->info()->valid_region().shape.z() << std::endl;
+
+    std::cout << "token->info()->valid_region().shape.x() " << position->info()->valid_region().shape.x() << std::endl;
+    std::cout << "token->info()->valid_region().shape.y() " << position->info()->valid_region().shape.y() << std::endl;
+    std::cout << "token->info()->valid_region().shape.z() " << position->info()->valid_region().shape.z() << std::endl;
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, _add_kernel_1->window(), run_pack);
 
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
