@@ -133,6 +133,8 @@ inline void Iterator::increment(const size_t dimension)
 
     _dims[dimension]._dim_start += _dims[dimension]._stride;
 
+    std::cout << "_dims[dimension]._stride " << std::endl;
+
     for (unsigned int n = 0; n < dimension; ++n)
     {
         _dims[n]._dim_start = _dims[dimension]._dim_start;
