@@ -62,6 +62,9 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
 
     // Reshape window if tensor valid region has been reshaped
+        std::cout << "win.DimX()" << _add_kernel_1->window().x().end() << std::endl;
+        std::cout << "win.DimY()" <<  _add_kernel_1->window().y().end() << std::endl;
+        std::cout << "win.DimZ()" <<  _add_kernel_1->window().z().end() << std::endl;
     Window win = _add_kernel_1->window();
 
     size_t reshaped_x = token->info()->valid_region().shape.x() <  segment->info()->valid_region().shape.x()
