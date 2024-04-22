@@ -31,6 +31,8 @@ void CpuEmbedSum::configure(const ITensorInfo *token,
                                          experimental::MemoryLifetime::Persistent,
                                          _tmp_token_segment.total_size());
     
+    std::cout << "src/cpu/operators/CpuEmbedSum.cpp " << _tmp_token_segment.total_size() << std::endl;
+    
     _add_kernel_2->configure(&_tmp_token_segment,position,output,emb_info.c_policy());
 }
 
