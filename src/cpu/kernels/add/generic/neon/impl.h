@@ -40,7 +40,6 @@ template <typename ScalarType>
 void add_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
-    std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl " << std::endl;
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, wrapper::traits::BitWidth::W128>;
 
@@ -110,42 +109,13 @@ void add_same_neon(
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
     
-        // If valid region x has been runtime reshaped
-        /*
-        if(src0->info()->valid_region().shape.x()!=src0->info()->tensor_shape().x())
-        {
-            Strides stride_src0 = compute_valid_strides(*src0->info());
-            Iterator input1(src0, stride_src0, input1_win);  
-        }
-        else Iterator input1(src0, input1_win); 
-
-        // If valid region x has been runtime reshaped
-        if(src1->info()->valid_region().shape.x()!=src1->info()->tensor_shape().x())
-        {
-            Strides stride_src1 = compute_valid_strides(*src1->info());
-            Iterator input2(src1, stride_src1, input2_win);  
-        }
-        else Iterator input2(src1, input2_win); 
-
-        // If valid region x has been runtime reshaped
-        if(dst->info()->valid_region().shape.x()!=dst->info()->tensor_shape().x())
-        {
-            Strides stride_dst = compute_valid_strides(*dst->info());
-            Iterator output(dst, stride_dst, win);  
-        }
-        else Iterator output(dst, win);
-        */
         Strides stride_src0 = compute_valid_strides(*src0->info());
         Iterator input1(src0, stride_src0, input1_win); 
         Strides stride_src1 = compute_valid_strides(*src1->info());
         Iterator input2(src1, stride_src1, input2_win);
         Strides stride_dst = compute_valid_strides(*dst->info());
         Iterator output(dst, stride_dst, win);
-        
-        std::cout << "win.DimX()" << win.x().end() << std::endl;
-        std::cout << "win.DimY()" << win.y().end() << std::endl;
-        std::cout << "win.DimZ()" << win.z().end() << std::endl;
-        int count = 0;
+
         execute_window_loop(
             win,
             [&](const Coordinates &)
@@ -173,25 +143,10 @@ void add_same_neon(
                     const auto val2 = *(input2_ptr + x);
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
-                        count ++;
-                }
-
-                
-                std::cout << *reinterpret_cast<float *>(output.ptr()) <<" "
-                          << *(reinterpret_cast<float *>(output.ptr()) +1) <<" "
-                          << *(reinterpret_cast<float *>(output.ptr()) +2) <<" "
-                          << *(reinterpret_cast<float *>(output.ptr()) +3) <<" "
-                          << *(reinterpret_cast<float *>(output.ptr()) +4) <<" "
-                          << *(reinterpret_cast<float *>(output.ptr()) +5) <<" "
-                          << *(reinterpret_cast<float *>(output.ptr()) +6) <<" ";
-                if(count == 768){
-                    std::cout << std::endl;
-                    count = 0;
                 }
             },
             input1, input2, output);
     }
-    std::cout << std::endl;
 }
 
 bool add_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
