@@ -53,6 +53,18 @@ inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&...fixe
     return strides;
 }
 
+/** Create a strides object based on the tensor dimensions.
+ *
+ * @param[in] info Tensor info object used to compute the strides.
+ *
+ * @return Strides object based on element size and tensor shape.
+ */
+template <typename... Ts>
+inline Strides compute_strides(const ITensorInfo &info)
+{
+    return compute_strides(info, info.element_size());
+}
+
 /** Create a strides object based on the provided strides and the valid tensor region dimensions.
  *
  * @param[in] info          Tensor info object providing the shape of the valid tensor region for unspecified strides.
@@ -85,9 +97,9 @@ inline Strides compute_valid_strides(const ITensorInfo &info, T stride_x, Ts &&.
  * @return Strides object based on element size and tensor shape.
  */
 template <typename... Ts>
-inline Strides compute_strides(const ITensorInfo &info)
+inline Strides compute_valid_strides(const ITensorInfo &info)
 {
-    return compute_strides(info, info.element_size());
+    return compute_valid_strides(info, info.element_size());
 }
 
 /** Given an integer value, this function returns the next power of two
