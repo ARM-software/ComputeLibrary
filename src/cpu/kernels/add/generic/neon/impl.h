@@ -139,11 +139,10 @@ void add_same_neon(
                     const auto val2 = *(input2_ptr + x);
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
-                    
-                    std::cout << *(output_ptr + x) <<" ";
                 }
             },
             input1, input2, output);
+        std::cout << *reinterpret_cast<float *>(output.ptr()) <<" " << *(reinterpret_cast<float *>(output.ptr())+1)<< std::endl;
     }
 }
 
