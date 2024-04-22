@@ -112,9 +112,9 @@ void add_same_neon(
         Iterator input1(src0, input1_win);
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
-        std::cout << "win.DimX()" << win.DimX << std::endl;
-        std::cout << "win.DimY()" << win.DimY << std::endl;
-        std::cout << "win.DimZ()" << win.DimZ << std::endl;
+        std::cout << "win.DimX()" << win.x().end << std::endl;
+        std::cout << "win.DimY()" << win.y().end << std::endl;
+        std::cout << "win.DimZ()" << win.z().end << std::endl;
         execute_window_loop(
             win,
             [&](const Coordinates &)
