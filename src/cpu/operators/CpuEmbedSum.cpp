@@ -71,6 +71,7 @@ void CpuEmbedSum::run(ITensorPack &tensors)
 
     std::cout << "reshaped_x " << reshaped_x << std::endl;
     win.set(Window::DimX, Window::Dimension(0,reshaped_x,1));
+    std::cout << aux_token_segemnt.get()->ptr_to_element(Coordinates(0,0)); 
     std::cout << "src/cpu/operators/CpuEmbedSum.cpp 1" << std::endl;
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
