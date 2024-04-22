@@ -366,7 +366,7 @@ std::pair<Window, size_t> calculate_squashed_or_max_window_using_valid_region(co
         }
         squashed_bytes *= shape[dim];
     }
-    std::cout <<"squashed_bytes: " squashed_bytes << std::endl;
+    std::cout <<"squashed_bytes: "<< squashed_bytes << std::endl;
     if (dim == num_dimensions)
     {
         const auto squashed_elements = squashed_bytes / src.element_size();
