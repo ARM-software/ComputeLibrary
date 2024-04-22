@@ -146,7 +146,7 @@ void add_same_neon(
                         count ++;
                 }
 
-                /*
+                
                 std::cout << *reinterpret_cast<float *>(output.ptr()) <<" "
                           << *(reinterpret_cast<float *>(output.ptr()) +1) <<" "
                           << *(reinterpret_cast<float *>(output.ptr()) +2) <<" "
@@ -157,7 +157,7 @@ void add_same_neon(
                 if(count == 768){
                     std::cout << std::endl;
                     count = 0;
-                }*/
+                }
             },
             input1, input2, output);
     }
