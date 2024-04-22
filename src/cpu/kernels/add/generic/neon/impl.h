@@ -48,9 +48,6 @@ void add_same_neon(
     Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
     // Clear X Dimension on execution window as we handle manually
-        std::cout << "win.DimX()" << window.x().end() << std::endl;
-        std::cout << "win.DimY()" << window.y().end() << std::endl;
-        std::cout << "win.DimZ()" << window.z().end() << std::endl;
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
@@ -146,7 +143,13 @@ void add_same_neon(
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
                 }
 
-                std::cout << *reinterpret_cast<float *>(output.ptr()) <<" ";
+                std::cout << *reinterpret_cast<float *>(output.ptr()) <<" "
+                          << *(reinterpret_cast<float *>(output.ptr()) +1) <<" "
+                          << *(reinterpret_cast<float *>(output.ptr()) +2) <<" "
+                          << *(reinterpret_cast<float *>(output.ptr()) +3) <<" "
+                          << *(reinterpret_cast<float *>(output.ptr()) +4) <<" "
+                          << *(reinterpret_cast<float *>(output.ptr()) +5) <<" "
+                          << *(reinterpret_cast<float *>(output.ptr()) +6) <<" ";
             },
             input1, input2, output);
     }

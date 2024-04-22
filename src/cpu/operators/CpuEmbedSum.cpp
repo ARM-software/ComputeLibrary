@@ -71,9 +71,6 @@ void CpuEmbedSum::run(ITensorPack &tensors)
                         ? reshaped_info : position->info();
 
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window_using_valid_region(*reshaped_info);
-    std::cout << "win.DimX()" <<  win.x().end() << std::endl;
-    std::cout << "win.DimY()" <<  win.y().end() << std::endl;
-    std::cout << "win.DimZ()" <<  win.z().end() << std::endl;
 
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
