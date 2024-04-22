@@ -56,6 +56,8 @@ void add_same_neon(
     const auto    window_end_x          = static_cast<int>(window.x().end());
     const bool    is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
 
+    std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl "<< window_end_x << std::endl;
+
     if (is_broadcast_across_x)
     {
         const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
