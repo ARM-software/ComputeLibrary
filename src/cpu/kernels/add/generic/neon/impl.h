@@ -115,6 +115,7 @@ void add_same_neon(
         std::cout << "win.DimX()" << win.x().end() << std::endl;
         std::cout << "win.DimY()" << win.y().end() << std::endl;
         std::cout << "win.DimZ()" << win.z().end() << std::endl;
+        int count = 0;
         execute_window_loop(
             win,
             [&](const Coordinates &)
@@ -132,6 +133,7 @@ void add_same_neon(
                     const auto res =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                     wrapper::vstore(output_ptr + x, res);
+                    count ++;
                 }
 
                 // Compute left-over elements
@@ -141,6 +143,7 @@ void add_same_neon(
                     const auto val2 = *(input2_ptr + x);
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
+                        count ++;
                 }
 
                 std::cout << *reinterpret_cast<float *>(output.ptr()) <<" "
@@ -150,6 +153,10 @@ void add_same_neon(
                           << *(reinterpret_cast<float *>(output.ptr()) +4) <<" "
                           << *(reinterpret_cast<float *>(output.ptr()) +5) <<" "
                           << *(reinterpret_cast<float *>(output.ptr()) +6) <<" ";
+                if(count == 768){
+                    std::cout << std::endl;
+                    count = 0;
+                }
             },
             input1, input2, output);
     }
