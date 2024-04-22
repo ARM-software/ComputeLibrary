@@ -126,7 +126,7 @@ void add_same_neon(
         else Iterator input2(src1, input2_win); 
 
         // If valid region x has been runtime reshaped
-        if(output->info()->valid_region().shape.x()!=output->info()->tensor_shape().x())
+        if(dst->info()->valid_region().shape.x()!=dst->info()->tensor_shape().x())
         {
             Strides stride_output = compute_valid_strides(dst->info(),dst->info()->element_size());
             Iterator output(dst, stride_output, win);  
