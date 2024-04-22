@@ -70,6 +70,7 @@ void CpuEmbedSum::run(ITensorPack &tensors)
                         ? reshaped_x : position->info()->valid_region().shape.x();
 
     std::cout << "reshaped_x " << reshaped_x << std::endl;
+    win.set(Window::DimX, Window::Dimension(0,reshaped_x,1));
 
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
