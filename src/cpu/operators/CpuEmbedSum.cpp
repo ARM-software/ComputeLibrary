@@ -63,9 +63,6 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
 
     // Reshape window if tensor valid region has been reshaped
-        std::cout << "win.DimX()" << _add_kernel_1->window().x().end() << std::endl;
-        std::cout << "win.DimY()" <<  _add_kernel_1->window().y().end() << std::endl;
-        std::cout << "win.DimZ()" <<  _add_kernel_1->window().z().end() << std::endl;
     Window win = _add_kernel_1->window();
 
     auto reshaped_info = token->info()->valid_region().shape.x() <  segment->info()->valid_region().shape.x()
@@ -74,6 +71,10 @@ void CpuEmbedSum::run(ITensorPack &tensors)
                         ? reshaped_info : position->info();
 
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window_using_valid_region(*reshaped_info);
+    std::cout << "win.DimX()" <<  win.x().end() << std::endl;
+    std::cout << "win.DimY()" <<  win.y().end() << std::endl;
+    std::cout << "win.DimZ()" <<  win.z().end() << std::endl;
+
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
