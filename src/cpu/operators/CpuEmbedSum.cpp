@@ -9,6 +9,7 @@
 
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
+#include "src/core/helpers/WindowHelpers.h"
 
 
 namespace arm_compute
@@ -67,12 +68,12 @@ void CpuEmbedSum::run(ITensorPack &tensors)
         std::cout << "win.DimZ()" <<  _add_kernel_1->window().z().end() << std::endl;
     Window win = _add_kernel_1->window();
 
-    size_t reshaped_x = token->info()->valid_region().shape.x() <  segment->info()->valid_region().shape.x()
-                        ? token->info()->valid_region().shape.x() : segment->info()->valid_region().shape.x();
-    reshaped_x = reshaped_x < position->info()->valid_region().shape.x() 
-                        ? reshaped_x : position->info()->valid_region().shape.x();
+    auto reshaped_info = token->info()->valid_region().shape.x() <  segment->info()->valid_region().shape.x()
+                        ? token->info() : segment->info();
+    reshaped_info = reshaped_info->valid_region().shape.x() < position->info()->valid_region().shape.x() 
+                        ? reshaped_info : position->info();
 
-    win.set(Window::DimX, Window::Dimension(0,reshaped_x,1));
+    std::tie(win, _split_dimension) = calculate_squashed_or_max_window_using_valid_region(*reshaped_info);
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
@@ -81,7 +82,7 @@ void CpuEmbedSum::run(ITensorPack &tensors)
 
     NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
     // Reshape output tensor
-    output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshaped_x));
+    output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshaped_info->valid_region().shape.x()));
     std::cout<< "output->info()->valid_region().shape.x() " << output->info()->valid_region().shape.x() << std::endl;
     std::cout<< "output->info()->valid_region().shape.y() " << output->info()->valid_region().shape.y() << std::endl;
     std::cout<< "output->info()->valid_region().shape.z() " << output->info()->valid_region().shape.z() << std::endl;

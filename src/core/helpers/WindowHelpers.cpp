@@ -346,4 +346,46 @@ std::pair<Window, size_t> calculate_squashed_or_max_window(const ITensorInfo &sr
     return std::make_pair(win, split_dimension);
 }
 
+std::pair<Window, size_t> calculate_squashed_or_max_window_using_valid_region(const ITensorInfo &src)
+{
+    const auto &shape          = src.valid_region().shape;
+    const auto &strides        = src.strides_in_bytes();
+    const auto  num_dimensions = src.num_dimensions();
+
+    Window win;
+    size_t split_dimension = Window::DimY;
+    size_t dim             = 0;
+    size_t squashed_bytes  = src.element_size();
+
+    // Try to squash the low dimensions together.
+    for (; dim < num_dimensions; ++dim)
+    {
+        if (strides[dim] != squashed_bytes)
+        {
+            break;
+        }
+        squashed_bytes *= shape[dim];
+    }
+    if (dim == num_dimensions)
+    {
+        const auto squashed_elements = squashed_bytes / src.element_size();
+        split_dimension              = Window::DimX;
+        // The input tensor can be interpreted as 1D array.
+        win.set(0, Window::Dimension(0, squashed_elements, 1));
+        for (dim = 1; dim < Coordinates::num_max_dimensions; ++dim)
+        {
+            win.set(dim, Window::Dimension(0, 1, 1));
+        }
+    }
+    else
+    {
+        // Generate the max window.
+        for (dim = 0; dim < Coordinates::num_max_dimensions; ++dim)
+        {
+            win.set(dim, Window::Dimension(0, shape[dim], 1));
+        }
+    }
+    return std::make_pair(win, split_dimension);
+}
+
 } // namespace arm_compute

@@ -44,7 +44,6 @@ public:
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 private:
-
     enum AuxTensorIdx
     {
         TokenSegmentOutput = 0,
@@ -57,6 +56,8 @@ private:
     TensorInfo _tmp_token_segment{};
 
     experimental::MemoryRequirements _aux_mem{Count};
+
+    size_t _split_dimension{Window::DimY};
 };
 } // namespace cpu
 } // namespace arm_compute
