@@ -107,6 +107,7 @@ void add_same_neon(
     }
     else
     {
+        std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 3 " << std::endl;
         // Clear X Dimension on execution window as we handle manually
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
