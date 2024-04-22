@@ -52,9 +52,22 @@ CpuEmbedSum::validate(const ITensorInfo *token,
 void CpuEmbedSum::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    std::cout << " SUMMMMMMMMMMMM " << std::endl;
-    NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, _add_kernel_1->window(), tensors);
-    NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, _add_kernel_2->window(), tensors);
+    auto token      = tensors.get_const_tensor(ACL_SRC_0);
+    auto segment    = tensors.get_const_tensor(ACL_SRC_1);
+    auto position   = tensors.get_const_tensor(ACL_SRC_2);
+    auto output     = tensors.get_tensor(ACL_DST);
+
+    CpuAuxTensorHandler aux_token_segemnt(offset_int_vec(TokenSegmentOutput), _tmp_token_segment, tensors, true);
+
+    ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
+
+    NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, _add_kernel_1->window(), run_pack);
+
+    run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
+    run_pack.add_const_tensor(ACL_SRC_1,position);
+    run_pack.add_tensor(ACL_DST,output);
+
+    NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, _add_kernel_2->window(), run_pack);
 }
 
 
