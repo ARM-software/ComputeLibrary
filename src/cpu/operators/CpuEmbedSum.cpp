@@ -64,13 +64,14 @@ void CpuEmbedSum::run(ITensorPack &tensors)
 
     // Reshape window if tensor valid region has been reshaped
     Window win = _add_kernel_1->window();
-
     auto reshaped_info = token->info()->valid_region().shape.x() <  segment->info()->valid_region().shape.x()
                         ? token->info() : segment->info();
     reshaped_info = reshaped_info->valid_region().shape.x() < position->info()->valid_region().shape.x() 
                         ? reshaped_info : position->info();
+    size_t reshape_x = reshaped_info->valid_region().shape.x();
 
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window_using_valid_region(*reshaped_info);
+    win.set_dimension_step(0,reshape_x);
 
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
@@ -80,7 +81,7 @@ void CpuEmbedSum::run(ITensorPack &tensors)
 
     NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
     // Reshape output tensor
-    output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshaped_info->valid_region().shape.x()));
+    output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshape_x));
     std::cout<< "output->info()->valid_region().shape.x() " << output->info()->valid_region().shape.x() << std::endl;
     std::cout<< "output->info()->valid_region().shape.y() " << output->info()->valid_region().shape.y() << std::endl;
     std::cout<< "output->info()->valid_region().shape.z() " << output->info()->valid_region().shape.z() << std::endl;
