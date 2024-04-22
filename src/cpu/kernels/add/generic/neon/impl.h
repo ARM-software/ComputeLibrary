@@ -140,10 +140,12 @@ void add_same_neon(
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
                 }
+
+                std::cout << *reinterpret_cast<float *>(output.ptr()) <<" ";
             },
             input1, input2, output);
-        std::cout << *reinterpret_cast<float *>(output.ptr()) <<" " << *(reinterpret_cast<float *>(output.ptr())+2)<< std::endl;
     }
+    std::cout << std::endl;
 }
 
 bool add_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
