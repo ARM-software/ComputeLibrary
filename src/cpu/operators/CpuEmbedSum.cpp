@@ -61,6 +61,9 @@ void CpuEmbedSum::run(ITensorPack &tensors)
 
     ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
 
+    std::cout << "token->info()->valid_region().shape.x() " << token->info()->valid_region().shape.x() << std::endl;
+    std::cout << "token->info()->valid_region().shape.y() " << token->info()->valid_region().shape.y() << std::endl;
+    std::cout << "token->info()->valid_region().shape.z() " << token->info()->valid_region().shape.z() << std::endl;
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, _add_kernel_1->window(), run_pack);
 
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
