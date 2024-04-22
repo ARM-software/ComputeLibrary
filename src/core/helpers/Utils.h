@@ -96,7 +96,6 @@ inline Strides compute_valid_strides(const ITensorInfo &info, T stride_x, Ts &&.
  *
  * @return Strides object based on element size and tensor shape.
  */
-template <typename... Ts>
 inline Strides compute_valid_strides(const ITensorInfo &info)
 {
     return compute_valid_strides(info, info.element_size());
