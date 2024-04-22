@@ -115,6 +115,8 @@ void add_same_neon(
         std::cout << "win.DimX()" << win.x().end() << std::endl;
         std::cout << "win.DimY()" << win.y().end() << std::endl;
         std::cout << "win.DimZ()" << win.z().end() << std::endl;
+        std::cout << "input1._dims[0]._stride() " << input1._dims[0]._stride() << std::end;
+        std::cout << "input2._dims[0]._stride() " << input2._dims[0]._stride() << std::end;
         int count = 0;
         execute_window_loop(
             win,
