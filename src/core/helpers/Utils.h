@@ -42,7 +42,7 @@ inline Strides compute_strides(const ITensorInfo &info, T stride_x)
     const TensorShape &shape = info.tensor_shape();
 
     // Create strides object
-    Strides strides(stride_x, fixed_strides...);
+    Strides strides(stride_x);
 
     for (size_t i; i < info.num_dimensions(); ++i)
     {
