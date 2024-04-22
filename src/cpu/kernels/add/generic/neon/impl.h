@@ -30,6 +30,7 @@
 #include "arm_compute/core/Window.h"
 
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/helpers/Utils.h"
 
 namespace arm_compute
 {
@@ -120,7 +121,7 @@ void add_same_neon(
         // If valid region x has been runtime reshaped
         if(src1->info()->valid_region().shape.x()!=src1->info()->tensor_shape().x())
         {
-            Strides stride_src1 = compute_valid_strides(src1->info());
+            Strides stride_src1 = compute_valid_strides(dst->info());
             Iterator input2(src1, stride_src1, input2_win);  
         }
         else Iterator input2(src1, input2_win); 
