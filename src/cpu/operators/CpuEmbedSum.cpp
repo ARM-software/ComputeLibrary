@@ -60,8 +60,6 @@ void CpuEmbedSum::run(ITensorPack &tensors)
 
     CpuAuxTensorHandler aux_token_segemnt(offset_int_vec(TokenSegmentOutput), _tmp_token_segment, tensors, true);
 
-    ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
-
     // Reshape window if tensor valid region has been reshaped
     Window win = _add_kernel_1->window();
     auto reshaped_info = token->info()->valid_region().shape.x() <  segment->info()->valid_region().shape.x()
@@ -76,12 +74,19 @@ void CpuEmbedSum::run(ITensorPack &tensors)
         std::cout << s <<" " << std::endl;
     win.set_dimension_step(0,0);
 
+    ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
+    token->info()->set_valid_region(token->info()->valid_region().set(0,0,reshape_x));
+    segment->info()->set_valid_region(segment->info()->valid_region().set(0,0,reshape_x));
+    aux_token_segemnt.get()->info()->set_valid_region(aux_token_segemnt.get()->info()->valid_region().set(0,0,reshape_x));
+
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
     run_pack.add_const_tensor(ACL_SRC_1,position);
     run_pack.add_tensor(ACL_DST,output);
-
+    position->info()->set_valid_region(position->info()->valid_region().set(0,0,reshape_x));
+    output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshape_x));
+    
     NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
     // Reshape output tensor
     output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshape_x));
