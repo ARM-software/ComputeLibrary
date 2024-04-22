@@ -352,6 +352,10 @@ std::pair<Window, size_t> calculate_squashed_or_max_window_using_valid_region(co
     const auto &strides        = src.strides_in_bytes();
     const auto  num_dimensions = src.num_dimensions();
 
+    std::cout <<"x: "<< shape.x() << std::endl;
+    std::cout <<"y: "<< shape.y() << std::endl;
+    std::cout <<"z: "<< shape.z() << std::endl;
+
     Window win;
     size_t split_dimension = Window::DimY;
     size_t dim             = 0;
