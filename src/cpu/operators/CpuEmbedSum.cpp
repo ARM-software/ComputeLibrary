@@ -70,14 +70,14 @@ void CpuEmbedSum::run(ITensorPack &tensors)
                         ? reshaped_x : position->info()->valid_region().shape.x();
 
     std::cout << "reshaped_x " << reshaped_x << std::endl;
-    
-    NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, _add_kernel_1->window(), run_pack);
+
+    NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
     run_pack.add_const_tensor(ACL_SRC_1,position);
     run_pack.add_tensor(ACL_DST,output);
 
-    NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, _add_kernel_2->window(), run_pack);
+    NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
 }
 
 
