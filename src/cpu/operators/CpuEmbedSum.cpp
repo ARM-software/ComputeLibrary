@@ -69,9 +69,6 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     size_t reshape_x = reshaped_info->valid_region().shape.x();
 
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window_using_valid_region(*reshaped_info);
-    std::cout<< "reshaped_info->strides_in_bytes()" << std::endl;
-    for(auto s : reshaped_info->strides_in_bytes())
-        std::cout << s <<" " << std::endl;
     win.set_dimension_step(0,0);
 
     ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
