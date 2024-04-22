@@ -73,8 +73,7 @@ inline Strides compute_strides(const ITensorInfo &info)
  * @return Strides object based on the specified strides. Missing strides are
  *         calculated based on the tensor shape and the strides of lower dimensions.
  */
-template <typename T>
-inline Strides compute_valid_strides(const ITensorInfo &info, T stride_x)
+inline Strides compute_valid_strides(const ITensorInfo &info, size_t stride_x)
 {
     const TensorShape &shape = info.valid_region().shape;
 
