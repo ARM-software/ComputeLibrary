@@ -109,9 +109,30 @@ void add_same_neon(
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-        Iterator input1(src0, input1_win);
-        Iterator input2(src1, input2_win);
-        Iterator output(dst, win);
+        // If valid region x has been runtime reshaped
+        if(src0->info()->valid_region().shape.x()!=src0->info()->tensor_shape().x())
+        {
+            Strides stride_input1 = compute_valid_strides(src0->info(),src0->info()->element_size());
+            Iterator input1(src0, stride_input1, input1_win);  
+        }
+        else Iterator input1(src0, input1_win); 
+
+        // If valid region x has been runtime reshaped
+        if(src1->info()->valid_region().shape.x()!=src1->info()->tensor_shape().x())
+        {
+            Strides stride_input2 = compute_valid_strides(src1->info(),src1->info()->element_size());
+            Iterator input1(src1, stride_input2, input2_win);  
+        }
+        else Iterator input2(src1, input2_win); 
+
+        // If valid region x has been runtime reshaped
+        if(output->info()->valid_region().shape.x()!=output->info()->tensor_shape().x())
+        {
+            Strides stride_output = compute_valid_strides(dst->info(),dst->info()->element_size());
+            Iterator output(dst, stride_output, win);  
+        }
+        else Iterator output(dst, win);
+        
         std::cout << "win.DimX()" << win.x().end() << std::endl;
         std::cout << "win.DimY()" << win.y().end() << std::endl;
         std::cout << "win.DimZ()" << win.z().end() << std::endl;

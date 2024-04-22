@@ -53,6 +53,31 @@ inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&...fixe
     return strides;
 }
 
+/** Create a strides object based on the provided strides and the valid tensor region dimensions.
+ *
+ * @param[in] info          Tensor info object providing the shape of the valid tensor region for unspecified strides.
+ * @param[in] stride_x      Stride to be used in X dimension (in bytes).
+ * @param[in] fixed_strides Strides to be used in higher dimensions starting at Y (in bytes).
+ *
+ * @return Strides object based on the specified strides. Missing strides are
+ *         calculated based on the tensor shape and the strides of lower dimensions.
+ */
+template <typename T, typename... Ts>
+inline Strides compute_valid_strides(const ITensorInfo &info, T stride_x, Ts &&...fixed_strides)
+{
+    const TensorShape &shape = info.valid_region().shape;
+
+    // Create strides object
+    Strides strides(stride_x, fixed_strides...);
+
+    for (size_t i = 1 + sizeof...(Ts); i < info.num_dimensions(); ++i)
+    {
+        strides.set(i, shape[i - 1] * strides[i - 1]);
+    }
+
+    return strides;
+}
+
 /** Create a strides object based on the tensor dimensions.
  *
  * @param[in] info Tensor info object used to compute the strides.

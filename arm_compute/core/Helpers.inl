@@ -98,6 +98,15 @@ inline Iterator::Iterator(const ITensor *tensor, const Window &win) : Iterator()
                tensor->info()->offset_first_element_in_bytes(), win);
 }
 
+inline Iterator::Iterator(const ITensor *tensor, const Strides &strides, const Window &window) : Iterator()
+{
+    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+    ARM_COMPUTE_ERROR_ON(tensor->info() == nullptr);
+
+    initialize(tensor->info()->num_dimensions(), strides, tensor->buffer(),
+               tensor->info()->offset_first_element_in_bytes(), window);
+}
+
 inline Iterator::Iterator(size_t num_dims, const Strides &strides, uint8_t *buffer, size_t offset, const Window &win)
     : Iterator()
 {

@@ -55,6 +55,14 @@ public:
      */
     Iterator(const ITensor *tensor, const Window &window);
 
+    /** Create a container iterator for the tensor with the stride and window.
+     *
+     * @param[in] tensor The tensor to associate to the iterator.
+     * @param[in] strides  The strides in bytes.
+     * @param[in] window   The window which will be used to iterate over the tensor.
+     */
+    Iterator(const ITensor *tensor, const Strides &strides, const Window &window);
+
     /** Create a container iterator for the tensor with the specified number of dimensions, stride, buffer pointer and window.
      *
      * @param[in] num_dims The number of dimensions.
