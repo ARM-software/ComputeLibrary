@@ -142,7 +142,7 @@ void add_same_neon(
                 }
             },
             input1, input2, output);
-        std::cout << *reinterpret_cast<float *>(output.ptr()) <<" " << *(reinterpret_cast<float *>(output.ptr())+767)<< std::endl;
+        std::cout << *reinterpret_cast<float *>(output.ptr()) <<" " << *(reinterpret_cast<float *>(output.ptr())+12)<< std::endl;
     }
 }
 
