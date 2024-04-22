@@ -39,7 +39,7 @@ template <typename ScalarType>
 void add_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
-
+    std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl " << std::endl;
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, wrapper::traits::BitWidth::W128>;
 
@@ -139,12 +139,11 @@ void add_same_neon(
                     const auto val2 = *(input2_ptr + x);
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
+                    
+                    std::cout << *(output_ptr + x) <<" ";
                 }
             },
             input1, input2, output);
-
-        std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl " << std::endl;
-        std::cout << *reinterpret_cast<float *>(output.ptr()) <<" " << *reinterpret_cast<float *>(output.ptr()+1)<< std::endl;
     }
 }
 
