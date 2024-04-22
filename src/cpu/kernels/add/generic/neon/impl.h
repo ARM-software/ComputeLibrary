@@ -140,7 +140,10 @@ void add_same_neon(
                     const auto val2 = wrapper::vloadq(input2_ptr + x);
                     const auto res =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
+
+                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7.3 " << std::endl;
                     wrapper::vstore(output_ptr + x, res);
+                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7.4 " << std::endl;
                 }
 
                 std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 8 " << std::endl;
