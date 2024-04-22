@@ -133,7 +133,6 @@ void add_same_neon(
                     const auto res =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                     wrapper::vstore(output_ptr + x, res);
-                    count ++;
                 }
 
                 // Compute left-over elements
