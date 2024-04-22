@@ -161,7 +161,9 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     // Auto initialize dst if not initialized
     const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
 
-    set_data_type_if_unknown(*dst, src0->data_type());
+    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(out_shape));
+
+    // Explicitly set the tensor shape to preserve dimensions
     set_shape_if_empty(*dst, out_shape);
 
     // Configure kernel window
