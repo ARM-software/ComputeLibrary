@@ -139,6 +139,7 @@ void add_same_neon(
                     wrapper::vstore(output_ptr + x, res);
                 }
 
+                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 8 " << std::endl;
                 // Compute left-over elements
                 for (; x < window_end_x; ++x)
                 {
@@ -147,6 +148,7 @@ void add_same_neon(
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
                 }
+                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 9 " << std::endl;
             },
             input1, input2, output);
     }
