@@ -116,13 +116,17 @@ void add_same_neon(
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
 
+        std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 4 " << std::endl;
         execute_window_loop(
             win,
             [&](const Coordinates &)
             {
                 const auto input1_ptr = reinterpret_cast<const ScalarType *>(input1.ptr());
+                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 5 " << std::endl;
                 const auto input2_ptr = reinterpret_cast<const ScalarType *>(input2.ptr());
+                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 6 " << std::endl;
                 const auto output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
+                std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 7 " << std::endl;
 
                 // Compute S elements per iteration
                 int x = window_start_x;
