@@ -113,7 +113,7 @@ void add_same_neon(
         // If valid region x has been runtime reshaped
         if(src0->info()->valid_region().shape.x()!=src0->info()->tensor_shape().x())
         {
-            Strides stride_src0 = compute_valid_strides(src0->info());
+            Strides stride_src0 = compute_valid_strides(*src0->info());
             Iterator input1(src0, stride_src0, input1_win);  
         }
         else Iterator input1(src0, input1_win); 
@@ -121,7 +121,7 @@ void add_same_neon(
         // If valid region x has been runtime reshaped
         if(src1->info()->valid_region().shape.x()!=src1->info()->tensor_shape().x())
         {
-            Strides stride_src1 = compute_valid_strides(src1->info());
+            Strides stride_src1 = compute_valid_strides(*src1->info());
             Iterator input2(src1, stride_src1, input2_win);  
         }
         else Iterator input2(src1, input2_win); 
@@ -129,7 +129,7 @@ void add_same_neon(
         // If valid region x has been runtime reshaped
         if(dst->info()->valid_region().shape.x()!=dst->info()->tensor_shape().x())
         {
-            Strides stride_dst = compute_valid_strides(dst->info());
+            Strides stride_dst = compute_valid_strides(*dst->info());
             Iterator output(dst, stride_dst, win);  
         }
         else Iterator output(dst, win);
