@@ -77,6 +77,12 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     run_pack.add_tensor(ACL_DST,output);
 
     NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
+    // Reshape output tensor
+    output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshaped_x));
+    std::cout<< "output->info()->valid_region().shape.x() " << output->info()->valid_region().shape.x() << std::endl;
+    std::cout<< "output->info()->valid_region().shape.y() " << output->info()->valid_region().shape.y() << std::endl;
+    std::cout<< "output->info()->valid_region().shape.z() " << output->info()->valid_region().shape.z() << std::endl;
+
 }
 
 
