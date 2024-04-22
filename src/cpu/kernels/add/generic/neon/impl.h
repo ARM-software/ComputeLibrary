@@ -39,6 +39,8 @@ template <typename ScalarType>
 void add_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
+
+    std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 1 " << std::endl;
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, wrapper::traits::BitWidth::W128>;
 
@@ -46,6 +48,7 @@ void add_same_neon(
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
     Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
+    std::cout << " src/cpu/kernels/CpuAddKernel.cpp impl 2 " << std::endl;
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));

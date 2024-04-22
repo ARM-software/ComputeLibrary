@@ -190,13 +190,9 @@ void CpuAddKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
     ARM_COMPUTE_ERROR_ON(tensors.empty());
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
-    std::cout << " src/cpu/kernels/CpuAddKernel.cpp 1 " << std::endl;
     const ITensor *src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
-    std::cout << " src/cpu/kernels/CpuAddKernel.cpp 2 " << std::endl;
     const ITensor *src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
-    std::cout << " src/cpu/kernels/CpuAddKernel.cpp 3 " << std::endl;
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
-    std::cout << " src/cpu/kernels/CpuAddKernel.cpp 4 " << std::endl;
 
     _run_method(src0, src1, dst, _policy, window);
 }
