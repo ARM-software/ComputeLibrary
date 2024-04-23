@@ -30,6 +30,7 @@
 
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/helpers/Utils.h"
 
 #include <arm_neon.h>
 
@@ -94,12 +95,18 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
      */
 
     // Set window for dst tensor. Set to 0 the X and Y dimensions in order to allow multi-threading implementation and future batched matrix multiplications
-    Window win_out(window);
-    win_out.set(Window::DimX, Window::Dimension(0, 0, 0));
-    win_out.set(Window::DimY, Window::Dimension(0, 0, 0));
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    Window win_out(window);
+    size_t split_dimension;
+
+    if(!valid_shape_check(*src->info()))
+    std::tie(win_out, split_dimension) = calculate_squashed_or_max_window_using_valid_region(*src->info());
+
+    win_out.set(Window::DimX, Window::Dimension(0, 0, 0));
+    win_out.set(Window::DimY, Window::Dimension(0, 0, 0));
 
     Iterator in(src, window);
     Iterator out(dst, win_out);

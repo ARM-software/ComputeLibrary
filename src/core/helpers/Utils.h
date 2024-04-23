@@ -99,6 +99,22 @@ inline Strides compute_valid_strides(ITensorInfo &info)
     return compute_valid_strides(info, info.element_size());
 }
 
+/** Verify if valid region has been changed in runtime
+ *
+ * @param[in] info Tensor info object to be verified.
+ *
+ * @return A boolean if valid region has been modified.
+ */
+inline bool valid_shape_check(ITensorInfo &info)
+{
+    for (size_t i = 1; i < info.num_dimensions(); ++i)
+    {
+        if(info.tensor_shape()[i]!=info.valid_region().shape[i])return false;
+        std::cout << info.tensor_shape()[i] << " " << info.valid_region().shape[i] << std::endl;
+    }
+    return true;
+}
+
 /** Given an integer value, this function returns the next power of two
  *
  * @param[in] x Input value
