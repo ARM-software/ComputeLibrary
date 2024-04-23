@@ -107,6 +107,7 @@ inline Strides compute_valid_strides(ITensorInfo &info)
  */
 inline bool valid_shape_check(ITensorInfo &info)
 {
+    std::cout << info.num_dimensions() << std::endl;
     for (size_t i = 1; i < info.num_dimensions(); ++i)
     {
         std::cout << info.tensor_shape()[i] << " " << info.valid_region().shape[i] << std::endl;
