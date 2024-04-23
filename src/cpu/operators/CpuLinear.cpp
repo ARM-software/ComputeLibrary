@@ -120,8 +120,6 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "c->info()->valid_region().shape.y()" << c->info()->valid_region().shape.y() << std::endl;
     std::cout << "c->info()->valid_region().shape.z()" << c->info()->valid_region().shape.z() << std::endl;
 
-    for(auto i : a->info()->valid_strides_in_bytes())std::cout << "valid stride " << i << std::endl;
-
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
     CpuAuxTensorHandler transposed1xw_b(offset_int_vec(Transposed1xWRHS), _tmp_b, tensors, true);
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);

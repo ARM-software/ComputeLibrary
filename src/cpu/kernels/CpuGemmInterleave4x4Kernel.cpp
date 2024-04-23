@@ -124,6 +124,7 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     win_out.scale(Window::DimY, 0.25f);
     
     Iterator in(src, src->info()->valid_strides_in_bytes(), win);
+    for(auto i : src->info()->valid_strides_in_bytes())std::cout << "src valid stride " << i << std::endl;
     Iterator out(dst, win_out);
 
     execute_window_loop(
