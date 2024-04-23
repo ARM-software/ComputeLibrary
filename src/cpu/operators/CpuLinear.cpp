@@ -104,7 +104,7 @@ void CpuLinear::run(ITensorPack &tensors)
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto a = tensors.get_const_tensor(ACL_SRC_0);
     auto b = tensors.get_const_tensor(ACL_SRC_1);
-    //auto c = tensors.get_const_tensor(ACL_SRC_2);
+    auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
@@ -115,6 +115,10 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "b->info()->valid_region().shape.x()" << b->info()->valid_region().shape.x() << std::endl;
     std::cout << "b->info()->valid_region().shape.y()" << b->info()->valid_region().shape.y() << std::endl;
     std::cout << "b->info()->valid_region().shape.z()" << b->info()->valid_region().shape.z() << std::endl;
+
+    std::cout << "c->info()->valid_region().shape.x()" << c->info()->valid_region().shape.x() << std::endl;
+    std::cout << "c->info()->valid_region().shape.y()" << c->info()->valid_region().shape.y() << std::endl;
+    std::cout << "c->info()->valid_region().shape.z()" << c->info()->valid_region().shape.z() << std::endl;
 
     for(auto i : a->info()->valid_strides_in_bytes())std::cout << i << std::endl;
 
