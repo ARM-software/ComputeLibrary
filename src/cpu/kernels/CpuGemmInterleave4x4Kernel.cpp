@@ -123,13 +123,7 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_out.scale(Window::DimY, 0.25f);
     
-    if(valid_reshaped)
-    {
-        Iterator in(src, src->info()->valid_strides_in_bytes(), win);
-    }else
-    {
-        Iterator in(src, win);
-    }
+    Iterator in(src, src->info()->valid_strides_in_bytes(), win);
     Iterator out(dst, win_out);
 
     execute_window_loop(
