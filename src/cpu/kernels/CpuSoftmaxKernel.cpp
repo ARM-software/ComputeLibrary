@@ -48,6 +48,7 @@ namespace kernels
 {
 namespace
 {
+
 /* Softmax */
 static const std::vector<typename CpuSoftmaxKernel::SoftmaxKernel> available_kernels = {
     {"sme2_fp32_softmax",
@@ -65,9 +66,23 @@ static const std::vector<typename CpuSoftmaxKernel::SoftmaxKernel> available_ker
      [](const SoftmaxKernelDataTypeISASelectorData &data)
      { return (!data.is_log && data.dt == DataType::F16) && data.isa.fp16; },
      REGISTER_FP16_NEON(neon_fp16_softmax<false>)},
+    {"sme2_qu8_softmax_lut_512VL",
+     [](const SoftmaxKernelDataTypeISASelectorData &data)
+     {
+         return (!data.is_log && data.dt == DataType::QASYMM8 && data.isa.sme2 && data.axis == 0 &&
+                 data.sme2_vector_length == 512);
+     },
+     REGISTER_QASYMM8_SME2(sme2_qasymm8_softmax_lut_512VL)},
     {"neon_qu8_softmax",
      [](const SoftmaxKernelDataTypeISASelectorData &data) { return (!data.is_log && data.dt == DataType::QASYMM8); },
      REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_softmax<false>)},
+    {"sme2_qs8_softmax_lut_512VL",
+     [](const SoftmaxKernelDataTypeISASelectorData &data)
+     {
+         return (!data.is_log && data.dt == DataType::QASYMM8_SIGNED && data.isa.sme2 && data.axis == 0 &&
+                 data.sme2_vector_length == 512);
+     },
+     REGISTER_QASYMM8_SIGNED_SME2(sme2_qasymm8_signed_softmax_lut_512VL)},
     {"neon_qs8_softmax",
      [](const SoftmaxKernelDataTypeISASelectorData &data)
      { return (!data.is_log && data.dt == DataType::QASYMM8_SIGNED); },
@@ -87,6 +102,28 @@ static const std::vector<typename CpuSoftmaxKernel::SoftmaxKernel> available_ker
      { return (data.is_log && data.dt == DataType::QASYMM8_SIGNED); },
      REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qasymm8_signed_softmax<true>)},
 };
+
+void init_lut(std::vector<float> &lut, DataType type, float scale, float beta)
+{
+    if (type == DataType::QASYMM8)
+    {
+        for (int i = 0; i < 256; ++i)
+        {
+            lut.push_back(std::exp(-scale * beta * i));
+        }
+    }
+    else if (type == DataType::QASYMM8_SIGNED)
+    {
+        for (int i = -128; i < 128; ++i)
+        {
+            lut.push_back(std::exp(-scale * beta * i));
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Invalid datatype for QASYMM8/QASYMM8_SIGNED softmax");
+    }
+}
 
 Status validate_arguments_softmax(
     const ITensorInfo &src, const ITensorInfo &dst, float beta, int axis, const ITensorInfo &tmp, bool is_log)
@@ -157,8 +194,8 @@ void CpuSoftmaxKernel::configure(
         auto_init_if_empty(*tmp, TensorInfo(*src).set_data_type(DataType::F32).reset_padding());
     }
 
-    const auto *uk = CpuSoftmaxKernel::get_implementation(
-        SoftmaxKernelDataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa(), is_log, axis});
+    const auto *uk = CpuSoftmaxKernel::get_implementation(SoftmaxKernelDataTypeISASelectorData{
+        src->data_type(), CPUInfo::get().get_isa(), is_log, axis, CPUInfo::get().get_sme2_vector_length()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     std::string kernel_name = is_log ? std::string("CpuLogSoftmaxKernel") : std::string("CpuSoftmaxKernel");
@@ -194,6 +231,13 @@ void CpuSoftmaxKernel::configure(
     win.set(_axis, Window::Dimension(0, 1, 1));
 
     ICpuKernel<CpuSoftmaxKernel>::configure(win);
+
+    const std::string uk_name = uk->name;
+    if (uk_name == "sme2_qu8_softmax_lut_512VL" || uk_name == "sme2_qs8_softmax_lut_512VL")
+    {
+        const float scale = src->quantization_info().uniform().scale;
+        init_lut(_lut, src->data_type(), scale, beta);
+    }
 }
 
 Status CpuSoftmaxKernel::validate(
@@ -230,11 +274,11 @@ void CpuSoftmaxKernel::run_op(ITensorPack &tensors, const Window &window, const 
         const unsigned int tmp_size_for_thread = tmp->info()->element_size() * num_elems_processed_per_iteration;
 
         void *tmp_for_thread = tmp->buffer() + (info.thread_id * tmp_size_for_thread);
-        _run_method(src, tmp_for_thread, dst, _beta, _axis, window);
+        _run_method(src, tmp_for_thread, dst, _beta, _axis, window, _lut.data());
     }
     else
     {
-        _run_method(src, nullptr, dst, _beta, _axis, window);
+        _run_method(src, nullptr, dst, _beta, _axis, window, nullptr);
     }
 }
 

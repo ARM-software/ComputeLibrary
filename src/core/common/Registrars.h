@@ -72,9 +72,13 @@
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
 #if defined(ARM_COMPUTE_ENABLE_SME2)
-#define REGISTER_FP32_SME2(func_name) &(func_name)
+#define REGISTER_FP32_SME2(func_name)           &(func_name)
+#define REGISTER_QASYMM8_SME2(func_name)        &(func_name)
+#define REGISTER_QASYMM8_SIGNED_SME2(func_name) &(func_name)
 #else /* !defined(ARM_COMPUTE_ENABLE_SME2) */
-#define REGISTER_FP32_SME2(func_name) nullptr
+#define REGISTER_FP32_SME2(func_name)           nullptr
+#define REGISTER_QASYMM8_SME2(func_name)        nullptr
+#define REGISTER_QASYMM8_SIGNED_SME2(func_name) nullptr
 #endif /* defined(ARM_COMPUTE_ENABLE_SME2) */
 
 #if defined(ARM_COMPUTE_ENABLE_NEON)
@@ -106,10 +110,17 @@
 #define REGISTER_QASYMM8_SIGNED_SVE2(func_name) nullptr
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+#define REGISTER_QASYMM8_SIGNED_SME2(func_name) &(func_name)
+#else /* !defined(ARM_COMPUTE_ENABLE_SME2) */
+#define REGISTER_QASYMM8_SIGNED_SME2(func_name) nullptr
+#endif /* defined(ARM_COMPUTE_ENABLE_SME2) */
+
 #else /* defined(ENABLE_QASYMM8_SIGNED_KERNELS) */
 #define REGISTER_QASYMM8_SIGNED_NEON(func_name) nullptr
 #define REGISTER_QASYMM8_SIGNED_SVE(func_name)  nullptr
 #define REGISTER_QASYMM8_SIGNED_SVE2(func_name) nullptr
+#define REGISTER_QASYMM8_SIGNED_SME2(func_name) nullptr
 #endif /* defined(ENABLE_QASYMM8_SIGNED_KERNELS) */
 
 #if defined(ENABLE_QASYMM8_KERNELS)
@@ -127,10 +138,17 @@
 #define REGISTER_QASYMM8_SVE2(func_name) nullptr
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+#define REGISTER_QASYMM8_SME2(func_name) &(func_name)
+#else /* !defined(ARM_COMPUTE_ENABLE_SME2) */
+#define REGISTER_QASYMM8_SME2(func_name) nullptr
+#endif /* defined(ARM_COMPUTE_ENABLE_SME2) */
+
 #else /* defined(ENABLE_QASYMM8_KERNELS) */
 #define REGISTER_QASYMM8_NEON(func_name) nullptr
 #define REGISTER_QASYMM8_SVE(func_name)  nullptr
 #define REGISTER_QASYMM8_SVE2(func_name) nullptr
+#define REGISTER_QASYMM8_SME2(func_name) nullptr
 #endif /* defined(ENABLE_QASYMM8_KERNELS) */
 
 #if defined(ENABLE_QSYMM16_KERNELS)

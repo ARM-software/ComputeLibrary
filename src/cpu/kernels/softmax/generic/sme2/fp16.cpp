@@ -720,8 +720,15 @@ loop_3_end%=:
     );
 }
 
-void sme2_fp16_softmax(const ITensor *in, void *const, ITensor *out, const float beta, int axis, const Window &window)
+void sme2_fp16_softmax(const ITensor *in,
+                       void *const,
+                       ITensor      *out,
+                       const float   beta,
+                       int           axis,
+                       const Window &window,
+                       const float  *lut_ptr)
 {
+    ARM_COMPUTE_UNUSED(lut_ptr);
     ARM_COMPUTE_UNUSED(axis);
 
     const auto *src_info = in->info();

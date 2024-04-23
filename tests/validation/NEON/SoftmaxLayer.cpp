@@ -145,7 +145,7 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
     cpu_isa.fp16 = (data_type == DataType::F16);
 
     const auto *selected_impl = CpuSoftmaxKernel::get_implementation(
-        SoftmaxKernelDataTypeISASelectorData{ data_type, cpu_isa, false /* is_log */, 0 /* axis */},
+        SoftmaxKernelDataTypeISASelectorData{ data_type, cpu_isa, false /* is_log */, 0 /* axis */, CPUInfo::get().get_sme2_vector_length()},
         cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);

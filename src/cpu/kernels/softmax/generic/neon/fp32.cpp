@@ -31,9 +31,15 @@ namespace cpu
 {
 
 template <bool IS_LOG>
-void neon_fp32_softmax(
-    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window)
+void neon_fp32_softmax(const ITensor *in,
+                       void *const    tmp,
+                       ITensor       *out,
+                       const float    beta,
+                       int            axis,
+                       const Window  &window,
+                       const float   *lut_ptr)
 {
+    ARM_COMPUTE_UNUSED(lut_ptr);
     if (axis == 0)
     {
         return neon_softmax_x_float<float, IS_LOG>(in, tmp, out, beta, axis, window);
@@ -44,10 +50,20 @@ void neon_fp32_softmax(
     }
 }
 
-template void neon_fp32_softmax<true>(
-    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window);
-template void neon_fp32_softmax<false>(
-    const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window);
+template void neon_fp32_softmax<true>(const ITensor *in,
+                                      void *const    tmp,
+                                      ITensor       *out,
+                                      const float    beta,
+                                      int            axis,
+                                      const Window  &window,
+                                      const float   *lut_ptr);
+template void neon_fp32_softmax<false>(const ITensor *in,
+                                       void *const    tmp,
+                                       ITensor       *out,
+                                       const float    beta,
+                                       int            axis,
+                                       const Window  &window,
+                                       const float   *lut_ptr);
 
 } // namespace cpu
 } // namespace arm_compute

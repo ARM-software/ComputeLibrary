@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 
 #include "src/common/cpuinfo/CpuInfo.h"
 #include "src/common/cpuinfo/CpuIsaInfo.h"
+#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 
 namespace arm_compute
 {
@@ -135,4 +136,14 @@ unsigned int CPUInfo::get_L2_cache_size() const
 {
     return _impl->L2_cache_size;
 }
+
+unsigned long CPUInfo::get_sme2_vector_length() const
+{
+#ifdef ARM_COMPUTE_ENABLE_SME2
+    return arm_gemm::utils::sme::get_vector_length<int8_t>();
+#else  // ARM_COMPUTE_ENABLE_SME2
+    return 0;
+#endif // ARM_COMPUTE_ENABLE_SME2
+}
+
 } // namespace arm_compute

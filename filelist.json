@@ -2243,7 +2243,9 @@
           "sve2":{
             "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],
             "fp32" :["src/cpu/kernels/softmax/generic/sme2/fp32.cpp"],
-            "fp16" :["src/cpu/kernels/softmax/generic/sme2/fp16.cpp"]
+            "fp16" :["src/cpu/kernels/softmax/generic/sme2/fp16.cpp"],
+            "qasymm8" :["src/cpu/kernels/softmax/generic/sme2/qasymm8.cpp"],
+            "qasymm8_signed" :["src/cpu/kernels/softmax/generic/sme2/qasymm8_signed.cpp"]
           }
         }
       },
