@@ -91,8 +91,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
-
-
     const size_t window_start_x = window.x().start();
     const size_t window_end_x   = window.x().end();
 
@@ -112,10 +110,13 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_out.scale(Window::DimY, 0.25f);
 
-    size_t split_dimension;
 
     if(!valid_shape_check(*src->info()))
-    std::tie(win_out, split_dimension) = calculate_squashed_or_max_window_using_valid_region(*src->info());
+    win_out = calculate_max_window_using_valid_region(*src->info());
+
+    std::cout << win_out.x().end() << std::endl;
+    std::cout << win_out.y().end() << std::endl;
+    std::cout << win_out.z().end() << std::endl;
     
     Iterator in(src, win);
     Iterator out(dst, win_out);

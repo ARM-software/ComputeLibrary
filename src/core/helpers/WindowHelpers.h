@@ -218,12 +218,21 @@ std::pair<Window, size_t> calculate_squashed_or_max_window(const ITensorInfo &sr
  * as 1D array and all the dimensions can be squashed together into the x-dimension.
  * Otherwise, generate the max window for the given tensor valid region.
  *
- * @param[in] src0 Tensor info object defining the shape of the first input tensor.
- * @param[in] src1 Tensor info object defining the shape of the second input tensor.
+ * @param[in] src Tensor info object defining the shape of the input tensor.
  *
  * @return The squashed or maximum window the kernel can be executed on and the preferred split dimension.
  */
-std::pair<Window, size_t> calculate_squashed_or_max_window_using_valid_region(const ITensorInfo &src0);
+std::pair<Window, size_t> calculate_squashed_or_max_window_using_valid_region(const ITensorInfo &src);
+
+/** Calculate the maximum window for the given tensor valid region.
+ *
+ * Generate the max window for the given tensor valid region.
+ *
+ * @param[in] src Tensor info object defining the shape of the input tensor.
+ *
+ * @return The maximum window the kernel can be executed on.
+ */
+Window calculate_max_window_using_valid_region(const ITensorInfo &src);
 
 /** Function to compute the shape of output and window for the given inputs
  *

@@ -389,4 +389,21 @@ std::pair<Window, size_t> calculate_squashed_or_max_window_using_valid_region(co
     return std::make_pair(win, split_dimension);
 }
 
+Window calculate_max_window_using_valid_region(const ITensorInfo &src)
+{
+    const auto &shape          = src.valid_region().shape;
+    const auto  num_dimensions = src.num_dimensions();
+
+    Window win;
+    size_t dim = 0;
+    
+    // Generate the max window.
+    for (dim = 0; dim < Coordinates::num_max_dimensions; ++dim)
+    {
+        win.set(dim, Window::Dimension(0, shape[dim], 1));
+    }
+
+    return win;
+}
+
 } // namespace arm_compute
