@@ -108,9 +108,9 @@ void CpuLinear::run(ITensorPack &tensors)
     auto d = tensors.get_tensor(ACL_DST);
 
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
-    std::cout << "a->info()->valid_region().shape.x()" << a->info()->valid_region().shape.x() << std::endl;
-    std::cout << "a->info()->valid_region().shape.y()" << a->info()->valid_region().shape.y() << std::endl;
-    std::cout << "a->info()->valid_region().shape.z()" << a->info()->valid_region().shape.z() << std::endl;
+    std::cout << "a->info()->valid_region().shape.x()" << a->info()->valid_region().shape[0] << std::endl;
+    std::cout << "a->info()->valid_region().shape.y()" << a->info()->valid_region().shape[1] << std::endl;
+    std::cout << "a->info()->valid_region().shape.z()" << a->info()->valid_region().shape[2] << std::endl;
 
     std::cout << "b->info()->valid_region().shape.x()" << b->info()->valid_region().shape.x() << std::endl;
     std::cout << "b->info()->valid_region().shape.y()" << b->info()->valid_region().shape.y() << std::endl;
