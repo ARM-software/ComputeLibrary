@@ -98,9 +98,9 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
         window_touse = calculate_max_window_using_valid_region(*src->info());
     }
 
-    std::cout <<"win_out.x().end() " << window_touse.x().end() << std::endl;
-    std::cout <<"win_out.y().end() " << window_touse.y().end() << std::endl;
-    std::cout <<"win_out.z().end() " << window_touse.z().end() << std::endl;
+    std::cout <<"window_touse.x().end() " << window_touse.x().end() << std::endl;
+    std::cout <<"window_touse.y().end() " << window_touse.y().end() << std::endl;
+    std::cout <<"window_touse.z().end() " << window_touse.z().end() << std::endl;
 
     const size_t window_start_x = window.x().start();
     const size_t window_end_x   = window.x().end();
