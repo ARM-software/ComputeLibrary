@@ -91,6 +91,17 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
+    Window window_touse = window;
+    // If tensor has been runtime reshaped
+    if(!valid_shape_check(*src->info()))
+    {
+        window_touse = calculate_max_window_using_valid_region(*src->info());
+    }
+
+    std::cout <<"win_out.x().end() " << window_touse.x().end() << std::endl;
+    std::cout <<"win_out.y().end() " << window_touse.y().end() << std::endl;
+    std::cout <<"win_out.z().end() " << window_touse.z().end() << std::endl;
+
     const size_t window_start_x = window.x().start();
     const size_t window_end_x   = window.x().end();
 
@@ -109,14 +120,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     Window win_out(window);
     win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_out.scale(Window::DimY, 0.25f);
-
-
-    if(!valid_shape_check(*src->info()))
-    win_out = calculate_max_window_using_valid_region(*src->info());
-
-    std::cout <<"win_out.x().end() " << win_out.x().end() << std::endl;
-    std::cout <<"win_out.y().end() " << win_out.y().end() << std::endl;
-    std::cout <<"win_out.z().end() " << win_out.z().end() << std::endl;
     
     Iterator in(src, win);
     Iterator out(dst, win_out);
@@ -146,7 +149,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                 {
                     size_t y = 0;
 
-   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 4" << std::endl;
                     for (; y < partial_y; ++y)
                     {
                         std::memcpy(out.ptr() + (x * 4 + y) * element_size,
