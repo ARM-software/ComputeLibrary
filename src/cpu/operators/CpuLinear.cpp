@@ -112,7 +112,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "a->info()->valid_region().shape.y()" << a->info()->valid_region().shape.y() << std::endl;
     std::cout << "a->info()->valid_region().shape.z()" << a->info()->valid_region().shape.z() << std::endl;
 
-    for(auto i : a->info()->strides_in_bytes())std::cout << i << std::endl;
+    for(auto i : a->info()->valid_strides_in_bytes())std::cout << i << std::endl;
 
     std::cout << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0)))  
               << " " 
