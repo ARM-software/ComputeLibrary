@@ -2,6 +2,7 @@
 #define ARM_COMPUTE_CPU_LINEAR_H
 
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/SubTensor.h"
 
 #include "src/cpu/ICpuOperator.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
