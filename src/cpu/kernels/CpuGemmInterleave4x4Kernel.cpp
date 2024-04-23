@@ -114,9 +114,9 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     if(!valid_shape_check(*src->info()))
     win_out = calculate_max_window_using_valid_region(*src->info());
 
-    std::cout << win_out.x().end() << std::endl;
-    std::cout << win_out.y().end() << std::endl;
-    std::cout << win_out.z().end() << std::endl;
+    std::cout <<"win_out.x().end() " << win_out.x().end() << std::endl;
+    std::cout <<"win_out.y().end() " << win_out.y().end() << std::endl;
+    std::cout <<"win_out.z().end() " << win_out.z().end() << std::endl;
     
     Iterator in(src, win);
     Iterator out(dst, win_out);
