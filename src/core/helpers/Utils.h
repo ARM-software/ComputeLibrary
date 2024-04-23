@@ -109,8 +109,8 @@ inline bool valid_shape_check(ITensorInfo &info)
 {
     for (size_t i = 1; i < info.num_dimensions(); ++i)
     {
-        if(info.tensor_shape()[i]!=info.valid_region().shape[i])return false;
         std::cout << info.tensor_shape()[i] << " " << info.valid_region().shape[i] << std::endl;
+        if(info.tensor_shape()[i]!=info.valid_region().shape[i])return false;
     }
     return true;
 }
