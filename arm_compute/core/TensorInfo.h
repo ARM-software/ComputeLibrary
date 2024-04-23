@@ -233,6 +233,7 @@ public:
     ITensorInfo                 &set_quantization_info(const QuantizationInfo &quantization_info) override;
     ITensorInfo                 &set_data_layout(const DataLayout &data_layout) override;
     ITensorInfo                 &reset_padding() override;
+    void                         set_valid_region(const ValidRegion &valid_region) override;
     bool                         auto_padding() override;
     ITensorInfo                 &set_lock_paddings(bool flag) override;
     bool                         lock_paddings() const override;
@@ -248,6 +249,10 @@ public:
     const Strides &strides_in_bytes() const override
     {
         return _strides_in_bytes;
+    }
+    const Strides &valid_strides_in_bytes() const override
+    {
+        return _valid_strides_in_bytes;
     }
     size_t offset_first_element_in_bytes() const override
     {
@@ -320,10 +325,6 @@ public:
     {
         return _valid_region;
     }
-    void set_valid_region(const ValidRegion &valid_region) override
-    {
-        _valid_region = valid_region;
-    }
     QuantizationInfo quantization_info() const override
     {
         return _quantization_info;
@@ -358,6 +359,7 @@ private:
     size_t           _total_size;
     size_t           _offset_first_element_in_bytes;
     Strides          _strides_in_bytes;
+    Strides          _valid_strides_in_bytes;
     size_t           _num_channels;
     TensorShape      _tensor_shape;
     TensorDimsState  _dims_state;

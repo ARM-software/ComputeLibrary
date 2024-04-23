@@ -429,6 +429,12 @@ ITensorInfo &TensorInfo::set_tensor_shape(const TensorShape &shape)
     return *this;
 }
 
+void TensorInfo::set_valid_region(const ValidRegion &valid_region)
+{
+    _valid_strides_in_bytes = compute_valid_strides(*this);
+    _valid_region = valid_region;
+}
+
 ITensorInfo &TensorInfo::set_tensor_dims_state(const TensorDimsState &state)
 {
     _dims_state = state;

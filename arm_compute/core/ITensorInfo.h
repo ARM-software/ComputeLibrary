@@ -194,6 +194,11 @@ public:
      * @return Strides in bytes for each tensor dimension
      */
     virtual const Strides &strides_in_bytes() const = 0;
+    /** The strides in bytes for accessing each dimension of the tensor valid region
+     *
+     * @return Strides in bytes for each tensor dimension in valid region
+     */
+    virtual const Strides &valid_strides_in_bytes() const = 0;
     /** The offset from the beginning of the memory allocation to the first element of the tensor.
      *  This can be used to access efficiently elements in a 2D tensor
      *
