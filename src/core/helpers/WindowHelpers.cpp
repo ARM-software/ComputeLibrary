@@ -392,7 +392,6 @@ std::pair<Window, size_t> calculate_squashed_or_max_window_using_valid_region(co
 Window calculate_max_window_using_valid_region(const ITensorInfo &src)
 {
     const auto &shape          = src.valid_region().shape;
-    const auto  num_dimensions = src.num_dimensions();
 
     Window win;
     size_t dim = 0;
