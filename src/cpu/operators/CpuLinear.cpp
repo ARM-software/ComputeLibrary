@@ -107,6 +107,12 @@ void CpuLinear::run(ITensorPack &tensors)
     //auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
+    std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
+    std::cout << a->ptr_to_element(Coordinates(0,0)) 
+              << " " 
+              <<a->ptr_to_element(Coordinates(0,767))
+              << std::endl;
+
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
     CpuAuxTensorHandler transposed1xw_b(offset_int_vec(Transposed1xWRHS), _tmp_b, tensors, true);
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
