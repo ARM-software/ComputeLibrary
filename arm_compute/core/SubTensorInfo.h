@@ -142,6 +142,10 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->strides_in_bytes();
     }
+    const Strides &valid_strides_in_bytes() const override
+    {
+        return _valid_strides_in_bytes;
+    }
     size_t offset_first_element_in_bytes() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
@@ -271,6 +275,7 @@ private:
     TensorDimsState _dims_state;
     Coordinates     _coords;
     ValidRegion     _valid_region;
+    Strides         _valid_strides_in_bytes;
     bool            _extend_parent;
     bool            _lock_paddings;
 };
