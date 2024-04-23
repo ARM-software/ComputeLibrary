@@ -30,6 +30,7 @@
 
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/helpers/Utils.h"
 
 #include <arm_neon.h>
 
@@ -90,6 +91,8 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
+
+
     const size_t window_start_x = window.x().start();
     const size_t window_end_x   = window.x().end();
 
@@ -109,6 +112,11 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_out.scale(Window::DimY, 0.25f);
 
+    size_t split_dimension;
+
+    if(!valid_shape_check(*src->info()))
+    std::tie(win_out, split_dimension) = calculate_squashed_or_max_window_using_valid_region(*src->info());
+    
     Iterator in(src, win);
     Iterator out(dst, win_out);
 
@@ -120,6 +128,7 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
             {
                 for (size_t x = window_start_x; x < window_end_x; ++x)
                 {
+
                     std::memcpy(out.ptr() + (x * 4 + 0) * element_size, (in.ptr() + 0 * in_stride) + x * element_size,
                                 element_size);
                     std::memcpy(out.ptr() + (x * 4 + 1) * element_size, (in.ptr() + 1 * in_stride) + x * element_size,
@@ -135,6 +144,8 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                 for (size_t x = window_start_x; x < window_end_x; ++x)
                 {
                     size_t y = 0;
+
+   std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp 4" << std::endl;
                     for (; y < partial_y; ++y)
                     {
                         std::memcpy(out.ptr() + (x * 4 + y) * element_size,

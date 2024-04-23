@@ -100,10 +100,6 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
     Window win_out(window);
-    size_t split_dimension;
-
-    if(!valid_shape_check(*src->info()))
-    std::tie(win_out, split_dimension) = calculate_squashed_or_max_window_using_valid_region(*src->info());
 
     win_out.set(Window::DimX, Window::Dimension(0, 0, 0));
     win_out.set(Window::DimY, Window::Dimension(0, 0, 0));
