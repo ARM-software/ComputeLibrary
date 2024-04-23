@@ -102,13 +102,11 @@ void CpuLinear::run(ITensorPack &tensors)
 {
 
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    auto a = tensors.get_tensor(ACL_SRC_0);
+    auto a = tensors.get_const_tensor(ACL_SRC_0);
     auto b = tensors.get_const_tensor(ACL_SRC_1);
     //auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
-    SubTensor a_sub(a,a->info()->valid_region().shape,Coordinates(0,0));
-    
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
     std::cout << "a->info()->valid_region().shape.x()" << a->info()->valid_region().shape.x() << std::endl;
     std::cout << "a->info()->valid_region().shape.y()" << a->info()->valid_region().shape.y() << std::endl;
