@@ -67,24 +67,24 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     reshaped_info = reshaped_info->valid_region().shape.x() < position->info()->valid_region().shape.x() 
                         ? reshaped_info : position->info();
     size_t reshape_x = reshaped_info->valid_region().shape.x();
-
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window_using_valid_region(*reshaped_info);
     win.set_dimension_step(0,0);
 
+    // Add token and segment
     ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
     token->info()->set_valid_region(token->info()->valid_region().set(0,0,reshape_x));
     segment->info()->set_valid_region(segment->info()->valid_region().set(0,0,reshape_x));
     aux_token_segemnt.get()->info()->set_valid_region(aux_token_segemnt.get()->info()->valid_region().set(0,0,reshape_x));
-
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
 
+    // Add position
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
     run_pack.add_const_tensor(ACL_SRC_1,position);
     run_pack.add_tensor(ACL_DST,output);
     position->info()->set_valid_region(position->info()->valid_region().set(0,0,reshape_x));
     output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshape_x));
-    
     NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
+
     // Reshape output tensor
     output->info()->set_valid_region(output->info()->valid_region().set(0,0,reshape_x));
 

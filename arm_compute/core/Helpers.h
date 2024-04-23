@@ -57,7 +57,7 @@ public:
 
     /** Create a container iterator for the tensor with the stride and window.
      *
-     * @param[in] tensor The tensor to associate to the iterator.
+     * @param[in] tensor   The tensor to associate to the iterator.
      * @param[in] strides  The strides in bytes.
      * @param[in] window   The window which will be used to iterate over the tensor.
      */
