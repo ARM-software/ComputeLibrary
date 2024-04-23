@@ -108,9 +108,9 @@ void CpuLinear::run(ITensorPack &tensors)
     auto d = tensors.get_tensor(ACL_DST);
 
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
-    std::cout << a->ptr_to_element(Coordinates(0,0)) 
+    std::cout << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0)))  
               << " " 
-              <<a->ptr_to_element(Coordinates(0,767))
+              << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,767)))
               << std::endl;
 
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
