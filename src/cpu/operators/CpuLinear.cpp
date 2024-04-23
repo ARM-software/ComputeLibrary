@@ -108,16 +108,17 @@ void CpuLinear::run(ITensorPack &tensors)
     auto d = tensors.get_tensor(ACL_DST);
 
     SubTensor a_sub(a,a->info()->valid_region().shape,Coordinates(0,0));
-
+    
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
     std::cout << "a->info()->valid_region().shape.x()" << a->info()->valid_region().shape.x() << std::endl;
     std::cout << "a->info()->valid_region().shape.y()" << a->info()->valid_region().shape.y() << std::endl;
     std::cout << "a->info()->valid_region().shape.z()" << a->info()->valid_region().shape.z() << std::endl;
 
+    for(auto i : a->info()->valid_strides_in_bytes())std::cout << i << std::endl;
     
-    std::cout << *reinterpret_cast<float *>(a_sub.ptr_to_element(Coordinates(0,0)))  
+    std::cout << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0)))  
               << " " 
-              << *reinterpret_cast<float *>(a_sub.ptr_to_element(Coordinates(0,7)))
+              << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,7)))
               << std::endl;
 
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
