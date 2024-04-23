@@ -110,7 +110,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
     std::cout << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0)))  
               << " " 
-              << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,767)))
+              << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,6)))
               << std::endl;
 
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
