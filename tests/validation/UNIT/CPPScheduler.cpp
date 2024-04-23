@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,8 +68,7 @@ public:
 
 TEST_SUITE(UNIT)
 TEST_SUITE(CPPScheduler)
-
-#if !defined(BARE_METAL)
+#if defined(ARM_COMPUTE_CPP_SCHEDULER) && !defined(BARE_METAL)
 TEST_CASE(RethrowException, framework::DatasetMode::ALL)
 {
     CPPScheduler scheduler;
@@ -87,7 +86,6 @@ TEST_CASE(RethrowException, framework::DatasetMode::ALL)
     }
     ARM_COMPUTE_EXPECT_FAIL("Expected exception not caught", framework::LogLevel::ERRORS);
 }
-#endif // !defined(BARE_METAL)
-
+#endif // defined(ARM_COMPUTE_CPP_SCHEDULER) &&  !defined(BARE_METAL)
 TEST_SUITE_END()
 TEST_SUITE_END()
