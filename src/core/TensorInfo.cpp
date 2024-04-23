@@ -38,6 +38,7 @@ TensorInfo::TensorInfo()
     : _total_size(0),
       _offset_first_element_in_bytes(0),
       _strides_in_bytes(),
+      _valid_strides_in_bytes(),
       _num_channels(0),
       _tensor_shape(),
       _dims_state(),
@@ -60,6 +61,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info) : TensorInfo()
     _total_size                    = info.total_size();
     _offset_first_element_in_bytes = info.offset_first_element_in_bytes();
     _strides_in_bytes              = info.strides_in_bytes();
+    _valid_strides_in_bytes        = info.valid_strides_in_bytes();
     _num_channels                  = info.num_channels();
     _tensor_shape                  = info.tensor_shape();
     _dims_state                    = info.tensor_dims_state();
@@ -81,6 +83,7 @@ TensorInfo::TensorInfo(const TensorInfo &info) : TensorInfo()
     _total_size                    = info.total_size();
     _offset_first_element_in_bytes = info.offset_first_element_in_bytes();
     _strides_in_bytes              = info.strides_in_bytes();
+    _valid_strides_in_bytes        = info.valid_strides_in_bytes();
     _num_channels                  = info.num_channels();
     _tensor_shape                  = info.tensor_shape();
     _dims_state                    = info.tensor_dims_state();
