@@ -122,11 +122,6 @@ void CpuLinear::run(ITensorPack &tensors)
 
     for(auto i : a->info()->valid_strides_in_bytes())std::cout << i << std::endl;
 
-    std::cout << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0)))  
-              << " " 
-              << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,7)))
-              << std::endl;
-
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
     CpuAuxTensorHandler transposed1xw_b(offset_int_vec(Transposed1xWRHS), _tmp_b, tensors, true);
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
@@ -157,6 +152,14 @@ void CpuLinear::run(ITensorPack &tensors)
     }
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
+
+    std::cout << "interleaved_a.get()->info()->valid_region().shape.x()" << interleaved_a.get()->info()->valid_region().shape.x() << std::endl;
+    std::cout << "interleaved_a.get()->info()->valid_region().shape.y()" << interleaved_a.get()->info()->valid_region().shape.y() << std::endl;
+    std::cout << "interleaved_a.get()->info()->valid_region().shape.z()" << interleaved_a.get()->info()->valid_region().shape.z() << std::endl;
+
+    std::cout << "b_to_use->info()->valid_region().shape.x()" << b_to_use->info()->valid_region().shape.x() << std::endl;
+    std::cout << "b_to_use->info()->valid_region().shape.y()" << b_to_use->info()->valid_region().shape.y() << std::endl;
+    std::cout << "b_to_use->info()->valid_region().shape.z()" << b_to_use->info()->valid_region().shape.z() << std::endl;
     
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
