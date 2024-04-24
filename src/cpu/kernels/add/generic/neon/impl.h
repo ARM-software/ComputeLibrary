@@ -113,6 +113,10 @@ void add_same_neon(
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
 
+        std::court <<"win.x().end() " <<win.x().end() << std::endl;
+        std::court <<"win.y().end() " <<win.y().end() << std::endl;
+        std::court <<"win.z().end() " <<win.z().end() << std::endl;
+
         execute_window_loop(
             win,
             [&](const Coordinates &)
@@ -146,7 +150,7 @@ void add_same_neon(
                           << *(output_ptr+3) << " "
                           << *(output_ptr+4) << " "
                           << *(output_ptr+5) << " "
-                          << *(output_ptr+6) << " ";
+                          << *(output_ptr+6) << std::endl;
             },
             input1, input2, output);
     }
