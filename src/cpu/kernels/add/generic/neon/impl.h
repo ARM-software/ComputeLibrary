@@ -113,9 +113,9 @@ void add_same_neon(
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
 
-        std::court <<"win.x().end() " <<win.x().end() << std::endl;
-        std::court <<"win.y().end() " <<win.y().end() << std::endl;
-        std::court <<"win.z().end() " <<win.z().end() << std::endl;
+        std::cout <<"win.x().end() " <<win.x().end() << std::endl;
+        std::cout <<"win.y().end() " <<win.y().end() << std::endl;
+        std::cout <<"win.z().end() " <<win.z().end() << std::endl;
 
         execute_window_loop(
             win,
