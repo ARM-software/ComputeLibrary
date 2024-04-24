@@ -105,75 +105,6 @@ public:
         TensorInfo text_info(_length, format);
         text.allocator()->init(text_info);
     }
-    /** Fill an text tensor with the content of the currently open text file.
-     *
-     * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
-     */
-    template <typename T>
-    void fill_text(T &text)
-    {
-        ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON(text.info()->dimension(0) != _length );
-        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&text, TextFormat::UTF8);
-        ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
-
-        unsigned char c = 0;
-
-        /* read input from text data feeder */
-        try
-        {
-            Window window;
-            window.set(Window::DimX, Window::Dimension(0,_length,1));
-            Iterator out(&text,window);
-            execute_window_loop(
-                window,
-                [&](const Coordinates &)
-                {
-                    c = _feeder->get();
-                    *out.ptr() = c;
-                },
-                out
-            );
-        }
-        catch (const std::ifstream::failure &e)
-        {
-            ARM_COMPUTE_ERROR_VAR("Loading text file: %s", e.what());
-        }
-    }
-    /** Fill an text tensor with the preprocessed token id  of the currently open text file.
-     *
-     * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
-     */
-    template <typename T>
-    void fill_token_id(T &tensor)
-    {
-        ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
-
-        unsigned char c = 0;
-
-        /* read input from text data feeder */
-        try
-        {
-
-            Window window;
-            window.set(Window::DimX, Window::Dimension(0,_length,1));
-            Iterator out(&tensor,window);
-            execute_window_loop(
-                window,
-                [&](const Coordinates &)
-                {
-                    c = _feeder->get();
-                    *out.ptr() = c;
-                },
-                out
-            );
-        }
-        catch (const std::ifstream::failure &e)
-        {
-            ARM_COMPUTE_ERROR_VAR("Loading text file: %s", e.what());
-        }
-    }
 protected:
     std::unique_ptr<ITextDataFeeder> _feeder;
     unsigned int _length;
@@ -221,10 +152,227 @@ public:
         }
         ARM_COMPUTE_ERROR_ON(is_open());
     }
+
+    /** Fill an text tensor with the content of the currently open text file.
+     *
+     * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
+     */
+    template <typename T>
+    void fill_text(T &text)
+    {
+        ARM_COMPUTE_ERROR_ON(!is_open());
+        ARM_COMPUTE_ERROR_ON(text.info()->dimension(0) != _length );
+        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&text, TextFormat::UTF8);
+        ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
+
+        unsigned char c = 0;
+
+        /* read input from text data feeder */
+        try
+        {
+            Window window;
+            window.set(Window::DimX, Window::Dimension(0,_length,1));
+            Iterator out(&text,window);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    c = _feeder->get();
+                    *out.ptr() = c;
+                },
+                out
+            );
+        }
+        catch (const std::ifstream::failure &e)
+        {
+            ARM_COMPUTE_ERROR_VAR("Loading text file: %s", e.what());
+        }
+    }
 private:
     std::ifstream _fs;
 };
 
+class TokenLoader : public ITextLoader
+{
+public:
+    /** Default constructor */
+    TokenLoader(): ITextLoader(), _fs()
+    {
+    }
+    // Inherited methods overridden:
+    bool is_open() override
+    {
+        return _fs.is_open();
+    }
+    void set_length(unsigned int length)
+    {
+        _length = length;
+    }
+    void open(const std::string &filename) override
+    {
+        ARM_COMPUTE_ERROR_ON(is_open());
+        try
+        {
+            _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            _fs.open(filename, std::ios::in | std::ios::binary);
+
+            std::tie(_length)  = parse_txt_header(_fs);
+
+            _feeder = std::make_unique<FileTextFeeder>(_fs);
+        }
+        catch (std::runtime_error &e)
+        {
+            ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
+        }
+    }
+    void close() override
+    {
+        if (is_open())
+        {
+            _fs.close();
+            _feeder = nullptr;
+        }
+        ARM_COMPUTE_ERROR_ON(is_open());
+    }
+    /** Fill an text tensor with the preprocessed token id  of the currently open text file.
+     *
+     * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
+     */
+    template <typename T>
+    void fill_token_id(T &tensor, const std::string &vocab)
+    {
+        ARM_COMPUTE_ERROR_ON(!is_open());
+        ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
+
+        unsigned char c = 0;
+
+        /* read input from text data feeder */
+        try
+        {
+            std::vector<unsigned int> token_id;
+            std::string input;
+            for(int i = 0;i < _length ; i++)
+            {
+                input+= _feeder->get();
+            }
+            std::cout << input << std::endl;
+            Window window;
+            window.set(Window::DimX, Window::Dimension(0,_length,1));
+            Iterator out(&tensor,window);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    c = _feeder->get();
+                    *out.ptr() = c;
+                },
+                out
+            );
+        }
+        catch (const std::ifstream::failure &e)
+        {
+            ARM_COMPUTE_ERROR_VAR("Loading text file: %s", e.what());
+        }
+    }
+private:
+    void preprocess(ITensor &tensor)
+    {
+        /* Currently only support UTF-8 */
+        if (tensor.info()->data_type() == DataType::F32)
+        {
+            const char pad_token[]          = u8"[PAD]";
+            const char start_token[]        = u8"[CLS]";
+            const char end_token[]          = u8"[SEP]";
+            const char divide_helper[]      = u8" ";
+            get_token<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
+                                                                        std::move(start_token),
+                                                                        std::move(end_token),
+                                                                        std::move(divide_helper));
+        }
+        else if (tensor.info()->data_type() == DataType::F16)
+        {
+            const char pad_token[]          = u8"[PAD]";
+            const char start_token[]        = u8"[CLS]";
+            const char end_token[]          = u8"[SEP]";
+            const char divide_helper[]      = u8" ";
+            get_token<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
+                                                                        std::move(start_token),
+                                                                        std::move(end_token),
+                                                                        std::move(divide_helper));
+        }
+        else if (tensor.info()->data_type() == DataType::U8)
+        {
+            const char pad_token[]          = u8"[PAD]";
+            const char start_token[]        = u8"[CLS]";
+            const char end_token[]          = u8"[SEP]";
+            const char divide_helper[]      = u8" ";
+            get_token<char,const char *,const char *,const char *>(tensor,std::move(pad_token),
+                                                                        std::move(start_token),
+                                                                        std::move(end_token),
+                                                                        std::move(divide_helper));
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+        }
+    }
+
+    template <typename T, typename... Args>
+    void get_token(ITensor &tensor,Args &&... tokens)
+    {
+        const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
+        const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
+        const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
+        ARM_COMPUTE_UNUSED(pad_token);
+
+        /** Read in */
+        std::basic_string<T> buffer;
+        Window window;
+        window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0),1)); // Padding offset
+        execute_window_loop(window,
+                            [&](const Coordinates id){
+                                buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                            });
+        
+        /** Sepreate into tokens and look up vocab list */
+        std::map<std::basic_string<T>,int> token2id = get_token2id(_vocab_file);
+        std::vector<unsigned int> text_ids;
+        std::vector<std::basic_string<T>> tokens_vec;
+
+        /* Split the text into words */
+        std::basic_string<T> pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
+        std::regex re(pat);
+        std::smatch m;
+
+        while (std::regex_search(buffer, m, re))
+        {
+            for (std::basic_string<T> x : m)
+            {
+                tokens_vec.push_back(x);
+            }
+            buffer = m.suffix();
+        }
+
+        // [CLS]
+        text_ids.push_back(token2id[start_token]);
+        
+        // Input content
+        find_longest_matching<T>(tokens_vec, token2id, text_ids);
+
+        // [SEP]
+        text_ids.push_back(token2id[end_token]);
+        for(auto i : text_ids)std::cout << i << std::endl;
+        /** Write back */
+        tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
+        window.use_tensor_dimensions(tensor.info()->tensor_shape());
+        execute_window_loop(window,
+                            [&](const Coordinates id){
+                                *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
+                            });
+
+    }
+    std::ifstream _fs;
+};
 
 /** Factory for generating appropriate text loader**/
 class TextLoaderFactory final

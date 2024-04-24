@@ -291,7 +291,7 @@ public:
      * @param[in] filename     Text file
      * @param[in] preprocessor (Optional) Text pre-processing object
      */
-    TextAccessor(std::string filename, std::unique_ptr<IPreprocessor> preprocessor = nullptr);
+    TextAccessor(std::string filename, std::string vocab_filename, std::unique_ptr<IPreprocessor> preprocessor = nullptr);
     /** Allow instances of this class to be move constructed */
     TextAccessor(TextAccessor &&) = default;
 
@@ -301,6 +301,7 @@ public:
 private:
     bool                           _already_loaded;
     const std::string              _filename;
+    const std::string              _vocab_filename;
     std::unique_ptr<IPreprocessor> _preprocessor;
 };
 
@@ -581,7 +582,7 @@ get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters
         }
         else if (arm_compute::utility::endswith(text_file_lower, ".txt"))
         {
-            return std::make_unique<TextAccessor>(text_file, std::move(preprocessor));
+            return std::make_unique<TextAccessor>(text_file, graph_parameters.vocabulary, std::move(preprocessor));
         }
         else 
         {
