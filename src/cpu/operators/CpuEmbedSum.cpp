@@ -65,9 +65,9 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     CpuAuxTensorHandler aux_token_segemnt(offset_int_vec(TokenSegmentOutput), _tmp_token_segment, tensors, true);
 
     Window win = _add_kernel_1->window();
-    std::cout <<"CpuEmbedSum win.x().end() " <<win.x().end() << std::endl;
-    std::cout <<"CpuEmbedSum win.y().end() " <<win.y().end() << std::endl;
-    std::cout <<"CpuEmbedSum win.z().end() " <<win.z().end() << std::endl;
+    std::cout <<"CpuEmbedSum win.x().end() " <<_add_kernel_1->window().x().end() << std::endl;
+    std::cout <<"CpuEmbedSum win.y().end() " <<_add_kernel_1->window().y().end() << std::endl;
+    std::cout <<"CpuEmbedSum win.z().end() " <<_add_kernel_1->window().z().end() << std::endl;
 
     ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
     NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
