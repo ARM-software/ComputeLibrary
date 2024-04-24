@@ -283,7 +283,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     /** Write back */
     tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
-    std::cout << "graph preprocess tensor id " << tensor.info()->id() << std::endl;
+    std::cout << "text_ids.size() " << text_ids.size() << std::endl;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
     execute_window_loop(window,
                         [&](const Coordinates id){
@@ -529,14 +529,14 @@ bool TextAccessor::access_tensor(ITensor &tensor)
         // Open a text feeder from file (ifstream)
         textloader->open(_filename);
 
-        std::cout << "Text Loader tensor " << tensor.info()->tensor_shape().x() << std::endl;
-        // Fill tensor with text
-        textloader->fill_text(tensor);
         // Preprocess tensor
         if (_preprocessor)
         {
             _preprocessor->preprocess(tensor);
         }
+
+        // Fill tensor with text
+        textloader->fill_text(tensor);
     }
 
     _already_loaded = !_already_loaded;
