@@ -199,14 +199,15 @@ public:
             std::cout << "tensor.info()->tensor_shape().y()"  << tensor.info()->tensor_shape().y() << std::endl;
             std::cout << "tensor.info()->tensor_shape().z()"  << tensor.info()->tensor_shape().z() << std::endl;
             Window window;
-            window.set(Window::DimX, Window::Dimension(0,_length,1));
+            window.use_tensor_dimensions(tensor.info()->tensor_shape());
+            int token_index = 0;
             Iterator out(&tensor,window);
             execute_window_loop(
                 window,
                 [&](const Coordinates &)
                 {
-                    c = _feeder->get();
-                    *out.ptr() = c;
+                    *out.ptr() = text_ids[token_index];
+                    token_index++;
                 },
                 out
             );
