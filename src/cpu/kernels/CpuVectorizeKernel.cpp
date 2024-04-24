@@ -43,14 +43,6 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
     const auto uk = CpuVectorizeKernel::get_implementation(
         VectorizeKernelDataTypeISASelectorData{dst->data_type(), CPUInfo::get().get_isa()}
     );
-    std::cout << "src/cpu/kernels/CpuVectorizeKernel.cpp configure: " << std::endl;
-    std::cout << "src:" << std::endl;
-    for(auto v:src->tensor_shape())std::cout << v << " ";
-    std::cout << std::endl;
-
-    std::cout << "vector:" << std::endl;
-    for(auto v:vector->tensor_shape())std::cout << v << " ";
-    std::cout << std::endl;
 
     // Configure output tensor info.
     const TensorShape dst_shape(src->tensor_shape().x(),vector->tensor_shape().y());
