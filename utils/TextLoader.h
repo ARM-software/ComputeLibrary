@@ -157,7 +157,7 @@ public:
         {
             // Readin text file
             std::basic_string<char> buffer;
-            for(int i=0; i<_length; i++)
+            for(unsigned int i=0; i<_length; i++)
             {
                 buffer+=i;
             }
