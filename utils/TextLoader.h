@@ -149,6 +149,7 @@ public:
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
 
+        unsigned char c = 0;
         /* read input from text data feeder */
         try
         {
@@ -193,16 +194,23 @@ public:
             std::cout << " 4 " << std::endl;
             // [SEP]
             text_ids.push_back(token2id[end_token]);
+            for(auto i:text_ids)std::cout << i << std::endl;
 
             std::cout << "tensor.info()->tensor_shape().x()"  << tensor.info()->tensor_shape().x() << std::endl;
             std::cout << "tensor.info()->tensor_shape().y()"  << tensor.info()->tensor_shape().y() << std::endl;
             std::cout << "tensor.info()->tensor_shape().z()"  << tensor.info()->tensor_shape().z() << std::endl;
             Window window;
             window.use_tensor_dimensions(tensor.info()->tensor_shape());
-    execute_window_loop(window,
-                        [&](const Coordinates id){
-                            *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
-                        });
+            int token_index = 0;
+            Iterator out(&tensor,window);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    *out.ptr() = text_ids[token_index];
+                },
+                out
+            );
         }
         catch (const std::ifstream::failure &e)
         {
