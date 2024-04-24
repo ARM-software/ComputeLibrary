@@ -141,10 +141,10 @@ public:
     }
     /** Fill an text tensor with the content of the currently open text file.
      *
-     * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
+     * @param[in,out] tensor Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
      */
     template <typename T>
-    void fill_token(T &text, const std::string &vocabname)
+    void fill_token(T &tensor, const std::string &vocabname)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&text, TextFormat::UTF8);
@@ -196,7 +196,9 @@ public:
             // [SEP]
             text_ids.push_back(token2id[end_token]);
 
-
+            std::cout << "tensor.info()->tensor_shape().x()"  << tensor.info()->tensor_shape().x() << std::endl;
+            std::cout << "tensor.info()->tensor_shape().y()"  << tensor.info()->tensor_shape().y() << std::endl;
+            std::cout << "tensor.info()->tensor_shape().z()"  << tensor.info()->tensor_shape().z() << std::endl;
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
             Iterator out(&text,window);
