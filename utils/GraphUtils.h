@@ -645,8 +645,7 @@ get_segment_accessor(const std::string &path_to_file,
  */
 inline std::unique_ptr<graph::ITensorAccessor>
 get_token_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
-                   std::unique_ptr<IPreprocessor>               preprocessor = nullptr,
-                   bool                                         bgr          = true)
+                   std::unique_ptr<IPreprocessor>               preprocessor = nullptr)
 {
     if (!graph_parameters.validation_file.empty())
     {
