@@ -85,7 +85,7 @@ public:
         //const auto operation_layout = common_params.data_layout;
 
         // Create input tensor
-        const TensorShape src_tensor = TensorShape(13U);
+        const TensorShape src_tensor = TensorShape(7U);
 
         // Data layout
         const DataLayout operation_layout = DataLayout::NCHW;
@@ -96,12 +96,12 @@ public:
         graph << common_params.target << common_params.fast_math_hint;
 
         // Text preprocessor
-        std::unique_ptr<IPreprocessor> WP_preproccessor     = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
+        //std::unique_ptr<IPreprocessor> WP_preproccessor     = std::make_unique<WordPiecePreprocessor>(common_params.vocabulary);
         std::unique_ptr<IPreprocessor> at2_preproccessor    = std::make_unique<atoiPreprocessor>();
 
         // Encode Input
-        graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor))
-                                            , get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
+        graph << InputLayer(input_descriptor, /*get_input_accessor(common_params,move(WP_preproccessor)), */ 
+                                                get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
               
               << EmbeddingLayer(EmbeddingLayerInfo(d_model,
                                                    d_vocab,
