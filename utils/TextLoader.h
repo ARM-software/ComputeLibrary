@@ -154,7 +154,10 @@ public:
         {
             // Readin text file
             std::basic_string<char> buffer;
-            _feeder->get_chuck(&buffer,_length);
+            for(unsigned int i=0; i<_length; i++)
+            {
+                buffer+=_feeder->get();
+            }
 
             const char start_token[]        = u8"[CLS]";
             const char end_token[]          = u8"[SEP]";
@@ -191,18 +194,22 @@ public:
             std::cout << "tensor.info()->tensor_shape().x()"  << tensor.info()->tensor_shape().x() << std::endl;
             std::cout << "tensor.info()->tensor_shape().y()"  << tensor.info()->tensor_shape().y() << std::endl;
             std::cout << "tensor.info()->tensor_shape().z()"  << tensor.info()->tensor_shape().z() << std::endl;
+
             Window window;
-            window.use_tensor_dimensions(tensor.info()->tensor_shape());
-            int token_index = 0;
+            window.set(Window::DimX, Window::Dimension(0,tensor.info()->tensor_shape().x(),1));
             Iterator out(&tensor,window);
+            int i = 0;
             execute_window_loop(
                 window,
                 [&](const Coordinates &)
                 {
-                    *out.ptr() = text_ids[token_index];
+                    *out.ptr() = text_ids[i];
+                    i++;
                 },
                 out
             );
+
+            
         }
         catch (const std::ifstream::failure &e)
         {
