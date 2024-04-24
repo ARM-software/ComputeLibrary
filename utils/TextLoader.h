@@ -154,10 +154,7 @@ public:
         {
             // Readin text file
             std::basic_string<char> buffer;
-            for(unsigned int i=0; i<_length; i++)
-            {
-                buffer+=_feeder->get();
-            }
+            _feeder->get_chuck(&buffer,_length);
 
             const char start_token[]        = u8"[CLS]";
             const char end_token[]          = u8"[SEP]";
