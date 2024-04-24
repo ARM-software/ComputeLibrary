@@ -199,17 +199,10 @@ public:
             std::cout << "tensor.info()->tensor_shape().z()"  << tensor.info()->tensor_shape().z() << std::endl;
             Window window;
             window.use_tensor_dimensions(tensor.info()->tensor_shape());
-            int token_index = 0;
-            Iterator out(&tensor,window);
-            execute_window_loop(
-                window,
-                [&](const Coordinates &)
-                {
-                    *out.ptr() = text_ids[token_index];
-                    token_index++;
-                },
-                out
-            );
+    execute_window_loop(window,
+                        [&](const Coordinates id){
+                            *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
+                        });
         }
         catch (const std::ifstream::failure &e)
         {
