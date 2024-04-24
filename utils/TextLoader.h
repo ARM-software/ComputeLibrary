@@ -149,7 +149,6 @@ public:
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
 
-        unsigned char c = 0;
         /* read input from text data feeder */
         try
         {
