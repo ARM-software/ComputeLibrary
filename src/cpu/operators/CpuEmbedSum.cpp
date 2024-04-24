@@ -64,19 +64,15 @@ void CpuEmbedSum::run(ITensorPack &tensors)
 
     CpuAuxTensorHandler aux_token_segemnt(offset_int_vec(TokenSegmentOutput), _tmp_token_segment, tensors, true);
 
-    Window win = _add_kernel_1->window();
-    std::cout <<"CpuEmbedSum win.x().end() " <<_add_kernel_1->window().x().end() << std::endl;
-    std::cout <<"CpuEmbedSum win.y().end() " <<_add_kernel_1->window().y().end() << std::endl;
-    std::cout <<"CpuEmbedSum win.z().end() " <<_add_kernel_1->window().z().end() << std::endl;
 
     ITensorPack run_pack{{ACL_SRC_0, token}, {ACL_SRC_1, segment}, {ACL_DST, aux_token_segemnt.get()}};
-    NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, win, run_pack);
+    NEScheduler::get().schedule_op(_add_kernel_1.get(), Window::DimY, _add_kernel_1->window(), run_pack);
 
     // Add position
     run_pack.add_const_tensor(ACL_SRC_0,aux_token_segemnt.get());
     run_pack.add_const_tensor(ACL_SRC_1,position);
     run_pack.add_tensor(ACL_DST,output);
-    NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, win, run_pack);
+    NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, _add_kernel_2->window(), run_pack);
 
     /*
     // Reshape window if tensor valid region has been reshaped
