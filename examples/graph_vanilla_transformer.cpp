@@ -101,7 +101,7 @@ public:
 
         // Encode Input
         graph << InputLayer(input_descriptor, get_input_accessor(common_params,move(WP_preproccessor)), 
-                                                get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
+                                              get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
               
               << EmbeddingLayer(EmbeddingLayerInfo(d_model,
                                                    d_vocab,

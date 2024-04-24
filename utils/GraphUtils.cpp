@@ -529,14 +529,13 @@ bool TextAccessor::access_tensor(ITensor &tensor)
         // Open a text feeder from file (ifstream)
         textloader->open(_filename);
 
+        // Fill tensor with text
+        textloader->fill_text(tensor);
         // Preprocess tensor
         if (_preprocessor)
         {
             _preprocessor->preprocess(tensor);
         }
-
-        // Fill tensor with text
-        textloader->fill_text(tensor);
     }
 
     _already_loaded = !_already_loaded;
