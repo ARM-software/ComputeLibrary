@@ -48,8 +48,6 @@ Status ClScatter::validate(const ITensorInfo *src,
                            const ScatterInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(updates, indices, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32); // Currently, other datatypes are not suppported.
     if (src != nullptr)
     {
         // Check dst/src are same shape and datatype.

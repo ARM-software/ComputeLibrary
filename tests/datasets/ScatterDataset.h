@@ -137,7 +137,7 @@ public:
         //      - src/updates/dst should all have same number of dims. Indices should be 2D.
         add_config(TensorShape(6U, 5U), TensorShape(6U, 2U), TensorShape(1U, 2U), TensorShape(6U, 5U));
         add_config(TensorShape(9U, 3U, 4U), TensorShape(9U, 3U, 2U), TensorShape(1U, 2U), TensorShape(9U, 3U, 4U));
-        add_config(TensorShape(3U, 2U, 4U, 2U), TensorShape(3U, 2U, 4U, 2U), TensorShape(1U, 2U), TensorShape(3U, 2U, 4U, 2U));
+        add_config(TensorShape(17U, 3U, 2U, 4U), TensorShape(17U, 3U, 2U, 7U), TensorShape(1U, 7U), TensorShape(17U, 3U, 2U, 4U));
     }
 };
 

@@ -37,6 +37,7 @@ namespace opencl
 {
 namespace kernels
 {
+
 class ClScatterKernel : public IClKernel
 {
 public:

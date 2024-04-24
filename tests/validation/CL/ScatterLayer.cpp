@@ -52,62 +52,117 @@ TEST_SUITE(CL)
 TEST_SUITE(Scatter)
 DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     make("InputInfo", { TensorInfo(TensorShape(9U), 1, DataType::F32),    // Mismatching data types
-                                            TensorInfo(TensorShape(15U), 1, DataType::F32), // Valid
-                                            TensorInfo(TensorShape(8U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(217U), 1, DataType::F32),    // Mismatch input/output dims.
-                                            TensorInfo(TensorShape(217U), 1, DataType::F32),    // Updates dim higher than Input/Output dims.
-                                            TensorInfo(TensorShape(12U), 1, DataType::F32),      // Indices wrong datatype.
-                                          }),
-    make("UpdatesInfo",{                    TensorInfo(TensorShape(3U), 1, DataType::F16),
-                                             TensorInfo(TensorShape(15U), 1, DataType::F32),
-                                             TensorInfo(TensorShape(2U), 1, DataType::F32),
-                                             TensorInfo(TensorShape(217U), 1, DataType::F32),
-                                             TensorInfo(TensorShape(217U, 3U), 1, DataType::F32),
-                                             TensorInfo(TensorShape(2U), 1, DataType::F32),
-                                          }),
-    make("IndicesInfo",{                  TensorInfo(TensorShape(1U, 3U), 1, DataType::S32),
-                                          TensorInfo(TensorShape(1U, 15U), 1, DataType::S32),
-                                          TensorInfo(TensorShape(1U, 2U), 1, DataType::S32),
-                                          TensorInfo(TensorShape(1U, 271U), 1, DataType::S32),
-                                          TensorInfo(TensorShape(1U, 271U), 1, DataType::S32),
-                                          TensorInfo(TensorShape(1U, 2U), 1 , DataType::F32)
-                                          }),
-    make("OutputInfo",{                     TensorInfo(TensorShape(9U), 1, DataType::F16),
-                                            TensorInfo(TensorShape(15U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(8U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(271U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(12U), 1, DataType::F32)
-                                           }),
+                        TensorInfo(TensorShape(15U), 1, DataType::F32),   // Valid
+                        TensorInfo(TensorShape(8U), 1, DataType::F32),
+                        TensorInfo(TensorShape(217U), 1, DataType::F32),    // Mismatch input/output dims.
+                        TensorInfo(TensorShape(217U), 1, DataType::F32),    // Updates dim higher than Input/Output dims.
+                        TensorInfo(TensorShape(12U), 1, DataType::F32),     // Indices wrong datatype.
+                        TensorInfo(TensorShape(9U, 3U, 4U), 1, DataType::F32), // Number of updates != number of indices
+                        TensorInfo(TensorShape(17U, 3U, 3U, 2U), 1, DataType::F32), // index_len != (dst_dims - upt_dims + 1)
+                        TensorInfo(TensorShape(17U, 3U, 3U, 2U, 2U, 2U), 1, DataType::F32), // index_len > 5
+    }),
+    make("UpdatesInfo",{TensorInfo(TensorShape(3U), 1, DataType::F16),
+                        TensorInfo(TensorShape(15U), 1, DataType::F32),
+                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                        TensorInfo(TensorShape(217U), 1, DataType::F32),
+                        TensorInfo(TensorShape(217U, 3U), 1, DataType::F32),
+                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                        TensorInfo(TensorShape(9U, 3U, 2U), 1, DataType::F32),
+                        TensorInfo(TensorShape(17U, 3U, 2U), 1, DataType::F32),
+                        TensorInfo(TensorShape(1U), 1, DataType::F32),
+    }),
+    make("IndicesInfo",{TensorInfo(TensorShape(1U, 3U), 1, DataType::S32),
+                        TensorInfo(TensorShape(1U, 15U), 1, DataType::S32),
+                        TensorInfo(TensorShape(1U, 2U), 1, DataType::S32),
+                        TensorInfo(TensorShape(1U, 271U), 1, DataType::S32),
+                        TensorInfo(TensorShape(1U, 271U), 1, DataType::S32),
+                        TensorInfo(TensorShape(1U, 2U), 1 , DataType::F32),
+                        TensorInfo(TensorShape(1U, 4U), 1, DataType::S32),
+                        TensorInfo(TensorShape(3U, 2U), 1, DataType::S32),
+                        TensorInfo(TensorShape(6U, 2U), 1, DataType::S32),
+    }),
+    make("OutputInfo",{TensorInfo(TensorShape(9U), 1, DataType::F16),
+                       TensorInfo(TensorShape(15U), 1, DataType::F32),
+                       TensorInfo(TensorShape(8U), 1, DataType::F32),
+                       TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
+                       TensorInfo(TensorShape(271U), 1, DataType::F32),
+                       TensorInfo(TensorShape(12U), 1, DataType::F32),
+                       TensorInfo(TensorShape(9U, 3U, 4U), 1, DataType::F32),
+                       TensorInfo(TensorShape(17U, 3U, 3U, 2U), 1, DataType::F32),
+                       TensorInfo(TensorShape(17U, 3U, 3U, 2U, 2U, 2U), 1, DataType::F32),
+    }),
     make("ScatterInfo",{ ScatterInfo(ScatterFunction::Add, false),
                          ScatterInfo(ScatterFunction::Max, false),
                          ScatterInfo(ScatterFunction::Min, false),
                          ScatterInfo(ScatterFunction::Add, false),
                          ScatterInfo(ScatterFunction::Update, false),
                          ScatterInfo(ScatterFunction::Sub, false),
-                                           }),
-    make("Expected", { false, true, true, false, false, false })),
+                         ScatterInfo(ScatterFunction::Sub, false),
+                         ScatterInfo(ScatterFunction::Update, false),
+                         ScatterInfo(ScatterFunction::Update, false),
+    }),
+    make("Expected", { false, true, true, false, false, false, false, false, false })),
     input_info, updates_info, indices_info, output_info, scatter_info, expected)
 {
-    const Status status = CLScatter::validate(&input_info.clone()->set_is_resizable(true), &updates_info.clone()->set_is_resizable(true), &indices_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), scatter_info);
+    const Status status = CLScatter::validate(&input_info, &updates_info, &indices_info, &output_info, scatter_info);
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 
+const auto allScatterFunctions = make("ScatterFunction",
+    {ScatterFunction::Update, ScatterFunction::Add, ScatterFunction::Sub, ScatterFunction::Min, ScatterFunction::Max });
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small1DScatterDataset(),
-                                                                                                                    make("DataType", {DataType::F32}),
-                                                                                                                    make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add, ScatterFunction::Sub, ScatterFunction::Min, ScatterFunction::Max }),
-                                                                                                                    make("ZeroInit", {false})))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::Small1DScatterDataset(),
+        make("DataType", {DataType::F32}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 // With this test, src should be passed as nullptr.
-FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small1DScatterDataset(),
-                                                                                                                    make("DataType", {DataType::F32}),
-                                                                                                                    make("ScatterFunction", {ScatterFunction::Add}),
-                                                                                                                    make("ZeroInit", {true})))
+FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::Small1DScatterDataset(),
+        make("DataType", {DataType::F32}),
+        make("ScatterFunction", {ScatterFunction::Add}),
+        make("ZeroInit", {true}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+
+// Updates/src/dst have same no. dims.
+FIXTURE_DATA_TEST_CASE(RunSmallMultiDim, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMultiDimDataset(),
+        make("DataType", {DataType::F32}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+
+// m+1-D to m+n-D cases
+FIXTURE_DATA_TEST_CASE(RunSmallMultiIndices, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMultiIndicesDataset(),
+        make("DataType", {DataType::F32}),
+        make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add }),
+        make("ZeroInit", {false}),
+        make("Inplace", {false, true})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+
+// m+k, k-1-D m+n-D case
+FIXTURE_DATA_TEST_CASE(RunSmallBatchedMultiIndices, CLScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+    combine(datasets::SmallScatterBatchedDataset(),
+        make("DataType", {DataType::F32}),
+        make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add }),
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }

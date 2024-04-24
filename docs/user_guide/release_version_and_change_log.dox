@@ -41,6 +41,9 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v24.05 Public major release
+ - Add @ref CLScatter operator for FP32 data type
+
 v24.04 Public major release
  - Add Bfloat16 data type support for @ref NEMatMul.
  - Add support for SoftMax in SME2 for FP32 and FP16.

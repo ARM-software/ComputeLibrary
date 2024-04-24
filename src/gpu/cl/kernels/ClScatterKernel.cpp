@@ -27,10 +27,13 @@
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
+
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -38,6 +41,12 @@ namespace opencl
 {
 namespace kernels
 {
+
+namespace
+{
+constexpr int max_index_length = 5;
+} // namespace
+
 ClScatterKernel::ClScatterKernel()
 {
 }
@@ -47,21 +56,33 @@ Status ClScatterKernel::validate(const ITensorInfo *updates,
                                  const ITensorInfo *dst,
                                  const ScatterInfo &info)
 {
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(updates, dst);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(indices, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->num_dimensions() > 1, "Only 1D output tensors are currently supported.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(indices->num_dimensions() > 2, "Only 2D indices tensors are currently supported.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(updates->num_dimensions() > 1, "Only 1D update tensors are currently supported.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        indices->tensor_shape().y() != updates->tensor_shape()[updates->num_dimensions() - 1],
-        "Height of indices tensor should match size of highest dimension in updates tensor.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(updates->num_dimensions() > dst->num_dimensions(),
-                                    "Update tensor cannot have more dims than output tensor.");
     ARM_COMPUTE_UNUSED(info);
+
+    const TensorShape &ind_shape = indices->tensor_shape();
+    const TensorShape &upt_shape = updates->tensor_shape();
+    const TensorShape &dst_shape = dst->tensor_shape();
+
+    const int32_t upt_dims = upt_shape.num_dimensions();
+    const int32_t dst_dims = dst_shape.num_dimensions();
+    const int32_t ind_dims = ind_shape.num_dimensions();
+
+    const int32_t index_len = ind_shape[0];
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(updates, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(indices, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(ind_dims > 2, "Only 2D indices tensors are currently supported.");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        ind_shape[1] != upt_shape[upt_dims - 1],
+        "Height of indices tensor should match size of highest dimension in updates tensor.");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(upt_dims > dst_dims, "Update tensor cannot have more dims than output tensor.");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(index_len > max_index_length, "Maximum supported index length is 5!");
+    ARM_COMPUTE_RETURN_ERROR_ON(index_len != dst_dims - upt_dims + 1);
 
     return Status{};
 }
+
 void ClScatterKernel::configure(const ClCompileContext &compile_context,
                                 const ITensorInfo      *updates,
                                 const ITensorInfo      *indices,
@@ -71,22 +92,51 @@ void ClScatterKernel::configure(const ClCompileContext &compile_context,
     ARM_COMPUTE_ERROR_ON_NULLPTR(updates, dst, indices);
     ARM_COMPUTE_LOG_PARAMS(updates, indices, dst, info);
 
-    // Configure kernel window
-    const auto indices_shape = indices->tensor_shape();
-    Window     win           = calculate_max_window(
-                      *indices, Steps(indices_shape.x(), indices_shape.y())); // Ensures single thread for deterministic output.
+    const TensorShape &dst_shape = dst->tensor_shape();
+
+    const bool is_scalar_block = updates->num_dimensions() == 1;
+    const int  n0 = adjust_vec_size(16 / updates->element_size(), is_scalar_block ? 1 : updates->dimension(0));
+
+    const int partial_n0 = updates->dimension(0) % n0;
+
+    // The GWS will be 2D [x, y]
+    //  x-dimension refers to the x coordinate of the dst tensor
+    //  y-dimension refers to the collapsed y-coordinate of the data part of the dst tensor
+    Window    win       = calculate_max_window(dst_shape, Steps(n0));
+    const int index_len = indices->dimension(0);
+
+    // Collapse the dimensions corresponding to indices in the execution window
+    for (int i = 0; i < index_len; ++i)
+    {
+        win.set(dst->num_dimensions() - (i + 1), Window::Dimension(0, 1, 1));
+    }
+
+    win = win.collapse(win, 1);
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
-    build_opts.add_option("-DINDICES_DIMS=" + support::cpp11::to_string(indices->num_dimensions()));
-    build_opts.add_option("-DINDICES_SHAPE_Y=" + support::cpp11::to_string(indices_shape.y()));
-    build_opts.add_option("-DOUT_SHAPE_X=" + support::cpp11::to_string(dst->tensor_shape().x()));
+
+    const int num_dims = dst->num_dimensions();
+
+    build_opts.add_option("-DNUM_INDICES=" + support::cpp11::to_string(indices->dimension(1)));
+    build_opts.add_option("-DINDEX_LENGTH=" + support::cpp11::to_string(index_len));
+
+    // We provide 5 variables to use in a constant array
+    for (int i = 1; i <= max_index_length; i++)
+    {
+        build_opts.add_option("-DOUT_SHAPE_N_MINUS_" + support::cpp11::to_string(i) + "=" +
+                              support::cpp11::to_string(dst_shape[std::max(num_dims - i, 0)]));
+    }
+
+    build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
+    build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_n0));
 
     switch (info.func)
     {
         case ScatterFunction::Update:
             build_opts.add_option("-DSCATTER_FUNCTION=UPDATE_OP");
+            build_opts.add_option("-DSKIP_OUTPUT_READ");
             break;
         case ScatterFunction::Add:
             build_opts.add_option("-DSCATTER_FUNCTION=ADD_OP");
@@ -105,9 +155,12 @@ void ClScatterKernel::configure(const ClCompileContext &compile_context,
     }
 
     // Create kernel
-    std::string kernel_name("scatter1D");
+    std::string kernel_name = "scatter_mp1d_2d_mpnd";
+    build_opts.add_option("-D" + upper_string(kernel_name));
+
     ICLKernel::configure_internal(win);
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
     _config_id += "_";
@@ -123,18 +176,29 @@ void ClScatterKernel::configure(const ClCompileContext &compile_context,
 
 void ClScatterKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
-    unsigned int idx = 0;
-
-    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
-
     const auto updates =
         utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
     const auto indices =
         utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
     auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
-    add_4D_tensor_argument(idx, updates, window_collapsed);
-    add_4D_tensor_argument(idx, indices, window_collapsed);
-    add_4D_tensor_argument(idx, dst, window_collapsed);
+
+    const ITensorInfo *dst_info = dst->info();
+    const int          num_dims = dst_info->num_dimensions();
+
+    const int index_len = indices->info()->dimension(0);
+
+    // calculate m-dimensional data block strides in updates and destination tensors
+    const int upt_block_stride = updates->info()->strides_in_bytes()[updates->info()->num_dimensions() - 1];
+    const int out_block_stride = dst_info->strides_in_bytes()[num_dims - index_len];
+
+    unsigned int idx = 0;
+
+    add_2D_tensor_argument(idx, updates, window);
+    add_2D_tensor_argument(idx, indices, window);
+    add_2D_tensor_argument(idx, dst, window);
+
+    _kernel.setArg<cl_int>(idx++, upt_block_stride);
+    _kernel.setArg<cl_int>(idx++, out_block_stride);
 
     enqueue(queue, *this, window, lws_hint());
 }

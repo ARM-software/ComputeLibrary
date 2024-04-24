@@ -441,6 +441,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map = 
     {"reorg_layer_nhwc", "nhwc/reorg_layer.cl"},
     {"scale_nearest_neighbour_nhwc", "nhwc/scale.cl"},
     {"scale_bilinear_nhwc", "nhwc/scale.cl"},
+    {"scatter_mp1d_2d_mpnd", "common/scatter.cl"},
     {"scatter1D", "common/scatter.cl"},
     {"space_to_batch_nhwc", "nhwc/space_to_batch.cl"},
     {"space_to_batch_static_nhwc", "nhwc/space_to_batch.cl"},
