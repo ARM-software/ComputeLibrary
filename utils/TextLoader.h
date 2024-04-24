@@ -149,11 +149,9 @@ public:
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
 
-        unsigned char c = 0;
         /* read input from text data feeder */
         try
         {
-            std::cout << " 1 " << std::endl;
             // Readin text file
             std::basic_string<char> buffer;
             for(unsigned int i=0; i<_length; i++)
@@ -164,7 +162,6 @@ public:
             const char start_token[]        = u8"[CLS]";
             const char end_token[]          = u8"[SEP]";
 
-            std::cout << " 2 " << std::endl;
             /** Sepreate into tokens and look up vocab list */
             std::map<std::basic_string<char>,int> token2id = utils::get_token2id(vocabname);
             std::vector<unsigned int> text_ids;
@@ -175,7 +172,6 @@ public:
             std::regex re(pat);
             std::smatch m;
 
-            std::cout << " 3 " << std::endl;
             while (std::regex_search(buffer, m, re))
             {
                 for (std::basic_string<char> x : m)
@@ -191,7 +187,6 @@ public:
             // Input content
             utils::find_longest_matching<char>(tokens_vec, token2id, text_ids);
 
-            std::cout << " 4 " << std::endl;
             // [SEP]
             text_ids.push_back(token2id[end_token]);
             for(auto i:text_ids)std::cout << i << std::endl;
