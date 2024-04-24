@@ -191,10 +191,6 @@ public:
             text_ids.push_back(token2id[end_token]);
             for(auto i:text_ids)std::cout << i << std::endl;
 
-            std::cout << "tensor.info()->tensor_shape().x()"  << tensor.info()->tensor_shape().x() << std::endl;
-            std::cout << "tensor.info()->tensor_shape().y()"  << tensor.info()->tensor_shape().y() << std::endl;
-            std::cout << "tensor.info()->tensor_shape().z()"  << tensor.info()->tensor_shape().z() << std::endl;
-
             Window window;
             window.set(Window::DimX, Window::Dimension(0,tensor.info()->tensor_shape().x(),1));
             Iterator out(&tensor,window);
@@ -203,13 +199,12 @@ public:
                 window,
                 [&](const Coordinates &)
                 {
-                    std::cout << text_ids[i] << std::endl;
                     *reinterpret_cast<unsigned int *>(out.ptr()) = text_ids[i];
                     i++;
                 },
                 out
             );
-
+            std::cout << "Wo cao ni ma " << std::endl;
             
         }
         catch (const std::ifstream::failure &e)
