@@ -280,7 +280,7 @@ void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
 
     // [SEP]
     text_ids.push_back(token2id[end_token]);
-
+    for(auto i : text_ids)std::cout << i << std::endl;
     /** Write back */
     tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
     std::cout << "text_ids.size() " << text_ids.size() << std::endl;
