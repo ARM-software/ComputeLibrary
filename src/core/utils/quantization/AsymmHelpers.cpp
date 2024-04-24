@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,13 +122,13 @@ arm_compute::Status calculate_quantized_multipliers(const QuantizationInfo  &iq_
     ARM_COMPUTE_RETURN_ERROR_ON(iq_info.scale().empty());
     ARM_COMPUTE_RETURN_ERROR_ON(wq_info.scale().empty());
     ARM_COMPUTE_RETURN_ERROR_ON(oq_info.scale().empty());
-
-    const unsigned int size = wq_info.scale().size();
-
-    auto &quant_multipliers = stage_info.gemmlowp_multipliers;
-    auto &quant_shifts      = stage_info.gemmlowp_shifts;
-    quant_multipliers.resize(size);
-    quant_shifts.resize(size);
+    constexpr unsigned int padding_elems = 32; // assembly kernels assume the shifts and multipliers buffers are padded
+    const unsigned int     size          = wq_info.scale().size();
+    const size_t           padded_size   = (size == 1) ? 1 : size + padding_elems;
+    auto                  &quant_multipliers = stage_info.gemmlowp_multipliers;
+    auto                  &quant_shifts      = stage_info.gemmlowp_shifts;
+    quant_multipliers.resize(padded_size);
+    quant_shifts.resize(padded_size);
 
     const auto &w_scales = wq_info.scale();
     const float i_scale  = iq_info.scale().at(0);
