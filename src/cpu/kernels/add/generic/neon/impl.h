@@ -140,6 +140,13 @@ void add_same_neon(
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
                 }
+                std::cout << *(output_ptr) << " "
+                          << *(output_ptr+1) << " "
+                          << *(output_ptr+2) << " "
+                          << *(output_ptr+3) << " "
+                          << *(output_ptr+4) << " "
+                          << *(output_ptr+5) << " "
+                          << *(output_ptr+6) << " ";
             },
             input1, input2, output);
     }
