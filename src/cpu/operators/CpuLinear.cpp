@@ -104,7 +104,7 @@ void CpuLinear::run(ITensorPack &tensors)
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto a = tensors.get_const_tensor(ACL_SRC_0);
     auto b = tensors.get_const_tensor(ACL_SRC_1);
-    auto c = tensors.get_const_tensor(ACL_SRC_2);
+    //auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
