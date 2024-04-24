@@ -119,15 +119,6 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
                                                                     std::move(start_token),
                                                                     std::move(end_token),
                                                                     std::move(divide_helper));
-        /*
-        const char32_t pad_token[]      = U"[PAD]";
-        const char32_t start_token[]    = U"[CLS]";
-        const char32_t end_token[]      = U"[SEP]";
-        char divide_helper              = U8' ';
-        preprocess_typed<char32_t,const char32_t *,const char32_t *>(tensor,std::move(pad_token),
-                                                                            std::move(start_token),
-                                                                            std::move(end_token));
-                                                                            */
     }
     else if (tensor.info()->data_type() == DataType::F16)
     {
@@ -139,15 +130,6 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
                                                                     std::move(start_token),
                                                                     std::move(end_token),
                                                                     std::move(divide_helper));
-        /*
-        const char16_t pad_token[]      = u"[PAD]";
-        const char16_t start_token[]    = u"[CLS]";
-        const char16_t end_token[]      = u"[SEP]";
-        char divide_helper              = u' ';
-        preprocess_typed<char16_t,const char16_t *,const char16_t *>(tensor,std::move(pad_token),
-                                                                            std::move(start_token),
-                                                                            std::move(end_token));
-                                                                            */
     }
     else if (tensor.info()->data_type() == DataType::U8)
     {
@@ -164,6 +146,61 @@ void WordPiecePreprocessor::preprocess(ITensor &tensor)
     {
         ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
+}
+
+template <typename T, typename... Args>
+void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
+{
+    const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
+    const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
+    const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
+    ARM_COMPUTE_UNUSED(pad_token);
+
+    /** Read in */
+    std::basic_string<T> buffer;
+    Window window;
+    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0),1)); // Padding offset
+    execute_window_loop(window,
+                        [&](const Coordinates id){
+                            buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
+                        });
+    
+    /** Sepreate into tokens and look up vocab list */
+    std::map<std::basic_string<T>,int> token2id = get_token2id(_vocab_file);
+    std::vector<unsigned int> text_ids;
+    std::vector<std::basic_string<T>> tokens_vec;
+
+    /* Split the text into words */
+    std::basic_string<T> pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
+    std::regex re(pat);
+    std::smatch m;
+
+    while (std::regex_search(buffer, m, re))
+    {
+        for (std::basic_string<T> x : m)
+        {
+            tokens_vec.push_back(x);
+        }
+        buffer = m.suffix();
+    }
+
+    // [CLS]
+    text_ids.push_back(token2id[start_token]);
+    
+    // Input content
+    find_longest_matching<T>(tokens_vec, token2id, text_ids);
+
+    // [SEP]
+    text_ids.push_back(token2id[end_token]);
+    for(auto i : text_ids)std::cout << i << std::endl;
+    /** Write back */
+    tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+    execute_window_loop(window,
+                        [&](const Coordinates id){
+                            *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
+                        });
+
 }
 
 /** Helper function for converting token to id
@@ -235,63 +272,6 @@ void find_longest_matching(std::vector<std::basic_string<T>> &tokens_vec,
     }
 }
 
-
-template <typename T, typename... Args>
-void WordPiecePreprocessor::preprocess_typed(ITensor &tensor,Args &&... tokens)
-{
-    const T * pad_token     = reinterpret_cast<const T *>(get_nth_elm<0>(tokens...));
-    const T * start_token   = reinterpret_cast<const T *>(get_nth_elm<1>(tokens...));
-    const T * end_token     = reinterpret_cast<const T *>(get_nth_elm<2>(tokens...));
-    ARM_COMPUTE_UNUSED(pad_token);
-
-    /** Read in */
-    std::basic_string<T> buffer;
-    Window window;
-    window.set(Window::DimX, Window::Dimension(0,tensor.info()->dimension(0),1)); // Padding offset
-    execute_window_loop(window,
-                        [&](const Coordinates id){
-                            buffer+= *reinterpret_cast<T *>(tensor.ptr_to_element(id));
-                        });
-    
-    /** Sepreate into tokens and look up vocab list */
-    std::map<std::basic_string<T>,int> token2id = get_token2id(_vocab_file);
-    std::vector<unsigned int> text_ids;
-    std::vector<std::basic_string<T>> tokens_vec;
-
-    /* Split the text into words */
-    std::basic_string<T> pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
-    std::regex re(pat);
-    std::smatch m;
-
-    while (std::regex_search(buffer, m, re))
-    {
-        for (std::basic_string<T> x : m)
-        {
-            tokens_vec.push_back(x);
-        }
-        buffer = m.suffix();
-    }
-
-    // [CLS]
-    text_ids.push_back(token2id[start_token]);
-    
-    // Input content
-    find_longest_matching<T>(tokens_vec, token2id, text_ids);
-
-    // [SEP]
-    text_ids.push_back(token2id[end_token]);
-    for(auto i : text_ids)std::cout << i << std::endl;
-    /** Write back */
-    tensor.info()->set_valid_region(tensor.info()->valid_region().set(0,0,text_ids.size()));
-    std::cout << "text_ids.size() " << text_ids.size() << std::endl;
-    std::cout << "tensor.info()->tensor_shape().x " << tensor.info()->tensor_shape().x() << std::endl;
-    window.use_tensor_dimensions(tensor.info()->tensor_shape());
-    execute_window_loop(window,
-                        [&](const Coordinates id){
-                            *reinterpret_cast<unsigned int *>(tensor.ptr_to_element(id)) = text_ids[id[0]]; //Using dimesion x
-                        });
-
-}
 
 void atoiPreprocessor::preprocess(ITensor &tensor)
 {
@@ -529,9 +509,12 @@ bool TextAccessor::access_tensor(ITensor &tensor)
 
         // Open a text feeder from file (ifstream)
         textloader->open(_filename);
-
+        
         // Fill tensor with text
-        textloader->fill_text(tensor);
+        //textloader->fill_text(tensor);
+
+        // Fill tensor with token
+        textloader->fill_token_id(tensor);
 
         // Preprocess tensor
         _preprocessor->preprocess(tensor);

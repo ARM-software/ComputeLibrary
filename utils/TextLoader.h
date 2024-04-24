@@ -7,6 +7,7 @@
 #include "arm_compute/core/Types.h"
 
 #include "utils/Utils.h"
+#include "utils/GraphUtils.h"
 
 #include <cstdlib>
 #include <memory>
@@ -154,8 +155,10 @@ public:
         /* read input from text data feeder */
         try
         {
+
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
+            std::cout << "utils/TextLoader.h " << _length << std::endl;
             Iterator out(&tensor,window);
             execute_window_loop(
                 window,
