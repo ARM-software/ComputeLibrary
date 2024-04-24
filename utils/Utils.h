@@ -916,24 +916,7 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
  * 
  * @return A map containing token, id
 */
-std::map<std::string,int> get_token2id(std::string path_vocab)
-{
-    std::map<std::string,int> token2id;
-
-    std::fstream fstream_vocab;
-    fstream_vocab.open(path_vocab,std::ios::in);
-
-    std::string line;
-    while (getline(fstream_vocab,line))
-    {   
-        char *token     = strtok(const_cast<char*>(line.c_str()), " ");
-        char *token_id  = strtok(nullptr, " "); // Continues previous str invocation
-        token2id[token] = std::stoi(token_id);
-    }
-    fstream_vocab.close();
-
-    return token2id;
-}
+std::map<std::string,int> get_token2id(std::string path_vocab);
 
 /** Find longest matching string in vocabulary list and convert it into vector
  *  
