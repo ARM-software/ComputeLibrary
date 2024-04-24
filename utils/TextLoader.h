@@ -189,7 +189,6 @@ public:
 
             // [SEP]
             text_ids.push_back(token2id[end_token]);
-            for(auto i:text_ids)std::cout << i << std::endl;
 
             Window window;
             window.set(Window::DimX, Window::Dimension(0,tensor.info()->tensor_shape().x(),1));
@@ -204,7 +203,6 @@ public:
                 },
                 out
             );
-            std::cout << "Wo cao ni ma " << std::endl;
             
         }
         catch (const std::ifstream::failure &e)
