@@ -124,7 +124,6 @@ public:
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
             Iterator out(&text,window);
-            std::cout << "Text Loader tensor " << text.info()->tensor_shape().x() << std::endl;
             execute_window_loop(
                 window,
                 [&](const Coordinates &)

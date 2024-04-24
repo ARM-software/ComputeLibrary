@@ -529,6 +529,7 @@ bool TextAccessor::access_tensor(ITensor &tensor)
         // Open a text feeder from file (ifstream)
         textloader->open(_filename);
 
+        std::cout << "Text Loader tensor " << tensor.info()->tensor_shape().x() << std::endl;
         // Fill tensor with text
         textloader->fill_text(tensor);
         // Preprocess tensor
