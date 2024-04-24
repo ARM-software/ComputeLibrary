@@ -203,6 +203,7 @@ public:
                 window,
                 [&](const Coordinates &)
                 {
+                    std::cout << text_ids[i] << std::endl;
                     *out.ptr() = text_ids[i];
                     i++;
                 },
