@@ -469,6 +469,11 @@ bool TokenAccessor::access_tensor(ITensor &tensor)
         // Fill tensor with text
         textloader->fill_token(tensor,_vocabname);
 
+        // Preprocess tensor
+        if (_preprocessor)
+        {
+            _preprocessor->preprocess(tensor);
+        }
     }
 
     _already_loaded = !_already_loaded;
