@@ -532,11 +532,9 @@ bool TextAccessor::access_tensor(ITensor &tensor)
 
         // Fill tensor with text
         textloader->fill_text(tensor);
+
         // Preprocess tensor
-        if (_preprocessor)
-        {
-            _preprocessor->preprocess(tensor);
-        }
+        _preprocessor->preprocess(tensor);
     }
 
     _already_loaded = !_already_loaded;

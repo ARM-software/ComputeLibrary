@@ -139,6 +139,39 @@ public:
             ARM_COMPUTE_ERROR_VAR("Loading text file: %s", e.what());
         }
     }
+    /** Fill an text tensor with the preprocessed token id  of the currently open text file.
+     *
+     * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
+     */
+    template <typename T>
+    void fill_token_id(T &tensor)
+    {
+        ARM_COMPUTE_ERROR_ON(!is_open());
+        ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
+
+        unsigned char c = 0;
+
+        /* read input from text data feeder */
+        try
+        {
+            Window window;
+            window.set(Window::DimX, Window::Dimension(0,_length,1));
+            Iterator out(&tensor,window);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    c = _feeder->get();
+                    *out.ptr() = c;
+                },
+                out
+            );
+        }
+        catch (const std::ifstream::failure &e)
+        {
+            ARM_COMPUTE_ERROR_VAR("Loading text file: %s", e.what());
+        }
+    }
 protected:
     std::unique_ptr<ITextDataFeeder> _feeder;
     unsigned int _length;
