@@ -158,7 +158,6 @@ public:
 
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
-            std::cout << "utils/TextLoader.h " << _length << std::endl;
             Iterator out(&tensor,window);
             execute_window_loop(
                 window,
