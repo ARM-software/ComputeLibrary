@@ -91,47 +91,27 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    Window window_touse = window;
-    bool valid_reshaped = false;
-    // If tensor has been runtime reshaped
-    if(!valid_shape_check(*src->info()))
-    {
-        valid_reshaped = true;
-        window_touse = calculate_max_window_using_valid_region(*src->info());
-    }
+    const size_t window_start_x = window.x().start();
+    const size_t window_end_x   = window.x().end();
 
-    std::cout <<"window_touse.x().end() " << window_touse.x().end() << std::endl;
-    std::cout <<"window_touse.y().end() " << window_touse.y().end() << std::endl;
-    std::cout <<"window_touse.z().end() " << window_touse.z().end() << std::endl;
-
-    const size_t window_start_x = window_touse.x().start();
-    const size_t window_end_x   = window_touse.x().end();
-
-    const size_t in_height = valid_reshaped ? src->info()->valid_region().shape.x() : src->info()->dimension(1);
-    const size_t in_stride = valid_reshaped ? src->info()->valid_strides_in_bytes()[1]: src->info()->strides_in_bytes()[1];
+    const size_t in_height = src->info()->dimension(1);
+    const size_t in_stride = src->info()->strides_in_bytes()[1];
 
     const size_t partial_y = in_height % 4;
 
     const size_t element_size = src->info()->element_size();
 
     // Set window for the src tensor
-    Window win = window_touse;
+    Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     // Set window for the dst tensor
-    Window win_out(window_touse);
+    Window win_out(window);
     win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_out.scale(Window::DimY, 0.25f);
-    
-    Iterator in(src, src->info()->valid_strides_in_bytes(), win);
-    for(auto i : src->info()->valid_strides_in_bytes())std::cout << "src valid stride " << i << std::endl;
-    TensorShape shape = compute_interleaved_valid_shape(*dst->info());
-    std::cout << "dst valid shape x " << shape.x() << std::endl;
-    std::cout << "dst valid shape y " << shape.y() << std::endl;
-    std::cout << "dst valid shape z " << shape.z() << std::endl;
-    Iterator out(dst, win_out);
-    for(auto i : dst->info()->strides_in_bytes())std::cout << "dst stride " << i << std::endl;
 
+    Iterator in(src, win);
+    Iterator out(dst, win_out);
 
     execute_window_loop(
         win,
@@ -141,7 +121,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
             {
                 for (size_t x = window_start_x; x < window_end_x; ++x)
                 {
-
                     std::memcpy(out.ptr() + (x * 4 + 0) * element_size, (in.ptr() + 0 * in_stride) + x * element_size,
                                 element_size);
                     std::memcpy(out.ptr() + (x * 4 + 1) * element_size, (in.ptr() + 1 * in_stride) + x * element_size,
@@ -157,7 +136,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                 for (size_t x = window_start_x; x < window_end_x; ++x)
                 {
                     size_t y = 0;
-
                     for (; y < partial_y; ++y)
                     {
                         std::memcpy(out.ptr() + (x * 4 + y) * element_size,
