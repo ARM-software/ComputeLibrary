@@ -134,6 +134,10 @@ void add_same_neon(
                     const auto res =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                     wrapper::vstore(output_ptr + x, res);
+                    std::cout << *(output_ptr) << " "
+                              << *(output_ptr+1) << " "
+                              << *(output_ptr+2) << " "
+                              << *(output_ptr+3) << " ";
                 }
 
                 // Compute left-over elements
@@ -144,13 +148,6 @@ void add_same_neon(
                     *(output_ptr + x) =
                         (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
                 }
-                std::cout << *(output_ptr) << " "
-                          << *(output_ptr+1) << " "
-                          << *(output_ptr+2) << " "
-                          << *(output_ptr+3) << " "
-                          << *(output_ptr+4) << " "
-                          << *(output_ptr+5) << " "
-                          << *(output_ptr+6) << std::endl;
             },
             input1, input2, output);
     }
