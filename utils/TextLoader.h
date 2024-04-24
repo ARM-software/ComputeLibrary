@@ -152,7 +152,6 @@ public:
         ARM_COMPUTE_ERROR_ON(_feeder.get() == nullptr);
 
         unsigned char c = 0;
-        std::cout << "token loader "<< _length << std::endl;
         /* read input from text data feeder */
         try
         {
@@ -204,6 +203,8 @@ public:
             _fs.open(filename, std::ios::in | std::ios::binary);
 
             std::tie(_length)  = parse_txt_header(_fs);
+
+        std::cout << "token loader "<< _length << std::endl;
 
             _feeder = std::make_unique<FileTextFeeder>(_fs);
         }
