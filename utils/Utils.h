@@ -910,6 +910,75 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
     return num_mismatches;
 }
 
+/** Helper function for converting token to id
+ * 
+ * @param[in] path_vocab    String path to vocab list txt file
+ * 
+ * @return A map containing token, id
+*/
+std::map<std::string,int> get_token2id(std::string path_vocab)
+{
+    std::map<std::string,int> token2id;
+
+    std::fstream fstream_vocab;
+    fstream_vocab.open(path_vocab,std::ios::in);
+
+    std::string line;
+    while (getline(fstream_vocab,line))
+    {   
+        char *token     = strtok(const_cast<char*>(line.c_str()), " ");
+        char *token_id  = strtok(nullptr, " "); // Continues previous str invocation
+        token2id[token] = std::stoi(token_id);
+    }
+    fstream_vocab.close();
+
+    return token2id;
+}
+
+/** Find longest matching string in vocabulary list and convert it into vector
+ *  
+ * @note left    right
+ *         0 1 2 3 4  
+ * 
+ * @param[in] tokens_vec    Input text seperated into tokens stored in a vector
+ * @param[in] token2id      Token to id vocabulary map
+ * @param[in,out] text_ids  Vector stroing converted text id
+*/
+template<typename T>
+void find_longest_matching(std::vector<std::basic_string<T>> &tokens_vec,
+                           std::map<std::basic_string<T>,int> &token2id,
+                           std::vector<unsigned int> &text_ids)
+{
+    unsigned int token_len;
+    unsigned int left,right;
+    std::basic_string<T> token_buffer;
+   for(const auto &token : tokens_vec)
+    {
+        token_buffer = token;
+        token_len = token.size();
+        left = 0;
+    loop:
+        while (left < token_len)
+        {
+            right = token_len;
+            while (right > left)
+            {
+                auto it = token2id.find(token_buffer.substr(left, right - left));
+                if (it != token2id.end())
+                {
+                    text_ids.push_back(it->second);
+                    left = right;
+                    token_buffer = "##" + token_buffer.substr(left, token_len);
+                    goto loop;
+                }
+                right--;
+            }
+            ARM_COMPUTE_ERROR_ON_MSG(right == left, token_buffer.append(" unkown in vocabulary list"));
+            left++;
+        }
+    }
+}
+
 } // namespace utils
 } // namespace arm_compute
 #endif /* __UTILS_UTILS_H__*/

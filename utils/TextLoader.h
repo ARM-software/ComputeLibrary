@@ -144,7 +144,7 @@ public:
      * @param[in,out] text Text tensor to fill (Must be allocated, and of matching dimensions with the opened text file).
      */
     template <typename T>
-    void fill_token(T &text)
+    void fill_token(T &text, const std::string &vocabname)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(text.info()->dimension(0) != _length );
@@ -155,6 +155,45 @@ public:
         /* read input from text data feeder */
         try
         {
+            // Readin text file
+            std::basic_string<char> buffer;
+            for(int i=0; i<_length; i++)
+            {
+                buffer+=i;
+            }
+
+            const char start_token[]        = u8"[CLS]";
+            const char end_token[]          = u8"[SEP]";
+
+            /** Sepreate into tokens and look up vocab list */
+            std::map<std::basic_string<char>,int> token2id = utils::get_token2id(vocabname);
+            std::vector<unsigned int> text_ids;
+            std::vector<std::basic_string<char>> tokens_vec;
+
+            /* Split the text into words */
+            std::basic_string<char> pat = R"([[:punct:]]|[[:alpha:]]+|[[:digit:]]+)";
+            std::regex re(pat);
+            std::smatch m;
+
+            while (std::regex_search(buffer, m, re))
+            {
+                for (std::basic_string<char> x : m)
+                {
+                    tokens_vec.push_back(x);
+                }
+                buffer = m.suffix();
+            }
+
+            // [CLS]
+            text_ids.push_back(token2id[start_token]);
+            
+            // Input content
+            utils::find_longest_matching<char>(tokens_vec, token2id, text_ids);
+
+            // [SEP]
+            text_ids.push_back(token2id[end_token]);
+
+
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
             Iterator out(&text,window);
@@ -203,8 +242,6 @@ public:
             _fs.open(filename, std::ios::in | std::ios::binary);
 
             std::tie(_length)  = parse_txt_header(_fs);
-
-        std::cout << "token loader "<< _length << std::endl;
 
             _feeder = std::make_unique<FileTextFeeder>(_fs);
         }
