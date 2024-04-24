@@ -201,7 +201,7 @@ public:
             std::cout << "tensor.info()->tensor_shape().z()"  << tensor.info()->tensor_shape().z() << std::endl;
             Window window;
             window.set(Window::DimX, Window::Dimension(0,_length,1));
-            Iterator out(&text,window);
+            Iterator out(&tensor,window);
             execute_window_loop(
                 window,
                 [&](const Coordinates &)
