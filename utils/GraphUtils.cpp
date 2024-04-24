@@ -521,6 +521,32 @@ bool TextAccessor::access_tensor(ITensor &tensor)
     return _already_loaded;
 }
 
+TokenAccessor::TokenAccessor(std::string filename, std::string vocabname, std::unique_ptr<IPreprocessor> preprocessor)
+    : _already_loaded(false), _filename(std::move(filename)), _vocabname(std::move(vocabname)), _preprocessor(std::move(preprocessor))
+{
+}
+
+bool TokenAccessor::access_tensor(ITensor &tensor)
+{
+    if (!_already_loaded)
+    {
+        auto textloader = utils::TextLoaderFactory::create(_filename);
+        ARM_COMPUTE_EXIT_ON_MSG(textloader == nullptr, "Unsupported Text type");
+
+        // Open a text feeder from file (ifstream)
+        textloader->open(_filename);
+        
+        // Fill tensor with text
+        textloader->fill_token(tensor);
+
+        // Preprocess tensor
+        _preprocessor->preprocess(tensor);
+    }
+
+    _already_loaded = !_already_loaded;
+    return _already_loaded;
+}
+
 ValidationInputAccessor::ValidationInputAccessor(const std::string             &image_list,
                                                  std::string                    images_path,
                                                  std::unique_ptr<IPreprocessor> preprocessor,
