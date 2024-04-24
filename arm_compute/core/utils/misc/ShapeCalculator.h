@@ -304,6 +304,45 @@ compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 
     return shape_interleaved_a;
 }
 
+/** Calculate the interleaved shape of an input tensor valid region
+ *
+ * @param[in] a                         Input tensor info
+ * @param[in] mult_interleave4x4_height (Optional) Interleave4x4 height
+ * @param[in] reinterpret_input_as_3d   (Optional)  Set to true if the input need to be interpreted as 3d
+ *
+ * @return the calculated shape
+ */
+inline TensorShape
+compute_interleaved_valid_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false)
+{
+    // The interleaved output matrix will have the following shape: [ a_height * W, ceil(a_width / W) ] where W = 4 * mult_interleave4x4_height
+    ARM_COMPUTE_ERROR_ON(mult_interleave4x4_height < 1);
+    const int   interleave_width = 4 * mult_interleave4x4_height;
+    TensorShape shape_interleaved_a{a.valid_region().shape};
+    shape_interleaved_a.set(0, a.dimension(0) * interleave_width);
+    if (reinterpret_input_as_3d)
+    {
+        const int M      = a.dimension(1) * a.dimension(2);
+        const int height = std::ceil(M / static_cast<float>(interleave_width));
+        shape_interleaved_a.set(1, height);
+
+        // When the data format is NHWC and the shapes are Nx1x1
+        // the tensor shape num_dimensions is automatically set to 1 instead of 3.
+        // To avoid failures by removing a dimension that doesn't exist
+        // check if the number of dimensions is greater than 2.
+        if (shape_interleaved_a.num_dimensions() > 2)
+        {
+            shape_interleaved_a.remove_dimension(2);
+        }
+    }
+    else
+    {
+        shape_interleaved_a.set(1, std::ceil(a.dimension(1) / static_cast<float>(interleave_width)));
+    }
+
+    return shape_interleaved_a;
+}
+
 /** Calculate the transposed 1xW shape
  *
  * @param[in] b Input tensor info

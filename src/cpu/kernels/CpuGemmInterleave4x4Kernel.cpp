@@ -125,6 +125,10 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     
     Iterator in(src, src->info()->valid_strides_in_bytes(), win);
     for(auto i : src->info()->valid_strides_in_bytes())std::cout << "src valid stride " << i << std::endl;
+    TensorShape shape = compute_interleaved_valid_shape(*dst->info());
+    std::cout << "dst valid shape x " << shape.x() << std::endl;
+    std::cout << "dst valid shape y " << shape.y() << std::endl;
+    std::cout << "dst valid shape z " << shape.z() << std::endl;
     Iterator out(dst, win_out);
     for(auto i : dst->info()->strides_in_bytes())std::cout << "dst stride " << i << std::endl;
 
