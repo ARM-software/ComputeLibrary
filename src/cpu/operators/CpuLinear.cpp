@@ -123,6 +123,13 @@ void CpuLinear::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
 
+    std::cout <<"a x: " << a->info()->tensor_shape().x() << std::endl;
+    std::cout <<"a y: " << a->info()->tensor_shape().y() << std::endl;
+    std::cout <<"a z: " << a->info()->tensor_shape().z() << std::endl;
+
+    std::cout <<"b x: " << b->info()->tensor_shape().x() << std::endl;
+    std::cout <<"b y: " << b->info()->tensor_shape().y() << std::endl;
+    std::cout <<"b z: " << b->info()->tensor_shape().z() << std::endl;
     if (_run_interleave_transpose)
     {
         // Run interleave kernel
@@ -147,13 +154,6 @@ void CpuLinear::run(ITensorPack &tensors)
     }
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
-    std::cout <<"a x: " << interleaved_a.get()->info()->tensor_shape().x() << std::endl;
-    std::cout <<"a y: " << interleaved_a.get()->info()->tensor_shape().y() << std::endl;
-    std::cout <<"a z: " << interleaved_a.get()->info()->tensor_shape().z() << std::endl;
-
-    std::cout <<"b x: " << b_to_use->info()->tensor_shape().x() << std::endl;
-    std::cout <<"b y: " << b_to_use->info()->tensor_shape().y() << std::endl;
-    std::cout <<"b z: " << b_to_use->info()->tensor_shape().z() << std::endl;
 
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
