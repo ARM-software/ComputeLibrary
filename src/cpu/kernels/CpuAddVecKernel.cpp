@@ -117,7 +117,7 @@ size_t CpuAddVecKernel::get_mws(const CPUInfo &platform, size_t thread_count) co
     ARM_COMPUTE_UNUSED(thread_count);
 
 #if defined(ENABLE_FP32_KERNELS)
-    if (this->_run_method == &add_fp32_neon)
+    if (this->_run_method == &add_vec_fp32_neon)
     {
         size_t mws = ICPPKernel::default_mws;
         if (platform.get_cpu_model() == CPUModel::N1)
