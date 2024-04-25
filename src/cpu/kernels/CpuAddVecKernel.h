@@ -10,7 +10,7 @@ namespace cpu
 {
 namespace kernels
 {
-/** Interface for the kernel to perform addition between two tensors */
+/** Interface for the kernel to add vector to certaine dimension of a tensor */
 class CpuAddVecKernel : public ICpuKernel<CpuAddVecKernel>
 {
 private:
@@ -41,7 +41,7 @@ public:
      *   - (QSYMM16,QSYMM16) -> QSYMM16
      *
      * @param[in]  src0             First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in]  src1             Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  src1             Second input tensor info, should be a vector. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
      * @param[in]  src0_target_dim  Target dimension to be add for tensor src0.
      * @param[in]  src1_target_dim  Target dimension to be add for tensor src1.
      * @param[out] dst              The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.

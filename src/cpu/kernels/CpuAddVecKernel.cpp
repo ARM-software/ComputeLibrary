@@ -71,16 +71,13 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     _name       = std::string("CpuAddVecKernel").append("/").append(uk->name);
 
     // Auto initialize dst if not initialized
-    const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
 
-    std::cout <<"out_shape.x() " << out_shape.x() << std::endl;
-    std::cout <<"out_shape.y() " << out_shape.y() << std::endl;
-    std::cout <<"out_shape.z() " << out_shape.z() << std::endl;
+    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(src0->tensor_shape()));
 
-    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(out_shape));
+    std::cout <<"src0->tensor_shape().x() " << dst->tensor_shape().x() << std::endl;
+    std::cout <<"src0->tensor_shape().y() " << dst->tensor_shape().y() << std::endl;
+    std::cout <<"src0->tensor_shape().z() " << dst->tensor_shape().z() << std::endl;
 
-    // Explicitly set the tensor shape to preserve dimensions
-    set_shape_if_empty(*dst, out_shape);
 
     // Configure kernel window
     Window win;
@@ -88,6 +85,7 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     ICpuKernel::configure(win);
     std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.x().end() " << win.x().end() << std::endl;
     std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.y().end() " << win.y().end() << std::endl;
+    std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.z().end() " << win.z().end() << std::endl;
 }
 
 Status
