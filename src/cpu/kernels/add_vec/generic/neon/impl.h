@@ -25,6 +25,7 @@ void add_vec_same_neon(
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
     Window input2_win;
     input2_win.use_tensor_dimensions(src1->info()->tensor_shape());
+    input2_win.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
     std::cout << "input1_win x" << input1_win.x().end() << std::endl;
     std::cout << "input1_win y" << input1_win.y().end() << std::endl;
