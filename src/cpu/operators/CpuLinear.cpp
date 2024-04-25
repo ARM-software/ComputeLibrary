@@ -163,7 +163,8 @@ void CpuLinear::run(ITensorPack &tensors)
     // Run bias addition kernel
     if (_run_bias_addition)
     {
-        ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
+        ITensorPack pack{{ACL_SRC_1, c}, {ACL_DST, d}};
+        pack.add_const_tensor(ACL_SRC_0, temp_d.get());
         NEScheduler::get().schedule_op(_add_bias.get(), Window::DimY, _kernel->window(), pack);
     }
 
