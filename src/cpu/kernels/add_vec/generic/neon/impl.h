@@ -59,7 +59,7 @@ void add_vec_same_neon(
             const auto input2_ptr = reinterpret_cast<const ScalarType *>(input2.ptr());
             const auto output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
 
-            std::cout << *reinterpret_cast<const ScalarType *>(src0->ptr_to_element(Coordinates(0,0))) << std::endl;
+            std::cout << *reinterpret_cast<const ScalarType *>(src1->ptr_to_element(Coordinates(0,0))) << std::endl;
             std::cout << *input1_ptr << std::endl;
             // Compute S elements per iteration
             int x = window_start_target0;
