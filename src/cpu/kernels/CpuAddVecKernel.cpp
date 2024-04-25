@@ -48,6 +48,7 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
 void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, size_t src0_target_dim, size_t src1_target_dim, ConvertPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_UNUSED(src1);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
     
     _src0_target_dim = src0_target_dim;
