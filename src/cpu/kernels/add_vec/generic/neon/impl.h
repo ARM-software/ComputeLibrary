@@ -45,7 +45,7 @@ void add_vec_same_neon(
 
     // Clear X Dimension on execution window as we handle manually
     input1_win.set(src0_target_dim, Window::Dimension(0, 1, 1));
-    input2_win.set(src1_target_dim, Window::Dimension(0, 0, 1));
+    input2_win.set(src1_target_dim, Window::Dimension(0, 0, 0));
 
     Iterator input1(src0, input1_win);
     Iterator input2(src1, input2_win);
