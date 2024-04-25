@@ -28,13 +28,21 @@ void add_vec_same_neon(
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
     Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
+    std::cout << "input1_win x" << input1_win.x().end() << std::endl;
+    std::cout << "input1_win y" << input1_win.y().end() << std::endl;
+    std::cout << "input1_win z" << input1_win.z().end() << std::endl;
+
+    std::cout << "input2_win x" << input2_win.x().end() << std::endl;
+    std::cout << "input2_win y" << input2_win.y().end() << std::endl;
+    std::cout << "input2_win z" << input2_win.z().end() << std::endl;
+
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    win.set(src0_target_dim, Window::Dimension(0, 1, 1));
 
-    constexpr int window_step_x         = 16 / sizeof(ScalarType);
-    const auto    window_start_x        = static_cast<int>(window.x().start());
-    const auto    window_end_x          = static_cast<int>(window.x().end());
+    constexpr int window_step_target0         = 16 / sizeof(ScalarType);
+    const auto    window_start_target0        = static_cast<int>(window[src0_target_dim].start());
+    const auto    window_end_target0          = static_cast<int>(window[src0_target_dim].end());
     const bool    is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
 
     if (is_broadcast_across_x)
@@ -103,8 +111,8 @@ void add_vec_same_neon(
                 const auto output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
 
                 // Compute S elements per iteration
-                int x = window_start_x;
-                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                int x = window_start_target0;
+                for (; x <= (window_end_target0 - window_step_target0); x += window_step_target0)
                 {
                     const auto val1 = wrapper::vloadq(input1_ptr + x);
                     const auto val2 = wrapper::vloadq(input2_ptr + x);
@@ -114,7 +122,7 @@ void add_vec_same_neon(
                 }
 
                 // Compute left-over elements
-                for (; x < window_end_x; ++x)
+                for (; x < window_end_target0; ++x)
                 {
                     const auto val1 = *(input1_ptr + x);
                     const auto val2 = *(input2_ptr + x);
