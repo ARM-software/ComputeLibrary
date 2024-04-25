@@ -70,6 +70,8 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     _run_method = uk->ukernel;
     _name       = std::string("CpuAddVecKernel").append("/").append(uk->name);
 
+    std::cout << uk->name << std::endl;
+
     // Auto initialize dst if not initialized
     const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
 
