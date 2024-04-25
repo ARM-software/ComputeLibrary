@@ -71,10 +71,6 @@ void CpuLinear::configure(const ITensorInfo *a,
             const int k = a->dimension(1);
             const int n = b_to_use->dimension(1);
 
-            std::cout <<"m " << m << std::endl;
-            std::cout <<"n " << n << std::endl;
-            std::cout <<"k " << k << std::endl;
-
             // Configure matrix multiplication kernel
             _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, _run_interleave_transpose,
                                   GEMMReshapeInfo(m, n, k));
