@@ -21,9 +21,6 @@ void add_vec_same_neon(
     std::cout << " src0_target_dim " << src0_target_dim << std::endl;
     std::cout << " src1_target_dim " << src1_target_dim << std::endl;
 
-    /** SIMD vector tag type. */
-    using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, wrapper::traits::BitWidth::W128>;
-
     // Create input windows
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
     Window input2_win;
