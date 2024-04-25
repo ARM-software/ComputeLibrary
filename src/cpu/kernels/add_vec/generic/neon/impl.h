@@ -26,7 +26,8 @@ void add_vec_same_neon(
 
     // Create input windows
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
-    Window input2_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
+    Window input2_win;
+    input2_win.use_tensor_dimensions(src1->info()->tensor_shape());
 
     std::cout << "input1_win x" << input1_win.x().end() << std::endl;
     std::cout << "input1_win y" << input1_win.y().end() << std::endl;
@@ -43,95 +44,44 @@ void add_vec_same_neon(
     constexpr int window_step_target0         = 16 / sizeof(ScalarType);
     const auto    window_start_target0        = static_cast<int>(window[src0_target_dim].start());
     const auto    window_end_target0          = static_cast<int>(window[src0_target_dim].end());
-    const bool    is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
 
-    if (is_broadcast_across_x)
-    {
-        const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
-        Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
-        Window         non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
-        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? src1 : src0;
-        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? src1 : src0;
+    // Clear X Dimension on execution window as we handle manually
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-        // Clear X Dimension on execution window as we handle manually
-        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Iterator input1(src0, input1_win);
+    Iterator input2(src1, input2_win);
+    Iterator output(dst, win);
 
-        Iterator broadcast_input(broadcast_tensor, broadcast_win);
-        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
-        Iterator output(dst, win);
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
+        {
+            const auto input1_ptr = reinterpret_cast<const ScalarType *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const ScalarType *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
 
-        execute_window_loop(
-            win,
-            [&](const Coordinates &)
+            // Compute S elements per iteration
+            int x = window_start_target0;
+            for (; x <= (window_end_target0 - window_step_target0); x += window_step_target0)
             {
-                const auto non_broadcast_input_ptr = reinterpret_cast<const ScalarType *>(non_broadcast_input.ptr());
-                const auto output_ptr              = reinterpret_cast<ScalarType *>(output.ptr());
+                const auto val1 = wrapper::vloadq(input1_ptr + x);
+                const auto val2 = wrapper::vloadq(input2_ptr + x);
+                const auto res =
+                    (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
+                wrapper::vstore(output_ptr + x, res);
+            }
 
-                const ScalarType broadcast_value     = *reinterpret_cast<const ScalarType *>(broadcast_input.ptr());
-                const auto       broadcast_value_vec = wrapper::vdup_n(broadcast_value, ExactTagType{});
-
-                // Compute S elements per iteration
-                int x = window_start_target0;
-                for (; x <= (window_end_target0 - window_step_target0); x += window_step_target0)
-                {
-                    const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
-                    const auto res             = (policy == ConvertPolicy::SATURATE)
-                                                     ? wrapper::vqadd(broadcast_value_vec, non_broadcast_v)
-                                                     : wrapper::vadd(broadcast_value_vec, non_broadcast_v);
-                    wrapper::vstore(output_ptr + x, res);
-                }
-
-                // Compute left-over elements
-                for (; x < window_end_target0; ++x)
-                {
-                    const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
-                    *(output_ptr + x)          = (policy == ConvertPolicy::SATURATE)
-                                                     ? wrapper::add_sat(broadcast_value, non_broadcast_v)
-                                                     : broadcast_value + non_broadcast_v;
-                }
-            },
-            broadcast_input, non_broadcast_input, output);
-    }
-    else
-    {
-        // Clear X Dimension on execution window as we handle manually
-        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-        Iterator input1(src0, input1_win);
-        Iterator input2(src1, input2_win);
-        Iterator output(dst, win);
-
-        execute_window_loop(
-            win,
-            [&](const Coordinates &)
+            // Compute left-over elements
+            for (; x < window_end_target0; ++x)
             {
-                const auto input1_ptr = reinterpret_cast<const ScalarType *>(input1.ptr());
-                const auto input2_ptr = reinterpret_cast<const ScalarType *>(input2.ptr());
-                const auto output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
-
-                // Compute S elements per iteration
-                int x = window_start_target0;
-                for (; x <= (window_end_target0 - window_step_target0); x += window_step_target0)
-                {
-                    const auto val1 = wrapper::vloadq(input1_ptr + x);
-                    const auto val2 = wrapper::vloadq(input2_ptr + x);
-                    const auto res =
-                        (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
-                    wrapper::vstore(output_ptr + x, res);
-                }
-
-                // Compute left-over elements
-                for (; x < window_end_target0; ++x)
-                {
-                    const auto val1 = *(input1_ptr + x);
-                    const auto val2 = *(input2_ptr + x);
-                    *(output_ptr + x) =
-                        (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
-                }
-            },
-            input1, input2, output);
-    }
+                const auto val1 = *(input1_ptr + x);
+                const auto val2 = *(input2_ptr + x);
+                *(output_ptr + x) =
+                    (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
+            }
+        },
+        input1, input2, output);
 }
 
 } // namespace cpu
