@@ -31,8 +31,8 @@ namespace arm_compute
 namespace cpu
 {
 #define DECLARE_ADD_VEC_KERNEL(func_name)                                                                   \
-    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, \
-                   const Window &window)
+    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, size_t src0_target_dim, size_t src1_target_dim, \
+                   const ConvertPolicy &policy, const Window &window)
 
 DECLARE_ADD_VEC_KERNEL(add_vec_fp32_neon);
 

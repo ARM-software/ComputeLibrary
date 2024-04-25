@@ -79,7 +79,7 @@ void CpuLinear::configure(const ITensorInfo *a,
         if (_run_bias_addition)
         {
             _add_bias = std::make_unique<cpu::kernels::CpuAddVecKernel>();
-            _add_bias->configure(gemm_output_to_use, c, d, ConvertPolicy::SATURATE);
+            _add_bias->configure(gemm_output_to_use, c, d, Window::DimY, Window::DimX, ConvertPolicy::SATURATE);
             _aux_mem[TempResult] =
                 experimental::MemoryInfo(offset_int_vec(TempResult), experimental::MemoryLifetime::Persistent, _tmp_d.total_size());
         }

@@ -45,7 +45,7 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
 }
 } // namespace
 
-void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy)
+void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, size_t src0_target_dim, size_t src1_target_dim, ConvertPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
@@ -57,6 +57,9 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     std::cout <<"src1->tensor_shape().x() " << src1->tensor_shape().x() << std::endl;
     std::cout <<"src1->tensor_shape().y() " << src1->tensor_shape().y() << std::endl;
     std::cout <<"src1->tensor_shape().z() " << src1->tensor_shape().z() << std::endl;
+    
+    _src0_target_dim = src0_target_dim;
+    _src1_target_dim = src1_target_dim;
 
     const auto uk                 = CpuAddVecKernel::get_implementation<CpuAddVecKernelDataTypeISASelectorData>(
         CpuAddVecKernelDataTypeISASelectorData{src0->data_type(), CPUInfo::get().get_isa()});
@@ -85,9 +88,11 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
 }
 
 Status
-CpuAddVecKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy)
+CpuAddVecKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, size_t src0_target_dim, size_t src1_target_dim, ConvertPolicy policy)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_UNUSED(src0_target_dim);
+    ARM_COMPUTE_UNUSED(src1_target_dim);
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src0, *src1, *dst, policy));
 
@@ -107,7 +112,7 @@ void CpuAddVecKernel::run_op(ITensorPack &tensors, const Window &window, const T
     const ITensor *src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
-    _run_method(src0, src1, dst, _policy, window);
+    _run_method(src0, src1, dst, _src0_target_dim, _src1_target_dim, _policy, window);
 }
 
 const char *CpuAddVecKernel::name() const

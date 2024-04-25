@@ -15,7 +15,7 @@ class CpuAddVecKernel : public ICpuKernel<CpuAddVecKernel>
 {
 private:
     using AddVecKernelPtr = std::add_pointer<void(
-        const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+        const ITensor *, const ITensor *, ITensor *, size_t , size_t, const ConvertPolicy &, const Window &)>::type;
 
 public:
     struct AddKernel
@@ -40,12 +40,14 @@ public:
      *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
      *   - (QSYMM16,QSYMM16) -> QSYMM16
      *
-     * @param[in]  src0   First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in]  src1   Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[out] dst    The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
-     * @param[in]  policy Overflow policy.
+     * @param[in]  src0             First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  src1             Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  src0_target_dim  Target dimension to be add for tensor src0.
+     * @param[in]  src1_target_dim  Target dimension to be add for tensor src1.
+     * @param[out] dst              The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
+     * @param[in]  policy           Overflow policy.
      */
-    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy);
+    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, size_t src0_target_dim, size_t src1_target_dim, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuAddVecKernel::configure()
@@ -53,7 +55,7 @@ public:
      * @return a status
      */
     static Status
-    validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy);
+    validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, size_t src0_target_dim, size_t src1_target_dim, ConvertPolicy policy);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -76,6 +78,8 @@ public:
     }
 
 private:
+    size_t          _src0_target_dim{Window::DimY};
+    size_t          _src1_target_dim{Window::DimY};
     ConvertPolicy   _policy{};
     AddVecKernelPtr _run_method{nullptr};
     std::string     _name{};
