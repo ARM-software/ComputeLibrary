@@ -71,8 +71,8 @@ void add_vec_same_neon(
                 const auto       broadcast_value_vec = wrapper::vdup_n(broadcast_value, ExactTagType{});
 
                 // Compute S elements per iteration
-                int x = window_start_x;
-                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                int x = window_start_target0;
+                for (; x <= (window_end_target0 - window_step_target0); x += window_step_target0)
                 {
                     const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
                     const auto res             = (policy == ConvertPolicy::SATURATE)
@@ -82,7 +82,7 @@ void add_vec_same_neon(
                 }
 
                 // Compute left-over elements
-                for (; x < window_end_x; ++x)
+                for (; x < window_end_target0; ++x)
                 {
                     const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
                     *(output_ptr + x)          = (policy == ConvertPolicy::SATURATE)
