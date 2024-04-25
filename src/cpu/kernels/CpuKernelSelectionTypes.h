@@ -118,6 +118,12 @@ struct VectorizeKernelDataTypeISASelectorData
     cpuinfo::CpuIsaInfo isa;
 };
 
+struct CpuAddVecKernelDataTypeISASelectorData
+{
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
+};
+
 // Selector pointer types
 using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
 using DataTypeDataLayoutSelectorPtr     = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
@@ -134,6 +140,8 @@ using VectorizeKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const VectorizeKernelDataTypeISASelectorData &data)>::type;
 using CpuAddKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const CpuAddKernelDataTypeISASelectorData &data)>::type;
+using CpuAddVecKernelDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const CpuAddVecKernelDataTypeISASelectorData &data)>::type;
 using ScaleKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const ScaleKernelDataTypeISASelectorData &data)>::type;
 using SoftmaxKernelDataTypeISASelectorDataPtr =

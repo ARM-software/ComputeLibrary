@@ -2344,13 +2344,20 @@
           }
         }
       },
+
+
       "Linear": {
         "files": {
           "common": [
+            "src/cpu/kernels/CpuAddVecKernel.cpp",
             "src/cpu/kernels/CpuLinearKernel.cpp",
             "src/cpu/operators/CpuLinear.cpp",
             "src/runtime/NEON/functions/NELinearLayer.cpp"
-          ]
+          ],
+          "neon": {
+            "common": ["src/cpu/kernels/add_vec/generic/neon/impl.cpp"],
+            "fp32":["src/cpu/kernels/add_vec/generic/neon/fp32.cpp"]
+          }
         }
       },
       "SimpleForward": {
