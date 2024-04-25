@@ -81,7 +81,7 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
 
     // Configure kernel window
     Window win;
-    win.use_tensor_dimensions(src0);
+    win.use_tensor_dimensions(src0->tensor_shape());
     ICpuKernel::configure(win);
     std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.x().end() " << win.x().end() << std::endl;
     std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.y().end() " << win.y().end() << std::endl;
