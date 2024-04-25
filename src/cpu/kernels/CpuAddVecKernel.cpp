@@ -29,7 +29,7 @@ namespace kernels
 namespace
 {
 static const std::vector<CpuAddVecKernel::AddKernel> available_kernels = {
-    {"neon_fp32_add", [](const CpuAddVecKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
+    {"neon_fp32_add_vec", [](const CpuAddVecKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
      REGISTER_FP32_NEON(arm_compute::cpu::add_vec_fp32_neon)},
     };
 
@@ -70,10 +70,12 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     _run_method = uk->ukernel;
     _name       = std::string("CpuAddVecKernel").append("/").append(uk->name);
 
-    std::cout << uk->name << std::endl;
-
     // Auto initialize dst if not initialized
     const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
+
+    std::cout <<"out_shape.x() " << out_shape.x() << std::endl;
+    std::cout <<"out_shape.y() " << out_shape.y() << std::endl;
+    std::cout <<"out_shape.z() " << out_shape.z() << std::endl;
 
     auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(out_shape));
 
