@@ -67,9 +67,9 @@ void CpuLinear::configure(const ITensorInfo *a,
                 experimental::MemoryInfo(offset_int_vec(Transposed1xWRHS), experimental::MemoryLifetime::Persistent, _tmp_b.total_size());
             
             // Use a and b here instead of _tmp_a and _tmp_b because CpuGemmMatrixMultiplyKernel requires the original m,n,k in case of interleaved a and transposed1xw b
-            const int n = a->dimension(0);
+            const int m = a->dimension(0);
             const int k = a->dimension(1);
-            const int m = b_to_use->dimension(1);
+            const int n = b_to_use->dimension(1);
 
             std::cout <<"m " << m << std::endl;
             std::cout <<"n " << n << std::endl;
@@ -167,12 +167,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout <<"mm y: " << temp_d.get()->info()->tensor_shape().y() << std::endl;
     std::cout <<"mm z: " << temp_d.get()->info()->tensor_shape().z() << std::endl;
 
-    // Run bias addition kernel
-    if (_run_bias_addition)
-    {
-        ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
-        _add_bias->run(pack);
-    }
+   
 
     std::cout <<"d->info()->tensor_shape().x() " << d->info()->tensor_shape().x() << std::endl;
     std::cout <<"d->info()->tensor_shape().y() " << d->info()->tensor_shape().y() << std::endl;
