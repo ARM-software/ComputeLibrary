@@ -71,10 +71,6 @@ void CpuLinear::configure(const ITensorInfo *a,
             const int k = a->dimension(1);
             const int n = b_to_use->dimension(1);
 
-            std::cout <<"m " << m << std::endl;
-            std::cout <<"n " << n << std::endl;
-            std::cout <<"k " << k << std::endl;
-
             // Configure matrix multiplication kernel
             _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, _run_interleave_transpose,
                                   GEMMReshapeInfo(m, n, k));
@@ -127,13 +123,6 @@ void CpuLinear::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
 
-    std::cout <<"a x: " << a->info()->tensor_shape().x() << std::endl;
-    std::cout <<"a y: " << a->info()->tensor_shape().y() << std::endl;
-    std::cout <<"a z: " << a->info()->tensor_shape().z() << std::endl;
-
-    std::cout <<"b x: " << b->info()->tensor_shape().x() << std::endl;
-    std::cout <<"b y: " << b->info()->tensor_shape().y() << std::endl;
-    std::cout <<"b z: " << b->info()->tensor_shape().z() << std::endl;
     if (_run_interleave_transpose)
     {
         // Run interleave kernel
@@ -167,15 +156,20 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout <<"mm y: " << temp_d.get()->info()->tensor_shape().y() << std::endl;
     std::cout <<"mm z: " << temp_d.get()->info()->tensor_shape().z() << std::endl;
 
-   
+    std::cout <<"c x: " << c->info()->tensor_shape().x() << std::endl;
+    std::cout <<"c y: " << c->info()->tensor_shape().y() << std::endl;
+    std::cout <<"c z: " << c->info()->tensor_shape().z() << std::endl;
+
+    // Run bias addition kernel
+    if (_run_bias_addition)
+    {
+        ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
+        _add_bias->run(pack);
+    }
 
     std::cout <<"d->info()->tensor_shape().x() " << d->info()->tensor_shape().x() << std::endl;
     std::cout <<"d->info()->tensor_shape().y() " << d->info()->tensor_shape().y() << std::endl;
     std::cout <<"d->info()->tensor_shape().z() " << d->info()->tensor_shape().z() << std::endl;
-
-    std::cout <<"c->info()->tensor_shape().x() " << c->info()->tensor_shape().x() << std::endl;
-    std::cout <<"c->info()->tensor_shape().y() " << c->info()->tensor_shape().y() << std::endl;
-    std::cout <<"c->info()->tensor_shape().z() " << c->info()->tensor_shape().z() << std::endl;
 
 }
 
