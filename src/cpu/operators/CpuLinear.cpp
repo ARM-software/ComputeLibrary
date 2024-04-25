@@ -58,7 +58,7 @@ void CpuLinear::configure(const ITensorInfo *a,
             _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
             _interleave_kernel->configure(a, &_tmp_a);
             _aux_mem[InterleavedLHS] =
-                experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Temporary, _tmp_a.total_size());
+                experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Persistent, _tmp_a.total_size());
             
             // Configure rhs transpose1xw kernel
             _transpose1xW_b_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
