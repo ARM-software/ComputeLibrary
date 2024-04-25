@@ -63,13 +63,17 @@ void add_vec_same_neon(
             int x = window_start_target0;
             for (; x <= (window_end_target0 - window_step_target0); x += window_step_target0)
             {
+                for(int j =0; j <window_step_target0; j++)
+                {
+                    std::cout << *(input1_ptr + x + j) << " ";
+                }
                 const auto val1 = wrapper::vloadq(input1_ptr + x);
                 const auto val2 = wrapper::vloadq(input2_ptr + x);
                 const auto res =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                 wrapper::vstore(output_ptr + x, res);
             }
-
+            std::cout << std::endl;
             // Compute left-over elements
             for (; x < window_end_target0; ++x)
             {
