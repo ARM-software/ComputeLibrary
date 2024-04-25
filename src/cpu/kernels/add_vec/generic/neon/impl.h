@@ -78,6 +78,7 @@ void add_vec_same_neon(
                 *(output_ptr + x) =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
             }
+            std::cout << x << std::endl;
         },
         input1, input2, output);
 }
