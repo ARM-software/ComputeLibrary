@@ -104,7 +104,7 @@ void CpuLinear::run(ITensorPack &tensors)
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto a = tensors.get_const_tensor(ACL_SRC_0);
     auto b = tensors.get_const_tensor(ACL_SRC_1);
-    //auto c = tensors.get_const_tensor(ACL_SRC_2);
+    auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
@@ -143,6 +143,14 @@ void CpuLinear::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
+
+    std::cout <<"d->info()->tensor_shape().x() " << d->info()->tensor_shape().x() << std::endl;
+    std::cout <<"d->info()->tensor_shape().y() " << d->info()->tensor_shape().y() << std::endl;
+    std::cout <<"d->info()->tensor_shape().z() " << d->info()->tensor_shape().z() << std::endl;
+
+    std::cout <<"c->info()->tensor_shape().x() " << c->info()->tensor_shape().x() << std::endl;
+    std::cout <<"c->info()->tensor_shape().y() " << c->info()->tensor_shape().y() << std::endl;
+    std::cout <<"c->info()->tensor_shape().z() " << c->info()->tensor_shape().z() << std::endl;
 
 }
 
