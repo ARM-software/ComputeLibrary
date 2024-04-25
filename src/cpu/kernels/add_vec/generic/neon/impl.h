@@ -18,6 +18,9 @@ void add_vec_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, size_t src0_target_dim, size_t src1_target_dim, const ConvertPolicy &policy, const Window &window)
 {
     std::cout << "Add veccccccccccccccccccccccccccccccccccccccc  " << std::endl;
+    std::cout << " src0_target_dim " << src0_target_dim << std::endl;
+    std::cout << " src1_target_dim " << src1_target_dim << std::endl;
+
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, wrapper::traits::BitWidth::W128>;
 
