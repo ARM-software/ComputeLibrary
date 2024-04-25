@@ -14,7 +14,7 @@ namespace arm_compute
 namespace cpu
 {
 template <typename ScalarType>
-void add_same_neon(
+void add_vec_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     std::cout << "Add veccccccccccccccccccccccccccccccccccccccc  " << std::endl;
