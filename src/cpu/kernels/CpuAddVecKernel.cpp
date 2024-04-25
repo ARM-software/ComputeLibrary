@@ -84,8 +84,7 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
 
     // Configure kernel window
     Window win;
-    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src0, *src1);
-
+    win.use_tensor_dimensions(src0);
     ICpuKernel::configure(win);
     std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.x().end() " << win.x().end() << std::endl;
     std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.y().end() " << win.y().end() << std::endl;
