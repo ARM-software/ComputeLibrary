@@ -170,6 +170,8 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src0, *src1);
 
     ICpuKernel::configure(win);
+    std::cout << "win.x().end() " << win.x().end() << std::endl;
+    std::cout << "win.y().end() " << win.y().end() << std::endl;
 }
 
 Status
