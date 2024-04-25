@@ -86,7 +86,6 @@ CpuAddVecKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, cons
 
 void CpuAddVecKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
-
     std::cout << "CpuAddVecKernel::run_op 1" << std::endl; 
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
