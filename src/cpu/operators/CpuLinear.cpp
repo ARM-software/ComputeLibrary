@@ -75,6 +75,14 @@ void CpuLinear::configure(const ITensorInfo *a,
             _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, _run_interleave_transpose,
                                   GEMMReshapeInfo(m, n, k));
         }
+        
+        if (_run_bias_addition)
+        {
+            _add_bias = std::make_unique<cpu::CpuAdd>();
+            _add_bias->configure(gemm_output_to_use, c, d, ConvertPolicy::SATURATE);
+            _aux_mem[TempResult] =
+                experimental::MemoryInfo(offset_int_vec(TempResult), experimental::MemoryLifetime::Persistent, _tmp_d.total_size());
+        }
     }
 
     
@@ -144,6 +152,13 @@ void CpuLinear::run(ITensorPack &tensors)
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
 
+    // Run bias addition kernel
+    if (_run_bias_addition)
+    {
+        ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
+        _add_bias->run(pack);
+    }
+    
     std::cout <<"d->info()->tensor_shape().x() " << d->info()->tensor_shape().x() << std::endl;
     std::cout <<"d->info()->tensor_shape().y() " << d->info()->tensor_shape().y() << std::endl;
     std::cout <<"d->info()->tensor_shape().z() " << d->info()->tensor_shape().z() << std::endl;

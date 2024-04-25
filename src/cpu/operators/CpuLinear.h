@@ -8,6 +8,7 @@
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
+#include "src/cpu/operators/CpuAdd.h"
 
 namespace arm_compute
 {
@@ -78,6 +79,7 @@ private:
     std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel> _mm_kernel{nullptr};
     std::unique_ptr<kernels::CpuGemmInterleave4x4Kernel>  _interleave_kernel{nullptr};
     std::unique_ptr<kernels::CpuGemmTranspose1xWKernel>   _transpose1xW_b_kernel{nullptr};
+    std::unique_ptr<cpu::CpuAdd>                          _add_bias{nullptr};
 
     experimental::MemoryRequirements _aux_mem{Count};
 };
