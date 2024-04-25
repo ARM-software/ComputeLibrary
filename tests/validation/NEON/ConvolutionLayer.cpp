@@ -1357,6 +1357,27 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, NEGEMMConvolutionLayerQuantizedPerChannel
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+
+FIXTURE_DATA_TEST_CASE(MemoryStressLargeChannels, NEGEMMConvolutionLayerQuantizedPerChannelFixture<int8_t>,
+    framework::DatasetMode::ALL,
+        combine(
+            make("In", TensorShape(1U)),
+            make("Weights", TensorShape(1U, 1U, 1U, 17000U)),
+            make("Biases", TensorShape(17000U)),
+            make("Out", TensorShape(1U, 1U, 17000U)),
+            make("Info", PadStrideInfo(1, 1, 0, 0)),
+            make("Dilation", Size2D(1, 1)),
+            make("ReshapeWeights", { true }),
+            make("DataType", { DataType::QASYMM8_SIGNED }),
+            make("DataLayout", { DataLayout::NHWC }),
+            make("QuantizationInfo", QuantizationInfo(0.5f, 10)),
+            make("ActivationInfo", ActivationLayerInfo()),
+            make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
 TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 TEST_SUITE_END() // Quantized
 
