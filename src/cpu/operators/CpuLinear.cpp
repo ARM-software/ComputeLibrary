@@ -67,9 +67,9 @@ void CpuLinear::configure(const ITensorInfo *a,
                 experimental::MemoryInfo(offset_int_vec(Transposed1xWRHS), experimental::MemoryLifetime::Persistent, _tmp_b.total_size());
             
             // Use a and b here instead of _tmp_a and _tmp_b because CpuGemmMatrixMultiplyKernel requires the original m,n,k in case of interleaved a and transposed1xw b
-            const int m = a->dimension(0);
+            const int n = a->dimension(0);
             const int k = a->dimension(1);
-            const int n = b_to_use->dimension(1);
+            const int m = b_to_use->dimension(1);
 
             // Configure matrix multiplication kernel
             _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, _run_interleave_transpose,
