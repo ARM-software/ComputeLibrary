@@ -17,6 +17,7 @@ template <typename ScalarType>
 void add_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
+    std::cout << "Add veccccccccccccccccccccccccccccccccccccccc  " << std::endl;
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, wrapper::traits::BitWidth::W128>;
 
