@@ -108,11 +108,12 @@ void CpuAddVecKernel::run_op(ITensorPack &tensors, const Window &window, const T
     ARM_COMPUTE_ERROR_ON(tensors.empty());
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
+    std::cout << "CpuAddVecKernel::run_op 1" << std::endl; 
     const ITensor *src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     const ITensor *src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
 
-    std::cout << "CpuAddVecKernel::run_op " << std::endl; 
+    std::cout << "CpuAddVecKernel::run_op 2" << std::endl; 
     _run_method(src0, src1, dst, _src0_target_dim, _src1_target_dim, _policy, window);
 }
 
