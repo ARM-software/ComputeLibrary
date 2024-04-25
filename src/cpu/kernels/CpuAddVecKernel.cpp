@@ -49,14 +49,6 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
-
-    std::cout <<"src0->tensor_shape().x() " << src0->tensor_shape().x() << std::endl;
-    std::cout <<"src0->tensor_shape().y() " << src0->tensor_shape().y() << std::endl;
-    std::cout <<"src0->tensor_shape().z() " << src0->tensor_shape().z() << std::endl;
-
-    std::cout <<"src1->tensor_shape().x() " << src1->tensor_shape().x() << std::endl;
-    std::cout <<"src1->tensor_shape().y() " << src1->tensor_shape().y() << std::endl;
-    std::cout <<"src1->tensor_shape().z() " << src1->tensor_shape().z() << std::endl;
     
     _src0_target_dim = src0_target_dim;
     _src1_target_dim = src1_target_dim;
@@ -71,21 +63,12 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     _name       = std::string("CpuAddVecKernel").append("/").append(uk->name);
 
     // Auto initialize dst if not initialized
-
     auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(src0->tensor_shape()));
-
-    std::cout <<"src0->tensor_shape().x() " << dst->tensor_shape().x() << std::endl;
-    std::cout <<"src0->tensor_shape().y() " << dst->tensor_shape().y() << std::endl;
-    std::cout <<"src0->tensor_shape().z() " << dst->tensor_shape().z() << std::endl;
-
 
     // Configure kernel window
     Window win;
     win.use_tensor_dimensions(src0->tensor_shape());
     ICpuKernel::configure(win);
-    std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.x().end() " << win.x().end() << std::endl;
-    std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.y().end() " << win.y().end() << std::endl;
-    std::cout << "src/cpu/kernels/CpuAddVecKernel.cpp win.z().end() " << win.z().end() << std::endl;
 }
 
 Status
