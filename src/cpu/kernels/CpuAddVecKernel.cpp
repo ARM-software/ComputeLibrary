@@ -50,6 +50,14 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
 
+    std::cout <<"src0->tensor_shape().x() " << src0->tensor_shape().x() << std::endl;
+    std::cout <<"src0->tensor_shape().y() " << src0->tensor_shape().y() << std::endl;
+    std::cout <<"src0->tensor_shape().z() " << src0->tensor_shape().z() << std::endl;
+
+    std::cout <<"src1->tensor_shape().x() " << src1->tensor_shape().x() << std::endl;
+    std::cout <<"src1->tensor_shape().y() " << src1->tensor_shape().y() << std::endl;
+    std::cout <<"src1->tensor_shape().z() " << src1->tensor_shape().z() << std::endl;
+
     const auto uk                 = CpuAddVecKernel::get_implementation<CpuAddVecKernelDataTypeISASelectorData>(
         CpuAddVecKernelDataTypeISASelectorData{src0->data_type(), CPUInfo::get().get_isa()});
 
