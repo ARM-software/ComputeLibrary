@@ -472,15 +472,9 @@ template <typename TensorType, typename AccessorType, typename FunctionType, boo
 class GEMMLowpDequantizedMatrixMultiplyValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, bool accumulate)
     {
-        // Accumulation is supported for Int8/UInt8 only in aarch64
-        bool accumulate = true;
-        // Accumulation is not supported for Int8/UInt8 in aarch32
-#ifdef __arm__
-        accumulate = false;
-#endif //__arm__
-        bool dynamic_qinfo = false;
+        const bool dynamic_qinfo = false;
         const auto a_qinfo = QuantizationInfo(1.0f / 255, a_offset);
         const auto b_qinfo = QuantizationInfo(5.0f / 255, b_offset);
         TensorFillInfo finfo;
