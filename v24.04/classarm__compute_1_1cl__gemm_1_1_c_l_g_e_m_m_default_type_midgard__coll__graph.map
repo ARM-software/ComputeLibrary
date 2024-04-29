@@ -1,0 +1,4 @@
+<map id="CLGEMMDefaultTypeMidgard" name="CLGEMMDefaultTypeMidgard">
+<area shape="rect" id="node1" title="Midgard based OpenCL GEMMKernel selection." alt="" coords="5,80,216,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__gemm_1_1_i_c_l_g_e_m_m_kernel_selection.xhtml" title="Basic interface for the GEMM kernel selection." alt="" coords="18,5,203,32"/>
+</map>

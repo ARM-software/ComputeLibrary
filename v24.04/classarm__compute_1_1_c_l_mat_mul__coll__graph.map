@@ -1,0 +1,4 @@
+<map id="CLMatMul" name="CLMatMul">
+<area shape="rect" id="node1" title="Basic function to execute MatMul (Matrix Multiplication) on OpenCL." alt="" coords="5,80,92,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="8,5,89,32"/>
+</map>

@@ -1,0 +1,15 @@
+var namespacearm__compute_1_1opencl_1_1kernels_1_1gemm =
+[
+    [ "CLGEMMConfigArray", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_c_l_g_e_m_m_config_array.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_c_l_g_e_m_m_config_array" ],
+    [ "ClGemmDefaultConfigNativeBifrost", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_bifrost.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_bifrost" ],
+    [ "ClGemmDefaultConfigNativeMidgard", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_midgard.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_midgard" ],
+    [ "ClGemmDefaultConfigNativeValhall", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_valhall.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_valhall" ],
+    [ "ClGemmDefaultConfigReshapedBifrost", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_bifrost.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_bifrost" ],
+    [ "ClGemmDefaultConfigReshapedRhsOnlyBifrost", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_bifrost.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_bifrost" ],
+    [ "ClGemmDefaultConfigReshapedRhsOnlyValhall", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_valhall.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_valhall" ],
+    [ "ClGemmDefaultConfigReshapedValhall", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_valhall.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_valhall" ],
+    [ "ClGemmNativeKernelConfigurationFactory", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_native_kernel_configuration_factory.xhtml", null ],
+    [ "ClGemmReshapedKernelConfigurationFactory", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_reshaped_kernel_configuration_factory.xhtml", null ],
+    [ "ClGemmReshapedOnlyRhsKernelConfigurationFactory", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_reshaped_only_rhs_kernel_configuration_factory.xhtml", null ],
+    [ "IClGemmKernelConfig", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_i_cl_gemm_kernel_config.xhtml", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_i_cl_gemm_kernel_config" ]
+];

@@ -1,0 +1,6 @@
+<map id="ClGemmLowpMatrixAReductionKernel" name="ClGemmLowpMatrixAReductionKernel">
+<area shape="rect" id="node1" title="OpenCL kernel used to compute the row&#45;vectors of sums of all the entries in each row of Matrix A." alt="" coords="5,229,235,271"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1opencl_1_1kernels_1_1_i_cl_gemm_lowp_reduction_kernel.xhtml" title="Common interface for all OpenCL reduction kernels." alt="" coords="9,155,231,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="80,80,160,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="87,5,153,32"/>
+</map>
