@@ -28,8 +28,15 @@
 // Where a corresponds to the existing value, and b the new value.
 #define ADD_OP(a, b) ((a) + (b))
 #define SUB_OP(a, b) ((a) - (b))
+
+#ifdef IS_FLOAT
 #define MAX_OP(a, b) fmax(a, b)
 #define MIN_OP(a, b) fmin(a, b)
+#else // ifdef IS_FLOAT
+#define MAX_OP(a, b) max(a, b)
+#define MIN_OP(a, b) min(a, b)
+#endif // ifdef IS_FLOAT
+
 #define UPDATE_OP(a, b) (b)
 
 #ifdef SCATTER_MP1D_2D_MPND

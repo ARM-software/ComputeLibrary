@@ -138,7 +138,13 @@ SimpleTensor<T> scatter_layer(const SimpleTensor<T> &src, const SimpleTensor<T> 
 }
 
 template SimpleTensor<float> scatter_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
-
+template SimpleTensor<half> scatter_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<int32_t> scatter_layer(const SimpleTensor<int32_t> &src, const SimpleTensor<int32_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<uint32_t> scatter_layer(const SimpleTensor<uint32_t> &src, const SimpleTensor<uint32_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<int16_t> scatter_layer(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<uint16_t> scatter_layer(const SimpleTensor<uint16_t> &src, const SimpleTensor<uint16_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<int8_t> scatter_layer(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<uint8_t> scatter_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -27,6 +27,7 @@
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 
 #include "src/common/utils/Log.h"
@@ -70,7 +71,8 @@ Status ClScatterKernel::validate(const ITensorInfo *updates,
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(updates, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(indices, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32, DataType::F16, DataType::S32, DataType::S16,
+                                                 DataType::S8, DataType::U32, DataType::U16, DataType::U8);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(ind_dims > 2, "Only 2D indices tensors are currently supported.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
         ind_shape[1] != upt_shape[upt_dims - 1],
@@ -116,6 +118,7 @@ void ClScatterKernel::configure(const ClCompileContext &compile_context,
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
+    build_opts.add_option_if(is_data_type_float(dst->data_type()), "-DIS_FLOAT");
 
     const int num_dims = dst->num_dimensions();
 

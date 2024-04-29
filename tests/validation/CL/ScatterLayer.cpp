@@ -41,6 +41,8 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for fp32 data type */
+RelativeTolerance<float> tolerance_f16(0.02f); /**< Tolerance value for comparing reference's output against implementation's output for fp16 data type */
+RelativeTolerance<int32_t> tolerance_int(0); /**< Tolerance value for comparing reference's output against implementation's output for integer data types */
 } // namespace
 
 template <typename T>
@@ -53,6 +55,7 @@ TEST_SUITE(Scatter)
 DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     make("InputInfo", { TensorInfo(TensorShape(9U), 1, DataType::F32),    // Mismatching data types
                         TensorInfo(TensorShape(15U), 1, DataType::F32),   // Valid
+                        TensorInfo(TensorShape(15U), 1, DataType::U8),   // Valid
                         TensorInfo(TensorShape(8U), 1, DataType::F32),
                         TensorInfo(TensorShape(217U), 1, DataType::F32),    // Mismatch input/output dims.
                         TensorInfo(TensorShape(217U), 1, DataType::F32),    // Updates dim higher than Input/Output dims.
@@ -63,6 +66,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     }),
     make("UpdatesInfo",{TensorInfo(TensorShape(3U), 1, DataType::F16),
                         TensorInfo(TensorShape(15U), 1, DataType::F32),
+                        TensorInfo(TensorShape(15U), 1, DataType::U8),
                         TensorInfo(TensorShape(2U), 1, DataType::F32),
                         TensorInfo(TensorShape(217U), 1, DataType::F32),
                         TensorInfo(TensorShape(217U, 3U), 1, DataType::F32),
@@ -72,6 +76,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
                         TensorInfo(TensorShape(1U), 1, DataType::F32),
     }),
     make("IndicesInfo",{TensorInfo(TensorShape(1U, 3U), 1, DataType::S32),
+                        TensorInfo(TensorShape(1U, 15U), 1, DataType::S32),
                         TensorInfo(TensorShape(1U, 15U), 1, DataType::S32),
                         TensorInfo(TensorShape(1U, 2U), 1, DataType::S32),
                         TensorInfo(TensorShape(1U, 271U), 1, DataType::S32),
@@ -83,6 +88,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     }),
     make("OutputInfo",{TensorInfo(TensorShape(9U), 1, DataType::F16),
                        TensorInfo(TensorShape(15U), 1, DataType::F32),
+                       TensorInfo(TensorShape(15U), 1, DataType::U8),
                        TensorInfo(TensorShape(8U), 1, DataType::F32),
                        TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                        TensorInfo(TensorShape(271U), 1, DataType::F32),
@@ -93,6 +99,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     }),
     make("ScatterInfo",{ ScatterInfo(ScatterFunction::Add, false),
                          ScatterInfo(ScatterFunction::Max, false),
+                         ScatterInfo(ScatterFunction::Max, false),
                          ScatterInfo(ScatterFunction::Min, false),
                          ScatterInfo(ScatterFunction::Add, false),
                          ScatterInfo(ScatterFunction::Update, false),
@@ -101,7 +108,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
                          ScatterInfo(ScatterFunction::Update, false),
                          ScatterInfo(ScatterFunction::Update, false),
     }),
-    make("Expected", { false, true, true, false, false, false, false, false, false })),
+    make("Expected", { false, true, true, true, false, false, false, false, false, false })),
     input_info, updates_info, indices_info, output_info, scatter_info, expected)
 {
     const Status status = CLScatter::validate(&input_info, &updates_info, &indices_info, &output_info, scatter_info);
@@ -168,7 +175,94 @@ FIXTURE_DATA_TEST_CASE(RunSmallBatchedMultiIndices, CLScatterLayerFixture<float>
 }
 
 TEST_SUITE_END() // FP32
+
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMixedDataset(),
+        make("DataType", {DataType::F16}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Integer)
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<int32_t>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMixedDataset(),
+        make("DataType", {DataType::S32}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_int);
+}
+TEST_SUITE_END() // S32
+
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMixedDataset(),
+        make("DataType", {DataType::S16}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_int);
+}
+TEST_SUITE_END() // S16
+
+TEST_SUITE(S8)
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMixedDataset(),
+        make("DataType", {DataType::S8}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_int);
+}
+TEST_SUITE_END() // S8
+
+TEST_SUITE(U32)
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<uint32_t>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMixedDataset(),
+        make("DataType", {DataType::U32}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_int);
+}
+TEST_SUITE_END() // U32
+
+TEST_SUITE(U16)
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<uint16_t>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMixedDataset(),
+        make("DataType", {DataType::U16}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_int);
+}
+TEST_SUITE_END() // U16
+
+TEST_SUITE(U8)
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterMixedDataset(),
+        make("DataType", {DataType::U8}),
+        allScatterFunctions,
+        make("ZeroInit", {false}),
+        make("Inplace", {false})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_int);
+}
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // Integer
+
 TEST_SUITE_END() // Scatter
 TEST_SUITE_END() // CL
 } // namespace validation
