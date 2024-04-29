@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "Permute.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -42,11 +43,11 @@ SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
     permute(dst_shape, perm);
 
     // Create reference
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), src.num_channels(), src.quantization_info() };
+    SimpleTensor<T> dst{dst_shape, src.data_type(), src.num_channels(), src.quantization_info()};
 
     // Compute reference
     const uint32_t num_elements = src.num_elements();
-    for(uint32_t i = 0; i < num_elements; ++i)
+    for (uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates src_coords = index2coord(src.shape(), i);
         Coordinates       dst_coords = src_coords;
@@ -58,13 +59,14 @@ SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
     return dst;
 }
 
-template SimpleTensor<int8_t> permute(const SimpleTensor<int8_t> &src, PermutationVector perm);
-template SimpleTensor<uint8_t> permute(const SimpleTensor<uint8_t> &src, PermutationVector perm);
-template SimpleTensor<int16_t> permute(const SimpleTensor<int16_t> &src, PermutationVector perm);
+template SimpleTensor<int8_t>   permute(const SimpleTensor<int8_t> &src, PermutationVector perm);
+template SimpleTensor<uint8_t>  permute(const SimpleTensor<uint8_t> &src, PermutationVector perm);
+template SimpleTensor<int16_t>  permute(const SimpleTensor<int16_t> &src, PermutationVector perm);
 template SimpleTensor<uint16_t> permute(const SimpleTensor<uint16_t> &src, PermutationVector perm);
 template SimpleTensor<uint32_t> permute(const SimpleTensor<uint32_t> &src, PermutationVector perm);
-template SimpleTensor<float> permute(const SimpleTensor<float> &src, PermutationVector perm);
-template SimpleTensor<half> permute(const SimpleTensor<half> &src, PermutationVector perm);
+template SimpleTensor<float>    permute(const SimpleTensor<float> &src, PermutationVector perm);
+template SimpleTensor<half>     permute(const SimpleTensor<half> &src, PermutationVector perm);
+template SimpleTensor<bfloat16> permute(const SimpleTensor<bfloat16> &src, PermutationVector perm);
 } // namespace reference
 } // namespace validation
 } // namespace test

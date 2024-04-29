@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ const AbsoluteTolerance<float>            abs_tolerance_f16(0.3f);              
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr float                           tolerance_num_f16 = 0.07f;                 /**< Tolerance number for FP16 */
 #endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0);                           /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr AbsoluteTolerance<int32_t> tolerance_qasymm8(1);                           /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",

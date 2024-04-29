@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,12 @@
 #define REGISTER_FP16_SVE2(func_name) nullptr
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+#define REGISTER_FP16_SME2(func_name) &(func_name)
+#else /* !defined(ARM_COMPUTE_ENABLE_SME2) */
+#define REGISTER_FP16_SME2(func_name) nullptr
+#endif /* defined(ARM_COMPUTE_ENABLE_SME2) */
+
 #if defined(ARM_COMPUTE_ENABLE_NEON)
 #define REGISTER_FP16_NEON(func_name) &(func_name)
 #else /* !defined(ARM_COMPUTE_ENABLE_NEON) */
@@ -48,6 +54,7 @@
 #define REGISTER_FP16_NEON(func_name) nullptr
 #define REGISTER_FP16_SVE(func_name)  nullptr
 #define REGISTER_FP16_SVE2(func_name) nullptr
+#define REGISTER_FP16_SME2(func_name) nullptr
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
 
 #if defined(ENABLE_FP32_KERNELS)
@@ -64,6 +71,12 @@
 #define REGISTER_FP32_SVE2(func_name) nullptr
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+#define REGISTER_FP32_SME2(func_name) &(func_name)
+#else /* !defined(ARM_COMPUTE_ENABLE_SME2) */
+#define REGISTER_FP32_SME2(func_name) nullptr
+#endif /* defined(ARM_COMPUTE_ENABLE_SME2) */
+
 #if defined(ARM_COMPUTE_ENABLE_NEON)
 #define REGISTER_FP32_NEON(func_name) &(func_name)
 #else /* !defined(ARM_COMPUTE_ENABLE_NEON) */
@@ -74,6 +87,7 @@
 #define REGISTER_FP32_NEON(func_name) nullptr
 #define REGISTER_FP32_SVE(func_name)  nullptr
 #define REGISTER_FP32_SVE2(func_name) nullptr
+#define REGISTER_FP32_SME2(func_name) nullptr
 #endif /* defined(ENABLE_FP32_KERNELS) */
 
 #if defined(ENABLE_QASYMM8_SIGNED_KERNELS)

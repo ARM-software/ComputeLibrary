@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "ActivationLayer.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -40,7 +41,7 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
     ARM_COMPUTE_UNUSED(oq_info);
 
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
+    SimpleTensor<T> dst{src.shape(), src.data_type(), 1};
 
     // Compute reference
     const T a(info.a());
@@ -48,7 +49,7 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
 #if defined(_OPENMP)
     #pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = activate_float<T>(src[i], a, b, info.activation());
     }
@@ -57,7 +58,8 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
 }
 
 template <>
-SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
+SimpleTensor<uint8_t>
+activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
 {
     const QuantizationInfo dst_qinfo = oq_info.empty() ? src.quantization_info() : oq_info;
 
@@ -68,7 +70,8 @@ SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src
 }
 
 template <>
-SimpleTensor<int8_t> activation_layer<int8_t>(const SimpleTensor<int8_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
+SimpleTensor<int8_t>
+activation_layer<int8_t>(const SimpleTensor<int8_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
 {
     const QuantizationInfo dst_qinfo = oq_info.empty() ? src.quantization_info() : oq_info;
 
@@ -79,7 +82,8 @@ SimpleTensor<int8_t> activation_layer<int8_t>(const SimpleTensor<int8_t> &src, A
 }
 
 template <>
-SimpleTensor<int16_t> activation_layer<int16_t>(const SimpleTensor<int16_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
+SimpleTensor<int16_t>
+activation_layer<int16_t>(const SimpleTensor<int16_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
 {
     const QuantizationInfo dst_qinfo = oq_info.empty() ? src.quantization_info() : oq_info;
 
@@ -88,9 +92,14 @@ SimpleTensor<int16_t> activation_layer<int16_t>(const SimpleTensor<int16_t> &src
     SimpleTensor<int16_t> dst     = convert_to_symmetric<int16_t>(dst_tmp, dst_qinfo);
     return dst;
 }
-template SimpleTensor<int32_t> activation_layer(const SimpleTensor<int32_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
-template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
-template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
+template SimpleTensor<int32_t>
+activation_layer(const SimpleTensor<int32_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
+template SimpleTensor<float>
+activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
+template SimpleTensor<half>
+activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
+template SimpleTensor<bfloat16>
+activation_layer(const SimpleTensor<bfloat16> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,40 +122,35 @@ template <typename T>
 using NESoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NESoftmaxLayer, T>;
 
 DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
-    concat(concat(
+    concat(
         combine(
-            make("CpuExt", std::string("NEON")),
+            make("CpuExt", std::string("neon")),
             make("DataType", { DataType::F32,
                             DataType::F16,
                             DataType::QASYMM8,
                             DataType::QASYMM8_SIGNED})
         ),
         combine(
-            make("CpuExt", std::string("SVE")),
+            make("CpuExt", std::string("sme2")),
             make("DataType", { DataType::F32,
                             DataType::F16}))
-        ),
-        combine(
-            make("CpuExt", std::string("SVE2")),
-            make("DataType", { DataType::QASYMM8,
-                            DataType::QASYMM8_SIGNED}))
         ),
         cpu_ext, data_type)
 {
     using namespace cpu::kernels;
 
     cpuinfo::CpuIsaInfo cpu_isa{};
-    cpu_isa.neon = (cpu_ext == "NEON");
-    cpu_isa.sve  = (cpu_ext == "SVE");
-    cpu_isa.sve2 = (cpu_ext == "SVE2");
+    cpu_isa.neon = (cpu_ext == "neon");
+    cpu_isa.sme2 = (cpu_ext == "sme2");
     cpu_isa.fp16 = (data_type == DataType::F16);
 
     const auto *selected_impl = CpuSoftmaxKernel::get_implementation(
-        SoftmaxKernelDataTypeISASelectorData{ data_type, cpu_isa, false /* is_log */ }, cpu::KernelSelectionType::Preferred);
+        SoftmaxKernelDataTypeISASelectorData{ data_type, cpu_isa, false /* is_log */, 0 /* axis */},
+        cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
 
-    std::string expected = "neon_" + cpu_impl_dt(data_type) + "_softmax";
+    std::string expected = cpu_ext + "_" + cpu_impl_dt(data_type) + "_softmax";
     std::string actual   = selected_impl->name;
 
     ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
@@ -164,9 +159,19 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall2D, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F16),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
     combine(
-        datasets::Small4DShapes(),
+        datasets::SmallShapes(),
         make("DataType", DataType::F16),
         make("Beta", { 1.0f, 2.0f }),
         make("Axis", { 0, 1 })))
@@ -178,7 +183,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall4D, NESoftmaxLayerFixture<half>, framework::Datas
     combine(
         datasets::Small4DShapes(),
         make("DataType", DataType::F16),
-        make("Beta", { 1.0f, 2.0f }),
+        make("Beta", { 1.0f }),
         make("Axis", { 0, 2, -1 })))
 {
     // Validate output

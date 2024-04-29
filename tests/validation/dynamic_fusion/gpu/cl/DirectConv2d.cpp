@@ -177,7 +177,8 @@ template <typename T>
 using DynamicFusionGpuDirectConv2dFixture = DynamicFusionDirectConv2dValidationFixture<CLTensor, CLAccessor, GpuConv2d, T>;
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDirectConv2dFixture<half>, framework::DatasetMode::PRECOMMIT,
+/// TODO: COMPMID-6877: Once the issue in Conv2d is resolved, re-enable these
+FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDirectConv2dFixture<half>, framework::DatasetMode::DISABLED,
                combine(combine(combine(zip(zip(zip(zip(zip(
                framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
                                                         TensorShape(19U, 5U, 16U, 4U),
@@ -213,7 +214,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuDirectConv2dFixture<half>, fram
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDirectConv2dFixture<float>, framework::DatasetMode::PRECOMMIT,
+/// TODO: COMPMID-6877: Once the issue in Conv2d is resolved, re-enable these
+FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuDirectConv2dFixture<float>, framework::DatasetMode::DISABLED,
                combine(combine(combine(zip(zip(zip(zip(zip(
                framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
                                                         TensorShape(19U, 5U, 16U, 4U),

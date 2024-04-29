@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_BFLOAT16_H
-#define ARM_COMPUTE_BFLOAT16_H
+#ifndef ACL_SUPPORT_BFLOAT16_H
+#define ACL_SUPPORT_BFLOAT16_H
 
 #include <cstdint>
 #include <cstring>
-
+#include <ostream>
 namespace arm_compute
 {
 namespace
@@ -131,8 +131,16 @@ public:
         return val;
     }
 
+    bfloat16 &operator+=(float v)
+    {
+        value = float_to_bf16(bf16_to_float(value) + v);
+        return *this;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const bfloat16 &arg);
+
 private:
     uint16_t value;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_BFLOAT16_H */
+#endif // ACL_SUPPORT_BFLOAT16_H

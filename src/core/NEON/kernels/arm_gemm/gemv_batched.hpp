@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,8 +88,8 @@ public:
         return _subgemm->get_B_pretransposed_array_size();
     }
 
-    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
-        _subgemm->pretranspose_B_array(buffer, B, ldb, B_multi_stride);
+    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+        _subgemm->pretranspose_B_array(buffer, B, ldb, B_multi_stride, transposed);
     }
 
     void set_pretransposed_B_data(void *buffer) override {

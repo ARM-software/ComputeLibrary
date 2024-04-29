@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,11 +24,7 @@
 #include "ClComponentStore.h"
 
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.h"
-#else //ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwStore.h"
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 #include <memory>
 
@@ -46,22 +42,13 @@ Status ClComponentStore::validate(const Properties &properties, const ArgumentPa
 ClComponentStore::ClComponentStore(ComponentId                      id,
                                    const Properties                &properties,
                                    const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuKernelComponent{id, properties, tensors},
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer{std::make_unique<ClTemplateStore>(id, tensors)}
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer{std::make_unique<GpuCkwStore>(id, tensors)}
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
+    : IGpuKernelComponent{id, properties, tensors}, _component_writer{std::make_unique<GpuCkwStore>(id, tensors)}
 {
 }
 ClComponentStore::~ClComponentStore()
 {
 }
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-const IGpuTemplateComponentWriter *ClComponentStore::template_writer() const
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuCkwComponentDriver *ClComponentStore::ckw_component_driver() const
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
     return _component_writer.get();
 }

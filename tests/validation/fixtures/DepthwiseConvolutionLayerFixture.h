@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DEPTHWISE_CONVOLUTION_FIXTURE
-#define ARM_COMPUTE_TEST_DEPTHWISE_CONVOLUTION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DEPTHWISECONVOLUTIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DEPTHWISECONVOLUTIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -38,6 +38,7 @@
 
 #include "utils/Utils.h"
 
+#include <cstdint>
 #include <random>
 
 namespace arm_compute
@@ -54,6 +55,35 @@ class DepthwiseConvolutionLayerValidationGenericFixture : public framework::Fixt
 public:
     using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
+    void setup_quantization(TensorShape input_shape, TensorShape weights_shape, QuantizationInfo &input_q_info,
+        QuantizationInfo &weights_q_info, DataType data_type)
+    {
+        ARM_COMPUTE_UNUSED(input_shape);
+        const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
+        const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
+
+        std::mt19937                           generator(library->seed() + _hash);
+        std::uniform_real_distribution<float>  distribution_float(-5.0f, 3.0f);
+        std::uniform_int_distribution<int32_t> distribution_t(t_min, t_max);
+
+        const float scale_lhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        const float scale_rhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+
+        const int32_t offset_lhs = distribution_t(generator);
+        const int32_t offset_rhs = distribution_t(generator);
+
+        _input_quantization_info = QuantizationInfo(scale_lhs, offset_lhs);
+        _weights_quantization_info = QuantizationInfo(scale_rhs, offset_rhs);
+
+        QuantizationHint q_hint = suggest_conv_dst_q_info_and_bias(input_q_info, weights_q_info,
+            weights_shape.y() /* heights */, weights_shape.x() /* width */, 1 /* channels */,
+            data_type, 0.5f /* bias_fraction */);
+
+        _output_quantization_info = q_hint.q_info;
+        _min_bias = q_hint.bias_min;
+        _max_bias = q_hint.bias_max;
+    }
+
 public:
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation,
                unsigned int depth_multiplier, DataType input_data_type, DataType weights_data_type,
@@ -61,13 +91,18 @@ public:
                DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false, bool in_place = false, bool run_twice = false)
     {
         ARM_COMPUTE_ERROR_ON(mixed_layout && in_place);
+        // This hash is used by random generators. There may be hash collisions but
+        // this is intentional as it's a very easy way to make the the current
+        // random generation process almost different for many test configurations,
+        // which were using the same set of values before.
+        _hash = in_shape[0] + in_shape[1] + in_shape[2] + in_shape[3] +
+            kernel_size.width + kernel_size.height + dilation.x() +
+            dilation.y() + pad_stride_info.pad_bottom() + pad_stride_info.pad_left() + pad_stride_info.pad_right() + pad_stride_info.pad_top();
+
         _mixed_layout              = mixed_layout;
         _input_shape               = in_shape;
         _input_data_type           = input_data_type;
         _weights_data_type         = weights_data_type;
-        _input_quantization_info   = input_quantization_info;
-        _weights_quantization_info = weights_quantization_info;
-        _output_quantization_info  = output_quantization_info;
         _data_layout               = data_layout;
         _pad_stride_info           = pad_stride_info;
         _act_info                  = act_info;
@@ -87,6 +122,16 @@ public:
 
         _weights_shape.set(2, _output_shape.z());
         _biases_shape = TensorShape(_weights_shape[2]);
+
+        _input_quantization_info = input_quantization_info;
+        _weights_quantization_info = weights_quantization_info;
+        _output_quantization_info = output_quantization_info;
+
+        if(is_data_type_quantized(_input_data_type) && !is_data_type_quantized_symmetric(weights_data_type) && (!act_info.enabled() || act_info.activation() == ActivationFunction::IDENTITY))
+        {
+            setup_quantization(in_shape, _weights_shape, _input_quantization_info, _weights_quantization_info, _input_data_type);
+            _use_dynamic_output_quant = true;
+        }
     }
 
     void configure_target()
@@ -150,18 +195,18 @@ public:
         }
 
         // Fill tensors
-        fill(AccessorType(_src), 0);
-        fill(AccessorType(_weights), 1);
-        fill(AccessorType(_biases), 2);
+        fill(AccessorType(_src), 0 + _hash);
+        fill(AccessorType(_weights), 1 + _hash);
+        fill(AccessorType(_biases), 2 + _hash);
 
         // Run with variable input
         if(_run_twice) {
             _dwc.run();
 
             // Fill tensors with a new seed
-            fill(AccessorType(_src), 3);
-            fill(AccessorType(_weights), 4);
-            fill(AccessorType(_biases), 5);
+            fill(AccessorType(_src), 3 + _hash);
+            fill(AccessorType(_weights), 4 + _hash);
+            fill(AccessorType(_biases), 5 + _hash);
         }
 
         if(_mixed_layout)
@@ -181,18 +226,19 @@ public:
         SimpleTensor<TW>    weights{ _weights_shape, _weights_data_type, 1, _weights_quantization_info };
         SimpleTensor<TBias> biases{ _biases_shape, _bias_data_type, 1, _input_quantization_info };
 
-        fill(src, 0);
-        fill(weights, 1);
-        fill(biases, 2);
+        fill(src, 0 + _hash);
+        fill(weights, 1 + _hash);
+        fill(biases, 2 + _hash);
+
         if(_run_twice) {
             SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, _output_shape, _pad_stride_info, _depth_multiplier, _dilation, _output_quantization_info);
             if(_act_info.enabled()) {
                 reference::activation_layer<T>(depth_out, _act_info);
             }
 
-            fill(src, 3);
-            fill(weights, 4);
-            fill(biases, 5);
+            fill(src, 3 + _hash);
+            fill(weights, 4 + _hash);
+            fill(biases, 5 + _hash);
         }
 
         SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, _output_shape, _pad_stride_info, _depth_multiplier, _dilation, _output_quantization_info);
@@ -222,14 +268,65 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::uniform_int_distribution<uint32_t> distribution(0, 15);
-                library->fill(tensor, distribution, i);
+                if(_use_dynamic_output_quant)
+                {
+                    std::uniform_int_distribution<int32_t> distribution(0, 255);
+                    library->fill(tensor, distribution, i);
+                }
+                else
+                {
+                    // Legacy initialization in case the output quantization info can't be reliably estimated
+                    std::pair<int, int>                     bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
+                    library->fill(tensor, distribution, i);
+                }
                 break;
             }
             case DataType::QASYMM8_SIGNED:
+            {
+                if(_use_dynamic_output_quant)
+                {
+                    std::uniform_int_distribution<int32_t> distribution(-128, 127);
+                    library->fill(tensor, distribution, i);
+                }
+                else
+                {
+                    // Legacy initialization in case the output quantization info can't be reliably estimated
+                    std::pair<int, int>                    bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
+                    library->fill(tensor, distribution, i);
+                }
+                break;
+            }
             case DataType::QSYMM8_PER_CHANNEL:
             {
-                std::uniform_int_distribution<int32_t> distribution(-10, 10);
+                int min_bound = 128;
+                int max_bound = -127;
+                for(size_t i = 0; i < _weights_quantization_info.scale().size(); i++)
+                {
+                    std::pair<int, int> bounds = get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -1.0f, 1.0f, i);
+                    if(bounds.first < min_bound)
+                    {
+                        min_bound = bounds.first;
+                    }
+                    if(bounds.second > max_bound)
+                    {
+                        max_bound = bounds.second;
+                    }
+                }
+                std::uniform_int_distribution<int32_t> distribution(min_bound, max_bound);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case DataType::S32:
+            {
+                std::uniform_int_distribution<int32_t> distribution(_min_bias, _max_bias);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case DataType::BFLOAT16:
+            {
+                arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution{ -1.0f, 1.0f };
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -242,12 +339,6 @@ protected:
             case DataType::F32:
             {
                 std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-                library->fill(tensor, distribution, i);
-                break;
-            }
-            case DataType::S32:
-            {
-                std::uniform_int_distribution<int32_t> distribution(-100, 100);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -282,6 +373,18 @@ protected:
     bool                _mixed_layout{ false };
     bool                _in_place{ false };
     bool                _run_twice{ false };
+    bool                _use_dynamic_output_quant{false};
+
+    int32_t _hash{0};
+    // Random initialization limits
+    // Default values are previously handcrafted limits
+    // that sould be used when we don't use dynamic quantization
+    int32_t _min_bias{-100};
+    int32_t _max_bias{100};
+    int32_t _min_u8{0};
+    int32_t _max_u8{50};
+    int32_t _min_s8{-25};
+    int32_t _max_s8{25};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false, bool in_place = false, bool run_twice = false>
@@ -671,4 +774,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DEPTHWISE_CONVOLUTION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DEPTHWISECONVOLUTIONLAYERFIXTURE_H

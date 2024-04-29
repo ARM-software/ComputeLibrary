@@ -30,16 +30,24 @@ import subprocess
 import zlib
 import json
 import codecs
+import platform
 
-VERSION = "v24.02.1"
-LIBRARY_VERSION_MAJOR = 35
+VERSION = "v24.04"
+LIBRARY_VERSION_MAJOR = 36
 LIBRARY_VERSION_MINOR =  0
-LIBRARY_VERSION_PATCH =  1
+LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
 
 Import('env')
 Import('vars')
 Import('install_lib')
+
+# Workaround to enable cross-compiling from macOS® to Android™ using the Android NDK.
+if platform.system() == 'Darwin' and env['os'] == 'android':
+    # SCons incorrectly assumes that we always want to build a dynamic library on a macOS host.
+    # When targeting Android, we overwrite the following construction variables to build a shared library instead.
+    env.Replace(SHLIBSUFFIX = '.so')                      # overwrites .dylib
+    env.Replace(SHLINKFLAGS = ['$LINKFLAGS', '-shared'])  # overwrites -dynamiclib
 
 def build_bootcode_objs(sources):
     arm_compute_env.Append(ASFLAGS = "-I bootcode/")
@@ -564,12 +572,6 @@ if env['fixed_format_kernels']:
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']['common']
-    lib_files += filelist['experimental']['dynamic_fusion']['template_writer']
-
-if "ACL_INTERNAL_TEST_CKW_IN_DF" in env["extra_cxx_flags"]:
-    if not env["experimental_dynamic_fusion"]:
-        print("To use ACL_INTERNAL_TEST_CKW_IN_DF experimental_dynamic_fusion must be set to 1")
-        Exit(1)
     lib_files += filelist['experimental']['dynamic_fusion']['ckw_driver']
 
 # Logging files
@@ -722,10 +724,7 @@ Export('bootcode_o')
 
 if (env['multi_isa']):
     lib_static_objs, lib_shared_objs = build_multiisa_lib_objects()
-
-
-# STATIC library build.
-if (env['multi_isa']):
+    # STATIC library build.
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_static_objs, static=True)
 else:
     if 'sve2' in env['arch']:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMM_H
-#define ARM_COMPUTE_TEST_GEMM_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_GEMM_H
+#define ACL_TESTS_VALIDATION_REFERENCE_GEMM_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -41,8 +41,11 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
 SimpleTensor<T> gemm_mixed_precision(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta);
 
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
+void gemm_accumulate(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta, SimpleTensor<T> &dst);
+
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMM_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_GEMM_H

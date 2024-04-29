@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,8 +102,8 @@ Status CpuMatMul::validate(const ITensorInfo         *lhs,
                            const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16, DataType::QASYMM8,
-                                                         DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16, DataType::BFLOAT16,
+                                                         DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs->are_values_constant(), "LHS Tensor must be dynamic.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs->are_values_constant(), "RHS Tensor must be dynamic.");
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(lhs);
@@ -120,6 +120,7 @@ Status CpuMatMul::validate(const ITensorInfo         *lhs,
     auto gemm_info            = AsmGemmInfo();
     gemm_info.activation_info = act_info;
     gemm_info.fast_mode       = settings.fast_math();
+    gemm_info.fixed_format    = settings.fixed_format();
 
     // Validate and then permute a/b
     if (adj_lhs)
@@ -155,6 +156,14 @@ Status CpuMatMul::validate(const ITensorInfo         *lhs,
     {
         ARM_COMPUTE_RETURN_ON_ERROR(get_gemmlowp_output_stage_info(lhs_to_use, rhs_to_use, dst,
                                                                    gemm_info.activation_info, gemm_info.output_stage));
+    }
+
+    if (gemm_info.fixed_format)
+    {
+        gemm_info.weight_format                          = WeightFormat::ANY;
+        arm_compute::WeightFormat expected_weight_format = WeightFormat::ANY;
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuGemmAssemblyDispatch::has_opt_impl(expected_weight_format, lhs_to_use,
+                                                                               rhs_to_use, nullptr, dst, gemm_info));
     }
 
     cpu::CpuGemmAssemblyDispatch::validate(lhs_to_use, rhs_to_use, nullptr, dst, gemm_info);
@@ -221,6 +230,7 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
     // Fill AsmGemmInfo class object before configuration
     _gemm_info.activation_info = act_info;
     _gemm_info.fast_mode       = settings.fast_math();
+    _gemm_info.fixed_format    = settings.fixed_format();
     _gemm_info.negated_offsets = false;
 
     lhs_to_use = (_adj_lhs) ? _lhs_transposed : lhs_to_use;
@@ -231,6 +241,18 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
     {
         get_gemmlowp_output_stage_info(&lhs_to_use, &rhs_to_use, &dst_to_use, _gemm_info.activation_info,
                                        _gemm_info.output_stage);
+    }
+
+    if (_gemm_info.fixed_format)
+    {
+        _gemm_info.weight_format                         = WeightFormat::ANY;
+        arm_compute::WeightFormat expected_weight_format = WeightFormat::ANY;
+        ARM_COMPUTE_ERROR_THROW_ON(cpu::CpuGemmAssemblyDispatch::has_opt_impl(expected_weight_format, &lhs_to_use,
+                                                                              &rhs_to_use, nullptr, dst, _gemm_info));
+        // Set gemm weights info to the one returned by has_opt_impl
+        _gemm_info.weight_format = expected_weight_format;
+        // has_opt_impl may return a non fast math kernel, even if we requested one
+        _gemm_info.fast_mode = arm_compute::is_fixed_format_fast_math(expected_weight_format);
     }
 
     // Configure Asm Kernel

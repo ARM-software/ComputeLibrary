@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -919,7 +919,7 @@ void CpuGemmLowpOffsetContributionOutputStageKernel::configure(const ITensorInfo
 
     _a_offset     = a_offset;
     _b_offset     = b_offset;
-    _k_offset     = a_offset * b_offset * k;
+    _k            = k;
     _output_stage = output_stage;
 
     // If a_offset == 0, vector_sum_col can be a nullptr
@@ -958,6 +958,16 @@ Status CpuGemmLowpOffsetContributionOutputStageKernel::validate(const ITensorInf
     return Status{};
 }
 
+void CpuGemmLowpOffsetContributionOutputStageKernel::set_a_offset(int32_t a_offset)
+{
+    _a_offset = a_offset;
+}
+
+void CpuGemmLowpOffsetContributionOutputStageKernel::set_b_offset(int32_t b_offset)
+{
+    _b_offset = b_offset;
+}
+
 void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack      &tensors,
                                                             const Window     &window,
                                                             const ThreadInfo &info)
@@ -993,10 +1003,11 @@ void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack      &te
     // Check if symmetric per-channel execution
     const bool is_symm = _output_stage.is_quantized_per_channel;
 
+    auto k_offset = _a_offset * _b_offset * _k;
     if (is_symm)
     {
         run_offset_contribution_output_stage_symm(window, mm_result, vector_sum_col, vector_sum_row, bias, dst,
-                                                  _a_offset, _b_offset, _k_offset, _is_vector_sum_col_batched,
+                                                  _a_offset, _b_offset, k_offset, _is_vector_sum_col_batched,
                                                   _output_stage, reinterpret_as_3d, is_bounded_relu, is_fixed_point);
     }
     else
@@ -1004,13 +1015,13 @@ void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack      &te
         if (is_signed)
         {
             run_offset_contribution_output_stage<int8_t>(
-                window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset,
+                window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, k_offset,
                 _is_vector_sum_col_batched, _output_stage, reinterpret_as_3d, is_bounded_relu, is_fixed_point);
         }
         else
         {
             run_offset_contribution_output_stage<uint8_t>(
-                window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset,
+                window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, k_offset,
                 _is_vector_sum_col_batched, _output_stage, reinterpret_as_3d, is_bounded_relu, is_fixed_point);
         }
     }

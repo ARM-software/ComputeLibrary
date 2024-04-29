@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2023 Arm Limited.
+ * Copyright (c) 2019, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,5 +44,9 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
 template<typename T>
 void row_sums_indirect(size_t num_strings, const unsigned int *string_lengths, IndirectInputArg<T> A_arg,
                        size_t M, int32_t *output_ptr, const Requantize32 *qp);
+
+void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned int height,
+                         const int32_t* input, unsigned int in_stride, float *output, unsigned int out_stride,
+                         const float *row_bias, bool not_first_pass, const Activation &act);
 
 } // namespace arm_gemm

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1141,6 +1141,64 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
 
 template void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int height, const int8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
 template void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int height, const uint8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
+
+void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned int height,
+                         const int32_t* in_ptr, unsigned int in_stride, float *out_ptr, unsigned int out_stride,
+                         const float* bias_ptr, bool accumulate, const Activation &act)
+{
+    const float32x4_t vscale = vdupq_n_f32(qp.scale);
+    float maxval = std::numeric_limits<float>::infinity();
+    float minval = -std::numeric_limits<float>::infinity();
+
+    switch(act.type) {
+        default:
+        case Activation::Type::None:
+            break;
+        case Activation::Type::BoundedReLU:
+            maxval = static_cast<float>(act.param1);
+            /* fall through */
+        case Activation::Type::ReLU:
+            minval = 0;
+            break;
+    }
+
+    const float32x4_t vmin = vdupq_n_f32(minval);
+    const float32x4_t vmax = vdupq_n_f32(maxval);
+
+    for(unsigned int row=0; row<height; row++) {
+        auto row_in_ptr = in_ptr + (row * in_stride);
+        auto row_out_ptr = out_ptr + (row * out_stride);
+        unsigned int col=0;
+        if (width >= 4) {
+            for(; col <= (width - 4); col+= 4) {
+                const int32x4_t vin = vld1q_s32(row_in_ptr + col);
+                float32x4_t vdeq = vmulq_f32(vcvtq_f32_s32(vin), vscale);
+                if(bias_ptr) {
+                    const float32x4_t bin = vld1q_f32(bias_ptr + col);
+                    vdeq = vaddq_f32(vdeq, bin);
+                }
+                if(accumulate) {
+                    vdeq = vaddq_f32(vdeq, vld1q_f32(row_out_ptr + col));
+                }
+                vdeq = vminq_f32(vmaxq_f32(vdeq, vmin), vmax);
+                vst1q_f32(reinterpret_cast<float *>(row_out_ptr + col), vdeq);
+            }
+        }
+        // left-over elements
+        for(; col < width; ++col) {
+            const int32_t val = *(row_in_ptr + col);
+            float res = static_cast<float>(val * qp.scale);
+            if(bias_ptr) {
+                res += static_cast<float>(*(bias_ptr + col));
+            }
+            if(accumulate) {
+                res += *(row_out_ptr + col);
+            }
+            res = std::min(std::max(res, minval), maxval);
+            *(row_out_ptr + col) = res;
+        }
+    }
+}
 
 } // namespace arm_gemm
 

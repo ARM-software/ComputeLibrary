@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022 Arm Limited.
+ * Copyright (c) 2017-2020,2022,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ACTIVATION_LAYER_H
-#define ARM_COMPUTE_TEST_ACTIVATION_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_ACTIVATIONLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_ACTIVATIONLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -40,7 +40,7 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
 {
     T ret;
 
-    switch(activation)
+    switch (activation)
     {
         case ActivationLayerInfo::ActivationFunction::ABS:
             ret = std::abs(x);
@@ -61,13 +61,13 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
             ret = std::min<T>(a, std::max<T>(b, x));
             break;
         case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
-            ret = (x > 0) ? x : a * x;
+            ret = x > static_cast<T>(0) ? x : static_cast<T>(a * x);
             break;
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
             ret = std::log(static_cast<T>(1) + std::exp(static_cast<double>(x)));
             break;
         case ActivationLayerInfo::ActivationFunction::ELU:
-            ret = (x > 0) ? x : a * (std::exp(x) - static_cast<T>(1));
+            ret = x > static_cast<T>(0) ? x : static_cast<T>(a * (std::exp(x) - static_cast<T>(1)));
             break;
         case ActivationLayerInfo::ActivationFunction::SQRT:
             ret = std::sqrt(x);
@@ -82,10 +82,11 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
             ret = x;
             break;
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-            ret = x * ((std::min(std::max(static_cast<T>(x + 3), static_cast<T>(0.0f)), static_cast<T>(6.0f))) * 0.166666667f);
+            ret = x * ((std::min(std::max(static_cast<T>(x + 3), static_cast<T>(0.0f)), static_cast<T>(6.0f))) *
+                       0.166666667f);
             break;
         case ActivationLayerInfo::ActivationFunction::SWISH:
-            ret = static_cast<T>(x) / (static_cast<T>(1) + std::exp(-a*x));
+            ret = static_cast<T>(x) / (static_cast<T>(1) + std::exp(-a * x));
             break;
         case ActivationLayerInfo::ActivationFunction::GELU:
             ret = x * 0.5f * (1 + erf(x / std::sqrt(2.0f)));
@@ -99,9 +100,11 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
 }
 
 template <typename T>
-SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info = QuantizationInfo());
+SimpleTensor<T> activation_layer(const SimpleTensor<T>  &src,
+                                 ActivationLayerInfo     info,
+                                 const QuantizationInfo &oq_info = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ACTIVATION_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_ACTIVATIONLAYER_H

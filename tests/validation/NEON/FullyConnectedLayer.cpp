@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -487,7 +487,7 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation, NEFullyConnectedLayerQu
                                make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 FIXTURE_DATA_TEST_CASE(RunWithActivation, NEFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
                            combine(datasets::FullyConnectedLayerWithActivationDataset(),
@@ -529,7 +529,7 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEFullyConnectedLayerQuantizedMixedDa
                                NoActivationFunctionDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 FIXTURE_DATA_TEST_CASE(RunDynamicWeights, NEFullyConnectedLayerDynamicWeightsFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFullyConnectedLayerDataset(),
                        make("DataType", DataType::QASYMM8_SIGNED),

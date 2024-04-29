@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Arm Limited.
+ * Copyright (c) 2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,6 +92,7 @@ public:
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |S32            |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |S32            |
      * |QASYMM8_SIGNED |QSYMM8             |S32      |S32            |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |F32      |F32            |
      *
      * @note GEMM_LOWP:  low precision GEMM kernel
      *  This kernel performs the following computations:
@@ -100,12 +101,12 @@ public:
      *  -# Convert b values from QASYMM8 to int32 add b_offset to each of them.
      *  -# Compute the matrix product of the resulting a * b in int32.
      *
-     * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED otherwise
+     * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED/F32 otherwise
      *
      * @param[in]  a         First input tensor info (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
      * @param[in]  b         Second input tensor info (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
-     * @param[in]  c         Third input tensor info (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[out] dst       Output tensor info. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED
+     * @param[in]  c         Third input tensor info (Matrix C). It can be a nullptr. Data type supported: S32/F32
+     * @param[out] dst       Output tensor info. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED/F32
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */

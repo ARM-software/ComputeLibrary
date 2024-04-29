@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,7 +134,14 @@ template void Transform<8, 1, true, VLType::None>(float *, const __fp16 *, int, 
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #ifdef ARM_COMPUTE_ENABLE_BF16
 template void Transform<8, 1, true, VLType::None>(float *, const bfloat16 *, int, int, int, int, int);
-#endif
+#endif // ARM_COMPUTE_ENABLE_BF16
 #endif // AArch32
+
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+template void Transform<12, 1, false, VLType::None>(float *, const __fp16 *, int, int, int, int, int);
+#endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#ifdef ARM_COMPUTE_ENABLE_BF16
+template void Transform<12, 1, false, VLType::None>(float *, const bfloat16 *, int, int, int, int, int);
+#endif // ARM_COMPUTE_ENABLE_BF16
 
 } // namespace arm_gemm

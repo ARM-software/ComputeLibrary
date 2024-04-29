@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentActivation.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.h"
 
 namespace arm_compute
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_IGPUKERNELWRITER
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_IGPUKERNELWRITER
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_IGPUKERNELWRITER_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_IGPUKERNELWRITER_H
 
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/Window.h"
@@ -62,23 +62,14 @@ public:
     virtual std::string get_config_id() = 0;
     /** Generate execution window */
     virtual Window get_window() const = 0;
-    /** Get the kernel argument lists of the kernel
-     * @deprecated To be removed along with ClTemplateWriter
-     */
-    virtual std::map<ITensorInfo::Id, GpuKernelArgument> get_tensors()
-    {
-        return {};
-    }
-#ifdef ACL_INTERNAL_TEST_CKW_IN_DF
     /** Get the flat list of arguments of the kernel*/
     virtual GpuKernelArgumentList get_kernel_arguments()
     {
         return {};
     }
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };
 
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_IGPUKERNELWRITER */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_IGPUKERNELWRITER_H

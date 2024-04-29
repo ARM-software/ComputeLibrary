@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMMLOWP_OFFSETCONTRIBUTION_KERNEL_H
-#define ARM_COMPUTE_CPU_GEMMLOWP_OFFSETCONTRIBUTION_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
+
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -62,13 +64,16 @@ public:
      * @param[in]      k              Number of matrix A columns or Matrix B rows
      * @param[in]      a_offset       Offset to be added to each element of the matrix A.
      * @param[in]      b_offset       Offset to be added to each element of the matrix B.
+     * @param[in]      scale          (Optional) multiplies the contribution to make it the same scale as the dst in the case where mm_result is float
+     *                                (and so has already been scaled). Default is 1.0
      */
     void configure(ITensorInfo *mm_result,
                    ITensorInfo *vector_sum_col,
                    ITensorInfo *vector_sum_row,
                    int32_t      k,
                    int32_t      a_offset,
-                   int32_t      b_offset);
+                   int32_t      b_offset,
+                   float        scale = 1.0f);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuGemmLowpOffsetContributionKernel::configure()
@@ -81,6 +86,29 @@ public:
                            int32_t            a_offset,
                            int32_t            b_offset);
 
+    /** Set the a offset
+     * Warning: if a_offset is non-zero then vector_sum_col must be set in run_op.
+     *          Run configure or validate again if you aren't sure
+     *
+     * @param[in] a_offset Offset to be added to each element of the matrix A.
+     */
+    void set_a_offset(int32_t a_offset);
+
+    /** Set the b offset
+     * Warning: if b_offset is non-zero then vector_sum_row must be set in run_op.
+     *          Run configure or validate again if you aren't sure
+     *
+     * @param[in] b_offset Offset to be added to each element of the matrix B.
+     */
+    void set_b_offset(int32_t b_offset);
+
+    /** Set the dequantize scale
+     *
+     * @param[in] scale Multiplies the contribution to make it the same scale as the dst in the case where
+     *                  mm_result is float (and so has already been scaled).
+     */
+    void set_scale(float scale);
+
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
@@ -88,10 +116,11 @@ public:
 private:
     int32_t _a_offset{0};
     int32_t _b_offset{0};
-    int32_t _k_offset{0};
+    int32_t _k{0}; // Number of columns of A or rows of B, used in last offset term
+    float   _scale{1.0};
     bool    _slide_vector_sum_col{true};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMMLOWP_OFFSETCONTRIBUTION_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H

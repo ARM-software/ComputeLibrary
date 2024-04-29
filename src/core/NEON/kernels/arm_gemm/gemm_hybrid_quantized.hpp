@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -277,7 +277,9 @@ public:
         }
     }
 
-    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+        assert(!transposed);
+
         requantize_bias(in_buffer, B, ldb, B_multi_stride);
 
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);
@@ -296,7 +298,7 @@ public:
                     const unsigned int size = roundup(xmax-x0, strategy::out_width()) * k_size;
 
                     strat.transforms.PrepareB( buffer, B + (multi * B_multi_stride), ldb,
-                                               x0, xmax, k0, kmax);
+                                               x0, xmax, k0, kmax, false);
 
                     buffer += size;
                 }

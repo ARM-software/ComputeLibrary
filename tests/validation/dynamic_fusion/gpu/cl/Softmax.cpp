@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuSoftmax.h"
 
@@ -46,62 +46,70 @@ namespace validation
 RelativeTolerance<half>  tolerance_f16(half(0.2));
 RelativeTolerance<float> tolerance_f32(0.001f);
 
+using framework::dataset::make;
+
+/// TODO: COMPMID-6713
+/// Softmax is not implemented in CKW. Therefore, the tests are DISABLED.
+/// Enable the tests when Softmax is implemented in CKW.
+
 TEST_SUITE(CL)
 TEST_SUITE(DYNAMIC_FUSION)
 TEST_SUITE(SOFTMAX)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data types
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching shapes
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::S32), // Unsupported data type
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-
-                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM16), // Unsupported data type
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-
-                                                     })),
-               framework::dataset::make("beta", { 1.0,
-                                                  2.0,
-                                                  2.0,
-                                                  1.0,
-                                                  1.0,
-                                                  1.0,
-                                                  1.0,
-                                                  1.0,
-                                                  1.0,
-                                                  1.0,
-                                                })),
-               framework::dataset::make("axis", {
-                                                  0,
-                                                  0,
-                                                  1,  // Invalid as axis != 0
-                                                  0,
-                                                  0,
-                                                  0,
-                                                  -3, // Invalid as axis != 0
-                                                  2,  // Invalid as axis != 0
-                                                  1,  // Invalid as axis != 0
-                                                  -1, // Invalid as axis != 0
-                                                })),
-               framework::dataset::make("Expected", { false, false, false, true, false, false, false, false, false, false})),
-               input_info, output_info, beta, axis, expected)
+DATA_TEST_CASE(Validate, framework::DatasetMode::DISABLED,
+    zip(
+        make("InputInfo", {
+            TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data types
+            TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching shapes
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::S32), // Unsupported data type
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F16),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+        }),
+        make("OutputInfo",{
+            TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
+            TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM16), // Unsupported data type
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+        }),
+        make("beta", {
+            1.0,
+            2.0,
+            2.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+        }),
+        make("axis", {
+            0,
+            0,
+            1,  // Invalid as axis != 0
+            0,
+            0,
+            0,
+            -3, // Invalid as axis != 0
+            2,  // Invalid as axis != 0
+            1,  // Invalid as axis != 0
+            -1, // Invalid as axis != 0
+        }),
+        make("Expected", { false, false, false, true, false, false, false, false, false, false})),
+        input_info, output_info, beta, axis, expected)
 {
     // Create a new workload sketch
     CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
@@ -122,33 +130,39 @@ using DynamicFusionSoftmaxLayerFixture = DynamicFusionSoftmaxValidationFixture<C
 TEST_SUITE(FLOAT)
 TEST_SUITE(FP32)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                   framework::dataset::make("Axis", { 0 })),
-                                                                                                   framework::dataset::make("is_log", {false, true})))
+FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionSoftmaxLayerFixture<float>, framework::DatasetMode::DISABLED,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F32),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0 }),
+        make("is_log", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 
-FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                   framework::dataset::make("Axis", { 0 })),
-                                                                                                   framework::dataset::make("is_log", {false, true})))
+FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionSoftmaxLayerFixture<float>, framework::DatasetMode::DISABLED,
+    combine(
+        datasets::SoftmaxLayerLargeShapes(),
+        make("DataType", DataType::F32),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0 }),
+        make("is_log", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 
-FIXTURE_DATA_TEST_CASE(Run4D, DynamicFusionSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                   framework::dataset::make("Axis", { 0 })),
-                                                                                                   framework::dataset::make("is_log", {false, true})))
+FIXTURE_DATA_TEST_CASE(Run4D, DynamicFusionSoftmaxLayerFixture<float>, framework::DatasetMode::DISABLED,
+    combine(
+        datasets::SoftmaxLayer4DShapes(),
+        make("DataType", DataType::F32),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0 }),
+        make("is_log", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -156,33 +170,39 @@ FIXTURE_DATA_TEST_CASE(Run4D, DynamicFusionSoftmaxLayerFixture<float>, framework
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                   framework::dataset::make("Axis", { 0 })),
-                                                                                                   framework::dataset::make("is_log", {false, true})))
+FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionSoftmaxLayerFixture<half>, framework::DatasetMode::DISABLED,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F16),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0 }),
+        make("is_log", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 
 
-FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                   framework::dataset::make("Axis", { 0 })),
-                                                                                                   framework::dataset::make("is_log", {false, true})))
+FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionSoftmaxLayerFixture<half>, framework::DatasetMode::DISABLED,
+    combine(
+        datasets::SoftmaxLayerLargeShapes(),
+        make("DataType", DataType::F16),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0 }),
+        make("is_log", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 
 
-FIXTURE_DATA_TEST_CASE(Run4D, DynamicFusionSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                   framework::dataset::make("Axis", { 0 })),
-                                                                                                   framework::dataset::make("is_log", {false, true})))
+FIXTURE_DATA_TEST_CASE(Run4D, DynamicFusionSoftmaxLayerFixture<half>, framework::DatasetMode::DISABLED,
+    combine(
+        datasets::SoftmaxLayer4DShapes(),
+        make("DataType", DataType::F16),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0 }),
+        make("is_log", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -197,5 +217,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

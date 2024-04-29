@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,8 +88,10 @@ public:
 
         if (std::is_same<T, float>::value) {
             switch (ci->get_cpu_model()) {
-                default:
-                    return { 39.66, 5.18, 4.37 };
+                case CPUModel::V1:
+                    return { 53.48, 4.23, 6.53 };
+                default:                
+                    return { 29.07, 2.76, 5.39 };
             }
         }
 

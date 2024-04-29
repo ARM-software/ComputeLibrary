@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::QASYMM8), // Invalid exclude_padding = false with quantized type, no actual padding and NHWC
                                             TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U, 16U, 1U),  1, DataType::F32),
-                                          }),
+                                            TensorInfo(TensorShape(112, 112, 64,1), 1, DataType::F32, DataLayout::NHWC), // Mismatching number of channels
+                                            TensorInfo(TensorShape(112, 112, 64,1), 1, DataType::F32, DataLayout::NHWC), // Mismatching width
+                                         }),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
@@ -115,7 +117,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(12U, 12U, 5U), 1, DataType::QASYMM8),
                                             TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U, 15U, 1U), 1, DataType::F32),
-                                          })),
+                                            TensorInfo(TensorShape(56, 56, 64,1), 1, DataType::F32, DataLayout::NHWC),
+                                            TensorInfo(TensorShape(56, 51, 64,1), 1, DataType::F32, DataLayout::NHWC),
+
+                                           })),
     framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
                                             PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
                                             PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 2, 0)),
@@ -125,8 +130,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NHWC, PadStrideInfo(), false),
                                             PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
                                             PoolingLayerInfo(PoolingType::MAX, 2, DataLayout::NHWC, PadStrideInfo(1, 1, 0, 0), false),
+                                            PoolingLayerInfo(PoolingType::MAX,3,DataLayout::NHWC,PadStrideInfo(2,2,1,1)),
+                                            PoolingLayerInfo(PoolingType::MAX,3,DataLayout::NHWC,PadStrideInfo(2,2,1,1)),
+
                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, true, false, true, false, false})),
+    framework::dataset::make("Expected", { false, false, false, false, true, false, true, false, false, false, false})),
     input_info, output_info, pool_info, expected)
 {
     bool is_valid = bool(NEPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info));

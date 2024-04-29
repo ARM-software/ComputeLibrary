@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -79,7 +79,7 @@ def check_copyright( filename ):
         start = 2
         if("SConscript" in filename):
             start = 3
-        m = re.match("(# Copyright \(c\) )(.*\d{4})( [Arm|ARM].*)", content[start])
+        m = re.match(r"(# Copyright \(c\) )(.*\d{4})( [Arm|ARM].*)", content[start])
         line = m.group(1)
 
         if m.group(2): # Is there a year already?
@@ -101,7 +101,7 @@ def check_copyright( filename ):
         return
 
     # This only works until year 9999
-    m = re.match("(.*Copyright \(c\) )(.*\d{4})( [Arm|ARM].*)", content[1])
+    m = re.match(r"(.*Copyright \(c\) )(.*\d{4})( [Arm|ARM].*)", content[1])
     start =len(ref)+2
     if content[0] != "/*\n" or not m:
         start = 0
@@ -146,7 +146,7 @@ def check_license(filename):
 
     year = datetime.datetime.now().year
     # This only works until year 9999
-    m = re.match("(.*Copyright \(c\) )(.*\d{4})( [Arm|ARM].*)", content[2])
+    m = re.match(r"(.*Copyright \(c\) )(.*\d{4})( [Arm|ARM].*)", content[2])
 
     if not m:
         f.write("Copyright (c) {} Arm Limited\n".format(year))

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LARGE_GEMM_DATASET
-#define ARM_COMPUTE_TEST_LARGE_GEMM_DATASET
+#ifndef ACL_TESTS_DATASETS_LARGEGEMMDATASET_H
+#define ACL_TESTS_DATASETS_LARGEGEMMDATASET_H
 
 #include "tests/datasets/GEMMDataset.h"
 
@@ -79,7 +79,20 @@ public:
         add_config(TensorShape(1729U, 17U, 10U, 3U), TensorShape(128U, 1729U), TensorShape(128U), TensorShape(128U, 17U, 10U, 3U), 1.0f, 0.3f);
     }
 };
+
+class LargeAccumulateGEMMDataset final : public GEMMDataset
+{
+public:
+    LargeAccumulateGEMMDataset()
+    {
+        add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 429U), TensorShape(871U, 429U), 1.0f, 0.0f);
+        add_config(TensorShape(1021U, 1U), TensorShape(783U, 1021U), TensorShape(783U, 1U), TensorShape(783U, 1U), 1.0f, 0.0f);
+        add_config(TensorShape(1021U, 1U), TensorShape(783U, 1021U), TensorShape(783U, 1U), TensorShape(783U, 1U), 1.0f, 0.0f);
+        add_config(TensorShape(941U, 1U), TensorShape(623U, 941U), TensorShape(623U, 1U), TensorShape(623U, 1U), 1.0f, 0.0f);
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LARGE_GEMM_DATASET */
+#endif // ACL_TESTS_DATASETS_LARGEGEMMDATASET_H

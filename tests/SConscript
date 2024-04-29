@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2023 Arm Limited.
+# Copyright (c) 2017-2023,2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -80,6 +80,9 @@ noload_whole_archive = '-Wl,--no-whole-archive'
 if 'macos' in test_env['os']:
     load_whole_archive = '-Wl,-force_load'
     noload_whole_archive = ''
+
+if (env['multi_isa']):
+     test_env.Append(CPPDEFINES=['ARM_COMPUTE_ENABLE_BF16'])
 
 if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")

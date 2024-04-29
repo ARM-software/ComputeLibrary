@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -291,6 +291,16 @@ public:
         add_config(TensorShape(27U, 27U, 96U, 4U), TensorShape(5U, 5U, 96U, 256U), TensorShape(256U), TensorShape(27U, 27U, 256U, 4U), PadStrideInfo(1, 1, 2, 2));
         add_config(TensorShape(13U, 13U, 256U, 4U), TensorShape(1U, 1U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 4U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(224U, 224U, 3U, 4U), TensorShape(7U, 7U, 3U, 64U), TensorShape(64U), TensorShape(112U, 112U, 64U, 4U), PadStrideInfo(2, 2, 3, 3));
+    }
+};
+
+class VeryLargeConvolutionLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    VeryLargeConvolutionLayerDataset()
+    {
+        // Tensor size > 1e7 bytes && weight dimensions > 7
+        add_config(TensorShape(336U, 336U, 32U), TensorShape(9U, 9U, 32U, 64U), TensorShape(64U), TensorShape(168U, 168U, 64U), PadStrideInfo(2, 2, 4, 4));
     }
 };
 

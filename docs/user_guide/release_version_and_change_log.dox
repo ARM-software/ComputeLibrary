@@ -41,6 +41,17 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v24.04 Public major release
+ - Add Bfloat16 data type support for @ref NEMatMul.
+ - Add support for SoftMax in SME2 for FP32 and FP16.
+ - Add support for in place accumulation to CPU GEMM kernels.
+ - Add low-precision Int8 * Int8 -> FP32 CPU GEMM which dequantizes after multiplication
+ - Add is_dynamic flag to QuantizationInfo to signal to operators that it may change after configuration
+ - Performance optimizations:
+   - Optimize start-up time of @ref NEConvolutionLayer for some input configurations where GeMM is selected as the convolution algorithm
+   - Optimize @ref NEConvolutionLayer for input tensor size > 1e7 bytes and weight tensor height > 7
+   - Optimize @ref NESoftmaxLayer for axis != 0 by natively supporting higher axes up to axis 3.
+
 v24.02.1 Public patch release
  - Fix performance regression in fixed-format kernels
  - Fix compile and runtime errors in arm_compute_validation for Windows on Arm(WoA)

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef ACL_INTERNAL_TEST_CKW_IN_DF
+
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -217,4 +217,3 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF

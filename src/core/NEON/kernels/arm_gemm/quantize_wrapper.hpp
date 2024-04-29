@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -184,9 +184,11 @@ public:
         col_sums_pretransposed(B, ldb, B_multi_stride);
     }
 
-    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+        assert(!transposed);
+
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(buffer);
-        _subgemm->pretranspose_B_array(reinterpret_cast<void *>(buffer_int + col_sum_size()), B, ldb, B_multi_stride);
+        _subgemm->pretranspose_B_array(reinterpret_cast<void *>(buffer_int + col_sum_size()), B, ldb, B_multi_stride, transposed);
 
         requantize_bias(buffer, B, ldb, B_multi_stride);
     }

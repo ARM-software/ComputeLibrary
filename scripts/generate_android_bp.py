@@ -45,7 +45,9 @@ excluded_paths = ["build",
                   "/sve/",
                   "/SVE/",
                   "/sve2/",
-                  "/SVE2/"
+                  "/SVE2/",
+                  "/sme/",
+                  "/sme2/",
                   ]
 
 excluded_files = ["TracePoint.cpp"]
@@ -108,6 +110,7 @@ cc_library_static {
     proprietary: true,
     local_include_dirs: ["build/android-arm64v8a/src/core",
                          "build/android-arm64v8a/src/core/CL",
+                         "compute_kernel_writer/include",
                          "src/core/common",
                          "src/core/helpers",
                          "src/core/NEON/kernels/arm_gemm",

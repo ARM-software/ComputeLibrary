@@ -28,8 +28,6 @@
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DMaxShiftExpSum.h"
-#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DNorm.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuOperatorProperties.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 
@@ -88,9 +86,8 @@ Status GpuSoftmax::is_supported_op(const GpuWorkloadContext &context,
         arguments_norm.add_const_tensor(ACL_SRC_1, &sum);
         arguments_norm.add_const_tensor(ACL_DST_0, &dst_info_to_validate);
 
-        ARM_COMPUTE_RETURN_ON_ERROR(
-            ClComponentLogits1DMaxShiftExpSum::validate(properties, arguments_exp_sum, attributes));
-        ARM_COMPUTE_RETURN_ON_ERROR(ClComponentLogits1DNorm::validate(properties, arguments_norm, attributes));
+        ARM_COMPUTE_UNUSED(properties, attributes);
+        return Status(ErrorCode::RUNTIME_ERROR, "GpuSoftmax is not implemented");
     }
     else
     {
@@ -177,8 +174,8 @@ void GpuSoftmax::create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, ITensorI
             arguments_norm.add_const_tensor(ACL_SRC_1, sum);
             arguments_norm.add_const_tensor(ACL_DST_0, dst);
 
-            comp_graph.add_new_component<ClComponentLogits1DMaxShiftExpSum>(properties, arguments_exp_sum, attributes);
-            comp_graph.add_new_component<ClComponentLogits1DNorm>(properties, arguments_norm, attributes);
+            // Add to component graph -- NOT IMPLEMENTED
+            ARM_COMPUTE_UNUSED(comp_graph, attributes);
         }
     }
     else

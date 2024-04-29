@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018,2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,9 +61,14 @@ public:
         ConvolutionInterleave<height, block, VLType::None>(out, ptr, stride, conv, rounded_stringlen, y0, ymax, k0, kmax, integrate_sums, row_sum_multiplier);
     }
 
+    bool PrepareB_supports_transpose() const {
+        return false;
+    }
+
     template<typename TIn>
     void PrepareB(TOperand *out, const TIn *in, const int stride, const int x0,
-                  const int xmax, const int k0, const int kmax) {
+                  const int xmax, const int k0, const int kmax, bool transposed) {
+        assert (!transposed);
         Transform<width_vectors, block,  true, VLType::SVE>(out, in, stride, x0, xmax, k0, kmax);
     }
 

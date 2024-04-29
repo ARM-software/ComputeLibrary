@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
-#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -41,15 +41,27 @@ public:
     {
         return _fast_math;
     }
+    // get fixed format flag
+    bool fixed_format() const
+    {
+        return _fixed_format;
+    }
     // Set fast math flag
     CpuMatMulSettings &fast_math(bool fmath)
     {
         _fast_math = fmath;
         return *this;
-    };
+    }
+    // Set fixed format flag
+    CpuMatMulSettings &fixed_format(bool fixed_format)
+    {
+        _fixed_format = fixed_format;
+        return *this;
+    }
 
 private:
     bool _fast_math{false};
+    bool _fixed_format{false};
 };
 
 // Forward declarations
@@ -87,6 +99,7 @@ public:
      * |:--------------|:------------------|:--------------|
      * |F32            |F32                |F32            |
      * |F16            |F16                |F16            |
+     * |BFLOAT16       |BFLOAT16           |BFLOAT16       |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |QASYMM8_SIGNED |
      * |QASYMM8        |QASYMM8            |QASYMM8        |
      *
@@ -129,4 +142,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE_H
 
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
@@ -39,11 +39,7 @@ namespace dynamic_fusion
 /** Forward declaration */
 template <typename T>
 class ArgumentPack;
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-class ClTemplateStore;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
 class GpuCkwStore;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentStore final : public IGpuKernelComponent
 {
@@ -88,11 +84,7 @@ public:
     /** Allow instances of this class to be moved */
     ClComponentStore &operator=(ClComponentStore &&component) = default;
     /** Get writer for the component */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    const IGpuTemplateComponentWriter *template_writer() const override;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuCkwComponentDriver *ckw_component_driver() const override;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -100,13 +92,9 @@ public:
     }
 
 private:
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    std::unique_ptr<ClTemplateStore> _component_writer;
-#else  //ACL_INTERNAL_TEST_CKW_IN_DF
-    std::unique_ptr<GpuCkwStore>  _component_writer;
-#endif //ACL_INTERNAL_TEST_CKW_IN_DF
+    std::unique_ptr<GpuCkwStore> _component_writer;
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE_H

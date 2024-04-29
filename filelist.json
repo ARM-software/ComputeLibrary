@@ -770,6 +770,15 @@
         ]
       }
     },
+    "Scatter": {
+      "files": {
+        "common": [
+          "src/gpu/cl/kernels/ClScatterKernel.cpp",
+          "src/gpu/cl/operators/ClScatter.cpp",
+          "src/runtime/CL/functions/CLScatter.cpp"
+        ]
+      }
+    },
     "Select": {
       "files": {
         "common": [
@@ -1586,12 +1595,15 @@
               "src/core/NEON/kernels/arm_gemm/gemm_bf16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_fp32.cpp",
+              "src/core/NEON/kernels/arm_gemm/gemm_bf16bf16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_int16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_int8.cpp",
+              "src/core/NEON/kernels/arm_gemm/gemm_s8fp32.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_qint8.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_quint8.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_uint16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_uint8.cpp",
+              "src/core/NEON/kernels/arm_gemm/interleave-8way.cpp",
               "src/core/NEON/kernels/arm_gemm/interleave_indirect.cpp",
               "src/core/NEON/kernels/arm_gemm/mergeresults-fp16.cpp",
               "src/core/NEON/kernels/arm_gemm/mergeresults.cpp",
@@ -1684,6 +1696,7 @@
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp16_mla_6x32/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp32_mla_6x16/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp32bf16fp32_mmla_4x24/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp32bf16fp32_mmla_6x16/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffinterleaved_bf16fp32_dot_8x12/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffinterleaved_bf16fp32_mmla_8x12/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffinterleaved_fp16_mla_8x24/generic.cpp",
@@ -1711,6 +1724,9 @@
               "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_1VLx4VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_2VLx2VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_4VLx1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8qfp32_mopa_1VLx4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8qfp32_mopa_2VLx2VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8qfp32_mopa_4VLx1VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_1VLx4VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_4VLx1VL/generic.cpp",
@@ -2225,7 +2241,9 @@
             "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ]
           },
           "sve2":{
-            "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"]
+            "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],
+            "fp32" :["src/cpu/kernels/softmax/generic/sme2/fp32.cpp"],
+            "fp16" :["src/cpu/kernels/softmax/generic/sme2/fp16.cpp"]
           }
         }
       },
@@ -2324,7 +2342,6 @@
         "src/dynamic_fusion/sketch/attributes/ResizeAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/SoftmaxAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/ReshapeAttributes.cpp",
-        "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.cpp",
         "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGraph.cpp",
         "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.cpp",
         "src/dynamic_fusion/sketch/gpu/GpuKernelComponentStream.cpp",
@@ -2339,8 +2356,6 @@
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentMatMul.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentPool2d.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.cpp",
-        "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DMaxShiftExpSum.cpp",
-        "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DNorm.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentReshape.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentResize.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.cpp",
@@ -2360,21 +2375,6 @@
         "src/dynamic_fusion/sketch/gpu/operators/GpuSub.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuTanh.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.cpp"
-      ],
-      "template_writer": [
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateCast.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDepthwiseConv2d.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDirectConv2d.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplatePool2d.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateElementwiseBinary.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DMaxShiftExpSum.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DNorm.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateReshape.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateResize.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.cpp",
-        "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.cpp"
       ],
       "ckw_driver": [
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.cpp",

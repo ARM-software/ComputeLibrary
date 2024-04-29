@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #pragma once
 #ifdef __aarch64__
 
-#include "../std_transforms_fixed.hpp"
+#include "../std_transforms_fixed_trB.hpp"
 #include "../performance_parameters.hpp"
 
 #define ARGLIST  \
@@ -71,7 +71,7 @@ public:
         return true;
     }
 
-    StdTransformsFixed<rhs_operand_type, result_type, 6, 16, 1> transforms = {};
+    StdTransformsFixedTRB<rhs_operand_type, result_type, 6, 16, 1> transforms = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

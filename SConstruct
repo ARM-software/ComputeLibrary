@@ -227,9 +227,6 @@ if env['experimental_dynamic_fusion']:
     # Dynamic Fusion on GPU has a direct dependency on OpenCL and Compute Kernel Writer
     env['opencl'] = 1
 
-    # Build CKW by default
-    env["extra_cxx_flags"] += ' -DACL_INTERNAL_TEST_CKW_IN_DF'
-
 if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
     print("Compressed kernels are supported only for android builds")
     Exit(1)

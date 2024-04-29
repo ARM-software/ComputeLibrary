@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,8 @@ void CpuQuantize::configure(const ITensorInfo *src, ITensorInfo *dst)
 void CpuQuantize::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
+    auto split_dimension = static_cast<kernels::CpuQuantizeKernel *>(_kernel.get())->get_split_dimension_hint();
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 } // namespace cpu
 } // namespace arm_compute

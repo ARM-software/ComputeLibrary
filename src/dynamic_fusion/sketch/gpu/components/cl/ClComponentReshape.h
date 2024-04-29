@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESHAPE
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESHAPE
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESHAPE_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESHAPE_H
 
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
@@ -85,8 +85,8 @@ public:
     ClComponentReshape(ClComponentReshape &&component) = default;
     /** Allow instances of this class to be moved */
     ClComponentReshape &operator=(ClComponentReshape &&component) = default;
-    /** Get template writer for the component */
-    const IGpuTemplateComponentWriter *template_writer() const override;
+    /** Get writer for the component */
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -94,10 +94,9 @@ public:
     }
 
 private:
-    std::unique_ptr<ClTemplateReshape> _component_writer;
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESHAPE */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESHAPE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,8 @@ void run_parallel_pretranspose_B_array(arm_gemm::GemmCommon<TypeInput, TypeOutpu
                                        const TypeInput                             *src,
                                        int                                          src_ld,
                                        int                                          src_multi_stride,
-                                       unsigned int                                 num_threads)
+                                       unsigned int                                 num_threads,
+                                       bool                                         transpose)
 {
     ARM_COMPUTE_ERROR_ON(gemm_asm == nullptr);
     ARM_COMPUTE_ERROR_ON(num_threads == 0);
@@ -77,7 +78,8 @@ void run_parallel_pretranspose_B_array(arm_gemm::GemmCommon<TypeInput, TypeOutpu
 
             if (start < end)
             {
-                gemm_asm->pretranspose_B_array_part(dst->buffer(), src, src_ld, src_multi_stride, start, end);
+                gemm_asm->pretranspose_B_array_part(dst->buffer(), src, src_ld, src_multi_stride, transpose, start,
+                                                    end);
             }
         };
     }
@@ -279,6 +281,8 @@ private:
     bool                                                   _B_pretranspose_required{false};
     bool                                                   _is_b_constant{true};
     bool                                                   _is_c_constant{true};
+    bool                                                   _run_pre_pretranspose_b{false};
+    bool                                                   _B_pre_pretranspose_required{false};
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -443,8 +447,6 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
                                                              const AsmGemmInfo &gemm_info,
                                                              const OutputStage &os)
 {
-    ARM_COMPUTE_UNUSED(c);
-
     _is_b_constant = b->are_values_constant();
     _is_c_constant = c ? c->are_values_constant() : true;
 
@@ -479,16 +481,23 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
 
     _optimised_kernel = std::move(acl_gemm_wrapper);
     _gemm_info        = gemm_info;
+
     // Check if we need to pre-pretranspose B. Fixed format kernels need no pre-pretranspose.
-    const bool run_pre_pretranspose_b = _gemm_info.transpose_b && !isVarWeightsKernel();
-    if (run_pre_pretranspose_b)
+    _B_pre_pretranspose_required = _gemm_info.transpose_b && !isVarWeightsKernel();
+    _B_pretranspose_required     = _gemm_kernel_asm->B_pretranspose_required();
+
+    const bool kernel_supports_transpose = _gemm_kernel_asm->B_pretranspose_supports_transpose();
+    const bool kernel_can_fuse_transpose = _B_pretranspose_required && kernel_supports_transpose;
+    _run_pre_pretranspose_b              = _B_pre_pretranspose_required && !kernel_can_fuse_transpose;
+
+    if (_run_pre_pretranspose_b)
     {
         _pre_pretranspose_b = std::make_unique<CpuTranspose>();
         _pre_pretranspose_b->configure(b, &_pre_pretransposed_b_info);
         MemoryLifetime lifetime;
         if (_is_b_constant)
         {
-            if (_gemm_kernel_asm->B_pretranspose_required())
+            if (_B_pretranspose_required)
             {
                 // PrePretransposedB tensor is only used in prepare(), but is then succeeded by Pretranspose
                 // So PrePretransposedB can be freed inside prepare()
@@ -513,7 +522,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
     }
 
     // Check for pre-transposed support
-    if (_gemm_kernel_asm->B_pretranspose_required())
+    if (_B_pretranspose_required)
     {
         // Fixed format kernels need no pretranspose.
         ARM_COMPUTE_ERROR_ON(arm_compute::is_fixed_format(
@@ -524,13 +533,19 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
         _pretranspose_info                     = TensorInfo(TensorShape(B_pretranspose_size), 1, DataType::U8);
         _aux_mem[Pretranspose] =
             MemoryInfo(offset_int_vec(Pretranspose), MemoryLifetime::Persistent, B_pretranspose_size, alignment);
-        _B_pretranspose_required = true;
     }
 
     // Handle indirect GEMM convolution
     if (gemm_info.method == AsmConvMethod::Conv || gemm_info.method == AsmConvMethod::Indirect)
     {
         configure_indirect(a, b, d, gemm_info);
+    }
+
+    if (std::is_same<OutputStage, arm_gemm::DequantizeFloat>::value)
+    {
+        // Output dequantization is just the two src scales multiplied together
+        _gemm_kernel_asm->set_dequantize_scale(a->quantization_info().uniform().scale *
+                                               b->quantization_info().uniform().scale);
     }
 }
 
@@ -550,15 +565,16 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::prepare(ITensorPack &tensors)
                 reinterpret_cast<const int32_t *>(c->buffer() + c->info()->offset_first_element_in_bytes()), 0);
         }
         const ITensor *b_to_use = b;
+
         // Pre-pretranspose B if required
-        const bool          run_pre_pretranspose_b = _gemm_info.transpose_b && !isVarWeightsKernel();
         CpuAuxTensorHandler pre_pretransposed_b(
             offset_int_vec(PrePretransposedB), _pre_pretransposed_b_info, tensors,
             /*pack_inject: no need to inject into tensors*/
             false,
             /*bypass_alloc: no need to allocate if pre-pretranspose B is not required as this handle will not be used*/
-            !run_pre_pretranspose_b);
-        if (run_pre_pretranspose_b)
+            !_run_pre_pretranspose_b);
+
+        if (_run_pre_pretranspose_b)
         {
             ARM_COMPUTE_ERROR_ON(_pre_pretranspose_b == nullptr);
             ITensorPack pre_pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pre_pretransposed_b.get()}};
@@ -567,7 +583,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::prepare(ITensorPack &tensors)
         }
 
         // Pretranspose B if required
-        if (_gemm_kernel_asm->B_pretranspose_required())
+        if (_B_pretranspose_required)
         {
             // Fixed format kernels need no pretranspose.
             ARM_COMPUTE_ERROR_ON(arm_compute::is_fixed_format(
@@ -578,13 +594,17 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::prepare(ITensorPack &tensors)
             const int  multi_stride_b = b_to_use->info()->strides_in_bytes().z() / b_to_use->info()->element_size();
 
             CpuAuxTensorHandler pretranspose(offset_int_vec(Pretranspose), _pretranspose_info, tensors, false);
+
             ARM_COMPUTE_ERROR_ON(pretranspose.get()->buffer() == nullptr);
-            run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(_gemm_kernel_asm.get(), pretranspose.get(),
-                                                                     in1_ptr, ldb, multi_stride_b,
-                                                                     NEScheduler::get().num_threads());
+
+            const bool kernel_supports_transpose = _gemm_kernel_asm->B_pretranspose_supports_transpose();
+            run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(
+                _gemm_kernel_asm.get(), pretranspose.get(), in1_ptr, ldb, multi_stride_b,
+                NEScheduler::get().num_threads(), _B_pre_pretranspose_required && kernel_supports_transpose);
 
             b->mark_as_unused();
-            // Note that we don't need to mark b_to_use as unused, as if it's been assigned to pre_pretransposed_b, its memory will be auto-managed by the handler
+            // Note that we don't need to mark b_to_use as unused, as if it's been assigned to pre_pretransposed_b,
+            // its memory will be auto-managed by the handler
         }
 
         if (_gemm_info.method == AsmConvMethod::Indirect)
@@ -617,6 +637,15 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
     auto d = tensors.get_tensor(TensorType::ACL_DST);
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, d);
 
+    // Only update at runtime if the src quantization is dynamic
+    if (std::is_same<OutputStage, arm_gemm::DequantizeFloat>::value &&
+        (a->info()->quantization_info().is_dynamic() || b->info()->quantization_info().is_dynamic()))
+    {
+        // Output dequantization is just the two src scales multiplied together
+        _gemm_kernel_asm->set_dequantize_scale(a->info()->quantization_info().uniform().scale *
+                                               b->info()->quantization_info().uniform().scale);
+    }
+
     int       lda = a->info()->strides_in_bytes().y() / a->info()->element_size();
     int       ldb = 0;
     const int ldd = d->info()->strides_in_bytes().y() / d->info()->element_size();
@@ -640,12 +669,11 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
     const ITensor *b_to_use = b;
 
     // Pre-pretranspose B if required
-    const bool          run_pre_pretranspose_b = _gemm_info.transpose_b && !isVarWeightsKernel();
     CpuAuxTensorHandler pre_pretransposed_b(
         offset_int_vec(PrePretransposedB), _pre_pretransposed_b_info, tensors,
         false /*pack_inject: no need to inject into tensors*/,
-        !run_pre_pretranspose_b /*bypass_alloc: no need to allocate if pre-pretranspose B is not required as this handle will not be used*/);
-    if (b_to_use && !_is_b_constant && run_pre_pretranspose_b)
+        !_run_pre_pretranspose_b /*bypass_alloc: no need to allocate if pre-pretranspose B is not required as this handle will not be used*/);
+    if (b_to_use && !_is_b_constant && _run_pre_pretranspose_b)
     {
         ARM_COMPUTE_ERROR_ON(_pre_pretranspose_b == nullptr);
         ITensorPack pre_pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pre_pretransposed_b.get()}};
@@ -691,9 +719,10 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
             }
             else
             {
-                run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(_gemm_kernel_asm.get(), pretranspose.get(),
-                                                                         b_ptr, ldb, multi_stride_b,
-                                                                         NEScheduler::get().num_threads());
+                const bool kernel_supports_transpose = _gemm_kernel_asm->B_pretranspose_supports_transpose();
+                run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(
+                    _gemm_kernel_asm.get(), pretranspose.get(), b_ptr, ldb, multi_stride_b,
+                    NEScheduler::get().num_threads(), _B_pre_pretranspose_required && kernel_supports_transpose);
             }
         }
     }
@@ -762,11 +791,44 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
     arm_gemm::GemmConfig cfg;
     cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
     arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads,
-                            info.fixed_format, info.fast_mode, &cfg);
+                            info.fixed_format, info.fast_mode, info.accumulate, &cfg);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
     fallback->configure(a, b, c, d, args, info);
+    arm_gemm = std::move(fallback);
+}
+
+template <typename TypeInput, typename TypeOutput>
+void create_arm_gemm_dequant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_gemm,
+                             const ITensorInfo                                   *a,
+                             const ITensorInfo                                   *b,
+                             const ITensorInfo                                   *c,
+                             ITensorInfo                                         *d,
+                             arm_gemm::Activation                                 activation,
+                             const AsmGemmInfo                                   &info)
+{
+    ARM_COMPUTE_UNUSED(activation);
+
+    Params             p           = extract_parameters(a, b, d, info);
+    const CPUInfo     &ci          = NEScheduler::get().cpu_info();
+    const unsigned int num_threads = NEScheduler::get().num_threads();
+
+    arm_gemm::GemmConfig cfg;
+    cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads,
+                            info.fixed_format, info.fast_mode, info.accumulate, &cfg);
+
+    // Create arm_gemm fallback
+    auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::DequantizeFloat>>();
+
+    // Configure requantization info
+    const GEMMLowpOutputStageInfo os_info = info.output_stage;
+
+    arm_gemm::DequantizeFloat gemm_dequant_info{};
+    gemm_dequant_info = arm_gemm::DequantizeFloat(d->quantization_info().uniform().scale);
+
+    fallback->configure(a, b, c, d, args, info, gemm_dequant_info);
     arm_gemm = std::move(fallback);
 }
 
@@ -787,7 +849,7 @@ void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &
     arm_gemm::GemmConfig cfg;
     cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
     arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads,
-                            info.fixed_format, info.fast_mode, &cfg);
+                            info.fixed_format, info.fast_mode, info.accumulate, &cfg);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
@@ -842,7 +904,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
     cfg.weight_format                           = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
     arm_gemm::WeightFormat arm_gemm_expected_wf = assembly_utils::map_to_arm_gemm_weight_format(expected_weight_format);
     arm_gemm::GemmArgs     args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, act, num_threads,
-                                info.fixed_format, info.fast_mode, &cfg);
+                                info.fixed_format, info.fast_mode, info.accumulate, &cfg);
     // TODO: Incorporate info.transpose_b COMPMID-6595
     switch (a->data_type())
     {
@@ -886,9 +948,18 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
 #if defined(ARM_COMPUTE_ENABLE_BF16)
         case DataType::BFLOAT16:
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-                !(arm_gemm::has_opt_gemm<bfloat16, float, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
-                "We could not find an optimized kernel for BFLOAT16 input and F32 output");
+            if (d->data_type() == DataType::BFLOAT16)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                    !(arm_gemm::has_opt_gemm<bfloat16, bfloat16, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
+                    "We could not find an optimized kernel for BFLOAT16 input and BFLOAT16 output");
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                    !(arm_gemm::has_opt_gemm<bfloat16, float, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
+                    "We could not find an optimized kernel for BFLOAT16 input and F32 output");
+            }
             break;
         }
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
@@ -944,8 +1015,9 @@ Status CpuGemmAssemblyDispatch::validate(
                                     "Only F32 output supported for F32 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::F16 && d->data_type() != DataType::F16,
                                     "Only F16 output supported for F16 input");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::BFLOAT16 && d->data_type() != DataType::F32,
-                                    "Only F32 output supported for BFLOAT16 input");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::BFLOAT16 &&
+                                        (d->data_type() != DataType::F32 && d->data_type() != DataType::BFLOAT16),
+                                    "Only F32/BFLOAT16 output supported for BFLOAT16 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::U8 && d->data_type() != DataType::U32,
                                     "Only U32 output supported for U8 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::S8 && d->data_type() != DataType::S32,
@@ -1008,6 +1080,10 @@ void CpuGemmAssemblyDispatch::configure(
             {
                 create_arm_gemm<int8_t, int32_t>(_arm_gemm, a, b, c, d, act, info);
             }
+            else if (d->data_type() == DataType::F32)
+            {
+                create_arm_gemm_dequant<int8_t, float>(_arm_gemm, a, b, c, d, act, info);
+            }
             else
             {
                 create_arm_gemm_quant<int8_t, int8_t>(_arm_gemm, a, b, c, d, act, info);
@@ -1016,7 +1092,14 @@ void CpuGemmAssemblyDispatch::configure(
 #endif /* __aarch64__ */
 #if defined(ARM_COMPUTE_ENABLE_BF16)
         case DataType::BFLOAT16:
-            create_arm_gemm<bfloat16, float>(_arm_gemm, a, b, c, d, act, info);
+            if (d->data_type() == DataType::BFLOAT16)
+            {
+                create_arm_gemm<bfloat16, bfloat16>(_arm_gemm, a, b, c, d, act, info);
+            }
+            else
+            {
+                create_arm_gemm<bfloat16, float>(_arm_gemm, a, b, c, d, act, info);
+            }
             break;
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

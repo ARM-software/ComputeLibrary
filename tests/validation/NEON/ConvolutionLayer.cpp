@@ -109,6 +109,11 @@ const auto ActivationFunctionsDataset = make("ActivationInfo",
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f)
 });
 
+const auto NoActivation = make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+});
+
 const auto ActivationFunctionsDatasetNightly = make("ActivationInfo",
 {
     ActivationLayerInfo(),
@@ -762,21 +767,33 @@ FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer, HasOptImplFixtureNoFastMath
 }
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
-
+// These tests currently only works with SVE length 256
+// If other SVE length is used a kernel will fail to be found
+// This needs to be addressed in order to ensure it doesn't revert to FP32 kernels for systems with SVE length other than 256
 FIXTURE_DATA_TEST_CASE(UC2_2_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo8i4_bf16 })))
 {
-    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT_EQUAL(_computed_weight_format, arm_compute::WeightFormat::OHWIo8i4_bf16, framework::LogLevel::ERRORS);
+    if(Scheduler::get().cpu_info().has_bf16() && (arm_gemm::utils::get_vector_length<float>() == 8)){
+        ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT_EQUAL(_computed_weight_format, arm_compute::WeightFormat::OHWIo8i4_bf16, framework::LogLevel::ERRORS);
+    }
+    else{
+        ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo8i4_bf16 })))
 {
-    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo8i4_bf16, framework::LogLevel::ERRORS);
+    if(Scheduler::get().cpu_info().has_bf16() && (arm_gemm::utils::get_vector_length<float>() == 8)){
+        ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo8i4_bf16, framework::LogLevel::ERRORS);
+    }
+    else{
+        ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
+    }
 }
 
 #endif // ARM_COMPUTE_ENABLE_BF16
@@ -847,20 +864,36 @@ FIXTURE_DATA_TEST_CASE(UC3_2_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<c
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
 {
-    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
+    if(Scheduler::get().cpu_info().has_bf16()){
+        ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
+    }
+    else{
+        ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(UC3_2_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
 {
-    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
+    if(Scheduler::get().cpu_info().has_bf16()){
+        ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
+    }
+    else{
+        ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
+    }
 }
 
 #endif // ARM_COMPUTE_ENABLE_BF16
@@ -1136,7 +1169,7 @@ TEST_SUITE(Float)
 TEST_SUITE(BFLOAT16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                     framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                    framework::dataset::make("DataType", DataType::BFLOAT16)),
+                                                                                                                    framework::dataset::make("DataType", Scheduler::get().cpu_info().has_bf16() ? DataType::BFLOAT16 : DataType::F32)),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                                                                                             ActivationFunctionsDataset))
 {
@@ -1201,6 +1234,20 @@ FIXTURE_DATA_TEST_CASE(RunPaddedWeights, NEGEMMConvolutionLayerPaddedWeightsFixt
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
+
+// This very large shape test is required to test heuristic paths where the tensor size is > 1e7 bytes
+// and weight dimensions larger than 7
+FIXTURE_DATA_TEST_CASE(RunVeryLarge, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+    combine(datasets::VeryLargeConvolutionLayerDataset(),
+        framework::dataset::make("ReshapeWeights", { true }),
+        framework::dataset::make("DataType", DataType::F32),
+        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+        NoActivation))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
@@ -1310,6 +1357,27 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, NEGEMMConvolutionLayerQuantizedPerChannel
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+
+FIXTURE_DATA_TEST_CASE(MemoryStressLargeChannels, NEGEMMConvolutionLayerQuantizedPerChannelFixture<int8_t>,
+    framework::DatasetMode::ALL,
+        combine(
+            make("In", TensorShape(1U)),
+            make("Weights", TensorShape(1U, 1U, 1U, 17000U)),
+            make("Biases", TensorShape(17000U)),
+            make("Out", TensorShape(1U, 1U, 17000U)),
+            make("Info", PadStrideInfo(1, 1, 0, 0)),
+            make("Dilation", Size2D(1, 1)),
+            make("ReshapeWeights", { true }),
+            make("DataType", { DataType::QASYMM8_SIGNED }),
+            make("DataLayout", { DataLayout::NHWC }),
+            make("QuantizationInfo", QuantizationInfo(0.5f, 10)),
+            make("ActivationInfo", ActivationLayerInfo()),
+            make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
 TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 TEST_SUITE_END() // Quantized
 

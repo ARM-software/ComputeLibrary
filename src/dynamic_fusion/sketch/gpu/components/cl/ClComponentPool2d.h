@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,11 +42,7 @@ class ArgumentPack;
 class Pool2dAttributes;
 
 /** Forward declaration */
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-class ClTemplatePool2d;
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
 class GpuCkwPool2d;
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentPool2d final : public IGpuKernelComponent
 {
@@ -116,13 +112,9 @@ public:
 
     /** Allow instances of this class to be moved */
     ClComponentPool2d &operator=(ClComponentPool2d &&component) = default;
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    /** Get template writer for the component */
-    const IGpuTemplateComponentWriter *template_writer() const override;
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+
     /** Get GPU kernel writer for the component */
     const IGpuCkwComponentDriver *ckw_component_driver() const override;
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
     /** Get component type */
     GpuComponentType type() const override
@@ -131,11 +123,7 @@ public:
     }
 
 private:
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-    std::unique_ptr<ClTemplatePool2d> _component_writer;
-#else  // ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<GpuCkwPool2d> _component_writer;
-#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental
