@@ -103,7 +103,7 @@ protected:
     void fill_indices(U &&tensor, int i, const TensorShape &shape)
     {
         // Calculate max indices the shape should contain. Add an arbitrary value to allow testing for some out of bounds values (In this case min dimension)
-        const int32_t max = std::max({shape[0] , shape[1], shape[2]});
+        const int32_t max = std::min({shape[0] , shape[1], shape[2]}) + 1;
         library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(-2), static_cast<int32_t>(max));
     }
 
@@ -197,12 +197,13 @@ protected:
         TensorShape src_shape = a_shape;
         TensorShape updates_shape = b_shape;
         TensorShape indices_shape = c_shape;
+        const int num_ind_dims = c_shape.num_dimensions();
 
         // 1. Collapse batch index into a single dim if necessary for update tensor and indices tensor.
-        if(c_shape.num_dimensions() >= 3)
+        if(num_ind_dims >= 3)
         {
             indices_shape = indices_shape.collapsed_from(1);
-            updates_shape = updates_shape.collapsed_from(updates_shape.num_dimensions() - 2); // Collapses from last 2 dims
+            updates_shape = updates_shape.collapsed_from(updates_shape.num_dimensions() - (num_ind_dims -1)); // Collapses batch dims
         }
 
         // 2. Collapse data dims into a single dim.
@@ -212,16 +213,16 @@ protected:
         updates_shape.collapse(updates_shape.num_dimensions() - 1); // Collapse data dims (all except last dim which is batch dim)
 
         // Create reference tensors
-        SimpleTensor<T> src{ a_shape, data_type, 1, a_qinfo };
-        SimpleTensor<T> updates{b_shape, data_type, 1, QuantizationInfo() };
-        SimpleTensor<int32_t> indices{ c_shape, DataType::S32, 1, QuantizationInfo() };
+        SimpleTensor<T> src{ src_shape, data_type, 1, a_qinfo };
+        SimpleTensor<T> updates{updates_shape, data_type, 1, QuantizationInfo() };
+        SimpleTensor<int32_t> indices{ indices_shape, DataType::S32, 1, QuantizationInfo() };
 
         // Fill reference
         fill(src, 0 + _hash);
         fill(updates, 1 + _hash);
         fill_indices(indices, 2 + _hash, out_shape);
 
-        // Calculate individual reference.
+        // Calculate individual reference using collapsed shapes
         return reference::scatter_layer<T>(src, updates, indices, out_shape, info);
     }
 

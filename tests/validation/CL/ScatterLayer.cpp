@@ -164,10 +164,10 @@ FIXTURE_DATA_TEST_CASE(RunSmallMultiIndices, CLScatterLayerFixture<float>, frame
 }
 
 // m+k, k-1-D m+n-D case
-FIXTURE_DATA_TEST_CASE(RunSmallBatchedMultiIndices, CLScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallBatchedMultiIndices, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterBatchedDataset(),
         make("DataType", {DataType::F32}),
-        make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add }),
+        make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add}),
         make("ZeroInit", {false}),
         make("Inplace", {false})))
 {

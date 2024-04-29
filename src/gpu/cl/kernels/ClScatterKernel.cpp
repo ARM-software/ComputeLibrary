@@ -66,6 +66,7 @@ Status ClScatterKernel::validate(const ITensorInfo *updates,
     const int32_t upt_dims = upt_shape.num_dimensions();
     const int32_t dst_dims = dst_shape.num_dimensions();
     const int32_t ind_dims = ind_shape.num_dimensions();
+    const int32_t data_dim = upt_dims - (ind_dims - 1); // Number of batch dims is the number of indices dims - 1
 
     const int32_t index_len = ind_shape[0];
 
@@ -73,14 +74,34 @@ Status ClScatterKernel::validate(const ITensorInfo *updates,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(indices, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32, DataType::F16, DataType::S32, DataType::S16,
                                                  DataType::S8, DataType::U32, DataType::U16, DataType::U8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(ind_dims > 2, "Only 2D indices tensors are currently supported.");
+
+    // Check data dims in update tensor and output tensor are equal
+    for (int32_t i = 0; i < data_dim; i++)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(upt_shape[i] != dst_shape[i],
+                                        "Data dims should be same size in both updates and ouput tensor.");
+    }
+
+    // Check if batch dims in indices and updates tensor are equal.
+    for (int32_t i = 0; i < ind_dims - 1; i++)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(upt_shape[data_dim + i] != ind_shape[i + 1],
+                                        "Batch dimensions should be the same in updates and indices tensor.");
+    }
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(ind_shape[1] != upt_shape[data_dim],
+                                    "Height of indices tensor should match size of highest dimension in updates tensor "
+                                    "(Excluding batch dimension)");
+
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        ind_shape[1] != upt_shape[upt_dims - 1],
-        "Height of indices tensor should match size of highest dimension in updates tensor.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(upt_dims > dst_dims, "Update tensor cannot have more dims than output tensor.");
+        data_dim >= dst_dims, "Update tensor cannot have more dims than output tensor. (Excluding batch dimensions)");
+    ARM_COMPUTE_RETURN_ERROR_ON(index_len != dst_dims - data_dim);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((ind_dims < 2), "Shape of Indices tensor must be at least 2D");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(index_len > max_index_length, "Maximum supported index length is 5!");
-    ARM_COMPUTE_RETURN_ERROR_ON(index_len != dst_dims - upt_dims + 1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        index_len >= dst_dims && dst_dims != 1,
+        "Index length should be smaller than number of output dims (or equal to with 1D output)");
 
     return Status{};
 }
@@ -96,7 +117,7 @@ void ClScatterKernel::configure(const ClCompileContext &compile_context,
 
     const TensorShape &dst_shape = dst->tensor_shape();
 
-    const bool is_scalar_block = updates->num_dimensions() == 1;
+    const bool is_scalar_block = updates->num_dimensions() == 1; // Checks for replacing only a single element.
     const int  n0 = adjust_vec_size(16 / updates->element_size(), is_scalar_block ? 1 : updates->dimension(0));
 
     const int partial_n0 = updates->dimension(0) % n0;
@@ -120,9 +141,9 @@ void ClScatterKernel::configure(const ClCompileContext &compile_context,
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
     build_opts.add_option_if(is_data_type_float(dst->data_type()), "-DIS_FLOAT");
 
-    const int num_dims = dst->num_dimensions();
-
-    build_opts.add_option("-DNUM_INDICES=" + support::cpp11::to_string(indices->dimension(1)));
+    const int   num_dims      = dst->num_dimensions();
+    TensorShape ind_collapsed = indices->tensor_shape().collapsed_from(1);
+    build_opts.add_option("-DNUM_INDICES=" + support::cpp11::to_string(ind_collapsed[1]));
     build_opts.add_option("-DINDEX_LENGTH=" + support::cpp11::to_string(index_len));
 
     // We provide 5 variables to use in a constant array
@@ -187,11 +208,14 @@ void ClScatterKernel::run_op(ITensorPack &tensors, const Window &window, cl::Com
 
     const ITensorInfo *dst_info = dst->info();
     const int          num_dims = dst_info->num_dimensions();
+    const int          ind_dims = indices->info()->num_dimensions();
 
     const int index_len = indices->info()->dimension(0);
 
     // calculate m-dimensional data block strides in updates and destination tensors
-    const int upt_block_stride = updates->info()->strides_in_bytes()[updates->info()->num_dimensions() - 1];
+    const int upt_block_stride =
+        updates->info()->strides_in_bytes()[updates->info()->num_dimensions() - (ind_dims - 1)];
+
     const int out_block_stride = dst_info->strides_in_bytes()[num_dims - index_len];
 
     unsigned int idx = 0;

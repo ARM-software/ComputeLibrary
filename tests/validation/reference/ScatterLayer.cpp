@@ -63,6 +63,7 @@ T reduce_op(const T &current,const T &update,const ScatterFunction func)
 }
 
 template float reduce_op(const float &current,const float &update,const ScatterFunction func);
+template half reduce_op(const half &current,const half &update,const ScatterFunction func);
 }
 
 // NOTE: This function expects collapsed tensors as input.
