@@ -1,5 +1,0 @@
-<map id="CLInstanceNormalizationLayerKernel" name="CLInstanceNormalizationLayerKernel">
-<area shape="rect" id="node1" title="Interface for performing an instance normalization." alt="" coords="5,155,221,196"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="73,80,153,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="81,5,145,32"/>
-</map>
