@@ -113,6 +113,10 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
 
     Window win_out(window);
     std::cout << "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp " << std::endl;
+    std::cout << "window.x().end() " << window.x().end() << std::endl;
+    std::cout << "window.y().end() " << window.y().end() << std::endl;
+    std::cout << "window.z().end() " << window.z().end() << std::endl;
+
     std::cout << "win_out.x().end() " << win_out.x().end() << std::endl;
     std::cout << "win_out.y().end() " << win_out.y().end() << std::endl;
     std::cout << "win_out.z().end() " << win_out.z().end() << std::endl;
