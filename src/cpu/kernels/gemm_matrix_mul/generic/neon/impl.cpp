@@ -326,6 +326,9 @@ void matrix_matrix_multiply_f32(
             auto mtx_b1 = mtx_b0 + in_b_stride;
 
             std::cout << "mtx_a0 " << *mtx_a0 << std::endl;
+            std::cout << "mtx_a0 " << *(mtx_a0+1) << std::endl;
+            std::cout << "mtx_a0 " << *(mtx_a0+2) << std::endl;
+            std::cout << "mtx_a0 " << *(mtx_a0+3) << std::endl;
 
             float32x4_t acc00 = vdupq_n_f32(0.f);
             float32x4_t acc10 = vdupq_n_f32(0.f);
