@@ -135,10 +135,6 @@ void CpuLinear::run(ITensorPack &tensors)
 
     const ITensor *b_to_use = b;
 
-    std::cout <<"b_to_use x: " << b_to_use->info()->tensor_shape().x() << std::endl;
-    std::cout <<"b_to_use y: " << b_to_use->info()->tensor_shape().y() << std::endl;
-    std::cout <<"b_to_use z: " << b_to_use->info()->tensor_shape().z() << std::endl;
-
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
@@ -148,6 +144,14 @@ void CpuLinear::run(ITensorPack &tensors)
 
         b_to_use = transposed1xw_b.get();
     }
+
+    std::cout <<"b_to_use->info()->strides_in_bytes()[0] " << b_to_use->info()->strides_in_bytes()[0] << std::endl;
+    std::cout <<"b_to_use->info()->strides_in_bytes()[1] " << b_to_use->info()->strides_in_bytes()[1] << std::endl;
+    
+    std::cout <<"b_to_use x: " << b_to_use->info()->tensor_shape().x() << std::endl;
+    std::cout <<"b_to_use y: " << b_to_use->info()->tensor_shape().y() << std::endl;
+    std::cout <<"b_to_use z: " << b_to_use->info()->tensor_shape().z() << std::endl;
+
     // Use reshaped matrices
     std::cout << "b_to_use (0,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
     std::cout << "b_to_use (1,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(1,0))) << std::endl;
