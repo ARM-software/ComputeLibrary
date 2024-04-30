@@ -140,13 +140,7 @@ void CpuLinear::run(ITensorPack &tensors)
     }
 
     const ITensor *b_to_use = b;
-    if (_pretranspose_b_func)
-    {
-        // Run pretranspose kernel
-        ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
-        _pretranspose_b_func->run(pretranspose_pack);
-        b_to_use = pretransposed_b.get();
-    }
+   
 
     if (_run_interleave_transpose)
     {
