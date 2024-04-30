@@ -134,12 +134,18 @@ void CpuLinear::run(ITensorPack &tensors)
     }
 
     const ITensor *b_to_use = b;
+
+    std::cout <<"b_to_use x: " << b_to_use->info()->tensor_shape().x() << std::endl;
+    std::cout <<"b_to_use y: " << b_to_use->info()->tensor_shape().y() << std::endl;
+    std::cout <<"b_to_use z: " << b_to_use->info()->tensor_shape().z() << std::endl;
+    
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
         ITensorPack transpose_pack{{ACL_SRC, b_to_use}, {ACL_DST, transposed1xw_b.get()}};
         NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
                                         _transpose1xW_b_kernel->window(), transpose_pack);
+
         b_to_use = transposed1xw_b.get();
     }
     // Use reshaped matrices
