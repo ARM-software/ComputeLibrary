@@ -162,7 +162,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                     }
                 }
             }
-            std::cout << std::endl;
         },
         in, out);
 }
