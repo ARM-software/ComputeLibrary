@@ -115,8 +115,6 @@ void CpuLinear::run(ITensorPack &tensors)
     auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
-    std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
-    std::cout <<"a->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(a->ptr_to_element(Coordinates(0,0))) << std::endl;
 
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
     CpuAuxTensorHandler transposed1xw_b(offset_int_vec(Transposed1xWRHS), _tmp_b, tensors, true);
@@ -152,6 +150,9 @@ void CpuLinear::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
+
+    std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
+    std::cout <<"b_to_use->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
 
     // Run bias addition kernel
     if (_run_bias_addition)
