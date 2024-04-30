@@ -168,6 +168,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
     std::cout <<"a->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(a->ptr_to_element(Coordinates(0,0))) << std::endl;
     std::cout <<"b_to_use->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
+    std::cout <<"c->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(c->ptr_to_element(Coordinates(0,0))) << std::endl;
     std::cout <<"temp_d->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << std::endl;
 
     // Run bias addition kernel
