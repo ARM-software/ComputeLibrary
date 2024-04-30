@@ -147,6 +147,11 @@ void CpuLinear::run(ITensorPack &tensors)
     {
         // Run transpose1xw kernel
         ITensorPack transpose_pack{{ACL_SRC, b_to_use}, {ACL_DST, transposed1xw_b.get()}};
+
+            std::cout << "Run transpose1xw kernel window " <<std::endl;
+            std::cout << "_transpose1xW_b_kernel->window().x().end() " << _transpose1xW_b_kernel->window().x().end() <<std::endl;
+            std::cout << "_transpose1xW_b_kernel->window().y().end() " << _transpose1xW_b_kernel->window().y().end() <<std::endl;
+            std::cout << "_transpose1xW_b_kernel->window().z().end() " << _transpose1xW_b_kernel->window().z().end() <<std::endl;
         NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
                                         _transpose1xW_b_kernel->window(), transpose_pack);
 
