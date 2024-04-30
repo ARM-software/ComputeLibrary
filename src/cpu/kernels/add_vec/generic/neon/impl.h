@@ -68,8 +68,7 @@ void add_vec_same_neon(
                 
                 for(int j =0; j <window_step_target0; j++)
                 {
-                    std::cout << *(reinterpret_cast<const ScalarType *>(input1_ptr + x)+j) + 
-                                 *(reinterpret_cast<const ScalarType *>(input2_ptr + x)+j)
+                    std::cout << *(reinterpret_cast<const ScalarType *>(input1_ptr + x)+j) 
                          << " ";
                 }
                 const auto val1 = wrapper::vloadq(input1_ptr + x);
@@ -87,7 +86,6 @@ void add_vec_same_neon(
                 *(output_ptr + x) =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
             }
-            std::cout << x << std::endl;
         },
         input1, input2, output);
 }
