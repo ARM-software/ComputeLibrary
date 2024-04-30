@@ -165,7 +165,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "b_to_use (2,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(2,0))) << std::endl;
     std::cout << "b_to_use (3,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(3,0))) << std::endl;
     std::cout << "b_to_use (4,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(4,0))) << std::endl;
-    std::cout << "b_to_use (4,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(5,0))) << std::endl;
+    std::cout << "b_to_use (16,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(16,0))) << std::endl;
     std::cout << "b_to_use (0,1) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,1))) << std::endl;
 
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
