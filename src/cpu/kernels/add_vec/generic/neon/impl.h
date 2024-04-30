@@ -70,7 +70,7 @@ void add_vec_same_neon(
                 wrapper::vstore(output_ptr + x, res);
                 for(int j =0; j <window_step_target0; j++)
                 {
-                    std::cout << *(reinterpret_cast<const ScalarType *>(input2_ptr + x)+j) 
+                    std::cout << *(reinterpret_cast<const ScalarType *>(output.ptr() + x)+j) 
                          << " ";
                 }
             }
