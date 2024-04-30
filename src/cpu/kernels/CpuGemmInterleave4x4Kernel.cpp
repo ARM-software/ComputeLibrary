@@ -75,6 +75,7 @@ Status CpuGemmInterleave4x4Kernel::validate(const ITensorInfo *src, const ITenso
 
 void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp " << std::endl;
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
