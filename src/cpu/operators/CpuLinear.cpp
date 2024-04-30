@@ -133,19 +133,18 @@ void CpuLinear::run(ITensorPack &tensors)
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_a.get());
     }
 
-    std::cout << "b " << *reinterpret_cast<float *> (b->ptr_to_element(Coordinates(0,0))) << std::endl;
+    const ITensor *b_to_use = b;
     if (_run_interleave_transpose)
     {
-        if (!_reshape_b_only_on_first_run)
-        {
-            // Run transpose1xw kernel
-            ITensorPack transpose_pack{{ACL_SRC, b}, {ACL_DST, transposed1xw_b.get()}};
-            NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
-                                            _transpose1xW_b_kernel->window(), transpose_pack);
-        }
+        // Run transpose1xw kernel
+        ITensorPack transpose_pack{{ACL_SRC, b_to_use}, {ACL_DST, transposed1xw_b.get()}};
+        NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
+                                        _transpose1xW_b_kernel->window(), transpose_pack);
+        b_to_use = transposed1xw_b.get();
     }
     // Use reshaped matrices
-    mm_pack.add_const_tensor(ACL_SRC_1, b);
+    std::cout << "b_to_use " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
+    mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
 
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
