@@ -572,6 +572,7 @@ void matrix_matrix_multiply_f32(
             }
 
             const auto mtx_out0 = reinterpret_cast<float *>(out.ptr());
+            std::cout << "mtx_out0 " << *mtx_out0 << std::endl;
             const auto mtx_out1 = mtx_out0 + 4;
 
             if (id.x() < (out_width - 8))
