@@ -35,6 +35,8 @@ namespace cpu
 void vector_matrix_multiply_f32(
     const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
+
+    std::cout << "vector_matrix_multiply_f32 " << std::endl;
     const auto width_matrix_b = static_cast<int>(dst->info()->dimension(0));
     const auto in_b_stride =
         static_cast<int>(rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type()));
@@ -279,7 +281,6 @@ void vector_matrix_multiply_f32(
 void matrix_matrix_multiply_f32(
     const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
-    std::cout << "matrix_matrix_multiply_f32 " << std::endl;
     ARM_COMPUTE_UNUSED(info);
     const int    out_width   = static_cast<int>(dst->info()->dimension(0));
     const int    out_height  = static_cast<int>(dst->info()->dimension(1));
