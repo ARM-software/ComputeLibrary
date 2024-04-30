@@ -138,6 +138,12 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                                 element_size);
                     std::memcpy(out.ptr() + (x * 4 + 3) * element_size, (in.ptr() + 3 * in_stride) + x * element_size,
                                 element_size);
+                    std::cout << *reinterpret_cast<float *>((in.ptr() + 0 * in_stride) + x * element_size) << " "
+                              << *reinterpret_cast<float *>((in.ptr() + 1 * in_stride) + x * element_size) << " "
+                              << *reinterpret_cast<float *>((in.ptr() + 2 * in_stride) + x * element_size) << " "
+                              << *reinterpret_cast<float *>((in.ptr() + 3 * in_stride) + x * element_size) << " ";
+
+
                 }
             }
             else
