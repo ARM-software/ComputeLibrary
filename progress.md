@@ -192,6 +192,10 @@ Functionality:
             7. CpuGemmMatrixMultiplyKernel Requires 4*4transpose and 1w transpose
             8. src/cpu/operators/CpuScaleDotProduction.cpp: {ACL_SRC, const_cast<const ITensor*>(scaled_output.get())} causes 
                     free(): invalid next size (normal) Aborted
+            9. There is difference from pytroch bert, which has at the end of embedding
+                      embeddings = self.LayerNorm(embeddings)
+                      embeddings = self.dropout(embeddings)
+                while out inplementation does not
 
 
 Optimization: 
