@@ -110,18 +110,22 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
     std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp " << std::endl;
-    
+
     std::cout <<"key x: " << key->info()->tensor_shape().x() << std::endl;
     std::cout <<"key y: " << key->info()->tensor_shape().y() << std::endl;
     std::cout <<"key z: " << key->info()->tensor_shape().z() << std::endl;
 
+    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(0,0)))  << std::endl;
+
     std::cout <<"query x: " << query->info()->tensor_shape().x() << std::endl;
     std::cout <<"query y: " << query->info()->tensor_shape().y() << std::endl;
     std::cout <<"query z: " << query->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(0,0)))  << std::endl;
     
     std::cout <<"value x: " << value->info()->tensor_shape().x() << std::endl;
     std::cout <<"value y: " << value->info()->tensor_shape().y() << std::endl;
     std::cout <<"value z: " << value->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(0,0)))  << std::endl;
 
     if (_run_interleave_transpose)
     {
