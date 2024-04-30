@@ -129,25 +129,34 @@ void CpuLinear::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
 
-    // Run interleave kernel
-    ITensorPack interleave_pack{{ACL_SRC, a}, {ACL_DST, interleaved_a.get()}};
-    NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
-                                    interleave_pack);
-    // Use reshaped matrices
-    mm_pack.add_const_tensor(ACL_SRC_0, interleaved_a.get());
+    if (_run_interleave_transpose)
+    {
+        // Run interleave kernel
+        ITensorPack interleave_pack{{ACL_SRC, a}, {ACL_DST, interleaved_a.get()}};
+        NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
+                                        interleave_pack);
+        // Use reshaped matrices
+        mm_pack.add_const_tensor(ACL_SRC_0, interleaved_a.get());
+    }
 
     const ITensor *b_to_use = b;
-    // Run pretranspose kernel
-    ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
-    _pretranspose_b_func->run(pretranspose_pack);
-    b_to_use = pretransposed_b.get();
+    if (_pretranspose_b_func)
+    {
+        // Run pretranspose kernel
+        ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
+        _pretranspose_b_func->run(pretranspose_pack);
+        b_to_use = pretransposed_b.get();
+    }
 
-    // Run transpose1xw kernel
-    ITensorPack transpose_pack{{ACL_SRC, b_to_use}, {ACL_DST, transposed1xw_b.get()}};
-    NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
-                                    _transpose1xW_b_kernel->window(), transpose_pack);
+    if (_run_interleave_transpose)
+    {
+        // Run transpose1xw kernel
+        ITensorPack transpose_pack{{ACL_SRC, b_to_use}, {ACL_DST, transposed1xw_b.get()}};
+        NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
+                                        _transpose1xW_b_kernel->window(), transpose_pack);
 
-    b_to_use = transposed1xw_b.get();
+        b_to_use = transposed1xw_b.get();
+    }
 
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
@@ -156,10 +165,17 @@ void CpuLinear::run(ITensorPack &tensors)
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
 
+    std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
+    std::cout <<"a->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(a->ptr_to_element(Coordinates(0,0))) << std::endl;
+    std::cout <<"b_to_use->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
+    std::cout <<"temp_d->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << std::endl;
 
     // Run bias addition kernel
-    ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
-    NEScheduler::get().schedule_op(_add_bias.get(), Window::DimY, _add_bias->window(), pack);
+    if (_run_bias_addition)
+    {   
+        ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
+        NEScheduler::get().schedule_op(_add_bias.get(), Window::DimY, _add_bias->window(), pack);
+    }
 
 
 }
