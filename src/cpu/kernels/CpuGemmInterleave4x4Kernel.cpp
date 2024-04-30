@@ -115,9 +115,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     win_out.scale(Window::DimY, 0.25f);
 
-    std::cout << "win_out.x().end( " << win_out.x().end() << std::endl;
-    std::cout << "win_out.y().end( " << win_out.y().end() << std::endl;
-    std::cout << "win_out.z().end( " << win_out.z().end() << std::endl;
 
     Iterator in(src, win);
     Iterator out(dst, win_out);
@@ -138,10 +135,12 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                                 element_size);
                     std::memcpy(out.ptr() + (x * 4 + 3) * element_size, (in.ptr() + 3 * in_stride) + x * element_size,
                                 element_size);
+                    /*
                     std::cout << *reinterpret_cast<float *>((in.ptr() + 0 * in_stride) + x * element_size) << " "
                               << *reinterpret_cast<float *>((in.ptr() + 1 * in_stride) + x * element_size) << " "
                               << *reinterpret_cast<float *>((in.ptr() + 2 * in_stride) + x * element_size) << " "
                               << *reinterpret_cast<float *>((in.ptr() + 3 * in_stride) + x * element_size) << " ";
+                              */
 
 
                 }
