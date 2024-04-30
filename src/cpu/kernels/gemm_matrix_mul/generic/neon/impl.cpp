@@ -306,12 +306,12 @@ void matrix_matrix_multiply_f32(
     win_b.set(Window::DimX, Window::Dimension(window.x().start() / 4, window.x().end() / 4, 2 * in_b_stride));
     win_b.set(Window::DimY, Window::Dimension(0, 0, 0));
 
-    std::cout << "b_to_use (0,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(0,0))) << std::endl;
-    std::cout << "b_to_use (1,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(1,0))) << std::endl;
-    std::cout << "b_to_use (2,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(2,0))) << std::endl;
-    std::cout << "b_to_use (3,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(3,0))) << std::endl;
-    std::cout << "b_to_use (4,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(4,0))) << std::endl;
-    std::cout << "b_to_use (0,1) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(0,1))) << std::endl;
+    std::cout << "rhs (0,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(0,0))) << std::endl;
+    std::cout << "rhs (1,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(1,0))) << std::endl;
+    std::cout << "rhs (2,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(2,0))) << std::endl;
+    std::cout << "rhs (3,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(3,0))) << std::endl;
+    std::cout << "rhs (4,0) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(4,0))) << std::endl;
+    std::cout << "rhs (0,1) " << *reinterpret_cast<float *> (rhs->ptr_to_element(Coordinates(0,1))) << std::endl;
 
     Iterator ina(lhs, win_a);
     Iterator inb(rhs, win_b);
