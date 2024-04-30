@@ -325,7 +325,7 @@ void matrix_matrix_multiply_f32(
             auto mtx_b0 = reinterpret_cast<const float *>(inb.ptr());
             auto mtx_b1 = mtx_b0 + in_b_stride;
 
-            std::cout << "mtx_a0 " << *mtx_a0 << std::endl;
+            //std::cout << "mtx_a0 " << *mtx_a0 << std::endl;
             //std::cout << "mtx_b0 " << *mtx_b0 << std::endl;
             //std::cout << "mtx_b1 " << *mtx_b1 << std::endl;
 
