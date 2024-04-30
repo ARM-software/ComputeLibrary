@@ -135,13 +135,6 @@ void CpuLinear::run(ITensorPack &tensors)
 
     const ITensor *b_to_use = b;
 
-
-    std::cout << "b_to_use (0,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
-    std::cout << "b_to_use (1,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(1,0))) << std::endl;
-    std::cout << "b_to_use (2,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(2,0))) << std::endl;
-    std::cout << "b_to_use (3,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(3,0))) << std::endl;
-    std::cout << "b_to_use (4,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(4,0))) << std::endl;
-    std::cout << "b_to_use (0,1) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,1))) << std::endl;
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
@@ -152,34 +145,12 @@ void CpuLinear::run(ITensorPack &tensors)
         b_to_use = transposed1xw_b.get();
     }
 
-    std::cout <<"b_to_use->info()->strides_in_bytes()[0] " << b_to_use->info()->strides_in_bytes()[0] << std::endl;
-    std::cout <<"b_to_use->info()->strides_in_bytes()[1] " << b_to_use->info()->strides_in_bytes()[1] << std::endl;
-    
-    std::cout <<"b_to_use x: " << b_to_use->info()->tensor_shape().x() << std::endl;
-    std::cout <<"b_to_use y: " << b_to_use->info()->tensor_shape().y() << std::endl;
-    std::cout <<"b_to_use z: " << b_to_use->info()->tensor_shape().z() << std::endl;
-
     // Use reshaped matrices
-    std::cout << "b_to_use (0,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
-    std::cout << "b_to_use (1,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(1,0))) << std::endl;
-    std::cout << "b_to_use (2,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(2,0))) << std::endl;
-    std::cout << "b_to_use (3,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(3,0))) << std::endl;
-    std::cout << "b_to_use (4,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(4,0))) << std::endl;
-    std::cout << "b_to_use (0,1) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,1))) << std::endl;
-
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
 
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
-
-    std::cout <<"mm x: " << temp_d.get()->info()->tensor_shape().x() << std::endl;
-    std::cout <<"mm y: " << temp_d.get()->info()->tensor_shape().y() << std::endl;
-    std::cout <<"mm z: " << temp_d.get()->info()->tensor_shape().z() << std::endl;
-
-    std::cout <<"c x: " << c->info()->tensor_shape().x() << std::endl;
-    std::cout <<"c y: " << c->info()->tensor_shape().y() << std::endl;
-    std::cout <<"c z: " << c->info()->tensor_shape().z() << std::endl;
 
     // Run bias addition kernel
     if (_run_bias_addition)
@@ -188,9 +159,6 @@ void CpuLinear::run(ITensorPack &tensors)
         NEScheduler::get().schedule_op(_add_bias.get(), Window::DimY, _add_bias->window(), pack);
     }
 
-    std::cout <<"d->info()->tensor_shape().x() " << d->info()->tensor_shape().x() << std::endl;
-    std::cout <<"d->info()->tensor_shape().y() " << d->info()->tensor_shape().y() << std::endl;
-    std::cout <<"d->info()->tensor_shape().z() " << d->info()->tensor_shape().z() << std::endl;
 
 }
 
