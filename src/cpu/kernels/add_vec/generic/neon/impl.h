@@ -68,7 +68,9 @@ void add_vec_same_neon(
                 
                 for(int j =0; j <window_step_target0; j++)
                 {
-                    std::cout << *(reinterpret_cast<const ScalarType *>(input2_ptr + x)+j) << " ";
+                    std::cout << *(reinterpret_cast<const ScalarType *>(input1_ptr + x)+j) + 
+                                 *(reinterpret_cast<const ScalarType *>(input2_ptr + x)+j)
+                         << " ";
                 }
                 const auto val1 = wrapper::vloadq(input1_ptr + x);
                 const auto val2 = wrapper::vloadq(input2_ptr + x);
