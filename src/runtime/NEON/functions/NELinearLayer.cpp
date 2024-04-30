@@ -4,7 +4,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/common/utils/Log.h"
-#include "src/cpu/operators/CpuGemm.h"
+#include "src/cpu/operators/CpuLinear.h"
 
 namespace arm_compute
 {
@@ -15,7 +15,7 @@ struct  NELinearLayer::Impl
     const ITensor                      *weight{nullptr};
     const ITensor                      *bias{nullptr};
     ITensor                            *dst{nullptr};
-    std::unique_ptr<cpu::CpuGemm>       kernel{nullptr};
+    std::unique_ptr<cpu::CpuLinear>    kernel{nullptr};
 };
 
 NELinearLayer::NELinearLayer() : _impl(std::make_unique<Impl>())
@@ -36,7 +36,7 @@ void NELinearLayer::configure(const ITensor *input,
     _impl->bias     = bias;
     _impl->dst      = output;
 
-    _impl->kernel = std::make_unique<cpu::CpuGemm>();
+    _impl->kernel = std::make_unique<cpu::CpuLinear>();
     _impl->kernel->configure(input->info(), weight->info(), bias->info(), output->info(), 1.0f, 1.0f);
 }
 
@@ -45,7 +45,7 @@ Status NELinearLayer::validate(const ITensor *input,
                               const ITensor *bias, ITensor *output, const LinearLayerInfo& linear_info)
 {
     ARM_COMPUTE_UNUSED(linear_info);
-    return cpu::CpuGemm::validate(input->info(), weight->info(), bias->info(), output->info(), 1.0f, 1.0f);
+    return cpu::CpuLinear::validate(input->info(), weight->info(), bias->info(), output->info(), 1.0f, 1.0f);
 }
 
 void NELinearLayer::run()
