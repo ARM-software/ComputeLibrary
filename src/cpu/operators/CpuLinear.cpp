@@ -135,6 +135,13 @@ void CpuLinear::run(ITensorPack &tensors)
 
     const ITensor *b_to_use = b;
 
+
+    std::cout << "b_to_use (0,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
+    std::cout << "b_to_use (1,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(1,0))) << std::endl;
+    std::cout << "b_to_use (2,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(2,0))) << std::endl;
+    std::cout << "b_to_use (3,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(3,0))) << std::endl;
+    std::cout << "b_to_use (4,0) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(4,0))) << std::endl;
+    std::cout << "b_to_use (0,1) " << *reinterpret_cast<float *> (b_to_use->ptr_to_element(Coordinates(0,1))) << std::endl;
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
