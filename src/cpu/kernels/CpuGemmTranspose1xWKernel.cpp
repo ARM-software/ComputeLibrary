@@ -152,8 +152,8 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
                 else
                 {
                     std::memcpy(out_ptr + k * element_size, in_ptr + k * element_size, element_size);
-                    count++;
                     if(count%768 ==0)std::cout << *reinterpret_cast<const float *>(in_ptr + k * element_size) << std::endl;
+                    count++;
                 }
             }
         },
