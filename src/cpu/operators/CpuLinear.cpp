@@ -63,6 +63,10 @@ void CpuLinear::configure(const ITensorInfo *a,
             // Configure rhs transpose1xw kernel
             _transpose1xW_b_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
             _transpose1xW_b_kernel->configure(b_to_use, &_tmp_b);
+            std::cout << "_transpose1xW_b_kernel->configure window " <<std::endl;
+            std::cout << "_transpose1xW_b_kernel->window().x().end() " << _transpose1xW_b_kernel->window().x().end() <<std::endl;
+            std::cout << "_transpose1xW_b_kernel->window().y().end() " << _transpose1xW_b_kernel->window().y().end() <<std::endl;
+            std::cout << "_transpose1xW_b_kernel->window().z().end() " << _transpose1xW_b_kernel->window().z().end() <<std::endl;
             _aux_mem[Transposed1xWRHS] =
                 experimental::MemoryInfo(offset_int_vec(Transposed1xWRHS), experimental::MemoryLifetime::Persistent, _tmp_b.total_size());
             
@@ -138,7 +142,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout <<"b_to_use x: " << b_to_use->info()->tensor_shape().x() << std::endl;
     std::cout <<"b_to_use y: " << b_to_use->info()->tensor_shape().y() << std::endl;
     std::cout <<"b_to_use z: " << b_to_use->info()->tensor_shape().z() << std::endl;
-    
+
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
