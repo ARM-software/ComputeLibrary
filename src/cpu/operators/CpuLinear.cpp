@@ -54,6 +54,12 @@ void CpuLinear::configure(const ITensorInfo *a,
         }
         else
         {
+            _pretranspose_b_func = std::make_unique<CpuTranspose>();
+            _pretranspose_b_func->configure(b_to_use, &_pretransposed_b);
+            _aux_mem[PreTransposedRHS] =
+                experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), experimental::MemoryLifetime::Persistent, _pretransposed_b.total_size());
+            b_to_use = &_pretransposed_b;
+
             // Configure interleave kernel
             _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
             _interleave_kernel->configure(a, &_tmp_a);
@@ -117,6 +123,7 @@ void CpuLinear::run(ITensorPack &tensors)
 
 
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
+    CpuAuxTensorHandler pretransposed_b(offset_int_vec(PreTransposedRHS), _pretransposed_b, tensors,true);
     CpuAuxTensorHandler transposed1xw_b(offset_int_vec(Transposed1xWRHS), _tmp_b, tensors, true);
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
 
@@ -133,6 +140,16 @@ void CpuLinear::run(ITensorPack &tensors)
     }
 
     const ITensor *b_to_use = b;
+    if (_pretranspose_b_func)
+    {
+        if (!_reshape_b_only_on_first_run)
+        {
+            // Run pretranspose kernel
+            ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
+            _pretranspose_b_func->run(pretranspose_pack);
+        }
+        b_to_use = pretransposed_b.get();
+    }
 
     if (_run_interleave_transpose)
     {

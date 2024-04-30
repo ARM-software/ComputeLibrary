@@ -8,6 +8,7 @@
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
+#include "src/cpu/operators/CpuTranspose.h"
 #include "src/cpu/kernels/CpuAddVecKernel.h"
 
 namespace arm_compute
@@ -67,6 +68,7 @@ private:
     };
 
     TensorInfo _tmp_a{};
+    TensorInfo _pretransposed_b{};
     TensorInfo _tmp_b{};
     TensorInfo _tmp_d{};
 
@@ -77,6 +79,7 @@ private:
         true}; /**< If we run CpuGemmInterleave4x4Kernel on lhs and CpuGemmTranspose1xWKernel on rhs */
 
     std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel> _mm_kernel{nullptr};
+    std::unique_ptr<CpuTranspose>                         _pretranspose_b_func{nullptr};
     std::unique_ptr<kernels::CpuGemmInterleave4x4Kernel>  _interleave_kernel{nullptr};
     std::unique_ptr<kernels::CpuGemmTranspose1xWKernel>   _transpose1xW_b_kernel{nullptr};
     std::unique_ptr<kernels::CpuAddVecKernel>             _add_bias{nullptr};
