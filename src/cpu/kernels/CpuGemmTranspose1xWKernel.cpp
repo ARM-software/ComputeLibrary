@@ -133,7 +133,6 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
     const size_t out_stride   = dst->info()->strides_in_bytes()[1];
     const size_t vector_size  = 16 / element_size;
 
-    int count = 0;
     execute_window_loop(
         window,
         [&](const Coordinates &id)
@@ -152,8 +151,6 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
                 else
                 {
                     std::memcpy(out_ptr + k * element_size, in_ptr + k * element_size, element_size);
-                    if(count%768 ==0)std::cout << *reinterpret_cast<const float *>(out_ptr + k * element_size) << std::endl;
-                    count++;
                 }
             }
         },
