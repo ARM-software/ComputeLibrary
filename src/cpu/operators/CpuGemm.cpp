@@ -93,7 +93,7 @@ void CpuGemm::configure(const ITensorInfo *a,
         (!run_optimised ||
          (run_optimised && !cpu::CpuGemmAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
 
-    if (run_optimised && false)
+    if (run_optimised)
     {
         _run_interleave_transpose   = false;
         const ITensorInfo *c_to_use = is_c_bias ? c : nullptr;
@@ -410,7 +410,7 @@ void CpuGemm::run(ITensorPack &tensors)
     auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
-    if (_asm_glue && _asm_glue->is_configured() && false)
+    if (_asm_glue && _asm_glue->is_configured())
     {
         // Pass c to asm dispatch only if it's the bias tensor
         ITensorPack asm_pack = tensors;
