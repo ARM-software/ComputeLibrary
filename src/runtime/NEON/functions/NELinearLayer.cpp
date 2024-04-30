@@ -52,6 +52,8 @@ void NELinearLayer::run()
 {
     ITensorPack pack;
 
+    std::cout << "src/cpu/operators/ NELinearLayer::run()" << std::endl;
+    std::cout <<"src->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(_impl->src->ptr_to_element(Coordinates(0,0))) << std::endl;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->weight);
     pack.add_tensor(TensorType::ACL_SRC_2, _impl->bias);
