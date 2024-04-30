@@ -17,9 +17,9 @@ template <typename ScalarType>
 void add_vec_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, size_t src0_target_dim, size_t src1_target_dim, const ConvertPolicy &policy, const Window &window)
 {
-    std::cout << "Add veccccccccccccccccccccccccccccccccccccccc  " << std::endl;
-    std::cout << " src0_target_dim " << src0_target_dim << std::endl;
-    std::cout << " src1_target_dim " << src1_target_dim << std::endl;
+    //std::cout << "Add veccccccccccccccccccccccccccccccccccccccc  " << std::endl;
+    //std::cout << " src0_target_dim " << src0_target_dim << std::endl;
+    //std::cout << " src1_target_dim " << src1_target_dim << std::endl;
 
     // Create input windows
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
@@ -27,13 +27,13 @@ void add_vec_same_neon(
     input2_win.use_tensor_dimensions(src1->info()->tensor_shape());
     input2_win = input2_win.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
-    std::cout << "input1_win x" << input1_win.x().end() << std::endl;
-    std::cout << "input1_win y" << input1_win.y().end() << std::endl;
-    std::cout << "input1_win z" << input1_win.z().end() << std::endl;
+    //std::cout << "input1_win x" << input1_win.x().end() << std::endl;
+    //std::cout << "input1_win y" << input1_win.y().end() << std::endl;
+    //std::cout << "input1_win z" << input1_win.z().end() << std::endl;
 
-    std::cout << "input2_win x" << input2_win.x().end() << std::endl;
-    std::cout << "input2_win y" << input2_win.y().end() << std::endl;
-    std::cout << "input2_win z" << input2_win.z().end() << std::endl;
+    //std::cout << "input2_win x" << input2_win.x().end() << std::endl;
+    //std::cout << "input2_win y" << input2_win.y().end() << std::endl;
+    //std::cout << "input2_win z" << input2_win.z().end() << std::endl;
 
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
@@ -43,9 +43,9 @@ void add_vec_same_neon(
     const auto    window_start_target0        = static_cast<int>(window[src0_target_dim].start());
     const auto    window_end_target0          = static_cast<int>(window[src0_target_dim].end());
 
-    // Clear X Dimension on execution window as we handle manually
+    // Clear target Dimension on execution window as we handle manually
     input1_win.set(src0_target_dim, Window::Dimension(0, 1, 1));
-    input2_win.set(src1_target_dim, Window::Dimension(0, 0, 0));
+    input2_win.set(src1_target_dim, Window::Dimension(0, 0, 0)); // No increament
 
     Iterator input1(src0, input1_win);
     Iterator input2(src1, input2_win);
@@ -59,23 +59,24 @@ void add_vec_same_neon(
             const auto input2_ptr = reinterpret_cast<const ScalarType *>(input2.ptr());
             const auto output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
 
-            std::cout << *reinterpret_cast<const ScalarType *>(src1->ptr_to_element(Coordinates(0,0))) << std::endl;
-            std::cout << *input2_ptr << std::endl;
+            //std::cout << *reinterpret_cast<const ScalarType *>(src1->ptr_to_element(Coordinates(0,0))) << std::endl;
+            //std::cout << *input2_ptr << std::endl;
             // Compute S elements per iteration
             int x = window_start_target0;
             for (; x <= (window_end_target0 - window_step_target0); x += window_step_target0)
             {
+                /*
                 for(int j =0; j <window_step_target0; j++)
                 {
                     std::cout << *(reinterpret_cast<const ScalarType *>(input2_ptr + x)+j) << " ";
-                }
+                }*/
                 const auto val1 = wrapper::vloadq(input1_ptr + x);
                 const auto val2 = wrapper::vloadq(input2_ptr + x);
                 const auto res =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                 wrapper::vstore(output_ptr + x, res);
             }
-            std::cout << std::endl;
+            //std::cout << std::endl;
             // Compute left-over elements
             for (; x < window_end_target0; ++x)
             {
@@ -84,7 +85,7 @@ void add_vec_same_neon(
                 *(output_ptr + x) =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
             }
-            std::cout << x << std::endl;
+            //std::cout << x << std::endl;
         },
         input1, input2, output);
 }
