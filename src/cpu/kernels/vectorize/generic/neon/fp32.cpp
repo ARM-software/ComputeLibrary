@@ -34,7 +34,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     {
         dst->info()->set_valid_region(dst->info()->valid_region().set(0,0,reshape_input_x));
     }
-    Window win = calculate_max_window(dst->info()->valid_region());
+    Window win(window);
 
     std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
     std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
