@@ -34,7 +34,7 @@ void run_position_embedding(const Window &window, const ITensor *src, const ITen
     const unsigned int window_start_x   = static_cast<unsigned int>(window.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(window.x().end());
 
-    const unsigned int vector_depth     = vector->info()->tensor_shape().y();
+    const unsigned int vector_depth     = vector->info()->tensor_shape().x();
 
     unsigned int offset_vector,offset_dst;
 
