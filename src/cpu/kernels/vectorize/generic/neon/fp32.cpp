@@ -11,6 +11,19 @@ namespace cpu
 void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITensor *dst, const Window &window)
 {
     std::cout << " src/cpu/kernels/vectorize/generic/neon/fp32.cpp Window: " << std::endl;
+
+    std::cout << "src->info()->tensor_shape().x() " << src->info()->tensor_shape().x() << std::endl;
+    std::cout << "src->info()->tensor_shape().y() " << src->info()->tensor_shape().y() << std::endl;
+    std::cout << "src->info()->tensor_shape().z() " << src->info()->tensor_shape().z() << std::endl;
+
+    std::cout << "vector->info()->tensor_shape().x() " << vector->info()->tensor_shape().x() << std::endl;
+    std::cout << "vector->info()->tensor_shape().y() " << vector->info()->tensor_shape().y() << std::endl;
+    std::cout << "vector->info()->tensor_shape().z() " << vector->info()->tensor_shape().z() << std::endl;
+
+    std::cout << "dst->info()->tensor_shape().x() " << dst->info()->tensor_shape().x() << std::endl;
+    std::cout << "dst->info()->tensor_shape().y() " << dst->info()->tensor_shape().y() << std::endl;
+    std::cout << "dst->info()->tensor_shape().z() " << dst->info()->tensor_shape().z() << std::endl;
+
     std::cout << "window.x start " << window.x().start() << " end " << window.x().end() << " step " << window.x().step() << std::endl; 
     std::cout << "window.y start " << window.y().start() << " end " << window.y().end() << " step " << window.y().step() << std::endl; 
     std::cout << "window.z start " << window.z().start() << " end " << window.z().end() << " step " << window.z().step() << std::endl; 
@@ -22,7 +35,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
         dst->info()->set_valid_region(dst->info()->valid_region().set(0,0,reshape_input_x));
     }
     Window win = calculate_max_window(dst->info()->valid_region());
-    
+
     std::cout << "window.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
     std::cout << "window.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
     std::cout << "window.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
@@ -35,7 +48,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     unsigned int offset_vector,offset_dst;
 
     win.set(Window::DimX, Window::Dimension(0,1,1));
-    win.set(Window::DimY, Window::Dimension(0,1,1));
+    win.set(Window::DimY, Window::Dimension(0,0,1));
     Iterator src_iter(src,win);
     Iterator dst_iter(dst,win);
     Iterator vector_iter(vector,win);
