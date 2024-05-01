@@ -64,7 +64,6 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
         {
             for(unsigned int x = window_start_x; x < window_end_x; x++)
             {
-                std::cout<< "x:  " << x << std::endl;
                 offset_dst     = x * vector_depth;
                 offset_vector  = *(src_ptr+x) * vector_depth;
                 std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));
