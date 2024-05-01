@@ -971,6 +971,8 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     // Get input tensor descriptor
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
+    std::cout <<"input_tensor_desc.shape.x() " <<  input_tensor_desc.shape.x() << std::endl;
+    std::cout <<"input_tensor_desc.shape.y() " <<  input_tensor_desc.shape.y() << std::endl;
     // Vocabulary const node output tensor descriptor
     TensorDescriptor v_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
