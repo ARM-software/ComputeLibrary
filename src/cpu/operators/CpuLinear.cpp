@@ -142,7 +142,9 @@ void CpuLinear::run(ITensorPack &tensors)
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(1,0))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(2,0))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(3,0))) << " " 
+              
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(6,0))) << " " 
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(7,0))) << " " 
 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(767,0))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(768,0))) << " " 
