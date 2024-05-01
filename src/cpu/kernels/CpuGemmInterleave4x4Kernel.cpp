@@ -122,6 +122,7 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     // Set window for the src tensor
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    /*
     std::cout << "win.x().end( " << win.x().end() << std::endl;
     std::cout << "win.y().end( " << win.y().end() << std::endl;
     std::cout << "win.z().end( " << win.z().end() << std::endl;
@@ -129,7 +130,7 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
 
     std::cout << "in_height " << in_height << std::endl;
     std::cout << "in_stride " << in_stride << std::endl;
-    
+    */
 
     // Set window for the dst tensor
     Window win_out(window);
