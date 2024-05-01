@@ -151,9 +151,9 @@ void CpuLinear::run(ITensorPack &tensors)
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,1))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,2))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,3))) << " " 
-
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,4))) << " "
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,5))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,6))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(1,6))) << " " 
     << std::endl;
 
     if (_run_interleave_transpose)
