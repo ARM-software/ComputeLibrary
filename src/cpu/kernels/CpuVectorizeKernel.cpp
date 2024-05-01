@@ -55,6 +55,9 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
     {
         dst->set_tensor_shape(dst_shape);
     }
+    std::cout << "dst->info()->tensor_shape().x() " << dst->tensor_shape().x() << std::endl;
+    std::cout << "dst->info()->tensor_shape().y() " << dst->tensor_shape().y() << std::endl;
+    std::cout << "dst->info()->tensor_shape().z() " << dst->tensor_shape().z() << std::endl;
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
