@@ -54,17 +54,17 @@ void CpuGemmTranspose1xWKernel::configure(const ITensorInfo *src, ITensorInfo *d
     std::cout << "src->tensor_shape().y() " << src->tensor_shape().y() << std::endl;
     std::cout << "src->tensor_shape().z() " << src->tensor_shape().z() << std::endl;
 
-    std::cout << "src->valid_strides_in_bytes()[0] " <<src->valid_strides_in_bytes()[0] <<std::endl; 
-    std::cout << "src->valid_strides_in_bytes()[1] " <<src->valid_strides_in_bytes()[1] <<std::endl; 
-    std::cout << "src->valid_strides_in_bytes()[2] " <<src->valid_strides_in_bytes()[2] <<std::endl; 
+    std::cout << "src->valid_strides_in_bytes()[0] " <<src->strides_in_bytes()[0] <<std::endl; 
+    std::cout << "src->valid_strides_in_bytes()[1] " <<src->strides_in_bytes()[1] <<std::endl; 
+    std::cout << "src->valid_strides_in_bytes()[2] " <<src->strides_in_bytes()[2] <<std::endl; 
 
     std::cout << "dst->tensor_shape().x() " << dst->tensor_shape().x() << std::endl;
     std::cout << "dst->tensor_shape().y() " << dst->tensor_shape().y() << std::endl;
     std::cout << "dst->tensor_shape().z() " << dst->tensor_shape().z() << std::endl;
 
-    std::cout << "dst->valid_strides_in_bytes()[0] " <<dst->valid_strides_in_bytes()[0] <<std::endl; 
-    std::cout << "dst->valid_strides_in_bytes()[1] " <<dst->valid_strides_in_bytes()[1] <<std::endl; 
-    std::cout << "dst->valid_strides_in_bytes()[2] " <<dst->valid_strides_in_bytes()[2] <<std::endl; 
+    std::cout << "dst->valid_strides_in_bytes()[0] " <<dst->strides_in_bytes()[0] <<std::endl; 
+    std::cout << "dst->valid_strides_in_bytes()[1] " <<dst->strides_in_bytes()[1] <<std::endl; 
+    std::cout << "dst->valid_strides_in_bytes()[2] " <<dst->strides_in_bytes()[2] <<std::endl; 
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmTranspose1xWKernel::validate(src, dst));

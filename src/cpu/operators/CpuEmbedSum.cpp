@@ -70,15 +70,6 @@ void CpuEmbedSum::run(ITensorPack &tensors)
     run_pack.add_tensor(ACL_DST,output);
     NEScheduler::get().schedule_op(_add_kernel_2.get(), Window::DimY, _add_kernel_2->window(), run_pack);
 
-    std::cout << "src/cpu/operators/CpuEmbedSum.cpp output " << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0))) << std::endl;
-    std::cout << "token->info()->valid_strides_in_bytes()[0] " <<token->info()->strides_in_bytes()[0] <<std::endl; 
-    std::cout << "token->info()->valid_strides_in_bytes()[1] " <<token->info()->strides_in_bytes()[1] <<std::endl; 
-    std::cout << "token->info()->valid_strides_in_bytes()[2] " <<token->info()->strides_in_bytes()[2] <<std::endl; 
-
-    std::cout << "output->info()->valid_strides_in_bytes()[0] " <<output->info()->strides_in_bytes()[0] <<std::endl; 
-    std::cout << "output->info()->valid_strides_in_bytes()[1] " <<output->info()->strides_in_bytes()[1] <<std::endl; 
-    std::cout << "output->info()->valid_strides_in_bytes()[2] " <<output->info()->strides_in_bytes()[2] <<std::endl; 
 
     /*
     // Reshape window if tensor valid region has been reshaped
