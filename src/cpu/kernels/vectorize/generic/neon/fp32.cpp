@@ -17,13 +17,12 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     
     /* Runtime reshape valid tensor region if input has been reshaped during preprocess */
     size_t reshape_input_x = src->info()->valid_region().shape.x();
-    std::cout << "reshape_input_x " << reshape_input_x << std::endl;
     if(src->info()->tensor_shape().x() != reshape_input_x)
     {
         dst->info()->set_valid_region(dst->info()->valid_region().set(0,0,reshape_input_x));
     }
     Window win = calculate_max_window(dst->info()->valid_region());
-    std::cout << " reshaped " << std::endl;
+    
     std::cout << "window.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
     std::cout << "window.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
     std::cout << "window.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
