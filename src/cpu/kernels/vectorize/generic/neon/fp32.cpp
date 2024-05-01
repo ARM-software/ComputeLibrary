@@ -48,21 +48,21 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     unsigned int offset_vector,offset_dst;
 
     win.set(Window::DimX, Window::Dimension(0,1,1));
+    win.set(Window::DimY, Window::Dimension(0,0,1));
     win.set(Window::DimZ, Window::Dimension(0,0,1));
     Iterator src_iter(src,win);
-    Iterator dst_iter(dst,win);
-    Iterator vector_iter(vector,win);
 
     const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
-    const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
-    const auto vector_ptr   = reinterpret_cast<float *>(vector_iter.ptr());
-    std::cout << " src/cpu/kernels/vectorize/generic/neon/fp32.cpp win:" << std::endl;
-    std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
-    std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
-    std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
-
-    std::cout << "vector depth " << vector_depth << std::endl;
-    
+    execute_window_loop(win,
+        [&](const Coordinates &)
+        {
+            for(unsigned int x = window_start_x; x < window_end_x; x++)
+            {
+                std::cout<< "x:  " << x << std::endl;
+            }
+            
+        }, src_iter);
+    /*
     execute_window_loop(win,
         [&](const Coordinates &)
         {
@@ -76,7 +76,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
                 << *(dst_ptr + offset_dst + vector_depth -1) << std::endl;
             }
             
-        }, src_iter);
+        }, src_iter);*/
     /*
     unsigned int id_src, offset_vector, offset_dst;
     
