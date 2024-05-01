@@ -40,8 +40,8 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
     std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
     
-    const unsigned int window_start_y   = static_cast<unsigned int>(win.y().start());
-    const unsigned int window_end_y     = static_cast<unsigned int>(win.y().end());
+    const unsigned int window_start_x   = static_cast<unsigned int>(win.x().start());
+    const unsigned int window_end_x     = static_cast<unsigned int>(win.x().end());
 
     const unsigned int vector_depth     = vector->info()->tensor_shape().x(); 
 
@@ -63,7 +63,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     execute_window_loop(win,
         [&](const Coordinates &)
         {
-            for(unsigned int y = window_start_y; y < window_end_y; y++)
+            for(unsigned int x = window_start_x; x < window_end_x; x++)
             {
 
                 std::cout<< "x:  " << x << std::endl;
