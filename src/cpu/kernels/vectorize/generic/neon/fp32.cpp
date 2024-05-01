@@ -60,6 +60,8 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
     std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
     std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
+
+    std::cout << "vector depth " << vector_depth << std::endl;
     
     execute_window_loop(win,
         [&](const Coordinates &)
