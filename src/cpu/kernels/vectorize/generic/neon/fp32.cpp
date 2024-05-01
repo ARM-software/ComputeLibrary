@@ -43,7 +43,7 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     const unsigned int window_start_x   = static_cast<unsigned int>(win.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(win.x().end());
 
-    const unsigned int vector_depth     = vector->info()->tensor_shape().y(); 
+    const unsigned int vector_depth     = vector->info()->tensor_shape().x(); 
 
     unsigned int offset_vector,offset_dst;
 
