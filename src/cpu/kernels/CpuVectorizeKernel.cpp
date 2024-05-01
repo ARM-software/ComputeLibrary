@@ -65,6 +65,10 @@ void CpuVectorizeKernel::configure(const ITensorInfo *src, const ITensorInfo *ve
 
     win = calculate_max_window(*dst, Steps());
     ICPPKernel::configure(win);
+    std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
+    std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
+    std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << winz().step() << std::endl; 
+    
     
 }
 
