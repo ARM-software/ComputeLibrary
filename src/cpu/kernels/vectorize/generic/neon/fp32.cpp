@@ -36,9 +36,9 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     }
     Window win = calculate_max_window(dst->info()->valid_region());
 
-    std::cout << "window.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
-    std::cout << "window.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
-    std::cout << "window.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
+    std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
+    std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
+    std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
     
     const unsigned int window_start_x   = static_cast<unsigned int>(win.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(win.x().end());
@@ -57,9 +57,9 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
     const auto vector_ptr   = reinterpret_cast<float *>(vector_iter.ptr());
     std::cout << " src/cpu/kernels/vectorize/generic/neon/fp32.cpp win:" << std::endl;
-    std::cout << "window.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
-    std::cout << "window.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
-    std::cout << "window.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
+    std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
+    std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
+    std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
     
     execute_window_loop(win,
         [&](const Coordinates &)
