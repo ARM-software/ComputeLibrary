@@ -49,7 +49,6 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
 
     win.set(Window::DimX, Window::Dimension(0,1,1));
     win.set(Window::DimY, Window::Dimension(0,0,1));
-    win.set(Window::DimZ, Window::Dimension(0,0,1));
     Iterator src_iter(src,win);
     Iterator dst_iter(dst,win);
     Iterator vector_iter(vector,win);
