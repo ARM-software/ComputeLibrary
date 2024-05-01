@@ -976,17 +976,17 @@ NodeID GraphBuilder::add_embedding_node(Graph &g,
     // Vocabulary const node output tensor descriptor
     TensorDescriptor v_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-    v_desc.shape = TensorShape(emb_info.d_vocab(),emb_info.d_model());
+    v_desc.shape = TensorShape(emb_info.d_model(),emb_info.d_vocab());
 
     // Segment const node output tensor descriptor
     TensorDescriptor s_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-    s_desc.shape = TensorShape(emb_info.d_segment(),emb_info.d_model());
+    s_desc.shape = TensorShape(emb_info.d_model(),emb_info.d_segment());
 
     // Position const node output tensor descriptor
     TensorDescriptor p_desc = input_tensor_desc;
     // Reshape tensor to store weight with size of vocabulary and depth of d_model.
-    p_desc.shape = TensorShape(emb_info.d_position(),emb_info.d_model());
+    p_desc.shape = TensorShape(emb_info.d_model(),emb_info.d_position());
 
     NodeID v_c_nid  = add_const_node_with_name(g, params, "vocabs", v_desc,    std::move(vocabs_accessor));
     NodeID s_c_nid  = add_const_node_with_name(g, params, "segements", s_desc, std::move(segemnts_accessor));

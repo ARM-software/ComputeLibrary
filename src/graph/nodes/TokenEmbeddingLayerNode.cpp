@@ -26,7 +26,7 @@ TensorDescriptor TokenEmbeddingLayerNode::compute_output_descriptor(const Tensor
 {
     ARM_COMPUTE_UNUSED(emb_info);
     TensorDescriptor output_descriptor = vector_descriptor;
-    output_descriptor.shape.set(0, input_descriptor.shape.x());
+    output_descriptor.shape.set(1, input_descriptor.shape.x());
 
     std::cout << "src/graph/nodes/TokenEmbeddingLayerNode.cpp compute_output_descriptor" << std::endl;
     std::cout << "output_descriptor shape: " ;
