@@ -48,6 +48,23 @@ void CpuGemmInterleave4x4Kernel::configure(const ITensorInfo *src, ITensorInfo *
 
     // dst auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_interleaved_shape(*src)));
+    std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp src shape " << std::endl;
+
+    std::cout << "src->tensor_shape().x() " << src->tensor_shape().x() << std::endl;
+    std::cout << "src->tensor_shape().y() " << src->tensor_shape().y() << std::endl;
+    std::cout << "src->tensor_shape().z() " << src->tensor_shape().z() << std::endl;
+
+    std::cout << "src->valid_strides_in_bytes()[0] " <<src->valid_strides_in_bytes()[0] <<std::endl; 
+    std::cout << "src->valid_strides_in_bytes()[1] " <<src->valid_strides_in_bytes()[1] <<std::endl; 
+    std::cout << "src->valid_strides_in_bytes()[2] " <<src->valid_strides_in_bytes()[2] <<std::endl; 
+
+    std::cout << "dst->tensor_shape().x() " << dst->tensor_shape().x() << std::endl;
+    std::cout << "dst->tensor_shape().y() " << dst->tensor_shape().y() << std::endl;
+    std::cout << "dst->tensor_shape().z() " << dst->tensor_shape().z() << std::endl;
+
+    std::cout << "dst->valid_strides_in_bytes()[0] " <<dst->valid_strides_in_bytes()[0] <<std::endl; 
+    std::cout << "dst->valid_strides_in_bytes()[1] " <<dst->valid_strides_in_bytes()[1] <<std::endl; 
+    std::cout << "dst->valid_strides_in_bytes()[2] " <<dst->valid_strides_in_bytes()[2] <<std::endl; 
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmInterleave4x4Kernel::validate(src, dst));
