@@ -125,13 +125,13 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
     std::cout << "window.y().end() " << window.y().end() << std::endl;
     std::cout << "window.z().end() " << window.z().end() << std::endl;
 
-    std::cout << "win_out.x().end() " << win_out.x().end() << std::endl;
-    std::cout << "win_out.y().end() " << win_out.y().end() << std::endl;
-    std::cout << "win_out.z().end() " << win_out.z().end() << std::endl;
-
 
     win_out.set(Window::DimX, Window::Dimension(0, 0, 0));
     win_out.set(Window::DimY, Window::Dimension(0, 0, 0));
+
+    std::cout << "win_out.x().end() " << win_out.x().end() << std::endl;
+    std::cout << "win_out.y().end() " << win_out.y().end() << std::endl;
+    std::cout << "win_out.z().end() " << win_out.z().end() << std::endl;
 
     Iterator in(src, window);
     Iterator out(dst, win_out);
