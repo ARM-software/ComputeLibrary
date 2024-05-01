@@ -137,10 +137,12 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "a stride in byte x " << a->info()->strides_in_bytes()[0] << std::endl;
     std::cout << "a stride in byte y " << a->info()->strides_in_bytes()[1] << std::endl;
     std::cout << "a stride in byte z " << a->info()->strides_in_bytes()[2] << std::endl;
+
     std::cout << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0))) << " "
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(1,0))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(2,0))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(3,0))) << " " 
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(6,0))) << " " 
 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(767,0))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(768,0))) << " " 
