@@ -149,6 +149,7 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
         window,
         [&](const Coordinates &id)
         {
+            std::cout << "x: " << id.x() << " y: " << id.y() << std::endl;
             const uint8_t *in_ptr = in.ptr();
             uint8_t *const out_ptr =
                 out.ptr() + (id.y() * vector_size) * element_size + (id.x() / vector_size) * out_stride;
