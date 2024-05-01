@@ -44,7 +44,7 @@ TensorDescriptor SegmentEmbeddingLayerNode::compute_output_descriptor(const Tens
                                                                     const TensorDescriptor &vector_descriptor)
 {
     TensorDescriptor output_descriptor = vector_descriptor;
-    output_descriptor.shape.set(0, input_descriptor.shape.x());
+    output_descriptor.shape.set(1, input_descriptor.shape.x());
     std::cout << "src/graph/nodes/SegmentEmbeddingLayerNode.cpp compute_output_descriptor" << std::endl;
     std::cout << "output_descriptor shape: " ;
         for(auto v: output_descriptor.shape)std::cout << " "<<v;
