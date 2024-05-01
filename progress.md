@@ -196,6 +196,7 @@ Functionality:
                       embeddings = self.LayerNorm(embeddings)
                       embeddings = self.dropout(embeddings)
                 while out inplementation does not
+            10. segemnt embedding using verctorize kernel, produeces (*,2) shape, should be (*,1)
 
 
 Optimization: 
