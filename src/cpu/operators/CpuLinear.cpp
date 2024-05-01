@@ -129,6 +129,11 @@ void CpuLinear::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
     std::cout << "before interleave_transpose " << std::endl;
+
+    std::cout << "a tensor_shape x " << a->info()->tensor_shape().x() << std::endl;
+    std::cout << "a tensor_shape y " << a->info()->tensor_shape().y() << std::endl;
+    std::cout << "a tensor_shape z " << a->info()->tensor_shape().z() << std::endl;
+
     std::cout << "a stride in byte x " << a->info()->strides_in_bytes()[0] << std::endl;
     std::cout << "a stride in byte y " << a->info()->strides_in_bytes()[1] << std::endl;
     std::cout << "a stride in byte z " << a->info()->strides_in_bytes()[2] << std::endl;
