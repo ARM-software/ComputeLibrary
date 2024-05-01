@@ -128,6 +128,18 @@ void CpuLinear::run(ITensorPack &tensors)
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
+    std::cout << "before interleave_transpose " << std::endl;
+    std::cout << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0))) << " "
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(1,0))) << " " 
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(2,0))) << " " 
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(3,0))) << " " 
+    << std::endl;
+
+    std::cout << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0))) << " "
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,1))) << " " 
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,2))) << " " 
+              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,3))) << " " 
+    << std::endl;
 
     if (_run_interleave_transpose)
     {
@@ -140,7 +152,15 @@ void CpuLinear::run(ITensorPack &tensors)
     }
 
     const ITensor *b_to_use = b;
-   
+    /*
+    if (_pretranspose_b_func)
+    {
+        // Run pretranspose kernel
+        ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
+        _pretranspose_b_func->run(pretranspose_pack);
+        b_to_use = pretransposed_b.get();
+    }
+    */
 
     if (_run_interleave_transpose)
     {
@@ -151,7 +171,7 @@ void CpuLinear::run(ITensorPack &tensors)
 
         b_to_use = transposed1xw_b.get();
     }
-    
+
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
 

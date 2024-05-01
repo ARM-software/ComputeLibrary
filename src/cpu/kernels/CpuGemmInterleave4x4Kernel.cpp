@@ -48,23 +48,6 @@ void CpuGemmInterleave4x4Kernel::configure(const ITensorInfo *src, ITensorInfo *
 
     // dst auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_interleaved_shape(*src)));
-    std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp src shape " << std::endl;
-
-    std::cout << "src->tensor_shape().x() " << src->tensor_shape().x() << std::endl;
-    std::cout << "src->tensor_shape().y() " << src->tensor_shape().y() << std::endl;
-    std::cout << "src->tensor_shape().z() " << src->tensor_shape().z() << std::endl;
-
-    std::cout << "src->valid_strides_in_bytes()[0] " <<src->strides_in_bytes()[0] <<std::endl; 
-    std::cout << "src->valid_strides_in_bytes()[1] " <<src->strides_in_bytes()[1] <<std::endl; 
-    std::cout << "src->valid_strides_in_bytes()[2] " <<src->strides_in_bytes()[2] <<std::endl; 
-
-    std::cout << "dst->tensor_shape().x() " << dst->tensor_shape().x() << std::endl;
-    std::cout << "dst->tensor_shape().y() " << dst->tensor_shape().y() << std::endl;
-    std::cout << "dst->tensor_shape().z() " << dst->tensor_shape().z() << std::endl;
-
-    std::cout << "dst->valid_strides_in_bytes()[0] " <<dst->strides_in_bytes()[0] <<std::endl; 
-    std::cout << "dst->valid_strides_in_bytes()[1] " <<dst->strides_in_bytes()[1] <<std::endl; 
-    std::cout << "dst->valid_strides_in_bytes()[2] " <<dst->strides_in_bytes()[2] <<std::endl; 
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmInterleave4x4Kernel::validate(src, dst));
@@ -92,7 +75,6 @@ Status CpuGemmInterleave4x4Kernel::validate(const ITensorInfo *src, const ITenso
 
 void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
-    std::cout << "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp " << std::endl;
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
@@ -122,15 +104,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
     // Set window for the src tensor
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    /*
-    std::cout << "win.x().end( " << win.x().end() << std::endl;
-    std::cout << "win.y().end( " << win.y().end() << std::endl;
-    std::cout << "win.z().end( " << win.z().end() << std::endl;
-    std::cout << "window_end_x " << window_end_x <<std::endl;
-
-    std::cout << "in_height " << in_height << std::endl;
-    std::cout << "in_stride " << in_stride << std::endl;
-    */
 
     // Set window for the dst tensor
     Window win_out(window);
@@ -157,13 +130,6 @@ void CpuGemmInterleave4x4Kernel::run_op(ITensorPack &tensors, const Window &wind
                                 element_size);
                     std::memcpy(out.ptr() + (x * 4 + 3) * element_size, (in.ptr() + 3 * in_stride) + x * element_size,
                                 element_size);
-                    /*
-                    std::cout << *reinterpret_cast<float *>((in.ptr() + 0 * in_stride) + x * element_size) << " "
-                              << *reinterpret_cast<float *>((in.ptr() + 1 * in_stride) + x * element_size) << " "
-                              << *reinterpret_cast<float *>((in.ptr() + 2 * in_stride) + x * element_size) << " "
-                              << *reinterpret_cast<float *>((in.ptr() + 3 * in_stride) + x * element_size) << " ";
-                              */
-
 
                 }
             }

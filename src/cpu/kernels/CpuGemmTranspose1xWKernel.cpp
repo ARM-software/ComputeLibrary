@@ -48,23 +48,6 @@ void CpuGemmTranspose1xWKernel::configure(const ITensorInfo *src, ITensorInfo *d
 
     // Output tensor auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*src)));
-    std::cout << "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp src shape " << std::endl;
-
-    std::cout << "src->tensor_shape().x() " << src->tensor_shape().x() << std::endl;
-    std::cout << "src->tensor_shape().y() " << src->tensor_shape().y() << std::endl;
-    std::cout << "src->tensor_shape().z() " << src->tensor_shape().z() << std::endl;
-
-    std::cout << "src->valid_strides_in_bytes()[0] " <<src->strides_in_bytes()[0] <<std::endl; 
-    std::cout << "src->valid_strides_in_bytes()[1] " <<src->strides_in_bytes()[1] <<std::endl; 
-    std::cout << "src->valid_strides_in_bytes()[2] " <<src->strides_in_bytes()[2] <<std::endl; 
-
-    std::cout << "dst->tensor_shape().x() " << dst->tensor_shape().x() << std::endl;
-    std::cout << "dst->tensor_shape().y() " << dst->tensor_shape().y() << std::endl;
-    std::cout << "dst->tensor_shape().z() " << dst->tensor_shape().z() << std::endl;
-
-    std::cout << "dst->valid_strides_in_bytes()[0] " <<dst->strides_in_bytes()[0] <<std::endl; 
-    std::cout << "dst->valid_strides_in_bytes()[1] " <<dst->strides_in_bytes()[1] <<std::endl; 
-    std::cout << "dst->valid_strides_in_bytes()[2] " <<dst->strides_in_bytes()[2] <<std::endl; 
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmTranspose1xWKernel::validate(src, dst));
@@ -74,9 +57,6 @@ void CpuGemmTranspose1xWKernel::configure(const ITensorInfo *src, ITensorInfo *d
     // Configure kernel window
     Window win = calculate_max_window(*src, Steps(vector_size));
     ICPPKernel::configure(win);
-    std::cout << "win.x().end() " << win.x().end() << std::endl;
-    std::cout << "win.y().end() " << win.y().end() << std::endl;
-    std::cout << "win.z().end() " << win.z().end() << std::endl;
 }
 
 Status CpuGemmTranspose1xWKernel::validate(const ITensorInfo *src, const ITensorInfo *dst)
@@ -120,18 +100,10 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
     Window win_out(window);
-    std::cout << "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp " << std::endl;
-    std::cout << "window.x().end() " << window.x().end() << std::endl;
-    std::cout << "window.y().end() " << window.y().end() << std::endl;
-    std::cout << "window.z().end() " << window.z().end() << std::endl;
 
 
     win_out.set(Window::DimX, Window::Dimension(0, 0, 0));
     win_out.set(Window::DimY, Window::Dimension(0, 0, 0));
-
-    std::cout << "win_out.x().end() " << win_out.x().end() << std::endl;
-    std::cout << "win_out.y().end() " << win_out.y().end() << std::endl;
-    std::cout << "win_out.z().end() " << win_out.z().end() << std::endl;
 
     Iterator in(src, window);
     Iterator out(dst, win_out);
@@ -141,15 +113,10 @@ void CpuGemmTranspose1xWKernel::run_op(ITensorPack &tensors, const Window &windo
     const size_t out_stride   = dst->info()->strides_in_bytes()[1];
     const size_t vector_size  = 16 / element_size;
 
-    std::cout<< "in_width " << in_width << std::endl;
-    std::cout<< "out_stride " << out_stride << std::endl;
-    std::cout<< "vector_size " << vector_size << std::endl;
-
     execute_window_loop(
         window,
         [&](const Coordinates &id)
         {
-            std::cout << "x: " << id.x() << " y: " << id.y() << std::endl;
             const uint8_t *in_ptr = in.ptr();
             uint8_t *const out_ptr =
                 out.ptr() + (id.y() * vector_size) * element_size + (id.x() / vector_size) * out_stride;
