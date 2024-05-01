@@ -151,7 +151,7 @@ void CpuLinear::run(ITensorPack &tensors)
 
         b_to_use = transposed1xw_b.get();
     }
-
+    
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
 
