@@ -74,7 +74,6 @@ void add_vec_same_neon(
                          << " ";
                 }
             }
-            std::cout << std::endl;
             // Compute left-over elements
             for (; x < window_end_target0; ++x)
             {
@@ -82,7 +81,12 @@ void add_vec_same_neon(
                 const auto val2 = *(input2_ptr + x);
                 *(output_ptr + x) =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
+
+                std::cout << *(reinterpret_cast<const ScalarType *>(output.ptr() + x)) 
+                         << " ";
             }
+
+            std::cout << std::endl;
         },
         input1, input2, output);
 }
