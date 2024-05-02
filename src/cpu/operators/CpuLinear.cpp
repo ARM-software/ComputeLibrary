@@ -203,7 +203,6 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout <<"c->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(c->ptr_to_element(Coordinates(0,0))) << std::endl;
     
     std::cout <<"temp_d->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << std::endl;
-    
 
     std::cout << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << " "
               << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(1,0))) << " " 
@@ -222,6 +221,10 @@ void CpuLinear::run(ITensorPack &tensors)
               << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,6))) << " " 
               << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(767,6))) << " "
     << std::endl; 
+
+    std::cout << "temp_d.get()->info()->tensor_shape().x() " << temp_d.get()->info()->tensor_shape().x() << std::endl;
+    std::cout << "temp_d.get()->info()->tensor_shape().y() " << temp_d.get()->info()->tensor_shape().y() << std::endl;
+    std::cout << "temp_d.get()->info()->tensor_shape().z() " << temp_d.get()->info()->tensor_shape().z() << std::endl;
 
     // Run bias addition kernel
     if (_run_bias_addition)
