@@ -27,13 +27,13 @@ void add_vec_same_neon(
     input2_win.use_tensor_dimensions(src1->info()->tensor_shape());
     input2_win = input2_win.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
 
-    //std::cout << "input1_win x" << input1_win.x().end() << std::endl;
-    //std::cout << "input1_win y" << input1_win.y().end() << std::endl;
-    //std::cout << "input1_win z" << input1_win.z().end() << std::endl;
+    std::cout << "input1_win x" << input1_win.x().end() << std::endl;
+    std::cout << "input1_win y" << input1_win.y().end() << std::endl;
+    std::cout << "input1_win z" << input1_win.z().end() << std::endl;
 
-    //std::cout << "input2_win x" << input2_win.x().end() << std::endl;
-    //std::cout << "input2_win y" << input2_win.y().end() << std::endl;
-    //std::cout << "input2_win z" << input2_win.z().end() << std::endl;
+    std::cout << "input2_win x" << input2_win.x().end() << std::endl;
+    std::cout << "input2_win y" << input2_win.y().end() << std::endl;
+    std::cout << "input2_win z" << input2_win.z().end() << std::endl;
 
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
@@ -68,13 +68,8 @@ void add_vec_same_neon(
                 const auto res =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                 wrapper::vstore(output_ptr + x, res);
-                for(int j =0; j <window_step_target0; j++)
-                {
-                    std::cout << *(reinterpret_cast<const ScalarType *>(output.ptr() + x)+j) 
-                         << " ";
-                }
+                
             }
-            std::cout << std::endl;
             // Compute left-over elements
             for (; x < window_end_target0; ++x)
             {
