@@ -25,8 +25,8 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
     
     TensorShape query_reshape = TensorShape(query->tensor_shape().x()/info.h(),
-                                            info.h(),
                                             query->tensor_shape().y(),
+                                            info.h(),
                                             1);
     _reshape_query = query->clone()->set_tensor_shape(query_reshape);
 
@@ -155,7 +155,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout <<"reshaped_query.get() y: " << reshaped_query.get()->info()->tensor_shape().y() << std::endl;
     std::cout <<"reshaped_query.get() z: " << reshaped_query.get()->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
 
