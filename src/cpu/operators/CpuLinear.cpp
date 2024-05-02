@@ -85,7 +85,7 @@ void CpuLinear::configure(const ITensorInfo *a,
         if (_run_bias_addition)
         {
             _add_bias = std::make_unique<cpu::kernels::CpuAddVecKernel>();
-            _add_bias->configure(gemm_output_to_use, c, d, Window::DimY, Window::DimX, ConvertPolicy::SATURATE);
+            _add_bias->configure(gemm_output_to_use, c, d, Window::DimX, Window::DimX, ConvertPolicy::SATURATE);
             _aux_mem[TempResult] =
                 experimental::MemoryInfo(offset_int_vec(TempResult), experimental::MemoryLifetime::Persistent, _tmp_d.total_size());
         }
@@ -227,7 +227,7 @@ void CpuLinear::run(ITensorPack &tensors)
     if (_run_bias_addition)
     {   
         ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
-        NEScheduler::get().schedule_op(_add_bias.get(), Window::DimY, _add_bias->window(), pack);
+        NEScheduler::get().schedule_op(_add_bias.get(), Window::DimX, _add_bias->window(), pack);
     }
 
 
