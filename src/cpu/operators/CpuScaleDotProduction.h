@@ -63,6 +63,7 @@ private:
         InterleavedLHS = 3,
         PreTransposedRHS,
         Transposed1xWRHS,
+        QueryReshape,
         Count
     };
 
@@ -78,6 +79,7 @@ private:
     TensorInfo _tmp_query{};
     TensorInfo _pretransposed_key{};
     TensorInfo _tmp_key{};
+    TensorInfo _reshape_query{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};

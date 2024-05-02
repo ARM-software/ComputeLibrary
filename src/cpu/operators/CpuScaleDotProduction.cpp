@@ -28,13 +28,10 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                             info.h(),
                                             query->tensor_shape().y(),
                                             1);
-
-    std::cout << "query_reshape.x() " << query_reshape.x() << std::endl;
-    std::cout << "query_reshape.y() " << query_reshape.y() << std::endl;
-    std::cout << "query_reshape.z() " << query_reshape.z() << std::endl;
+    _reshape_query = query->clone()->set_tensor_shape(query_reshape);
 
     _query_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
-    _query_reshape_kernel->configure(query, &query->clone()->set_tensor_shape(query_reshape));
+    _query_reshape_kernel->configure(query, &_reshape_query);
 
     float scale = sqrt(info.d_model());
     std::cout << "info.d_model() " << info.d_model() << std::endl;
@@ -147,14 +144,17 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(767,6)))  << std::endl;
 
-    ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, output}};
+
+    CpuAuxTensorHandler reshaped_query(offset_int_vec(QueryReshape), _reshape_query, tensors);
+
+    ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
     const auto split_dimension = _query_reshape_kernel->get_split_dimension();
     NEScheduler::get().schedule_op(_query_reshape_kernel.get(), split_dimension, _query_reshape_kernel->window(), query_reshape_pack);
     
-    std::cout <<"output x: " << output->info()->tensor_shape().x() << std::endl;
-    std::cout <<"output y: " << output->info()->tensor_shape().y() << std::endl;
-    std::cout <<"output z: " << output->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout <<"reshaped_query.get() x: " << reshaped_query.get()->info()->tensor_shape().x() << std::endl;
+    std::cout <<"reshaped_query.get() y: " << reshaped_query.get()->info()->tensor_shape().y() << std::endl;
+    std::cout <<"reshaped_query.get() z: " << reshaped_query.get()->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0)))  << std::endl;
 
     ITensorPack gemm_QK_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
     _gemm_QK_func->run(gemm_QK_pack);
