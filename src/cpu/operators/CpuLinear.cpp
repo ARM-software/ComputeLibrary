@@ -22,6 +22,13 @@ void CpuLinear::configure(const ITensorInfo *a,
                           float              alpha,
                           float              beta, const LinearLayerInfo &linear_info)
 {
+    std::cout <<"src/cpu/operators/CpuLinear.cpp" <<std::endl;
+    std::cout << "a tensor_shape x " << a->tensor_shape().x() << std::endl;
+    std::cout << "a tensor_shape y " << a->tensor_shape().y() << std::endl;
+    std::cout << "a tensor_shape z " << a->tensor_shape().z() << std::endl;
+    std::cout << "b tensor_shape x " << b->tensor_shape().x() << std::endl;
+    std::cout << "b tensor_shape y " << b->tensor_shape().y() << std::endl;
+    std::cout << "b tensor_shape z " << b->tensor_shape().z() << std::endl;
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, linear_info);
     ARM_COMPUTE_UNUSED(linear_info);
 
