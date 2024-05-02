@@ -109,10 +109,31 @@ CpuScaleDotProduction::validate(const ITensorInfo *query, const ITensorInfo *key
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_UNUSED(tensors);
+
     auto query    = tensors.get_const_tensor(ACL_SRC_0);
     auto key  = tensors.get_const_tensor(ACL_SRC_1);
     auto value  = tensors.get_const_tensor(ACL_SRC_2);
     auto output = tensors.get_tensor(ACL_DST);
+
+    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp " << std::endl;
+
+    std::cout <<"query x: " << query->info()->tensor_shape().x() << std::endl;
+    std::cout <<"query y: " << query->info()->tensor_shape().y() << std::endl;
+    std::cout <<"query z: " << query->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(767,6)))  << std::endl;
+
+    std::cout <<"key x: " << key->info()->tensor_shape().x() << std::endl;
+    std::cout <<"key y: " << key->info()->tensor_shape().y() << std::endl;
+    std::cout <<"key z: " << key->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(767,6)))  << std::endl;
+
+    std::cout <<"value x: " << value->info()->tensor_shape().x() << std::endl;
+    std::cout <<"value y: " << value->info()->tensor_shape().y() << std::endl;
+    std::cout <<"value z: " << value->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(767,6)))  << std::endl;
 
     ITensorPack gemm_QK_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
     _gemm_QK_func->run(gemm_QK_pack);
