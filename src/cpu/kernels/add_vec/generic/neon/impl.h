@@ -33,7 +33,7 @@ void add_vec_same_neon(
 
     std::cout << "input2_win x" << input2_win.x().end() << std::endl;
     std::cout << "input2_win y" << input2_win.y().end() << std::endl;
-    std::cout << "input2_win z" << input2_win.z().end() << std::endl;
+    /std::cout << "input2_win z" << input2_win.z().end() << std::endl;
 
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
@@ -68,12 +68,14 @@ void add_vec_same_neon(
                 const auto res =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                 wrapper::vstore(output_ptr + x, res);
+                /*
                 for(int j =0; j <window_step_target0; j++)
                 {
                     std::cout << *(reinterpret_cast<const ScalarType *>(output.ptr() + x)+j) 
                          << " ";
-                }
+                }*/
             }
+            //std::cout << std::endl;
             // Compute left-over elements
             for (; x < window_end_target0; ++x)
             {
@@ -81,12 +83,7 @@ void add_vec_same_neon(
                 const auto val2 = *(input2_ptr + x);
                 *(output_ptr + x) =
                     (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
-
-                std::cout << *(reinterpret_cast<const ScalarType *>(output.ptr() + x)) 
-                         << " ";
             }
-
-            std::cout << std::endl;
         },
         input1, input2, output);
 }
