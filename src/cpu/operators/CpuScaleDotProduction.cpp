@@ -132,6 +132,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     if (_run_interleave_transpose)
     {
+        std::cout << "_run_interleave_transpose " << std::endl;
         // Run interleave kernel
         ITensorPack interleave_pack{{ACL_SRC, query}, {ACL_DST, interleaved_query.get()}};
         NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
@@ -142,6 +143,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     if (_pretranspose_key_func && _run_pretranspose)
     {
+        std::cout << "_pretranspose_key_func && _run_pretranspose " << std::endl;
         // Run pretranspose kernel
         ITensorPack pretranspose_pack{{ACL_SRC, key_to_use}, {ACL_DST, pretransposed_key.get()}};
         _pretranspose_key_func->run(pretranspose_pack);
@@ -150,6 +152,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     if (_run_interleave_transpose)
     {
+        std::cout << "_run_interleave_transpose " << std::endl;
         // Run transpose1xw kernel
         ITensorPack transpose_pack{{ACL_SRC, key_to_use}, {ACL_DST, transposed1xw_key.get()}};
         NEScheduler::get().schedule_op(_transpose1xW_key_kernel.get(), Window::DimY,
