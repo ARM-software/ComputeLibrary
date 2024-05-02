@@ -33,7 +33,7 @@ void add_vec_same_neon(
 
     std::cout << "input2_win x" << input2_win.x().end() << std::endl;
     std::cout << "input2_win y" << input2_win.y().end() << std::endl;
-    /std::cout << "input2_win z" << input2_win.z().end() << std::endl;
+    std::cout << "input2_win z" << input2_win.z().end() << std::endl;
 
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
