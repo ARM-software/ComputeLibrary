@@ -23,6 +23,18 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                       const ScaleDotProductionAttentionLayerInfo& info)
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
+    
+    TensorShape query_reshape = TensorShape(query->tensor_shape().x()/info.h(),
+                                            info.h(),
+                                            query->tensor_shape().y(),
+                                            1);
+
+    std::cout << "query_reshape.x() " << query_reshape.x() << std::endl;
+    std::cout << "query_reshape.y() " << query_reshape.x() << std::endl;
+    std::cout << "query_reshape.z() " << query_reshape.x() << std::endl;
+
+    _query_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
+    _query_reshape_kernel->configure(query, &query->clone()->set_tensor_shape(query_reshape));
 
     float scale = sqrt(info.d_model());
     std::cout << "info.d_model() " << info.d_model() << std::endl;

@@ -53,12 +53,6 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *query,
     _impl->scale_dot_production_op  = std::make_unique<cpu::CpuScaleDotProduction>();
     _impl->scale_dot_production_op->configure(query->info(),key->info(),value->info(),production_to_softmax->info(),info);
     _impl->scale_dot_pack = {{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_SRC_2, value}, {ACL_DST, production_to_softmax}};
-    
-    /*
-    _impl->aux_mem_req = _impl->scale_dot_production_op->workspace();
-    _impl->workspace =
-        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->scale_dot_pack, _impl->scale_dot_pack);
-    */
 
     /*  Softmax of previous product */
     _impl->softmax_op = std::make_unique<cpu::CpuSoftmaxGeneric>();
@@ -66,9 +60,9 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *query,
     _impl->softmax_pack = {{ACL_SRC, production_to_softmax}, {ACL_DST, softmax_to_gemm}};
 
     /* Scale dot production of key and query */
-    float scale = sqrt(info.d_model());
+    //float scale = sqrt(info.d_model());
     _impl->value_gemm_op = std::make_unique<cpu::CpuGemm>();
-    _impl->value_gemm_op->configure(softmax_to_gemm->info(),value->info(),nullptr,output->info(),scale,1.0);
+    _impl->value_gemm_op->configure(softmax_to_gemm->info(),value->info(),nullptr,output->info(),1.0,1.0);
     _impl->value_gemm_pack = {{ACL_SRC_0, production_to_softmax}, {ACL_SRC_1, value}, {ACL_DST, softmax_to_gemm}};
 
 }
