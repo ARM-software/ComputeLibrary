@@ -201,7 +201,27 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout <<"a->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(a->ptr_to_element(Coordinates(0,0))) << std::endl;
     std::cout <<"b_to_use->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
     std::cout <<"c->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(c->ptr_to_element(Coordinates(0,0))) << std::endl;
+    
     std::cout <<"temp_d->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << std::endl;
+    
+
+    std::cout << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << " "
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(1,0))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(2,0))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(3,0))) << " " 
+              
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(767,0))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(768,0))) << " " 
+    << std::endl;
+    std::cout << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << " "
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,1))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,2))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,3))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,4))) << " "
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,5))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,6))) << " " 
+              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(767,6))) << " "
+    << std::endl; 
 
     // Run bias addition kernel
     if (_run_bias_addition)
