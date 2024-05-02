@@ -163,6 +163,26 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                     _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                     _mm_kernel->window(), mm_pack);
+    
+
+    std::cout << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,0))) << " "
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(1,0))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(2,0))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(3,0))) << " " 
+              
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(767,0))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(768,0))) << " " 
+    << std::endl;
+
+    std::cout << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,0))) << " "
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,1))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,2))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,3))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,4))) << " "
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,5))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,6))) << " " 
+              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(767,6))) << " "
+    << std::endl; 
 
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);

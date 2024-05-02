@@ -174,26 +174,6 @@ void CpuLinear::run(ITensorPack &tensors)
         ITensorPack pack{{ACL_SRC_0, temp_d.get()}, {ACL_SRC_1, c}, {ACL_DST, d}};
         NEScheduler::get().schedule_op(_add_bias.get(), Window::DimX, _add_bias->window(), pack);
     }
-    std::cout << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,0))) << " "
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(1,0))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(2,0))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(3,0))) << " " 
-              
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(767,0))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(768,0))) << " " 
-    << std::endl;
-
-    std::cout << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,0))) << " "
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,1))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,2))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,3))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,4))) << " "
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,5))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(0,6))) << " " 
-              << *reinterpret_cast<const float *>(d->ptr_to_element(Coordinates(767,6))) << " "
-    << std::endl; 
-
-
 }
 
 
