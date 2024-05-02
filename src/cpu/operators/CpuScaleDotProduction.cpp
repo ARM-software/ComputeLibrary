@@ -158,15 +158,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
     const auto split_dimension = _query_reshape_kernel->get_split_dimension();
     NEScheduler::get().schedule_op(_query_reshape_kernel.get(), split_dimension, _query_reshape_kernel->window(), query_reshape_pack);
-    
-    std::cout <<"reshaped_query.get() x: " << reshaped_query.get()->info()->tensor_shape().x() << std::endl;
-    std::cout <<"reshaped_query.get() y: " << reshaped_query.get()->info()->tensor_shape().y() << std::endl;
-    std::cout <<"reshaped_query.get() z: " << reshaped_query.get()->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
 
     ITensorPack query_permute_pack{{ACL_SRC, reshaped_query.get()},{ACL_DST, permuted_query.get()}};
     _query_permute_func->run(query_permute_pack);
