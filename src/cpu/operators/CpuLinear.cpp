@@ -128,40 +128,7 @@ void CpuLinear::run(ITensorPack &tensors)
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
-    
-    /*
-    std::cout << "before interleave_transpose " << std::endl;
 
-    std::cout << "a tensor_shape x " << a->info()->tensor_shape().x() << std::endl;
-    std::cout << "a tensor_shape y " << a->info()->tensor_shape().y() << std::endl;
-    std::cout << "a tensor_shape z " << a->info()->tensor_shape().z() << std::endl;
-    std::cout << "b tensor_shape x " << b->info()->tensor_shape().x() << std::endl;
-    std::cout << "b tensor_shape y " << b->info()->tensor_shape().y() << std::endl;
-    std::cout << "b tensor_shape z " << b->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "a stride in byte x " << a->info()->strides_in_bytes()[0] << std::endl;
-    std::cout << "a stride in byte y " << a->info()->strides_in_bytes()[1] << std::endl;
-    std::cout << "a stride in byte z " << a->info()->strides_in_bytes()[2] << std::endl;
-
-    std::cout << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0))) << " "
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(1,0))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(2,0))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(3,0))) << " " 
-              
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(767,0))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(768,0))) << " " 
-    << std::endl;
-
-    std::cout << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,0))) << " "
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,1))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,2))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,3))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,4))) << " "
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,5))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,6))) << " " 
-              << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(767,6))) << " " 
-    << std::endl;   
-    */
 
     if (_run_interleave_transpose)
     {
@@ -200,36 +167,6 @@ void CpuLinear::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
-
-    std::cout << "src/cpu/operators/CpuLinear.cpp " << std::endl;
-    std::cout <<"a->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(a->ptr_to_element(Coordinates(0,0))) << std::endl;
-    std::cout <<"b_to_use->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(b_to_use->ptr_to_element(Coordinates(0,0))) << std::endl;
-    std::cout <<"c->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(c->ptr_to_element(Coordinates(0,0))) << std::endl;
-    
-    std::cout <<"temp_d->ptr_to_element(Coordinates(0,0)) " <<*reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << std::endl;
-
-    std::cout << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << " "
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(1,0))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(2,0))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(3,0))) << " " 
-              
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(767,0))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(768,0))) << " " 
-    << std::endl;
-    std::cout << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,0))) << " "
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,1))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,2))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,3))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,4))) << " "
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,5))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,6))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(767,6))) << " "
-    << std::endl; 
-
-
-    std::cout << "temp_d.get()->info()->tensor_shape().x() " << temp_d.get()->info()->tensor_shape().x() << std::endl;
-    std::cout << "temp_d.get()->info()->tensor_shape().y() " << temp_d.get()->info()->tensor_shape().y() << std::endl;
-    std::cout << "temp_d.get()->info()->tensor_shape().z() " << temp_d.get()->info()->tensor_shape().z() << std::endl;
 
     // Run bias addition kernel
     if (_run_bias_addition)

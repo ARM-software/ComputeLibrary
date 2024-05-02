@@ -17,23 +17,12 @@ template <typename ScalarType>
 void add_vec_same_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, size_t src0_target_dim, size_t src1_target_dim, const ConvertPolicy &policy, const Window &window)
 {
-    std::cout << "Add veccccccccccccccccccccccccccccccccccccccc  " << std::endl;
-    //std::cout << " src0_target_dim " << src0_target_dim << std::endl;
-    //std::cout << " src1_target_dim " << src1_target_dim << std::endl;
 
     // Create input windows
     Window input1_win = window.broadcast_if_dimension_le_one(src0->info()->tensor_shape());
     Window input2_win;
     input2_win.use_tensor_dimensions(src1->info()->tensor_shape());
     input2_win = input2_win.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
-
-    std::cout << "input1_win x" << input1_win.x().end() << std::endl;
-    std::cout << "input1_win y" << input1_win.y().end() << std::endl;
-    std::cout << "input1_win z" << input1_win.z().end() << std::endl;
-
-    std::cout << "input2_win x" << input2_win.x().end() << std::endl;
-    std::cout << "input2_win y" << input2_win.y().end() << std::endl;
-    std::cout << "input2_win z" << input2_win.z().end() << std::endl;
 
     // Clear X Dimension on execution window as we handle manually
     Window win = window;
