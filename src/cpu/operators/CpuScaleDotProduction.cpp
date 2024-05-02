@@ -25,7 +25,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
 
     _run_vector_matrix_multiplication   = key->dimension(1) < 2;
-    _run_pretranspose                   = false;
+    _run_pretranspose                   = true;
     
     float scale = sqrt(info.d_model());
     _run_scale = scale != 1.f;
