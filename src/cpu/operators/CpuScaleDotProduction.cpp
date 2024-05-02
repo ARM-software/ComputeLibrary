@@ -151,10 +151,10 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     const auto split_dimension = _query_reshape_kernel->get_split_dimension();
     NEScheduler::get().schedule_op(_query_reshape_kernel.get(), split_dimension, _query_reshape_kernel->window(), query_reshape_pack);
     
-    std::cout <<"query x: " << query->info()->tensor_shape().x() << std::endl;
-    std::cout <<"query y: " << query->info()->tensor_shape().y() << std::endl;
-    std::cout <<"query z: " << query->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout <<"output x: " << output->info()->tensor_shape().x() << std::endl;
+    std::cout <<"output y: " << output->info()->tensor_shape().y() << std::endl;
+    std::cout <<"output z: " << output->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0)))  << std::endl;
 
     ITensorPack gemm_QK_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
     _gemm_QK_func->run(gemm_QK_pack);
