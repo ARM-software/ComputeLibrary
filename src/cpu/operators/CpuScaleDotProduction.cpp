@@ -30,12 +30,19 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                             1);
     _reshape_query = query->clone()->set_tensor_shape(query_reshape);
 
+    TensorShape query_permute = TensorShape(query->tensor_shape().x()/info.h(),
+                                            query->tensor_shape().y(),
+                                            info.h(),
+                                            1);
+    _permute_query = query->clone()->set_tensor_shape(query_permute);
+
     _query_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
     _query_reshape_kernel->configure(query, &_reshape_query);
 
+    _query_permute_func = std::make_unique<CpuPermute>();
+    _query_permute_func->configure(&_reshape_query, &_permute_query, PermutationVector(0U, 2U, 1U));
+
     float scale = sqrt(info.d_model());
-    std::cout << "info.d_model() " << info.d_model() << std::endl;
-    std::cout << "scale " << scale << std::endl;
 
     GEMMInfo gemm_QK_info;
     gemm_QK_info.set_pretranspose_B(true);
@@ -146,6 +153,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
 
     CpuAuxTensorHandler reshaped_query(offset_int_vec(QueryReshape), _reshape_query, tensors);
+    CpuAuxTensorHandler permuted_query(offset_int_vec(QueryPermute), _permute_query, tensors);
 
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
     const auto split_dimension = _query_reshape_kernel->get_split_dimension();
@@ -158,6 +166,12 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
+
+    ITensorPack query_permute_pack{{ACL_SRC, reshaped_query.get()},{ACL_DST, permuted_query.get()}};
+    _query_permute_func->run(query_permute_pack);
+
+
+
 
     ITensorPack gemm_QK_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
     _gemm_QK_func->run(gemm_QK_pack);

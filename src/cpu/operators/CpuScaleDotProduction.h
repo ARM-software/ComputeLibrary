@@ -15,6 +15,7 @@
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 
 #include "src/cpu/kernels/CpuReshapeKernel.h"
+#include "src/cpu/operators/CpuPermute.h"
 #include "src/cpu/operators/CpuGemm.h"
 
 #include <memory>
@@ -64,6 +65,7 @@ private:
         PreTransposedRHS,
         Transposed1xWRHS,
         QueryReshape,
+        QueryPermute,
         Count
     };
 
@@ -75,11 +77,14 @@ private:
 
     std::unique_ptr<CpuGemm>                                _gemm_QK_func{nullptr};
     std::unique_ptr<kernels::CpuReshapeKernel>              _query_reshape_kernel{nullptr};
+    std::unique_ptr<CpuPermute>                             _query_permute_func{nullptr};
 
     TensorInfo _tmp_query{};
     TensorInfo _pretransposed_key{};
     TensorInfo _tmp_key{};
+
     TensorInfo _reshape_query{};
+    TensorInfo _permute_query{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};
