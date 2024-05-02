@@ -69,13 +69,8 @@ void add_vec_same_neon(
                     (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                 wrapper::vstore(output_ptr + x, res);
                 
-                for(int j =0; j <window_step_target0; j++)
-                {
-                    std::cout << *(input2.ptr() + x +j) 
-                         << " ";
-                }
+                
             }
-            std::cout << std::endl;
             // Compute left-over elements
             for (; x < window_end_target0; ++x)
             {
