@@ -128,6 +128,7 @@ void CpuLinear::run(ITensorPack &tensors)
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
+    /*
     std::cout << "before interleave_transpose " << std::endl;
 
     std::cout << "a tensor_shape x " << a->info()->tensor_shape().x() << std::endl;
@@ -155,7 +156,8 @@ void CpuLinear::run(ITensorPack &tensors)
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,5))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(0,6))) << " " 
               << * reinterpret_cast<float *>(a->ptr_to_element(Coordinates(767,6))) << " " 
-    << std::endl;
+    << std::endl;   
+    */
 
     if (_run_interleave_transpose)
     {
@@ -168,7 +170,7 @@ void CpuLinear::run(ITensorPack &tensors)
     }
 
     const ITensor *b_to_use = b;
-    /*
+    
     if (_pretranspose_b_func)
     {
         // Run pretranspose kernel
@@ -176,7 +178,7 @@ void CpuLinear::run(ITensorPack &tensors)
         _pretranspose_b_func->run(pretranspose_pack);
         b_to_use = pretransposed_b.get();
     }
-    */
+    
 
     if (_run_interleave_transpose)
     {
