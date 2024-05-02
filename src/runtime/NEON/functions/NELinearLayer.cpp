@@ -37,7 +37,7 @@ void NELinearLayer::configure(const ITensor *input,
     _impl->dst      = output;
 
     _impl->kernel = std::make_unique<cpu::CpuLinear>();
-    _impl->kernel->configure(weight->info(),input->info(), bias->info(), output->info(), 1.0f, 1.0f);
+    _impl->kernel->configure(input->info(), weight->info(), bias->info(), output->info(), 1.0f, 1.0f);
 }
 
 Status NELinearLayer::validate(const ITensor *input, 
@@ -52,8 +52,8 @@ void NELinearLayer::run()
 {
     ITensorPack pack;
 
-    pack.add_tensor(TensorType::ACL_SRC_0, _impl->weight);
-    pack.add_tensor(TensorType::ACL_SRC_1, _impl->src);
+    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
+    pack.add_tensor(TensorType::ACL_SRC_1, _impl->weight);
     pack.add_tensor(TensorType::ACL_SRC_2, _impl->bias);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
     
