@@ -155,7 +155,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout <<"reshaped_query.get() y: " << reshaped_query.get()->info()->tensor_shape().y() << std::endl;
     std::cout <<"reshaped_query.get() z: " << reshaped_query.get()->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
 
