@@ -40,9 +40,9 @@ NEScaleDotProductionAttentionLayer::NEScaleDotProductionAttentionLayer(std::shar
 
 NEScaleDotProductionAttentionLayer::~NEScaleDotProductionAttentionLayer() = default;
 
-void NEScaleDotProductionAttentionLayer::configure(const ITensor *key,
+void NEScaleDotProductionAttentionLayer::configure(const ITensor *query,
+                                                   const ITensor *key,
                                                    const ITensor *value,
-                                                   const ITensor *query,
                                                    ITensor *output,
                                                    const ScaleDotProductionAttentionLayerInfo& info)
 {
@@ -51,8 +51,8 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *key,
 
     /* Scale dot production of key and query */
     _impl->scale_dot_production_op  = std::make_unique<cpu::CpuScaleDotProduction>();
-    _impl->scale_dot_production_op->configure(key->info(),value->info(),query->info(),production_to_softmax->info(),info);
-    _impl->scale_dot_pack = {{ACL_SRC_0, key}, {ACL_SRC_1, value}, {ACL_SRC_2, query}, {ACL_DST, production_to_softmax}};
+    _impl->scale_dot_production_op->configure(query->info(),key->info(),value->info(),production_to_softmax->info(),info);
+    _impl->scale_dot_pack = {{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_SRC_2, value}, {ACL_DST, production_to_softmax}};
     
     /*
     _impl->aux_mem_req = _impl->scale_dot_production_op->workspace();

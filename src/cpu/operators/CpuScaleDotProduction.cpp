@@ -16,9 +16,9 @@ namespace arm_compute
 namespace cpu
 {
 
-void CpuScaleDotProduction::configure(const ITensorInfo *key,
+void CpuScaleDotProduction::configure(const ITensorInfo *query,
+                                      const ITensorInfo *key,
                                       const ITensorInfo *value,
-                                      const ITensorInfo *query,
                                       ITensorInfo *output,
                                       const ScaleDotProductionAttentionLayerInfo& info)
 {
@@ -85,7 +85,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *key,
 }
 
 Status
-CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output)
+CpuScaleDotProduction::validate(const ITensorInfo *query, const ITensorInfo *key, const ITensorInfo *value, ITensorInfo *output)
 {
     ARM_COMPUTE_UNUSED(key);
     ARM_COMPUTE_UNUSED(value);
@@ -97,9 +97,9 @@ CpuScaleDotProduction::validate(const ITensorInfo *key, const ITensorInfo *value
 void CpuScaleDotProduction::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_UNUSED(tensors);
-    auto key    = tensors.get_const_tensor(ACL_SRC_0);
-    auto value  = tensors.get_const_tensor(ACL_SRC_1);
-    auto query  = tensors.get_const_tensor(ACL_SRC_2);
+    auto query    = tensors.get_const_tensor(ACL_SRC_0);
+    auto key  = tensors.get_const_tensor(ACL_SRC_1);
+    auto value  = tensors.get_const_tensor(ACL_SRC_2);
     auto output = tensors.get_tensor(ACL_DST);
 
     const ITensor *key_to_use = key;

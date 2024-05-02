@@ -32,20 +32,20 @@ public:
     ~CpuScaleDotProduction() = default;
     
     /** Configure operator for a given list of arguments
-     *
-     * @param[in]  key             Attention key tensor info. Data types supported: U8.
-     * @param[in]  value           Attention value tensor info. Data types supported: U8.
-     * @param[in]  query           Attention key tensor info. Data types supported: U8.
+     * 
+     * @param[in]  query           Attention key tensor info. Data types supported: F32.
+     * @param[in]  key             Attention key tensor info. Data types supported: F32.
+     * @param[in]  value           Attention value tensor info. Data types supported: F32.
      * @param[out] output          Destination tensor info. Data type supported: F32
      */
-    void configure(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output, const ScaleDotProductionAttentionLayerInfo& info);
+    void configure( const ITensorInfo *query, const ITensorInfo *key, const ITensorInfo *value, ITensorInfo *output, const ScaleDotProductionAttentionLayerInfo& info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuScaleDotProduction::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *key, const ITensorInfo *value, const ITensorInfo *query, ITensorInfo *output);
+    static Status validate( const ITensorInfo *query, const ITensorInfo *key, const ITensorInfo *value, ITensorInfo *output);
 
     void transpose(ITensorPack &tensors);
 
