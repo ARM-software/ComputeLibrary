@@ -128,13 +128,16 @@ void CpuLinear::run(ITensorPack &tensors)
     CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
-    /*
+    
     std::cout << "before interleave_transpose " << std::endl;
 
     std::cout << "a tensor_shape x " << a->info()->tensor_shape().x() << std::endl;
     std::cout << "a tensor_shape y " << a->info()->tensor_shape().y() << std::endl;
     std::cout << "a tensor_shape z " << a->info()->tensor_shape().z() << std::endl;
-
+    std::cout << "b tensor_shape x " << b->info()->tensor_shape().x() << std::endl;
+    std::cout << "b tensor_shape y " << b->info()->tensor_shape().y() << std::endl;
+    std::cout << "b tensor_shape z " << b->info()->tensor_shape().z() << std::endl;
+/*
     std::cout << "a stride in byte x " << a->info()->strides_in_bytes()[0] << std::endl;
     std::cout << "a stride in byte y " << a->info()->strides_in_bytes()[1] << std::endl;
     std::cout << "a stride in byte z " << a->info()->strides_in_bytes()[2] << std::endl;
@@ -222,10 +225,6 @@ void CpuLinear::run(ITensorPack &tensors)
               << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(767,6))) << " "
     << std::endl; 
 
-    std::cout << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,7))) << " "
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,8))) << " " 
-              << *reinterpret_cast<const float *>(temp_d.get()->ptr_to_element(Coordinates(0,9))) << " " 
-    << std::endl; 
 
     std::cout << "temp_d.get()->info()->tensor_shape().x() " << temp_d.get()->info()->tensor_shape().x() << std::endl;
     std::cout << "temp_d.get()->info()->tensor_shape().y() " << temp_d.get()->info()->tensor_shape().y() << std::endl;
