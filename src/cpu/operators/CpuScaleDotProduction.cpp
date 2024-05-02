@@ -116,16 +116,19 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout <<"key z: " << key->info()->tensor_shape().z() << std::endl;
 
     std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(767,6)))  << std::endl;
 
     std::cout <<"query x: " << query->info()->tensor_shape().x() << std::endl;
     std::cout <<"query y: " << query->info()->tensor_shape().y() << std::endl;
     std::cout <<"query z: " << query->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(767,6)))  << std::endl;
     
     std::cout <<"value x: " << value->info()->tensor_shape().x() << std::endl;
     std::cout <<"value y: " << value->info()->tensor_shape().y() << std::endl;
     std::cout <<"value z: " << value->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(767,6)))  << std::endl;
 
     if (_run_interleave_transpose)
     {
