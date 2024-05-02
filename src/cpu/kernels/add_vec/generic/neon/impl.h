@@ -71,7 +71,7 @@ void add_vec_same_neon(
                 
                 for(int j =0; j <window_step_target0; j++)
                 {
-                    std::cout << *(reinterpret_cast<const ScalarType *>(input2.ptr() + x)+j) 
+                    std::cout << *(input2.ptr() + x +j) 
                          << " ";
                 }
             }
