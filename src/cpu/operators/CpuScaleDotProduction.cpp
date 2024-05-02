@@ -24,13 +24,12 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
 
-    float scale = sqrt(info.d_model());
 
     GEMMInfo gemm_QK_info;
     gemm_QK_info.set_pretranspose_B(true);
 
     _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
-    _gemm_QK_func->configure(query, key, nullptr, output, scale, 1, gemm_QK_info);
+    _gemm_QK_func->configure(query, key, nullptr, output, 1, 1, gemm_QK_info);
 
     /*
     _run_vector_matrix_multiplication   = key->dimension(1) < 2;
