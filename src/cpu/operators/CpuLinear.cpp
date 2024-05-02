@@ -22,13 +22,6 @@ void CpuLinear::configure(const ITensorInfo *a,
                           float              alpha,
                           float              beta, const LinearLayerInfo &linear_info)
 {
-    std::cout <<"src/cpu/operators/CpuLinear.cpp" <<std::endl;
-    std::cout << "a tensor_shape x " << a->tensor_shape().x() << std::endl;
-    std::cout << "a tensor_shape y " << a->tensor_shape().y() << std::endl;
-    std::cout << "a tensor_shape z " << a->tensor_shape().z() << std::endl;
-    std::cout << "b tensor_shape x " << b->tensor_shape().x() << std::endl;
-    std::cout << "b tensor_shape y " << b->tensor_shape().y() << std::endl;
-    std::cout << "b tensor_shape z " << b->tensor_shape().z() << std::endl;
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, linear_info);
     ARM_COMPUTE_UNUSED(linear_info);
 
@@ -136,6 +129,7 @@ void CpuLinear::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
     
+    /*
     std::cout << "before interleave_transpose " << std::endl;
 
     std::cout << "a tensor_shape x " << a->info()->tensor_shape().x() << std::endl;
@@ -144,7 +138,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << "b tensor_shape x " << b->info()->tensor_shape().x() << std::endl;
     std::cout << "b tensor_shape y " << b->info()->tensor_shape().y() << std::endl;
     std::cout << "b tensor_shape z " << b->info()->tensor_shape().z() << std::endl;
-/*
+
     std::cout << "a stride in byte x " << a->info()->strides_in_bytes()[0] << std::endl;
     std::cout << "a stride in byte y " << a->info()->strides_in_bytes()[1] << std::endl;
     std::cout << "a stride in byte z " << a->info()->strides_in_bytes()[2] << std::endl;
