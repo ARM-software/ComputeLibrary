@@ -169,6 +169,13 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     ITensorPack query_permute_pack{{ACL_SRC, reshaped_query.get()},{ACL_DST, permuted_query.get()}};
     _query_permute_func->run(query_permute_pack);
+    std::cout <<"permuted_query.get() x: " << permuted_query.get()->info()->tensor_shape().x() << std::endl;
+    std::cout <<"permuted_query.get() y: " << permuted_query.get()->info()->tensor_shape().y() << std::endl;
+    std::cout <<"permuted_query.get() z: " << permuted_query.get()->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
 
 
 
