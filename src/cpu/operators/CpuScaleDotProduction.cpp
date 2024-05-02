@@ -155,11 +155,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout <<"reshaped_query.get() y: " << reshaped_query.get()->info()->tensor_shape().y() << std::endl;
     std::cout <<"reshaped_query.get() z: " << reshaped_query.get()->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(4,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(5,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(reshaped_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
 
     ITensorPack gemm_QK_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
     _gemm_QK_func->run(gemm_QK_pack);
