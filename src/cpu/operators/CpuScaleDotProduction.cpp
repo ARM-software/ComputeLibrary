@@ -30,8 +30,8 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                             1);
 
     std::cout << "query_reshape.x() " << query_reshape.x() << std::endl;
-    std::cout << "query_reshape.y() " << query_reshape.x() << std::endl;
-    std::cout << "query_reshape.z() " << query_reshape.x() << std::endl;
+    std::cout << "query_reshape.y() " << query_reshape.y() << std::endl;
+    std::cout << "query_reshape.z() " << query_reshape.z() << std::endl;
 
     _query_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
     _query_reshape_kernel->configure(query, &query->clone()->set_tensor_shape(query_reshape));
