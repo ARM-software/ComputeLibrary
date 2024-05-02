@@ -14,6 +14,8 @@
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 
+#include "src/cpu/operators/CpuGemm.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -68,6 +70,8 @@ private:
     std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel{nullptr};
     std::unique_ptr<kernels::CpuGemmTranspose1xWKernel>     _transpose1xW_key_kernel{nullptr};
     std::unique_ptr<CpuActivation>                          _scale_func{nullptr};
+
+    std::unique_ptr<CpuGemm>                                _gemm_QK_func{nullptr};
 
     TensorInfo _tmp_query{};
     TensorInfo _pretransposed_key{};

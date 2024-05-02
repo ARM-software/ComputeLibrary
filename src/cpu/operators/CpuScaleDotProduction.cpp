@@ -24,6 +24,15 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
 
+    float scale = sqrt(info.d_model());
+
+    GEMMInfo gemm_QK_info;
+    gemm_QK_info.set_pretranspose_B(true);
+
+    _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
+    _gemm_QK_func->configure(query, key, nullptr, output, scale, 1, gemm_QK_info);
+
+    /*
     _run_vector_matrix_multiplication   = key->dimension(1) < 2;
     _run_pretranspose                   = true;
     
@@ -34,7 +43,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     const ITensorInfo *key_to_use = key;
     ITensorInfo *gemm_output_to_use = output;
 
-    /* Pretranspose Key, K=K^T */
+    // Pretranspose Key, K=K^T 
     _pretranspose_key_func = std::make_unique<CpuTranspose>();
     _pretranspose_key_func->configure(key_to_use, &_pretransposed_key);
 
@@ -43,7 +52,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     key_to_use = &_pretransposed_key;
     
 
-    /* Matrix multiply Query adn Key, QK */
+    // Matrix multiply Query adn Key, QK 
     _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
 
     // Select between GEMV and GEMM
@@ -76,6 +85,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
         _mm_kernel->configure(&_tmp_query, &_tmp_key, gemm_output_to_use, scale, _run_interleave_transpose,
                                 GEMMReshapeInfo(m, n, k));
     }
+    */
     
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
@@ -102,6 +112,10 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     auto value  = tensors.get_const_tensor(ACL_SRC_2);
     auto output = tensors.get_tensor(ACL_DST);
 
+    ITensorPack gemm_QK_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
+    _gemm_QK_func->run(gemm_QK_pack);
+
+    /*
     const ITensor *key_to_use = key;
 
     CpuAuxTensorHandler pretransposed_key(offset_int_vec(PreTransposedRHS), _pretransposed_key, tensors);
@@ -167,7 +181,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                     _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                     _mm_kernel->window(), mm_pack);
     
-
+    */
     std::cout << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,0))) << " "
               << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(1,0))) << " " 
               << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(2,0))) << " " 
