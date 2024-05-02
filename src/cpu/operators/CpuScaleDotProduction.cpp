@@ -25,8 +25,8 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
     
     TensorShape query_reshape = TensorShape(query->tensor_shape().x()/info.h(),
-                                            query->tensor_shape().y(),
                                             info.h(),
+                                            query->tensor_shape().y(),
                                             1);
     _reshape_query = query->clone()->set_tensor_shape(query_reshape);
 
