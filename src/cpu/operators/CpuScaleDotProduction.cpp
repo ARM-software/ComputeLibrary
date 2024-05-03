@@ -83,10 +83,14 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     std::cout << "_scaled_query_key.strides_in_bytes().y() " << _scaled_query_key.strides_in_bytes().y() << std::endl;
     std::cout << "_scaled_query_key.strides_in_bytes().z() " << _scaled_query_key.strides_in_bytes().z() << std::endl;
 
+    /*
     GEMMInfo gemm_QK_info;
     _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
     _gemm_QK_func->configure(&_permuted_query, &_transposed_key, nullptr, &_scaled_query_key, 1.0f, 0.0f,gemm_QK_info);
+    */
 
+    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
+    _mm_kernel->configure(&_permuted_query,&_transposed_key,&_scaled_query_key,1.0f,false);
 
 
 
@@ -221,7 +225,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     // Run matrix multiply compute multi-head attention between Query and Key
     ITensorPack gemm_QK_pack{{ACL_SRC_0, permuted_query.get()}, {ACL_SRC_1, transposed_key.get()}, {ACL_DST, scaled_query_key.get()}};
-    _gemm_QK_func->run(gemm_QK_pack);
+    //_gemm_QK_func->run(gemm_QK_pack);
+    NEScheduler::get().schedule_op(_mm_kernel.get(),Window::DimY,_mm_kernel->window(),gemm_QK_pack);
 
     std::cout <<"scaled_query_key.get() x: " << scaled_query_key.get()->info()->tensor_shape().x() << std::endl;
     std::cout <<"scaled_query_key.get() y: " << scaled_query_key.get()->info()->tensor_shape().y() << std::endl;
