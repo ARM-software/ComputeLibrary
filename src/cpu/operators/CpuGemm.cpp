@@ -95,6 +95,7 @@ void CpuGemm::configure(const ITensorInfo *a,
 
     if (run_optimised)
     {
+        std::cout << "run_optimised " << std::endl;
         _run_interleave_transpose   = false;
         const ITensorInfo *c_to_use = is_c_bias ? c : nullptr;
         _asm_glue                   = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
