@@ -86,7 +86,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     const int m = _permuted_query.dimension(1);
     const int n = _transposed_key.dimension(0);
     const int k = _permuted_query.dimension(0);
-    const float scale = 1.0f/sqrt(info.d_model());
+    const float scale = 1.0f/sqrt(info.h());
     _mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,scale,true,GEMMReshapeInfo(m, n, k));
 
     
