@@ -184,8 +184,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler permuted_key(offset_int_vec(KeyPermute), _permute_key, tensors);
 
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
-    const auto split_dimension = _query_reshape_kernel->get_split_dimension();
-    NEScheduler::get().schedule_op(_query_reshape_kernel.get(), split_dimension, _query_reshape_kernel->window(), query_reshape_pack);
+    const auto query_split_dimension = _query_reshape_kernel->get_split_dimension();
+    NEScheduler::get().schedule_op(_query_reshape_kernel.get(), query_split_dimension, _query_reshape_kernel->window(), query_reshape_pack);
 
     ITensorPack query_permute_pack{{ACL_SRC, reshaped_query.get()},{ACL_DST, permuted_query.get()}};
     _query_permute_func->run(query_permute_pack);
@@ -200,8 +200,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
     
     ITensorPack key_reshape_pack{{ACL_SRC_0, key},{ACL_DST, reshaped_key.get()}};
-    const auto split_dimension = _key_reshape_kernel->get_split_dimension();
-    NEScheduler::get().schedule_op(_key_reshape_kernel.get(), split_dimension, _key_reshape_kernel->window(), key_reshape_pack);
+    const auto key_split_dimension = _key_reshape_kernel->get_split_dimension();
+    NEScheduler::get().schedule_op(_key_reshape_kernel.get(), key_split_dimension, _key_reshape_kernel->window(), key_reshape_pack);
 
     ITensorPack key_permute_pack{{ACL_SRC, reshaped_key.get()},{ACL_DST, permuted_key.get()}};
     _key_permute_func->run(key_permute_pack);
