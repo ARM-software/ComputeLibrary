@@ -24,7 +24,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
     
-    // Query Multi-Head Reshape 
+    // Query multi-Head reshape 
     TensorShape query_reshape = TensorShape(query->tensor_shape().x()/info.h(),
                                             info.h(),
                                             query->tensor_shape().y(),
@@ -43,7 +43,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     _query_permute_func = std::make_unique<CpuPermute>();
     _query_permute_func->configure(&_reshaped_query, &_permuted_query, PermutationVector(0U, 2U, 1U));
 
-    // Key Multi-Head Reshape 
+    // Key multi-Head reshape 
     TensorShape key_reshape = TensorShape(key->tensor_shape().x()/info.h(),
                                           info.h(),
                                           key->tensor_shape().y(),
@@ -66,18 +66,16 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     _key_transpose_func = std::make_unique<CpuTranspose>();
     _key_transpose_func->configure(&_permuted_key, &_transposed_key);
 
-
-
-
-
-
+    // Matrix multiply compute multi-head attention between Query and Key
     float scale = sqrt(info.d_model());
 
     GEMMInfo gemm_QK_info;
-    gemm_QK_info.set_pretranspose_B(true);
 
     _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
-    _gemm_QK_func->configure(query, key, nullptr, output, 1/scale, 1, gemm_QK_info);
+    _gemm_QK_func->configure(&_permuted_query, &_transposed_key, nullptr, output, 1.0f/scale, 1.0f,gemm_QK_info);
+
+
+
 
     /*
     _run_vector_matrix_multiplication   = key->dimension(1) < 2;
@@ -187,6 +185,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler permuted_key(offset_int_vec(KeyPermute), _permuted_key, tensors);
     CpuAuxTensorHandler transposed_key(offset_int_vec(KeyTranspose), _transposed_key, tensors);
 
+    // Run Query multi-Head reshape 
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
     const auto query_split_dimension = _query_reshape_kernel->get_split_dimension();
     NEScheduler::get().schedule_op(_query_reshape_kernel.get(), query_split_dimension, _query_reshape_kernel->window(), query_reshape_pack);
@@ -203,6 +202,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
     
+    // Run Key multi-Head reshape 
     ITensorPack key_reshape_pack{{ACL_SRC_0, key},{ACL_DST, reshaped_key.get()}};
     const auto key_split_dimension = _key_reshape_kernel->get_split_dimension();
     NEScheduler::get().schedule_op(_key_reshape_kernel.get(), key_split_dimension, _key_reshape_kernel->window(), key_reshape_pack);
@@ -232,12 +232,18 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(transposed_key.get()->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
 
 
-
-
-
-
-    ITensorPack gemm_QK_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
+    ITensorPack gemm_QK_pack{{ACL_SRC_0, permuted_query.get()}, {ACL_SRC_1, transposed_key.get()}, {ACL_DST, output}};
     _gemm_QK_func->run(gemm_QK_pack);
+
+    std::cout <<"output.get() x: " << output->info()->tensor_shape().x() << std::endl;
+    std::cout <<"output.get() y: " << output->info()->tensor_shape().y() << std::endl;
+    std::cout <<"output.get() z: " << output->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
+
 
     /*
     const ITensor *key_to_use = key;
