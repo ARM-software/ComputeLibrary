@@ -89,8 +89,28 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     _gemm_QK_func->configure(&_permuted_query, &_transposed_key, nullptr, &_scaled_query_key, 1.0f, 0.0f,gemm_QK_info);
     */
 
+
+
+
+
+    // Configure interleave kernel
+    _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
+    _interleave_kernel->configure(&_permuted_query, &_tmp_query);
+    _aux_mem[InterleavedLHS] =
+        experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Persistent, _tmp_query.total_size());
+    
+    // Configure rhs transpose1xw kernel
+    _transpose1xW_key_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
+    _transpose1xW_key_kernel->configure(&_transposed_key, &_tmp_key);
+    _aux_mem[Transposed1xWRHS] =
+        experimental::MemoryInfo(offset_int_vec(Transposed1xWRHS),experimental::MemoryLifetime::Persistent, _tmp_key.total_size());
+
+    const int m = _permuted_query.dimension(1);
+    const int n = _transposed_key.dimension(0);
+    const int k = _permuted_query.dimension(0);
+
     _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
-    _mm_kernel->configure(&_permuted_query,&_transposed_key,&_scaled_query_key,1.0f,false);
+    _mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,1.0f,true,GEMMReshapeInfo(m, n, k));
 
 
 
@@ -223,10 +243,33 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack key_transpose_pack{{ACL_SRC, permuted_key.get()}, {ACL_DST, transposed_key.get()}};
     _key_transpose_func->run(key_transpose_pack);
 
+
+
+
+
+    CpuAuxTensorHandler interleaved_query(offset_int_vec(InterleavedLHS), _tmp_query, tensors, true);
+    CpuAuxTensorHandler transposed1xw_key(offset_int_vec(Transposed1xWRHS), _tmp_key, tensors, true);
+
+    // Run interleave kernel
+    ITensorPack interleave_pack{{ACL_SRC, permuted_query.get()}, {ACL_DST, interleaved_query.get()}};
+    NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
+                                    interleave_pack);
+
+    // Run transpose1xw kernel
+    ITensorPack transpose_pack{{ACL_SRC, transposed_key.get()}, {ACL_DST, transposed1xw_key.get()}};
+    NEScheduler::get().schedule_op(_transpose1xW_key_kernel.get(), Window::DimY,
+                                    _transpose1xW_key_kernel->window(), transpose_pack);
+
+
     // Run matrix multiply compute multi-head attention between Query and Key
-    ITensorPack gemm_QK_pack{{ACL_SRC_0, permuted_query.get()}, {ACL_SRC_1, transposed_key.get()}, {ACL_DST, scaled_query_key.get()}};
+    ITensorPack gemm_QK_pack{{ACL_SRC_0, interleaved_query.get()}, {ACL_SRC_1, transposed1xw_key.get()}, {ACL_DST, scaled_query_key.get()}};
     //_gemm_QK_func->run(gemm_QK_pack);
     NEScheduler::get().schedule_op(_mm_kernel.get(),Window::DimZ,_mm_kernel->window(),gemm_QK_pack);
+
+
+
+
+
 
     std::cout <<"scaled_query_key.get() x: " << scaled_query_key.get()->info()->tensor_shape().x() << std::endl;
     std::cout <<"scaled_query_key.get() y: " << scaled_query_key.get()->info()->tensor_shape().y() << std::endl;
@@ -304,7 +347,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
                                     _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                     _mm_kernel->window(), mm_pack);
     
-    */
+    
     std::cout << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,0))) << " "
               << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(1,0))) << " " 
               << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(2,0))) << " " 
@@ -323,7 +366,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
               << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,6))) << " " 
               << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(767,6))) << " "
     << std::endl; 
-
+    */
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
     ARM_COMPUTE_UNUSED(output);
