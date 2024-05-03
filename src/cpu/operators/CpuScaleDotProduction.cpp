@@ -44,6 +44,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     _query_permute_func = std::make_unique<CpuPermute>();
     _query_permute_func->configure(&_reshaped_query, &_permuted_query, PermutationVector(0U, 2U, 1U));
 
+
     // Key multi-Head reshape 
     TensorShape key_reshape = TensorShape(key->tensor_shape().x()/info.h(),
                                           info.h(),
@@ -68,31 +69,6 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     _key_transpose_func->configure(&_permuted_key, &_transposed_key);
 
 
-    // Matrix multiply compute multi-head attention between Query and Key
-    //float scale = sqrt(info.d_model());
-    TensorShape query_key_mm_reshape = TensorShape(_transposed_key.tensor_shape().x(),
-                                           _permuted_query.tensor_shape().y(),
-                                           _permuted_query.tensor_shape().z(),
-                                          1);
-    _scaled_query_key = key->clone()->set_tensor_shape(query_key_mm_reshape);
-    std::cout << "_scaled_query_key.tensor_shape().x() " << _scaled_query_key.tensor_shape().x() << std::endl;
-    std::cout << "_scaled_query_key.tensor_shape().y() " << _scaled_query_key.tensor_shape().y() << std::endl;
-    std::cout << "_scaled_query_key.tensor_shape().z() " << _scaled_query_key.tensor_shape().z() << std::endl;
-
-    std::cout << "_scaled_query_key.strides_in_bytes().x() " << _scaled_query_key.strides_in_bytes().x() << std::endl;
-    std::cout << "_scaled_query_key.strides_in_bytes().y() " << _scaled_query_key.strides_in_bytes().y() << std::endl;
-    std::cout << "_scaled_query_key.strides_in_bytes().z() " << _scaled_query_key.strides_in_bytes().z() << std::endl;
-
-    /*
-    GEMMInfo gemm_QK_info;
-    _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
-    _gemm_QK_func->configure(&_permuted_query, &_transposed_key, nullptr, &_scaled_query_key, 1.0f, 0.0f,gemm_QK_info);
-    */
-
-
-
-
-
     // Configure interleave kernel
     _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
     _interleave_kernel->configure(&_permuted_query, &_tmp_query);
@@ -105,69 +81,14 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     _aux_mem[Transposed1xWRHS] =
         experimental::MemoryInfo(offset_int_vec(Transposed1xWRHS),experimental::MemoryLifetime::Persistent, _tmp_key.total_size());
 
+    // Matrix multiply compute multi-head attention between Query and Key
+    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
     const int m = _permuted_query.dimension(1);
     const int n = _transposed_key.dimension(0);
     const int k = _permuted_query.dimension(0);
+    const float scale = 1.0f/sqrt(info.d_model());
+    _mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,scale,true,GEMMReshapeInfo(m, n, k));
 
-    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
-    _mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,1.0f,true,GEMMReshapeInfo(m, n, k));
-
-
-
-    /*
-    _run_vector_matrix_multiplication   = key->dimension(1) < 2;
-    _run_pretranspose                   = true;
-    
-    float scale = sqrt(info.d_model());
-    _run_scale = scale != 1.f;
-
-    // Pick b tensor in case pretranspose should be performed
-    const ITensorInfo *key_to_use = key;
-    ITensorInfo *gemm_output_to_use = output;
-
-    // Pretranspose Key, K=K^T 
-    _pretranspose_key_func = std::make_unique<CpuTranspose>();
-    _pretranspose_key_func->configure(key_to_use, &_pretransposed_key);
-
-    _aux_mem[PreTransposedRHS] =
-                experimental::MemoryInfo(offset_int_vec(PreTransposedRHS), experimental::MemoryLifetime::Persistent, _pretransposed_key.total_size());
-    key_to_use = &_pretransposed_key;
-    
-
-    // Matrix multiply Query adn Key, QK 
-    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
-
-    // Select between GEMV and GEMM
-    if (_run_vector_matrix_multiplication)
-    {
-        // Configure the matrix multiply kernel
-        _mm_kernel->configure(query, key_to_use, gemm_output_to_use, scale, false);
-    }
-    else
-    {
-        _run_interleave_transpose = !_run_vector_matrix_multiplication;
-        // Configure interleave kernel
-        _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
-        _interleave_kernel->configure(query, &_tmp_query);
-        _aux_mem[InterleavedLHS] =
-            experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Persistent, _tmp_query.total_size());
-
-        // Configure rhs transpose1xw kernel
-        _transpose1xW_key_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
-        _transpose1xW_key_kernel->configure(key_to_use, &_tmp_key);
-        _aux_mem[Transposed1xWRHS] =
-            experimental::MemoryInfo(offset_int_vec(Transposed1xWRHS),experimental::MemoryLifetime::Persistent, _tmp_key.total_size());
-
-        // Use a and b here instead of _tmp_a and _tmp_b because CpuGemmMatrixMultiplyKernel requires the original m,n,k in case of interleaved a and transposed1xw b
-        const int m = query->dimension(1);
-        const int n = key_to_use->dimension(0);
-        const int k = query->dimension(0);
-
-        // Configure matrix multiplication kernel
-        _mm_kernel->configure(&_tmp_query, &_tmp_key, gemm_output_to_use, scale, _run_interleave_transpose,
-                                GEMMReshapeInfo(m, n, k));
-    }
-    */
     
     ARM_COMPUTE_UNUSED(value);
     ARM_COMPUTE_UNUSED(query);
@@ -263,11 +184,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     // Run matrix multiply compute multi-head attention between Query and Key
     ITensorPack gemm_QK_pack{{ACL_SRC_0, interleaved_query.get()}, {ACL_SRC_1, transposed1xw_key.get()}, {ACL_DST, scaled_query_key.get()}};
-    //_gemm_QK_func->run(gemm_QK_pack);
     NEScheduler::get().schedule_op(_mm_kernel.get(),Window::DimZ,_mm_kernel->window(),gemm_QK_pack);
-
-
-
 
 
 
