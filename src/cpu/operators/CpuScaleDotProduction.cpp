@@ -69,7 +69,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 
 
     // Matrix multiply compute multi-head attention between Query and Key
-    float scale = sqrt(info.d_model());
+    //float scale = sqrt(info.d_model());
     TensorShape query_key_mm_reshape = TensorShape(_transposed_key.tensor_shape().x(),
                                            _permuted_query.tensor_shape().y(),
                                            _permuted_query.tensor_shape().z(),
@@ -78,7 +78,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 
     GEMMInfo gemm_QK_info;
     _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
-    _gemm_QK_func->configure(&_permuted_query, &_transposed_key, nullptr, &_scaled_query_key, 1.0f/scale, 1.0f,gemm_QK_info);
+    _gemm_QK_func->configure(&_permuted_query, &_transposed_key, nullptr, &_scaled_query_key, 1.0f, 1.0f,gemm_QK_info);
 
 
 
