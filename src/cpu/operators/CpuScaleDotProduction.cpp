@@ -226,7 +226,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     // Run matrix multiply compute multi-head attention between Query and Key
     ITensorPack gemm_QK_pack{{ACL_SRC_0, permuted_query.get()}, {ACL_SRC_1, transposed_key.get()}, {ACL_DST, scaled_query_key.get()}};
     //_gemm_QK_func->run(gemm_QK_pack);
-    NEScheduler::get().schedule_op(_mm_kernel.get(),Window::DimY,_mm_kernel->window(),gemm_QK_pack);
+    NEScheduler::get().schedule_op(_mm_kernel.get(),Window::DimZ,_mm_kernel->window(),gemm_QK_pack);
 
     std::cout <<"scaled_query_key.get() x: " << scaled_query_key.get()->info()->tensor_shape().x() << std::endl;
     std::cout <<"scaled_query_key.get() y: " << scaled_query_key.get()->info()->tensor_shape().y() << std::endl;
