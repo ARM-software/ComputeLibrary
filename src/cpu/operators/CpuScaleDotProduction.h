@@ -62,17 +62,16 @@ private:
     {
         /* Slots 0 - 2 reserved for CpuGemmAssemblyDispatch */
         InterleavedLHS = 3,
-        PreTransposedRHS,
         Transposed1xWRHS,
         QueryReshape,
         QueryPermute,
         KeyReshape,
         KeyPermute,
+        KeyTranspose,
         Count
     };
 
     std::unique_ptr<kernels::CpuGemmInterleave4x4Kernel>    _interleave_kernel{nullptr};
-    std::unique_ptr<CpuTranspose>                           _pretranspose_key_func{nullptr};
     std::unique_ptr<kernels::CpuGemmMatrixMultiplyKernel>   _mm_kernel{nullptr};
     std::unique_ptr<kernels::CpuGemmTranspose1xWKernel>     _transpose1xW_key_kernel{nullptr};
     std::unique_ptr<CpuActivation>                          _scale_func{nullptr};
@@ -82,15 +81,16 @@ private:
     std::unique_ptr<CpuPermute>                             _query_permute_func{nullptr};
     std::unique_ptr<kernels::CpuReshapeKernel>              _key_reshape_kernel{nullptr};
     std::unique_ptr<CpuPermute>                             _key_permute_func{nullptr};
+    std::unique_ptr<CpuTranspose>                           _key_transpose_func{nullptr};
 
     TensorInfo _tmp_query{};
-    TensorInfo _pretransposed_key{};
     TensorInfo _tmp_key{};
 
-    TensorInfo _reshape_query{};
-    TensorInfo _permute_query{};
-    TensorInfo _reshape_key{};
-    TensorInfo _permute_key{};
+    TensorInfo _reshaped_query{};
+    TensorInfo _permuted_query{};
+    TensorInfo _reshaped_key{};
+    TensorInfo _permuted_key{};
+    TensorInfo _transposed_key{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};
