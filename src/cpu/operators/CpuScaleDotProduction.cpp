@@ -84,8 +84,8 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     std::cout << "_scaled_query_key.strides_in_bytes().z() " << _scaled_query_key.strides_in_bytes().z() << std::endl;
 
     GEMMInfo gemm_QK_info;
-    gemm_QK_info.set_pretranspose_A(false);
-    gemm_QK_info.set_pretranspose_B(false);
+    gemm_QK_info.set_pretranspose_A(true);
+    gemm_QK_info.set_pretranspose_B(true);
     _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
     _gemm_QK_func->configure(&_permuted_query, &_transposed_key, nullptr, &_scaled_query_key, 1.0f, 0.0f,gemm_QK_info);
 
