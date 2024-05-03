@@ -66,6 +66,8 @@ private:
         Transposed1xWRHS,
         QueryReshape,
         QueryPermute,
+        KeyReshape,
+        KeyPermute,
         Count
     };
 
@@ -78,6 +80,8 @@ private:
     std::unique_ptr<CpuGemm>                                _gemm_QK_func{nullptr};
     std::unique_ptr<kernels::CpuReshapeKernel>              _query_reshape_kernel{nullptr};
     std::unique_ptr<CpuPermute>                             _query_permute_func{nullptr};
+    std::unique_ptr<kernels::CpuReshapeKernel>              _key_reshape_kernel{nullptr};
+    std::unique_ptr<CpuPermute>                             _key_permute_func{nullptr};
 
     TensorInfo _tmp_query{};
     TensorInfo _pretransposed_key{};
@@ -85,6 +89,8 @@ private:
 
     TensorInfo _reshape_query{};
     TensorInfo _permute_query{};
+    TensorInfo _reshape_key{};
+    TensorInfo _permute_key{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};

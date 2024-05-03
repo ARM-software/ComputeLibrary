@@ -24,6 +24,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
     
+    /* Query Multi-Head Reshape */
     TensorShape query_reshape = TensorShape(query->tensor_shape().x()/info.h(),
                                             info.h(),
                                             query->tensor_shape().y(),
@@ -41,6 +42,31 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 
     _query_permute_func = std::make_unique<CpuPermute>();
     _query_permute_func->configure(&_reshape_query, &_permute_query, PermutationVector(0U, 2U, 1U));
+
+    /* Key Multi-Head Reshape */
+    TensorShape key_reshape = TensorShape(key->tensor_shape().x()/info.h(),
+                                          info.h(),
+                                          key->tensor_shape().y(),
+                                          1);
+    _reshape_key = key->clone()->set_tensor_shape(key_reshape);
+
+    TensorShape key_permute = TensorShape(key->tensor_shape().x()/info.h(),
+                                          key->tensor_shape().y(),
+                                          info.h(),
+                                          1);
+    _permute_key = key->clone()->set_tensor_shape(key_permute);
+
+    _key_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
+    _key_reshape_kernel->configure(key, &_reshape_key);
+
+    _key_permute_func = std::make_unique<CpuPermute>();
+    _key_permute_func->configure(&_reshape_key, &_permute_key, PermutationVector(0U, 2U, 1U));
+
+
+
+
+
+
 
     float scale = sqrt(info.d_model());
 
@@ -154,6 +180,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     CpuAuxTensorHandler reshaped_query(offset_int_vec(QueryReshape), _reshape_query, tensors);
     CpuAuxTensorHandler permuted_query(offset_int_vec(QueryPermute), _permute_query, tensors);
+    CpuAuxTensorHandler reshaped_key(offset_int_vec(KeyReshape), _reshape_key, tensors);
+    CpuAuxTensorHandler permuted_key(offset_int_vec(KeyPermute), _permute_key, tensors);
 
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
     const auto split_dimension = _query_reshape_kernel->get_split_dimension();
@@ -161,6 +189,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     ITensorPack query_permute_pack{{ACL_SRC, reshaped_query.get()},{ACL_DST, permuted_query.get()}};
     _query_permute_func->run(query_permute_pack);
+
     std::cout <<"permuted_query.get() x: " << permuted_query.get()->info()->tensor_shape().x() << std::endl;
     std::cout <<"permuted_query.get() y: " << permuted_query.get()->info()->tensor_shape().y() << std::endl;
     std::cout <<"permuted_query.get() z: " << permuted_query.get()->info()->tensor_shape().z() << std::endl;
@@ -169,6 +198,25 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(permuted_query.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
+    
+    ITensorPack key_reshape_pack{{ACL_SRC_0, key},{ACL_DST, reshaped_key.get()}};
+    const auto split_dimension = _key_reshape_kernel->get_split_dimension();
+    NEScheduler::get().schedule_op(_key_reshape_kernel.get(), split_dimension, _key_reshape_kernel->window(), key_reshape_pack);
+
+    ITensorPack key_permute_pack{{ACL_SRC, reshaped_key.get()},{ACL_DST, permuted_key.get()}};
+    _key_permute_func->run(key_permute_pack);
+
+    std::cout <<"permuted_key.get() x: " << permuted_key.get()->info()->tensor_shape().x() << std::endl;
+    std::cout <<"permuted_key.get() y: " << permuted_key.get()->info()->tensor_shape().y() << std::endl;
+    std::cout <<"permuted_key.get() z: " << permuted_key.get()->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_key.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_key.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_key.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_key.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(permuted_key.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
+
+
+
 
 
 
