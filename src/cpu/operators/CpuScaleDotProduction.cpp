@@ -75,6 +75,13 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                            _permuted_query.tensor_shape().z(),
                                           1);
     _scaled_query_key = key->clone()->set_tensor_shape(query_key_mm_reshape);
+    std::cout << "_scaled_query_key.tensor_shape().x() " << _scaled_query_key.tensor_shape().x() << std::endl;
+    std::cout << "_scaled_query_key.tensor_shape().y() " << _scaled_query_key.tensor_shape().y() << std::endl;
+    std::cout << "_scaled_query_key.tensor_shape().z() " << _scaled_query_key.tensor_shape().z() << std::endl;
+
+    std::cout << "_scaled_query_key.strides_in_bytes().x() " << _scaled_query_key.strides_in_bytes().x() << std::endl;
+    std::cout << "_scaled_query_key.strides_in_bytes().y() " << _scaled_query_key.strides_in_bytes().y() << std::endl;
+    std::cout << "_scaled_query_key.strides_in_bytes().z() " << _scaled_query_key.strides_in_bytes().z() << std::endl;
 
     GEMMInfo gemm_QK_info;
     _gemm_QK_func = std::make_unique<cpu::CpuGemm>();
