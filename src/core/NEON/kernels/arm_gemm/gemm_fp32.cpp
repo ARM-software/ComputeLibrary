@@ -199,14 +199,14 @@ GemmImplementation<float, float>::with_estimate(
 GemmImplementation<float, float>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp32bf16fp32_mmla_6x4VL",
-    [](const GemmArgs &args) { return args._fast_mode && args._ci->has_bf16(); },
+    [](const GemmArgs &args) { return args._fast_mode && args._ci->has_svebf16(); },
     [](const GemmArgs &args) { return GemmHybridIndirect<cls_sve_hybrid_fp32bf16fp32_mmla_6x4VL, float, float>::estimate_cycles<float>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp32bf16fp32_mmla_6x4VL, float, float>(args); }
 ),
 GemmImplementation<float, float>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp32bf16fp32_mmla_4x6VL",
-    [](const GemmArgs &args) { return args._fast_mode && args._ci->has_bf16(); },
+    [](const GemmArgs &args) { return args._fast_mode && args._ci->has_svebf16(); },
     [](const GemmArgs &args) { return GemmHybridIndirect<cls_sve_hybrid_fp32bf16fp32_mmla_4x6VL, float, float>::estimate_cycles<float>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp32bf16fp32_mmla_4x6VL, float, float>(args); }
 ),
