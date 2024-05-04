@@ -134,8 +134,8 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     _concat_permute_func = std::make_unique<CpuPermute>();
     _concat_permute_func->configure(&_gemmed_context, &_permuted_concat, PermutationVector(0U, 2U, 1U));
 
-    _query_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
-    _query_reshape_kernel->configure(&_permuted_concat, output);
+    _concat_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
+    _concat_reshape_kernel->configure(&_permuted_concat, output);
 }
 
 Status
