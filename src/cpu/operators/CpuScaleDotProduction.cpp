@@ -107,14 +107,14 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 
 
     // Configure interleave kernel
-    _query_interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
-    _query_interleave_kernel->configure(&_softmaxed_product, &_interleaved_product);
+    _product_interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
+    _product_interleave_kernel->configure(&_softmaxed_product, &_interleaved_product);
     _aux_mem[InterleavedProduct] =
         experimental::MemoryInfo(offset_int_vec(InterleavedProduct), experimental::MemoryLifetime::Persistent, _interleaved_product.total_size());
     
     // Configure rhs transpose1xw kernel
-    _key_transpose1xW_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
-    _key_transpose1xW_kernel->configure(&_permuted_value, &_transposed1xW_value);
+    _value_transpose1xW_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
+    _value_transpose1xW_kernel->configure(&_permuted_value, &_transposed1xW_value);
     _aux_mem[Transposed1xWValue] =
         experimental::MemoryInfo(offset_int_vec(Transposed1xWValue),experimental::MemoryLifetime::Persistent, _transposed1xW_value.total_size());
 
