@@ -646,7 +646,10 @@ NodeID GraphBuilder::add_multi_head_attention_node(Graph &g, NodeParams params, 
 
     set_node_params(g, sdp_nid, params);
 
-    return sdp_nid;
+    NodeID c_nid = g.add_node<ConcatenateLayerNode>(1,descriptors::ConcatLayerDescriptor(DataLayoutDimension::CHANNEL));
+    g.add_connection(sdp_nid,0,c_nid,0);
+
+    return c_nid;
 }
 
 NodeID GraphBuilder::add_layer_norm_node(Graph &g, NodeParams params, NodeIdxPair input, LayerNormLayerInfo info)
