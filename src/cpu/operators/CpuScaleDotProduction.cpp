@@ -290,9 +290,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout <<"output z: " << output->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
     
 
 }
