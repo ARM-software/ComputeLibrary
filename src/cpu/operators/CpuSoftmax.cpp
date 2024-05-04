@@ -194,15 +194,7 @@ void CpuSoftmaxGeneric::run(ITensorPack &tensors)
         permute_out_pack.add_tensor(TensorType::ACL_DST, dst);
         _permute_output.run(permute_out_pack);
     }
-
-    std::cout <<"CpuSoftmax.cpp dst x: " << dst->info()->tensor_shape().x() << std::endl;
-    std::cout <<"CpuSoftmax.cpp dst y: " << dst->info()->tensor_shape().y() << std::endl;
-    std::cout <<"CpuSoftmax.cpp dst z: " << dst->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(dst->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(dst->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(dst->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(dst->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(dst->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
+    
 }
 
 experimental::MemoryRequirements CpuSoftmaxGeneric::workspace() const

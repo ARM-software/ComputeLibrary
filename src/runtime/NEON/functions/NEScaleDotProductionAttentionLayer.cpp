@@ -59,11 +59,10 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *query,
     _impl->softmax_op->configure(production_to_softmax->info(),softmax_to_gemm->info());
     _impl->softmax_pack = {{ACL_SRC, production_to_softmax}, {ACL_DST, softmax_to_gemm}};
 
-    /* Scale dot production of key and query */
-    //float scale = sqrt(info.d_model());
+    /* Multiply between scaled product and value */
     _impl->value_gemm_op = std::make_unique<cpu::CpuGemm>();
     _impl->value_gemm_op->configure(softmax_to_gemm->info(),value->info(),nullptr,output->info(),1.0,1.0);
-    _impl->value_gemm_pack = {{ACL_SRC_0, production_to_softmax}, {ACL_SRC_1, value}, {ACL_DST, softmax_to_gemm}};
+    _impl->value_gemm_pack = {{ACL_SRC_0, softmax_to_gemm}, {ACL_SRC_1, value}, {ACL_DST, output}};
 
 }
 
@@ -73,7 +72,6 @@ void NEScaleDotProductionAttentionLayer::run()
 
     _impl->scale_dot_production_op->run(_impl->scale_dot_pack);
     _impl->softmax_op->run(_impl->softmax_pack);
-
     _impl->value_gemm_op->run(_impl->value_gemm_pack);
 
 }

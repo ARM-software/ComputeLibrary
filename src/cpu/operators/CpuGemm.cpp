@@ -493,6 +493,14 @@ void CpuGemm::run(ITensorPack &tensors)
         _activation_func->run(pack);
     }
 
+    std::cout <<"CpuGemm.cpp dst x: " << d->info()->tensor_shape().x() << std::endl;
+    std::cout <<"CpuGemm.cpp dst y: " << d->info()->tensor_shape().y() << std::endl;
+    std::cout <<"CpuGemm.cpp dst z: " << d->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
 }
 
 void CpuGemm::prepare(ITensorPack &tensors)
