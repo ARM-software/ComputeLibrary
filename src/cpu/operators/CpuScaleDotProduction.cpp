@@ -124,7 +124,18 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     const int k1 = _softmaxed_product.dimension(0);
     _context_mm_kernel->configure(&_interleaved_product,&_permuted_value,&_gemmed_context,1.0f,true,GEMMReshapeInfo(m1, n1, k1));
 
-    
+    // Concat multi-Head reshape 
+
+    TensorShape concat_permute = TensorShape(query->tensor_shape().x()/info.h(),
+                                             info.h(),
+                                             query->tensor_shape().y(),
+                                             1);
+    _permuted_concat = query->clone()->set_tensor_shape(concat_permute);
+    _concat_permute_func = std::make_unique<CpuPermute>();
+    _concat_permute_func->configure(&_gemmed_context, &_permuted_concat, PermutationVector(0U, 2U, 1U));
+
+    _query_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
+    _query_reshape_kernel->configure(&_permuted_concat, output);
 }
 
 Status
@@ -174,6 +185,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler transposed_key(offset_int_vec(KeyTranspose), _transposed_key, tensors);
     CpuAuxTensorHandler reshaped_value(offset_int_vec(ValueReshape), _reshaped_value, tensors);
     CpuAuxTensorHandler permuted_value(offset_int_vec(ValuePermute), _permuted_value, tensors);
+    CpuAuxTensorHandler permuted_concat(offset_int_vec(ConcatPermute), _permuted_concat, tensors);
 
     CpuAuxTensorHandler scaled_query_key(offset_int_vec(QueryKeyScale), _scaled_query_key, tensors);
     CpuAuxTensorHandler interleaved_query(offset_int_vec(InterleavedLHS), _tmp_query, tensors, true);
@@ -266,7 +278,21 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
 
     // Concat all attention head together
+    ITensorPack concat_permute_pack{{ACL_SRC, gemmed_context.get()},{ACL_DST, permuted_concat.get()}};
+    _concat_permute_func->run(concat_permute_pack);
 
+    ITensorPack concat_reshape_pack{{ACL_SRC_0, permuted_concat.get()},{ACL_DST, output}};
+    const auto concat_split_dimension = _concat_reshape_kernel->get_split_dimension();
+    NEScheduler::get().schedule_op(_concat_reshape_kernel.get(), concat_split_dimension, _concat_reshape_kernel->window(), concat_reshape_pack);
+
+    std::cout <<"output x: " << output->info()->tensor_shape().x() << std::endl;
+    std::cout <<"output y: " << output->info()->tensor_shape().y() << std::endl;
+    std::cout <<"output z: " << output->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
     
 
 }

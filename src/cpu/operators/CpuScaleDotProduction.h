@@ -76,6 +76,7 @@ private:
         QueryKeyScale,
         Softmax,
         GemmedContext,
+        ConcatPermute,
         Count
     };
 
@@ -112,6 +113,7 @@ private:
     TensorInfo _permuted_key{};
     TensorInfo _reshaped_value{};
     TensorInfo _permuted_value{};
+    TensorInfo _permuted_concat{};
     TensorInfo _transposed_key{};
     TensorInfo _scaled_query_key{};
     TensorInfo _softmaxed_product{};
