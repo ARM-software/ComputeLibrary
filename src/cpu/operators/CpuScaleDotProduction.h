@@ -92,7 +92,7 @@ private:
     TensorInfo _reshaped_key{};
     TensorInfo _permuted_key{};
     TensorInfo _transposed_key{};
-    TensorInfo _reshaped_output{};
+    TensorInfo _scaled_query_key{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};
