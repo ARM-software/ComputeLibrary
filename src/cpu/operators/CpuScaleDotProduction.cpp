@@ -269,8 +269,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
 
     /*
     const ITensor *key_to_use = key;
