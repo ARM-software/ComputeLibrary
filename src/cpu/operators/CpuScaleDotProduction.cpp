@@ -89,14 +89,13 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     const float scale = 1.0f/sqrt(info.d_model()/info.h());
     _mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,scale,true,GEMMReshapeInfo(m, n, k));
 
-    /*  Softmax of previous product */
+    //  Softmax of previous product 
     _softmax_func = std::make_unique<cpu::CpuSoftmaxGeneric>();
     _softmax_func->configure(&_scaled_query_key,&_softmaxed_product);
 
-    ARM_COMPUTE_UNUSED(value);
-    ARM_COMPUTE_UNUSED(query);
-    ARM_COMPUTE_UNUSED(output);
-
+    //  Multiply between scaled product and value 
+    _value_gemm_func = std::make_unique<cpu::CpuGemm>();
+    _value_gemm_func->configure(&_softmaxed_product,value,nullptr,output,1.0,1.0);
 
 }
 
@@ -200,6 +199,9 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     ITensorPack softmax_pack = {{ACL_SRC, scaled_query_key.get()}, {ACL_DST, softmaxed_product.get()}};
     _softmax_func->run(softmax_pack);
+
+    ITensorPack value_gemm_pack = {{ACL_SRC_0,  softmaxed_product.get()}, {ACL_SRC_1, value}, {ACL_DST, output}};
+    _value_gemm_func->run(value_gemm_pack);
 
     /*
     const ITensor *key_to_use = key;
