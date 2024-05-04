@@ -224,6 +224,17 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack value_gemm_pack = {{ACL_SRC_0,  softmaxed_product.get()}, {ACL_SRC_1, permuted_value.get()}, {ACL_DST, output}};
     _value_gemm_func->run(value_gemm_pack);
 
+
+
+    std::cout <<"CpuGemm.cpp dst x: " << output->info()->tensor_shape().x() << std::endl;
+    std::cout <<"CpuGemm.cpp dst y: " << output->info()->tensor_shape().y() << std::endl;
+    std::cout <<"CpuGemm.cpp dst z: " << output->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
+
     /*
     const ITensor *key_to_use = key;
 
