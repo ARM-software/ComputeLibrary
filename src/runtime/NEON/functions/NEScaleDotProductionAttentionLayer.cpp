@@ -14,18 +14,10 @@ struct NEScaleDotProductionAttentionLayer::Impl
     MemoryGroup                         memory_group{};
 
     ITensorPack                         scale_dot_pack{};
-    ITensorPack                         softmax_pack{};
-    ITensorPack                         value_gemm_pack{};
 
     IRuntimeContext                    *ctx{nullptr};
 
     std::unique_ptr<cpu::CpuScaleDotProduction> scale_dot_production_op{nullptr};
-    std::unique_ptr<cpu::CpuGemm>               value_gemm_op{nullptr};
-
-    /*
-    WorkspaceData<Tensor>            workspace{};
-    experimental::MemoryRequirements aux_mem_req{};
-    */
 
     bool is_prepared{false};
 };
@@ -44,13 +36,10 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *query,
                                                    ITensor *output,
                                                    const ScaleDotProductionAttentionLayerInfo& info)
 {
-    ITensor * production_to_softmax = output;
-    ITensor * softmax_to_gemm = output;
-
     /* Scale dot production of key and query */
     _impl->scale_dot_production_op  = std::make_unique<cpu::CpuScaleDotProduction>();
-    _impl->scale_dot_production_op->configure(query->info(),key->info(),value->info(),production_to_softmax->info(),info);
-    _impl->scale_dot_pack = {{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_SRC_2, value}, {ACL_DST, production_to_softmax}};
+    _impl->scale_dot_production_op->configure(query->info(),key->info(),value->info(),output->info(),info);
+    _impl->scale_dot_pack = {{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_SRC_2, value}, {ACL_DST, output}};
 
 }
 
@@ -59,7 +48,6 @@ void NEScaleDotProductionAttentionLayer::run()
     ITensorPack pack;
 
     _impl->scale_dot_production_op->run(_impl->scale_dot_pack);
-    _impl->value_gemm_op->run(_impl->value_gemm_pack);
 
 }
 
