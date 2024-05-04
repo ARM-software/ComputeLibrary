@@ -23,7 +23,6 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                       const ScaleDotProductionAttentionLayerInfo& info)
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
-    ARM_COMPUTE_UNUSED(output);
     
     // Query multi-Head reshape 
     TensorShape query_reshape = TensorShape(query->tensor_shape().x()/info.h(),
@@ -87,7 +86,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     const int n = _transposed_key.dimension(0);
     const int k = _permuted_query.dimension(0);
     const float scale = 1.0f/sqrt(info.d_model()/info.h());
-    _mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,scale,true,GEMMReshapeInfo(m, n, k));
+    _mm_kernel->configure(&_tmp_query,&_tmp_key,output,scale,true,GEMMReshapeInfo(m, n, k));
 
     
     ARM_COMPUTE_UNUSED(value);
@@ -142,7 +141,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler reshaped_key(offset_int_vec(KeyReshape), _reshaped_key, tensors);
     CpuAuxTensorHandler permuted_key(offset_int_vec(KeyPermute), _permuted_key, tensors);
     CpuAuxTensorHandler transposed_key(offset_int_vec(KeyTranspose), _transposed_key, tensors);
-    CpuAuxTensorHandler scaled_query_key(offset_int_vec(QueryKeyScale), _scaled_query_key, tensors);
+    //CpuAuxTensorHandler scaled_query_key(offset_int_vec(QueryKeyScale), _scaled_query_key, tensors);
 
     // Run Query multi-Head reshape 
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
@@ -183,19 +182,19 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
 
     // Run matrix multiply compute multi-head attention between Query and Key
-    ITensorPack gemm_QK_pack{{ACL_SRC_0, interleaved_query.get()}, {ACL_SRC_1, transposed1xw_key.get()}, {ACL_DST, scaled_query_key.get()}};
+    ITensorPack gemm_QK_pack{{ACL_SRC_0, interleaved_query.get()}, {ACL_SRC_1, transposed1xw_key.get()}, {ACL_DST, output}};
     NEScheduler::get().schedule_op(_mm_kernel.get(),Window::DimZ,_mm_kernel->window(),gemm_QK_pack);
 
 
 
-    std::cout <<"scaled_query_key.get() x: " << scaled_query_key.get()->info()->tensor_shape().x() << std::endl;
-    std::cout <<"scaled_query_key.get() y: " << scaled_query_key.get()->info()->tensor_shape().y() << std::endl;
-    std::cout <<"scaled_query_key.get() z: " << scaled_query_key.get()->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
+    std::cout <<"output x: " << output->info()->tensor_shape().x() << std::endl;
+    std::cout <<"output y: " << output->info()->tensor_shape().y() << std::endl;
+    std::cout <<"output z: " << output->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
 
 
     /*
