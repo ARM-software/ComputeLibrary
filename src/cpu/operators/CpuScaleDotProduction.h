@@ -68,6 +68,8 @@ private:
         QueryPermute,
         KeyReshape,
         KeyPermute,
+        ValueReshape,
+        ValuePermute,
         KeyTranspose,
         QueryKeyScale,
         Softmax,
@@ -83,6 +85,8 @@ private:
     std::unique_ptr<CpuPermute>                             _query_permute_func{nullptr};
     std::unique_ptr<kernels::CpuReshapeKernel>              _key_reshape_kernel{nullptr};
     std::unique_ptr<CpuPermute>                             _key_permute_func{nullptr};
+    std::unique_ptr<kernels::CpuReshapeKernel>              _value_reshape_kernel{nullptr};
+    std::unique_ptr<CpuPermute>                             _value_permute_func{nullptr};
     std::unique_ptr<CpuTranspose>                           _key_transpose_func{nullptr};
     std::unique_ptr<CpuSoftmaxGeneric>                      _softmax_func{nullptr};
     std::unique_ptr<CpuGemm>                                _value_gemm_func{nullptr};
@@ -94,6 +98,8 @@ private:
     TensorInfo _permuted_query{};
     TensorInfo _reshaped_key{};
     TensorInfo _permuted_key{};
+    TensorInfo _reshaped_value{};
+    TensorInfo _permuted_value{};
     TensorInfo _transposed_key{};
     TensorInfo _scaled_query_key{};
     TensorInfo _softmaxed_product{};

@@ -31,16 +31,13 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                             query->tensor_shape().y(),
                                             1);
     _reshaped_query = query->clone()->set_tensor_shape(query_reshape);
-
     TensorShape query_permute = TensorShape(query->tensor_shape().x()/info.h(),
                                             query->tensor_shape().y(),
                                             info.h(),
                                             1);
     _permuted_query = query->clone()->set_tensor_shape(query_permute);
-
     _query_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
     _query_reshape_kernel->configure(query, &_reshaped_query);
-
     _query_permute_func = std::make_unique<CpuPermute>();
     _query_permute_func->configure(&_reshaped_query, &_permuted_query, PermutationVector(0U, 2U, 1U));
 
@@ -51,22 +48,36 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                           key->tensor_shape().y(),
                                           1);
     _reshaped_key = key->clone()->set_tensor_shape(key_reshape);
-
     TensorShape key_permute = TensorShape(key->tensor_shape().x()/info.h(),
                                           key->tensor_shape().y(),
                                           info.h(),
                                           1);
     _permuted_key = key->clone()->set_tensor_shape(key_permute);
-
     _key_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
     _key_reshape_kernel->configure(key, &_reshaped_key);
-
     _key_permute_func = std::make_unique<CpuPermute>();
     _key_permute_func->configure(&_reshaped_key, &_permuted_key, PermutationVector(0U, 2U, 1U));
-
     // Pretranspose Key, K=K^T 
     _key_transpose_func = std::make_unique<CpuTranspose>();
     _key_transpose_func->configure(&_permuted_key, &_transposed_key);
+
+    
+    // Value multi-Head reshape 
+    TensorShape value_reshape = TensorShape(value->tensor_shape().x()/info.h(),
+                                            info.h(),
+                                            value->tensor_shape().y(),
+                                            1);
+    _reshaped_value = value->clone()->set_tensor_shape(value_reshape);
+    TensorShape value_permute = TensorShape(value->tensor_shape().x()/info.h(),
+                                            value->tensor_shape().y(),
+                                            info.h(),
+                                            1);
+    _permuted_value = value->clone()->set_tensor_shape(value_permute);
+    _value_reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
+    _value_reshape_kernel->configure(value, &_reshaped_value);
+    _value_permute_func = std::make_unique<CpuPermute>();
+    _value_permute_func->configure(&_reshaped_value, &_permuted_value, PermutationVector(0U, 2U, 1U));
+
 
 
     // Configure interleave kernel
@@ -95,7 +106,7 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 
     //  Multiply between scaled product and value 
     _value_gemm_func = std::make_unique<cpu::CpuGemm>();
-    _value_gemm_func->configure(&_softmaxed_product,value,nullptr,output,1.0,1.0);
+    _value_gemm_func->configure(&_softmaxed_product,&_permuted_value,nullptr,output,1.0,1.0);
 
 }
 
@@ -144,6 +155,9 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler reshaped_key(offset_int_vec(KeyReshape), _reshaped_key, tensors);
     CpuAuxTensorHandler permuted_key(offset_int_vec(KeyPermute), _permuted_key, tensors);
     CpuAuxTensorHandler transposed_key(offset_int_vec(KeyTranspose), _transposed_key, tensors);
+    CpuAuxTensorHandler reshaped_value(offset_int_vec(ValueReshape), _reshaped_value, tensors);
+    CpuAuxTensorHandler permuted_value(offset_int_vec(ValuePermute), _permuted_value, tensors);
+
     CpuAuxTensorHandler scaled_query_key(offset_int_vec(QueryKeyScale), _scaled_query_key, tensors);
     CpuAuxTensorHandler interleaved_query(offset_int_vec(InterleavedLHS), _tmp_query, tensors, true);
     CpuAuxTensorHandler transposed1xw_key(offset_int_vec(Transposed1xWRHS), _tmp_key, tensors, true);
@@ -169,6 +183,13 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack key_transpose_pack{{ACL_SRC, permuted_key.get()}, {ACL_DST, transposed_key.get()}};
     _key_transpose_func->run(key_transpose_pack);
 
+    // Run Value multi-Head reshape 
+    ITensorPack value_reshape_pack{{ACL_SRC_0, value},{ACL_DST, reshaped_value.get()}};
+    const auto value_split_dimension = _value_reshape_kernel->get_split_dimension();
+    NEScheduler::get().schedule_op(_value_reshape_kernel.get(), value_split_dimension, _value_reshape_kernel->window(), value_reshape_pack);
+
+    ITensorPack value_permute_pack{{ACL_SRC, reshaped_value.get()},{ACL_DST, permuted_value.get()}};
+    _value_permute_func->run(value_permute_pack);
 
     // Run interleave kernel
     ITensorPack interleave_pack{{ACL_SRC, permuted_query.get()}, {ACL_DST, interleaved_query.get()}};
@@ -200,7 +221,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack softmax_pack = {{ACL_SRC, scaled_query_key.get()}, {ACL_DST, softmaxed_product.get()}};
     _softmax_func->run(softmax_pack);
 
-    ITensorPack value_gemm_pack = {{ACL_SRC_0,  softmaxed_product.get()}, {ACL_SRC_1, value}, {ACL_DST, output}};
+    ITensorPack value_gemm_pack = {{ACL_SRC_0,  softmaxed_product.get()}, {ACL_SRC_1, permuted_value.get()}, {ACL_DST, output}};
     _value_gemm_func->run(value_gemm_pack);
 
     /*
