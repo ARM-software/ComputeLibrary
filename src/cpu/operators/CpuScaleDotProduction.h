@@ -75,6 +75,7 @@ private:
         KeyTranspose,
         QueryKeyScale,
         Softmax,
+        GemmedContext,
         Count
     };
 
@@ -93,9 +94,12 @@ private:
     std::unique_ptr<CpuPermute>                             _key_permute_func{nullptr};
     std::unique_ptr<kernels::CpuReshapeKernel>              _value_reshape_kernel{nullptr};
     std::unique_ptr<CpuPermute>                             _value_permute_func{nullptr};
+    std::unique_ptr<kernels::CpuReshapeKernel>              _concat_reshape_kernel{nullptr};
+    std::unique_ptr<CpuPermute>                             _concat_permute_func{nullptr};
     std::unique_ptr<CpuTranspose>                           _key_transpose_func{nullptr};
     std::unique_ptr<CpuSoftmaxGeneric>                      _softmax_func{nullptr};
-    std::unique_ptr<CpuGemm>                                _value_gemm_func{nullptr};
+
+    
 
     TensorInfo _tmp_query{};
     TensorInfo _tmp_key{};
@@ -111,6 +115,7 @@ private:
     TensorInfo _transposed_key{};
     TensorInfo _scaled_query_key{};
     TensorInfo _softmaxed_product{};
+    TensorInfo _gemmed_context{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};

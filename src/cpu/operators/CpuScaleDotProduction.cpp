@@ -23,7 +23,6 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
                                       const ScaleDotProductionAttentionLayerInfo& info)
 {
     ARM_COMPUTE_LOG_PARAMS(key, value, query, output);
-    ARM_COMPUTE_UNUSED(output);
     
     // Query multi-Head reshape 
     TensorShape query_reshape = TensorShape(query->tensor_shape().x()/info.h(),
@@ -123,9 +122,9 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
     const int m1 = _softmaxed_product.dimension(1);
     const int n1 = _permuted_value.dimension(0);
     const int k1 = _softmaxed_product.dimension(0);
-    _context_mm_kernel->configure(&_interleaved_product,&_permuted_value,output,1.0f,true,GEMMReshapeInfo(m1, n1, k1));
+    _context_mm_kernel->configure(&_interleaved_product,&_permuted_value,&_gemmed_context,1.0f,true,GEMMReshapeInfo(m1, n1, k1));
 
-
+    
 }
 
 Status
@@ -182,6 +181,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler softmaxed_product(offset_int_vec(Softmax), _softmaxed_product, tensors);
     CpuAuxTensorHandler interleaved_product(offset_int_vec(InterleavedProduct), _interleaved_product, tensors, true);
     CpuAuxTensorHandler transposed1xW_value(offset_int_vec(Transposed1xWValue), _transposed1xW_value, tensors, true);
+    CpuAuxTensorHandler gemmed_context(offset_int_vec(GemmedContext), _gemmed_context, tensors);
 
     // Run Query multi-Head reshape 
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
@@ -251,116 +251,23 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_value_transpose1xW_kernel.get(), Window::DimY,
                                    _value_transpose1xW_kernel->window(), transpose_value_pack);
 
-
     // Run matrix multiply compute multi-head attention between Query and Key
-    ITensorPack gemm_context_pack{{ACL_SRC_0, interleaved_product.get()}, {ACL_SRC_1, transposed1xW_value.get()}, {ACL_DST, output}};
+    ITensorPack gemm_context_pack{{ACL_SRC_0, interleaved_product.get()}, {ACL_SRC_1, transposed1xW_value.get()}, {ACL_DST, gemmed_context.get()}};
     NEScheduler::get().schedule_op(_context_mm_kernel.get(),Window::DimZ,_context_mm_kernel->window(),gemm_context_pack);
 
 
-    /*
-    ITensorPack value_gemm_pack = {{ACL_SRC_0,  softmaxed_product.get()}, {ACL_SRC_1, permuted_value.get()}, {ACL_DST, output}};
-    _value_gemm_func->run(value_gemm_pack);
-*/
+    std::cout <<"gemmed_context.get() x: " << gemmed_context.get()->info()->tensor_shape().x() << std::endl;
+    std::cout <<"gemmed_context.get() y: " << gemmed_context.get()->info()->tensor_shape().y() << std::endl;
+    std::cout <<"gemmed_context.get() z: " << gemmed_context.get()->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
 
+    // Concat all attention head together
 
-    std::cout <<"output->info() x: " << output->info()->tensor_shape().x() << std::endl;
-    std::cout <<"output->info() y: " << output->info()->tensor_shape().y() << std::endl;
-    std::cout <<"output->info() z: " << output->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
-
-    /*
-    const ITensor *key_to_use = key;
-
-    CpuAuxTensorHandler pretransposed_key(offset_int_vec(PreTransposedRHS), _pretransposed_key, tensors);
-    CpuAuxTensorHandler interleaved_query(offset_int_vec(InterleavedLHS), _tmp_query, tensors, true);
-    CpuAuxTensorHandler transposed1xw_key(offset_int_vec(Transposed1xWRHS), _tmp_key, tensors, true);
-
-    ITensorPack mm_pack{{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_DST, output}};
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp " << std::endl;
-
-    std::cout <<"key x: " << key->info()->tensor_shape().x() << std::endl;
-    std::cout <<"key y: " << key->info()->tensor_shape().y() << std::endl;
-    std::cout <<"key z: " << key->info()->tensor_shape().z() << std::endl;
-
-    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(767,6)))  << std::endl;
-
-    std::cout <<"query x: " << query->info()->tensor_shape().x() << std::endl;
-    std::cout <<"query y: " << query->info()->tensor_shape().y() << std::endl;
-    std::cout <<"query z: " << query->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(767,6)))  << std::endl;
     
-    std::cout <<"value x: " << value->info()->tensor_shape().x() << std::endl;
-    std::cout <<"value y: " << value->info()->tensor_shape().y() << std::endl;
-    std::cout <<"value z: " << value->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(767,6)))  << std::endl;
-
-    if (_run_interleave_transpose)
-    {
-        std::cout << "_run_interleave_transpose " << std::endl;
-        // Run interleave kernel
-        ITensorPack interleave_pack{{ACL_SRC, query}, {ACL_DST, interleaved_query.get()}};
-        NEScheduler::get().schedule_op(_query_interleave_kernel.get(), Window::DimY, _query_interleave_kernel->window(),
-                                        interleave_pack);
-        // Use reshaped matrices
-        mm_pack.add_const_tensor(ACL_SRC_0, interleaved_query.get());
-    }
-
-    if (_pretranspose_key_func && _run_pretranspose)
-    {
-        std::cout << "_pretranspose_key_func && _run_pretranspose " << std::endl;
-        // Run pretranspose kernel
-        ITensorPack pretranspose_pack{{ACL_SRC, key_to_use}, {ACL_DST, pretransposed_key.get()}};
-        _pretranspose_key_func->run(pretranspose_pack);
-        key_to_use = pretransposed_key.get();
-    }
-
-    if (_run_interleave_transpose)
-    {
-        std::cout << "_run_interleave_transpose " << std::endl;
-        // Run transpose1xw kernel
-        ITensorPack transpose_pack{{ACL_SRC, key_to_use}, {ACL_DST, transposed1xw_key.get()}};
-        NEScheduler::get().schedule_op(_key_transpose1xW_kernel.get(), Window::DimY,
-                                        _key_transpose1xW_kernel->window(), transpose_pack);
-        key_to_use = transposed1xw_key.get();
-    }
-
-    // Use reshaped matrices
-    mm_pack.add_const_tensor(ACL_SRC_1, key_to_use);
-
-    NEScheduler::get().schedule_op(_product_mm_kernel.get(),
-                                    _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
-                                    _product_mm_kernel->window(), mm_pack);
-    
-    
-    std::cout << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,0))) << " "
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(1,0))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(2,0))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(3,0))) << " " 
-              
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(767,0))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(768,0))) << " " 
-    << std::endl;
-
-    std::cout << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,0))) << " "
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,1))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,2))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,3))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,4))) << " "
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,5))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,6))) << " " 
-              << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(767,6))) << " "
-    << std::endl; 
-    */
-    ARM_COMPUTE_UNUSED(value);
-    ARM_COMPUTE_UNUSED(query);
-    ARM_COMPUTE_UNUSED(output);
 
 }
 
