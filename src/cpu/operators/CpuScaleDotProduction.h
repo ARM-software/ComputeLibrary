@@ -16,6 +16,7 @@
 
 #include "src/cpu/kernels/CpuReshapeKernel.h"
 #include "src/cpu/operators/CpuPermute.h"
+#include "src/cpu/operators/CpuSoftmax.h"
 #include "src/cpu/operators/CpuGemm.h"
 
 #include <memory>
@@ -69,6 +70,7 @@ private:
         KeyPermute,
         KeyTranspose,
         QueryKeyScale,
+        Softmax,
         Count
     };
 
@@ -83,6 +85,7 @@ private:
     std::unique_ptr<kernels::CpuReshapeKernel>              _key_reshape_kernel{nullptr};
     std::unique_ptr<CpuPermute>                             _key_permute_func{nullptr};
     std::unique_ptr<CpuTranspose>                           _key_transpose_func{nullptr};
+    std::unique_ptr<CpuSoftmaxGeneric>                      _softmax_func{nullptr};
 
     TensorInfo _tmp_query{};
     TensorInfo _tmp_key{};
@@ -93,6 +96,7 @@ private:
     TensorInfo _permuted_key{};
     TensorInfo _transposed_key{};
     TensorInfo _scaled_query_key{};
+    TensorInfo _softmaxed_product{};
 
     bool _run_pretranspose{false};
     bool _run_scale{false};

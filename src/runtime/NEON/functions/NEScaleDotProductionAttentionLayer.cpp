@@ -3,7 +3,6 @@
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuScaleDotProduction.h"
-#include "src/cpu/operators/CpuSoftmax.h"
 #include "src/cpu/operators/CpuGemm.h"
 
 namespace arm_compute
@@ -21,7 +20,6 @@ struct NEScaleDotProductionAttentionLayer::Impl
     IRuntimeContext                    *ctx{nullptr};
 
     std::unique_ptr<cpu::CpuScaleDotProduction> scale_dot_production_op{nullptr};
-    std::unique_ptr<cpu::CpuSoftmaxGeneric>     softmax_op{nullptr};
     std::unique_ptr<cpu::CpuGemm>               value_gemm_op{nullptr};
 
     /*
@@ -54,11 +52,6 @@ void NEScaleDotProductionAttentionLayer::configure(const ITensor *query,
     _impl->scale_dot_production_op->configure(query->info(),key->info(),value->info(),production_to_softmax->info(),info);
     _impl->scale_dot_pack = {{ACL_SRC_0, query}, {ACL_SRC_1, key}, {ACL_SRC_2, value}, {ACL_DST, production_to_softmax}};
 
-    /*  Softmax of previous product */
-    _impl->softmax_op = std::make_unique<cpu::CpuSoftmaxGeneric>();
-    _impl->softmax_op->configure(production_to_softmax->info(),softmax_to_gemm->info());
-    _impl->softmax_pack = {{ACL_SRC, production_to_softmax}, {ACL_DST, softmax_to_gemm}};
-
     /* Multiply between scaled product and value */
     _impl->value_gemm_op = std::make_unique<cpu::CpuGemm>();
     _impl->value_gemm_op->configure(softmax_to_gemm->info(),value->info(),nullptr,output->info(),1.0,1.0);
@@ -71,7 +64,6 @@ void NEScaleDotProductionAttentionLayer::run()
     ITensorPack pack;
 
     _impl->scale_dot_production_op->run(_impl->scale_dot_pack);
-    _impl->softmax_op->run(_impl->softmax_pack);
     _impl->value_gemm_op->run(_impl->value_gemm_pack);
 
 }
