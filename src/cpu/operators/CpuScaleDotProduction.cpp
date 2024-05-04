@@ -81,32 +81,50 @@ void CpuScaleDotProduction::configure(const ITensorInfo *query,
 
 
     // Configure interleave kernel
-    _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
-    _interleave_kernel->configure(&_permuted_query, &_tmp_query);
+    _query_interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
+    _query_interleave_kernel->configure(&_permuted_query, &_tmp_query);
     _aux_mem[InterleavedLHS] =
         experimental::MemoryInfo(offset_int_vec(InterleavedLHS), experimental::MemoryLifetime::Persistent, _tmp_query.total_size());
     
     // Configure rhs transpose1xw kernel
-    _transpose1xW_key_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
-    _transpose1xW_key_kernel->configure(&_transposed_key, &_tmp_key);
+    _key_transpose1xW_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
+    _key_transpose1xW_kernel->configure(&_transposed_key, &_tmp_key);
     _aux_mem[Transposed1xWRHS] =
         experimental::MemoryInfo(offset_int_vec(Transposed1xWRHS),experimental::MemoryLifetime::Persistent, _tmp_key.total_size());
 
     // Matrix multiply compute multi-head attention between Query and Key
-    _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
+    _product_mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
     const int m = _permuted_query.dimension(1);
     const int n = _transposed_key.dimension(0);
     const int k = _permuted_query.dimension(0);
     const float scale = 1.0f/sqrt(info.d_model()/info.h());
-    _mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,scale,true,GEMMReshapeInfo(m, n, k));
+    _product_mm_kernel->configure(&_tmp_query,&_tmp_key,&_scaled_query_key,scale,true,GEMMReshapeInfo(m, n, k));
 
     //  Softmax of previous product 
     _softmax_func = std::make_unique<cpu::CpuSoftmaxGeneric>();
     _softmax_func->configure(&_scaled_query_key,&_softmaxed_product);
 
+
+
+    // Configure interleave kernel
+    _query_interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
+    _query_interleave_kernel->configure(&_softmaxed_product, &_interleaved_product);
+    _aux_mem[InterleavedProduct] =
+        experimental::MemoryInfo(offset_int_vec(InterleavedProduct), experimental::MemoryLifetime::Persistent, _interleaved_product.total_size());
+    
+    // Configure rhs transpose1xw kernel
+    _key_transpose1xW_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
+    _key_transpose1xW_kernel->configure(&_permuted_value, &_transposed1xW_value);
+    _aux_mem[Transposed1xWValue] =
+        experimental::MemoryInfo(offset_int_vec(Transposed1xWValue),experimental::MemoryLifetime::Persistent, _transposed1xW_value.total_size());
+
     //  Multiply between scaled product and value 
-    _value_gemm_func = std::make_unique<cpu::CpuGemm>();
-    _value_gemm_func->configure(&_softmaxed_product,&_permuted_value,nullptr,output,1.0,1.0);
+    _context_mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
+    const int m1 = _softmaxed_product.dimension(1);
+    const int n1 = _permuted_value.dimension(0);
+    const int k1 = _softmaxed_product.dimension(0);
+    _context_mm_kernel->configure(&_interleaved_product,&_permuted_value,output,1.0f,true,GEMMReshapeInfo(m1, n1, k1));
+
 
 }
 
@@ -162,6 +180,8 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     CpuAuxTensorHandler interleaved_query(offset_int_vec(InterleavedLHS), _tmp_query, tensors, true);
     CpuAuxTensorHandler transposed1xw_key(offset_int_vec(Transposed1xWRHS), _tmp_key, tensors, true);
     CpuAuxTensorHandler softmaxed_product(offset_int_vec(Softmax), _softmaxed_product, tensors);
+    CpuAuxTensorHandler interleaved_product(offset_int_vec(InterleavedProduct), _interleaved_product, tensors, true);
+    CpuAuxTensorHandler transposed1xW_value(offset_int_vec(Transposed1xWValue), _transposed1xW_value, tensors, true);
 
     // Run Query multi-Head reshape 
     ITensorPack query_reshape_pack{{ACL_SRC_0, query},{ACL_DST, reshaped_query.get()}};
@@ -171,7 +191,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack query_permute_pack{{ACL_SRC, reshaped_query.get()},{ACL_DST, permuted_query.get()}};
     _query_permute_func->run(query_permute_pack);
 
-    
     // Run Key multi-Head reshape 
     ITensorPack key_reshape_pack{{ACL_SRC_0, key},{ACL_DST, reshaped_key.get()}};
     const auto key_split_dimension = _key_reshape_kernel->get_split_dimension();
@@ -193,18 +212,18 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
 
     // Run interleave kernel
     ITensorPack interleave_pack{{ACL_SRC, permuted_query.get()}, {ACL_DST, interleaved_query.get()}};
-    NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
+    NEScheduler::get().schedule_op(_query_interleave_kernel.get(), Window::DimY, _query_interleave_kernel->window(),
                                     interleave_pack);
 
     // Run transpose1xw kernel
     ITensorPack transpose_pack{{ACL_SRC, transposed_key.get()}, {ACL_DST, transposed1xw_key.get()}};
-    NEScheduler::get().schedule_op(_transpose1xW_key_kernel.get(), Window::DimY,
-                                    _transpose1xW_key_kernel->window(), transpose_pack);
+    NEScheduler::get().schedule_op(_key_transpose1xW_kernel.get(), Window::DimY,
+                                    _key_transpose1xW_kernel->window(), transpose_pack);
 
 
     // Run matrix multiply compute multi-head attention between Query and Key
     ITensorPack gemm_QK_pack{{ACL_SRC_0, interleaved_query.get()}, {ACL_SRC_1, transposed1xw_key.get()}, {ACL_DST, scaled_query_key.get()}};
-    NEScheduler::get().schedule_op(_mm_kernel.get(),Window::DimZ,_mm_kernel->window(),gemm_QK_pack);
+    NEScheduler::get().schedule_op(_product_mm_kernel.get(),Window::DimZ,_product_mm_kernel->window(),gemm_QK_pack);
 
 
 
@@ -221,14 +240,32 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack softmax_pack = {{ACL_SRC, scaled_query_key.get()}, {ACL_DST, softmaxed_product.get()}};
     _softmax_func->run(softmax_pack);
 
+
+    // Run interleave kernel
+    ITensorPack interleave_product_pack{{ACL_SRC, softmaxed_product.get()}, {ACL_DST, interleaved_product.get()}};
+    NEScheduler::get().schedule_op(_product_interleave_kernel.get(), Window::DimY, _product_interleave_kernel->window(),
+                                    interleave_product_pack);
+
+    // Run transpose1xw kernel
+    ITensorPack transpose_value_pack{{ACL_SRC, permuted_value.get()}, {ACL_DST, transposed1xW_value.get()}};
+    NEScheduler::get().schedule_op(_value_transpose1xW_kernel.get(), Window::DimY,
+                                   _value_transpose1xW_kernel->window(), transpose_value_pack);
+
+
+    // Run matrix multiply compute multi-head attention between Query and Key
+    ITensorPack gemm_context_pack{{ACL_SRC_0, interleaved_product.get()}, {ACL_SRC_1, transposed1xW_value.get()}, {ACL_DST, output}};
+    NEScheduler::get().schedule_op(_context_mm_kernel.get(),Window::DimZ,_context_mm_kernel->window(),gemm_context_pack);
+
+
+    /*
     ITensorPack value_gemm_pack = {{ACL_SRC_0,  softmaxed_product.get()}, {ACL_SRC_1, permuted_value.get()}, {ACL_DST, output}};
     _value_gemm_func->run(value_gemm_pack);
+*/
 
 
-
-    std::cout <<"CpuGemm.cpp dst x: " << output->info()->tensor_shape().x() << std::endl;
-    std::cout <<"CpuGemm.cpp dst y: " << output->info()->tensor_shape().y() << std::endl;
-    std::cout <<"CpuGemm.cpp dst z: " << output->info()->tensor_shape().z() << std::endl;
+    std::cout <<"output->info() x: " << output->info()->tensor_shape().x() << std::endl;
+    std::cout <<"output->info() y: " << output->info()->tensor_shape().y() << std::endl;
+    std::cout <<"output->info() z: " << output->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
@@ -269,7 +306,7 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         std::cout << "_run_interleave_transpose " << std::endl;
         // Run interleave kernel
         ITensorPack interleave_pack{{ACL_SRC, query}, {ACL_DST, interleaved_query.get()}};
-        NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
+        NEScheduler::get().schedule_op(_query_interleave_kernel.get(), Window::DimY, _query_interleave_kernel->window(),
                                         interleave_pack);
         // Use reshaped matrices
         mm_pack.add_const_tensor(ACL_SRC_0, interleaved_query.get());
@@ -289,17 +326,17 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
         std::cout << "_run_interleave_transpose " << std::endl;
         // Run transpose1xw kernel
         ITensorPack transpose_pack{{ACL_SRC, key_to_use}, {ACL_DST, transposed1xw_key.get()}};
-        NEScheduler::get().schedule_op(_transpose1xW_key_kernel.get(), Window::DimY,
-                                        _transpose1xW_key_kernel->window(), transpose_pack);
+        NEScheduler::get().schedule_op(_key_transpose1xW_kernel.get(), Window::DimY,
+                                        _key_transpose1xW_kernel->window(), transpose_pack);
         key_to_use = transposed1xw_key.get();
     }
 
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, key_to_use);
 
-    NEScheduler::get().schedule_op(_mm_kernel.get(),
+    NEScheduler::get().schedule_op(_product_mm_kernel.get(),
                                     _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
-                                    _mm_kernel->window(), mm_pack);
+                                    _product_mm_kernel->window(), mm_pack);
     
     
     std::cout << *reinterpret_cast<const float *>(output->ptr_to_element(Coordinates(0,0))) << " "
