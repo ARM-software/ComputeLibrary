@@ -165,6 +165,7 @@ void CpuConcatenate::run(ITensorPack &tensors)
         NEScheduler::get().schedule_op(k.get(), Window::DimY, k->window(), pack);
         ++i;
     }
+    
 }
 } // namespace cpu
 } // namespace arm_compute
