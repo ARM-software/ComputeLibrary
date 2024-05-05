@@ -70,9 +70,10 @@ namespace
             {
                 var += (*(input_ptr + axis) - mean ) * (*(input_ptr + axis) - mean );
             }
-            var = var /axis_len;
+            var = var / (axis_len+1);
             
             std::cout <<" Var: " << var << std::endl;
+            
             /* Calculate layer normalization */
             axis = window_start_axis;
             for (; axis <=  axis_len; axis += window_step_axis)
