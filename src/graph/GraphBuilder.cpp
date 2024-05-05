@@ -759,7 +759,7 @@ NodeID GraphBuilder::add_feed_forward_node(Graph &g, NodeParams params, NodeIdxP
 
     // Create weight and bias tensor shape
     TensorDescriptor f_w_desc         = input_tensor_desc;
-    f_w_desc.shape                    = TensorShape(ff_info.d_ff(), input_tensor_desc.shape.x());
+    f_w_desc.shape                    = TensorShape(input_tensor_desc.shape.x(),ff_info.d_ff());
     TensorDescriptor f_b_desc         = input_tensor_desc;
     f_b_desc.shape                    = TensorShape(ff_info.d_ff());
     
