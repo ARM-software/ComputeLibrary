@@ -19,7 +19,8 @@ namespace
 
     void layer_norm_fp32(const ITensor *src, ITensor *dst, const Window &window,float epsilon,
                                                                                 float gamma,
-                                                                                float beta)
+                                                                                float beta,
+                                                                                int layer_axis)
     {
         std::cout <<"Layernorm src x: " << src->info()->tensor_shape().x() << std::endl;
         std::cout <<"Layernorm src y: " << src->info()->tensor_shape().y() << std::endl;
@@ -29,12 +30,12 @@ namespace
         std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
         std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
 
-        const int  window_step_y  = 1;
-        const auto window_start_y = static_cast<int>(window.y().start());
-        const auto window_end_y   = static_cast<int>(window.y().end());
+        const int  window_step_axis  = 1;
+        const auto window_start_axis = static_cast<int>(window[layer_axis].start());
+        const auto window_end_axis   = static_cast<int>(window[layer_axis].end());
 
-        Window win = window.collapse_if_possible(window, Window::DimZ);
-        win.set(Window::DimY, Window::Dimension(0, 1, 1));
+        Window win = window;//.collapse_if_possible(window, Window::DimZ)
+        win.set(layer_axis, Window::Dimension(0, 1, 1));
 
         Iterator input(src, win);
         Iterator output(dst, win);
@@ -50,31 +51,30 @@ namespace
             float mean = 0;
             float var = 0;
             float res;
-            count ++;
 
-            const int y_len = window_end_y - window_step_y;
+            const int axis_len = window_end_axis - window_step_axis;
             /* Calculate mean */
-            int y = window_start_y;
-            for (; y <=  y_len; y += window_step_y)
+            int axis = window_start_axis;
+            for (; axis <=  axis_len; axis += window_step_axis)
             {
-                mean+= *(input_ptr + y);
+                mean+= *(input_ptr + axis);
             }
-            mean = mean /(y_len+1);
+            mean = mean /(axis_len+1);
 
             /* Calculate variance */
-            y = window_start_y;
-            for (; y <=  y_len; y += window_step_y)
+            axis = window_start_axis;
+            for (; axis <=  axis_len; axis += window_step_axis)
             {
-                var += (*(input_ptr + y) - mean ) * (*(input_ptr + y) - mean );
+                var += (*(input_ptr + axis) - mean ) * (*(input_ptr + axis) - mean );
             }
-            var = var /y_len;
+            var = var /axis_len;
             
             /* Calculate layer normalization */
-            y = window_start_y;
-            for (; y <=  y_len; y += window_step_y)
+            axis = window_start_axis;
+            for (; axis <=  axis_len; axis += window_step_axis)
             {
-                res = ( ( *(input_ptr + y)-mean ) / sqrt( var+epsilon ) ) * gamma + beta;
-                *reinterpret_cast<float *>(output_ptr + y) = res;
+                res = ( ( *(input_ptr + axis)-mean ) / sqrt( var+epsilon ) ) * gamma + beta;
+                *reinterpret_cast<float *>(output_ptr + axis) = res;
             }
             
             ARM_COMPUTE_UNUSED(epsilon);
@@ -130,7 +130,7 @@ void CpuLayerNormKernel::run_op(ITensorPack &tensors, const Window &window, cons
     ARM_COMPUTE_UNUSED(thread_info);
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
-    layer_norm_fp32(src,dst,window,_info.epsilon(),_info.gamma(),_info.beta());
+    layer_norm_fp32(src,dst,window,_info.epsilon(),_info.gamma(),_info.beta(),_info.axis());
 }
 
 const char *CpuLayerNormKernel::name() const
