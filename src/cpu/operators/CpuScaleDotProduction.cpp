@@ -157,27 +157,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     auto value  = tensors.get_const_tensor(ACL_SRC_2);
     auto output = tensors.get_tensor(ACL_DST);
 
-    std::cout << "src/cpu/operators/CpuScaleDotProduction.cpp " << std::endl;
-
-    std::cout <<"query x: " << query->info()->tensor_shape().x() << std::endl;
-    std::cout <<"query y: " << query->info()->tensor_shape().y() << std::endl;
-    std::cout <<"query z: " << query->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(query->ptr_to_element(Coordinates(767,6)))  << std::endl;
-
-    std::cout <<"key x: " << key->info()->tensor_shape().x() << std::endl;
-    std::cout <<"key y: " << key->info()->tensor_shape().y() << std::endl;
-    std::cout <<"key z: " << key->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(key->ptr_to_element(Coordinates(767,6)))  << std::endl;
-
-    std::cout <<"value x: " << value->info()->tensor_shape().x() << std::endl;
-    std::cout <<"value y: " << value->info()->tensor_shape().y() << std::endl;
-    std::cout <<"value z: " << value->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(value->ptr_to_element(Coordinates(767,6)))  << std::endl;
-
-
     CpuAuxTensorHandler reshaped_query(offset_int_vec(QueryReshape), _reshaped_query, tensors);
     CpuAuxTensorHandler permuted_query(offset_int_vec(QueryPermute), _permuted_query, tensors);
     CpuAuxTensorHandler reshaped_key(offset_int_vec(KeyReshape), _reshaped_key, tensors);
@@ -238,17 +217,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_product_mm_kernel.get(),Window::DimZ,_product_mm_kernel->window(),gemm_QK_pack);
 
 
-
-    std::cout <<"scaled_query_key.get() x: " << scaled_query_key.get()->info()->tensor_shape().x() << std::endl;
-    std::cout <<"scaled_query_key.get() y: " << scaled_query_key.get()->info()->tensor_shape().y() << std::endl;
-    std::cout <<"scaled_query_key.get() z: " << scaled_query_key.get()->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(6,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(scaled_query_key.get()->ptr_to_element(Coordinates(7,0,0)))  << std::endl;
-
-
     ITensorPack softmax_pack = {{ACL_SRC, scaled_query_key.get()}, {ACL_DST, softmaxed_product.get()}};
     _softmax_func->run(softmax_pack);
 
@@ -267,16 +235,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack gemm_context_pack{{ACL_SRC_0, interleaved_product.get()}, {ACL_SRC_1, transposed1xW_value.get()}, {ACL_DST, gemmed_context.get()}};
     NEScheduler::get().schedule_op(_context_mm_kernel.get(),Window::DimZ,_context_mm_kernel->window(),gemm_context_pack);
 
-
-    std::cout <<"gemmed_context.get() x: " << gemmed_context.get()->info()->tensor_shape().x() << std::endl;
-    std::cout <<"gemmed_context.get() y: " << gemmed_context.get()->info()->tensor_shape().y() << std::endl;
-    std::cout <<"gemmed_context.get() z: " << gemmed_context.get()->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(0,0,1)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(63,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(gemmed_context.get()->ptr_to_element(Coordinates(64,0,0)))  << std::endl;
-
     // Concat all attention head together
     ITensorPack concat_permute_pack{{ACL_SRC, gemmed_context.get()},{ACL_DST, permuted_concat.get()}};
     _concat_permute_func->run(concat_permute_pack);
@@ -284,15 +242,6 @@ void CpuScaleDotProduction::run(ITensorPack &tensors)
     ITensorPack concat_reshape_pack{{ACL_SRC_0, permuted_concat.get()},{ACL_DST, output}};
     const auto concat_split_dimension = _concat_reshape_kernel->get_split_dimension();
     NEScheduler::get().schedule_op(_concat_reshape_kernel.get(), concat_split_dimension, _concat_reshape_kernel->window(), concat_reshape_pack);
-
-    std::cout <<"output x: " << output->info()->tensor_shape().x() << std::endl;
-    std::cout <<"output y: " << output->info()->tensor_shape().y() << std::endl;
-    std::cout <<"output z: " << output->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(output->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
-    
 
 }
 
