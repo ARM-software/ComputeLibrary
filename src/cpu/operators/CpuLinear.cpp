@@ -156,7 +156,7 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(1,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(2,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(3,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(3071,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(3021,0)))  << std::endl;
 
 
     CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
@@ -166,7 +166,6 @@ void CpuLinear::run(ITensorPack &tensors)
 
     ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
 
-    std::cout << "1 " << std::endl;
 
     if (_run_interleave_transpose)
     {
@@ -180,7 +179,6 @@ void CpuLinear::run(ITensorPack &tensors)
 
     const ITensor *b_to_use = b;
     
-    std::cout << "2 " << std::endl;
     if (_pretranspose_b_func)
     {
         // Run pretranspose kernel
@@ -190,7 +188,6 @@ void CpuLinear::run(ITensorPack &tensors)
     }
     
 
-    std::cout << "3 " << std::endl;
     if (_run_interleave_transpose)
     {
         // Run transpose1xw kernel
@@ -201,14 +198,13 @@ void CpuLinear::run(ITensorPack &tensors)
         b_to_use = transposed1xw_b.get();
     }
 
-    std::cout << "4 " << std::endl;
     // Use reshaped matrices
     mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
 
     NEScheduler::get().schedule_op(_mm_kernel.get(),
                                 _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
                                 _mm_kernel->window(), mm_pack);
-    std::cout << "5 " << std::endl;
+
     // Run bias addition kernel
     if (_run_bias_addition)
     {   
@@ -216,7 +212,15 @@ void CpuLinear::run(ITensorPack &tensors)
         NEScheduler::get().schedule_op(_add_bias.get(), Window::DimX, _add_bias->window(), pack);
     }
 
-    std::cout << "6 " << std::endl;
+    std::cout <<"d x: " << d->info()->tensor_shape().x() << std::endl;
+    std::cout <<"d y: " << d->info()->tensor_shape().y() << std::endl;
+    std::cout <<"d z: " << d->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(0,1)))  << std::endl;
+
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
 }
 
 
