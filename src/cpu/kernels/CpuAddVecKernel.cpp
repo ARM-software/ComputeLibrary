@@ -54,6 +54,11 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     _src0_target_dim = src0_target_dim;
     _src1_target_dim = src1_target_dim;
 
+
+    std::cout << "src0 x " << src0->tensor_shape().x() << std::endl;
+    std::cout << "src0 y " << src0->tensor_shape().y() << std::endl;
+    std::cout << "src0 z " << src0->tensor_shape().z() << std::endl;
+
     const auto uk                 = CpuAddVecKernel::get_implementation<CpuAddVecKernelDataTypeISASelectorData>(
         CpuAddVecKernelDataTypeISASelectorData{src0->data_type(), CPUInfo::get().get_isa()});
 
@@ -70,6 +75,10 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     Window win;
     win.use_tensor_dimensions(src0->tensor_shape());
     ICpuKernel::configure(win);
+
+    std::cout << "dst x " << dst->tensor_shape().x() << std::endl;
+    std::cout << "dst y " << dst->tensor_shape().y() << std::endl;
+    std::cout << "dst z " << dst->tensor_shape().z() << std::endl;
 }
 
 Status
