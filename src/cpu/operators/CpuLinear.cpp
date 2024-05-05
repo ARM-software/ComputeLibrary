@@ -25,7 +25,7 @@ void CpuLinear::configure(const ITensorInfo *a,
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, linear_info);
     ARM_COMPUTE_UNUSED(linear_info);
 
-    const bool is_c_bias = beta != 0 && c != nullptr;
+    const bool is_c_bias = c != nullptr;
     const bool run_optimised = false;
 
     _run_vector_matrix_multiplication = a->dimension(1) < 2;
@@ -84,6 +84,7 @@ void CpuLinear::configure(const ITensorInfo *a,
             std::cout << "gemm_output_to_use x " << gemm_output_to_use->tensor_shape().x() << std::endl;
             std::cout << "gemm_output_to_use y " << gemm_output_to_use->tensor_shape().y() << std::endl;
             std::cout << "gemm_output_to_use z " << gemm_output_to_use->tensor_shape().z() << std::endl;
+            std::cout << "_run_bias_addition:  " << _run_bias_addition << std::endl;
         }
         
         if (_run_bias_addition)
