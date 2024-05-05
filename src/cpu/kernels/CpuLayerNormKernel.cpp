@@ -22,14 +22,6 @@ namespace
                                                                                 float beta,
                                                                                 int layer_axis)
     {
-        std::cout <<"Layernorm src x: " << src->info()->tensor_shape().x() << std::endl;
-        std::cout <<"Layernorm src y: " << src->info()->tensor_shape().y() << std::endl;
-        std::cout <<"Layernorm src z: " << src->info()->tensor_shape().z() << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
-
         const int  window_step_axis  = 1;
         const auto window_start_axis = static_cast<int>(window[layer_axis].start());
         const auto window_end_axis   = static_cast<int>(window[layer_axis].end());
@@ -37,12 +29,8 @@ namespace
         Window win = window;//.collapse_if_possible(window, Window::DimZ)
         win.set(layer_axis, Window::Dimension(0, 1, 1));
 
-        std::cout << "win.x().end() " << win.x().end() << std::endl;
-        std::cout << "win.y().end() " << win.y().end() << std::endl;
-        std::cout << "win.z().end() " << win.z().end() << std::endl;
         Iterator input(src, win);
         Iterator output(dst, win);
-
 
         execute_window_loop(
         win,
