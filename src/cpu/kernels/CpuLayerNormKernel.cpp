@@ -21,6 +21,14 @@ namespace
                                                                                 float gamma,
                                                                                 float beta)
     {
+        std::cout <<"Layernorm src x: " << src->info()->tensor_shape().x() << std::endl;
+        std::cout <<"Layernorm src y: " << src->info()->tensor_shape().y() << std::endl;
+        std::cout <<"Layernorm src z: " << src->info()->tensor_shape().z() << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
+
         const int  window_step_y  = 1;
         const auto window_start_y = static_cast<int>(window.y().start());
         const auto window_end_y   = static_cast<int>(window.y().end());
