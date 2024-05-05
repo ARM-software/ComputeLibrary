@@ -228,6 +228,18 @@ Query,Key,Value Weight              (d_model, d_model, ...)
 Query,Key,Value Bias                (1, d_model, ...)
 
 
+Pytroch modificationL:
+Embedding:
+embeddings = self.LayerNorm(embeddings)
+embeddings = self.dropout(embeddings)
+
+Self Attention:
+attention_probs = self.dropout(attention_probs)
+
+BertSelfOutput
+hidden_states = self.dense(hidden_states)
+hidden_states = self.dropout(hidden_states)
+
 
 
 
