@@ -498,6 +498,19 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 
     auto src = tensors.get_const_tensor(ACL_SRC_0);
 
+
+        std::cout <<"Fully Connected x: " << src->info()->tensor_shape().x() << std::endl;
+        std::cout <<"Fully Connected y: " << src->info()->tensor_shape().y() << std::endl;
+        std::cout <<"Fully Connected z: " << src->info()->tensor_shape().z() << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
+
     CpuAuxTensorHandler flattened_src(offset_int_vec(FlattenedSrc), _flattened_src, tensors, false);
     CpuAuxTensorHandler transformed_wei(offset_int_vec(_trans_weights_idx), _trans_weights, tensors, false);
 

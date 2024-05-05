@@ -240,8 +240,11 @@ BertSelfOutput
 hidden_states = self.dense(hidden_states)
 hidden_states = self.dropout(hidden_states)
 
-Layer Norm
-self.elementwise_affine = elementwise_affine
+Layer Norm class LayerNorm(Module):
+self.elementwise_affine = elementwise_affine -> False
+
+Intermedia 
+
 
 
 
