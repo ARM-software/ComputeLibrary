@@ -80,6 +80,10 @@ void CpuLinear::configure(const ITensorInfo *a,
             // Configure matrix multiplication kernel
             _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, _run_interleave_transpose,
                                   GEMMReshapeInfo(m, n, k));
+
+            std::cout << "gemm_output_to_use x " << gemm_output_to_use->tensor_shape().x() << std::endl;
+            std::cout << "gemm_output_to_use y " << gemm_output_to_use->tensor_shape().y() << std::endl;
+            std::cout << "gemm_output_to_use z " << gemm_output_to_use->tensor_shape().z() << std::endl;
         }
         
         if (_run_bias_addition)
