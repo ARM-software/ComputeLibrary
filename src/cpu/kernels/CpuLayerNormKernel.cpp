@@ -40,8 +40,6 @@ namespace
         Iterator input(src, win);
         Iterator output(dst, win);
 
-
-        int count = 0;
         execute_window_loop(
         win,
         [&](const Coordinates &)
