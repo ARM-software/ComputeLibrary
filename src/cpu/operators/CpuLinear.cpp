@@ -221,7 +221,7 @@ void CpuLinear::run(ITensorPack &tensors)
 
     std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(3071,0,0)))  << std::endl;
 }
 
 
