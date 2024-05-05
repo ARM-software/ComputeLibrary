@@ -25,7 +25,7 @@ void CpuLinear::configure(const ITensorInfo *a,
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, linear_info);
     ARM_COMPUTE_UNUSED(linear_info);
 
-    const bool is_c_bias = beta == 1 && c != nullptr;
+    const bool is_c_bias = beta != 0 && c != nullptr;
     const bool run_optimised = false;
 
     _run_vector_matrix_multiplication = a->dimension(1) < 2;
@@ -212,9 +212,9 @@ void CpuLinear::run(ITensorPack &tensors)
         NEScheduler::get().schedule_op(_add_bias.get(), Window::DimX, _add_bias->window(), pack);
     }
 
-    std::cout <<"d x: " << temp_d.get()->info()->tensor_shape().x() << std::endl;
-    std::cout <<"d y: " << temp_d.get()->info()->tensor_shape().y() << std::endl;
-    std::cout <<"d z: " << temp_d.get()->info()->tensor_shape().z() << std::endl;
+    std::cout <<"d x: " << d->info()->tensor_shape().x() << std::endl;
+    std::cout <<"d y: " << d->info()->tensor_shape().y() << std::endl;
+    std::cout <<"d z: " << d->info()->tensor_shape().z() << std::endl;
     std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(0,1)))  << std::endl;
 
