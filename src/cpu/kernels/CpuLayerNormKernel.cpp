@@ -37,8 +37,12 @@ namespace
         Window win = window;//.collapse_if_possible(window, Window::DimZ)
         win.set(layer_axis, Window::Dimension(0, 1, 1));
 
+        std::cout << "win.x().end() " << win.x().end() << std::endl;
+        std::cout << "win.y().end() " << win.y().end() << std::endl;
+        std::cout << "win.z().end() " << win.z().end() << std::endl;
         Iterator input(src, win);
         Iterator output(dst, win);
+
 
         execute_window_loop(
         win,
