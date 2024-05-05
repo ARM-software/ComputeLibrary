@@ -71,6 +71,9 @@ void CpuAddVecKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1
     // Auto initialize dst if not initialized
     auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(src0->tensor_shape()));
 
+    // Explictly set tensor shape
+    dst->set_tensor_shape(src0->tensor_shape());
+
     // Configure kernel window
     Window win;
     win.use_tensor_dimensions(src0->tensor_shape());
