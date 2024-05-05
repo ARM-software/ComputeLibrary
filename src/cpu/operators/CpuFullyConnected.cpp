@@ -497,7 +497,7 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
 
     auto src = tensors.get_const_tensor(ACL_SRC_0);
-    auto b = tensors.get_tensor(ACL_SRC_1);
+    auto b = tensors.get_const_tensor(ACL_SRC_1);
     auto c = tensors.get_const_tensor(ACL_SRC_2);
 
 
