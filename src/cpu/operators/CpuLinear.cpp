@@ -24,6 +24,7 @@ void CpuLinear::configure(const ITensorInfo *a,
 {
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, linear_info);
     ARM_COMPUTE_UNUSED(linear_info);
+    ARM_COMPUTE_UNUSED(beta);
 
     const bool is_c_bias = c != nullptr;
     const bool run_optimised = false;
