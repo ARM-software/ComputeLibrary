@@ -504,8 +504,8 @@ void CpuFullyConnected::run(ITensorPack &tensors)
     std::cout <<"Fully Connected x: " << src->info()->tensor_shape().x() << std::endl;
     std::cout <<"Fully Connected y: " << src->info()->tensor_shape().y() << std::endl;
     std::cout <<"Fully Connected z: " << src->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,1)))  << std::endl;
 
     std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
