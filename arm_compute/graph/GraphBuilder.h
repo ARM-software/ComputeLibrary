@@ -394,8 +394,8 @@ public:
                                          NodeParams             params,
                                          NodeIdxPair            input,
                                          FeedForwardLayerInfo   info = FeedForwardLayerInfo(),
-                                         ITensorAccessorUPtr    ff_weights,
-                                         ITensorAccessorUPtr    ff_bias);
+                                         ITensorAccessorUPtr    ff_weights  = nullptr,
+                                         ITensorAccessorUPtr    ff_bias = nullptr);
     /** Adds a generate proposals layer node to the graph
      *
      * @param[in] g       Graph to add the layer to
