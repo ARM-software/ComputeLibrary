@@ -90,7 +90,7 @@ void NEFullyConnectedLayer::configure(const ITensor          *input,
     }
 
     _impl->aux_mem_req = _impl->op->workspace();
-    _impl->run_pack    = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_DST, output}};
+    _impl->run_pack    = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
     _impl->workspace =
         manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
 
