@@ -410,24 +410,6 @@ void CpuGemm::run(ITensorPack &tensors)
     auto c = tensors.get_const_tensor(ACL_SRC_2);
     auto d = tensors.get_tensor(ACL_DST);
 
-
-    std::cout <<"Fully Connected weight x: " << b->info()->tensor_shape().x() << std::endl;
-    std::cout <<"Fully Connected weight y: " << b->info()->tensor_shape().y() << std::endl;
-    std::cout <<"Fully Connected weight z: " << b->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
-    
-    std::cout <<"Fully Connected bias x: " << c ->info()->tensor_shape().x() << std::endl;
-    std::cout <<"Fully Connected bias y: " << c ->info()->tensor_shape().y() << std::endl;
-    std::cout <<"Fully Connected bias z: " << c ->info()->tensor_shape().z() << std::endl;
-    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
-
     if (_asm_glue && _asm_glue->is_configured())
     {
         // Pass c to asm dispatch only if it's the bias tensor

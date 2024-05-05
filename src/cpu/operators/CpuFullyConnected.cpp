@@ -497,19 +497,40 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
 
     auto src = tensors.get_const_tensor(ACL_SRC_0);
+    auto b = tensors.get_const_tensor(ACL_SRC_1);
+    auto c = tensors.get_const_tensor(ACL_SRC_2);
 
 
-        std::cout <<"Fully Connected x: " << src->info()->tensor_shape().x() << std::endl;
-        std::cout <<"Fully Connected y: " << src->info()->tensor_shape().y() << std::endl;
-        std::cout <<"Fully Connected z: " << src->info()->tensor_shape().z() << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    std::cout <<"Fully Connected x: " << src->info()->tensor_shape().x() << std::endl;
+    std::cout <<"Fully Connected y: " << src->info()->tensor_shape().y() << std::endl;
+    std::cout <<"Fully Connected z: " << src->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
 
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
-        std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(src->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
+
+
+
+    std::cout <<"Fully Connected weight x: " << b->info()->tensor_shape().x() << std::endl;
+    std::cout <<"Fully Connected weight y: " << b->info()->tensor_shape().y() << std::endl;
+    std::cout <<"Fully Connected weight z: " << b->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(0,1,0)))  << std::endl;
+    
+    std::cout <<"Fully Connected bias x: " << c ->info()->tensor_shape().x() << std::endl;
+    std::cout <<"Fully Connected bias y: " << c ->info()->tensor_shape().y() << std::endl;
+    std::cout <<"Fully Connected bias z: " << c ->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(0,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(c ->ptr_to_element(Coordinates(3,0,0)))  << std::endl;
 
 
     CpuAuxTensorHandler flattened_src(offset_int_vec(FlattenedSrc), _flattened_src, tensors, false);
