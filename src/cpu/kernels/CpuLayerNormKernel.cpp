@@ -62,6 +62,7 @@ namespace
                 mean+= *(input_ptr + axis);
             }
             mean = mean /(axis_len+1);
+            std::cout << "Mean: " <<mean << " ";
 
             /* Calculate variance */
             axis = window_start_axis;
@@ -71,6 +72,7 @@ namespace
             }
             var = var /axis_len;
             
+            std::cout <<" Var: " << var << std::endl;
             /* Calculate layer normalization */
             axis = window_start_axis;
             for (; axis <=  axis_len; axis += window_step_axis)
