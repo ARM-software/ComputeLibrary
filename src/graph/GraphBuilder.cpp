@@ -747,6 +747,46 @@ NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair i
     return f_nid;
 }
 
+NodeID GraphBuilder::add_feed_forward_node(Graph &g, NodeParams params, NodeIdxPair input, 
+                                                                  FeedForwardLayerInfo ff_info,
+                                                                  ITensorAccessorUPtr ff_weights,
+                                                                  ITensorAccessorUPtr ff_bias)
+{
+    check_nodeidx_pair(input, g);
+
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+
+    // Create weight and bias tensor shape
+    TensorDescriptor f_w_desc         = input_tensor_desc;
+    f_w_desc.shape                    = TensorShape(ff_info.d_ff(), input_tensor_desc.shape.y());
+    TensorDescriptor f_b_desc         = input_tensor_desc;
+    f_b_desc.shape                    = TensorShape(ff_info.d_ff());
+    
+    // Create weight and bias const node with npy tensor accessor
+    NodeID          q_w_nid  = add_const_node_with_name(g, params, "FF Weights", f_w_desc, std::move(ff_weights));
+    NodeID          q_b_nid  = add_const_node_with_name(g, params, "FF Bias", f_b_desc, std::move(ff_bias));
+
+    
+    // Specific Linear attention operation
+    LinearLayerInfo linear_info;
+
+    // Linear Nodes
+    NodeID f_nid    = g.add_node<LinearLayerNode>(linear_info);
+    
+    // Connect input
+    g.add_connection(input.node_id, input.index, f_nid, 0);
+
+    // Connect weights and bias
+    g.add_connection(q_w_nid, 0, f_nid, 1);
+    g.add_connection(q_b_nid, 0, f_nid, 2);
+
+    set_node_params(g, f_nid, params);
+
+    return f_nid;
+}
+
+
 NodeID GraphBuilder::add_l2_normalize_node(Graph &g, NodeParams params, NodeIdxPair input, int axis, float epsilon)
 {
     return create_simple_single_input_output_node<L2NormalizeLayerNode>(g, params, input, axis, epsilon);

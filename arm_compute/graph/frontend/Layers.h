@@ -706,7 +706,11 @@ public:
      *
      * @param[in] info Feed Forward layer information
      */
-    FeedForwardLayer(FeedForwardLayerInfo info) : _info(info)
+    FeedForwardLayer(FeedForwardLayerInfo   info,
+                     ITensorAccessorUPtr         ff_weights,
+                     ITensorAccessorUPtr         ff_bias) : _info(info),
+                                                            _ff_weights(std::move(ff_weights)),
+                                                            _ff_bias(std::move(ff_bias))
     {
     }
 
@@ -714,11 +718,13 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, TensorShape(0));
+        return GraphBuilder::add_feed_forward_node(s.graph(), common_params, input, _info, std::move( _ff_weights), std::move(_ff_bias));
     }
 
 private:
     FeedForwardLayerInfo _info;
+    ITensorAccessorUPtr _ff_weights;
+    ITensorAccessorUPtr _ff_bias;    
 };
 
 /** Flatten Layer */
