@@ -129,7 +129,7 @@ public:
 
               /* Self Intermediate */
               << FeedForwardLayer(FeedForwardLayerInfo(d_ff),get_weights_accessor(data_path, "/ff_weight.npy"),get_weights_accessor(data_path, "/ff_bias.npy"))
-              << ActivationLayer(ActivationLayerInfo(ActivationFunction::RELU))
+              
 
 
 
