@@ -134,7 +134,6 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(a->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
 
 
-
     std::cout <<"Fully Connected weight x: " << b->info()->tensor_shape().x() << std::endl;
     std::cout <<"Fully Connected weight y: " << b->info()->tensor_shape().y() << std::endl;
     std::cout <<"Fully Connected weight z: " << b->info()->tensor_shape().z() << std::endl;
@@ -142,6 +141,8 @@ void CpuLinear::run(ITensorPack &tensors)
     std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(1,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(2,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(3,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(767,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(768,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(b->ptr_to_element(Coordinates(0,1)))  << std::endl;
     
     std::cout <<"Fully Connected bias x: " << c ->info()->tensor_shape().x() << std::endl;
