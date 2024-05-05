@@ -497,8 +497,6 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
 
     auto src = tensors.get_const_tensor(ACL_SRC_0);
-    auto weight = tensors.get_const_tensor(ACL_SRC_1);
-    auto bias = tensors.get_const_tensor(ACL_SRC_2);
 
 
         std::cout <<"Fully Connected x: " << src->info()->tensor_shape().x() << std::endl;
