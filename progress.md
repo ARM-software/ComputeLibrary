@@ -245,6 +245,8 @@ self.elementwise_affine = elementwise_affine -> False
 
 Intermedia 
 
+Output
+hidden_states = self.dropout(hidden_states)
 
 
 

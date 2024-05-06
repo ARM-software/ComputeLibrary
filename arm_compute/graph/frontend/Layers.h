@@ -904,14 +904,14 @@ private:
     LayerNormLayerInfo _info;
 };
 
-/** Linear Layer */
-class LinearLayer final : public ILayer
+/** Multi Head Linear Layer */
+class MultiHeadLinearLayer final : public ILayer
 {
 public:
     /** Construct a linear layer computing Key, Value, Query
      *
      */
-    LinearLayer(LinearLayerInfo info,
+    MultiHeadLinearLayer(LinearLayerInfo info,
                 ITensorAccessorUPtr           query_weights,
                 ITensorAccessorUPtr           query_bias,
                 ITensorAccessorUPtr           key_weights,
@@ -931,7 +931,7 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_linear_layer(s.graph(), common_params, input, _info,
+        return GraphBuilder::add_multi_head_linear_layer(s.graph(), common_params, input, _info,
                                                                              std::move(_query_weights),
                                                                              std::move(_query_bias),
                                                                              std::move(_key_weights),

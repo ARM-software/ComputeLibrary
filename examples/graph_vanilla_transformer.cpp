@@ -115,7 +115,7 @@ public:
 
 
               /* Self Attention */
-              << LinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
+              << MultiHeadLinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
                                                                 get_weights_accessor(data_path, "/query_weight.npy"),
                                                                 get_weights_accessor(data_path, "/query_bias.npy"),
                                                                 get_weights_accessor(data_path, "/key_weight.npy"),
@@ -130,6 +130,9 @@ public:
               /* Self Intermediate */
               << FeedForwardLayer(FeedForwardLayerInfo(d_ff),get_weights_accessor(data_path, "/ff_weight.npy"),get_weights_accessor(data_path, "/ff_bias.npy"))
               << ActivationLayer(ActivationLayerInfo(ActivationFunction::GELU))
+
+              /* Output*/
+
 
 
 

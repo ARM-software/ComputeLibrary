@@ -661,7 +661,7 @@ NodeID GraphBuilder::add_layer_norm_node(Graph &g, NodeParams params, NodeIdxPai
     return l_nid;
 }
 
-NodeID GraphBuilder::add_linear_layer(Graph &g, NodeParams params, NodeIdxPair input, 
+NodeID GraphBuilder::add_multi_head_linear_layer(Graph &g, NodeParams params, NodeIdxPair input, 
                                                                   LinearLayerInfo linear_info,
                                                                   ITensorAccessorUPtr query_weights,
                                                                   ITensorAccessorUPtr query_bias,
