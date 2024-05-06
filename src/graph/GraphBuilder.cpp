@@ -758,7 +758,7 @@ NodeID GraphBuilder::add_linear_node(Graph &g, NodeParams params, NodeIdxPair in
     TensorDescriptor f_w_desc         = input_tensor_desc;
     f_w_desc.shape                    = ff_info.w_shape();
     TensorDescriptor f_b_desc         = input_tensor_desc;
-    f_b_desc.shape                    = TensorShape(ff_info.d_linear_hidden());
+    f_b_desc.shape                    = ff_info.b_shape();
     
     // Create weight and bias const node with npy tensor accessor
     NodeID          q_w_nid  = add_const_node_with_name(g, params, "FF Weights", f_w_desc, std::move(ff_weights));
