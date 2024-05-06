@@ -134,6 +134,11 @@ public:
                              get_weights_accessor(data_path, "/ff_bias.npy"))
               << ActivationLayer(ActivationLayerInfo(ActivationFunction::GELU))
 
+              /* Output*/
+              << LinearLayer(LinearLayerInfo(d_model,TensorShape(d_ff,d_model)/*weight*/,
+                                                     TensorShape(d_model)     /*bias*/),
+                             get_weights_accessor(data_path, "/ff_weight_1.npy"),
+                             get_weights_accessor(data_path, "/ff_bias_1.npy"))
               
 
 
