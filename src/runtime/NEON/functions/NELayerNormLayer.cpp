@@ -57,8 +57,8 @@ void NELayerNormLayer::run()
 
     std::cout << *reinterpret_cast<float *>(_impl->src->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(_impl->src->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(_impl->src->ptr_to_element(Coordinates(3071,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(_impl->src->ptr_to_element(Coordinates(3072,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->src->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->src->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
     
     _impl->op->run(pack);
 
@@ -70,8 +70,8 @@ void NELayerNormLayer::run()
 
     std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(3071,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(3072,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
 
 }
 
