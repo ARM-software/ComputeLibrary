@@ -1552,21 +1552,21 @@ public:
     }
 
     /** Get _w_shape */
-    TensorShape w_shape() const
+    TensorShape w_shape()
     {
         return  _w_shape;
     }
 
     /** Get _b_shape */
-    TensorShape w_shape() const
+    TensorShape w_shape()
     {
         return  _w_shape;
     }
     
 private:
     unsigned int _d_ff;
-    const TensorShape _w_shape;
-    const TensorShape _b_shape;
+    TensorShape _w_shape;
+    TensorShape _b_shape;
 
 };
 
