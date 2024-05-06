@@ -129,10 +129,12 @@ public:
 
               /* Self Intermediate */
               << LinearLayer(LinearLayerInfo(d_ff,TensorShape(d_model,d_ff)/*weight*/,
-                                                  TensorShape(d_model)     /*bias*/),get_weights_accessor(data_path, "/ff_weight.npy"),get_weights_accessor(data_path, "/ff_bias.npy"))
+                                                  TensorShape(d_ff)     /*bias*/),
+                             get_weights_accessor(data_path, "/ff_weight.npy"),
+                             get_weights_accessor(data_path, "/ff_bias.npy"))
               << ActivationLayer(ActivationLayerInfo(ActivationFunction::GELU))
 
-              /* Output*/
+              
 
 
 
