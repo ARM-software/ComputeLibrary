@@ -1531,15 +1531,17 @@ private:
     float _beta;
 };
 
-/** Feed Forward Layer Information Class */
-class FeedForwardLayerInfo final
+/** Linear Layer Information Class */
+class LinearLayerInfo final
 {
 public:
     /** Constructor
      * 
      * @param[in] d_ff  Amount of feed forward fully connected layer node
      */
-    FeedForwardLayerInfo(unsigned int d_ff = 2048U): _d_ff(d_ff)
+    LinearLayerInfo(unsigned int d_ff = 2048U, const TensorShape w_shape = TensorShape(),const TensorShape b_shape = TensorShape()): _d_ff(d_ff),
+                                                                                                     _w_shape(w_shape),
+                                                                                                     _b_shape(b_shape)
     {
     }
 
@@ -1548,9 +1550,23 @@ public:
     {
         return  _d_ff;
     }
+
+    /** Get _w_shape */
+    TensorShape w_shape() const
+    {
+        return  _w_shape;
+    }
+
+    /** Get _b_shape */
+    TensorShape w_shape() const
+    {
+        return  _w_shape;
+    }
     
 private:
     unsigned int _d_ff;
+    TensorShape _w_shape;
+    TensorShape _b_shape;
 
 };
 

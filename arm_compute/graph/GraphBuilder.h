@@ -393,7 +393,7 @@ public:
     static NodeID add_linear_node(Graph                  &g,
                                          NodeParams             params,
                                          NodeIdxPair            input,
-                                         FeedForwardLayerInfo   info = FeedForwardLayerInfo(),
+                                         LinearLayerInfo        info = LinearLayerInfo(),
                                          ITensorAccessorUPtr    ff_weights  = nullptr,
                                          ITensorAccessorUPtr    ff_bias = nullptr);
     /** Adds a generate proposals layer node to the graph
