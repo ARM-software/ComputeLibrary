@@ -662,7 +662,7 @@ NodeID GraphBuilder::add_layer_norm_node(Graph &g, NodeParams params, NodeIdxPai
 }
 
 NodeID GraphBuilder::add_multi_head_linear_layer(Graph &g, NodeParams params, NodeIdxPair input, 
-                                                                  LinearLayerInfo linear_info,
+                                                                  MultiHeadAttentionLayerInfo linear_info,
                                                                   ITensorAccessorUPtr query_weights,
                                                                   ITensorAccessorUPtr query_bias,
                                                                   ITensorAccessorUPtr key_weights,
@@ -703,12 +703,9 @@ NodeID GraphBuilder::add_multi_head_linear_layer(Graph &g, NodeParams params, No
 
     
     // Specific Linear attention operation
-    LinearLayerInfo  q_linear_info = linear_info;
-    q_linear_info.set_op(LinearAttentionOperation::Query);
-    LinearLayerInfo  k_linear_info = linear_info;
-    k_linear_info.set_op(LinearAttentionOperation::Key);
-    LinearLayerInfo  v_linear_info = linear_info;
-    v_linear_info.set_op(LinearAttentionOperation::Value);
+    MultiHeadAttentionLayerInfo  q_linear_info = linear_info;
+    MultiHeadAttentionLayerInfo  k_linear_info = linear_info;
+    MultiHeadAttentionLayerInfo  v_linear_info = linear_info;
 
     // Value, Key, Query Linear Nodes
     NodeID q_nid    = g.add_node<LinearLayerNode>(q_linear_info);
