@@ -1539,7 +1539,7 @@ public:
      * 
      * @param[in] d_ff  Amount of feed forward fully connected layer node
      */
-    LinearLayerInfo(unsigned int d_ff = 2048U, const TensorShape w_shape = TensorShape(),const TensorShape b_shape = TensorShape()): _d_ff(d_ff),
+    LinearLayerInfo(unsigned int d_ff = 2048U, TensorShape w_shape = TensorShape(), TensorShape b_shape = TensorShape()): _d_ff(d_ff),
                                                                                                      _w_shape(w_shape),
                                                                                                      _b_shape(b_shape)
     {

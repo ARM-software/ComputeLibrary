@@ -449,7 +449,7 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_multi_head_linear_layer(Graph &g, NodeParams params, NodeIdxPair input, 
-                                                               MultiHeadAttentionLayerInfo linear_info,
+                                                               MultiHeadLinearLayerInfo linear_info,
                                                                ITensorAccessorUPtr query_weights,
                                                                ITensorAccessorUPtr query_bias,
                                                                ITensorAccessorUPtr key_weights,
