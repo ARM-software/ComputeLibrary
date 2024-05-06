@@ -767,12 +767,8 @@ NodeID GraphBuilder::add_linear_node(Graph &g, NodeParams params, NodeIdxPair in
     NodeID          q_w_nid  = add_const_node_with_name(g, params, "FF Weights", f_w_desc, std::move(ff_weights));
     NodeID          q_b_nid  = add_const_node_with_name(g, params, "FF Bias", f_b_desc, std::move(ff_bias));
 
-    
-    // Specific Linear attention operation
-    LinearLayerInfo linear_info;
-
     // Linear Nodes
-    NodeID f_nid    = g.add_node<LinearLayerNode>(linear_info);
+    NodeID f_nid    = g.add_node<LinearLayerNode>(ff_info);
     
     // Connect input
     g.add_connection(input.node_id, input.index, f_nid, 0);
