@@ -139,6 +139,7 @@ public:
                                                      TensorShape(d_model)     /*bias*/),
                              get_weights_accessor(data_path, "/ff_weight_1.npy"),
                              get_weights_accessor(data_path, "/ff_bias_1.npy"))
+              << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
               
 
 
