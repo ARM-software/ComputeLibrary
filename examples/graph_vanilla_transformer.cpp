@@ -115,7 +115,7 @@ public:
 
 
               /* Self Attention */
-              << MultiHeadLinearLayer(LinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
+              << MultiHeadLinearLayer(MultiHeadLinearLayerInfo(d_model, h, LinearAttentionOperation::Unknown),
                                                                 get_weights_accessor(data_path, "/query_weight.npy"),
                                                                 get_weights_accessor(data_path, "/query_bias.npy"),
                                                                 get_weights_accessor(data_path, "/key_weight.npy"),
