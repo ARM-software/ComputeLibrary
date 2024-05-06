@@ -698,15 +698,15 @@ private:
     EltwiseOperation _op;
 };
 
-/** FeedForwardLayer */
-class FeedForwardLayer final : public ILayer
+/** LinearLayer */
+class LinearLayer final : public ILayer
 {
 public:
     /** Construct a feed forward layer.
      *
      * @param[in] info Feed Forward layer information
      */
-    FeedForwardLayer(FeedForwardLayerInfo   info,
+    LinearLayer(FeedForwardLayerInfo   info,
                      ITensorAccessorUPtr         ff_weights,
                      ITensorAccessorUPtr         ff_bias) : _info(info),
                                                             _ff_weights(std::move(ff_weights)),
@@ -718,7 +718,7 @@ public:
     {
         NodeParams  common_params = {name(), s.hints().target_hint};
         NodeIdxPair input         = {s.tail_node(), 0};
-        return GraphBuilder::add_feed_forward_node(s.graph(), common_params, input, _info, std::move( _ff_weights), std::move(_ff_bias));
+        return GraphBuilder::add_linear_node(s.graph(), common_params, input, _info, std::move( _ff_weights), std::move(_ff_bias));
     }
 
 private:

@@ -390,7 +390,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_feed_forward_node(Graph                  &g,
+    static NodeID add_linear_node(Graph                  &g,
                                          NodeParams             params,
                                          NodeIdxPair            input,
                                          FeedForwardLayerInfo   info = FeedForwardLayerInfo(),

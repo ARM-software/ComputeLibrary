@@ -747,7 +747,7 @@ NodeID GraphBuilder::add_multi_head_linear_layer(Graph &g, NodeParams params, No
     return f_nid;
 }
 
-NodeID GraphBuilder::add_feed_forward_node(Graph &g, NodeParams params, NodeIdxPair input, 
+NodeID GraphBuilder::add_linear_node(Graph &g, NodeParams params, NodeIdxPair input, 
                                                                   FeedForwardLayerInfo ff_info,
                                                                   ITensorAccessorUPtr ff_weights,
                                                                   ITensorAccessorUPtr ff_bias)
