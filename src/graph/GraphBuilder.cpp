@@ -756,7 +756,7 @@ NodeID GraphBuilder::add_linear_node(Graph &g, NodeParams params, NodeIdxPair in
 
     // Create weight and bias tensor shape
     TensorDescriptor f_w_desc         = input_tensor_desc;
-    f_w_desc.shape                    = TensorShape(input_tensor_desc.shape.x(),ff_info.d_linear_hidden());
+    f_w_desc.shape                    = ff_info.w_shape();
     TensorDescriptor f_b_desc         = input_tensor_desc;
     f_b_desc.shape                    = TensorShape(ff_info.d_linear_hidden());
     

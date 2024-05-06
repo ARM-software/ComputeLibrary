@@ -128,7 +128,7 @@ public:
               << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
 
               /* Self Intermediate */
-              << LinearLayer(LinearLayerInfo(d_ff),get_weights_accessor(data_path, "/ff_weight.npy"),get_weights_accessor(data_path, "/ff_bias.npy"))
+              << LinearLayer(LinearLayerInfo(d_ff,TensorShape(d_model,d_ff)),get_weights_accessor(data_path, "/ff_weight.npy"),get_weights_accessor(data_path, "/ff_bias.npy"))
               << ActivationLayer(ActivationLayerInfo(ActivationFunction::GELU))
 
               /* Output*/
