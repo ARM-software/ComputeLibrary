@@ -1565,8 +1565,8 @@ public:
     
 private:
     unsigned int _d_ff;
-    TensorShape _w_shape;
-    TensorShape _b_shape;
+    const TensorShape _w_shape;
+    const TensorShape _b_shape;
 
 };
 
