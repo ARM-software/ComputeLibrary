@@ -911,7 +911,7 @@ public:
     /** Construct a linear layer computing Key, Value, Query
      *
      */
-    MultiHeadLinearLayer(MultiHeadLinearLayerInfo info,
+    MultiHeadLinearLayer(LinearLayerInfo info,
                 ITensorAccessorUPtr           query_weights,
                 ITensorAccessorUPtr           query_bias,
                 ITensorAccessorUPtr           key_weights,
@@ -941,7 +941,7 @@ public:
     }
 
 private:
-    MultiHeadLinearLayerInfo _info;
+    LinearLayerInfo _info;
     ITensorAccessorUPtr _query_weights;
     ITensorAccessorUPtr _query_bias;        
     ITensorAccessorUPtr _key_weights;

@@ -662,7 +662,7 @@ NodeID GraphBuilder::add_layer_norm_node(Graph &g, NodeParams params, NodeIdxPai
 }
 
 NodeID GraphBuilder::add_multi_head_linear_layer(Graph &g, NodeParams params, NodeIdxPair input, 
-                                                                  MultiHeadLinearLayerInfo linear_info,
+                                                                  LinearLayerInfo linear_info,
                                                                   ITensorAccessorUPtr query_weights,
                                                                   ITensorAccessorUPtr query_bias,
                                                                   ITensorAccessorUPtr key_weights,
@@ -677,19 +677,19 @@ NodeID GraphBuilder::add_multi_head_linear_layer(Graph &g, NodeParams params, No
 
     // Create weight and bias tensor shape
     TensorDescriptor q_w_desc         = input_tensor_desc;
-    q_w_desc.shape                    = TensorShape(linear_info.d_model(), linear_info.d_model());
+    q_w_desc.shape                    = TensorShape(linear_info.d_linear_hidden(), linear_info.d_linear_hidden());
     TensorDescriptor q_b_desc         = input_tensor_desc;
-    q_b_desc.shape                    = TensorShape(linear_info.d_model());
+    q_b_desc.shape                    = TensorShape(linear_info.d_linear_hidden());
 
     TensorDescriptor k_w_desc         = input_tensor_desc;
-    k_w_desc.shape                    = TensorShape(linear_info.d_model(), linear_info.d_model());
+    k_w_desc.shape                    = TensorShape(linear_info.d_linear_hidden(), linear_info.d_linear_hidden());
     TensorDescriptor k_b_desc         = input_tensor_desc;
-    k_b_desc.shape                    = TensorShape(linear_info.d_model());
+    k_b_desc.shape                    = TensorShape(linear_info.d_linear_hidden());
 
     TensorDescriptor v_w_desc         = input_tensor_desc;
-    v_w_desc.shape                    = TensorShape(linear_info.d_model(), linear_info.d_model());
+    v_w_desc.shape                    = TensorShape(linear_info.d_linear_hidden(), linear_info.d_linear_hidden());
     TensorDescriptor v_b_desc         = input_tensor_desc;
-    v_b_desc.shape                    = TensorShape(linear_info.d_model());
+    v_b_desc.shape                    = TensorShape(linear_info.d_linear_hidden());
     
     // Create weight and bias const node with npy tensor accessor
     NodeID          q_w_nid  = add_const_node_with_name(g, params, "Query Weights", q_w_desc, std::move(query_weights));
@@ -703,12 +703,9 @@ NodeID GraphBuilder::add_multi_head_linear_layer(Graph &g, NodeParams params, No
 
     
     // Specific Linear attention operation
-    MultiHeadLinearLayerInfo  q_linear_info = linear_info;
-    q_linear_info.set_op(LinearAttentionOperation::Query);
-    MultiHeadLinearLayerInfo  k_linear_info = linear_info;
-    k_linear_info.set_op(LinearAttentionOperation::Key);
-    MultiHeadLinearLayerInfo  v_linear_info = linear_info;
-    v_linear_info.set_op(LinearAttentionOperation::Value);
+    LinearLayerInfo  q_linear_info = linear_info;
+    LinearLayerInfo  k_linear_info = linear_info;
+    LinearLayerInfo  v_linear_info = linear_info;
 
     // Value, Key, Query Linear Nodes
     NodeID q_nid    = g.add_node<LinearLayerNode>(q_linear_info);
@@ -759,9 +756,9 @@ NodeID GraphBuilder::add_linear_node(Graph &g, NodeParams params, NodeIdxPair in
 
     // Create weight and bias tensor shape
     TensorDescriptor f_w_desc         = input_tensor_desc;
-    f_w_desc.shape                    = TensorShape(input_tensor_desc.shape.x(),ff_info.d_ff());
+    f_w_desc.shape                    = TensorShape(input_tensor_desc.shape.x(),ff_info.d_linear_hidden());
     TensorDescriptor f_b_desc         = input_tensor_desc;
-    f_b_desc.shape                    = TensorShape(ff_info.d_ff());
+    f_b_desc.shape                    = TensorShape(ff_info.d_linear_hidden());
     
     // Create weight and bias const node with npy tensor accessor
     NodeID          q_w_nid  = add_const_node_with_name(g, params, "FF Weights", f_w_desc, std::move(ff_weights));

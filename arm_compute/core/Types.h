@@ -1537,18 +1537,20 @@ class LinearLayerInfo final
 public:
     /** Constructor
      * 
-     * @param[in] d_ff  Amount of feed forward fully connected layer node
+     * @param[in] d_d_linear_hidden Linear layer hidden depth
      */
-    LinearLayerInfo(unsigned int d_ff = 2048U, TensorShape w_shape = TensorShape(), TensorShape b_shape = TensorShape()): _d_ff(d_ff),
-                                                                                                     _w_shape(w_shape),
-                                                                                                     _b_shape(b_shape)
+    LinearLayerInfo(unsigned int d_linear_hidden = 2048U,
+                    TensorShape w_shape = TensorShape(),
+                    TensorShape b_shape = TensorShape()): _d_linear_hidden(d_linear_hidden),
+                                                          _w_shape(w_shape),
+                                                          _b_shape(b_shape)
     {
     }
 
-    /** Get d_ff */
-    int d_ff() const
+    /** Get d_model */
+    int d_linear_hidden() const
     {
-        return  _d_ff;
+        return  _d_linear_hidden;
     }
 
     /** Get _w_shape */
@@ -1564,7 +1566,7 @@ public:
     }
     
 private:
-    unsigned int _d_ff;
+    unsigned int _d_linear_hidden;
     TensorShape _w_shape;
     TensorShape _b_shape;
 
