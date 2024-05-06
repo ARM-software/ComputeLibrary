@@ -200,8 +200,8 @@ void CpuLinear::run(ITensorPack &tensors)
 
     std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
     std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(3071,0,0)))  << std::endl;
-    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(3072,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(d->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
 }
 
 
