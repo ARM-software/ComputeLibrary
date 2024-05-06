@@ -41,7 +41,8 @@ Status CpuLinearKernel::validate(const ITensorInfo *input1,
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::F32);
     ARM_COMPUTE_UNUSED(info);
-
+    ARM_COMPUTE_UNUSED(output);
+    
     /*
     TensorShape out_shape = input1->tensor_shape();
     if (op != LinearAttentionOperation::Key)
