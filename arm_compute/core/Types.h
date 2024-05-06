@@ -1552,15 +1552,15 @@ public:
     }
 
     /** Get _w_shape */
-    TensorShape w_shape()
+    TensorShape w_shape() const
     {
         return  _w_shape;
     }
 
     /** Get _b_shape */
-    TensorShape w_shape()
+    TensorShape b_shape() const 
     {
-        return  _w_shape;
+        return  _b_shape;
     }
     
 private:
