@@ -706,11 +706,11 @@ public:
      *
      * @param[in] info Feed Forward layer information
      */
-    LinearLayer(FeedForwardLayerInfo   info,
-                     ITensorAccessorUPtr         ff_weights,
-                     ITensorAccessorUPtr         ff_bias) : _info(info),
-                                                            _ff_weights(std::move(ff_weights)),
-                                                            _ff_bias(std::move(ff_bias))
+    LinearLayer(LinearLayerInfo   info,
+                ITensorAccessorUPtr         ff_weights,
+                ITensorAccessorUPtr         ff_bias) :  _info(info),
+                                                        _ff_weights(std::move(ff_weights)),
+                                                        _ff_bias(std::move(ff_bias))
     {
     }
 
@@ -722,7 +722,7 @@ public:
     }
 
 private:
-    FeedForwardLayerInfo _info;
+    LinearLayerInfo     _info;
     ITensorAccessorUPtr _ff_weights;
     ITensorAccessorUPtr _ff_bias;    
 };
