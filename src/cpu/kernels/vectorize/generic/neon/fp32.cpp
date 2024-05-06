@@ -9,25 +9,7 @@ namespace arm_compute
 namespace cpu
 {
 void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITensor *dst, const Window &window)
-{
-    std::cout << " src/cpu/kernels/vectorize/generic/neon/fp32.cpp Window: " << std::endl;
-
-    std::cout << "src->info()->tensor_shape().x() " << src->info()->tensor_shape().x() << std::endl;
-    std::cout << "src->info()->tensor_shape().y() " << src->info()->tensor_shape().y() << std::endl;
-    std::cout << "src->info()->tensor_shape().z() " << src->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "vector->info()->tensor_shape().x() " << vector->info()->tensor_shape().x() << std::endl;
-    std::cout << "vector->info()->tensor_shape().y() " << vector->info()->tensor_shape().y() << std::endl;
-    std::cout << "vector->info()->tensor_shape().z() " << vector->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "dst->info()->tensor_shape().x() " << dst->info()->tensor_shape().x() << std::endl;
-    std::cout << "dst->info()->tensor_shape().y() " << dst->info()->tensor_shape().y() << std::endl;
-    std::cout << "dst->info()->tensor_shape().z() " << dst->info()->tensor_shape().z() << std::endl;
-
-    std::cout << "window.x start " << window.x().start() << " end " << window.x().end() << " step " << window.x().step() << std::endl; 
-    std::cout << "window.y start " << window.y().start() << " end " << window.y().end() << " step " << window.y().step() << std::endl; 
-    std::cout << "window.z start " << window.z().start() << " end " << window.z().end() << " step " << window.z().step() << std::endl; 
-    
+{  
     /* Runtime reshape valid tensor region if input has been reshaped during preprocess */
     size_t reshape_input_x = src->info()->valid_region().shape.x();
     if(src->info()->tensor_shape().x() != reshape_input_x)
@@ -36,10 +18,6 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     }
     Window win(window);
 
-    std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
-    std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
-    std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
-    
     const unsigned int window_start_x   = static_cast<unsigned int>(win.x().start());
     const unsigned int window_end_x     = static_cast<unsigned int>(win.x().end());
 
@@ -55,10 +33,6 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
     const auto src_ptr      = reinterpret_cast<unsigned int *>(src_iter.ptr());
     const auto dst_ptr      = reinterpret_cast<float *>(dst_iter.ptr());
     const auto vector_ptr   = reinterpret_cast<float *>(vector_iter.ptr());
-    std::cout << " src/cpu/kernels/vectorize/generic/neon/fp32.cpp win:" << std::endl;
-    std::cout << "win.x start " << win.x().start() << " end " << win.x().end() << " step " << win.x().step() << std::endl; 
-    std::cout << "win.y start " << win.y().start() << " end " << win.y().end() << " step " << win.y().step() << std::endl; 
-    std::cout << "win.z start " << win.z().start() << " end " << win.z().end() << " step " << win.z().step() << std::endl; 
     execute_window_loop(win,
         [&](const Coordinates &)
         {
@@ -67,9 +41,6 @@ void neon_vectorize_int_2_float32(const ITensor *src, const ITensor *vector, ITe
                 offset_dst     = x * vector_depth;
                 offset_vector  = *(src_ptr+x) * vector_depth;
                 std::memcpy(dst_ptr + offset_dst, vector_ptr + offset_vector, (vector_depth) * sizeof(*vector_ptr));
-                std::cout<< "x:  " << x <<" "  << *(src_ptr+x) << ":  "
-                << *(dst_ptr + offset_dst)<< " " 
-                << *(dst_ptr + offset_dst + vector_depth -1) << std::endl;
             }
             
         }, src_iter);
