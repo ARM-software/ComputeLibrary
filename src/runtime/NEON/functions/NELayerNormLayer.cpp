@@ -52,6 +52,17 @@ void NELayerNormLayer::run()
     
     _impl->op->run(pack);
 
+    std::cout <<"src/runtime/NEON/functions/NELayerNormLayer.cpp x: " << _impl->dst->info()->tensor_shape().x() << std::endl;
+    std::cout <<"src/runtime/NEON/functions/NELayerNormLayer.cpp y: " << _impl->dst->info()->tensor_shape().y() << std::endl;
+    std::cout <<"src/runtime/NEON/functions/NELayerNormLayer.cpp z: " << _impl->dst->info()->tensor_shape().z() << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(0,1)))  << std::endl;
+
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(1,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(2,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(767,0,0)))  << std::endl;
+    std::cout << *reinterpret_cast<float *>(_impl->dst->ptr_to_element(Coordinates(768,0,0)))  << std::endl;
+
 }
 
 } // namespace arm_compute
