@@ -176,7 +176,7 @@ private:
                                 get_weights_accessor(data_path, "/ff_weight_1.npy"),
                                 get_weights_accessor(data_path, "/ff_bias_1.npy"));
 
-        graph   << EltwiseLayer(std::move(without_attention), std::move(with_attention), EltwiseOperation::Add).set_name("add&norm")
+        graph   << EltwiseLayer(std::move(with_attention), std::move(without_attention), EltwiseOperation::Add).set_name("add&norm")
                 << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps));
         
     }
