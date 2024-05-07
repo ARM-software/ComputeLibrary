@@ -100,10 +100,10 @@ public:
         std::unique_ptr<IPreprocessor> at2_preproccessor    = std::make_unique<atoiPreprocessor>();
 
         // Encode Input
-        graph << InputLayer(input_descriptor, get_token_accessor(common_params),
+        graph   << InputLayer(input_descriptor, get_token_accessor(common_params),
                                               get_segment_accessor(common_params.segment,move(at2_preproccessor))).set_name("in1")
               
-              << EmbeddingLayer(EmbeddingLayerInfo(d_model,
+                << EmbeddingLayer(EmbeddingLayerInfo(d_model,
                                                    d_vocab,
                                                    d_segemnt,
                                                    d_position,
@@ -111,41 +111,11 @@ public:
                                                    ConvertPolicy::SATURATE),
                                 get_weights_accessor(data_path, "/token_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout),
-                                get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1")
+                                get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1");
 
+                add_encoder_block(data_path,d_model,h,eps,d_ff);
 
-              /* Self Attention */
-              << MultiHeadLinearLayer(LinearLayerInfo(d_model),
-                                                                get_weights_accessor(data_path, "/query_weight.npy"),
-                                                                get_weights_accessor(data_path, "/query_bias.npy"),
-                                                                get_weights_accessor(data_path, "/key_weight.npy"),
-                                                                get_weights_accessor(data_path, "/key_bias.npy"),
-                                                                get_weights_accessor(data_path, "/value_weight.npy"),
-                                                                get_weights_accessor(data_path, "/value_bias.npy"))
-              << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
-
-              /* Self output */
-              << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
-
-              /* Self Intermediate */
-              << LinearLayer(LinearLayerInfo(d_ff,TensorShape(d_model,d_ff)/*weight*/,
-                                                  TensorShape(d_ff)     /*bias*/),
-                             get_weights_accessor(data_path, "/ff_weight.npy"),
-                             get_weights_accessor(data_path, "/ff_bias.npy"))
-              << ActivationLayer(ActivationLayerInfo(ActivationFunction::GELU))
-
-              /* Output*/
-              << LinearLayer(LinearLayerInfo(d_model,TensorShape(d_ff,d_model)/*weight*/,
-                                                     TensorShape(d_model)     /*bias*/),
-                             get_weights_accessor(data_path, "/ff_weight_1.npy"),
-                             get_weights_accessor(data_path, "/ff_bias_1.npy"))
-              << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
-              
-
-
-
-
-              << OutputLayer(get_output_accessor(common_params)).set_name("out1");
+        graph   << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
         // Decode Input
         // Finalize graph
@@ -173,6 +143,36 @@ private:
     CommonGraphOptions common_opts;
     CommonGraphParams  common_params;
     Stream             graph;
+
+    void add_encoder_block(std::string data_path,
+                           unsigned int d_model,unsigned int h,float eps,unsigned int d_ff)
+    {
+        /* Self Attention */
+        graph   << MultiHeadLinearLayer(LinearLayerInfo(d_model), get_weights_accessor(data_path, "/query_weight.npy"),
+                                                            get_weights_accessor(data_path, "/query_bias.npy"),
+                                                            get_weights_accessor(data_path, "/key_weight.npy"),
+                                                            get_weights_accessor(data_path, "/key_bias.npy"),
+                                                            get_weights_accessor(data_path, "/value_weight.npy"),
+                                                            get_weights_accessor(data_path, "/value_bias.npy"))
+                << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
+
+                /* Self output */
+                << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
+
+                /* Self Intermediate */
+                << LinearLayer(LinearLayerInfo(d_ff,TensorShape(d_model,d_ff)/*weight*/,
+                                                    TensorShape(d_ff)     /*bias*/),
+                                get_weights_accessor(data_path, "/ff_weight.npy"),
+                                get_weights_accessor(data_path, "/ff_bias.npy"))
+                << ActivationLayer(ActivationLayerInfo(ActivationFunction::GELU))
+
+                /* Output*/
+                << LinearLayer(LinearLayerInfo(d_model,TensorShape(d_ff,d_model)/*weight*/,
+                                                        TensorShape(d_model)     /*bias*/),
+                                get_weights_accessor(data_path, "/ff_weight_1.npy"),
+                                get_weights_accessor(data_path, "/ff_bias_1.npy"))
+                << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps));
+    }
 };
 
 /** Main program for Vanilla Transformer

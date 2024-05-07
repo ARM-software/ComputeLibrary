@@ -247,6 +247,7 @@ Intermedia
 
 Output
 hidden_states = self.dropout(hidden_states)
+hidden_states = self.LayerNorm(hidden_states + input_tensor)
 
 
 
