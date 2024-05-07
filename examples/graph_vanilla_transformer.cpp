@@ -158,10 +158,12 @@ private:
                                                             get_weights_accessor(data_path, "/key_bias.npy"),
                                                             get_weights_accessor(data_path, "/value_weight.npy"),
                                                             get_weights_accessor(data_path, "/value_bias.npy"))
-                << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1")
+                << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1");
 
+        graph   << EltwiseLayer(std::move(with_attention), std::move(without_attention), EltwiseOperation::Add).set_name("add&norm");
+        
                 /* Self output */
-                << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
+        graph   << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
 
                 /* Self Intermediate */
                 << LinearLayer(LinearLayerInfo(d_ff,TensorShape(d_model,d_ff)/*weight*/,
@@ -174,11 +176,9 @@ private:
                 << LinearLayer(LinearLayerInfo(d_model,TensorShape(d_ff,d_model)/*weight*/,
                                                         TensorShape(d_model)     /*bias*/),
                                 get_weights_accessor(data_path, "/ff_weight_1.npy"),
-                                get_weights_accessor(data_path, "/ff_bias_1.npy"));
-
-        graph   << EltwiseLayer(std::move(with_attention), std::move(without_attention), EltwiseOperation::Add).set_name("add&norm")
+                                get_weights_accessor(data_path, "/ff_bias_1.npy"))
                 << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps));
-        
+
     }
 };
 
