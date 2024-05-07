@@ -150,8 +150,8 @@ private:
         SubStream without_attention(graph);
         SubStream with_attention(graph);
 
-        /* Self Attention */
-        with_attention   
+        with_attention    
+                /* Self Attention */
                 << MultiHeadLinearLayer(LinearLayerInfo(d_model), get_weights_accessor(data_path, "/query_weight.npy"),
                                                             get_weights_accessor(data_path, "/query_bias.npy"),
                                                             get_weights_accessor(data_path, "/key_weight.npy"),
@@ -160,24 +160,28 @@ private:
                                                             get_weights_accessor(data_path, "/value_bias.npy"))
                 << MultiHeadAttentionLayer(MultiHeadAttentionLayerInfo(d_model,h)).set_name("mha1");
 
-        graph   << EltwiseLayer(std::move(with_attention), std::move(without_attention), EltwiseOperation::Add).set_name("add&norm");
+        graph   << EltwiseLayer(std::move(with_attention), std::move(without_attention), EltwiseOperation::Add).set_name("add_4_norm_attention");
         
                 /* Self output */
-        graph   << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps))
+        graph   << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps));
 
-                /* Self Intermediate */
-                << LinearLayer(LinearLayerInfo(d_ff,TensorShape(d_model,d_ff)/*weight*/,
+        SubStream without_ff(graph);
+        SubStream with_ff(graph);
+                /* Self Intermediate(Feed Forward)*/
+        with_ff << LinearLayer(LinearLayerInfo(d_ff,TensorShape(d_model,d_ff)/*weight*/,
                                                     TensorShape(d_ff)     /*bias*/),
                                 get_weights_accessor(data_path, "/ff_weight.npy"),
                                 get_weights_accessor(data_path, "/ff_bias.npy"))
                 << ActivationLayer(ActivationLayerInfo(ActivationFunction::GELU))
-
-                /* Output*/
                 << LinearLayer(LinearLayerInfo(d_model,TensorShape(d_ff,d_model)/*weight*/,
                                                         TensorShape(d_model)     /*bias*/),
                                 get_weights_accessor(data_path, "/ff_weight_1.npy"),
-                                get_weights_accessor(data_path, "/ff_bias_1.npy"))
-                << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps));
+                                get_weights_accessor(data_path, "/ff_bias_1.npy"));
+
+        graph   << EltwiseLayer(std::move(with_ff), std::move(without_ff), EltwiseOperation::Add).set_name("add_4_norm_ff");
+        
+                /* Output*/
+        graph   << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps));
 
     }
 };
