@@ -70,6 +70,7 @@ void NEArithmeticAddition::configure(const ITensor             *input1,
 
 void NEArithmeticAddition::run()
 {
+    std::cout << "NEArithmeticAddition::run " << std::endl;
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
