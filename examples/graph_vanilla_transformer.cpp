@@ -113,7 +113,7 @@ public:
                                 get_weights_accessor(data_path, "/segment_embedding.npy", operation_layout),
                                 get_weights_accessor(data_path, "/positional_embedding.npy", operation_layout)).set_name("tkemb1");
 
-                add_encoder_block(data_path,d_model,h,eps,d_ff);
+        add_encoder_block(data_path,d_model,h,eps,d_ff);
 
         graph   << OutputLayer(get_output_accessor(common_params)).set_name("out1");
             
@@ -147,8 +147,12 @@ private:
     void add_encoder_block(std::string data_path,
                            unsigned int d_model,unsigned int h,float eps,unsigned int d_ff)
     {
+        SubStream without_attention(graph);
+        SubStream with_attention(graph);
+
         /* Self Attention */
-        graph   << MultiHeadLinearLayer(LinearLayerInfo(d_model), get_weights_accessor(data_path, "/query_weight.npy"),
+        with_attention   
+                << MultiHeadLinearLayer(LinearLayerInfo(d_model), get_weights_accessor(data_path, "/query_weight.npy"),
                                                             get_weights_accessor(data_path, "/query_bias.npy"),
                                                             get_weights_accessor(data_path, "/key_weight.npy"),
                                                             get_weights_accessor(data_path, "/key_bias.npy"),
@@ -170,8 +174,11 @@ private:
                 << LinearLayer(LinearLayerInfo(d_model,TensorShape(d_ff,d_model)/*weight*/,
                                                         TensorShape(d_model)     /*bias*/),
                                 get_weights_accessor(data_path, "/ff_weight_1.npy"),
-                                get_weights_accessor(data_path, "/ff_bias_1.npy"))
+                                get_weights_accessor(data_path, "/ff_bias_1.npy"));
+
+        graph   << EltwiseLayer(std::move(without_attention), std::move(with_attention), EltwiseOperation::Add).set_name("add&norm")
                 << LayerNormLayer(LayerNormLayerInfo(0/*Window::DimX*/, eps));
+        
     }
 };
 
