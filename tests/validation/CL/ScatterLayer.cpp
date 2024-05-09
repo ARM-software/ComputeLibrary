@@ -125,7 +125,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScatterLayerFixture<float>, framework::Datase
         make("DataType", {DataType::F32}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {true})))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
@@ -136,7 +137,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, CLScatterLayerFixture<float>, framework
         make("DataType", {DataType::F32}),
         make("ScatterFunction", {ScatterFunction::Add}),
         make("ZeroInit", {true}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {true})))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
@@ -147,7 +149,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMultiDim, CLScatterLayerFixture<float>, framework
         make("DataType", {DataType::F32}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {true})))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
@@ -158,7 +161,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMultiIndices, CLScatterLayerFixture<float>, frame
         make("DataType", {DataType::F32}),
         make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add }),
         make("ZeroInit", {false}),
-        make("Inplace", {false, true})))
+        make("Inplace", {false, true}),
+        make("Padding", {true})))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
@@ -169,12 +173,29 @@ FIXTURE_DATA_TEST_CASE(RunSmallBatchedMultiIndices, CLScatterLayerFixture<float>
         make("DataType", {DataType::F32}),
         make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add}),
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {true})))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+
+// m+k, k-1-D m+n-D case
+FIXTURE_DATA_TEST_CASE(RunSmallScatterScalar, CLScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallScatterScalarDataset(),
+        make("DataType", {DataType::F32}),
+        make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add}),
+        make("ZeroInit", {false}),
+        make("Inplace", {false}),
+        make("Padding", {false}))) // NOTE: Padding not supported in this datset
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 TEST_SUITE_END() // FP32
+
+
+// NOTE: Padding is disabled for the SmallScatterMixedDataset due certain shapes not supporting padding.
+//       Padding is well tested in F32 Datatype test cases.
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
@@ -182,7 +203,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<half>, framework::Da
         make("DataType", {DataType::F16}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
@@ -196,7 +218,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<int32_t>, framework:
         make("DataType", {DataType::S32}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_int);
 }
@@ -208,7 +231,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<int16_t>, framework:
         make("DataType", {DataType::S16}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_int);
 }
@@ -220,7 +244,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<int8_t>, framework::
         make("DataType", {DataType::S8}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_int);
 }
@@ -232,7 +257,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<uint32_t>, framework
         make("DataType", {DataType::U32}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_int);
 }
@@ -244,7 +270,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<uint16_t>, framework
         make("DataType", {DataType::U16}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_int);
 }
@@ -256,7 +283,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, CLScatterLayerFixture<uint8_t>, framework:
         make("DataType", {DataType::U8}),
         allScatterFunctions,
         make("ZeroInit", {false}),
-        make("Inplace", {false})))
+        make("Inplace", {false}),
+        make("Padding", {false})))
 {
     validate(CLAccessor(_target), _reference, tolerance_int);
 }
