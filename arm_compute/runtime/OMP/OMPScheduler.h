@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_OMPSCHEDULER_H
-#define ARM_COMPUTE_OMPSCHEDULER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_OMP_OMPSCHEDULER_H
+#define ACL_ARM_COMPUTE_RUNTIME_OMP_OMPSCHEDULER_H
 
 #include "arm_compute/runtime/IScheduler.h"
 
@@ -79,6 +79,8 @@ protected:
 
 private:
     unsigned int _num_threads;
+    bool         _has_lmb;
+    unsigned int _nonlittle_num_cpus;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_OMPSCHEDULER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_OMP_OMPSCHEDULER_H
