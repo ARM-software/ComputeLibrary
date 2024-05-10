@@ -363,6 +363,8 @@ CpuInfo CpuInfo::build()
     isainfo.neon = get_hw_capability("hw.optional.neon");
     isainfo.fp16 = get_hw_capability("hw.optional.neon_fp16");
     isainfo.dot  = get_hw_capability("hw.optional.arm.FEAT_DotProd");
+    isainfo.bf16 = get_hw_capability("hw.optional.arm.FEAT_BF16");
+    isainfo.i8mm = get_hw_capability("hw.optional.arm.FEAT_I8MM");
     CpuInfo info(isainfo, cpus_model);
     return info;
 #elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
