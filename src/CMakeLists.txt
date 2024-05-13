@@ -812,6 +812,11 @@ target_sources(
 	cpu/kernels/range/generic/neon/fp16.cpp
 	cpu/kernels/range/generic/neon/fp32.cpp
 	cpu/kernels/range/generic/neon/integer.cpp
+	cpu/kernels/reduction_layer/generic/neon/fp16.cpp
+	cpu/kernels/reduction_layer/generic/neon/fp32.cpp
+	cpu/kernels/reduction_layer/generic/neon/integer.cpp
+	cpu/kernels/reduction_layer/generic/neon/qasymm8.cpp
+	cpu/kernels/reduction_layer/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/roialign/generic/neon/fp16.cpp
 	cpu/kernels/roialign/generic/neon/fp32.cpp
 	cpu/kernels/roialign/generic/neon/qasymm8.cpp

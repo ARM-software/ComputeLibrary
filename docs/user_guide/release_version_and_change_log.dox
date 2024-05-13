@@ -43,6 +43,7 @@ If there is more than one release in a month then an extra sequential number is 
 
 v24.05 Public major release
  - Add @ref CLScatter operator for FP32/16, S32/16/8, U32/16/8 data types
+ - Fix @ref NEReductionOperationKernel FP16 for armv8a multi_isa builds
 
 v24.04 Public major release
  - Add Bfloat16 data type support for @ref NEMatMul.

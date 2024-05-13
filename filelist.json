@@ -2115,7 +2115,14 @@
           "common": [
             "src/core/NEON/kernels/NEReductionOperationKernel.cpp",
             "src/runtime/NEON/functions/NEReductionOperation.cpp"
-          ]
+          ],
+          "neon":{
+            "fp32":["src/cpu/kernels/reduction_layer/generic/neon/fp32.cpp"],
+            "fp16":["src/cpu/kernels/reduction_layer/generic/neon/fp16.cpp"],
+            "integer":["src/cpu/kernels/reduction_layer/generic/neon/integer.cpp"],
+            "qasymm8":["src/cpu/kernels/reduction_layer/generic/neon/qasymm8.cpp"],
+            "qasymm8_signed":["src/cpu/kernels/reduction_layer/generic/neon/qasymm8_signed.cpp"]
+          }
         }
       },
       "Reorg": {
