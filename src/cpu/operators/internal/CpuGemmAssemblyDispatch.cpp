@@ -945,6 +945,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
             }
             break;
 #endif /* __aarch64__ */
+
 #if defined(ARM_COMPUTE_ENABLE_BF16)
         case DataType::BFLOAT16:
         {
@@ -963,13 +964,14 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
             break;
         }
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+#if defined(ARM_COMPUTE_ENABLE_FP16)
         case DataType::F16:
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(
                 !(arm_gemm::has_opt_gemm<float16_t, float16_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
                 "We could not find an optimized kernel for F16 input and F16 output");
             break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(true, "Usupported type. Could not find a kernel");
             break;
@@ -1102,11 +1104,11 @@ void CpuGemmAssemblyDispatch::configure(
             }
             break;
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
             create_arm_gemm<float16_t, float16_t>(_arm_gemm, a, b, c, d, act, info);
             break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             break;
     }

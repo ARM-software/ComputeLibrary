@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
+#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
 
 template<>
 void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const __fp16 *bias, Activation act, bool append)
@@ -86,7 +86,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -140,7 +140,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -217,7 +217,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -317,7 +317,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -439,7 +439,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -584,7 +584,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -752,7 +752,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -944,7 +944,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1150,7 +1150,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1204,7 +1204,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1278,7 +1278,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1372,7 +1372,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1485,7 +1485,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1618,7 +1618,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1771,7 +1771,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -1945,7 +1945,7 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
-#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ARM_COMPUTE_ENABLE_FP16
                                 ".arch  armv8.2-a+fp16\n"
 #endif
                                 "dup v0.8h, %[maxval].h[0]\n"
@@ -2112,4 +2112,4 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
     }
 }
 
-#endif // __aarch64__ && (FP16_KERNELS || __ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#endif // __aarch64__ && (FP16_KERNELS || ARM_COMPUTE_ENABLE_FP16)

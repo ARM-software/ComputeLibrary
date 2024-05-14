@@ -1593,7 +1593,6 @@
           "neon": {
             "common": [
               "src/core/NEON/kernels/arm_gemm/gemm_bf16.cpp",
-              "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_fp32.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_bf16bf16.cpp",
               "src/core/NEON/kernels/arm_gemm/gemm_int16.cpp",
@@ -1605,7 +1604,6 @@
               "src/core/NEON/kernels/arm_gemm/gemm_uint8.cpp",
               "src/core/NEON/kernels/arm_gemm/interleave-8way.cpp",
               "src/core/NEON/kernels/arm_gemm/interleave_indirect.cpp",
-              "src/core/NEON/kernels/arm_gemm/mergeresults-fp16.cpp",
               "src/core/NEON/kernels/arm_gemm/mergeresults.cpp",
               "src/core/NEON/kernels/arm_gemm/misc.cpp",
               "src/core/NEON/kernels/arm_gemm/quantized.cpp",
@@ -1622,13 +1620,8 @@
               "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u8_8x12/a55r1.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u8_8x12/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_u8_8x12/x1.cpp",
-              "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/a55r1.cpp",
-              "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/generic.cpp",
-              "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/x1.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_bf16fp32_dot_6x16/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_bf16fp32_mmla_6x16/generic.cpp",
-              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/a55.cpp",
-              "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp32_mla_4x24/a55.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp32_mla_4x24/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp32_mla_6x16/a55.cpp",
@@ -1682,6 +1675,13 @@
             "fp32":["src/cpu/kernels/gemm_matrix_mul/generic/neon/fp32.cpp",
                     "src/cpu/kernels/gemm_matrix_add/generic/neon/fp32.cpp"],
             "fp16":["src/cpu/kernels/gemm_matrix_mul/generic/neon/fp16.cpp",
+                    "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/a55r1.cpp",
+                    "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
+                    "src/core/NEON/kernels/arm_gemm/mergeresults-fp16.cpp",
+                    "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/generic.cpp",
+                    "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/a55.cpp",
+                    "src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/generic.cpp",
+                    "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/x1.cpp",
                     "src/cpu/kernels/gemm_matrix_add/generic/neon/fp16.cpp"],
             "estate32": [
               "src/core/NEON/kernels/arm_gemm/kernels/a32_sgemm_8x6/a53.cpp",
@@ -1690,6 +1690,7 @@
             ],
             "estate64": [
               "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemv_pretransposed/generic.cpp"
+
             ],
             "fixed_format_kernels": [
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_bf16fp32_mmla_6x16/generic.cpp",
