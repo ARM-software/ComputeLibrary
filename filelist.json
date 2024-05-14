@@ -2093,8 +2093,14 @@
           "common": [
             "src/cpu/operators/CpuQuantize.cpp",
             "src/cpu/kernels/CpuQuantizeKernel.cpp",
-            "src/runtime/NEON/functions/NEQuantizationLayer.cpp"
-          ]
+            "src/runtime/NEON/functions/NEQuantizationLayer.cpp",
+            "src/cpu/kernels/quantize/generic/neon/vquantize.cpp"
+          ],
+          "neon":{
+            "fp32":["src/cpu/kernels/quantize/generic/neon/fp32.cpp"],
+            "fp16":["src/cpu/kernels/quantize/generic/neon/fp16.cpp"],
+            "integer":["src/cpu/kernels/quantize/generic/neon/integer.cpp"]
+          }
         }
       },
       "Range": {

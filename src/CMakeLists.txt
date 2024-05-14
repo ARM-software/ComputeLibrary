@@ -809,6 +809,10 @@ target_sources(
 	cpu/kernels/pool3d/neon/fp32.cpp
 	cpu/kernels/pool3d/neon/qasymm8.cpp
 	cpu/kernels/pool3d/neon/qasymm8_signed.cpp
+	cpu/kernels/quantize/generic/neon/fp16.cpp
+	cpu/kernels/quantize/generic/neon/fp32.cpp
+	cpu/kernels/quantize/generic/neon/integer.cpp
+	cpu/kernels/quantize/generic/neon/vquantize.cpp
 	cpu/kernels/range/generic/neon/fp16.cpp
 	cpu/kernels/range/generic/neon/fp32.cpp
 	cpu/kernels/range/generic/neon/integer.cpp
