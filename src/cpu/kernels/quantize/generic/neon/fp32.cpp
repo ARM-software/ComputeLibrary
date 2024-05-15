@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/cpu/kernels/quantize/generic/neon/impl_fp32.h"
+#include "src/cpu/kernels/quantize/generic/neon/impl.h"
 
 namespace arm_compute
 {

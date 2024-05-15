@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 
 #include "src/core/NEON/NEMath.h"
@@ -246,6 +245,91 @@ uint32_t calculate_vector_index_quantized(uint32x4x4_t vec_res_idx, T vec_res_va
 
     return (res - 0xFFFFFFFF);
 }
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template <>
+uint32x4x4_t inline calculate_index(
+    uint32_t idx, float16x8_t a, float16x8_t b, uint32x4x4_t c, ReductionOperation op, int axis)
+{
+    uint32x4x2_t mask{0};
+    uint16x8_t   mask_u16{0};
+    if (op == ReductionOperation::ARG_IDX_MIN)
+    {
+        mask_u16 = wrapper::vcgt(b, a);
+    }
+    else
+    {
+        mask_u16 = wrapper::vclt(b, a);
+    }
+    mask.val[0]          = wrapper::vmovl(wrapper::vgetlow(mask_u16));
+    mask.val[1]          = wrapper::vmovl(wrapper::vgethigh(mask_u16));
+    uint32x4x2_t vec_idx = {{{idx + 0, idx + 1, idx + 2, idx + 3}, {idx + 4, idx + 5, idx + 6, idx + 7}}};
+    if (axis != 0)
+    {
+        vec_idx.val[0] = wrapper::vdup_n(idx, wrapper::traits::vector_128_tag{});
+        vec_idx.val[1] = wrapper::vdup_n(idx, wrapper::traits::vector_128_tag{});
+    }
+    uint32x4x4_t res = {wrapper::vbsl(mask.val[0], vec_idx.val[0], c.val[0]),
+                        wrapper::vbsl(mask.val[1], vec_idx.val[1], c.val[1]), 0, 0};
+
+    return res;
+}
+
+// Helper function to calculate the minimum value of the input vector. All the elements in the output vector contain the min value.
+inline float16x4_t calculate_min(float16x8_t in)
+{
+    auto pmin = wrapper::vpmin(wrapper::vgethigh(in), wrapper::vgetlow(in));
+    pmin      = wrapper::vpmin(pmin, pmin);
+    return wrapper::vpmin(pmin, pmin);
+}
+// Helper function to calculate the maximum value of the input vector. All the elements in the output vector contain the max value.
+inline float16x4_t calculate_max(float16x8_t in)
+{
+    auto pmax = wrapper::vpmax(wrapper::vgethigh(in), wrapper::vgetlow(in));
+    pmax      = wrapper::vpmax(pmax, pmax);
+    return wrapper::vpmax(pmax, pmax);
+}
+
+template <>
+inline uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, float16x8_t vec_res_value, ReductionOperation op)
+{
+    uint32x4x2_t res_idx_mask{0};
+    uint32x4_t   mask_ones = vdupq_n_u32(0xFFFFFFFF);
+    uint16x8_t   mask_u16;
+    if (op == ReductionOperation::ARG_IDX_MIN)
+    {
+        auto pmin = calculate_min(vec_res_value);
+        mask_u16  = wrapper::vceq(vec_res_value, wrapper::vcombine(pmin, pmin));
+    }
+    else
+    {
+        auto pmax = calculate_max(vec_res_value);
+        mask_u16  = wrapper::vceq(vec_res_value, wrapper::vcombine(pmax, pmax));
+    }
+
+    // Widen vectors
+    auto wide_u32_1 =
+        wrapper::vorr(vshll_n_u16(wrapper::vgetlow(mask_u16), 8), wrapper::vmovl(wrapper::vgetlow(mask_u16)));
+    auto wide_u32_2 =
+        wrapper::vorr(vshll_n_u16(wrapper::vgethigh(mask_u16), 8), wrapper::vmovl(wrapper::vgethigh(mask_u16)));
+    res_idx_mask.val[0] = wrapper::vand(vec_res_idx.val[0], wide_u32_1);
+    res_idx_mask.val[1] = wrapper::vand(vec_res_idx.val[1], wide_u32_2);
+    res_idx_mask.val[0] = wrapper::vadd(res_idx_mask.val[0], mask_ones);
+    res_idx_mask.val[1] = wrapper::vadd(res_idx_mask.val[1], mask_ones);
+
+    uint32_t res  = 0xFFFFFFFF;
+    uint32_t iter = 0;
+    do
+    {
+        auto pmin = wrapper::vpmin(wrapper::vgethigh(res_idx_mask.val[iter]), wrapper::vgetlow(res_idx_mask.val[iter]));
+        pmin      = wrapper::vpmin(pmin, pmin);
+        res       = std::min(wrapper::vgetlane(pmin, 0), res);
+        iter++;
+    } while (iter < 2);
+
+    return (res - 0xFFFFFFFF);
+}
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 template <class F>
 class Reducer
@@ -933,6 +1017,12 @@ struct RedOpYZW
                     if (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX)
                     {
                         wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + x, vec_res_idx.val[0]);
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                        if (std::is_same<T, float16_t>::value)
+                        {
+                            wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + x + 4, vec_res_idx.val[1]);
+                        }
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                     }
                     else
                     {

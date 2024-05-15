@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_DEQUANTIZE_KERNEL_H
-#define ARM_COMPUTE_CPU_DEQUANTIZE_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUDEQUANTIZEKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUDEQUANTIZEKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
@@ -56,8 +56,16 @@ public:
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+
+private:
+    /** Common signature for all the specialised @ref CpuDequantizeKernel functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using DequantizeFunctionExecutorPtr = void (*)(const ITensor *input, ITensor *output, const Window &window);
+    DequantizeFunctionExecutorPtr _func{nullptr};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_DEQUANTIZE_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUDEQUANTIZEKERNEL_H

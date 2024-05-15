@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-#include "src/cpu/kernels/quantize/generic/neon/impl_fp16.h"
+#include "src/cpu/kernels/quantize/generic/neon/impl.h"
 
 namespace arm_compute
 {

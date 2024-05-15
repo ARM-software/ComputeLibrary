@@ -21,24 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_CPU_KERNELS_QUANTIZE_GENERIC_NEON_IMPL_FP32_H
-#define ACL_SRC_CPU_KERNELS_QUANTIZE_GENERIC_NEON_IMPL_FP32_H
-
-#include "src/core/helpers/WindowHelpers.h"
-#include "src/core/NEON/NEAsymm.h"
+#include "src/cpu/kernels/dequantize/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-inline float32x4x4_t load_value(const float *input_ptr)
+void fp32_run_dequantization_core(const ITensor *input, ITensor *output, const Window &window)
 {
-    return {wrapper::vloadq(input_ptr), wrapper::vloadq(input_ptr + 4), wrapper::vloadq(input_ptr + 8),
-            wrapper::vloadq(input_ptr + 12)};
+    run_dequantization_core<float>(input, output, window);
 }
-
 } // namespace cpu
 } // namespace arm_compute
-
-#include "impl.h"
-#endif // ACL_SRC_CPU_KERNELS_QUANTIZE_GENERIC_NEON_IMPL_FP32_H

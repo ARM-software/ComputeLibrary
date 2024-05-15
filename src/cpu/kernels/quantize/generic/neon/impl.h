@@ -43,11 +43,39 @@ inline float32x4x4_t load_value(const T *input_ptr)
     return arm_compute::convert_to_float32x4x4<Tx16_t>(wrapper::vloadq(input_ptr));
 }
 
+template <>
+inline float32x4x4_t load_value(const float *input_ptr)
+{
+    return {wrapper::vloadq(input_ptr), wrapper::vloadq(input_ptr + 4), wrapper::vloadq(input_ptr + 8),
+            wrapper::vloadq(input_ptr + 12)};
+}
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template <>
+inline float32x4x4_t load_value(const float16_t *input_ptr)
+{
+    return {vcvt_f32_f16(wrapper::vload(input_ptr)), vcvt_f32_f16(wrapper::vload(input_ptr + 4)),
+            vcvt_f32_f16(wrapper::vload(input_ptr + 8)), vcvt_f32_f16(wrapper::vload(input_ptr + 12))};
+}
+
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 template <typename element_type>
 using vector_type = wrapper::traits::neon_vector_t<element_type, window_step>;
 
 template <typename quantized_type>
-vector_type<quantized_type> vquantize_qasymm8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi);
+inline vector_type<quantized_type> vquantize_qasymm8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi);
+
+template <>
+inline vector_type<uint8_t> vquantize_qasymm8<uint8_t>(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize(qv, qi);
+}
+
+template <>
+inline vector_type<int8_t> vquantize_qasymm8<int8_t>(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize_signed(qv, qi);
+}
 
 template <typename TOut, typename = typename std::enable_if<std::is_signed<TOut>::value, bool>::type>
 inline int8x16_t recombine_8_16(int16x8_t lower, int16x8_t upper)

@@ -744,6 +744,8 @@ target_sources(
 	cpu/kernels/depthwiseconv2d/generic/neon/impl.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/qasymm8.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/qasymm8_signed.cpp
+	cpu/kernels/dequantize/generic/neon/fp16.cpp
+	cpu/kernels/dequantize/generic/neon/fp32.cpp
 	cpu/kernels/directconv2d/nchw/all.cpp
 	cpu/kernels/directconv2d/nchw/fp16.cpp
 	cpu/kernels/directconv2d/nhwc/neon/fp16.cpp
@@ -812,7 +814,6 @@ target_sources(
 	cpu/kernels/quantize/generic/neon/fp16.cpp
 	cpu/kernels/quantize/generic/neon/fp32.cpp
 	cpu/kernels/quantize/generic/neon/integer.cpp
-	cpu/kernels/quantize/generic/neon/vquantize.cpp
 	cpu/kernels/range/generic/neon/fp16.cpp
 	cpu/kernels/range/generic/neon/fp32.cpp
 	cpu/kernels/range/generic/neon/integer.cpp

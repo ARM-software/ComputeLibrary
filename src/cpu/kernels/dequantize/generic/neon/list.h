@@ -21,26 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_CPU_KERNELS_QUANTIZE_GENERIC_NEON_IMPL_FP16_H
-#define ACL_SRC_CPU_KERNELS_QUANTIZE_GENERIC_NEON_IMPL_FP16_H
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifndef ACL_SRC_CPU_KERNELS_DEQUANTIZE_GENERIC_NEON_LIST_H
+#define ACL_SRC_CPU_KERNELS_DEQUANTIZE_GENERIC_NEON_LIST_H
 
-#include "src/core/helpers/WindowHelpers.h"
-#include "src/core/NEON/NEAsymm.h"
+#include "arm_compute/core/Helpers.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
 
-inline float32x4x4_t load_value(const float16_t *input_ptr)
-{
-    return {vcvt_f32_f16(wrapper::vload(input_ptr)), vcvt_f32_f16(wrapper::vload(input_ptr + 4)),
-            vcvt_f32_f16(wrapper::vload(input_ptr + 8)), vcvt_f32_f16(wrapper::vload(input_ptr + 12))};
-}
+#define DECLARE_DEQUANTIZE_KERNEL(func_name) void func_name(const ITensor *input, ITensor *output, const Window &window)
+
+DECLARE_DEQUANTIZE_KERNEL(fp32_run_dequantization_core);
+DECLARE_DEQUANTIZE_KERNEL(fp16_run_dequantization_core);
+
+#undef DECLARE_DEQUANTIZE_KERNEL
 
 } // namespace cpu
 } // namespace arm_compute
-#include "impl.h"
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#endif // ACL_SRC_CPU_KERNELS_QUANTIZE_GENERIC_NEON_IMPL_FP16_H
+#endif // ACL_SRC_CPU_KERNELS_DEQUANTIZE_GENERIC_NEON_LIST_H

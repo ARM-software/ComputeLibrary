@@ -21,21 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "impl.h"
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/cpu/kernels/dequantize/generic/neon/impl.h"
+
 namespace arm_compute
 {
 namespace cpu
 {
-template <>
-vector_type<uint8_t> vquantize_qasymm8<uint8_t>(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+void fp16_run_dequantization_core(const ITensor *input, ITensor *output, const Window &window)
 {
-    return vquantize(qv, qi);
-}
-
-template <>
-vector_type<int8_t> vquantize_qasymm8<int8_t>(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
-{
-    return vquantize_signed(qv, qi);
+    run_dequantization_core<float16_t>(input, output, window);
 }
 } // namespace cpu
 } // namespace arm_compute
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

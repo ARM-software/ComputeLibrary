@@ -1415,7 +1415,11 @@
             "src/cpu/operators/CpuDequantize.cpp",
             "src/cpu/kernels/CpuDequantizeKernel.cpp",
             "src/runtime/NEON/functions/NEDequantizationLayer.cpp"
-          ]
+          ],
+          "neon":{
+            "fp32":["src/cpu/kernels/dequantize/generic/neon/fp32.cpp"],
+            "fp16":["src/cpu/kernels/dequantize/generic/neon/fp16.cpp"]
+          }
         }
       },
       "DetectionPostProcess": {
@@ -2093,8 +2097,7 @@
           "common": [
             "src/cpu/operators/CpuQuantize.cpp",
             "src/cpu/kernels/CpuQuantizeKernel.cpp",
-            "src/runtime/NEON/functions/NEQuantizationLayer.cpp",
-            "src/cpu/kernels/quantize/generic/neon/vquantize.cpp"
+            "src/runtime/NEON/functions/NEQuantizationLayer.cpp"
           ],
           "neon":{
             "fp32":["src/cpu/kernels/quantize/generic/neon/fp32.cpp"],
