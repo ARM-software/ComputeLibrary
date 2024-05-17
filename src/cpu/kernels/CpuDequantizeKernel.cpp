@@ -85,7 +85,7 @@ void CpuDequantizeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
             break;
 #ifdef ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
-            _func = REGISTER_FP32_NEON(fp16_run_dequantization_core);
+            _func = REGISTER_FP16_NEON(fp16_run_dequantization_core);
             break;
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
