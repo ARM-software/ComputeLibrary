@@ -79,7 +79,6 @@ protected:
 
 private:
     unsigned int _num_threads;
-    bool         _has_lmb;
     unsigned int _nonlittle_num_cpus;
 };
 } // namespace arm_compute

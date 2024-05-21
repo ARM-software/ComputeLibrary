@@ -53,15 +53,10 @@ TEST_SUITE(UNIT)
 TEST_CASE(CpuCapacity, framework::DatasetMode::ALL)
 {
     CPUInfo& ci =  arm_compute::Scheduler::get().cpu_info();
-    const uint32_t total_num_cpus = ci.get_cpu_num();
     const uint32_t nonlittle_num_cpus = ci.get_cpu_num_excluding_little();
-    const bool has_lmb = ci.cpu_has_little_mid_big();
     const uint32_t num_threads = arm_compute::Scheduler::get().num_threads();
 
-    if(has_lmb){
-        ARM_COMPUTE_EXPECT(total_num_cpus!=nonlittle_num_cpus , framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(num_threads==nonlittle_num_cpus , framework::LogLevel::ERRORS);
-    }
+    ARM_COMPUTE_EXPECT(num_threads<=nonlittle_num_cpus , framework::LogLevel::ERRORS);
 }
 #endif /* defined(ARM_COMPUTE_OPENMP_SCHEDULER) && !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
     (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)*/

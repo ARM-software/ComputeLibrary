@@ -121,7 +121,6 @@ public:
     CpuModel cpu_model() const;
     uint32_t num_cpus() const;
     uint32_t not_little_num_cpus() const;
-    bool     has_little_mid_big() const;
 
 private:
     CpuIsaInfo            _isa{};

@@ -145,14 +145,6 @@ unsigned long CPUInfo::get_sme2_vector_length() const
     return 0;
 #endif // ARM_COMPUTE_ENABLE_SME2
 }
-bool CPUInfo::cpu_has_little_mid_big() const
-{
-#if defined(__ANDROID__)
-    return _impl->info.has_little_mid_big();
-#else  /* defined(__ANDROID__) */
-    return false;
-#endif /* defined(__ANDROID__) */
-}
 unsigned int CPUInfo::get_cpu_num_excluding_little() const
 {
 #if defined(__ANDROID__)

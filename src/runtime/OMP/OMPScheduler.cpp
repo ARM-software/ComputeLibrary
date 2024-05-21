@@ -36,16 +36,13 @@ namespace arm_compute
     (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)
 OMPScheduler::OMPScheduler() // NOLINT
     : _num_threads(cpu_info().get_cpu_num_excluding_little()),
-      _has_lmb(cpu_info().cpu_has_little_mid_big()),
       _nonlittle_num_cpus(cpu_info().get_cpu_num_excluding_little())
 {
 }
 #else  /* !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
     (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)*/
 OMPScheduler::OMPScheduler() // NOLINT
-    : _num_threads(omp_get_max_threads()),
-      _has_lmb(cpu_info().cpu_has_little_mid_big()),
-      _nonlittle_num_cpus(cpu_info().get_cpu_num_excluding_little())
+    : _num_threads(omp_get_max_threads()), _nonlittle_num_cpus(cpu_info().get_cpu_num_excluding_little())
 {
 }
 #endif /* !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
@@ -61,7 +58,7 @@ void OMPScheduler::set_num_threads(unsigned int num_threads)
     const unsigned int num_cores = omp_get_max_threads();
 #if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
     (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)
-    const unsigned int adjusted_num_threads = (_has_lmb) ? _nonlittle_num_cpus : num_threads;
+    const unsigned int adjusted_num_threads = std::min(_nonlittle_num_cpus, num_threads);
     _num_threads                            = (num_threads == 0) ? num_cores : adjusted_num_threads;
 #else  /* !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
     (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)*/

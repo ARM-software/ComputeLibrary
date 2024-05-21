@@ -270,12 +270,6 @@ int get_max_cpus()
     }
     return max_cpus;
 }
-
-const static std::map<std::string, std::vector<uint32_t>> known_configurations_with_little_cores = {
-    {"xiaomi14-pro", {379, 379, 923, 923, 923, 867, 867, 1024}}};
-
-const static std::map<std::string, uint32_t> number_of_cores_to_use = {{"xiaomi14-pro", 6}};
-
 #if defined(__ANDROID__)
 std::vector<uint32_t> get_cpu_capacities()
 {
@@ -303,14 +297,6 @@ uint32_t not_little_num_cpus_internal()
     std::vector<uint32_t> cpus_all = get_cpu_capacities();
     std::vector<uint32_t> cpus_not_little;
 
-    for (auto &it : known_configurations_with_little_cores)
-    {
-        if (it.second == cpus_all)
-        {
-            return number_of_cores_to_use.find(it.first)->second;
-        }
-    }
-
     std::vector<uint32_t>::iterator result       = std::max_element(cpus_all.begin(), cpus_all.end());
     uint32_t                        max_capacity = *result;
     uint32_t                        threshold    = max_capacity / 2;
@@ -322,33 +308,6 @@ uint32_t not_little_num_cpus_internal()
         }
     }
     return cpus_not_little.size();
-}
-
-bool has_little_mid_big_internal()
-{
-    std::vector<uint32_t> cpus_all = get_cpu_capacities();
-    std::vector<uint32_t> cpus_not_little;
-
-    for (auto &it : known_configurations_with_little_cores)
-    {
-        if (it.second == cpus_all)
-        {
-            return true;
-        }
-    }
-    std::sort(cpus_all.begin(), cpus_all.end());
-    std::vector<uint32_t>::iterator ip;
-    ip = std::unique(cpus_all.begin(), cpus_all.end());
-    cpus_all.resize(std::distance(cpus_all.begin(), ip));
-
-    if (cpus_all.size() == 3)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
 }
 #endif /* defined(__ANDROID__) */
 #elif defined(__aarch64__) && \
@@ -490,15 +449,6 @@ uint32_t CpuInfo::not_little_num_cpus() const
     return not_little_num_cpus_internal();
 #else  /* defined(__ANDROID__) */
     return num_cpus();
-#endif /* defined(__ANDROID__) */
-}
-
-bool CpuInfo::has_little_mid_big() const
-{
-#if defined(__ANDROID__)
-    return has_little_mid_big_internal();
-#else  /* defined(__ANDROID__) */
-    return false;
 #endif /* defined(__ANDROID__) */
 }
 

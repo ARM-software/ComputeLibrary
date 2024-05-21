@@ -176,13 +176,6 @@ public:
      * @return Number of CPUs excluding little
      */
     unsigned int get_cpu_num_excluding_little() const;
-    /** Return whether the device has little, medium and big CPUs in case
-     * of an Android device, returns false otherwise
-     *
-     * @return Whether the device has little, medium and big CPUs
-     */
-    bool cpu_has_little_mid_big() const;
-
     /** Return the vector length in bytes for sme2
      *
      * @return Vector length if sme2 is enabled, otherwise returns 0.
