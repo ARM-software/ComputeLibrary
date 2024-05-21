@@ -30,17 +30,38 @@ namespace arm_compute
 namespace
 {
 
-void init_lut_fp16(ActivationLayerInfo::LookupTable65536 *lut)
+float16_t activation(float16_t x, const LUTInfo &info)
+{
+    float16_t out = 0.f;
+    switch (info.act)
+    {
+        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
+            out = 1.f / (1.f + std::exp(-x));
+            break;
+        case ActivationLayerInfo::ActivationFunction::TANH:
+        {
+            out = static_cast<float16_t>(info.alpha * std::tanh(info.beta * x));
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Unsupported Activation for 16-bit LUT table");
+            break;
+    }
+    return out;
+}
+
+void init_lut_fp16(ActivationLayerInfo::LookupTable65536 *lut, const LUTInfo &info)
 {
     union Element
     {
         uint16_t  i = 0;
         float16_t fp;
     } item;
+
     // Fill lut by iterating over all 16 bit values using the union.
     while (true)
     {
-        (*lut)[item.i] = 1.f / (1.f + std::exp(-item.fp));
+        (*lut)[item.i] = activation(item.fp, info);
         if (item.i == 65535)
             break;
         item.i++;
@@ -62,7 +83,7 @@ std::shared_ptr<ActivationLayerInfo::LookupTable65536> LUTManager::get_lut_table
         // Not found, or pointer not valid
         // We do not use make_shared to prevent the weak_ptr keeping the control block alive
         std::shared_ptr<ActivationLayerInfo::LookupTable65536> ptr(new ActivationLayerInfo::LookupTable65536);
-        init_lut_fp16(ptr.get());
+        init_lut_fp16(ptr.get(), info);
         map_fp16[info] = ptr;
         return ptr;
     }
