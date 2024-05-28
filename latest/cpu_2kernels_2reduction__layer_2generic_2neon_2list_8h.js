@@ -1,0 +1,25 @@
+var cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h =
+[
+    [ "DECLARE_REDUCTION_KERNEL", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#ae1a898d57780803b7a6a985e5fc97f79", null ],
+    [ "reduce_RedOpX_reduceX_float16_8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a3e290b2c02428ed6271eed8ee2967f5d", null ],
+    [ "reduce_RedOpX_reduceX_float32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a4f9d58654fd6f789295265b3820c4989", null ],
+    [ "reduce_RedOpX_reduceX_qasymm8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#afd4deccd50a5c4e19ecdd2149e5e28df", null ],
+    [ "reduce_RedOpX_reduceX_qasymm8_signed", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#ac59fa7c8e534552e9885b55d4ba8be00", null ],
+    [ "reduce_RedOpX_reduceX_S32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#ac6efc48faa49a8a99546c23a86981d0c", null ],
+    [ "reduce_RedOpYZW_complex_reduceZ_float32_4_2_SUM", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a46f6f84620860a0d6bde2f811de84795", null ],
+    [ "reduce_RedOpYZW_reduceW_float16_8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a300e5c098bfc5217d8bbcd803e139285", null ],
+    [ "reduce_RedOpYZW_reduceW_float32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#af1f7c6e3a32b3376da26832ab4c22f71", null ],
+    [ "reduce_RedOpYZW_reduceW_qasymm8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#ae97d26cd8c2804d21632b16805068692", null ],
+    [ "reduce_RedOpYZW_reduceW_qasymm8_signed", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a1f7bea90d6fb3fc54eaa740391de651f", null ],
+    [ "reduce_RedOpYZW_reduceW_S32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#abbe4e5ada499feb7b3e803ca4235b97f", null ],
+    [ "reduce_RedOpYZW_reduceY_float16_8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#acb42241ccdaaece91abe43a05fec9862", null ],
+    [ "reduce_RedOpYZW_reduceY_float32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#adf523a628d65879626eeb0fa29e8bc94", null ],
+    [ "reduce_RedOpYZW_reduceY_qasymm8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a949eb7d9e085c95d787f008ec7d0ea57", null ],
+    [ "reduce_RedOpYZW_reduceY_qasymm8_signed", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#ae59d1a96211886454df03e431390d765", null ],
+    [ "reduce_RedOpYZW_reduceY_S32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a9a907cb91771e6336e044c199fc0f3ca", null ],
+    [ "reduce_RedOpYZW_reduceZ_float16_8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a1f26a46255af29513c929867373010fe", null ],
+    [ "reduce_RedOpYZW_reduceZ_float32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a5a2ed84f07afcd16d699188905dc82b1", null ],
+    [ "reduce_RedOpYZW_reduceZ_qasymm8", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a466d8342a69a15fa33fa2b2d439d31be", null ],
+    [ "reduce_RedOpYZW_reduceZ_qasymm8_signed", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#aeccd3755fdc037393b083305dd80c54c", null ],
+    [ "reduce_RedOpYZW_reduceZ_S32_4", "cpu_2kernels_2reduction__layer_2generic_2neon_2list_8h.xhtml#a6766a7c8a464de63940895f62821d246", null ]
+];

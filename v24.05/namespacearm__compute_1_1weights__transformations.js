@@ -1,0 +1,5 @@
+var namespacearm__compute_1_1weights__transformations =
+[
+    [ "CLConvertFullyConnectedWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_c_l_convert_fully_connected_weights_managed.xhtml", "classarm__compute_1_1weights__transformations_1_1_c_l_convert_fully_connected_weights_managed" ],
+    [ "NEFullyConnectedLayerReshapeWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_n_e_fully_connected_layer_reshape_weights_managed.xhtml", "classarm__compute_1_1weights__transformations_1_1_n_e_fully_connected_layer_reshape_weights_managed" ]
+];
