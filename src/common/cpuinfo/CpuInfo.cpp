@@ -29,6 +29,7 @@
 #include "support/StringSupport.h"
 #include "support/ToolchainSupport.h"
 
+#include <map>
 #include <sstream>
 
 #if !defined(BARE_METAL)
@@ -269,6 +270,46 @@ int get_max_cpus()
     }
     return max_cpus;
 }
+#if defined(__ANDROID__)
+std::vector<uint32_t> get_cpu_capacities()
+{
+    std::vector<uint32_t> cpu_capacities;
+    for (int i = 0; i < get_max_cpus(); ++i)
+    {
+        std::stringstream str;
+        str << "/sys/devices/system/cpu/cpu" << i << "/cpu_capacity";
+        std::ifstream file(str.str(), std::ios::in);
+        if (file.is_open())
+        {
+            std::string line;
+            if (bool(getline(file, line)))
+            {
+                cpu_capacities.emplace_back(support::cpp11::stoul(line));
+            }
+        }
+    }
+
+    return cpu_capacities;
+}
+
+uint32_t not_little_num_cpus_internal()
+{
+    std::vector<uint32_t> cpus_all = get_cpu_capacities();
+    std::vector<uint32_t> cpus_not_little;
+
+    std::vector<uint32_t>::iterator result       = std::max_element(cpus_all.begin(), cpus_all.end());
+    uint32_t                        max_capacity = *result;
+    uint32_t                        threshold    = max_capacity / 2;
+    for (unsigned int i = 0; i < cpus_all.size(); i++)
+    {
+        if (!(cpus_all[i] < threshold))
+        {
+            cpus_not_little.emplace_back(cpus_all[i]);
+        }
+    }
+    return cpus_not_little.size();
+}
+#endif /* defined(__ANDROID__) */
 #elif defined(__aarch64__) && \
     defined(__APPLE__) /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 /** Query features through sysctlbyname
@@ -398,6 +439,15 @@ CpuModel CpuInfo::cpu_model() const
 uint32_t CpuInfo::num_cpus() const
 {
     return _cpus.size();
+}
+
+uint32_t CpuInfo::not_little_num_cpus() const
+{
+#if defined(__ANDROID__)
+    return not_little_num_cpus_internal();
+#else  /* defined(__ANDROID__) */
+    return num_cpus();
+#endif /* defined(__ANDROID__) */
 }
 
 uint32_t num_threads_hint()

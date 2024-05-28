@@ -39,6 +39,7 @@ namespace opencl
 // Forward declaration
 class ClFillKernel;
 class ClScatterKernel;
+class ClCopyKernel;
 
 /** Basic operator to execute Scatter on OpenCL. This operator calls the following OpenCL kernels:
  *
@@ -56,13 +57,14 @@ public:
      * Valid data layouts:
      * - All
      *
-     * @note indices must always be U32
+     * @note indices must always be S32.
+     * @note Negative indices are treated as out of bounds.
      * @note src, updates and dst tensors must be same datatype.
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  src             Source input tensor info. Can be nullptr when using "Add" Scatter Function with zero initialization.
      * @param[in]  updates         Tensor info for tensor storing update values to use for scatter function. Data types supported: same as @p src.
-     * @param[in]  indices         Tensor info for tensor storing indices to use for scatter function. Data types supported: U32 only.
+     * @param[in]  indices         Tensor info for tensor storing indices to use for scatter function. Data types supported: S32 only.
      * @param[out] dst             Output tensor to store the result of the Scatter Function. Data types supported: same as @p src and @p updates.
      * @param[in]  Scatter_info    Contains Scatter operation information described in @ref ScatterInfo.
      */
@@ -89,7 +91,9 @@ public:
 private:
     std::unique_ptr<opencl::IClKernel> _scatter_kernel{nullptr};
     std::unique_ptr<opencl::IClKernel> _fill_kernel{nullptr};
+    std::unique_ptr<opencl::IClKernel> _copy_kernel{nullptr};
     bool                               _fill_zero{false};
+    bool                               _run_copy{false};
 };
 } // namespace opencl
 } // namespace arm_compute

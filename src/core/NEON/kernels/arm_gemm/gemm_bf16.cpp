@@ -86,7 +86,7 @@ static const GemmImplementation<bfloat16, float> gemm_bf16_methods[] =
     "sme2_interleaved_nomerge_bf16fp32_mopa_1VLx4VL",
     [](const GemmArgs &args) { return args._ci->has_sme2(); },
     [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
-                               return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
+                               return args._Nsize >= 8*VL || args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
     [](const GemmArgs &args) { return new GemmInterleavedNoMerge<cls_sme2_interleaved_nomerge_bf16fp32_mopa_1VLx4VL, bfloat16, float>(args); }
 },
 {

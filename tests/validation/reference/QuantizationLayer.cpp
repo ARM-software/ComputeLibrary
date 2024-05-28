@@ -80,15 +80,6 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
                 dst[i] = quantize_qasymm16((src[i]), qinfo, rounding_policy);
             }
             break;
-        case DataType::F32:
-#if defined(_OPENMP)
-            #pragma omp parallel for
-#endif /* _OPENMP */
-            for(int i = 0; i < src.num_elements(); ++i)
-            {
-                dst[i] = dequantize_s32((src[i]), qinfo);
-            }
-            break;
         default:
             ARM_COMPUTE_ERROR("Unsupported output data type");
     }
@@ -136,7 +127,6 @@ template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src,
 template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<float> quantization_layer(const SimpleTensor<int32_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

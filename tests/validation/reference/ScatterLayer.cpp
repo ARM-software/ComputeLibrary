@@ -23,6 +23,7 @@
  */
 #include "ScatterLayer.h"
 #include "tests/validation/Helpers.h"
+#include "arm_compute/core/TensorShape.h"
 
 namespace arm_compute
 {
@@ -62,51 +63,89 @@ T reduce_op(const T &current,const T &update,const ScatterFunction func)
 }
 
 template float reduce_op(const float &current,const float &update,const ScatterFunction func);
+template half reduce_op(const half &current,const half &update,const ScatterFunction func);
 }
 
-// Note : This function currently only supports 1D src, 1D updates, 2D indices, 1D output tensors.
+// NOTE: This function expects collapsed tensors as input.
+// Batch dims for update/indices tensors should be collapsed into a single dim.
+// Data dims should be collapsed into a single dim for both update and src tensors prior to calling this function.
 template <typename T>
-SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<uint32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
+SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
 {
+    // 1. If zero initialization variable is false, copy src data to dst.
     SimpleTensor<T> dst{ out_shape, src.data_type(), 1 };
-
-    // 1. If zero initialization variable is true, fill dst with 0 values. Else copy src data to dst.
-    if(info.zero_initialization)
-    {
-        for (int i = 0; i < src.num_elements(); ++i)
-        {
-            dst[i] = static_cast<T>(0);
-        }
-    }
-    else
+    if(!info.zero_initialization)
     {
         std::copy_n(src.data(), src.num_elements(), dst.data());
     }
 
-    // 2. Get max index of output tensor, then iterate over index tensor.
-    const auto x_bound = dst.shape().x();
+    // Number of elements between each value of the dim being iterated through
+    const unsigned int data_stride = updates.shape().total_size_lower(updates.shape().num_dimensions() - 1);
+    const unsigned int no_output_dims = out_shape.num_dimensions();
 
-
-    for(int i = 0; i < indices.num_elements(); ++i)
+    // Calculate output stride at given index for all output dims.
+    std::vector<unsigned int> out_stride_at_idx(no_output_dims);
+    for (unsigned int i = 0 ; i < no_output_dims; i++)
     {
-        // 3. Check whether index is out of bounds for dst, if not then apply reduce op.
-        const auto index = indices[i];
-        if (index < x_bound) // Note : index is always >= 0 as datatype is unsigned.
+        out_stride_at_idx[i] = out_shape.total_size_lower(i);
+    }
+
+    const unsigned int indices_x_dim = static_cast<unsigned int>(indices.shape()[0]);
+    const unsigned int indices_y_dim = static_cast<unsigned int>(indices.shape()[1]);
+
+    // 2. Iterate over indices tensor y-dim and replace sections of dst tensor with relevant areas of update tensor.
+    for(unsigned int i = 0; i < indices_y_dim; i++)
+    {
+        // NOTE : Currently, indices.shape() == [X, Y, 1, 1], where  X is the indices dim and Y is the batch dim
+        // Starting index for both the update and indices tensors.
+        const unsigned int update_dim_start = i * data_stride;
+        const unsigned int indices_dim_start = i * indices_x_dim;
+        bool out_of_bounds = false;
+        unsigned int out_offset_acc = 0;
+
+        // Iterate over each indices value for the relevant batch and accumulate the offset.
+        for(unsigned int j = 0; j < indices_x_dim; j++)
         {
-            dst[index] = reduce_op(dst[index], updates[i], info.func);
+            // Get first index value with i * indices_x_dim (iterating through y-dim/batch idx), then iterate through x dim by adding k
+            const int index_value = indices[indices_dim_start + j];
+            const unsigned int out_dim = no_output_dims - (j+1);   // Calculate corresponding output dim to current index value.
+            if(index_value < static_cast<int>(out_shape[out_dim]) && index_value >= 0)
+            {
+                out_offset_acc += (index_value * out_stride_at_idx[out_dim]); // offset accumulation
+            }
+            else
+            {
+                out_of_bounds = true;
+                break;
+            }
+        }
+
+        // If not out of bounds, copy update tensor elements to output
+        if(!out_of_bounds)
+        {
+            for (unsigned int j = 0 ; j < data_stride; j++)
+            {
+                dst[out_offset_acc + j] = reduce_op(dst[out_offset_acc + j], updates[update_dim_start + j], info.func);
+            }
         }
     }
     return dst;
 }
 
 template <typename T>
-SimpleTensor<T> scatter_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<uint32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
+SimpleTensor<T> scatter_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info)
 {
     return scatter_layer_internal<T>(src, updates, indices, out_shape, info);
 }
 
-template SimpleTensor<float> scatter_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &updates, const SimpleTensor<uint32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
-
+template SimpleTensor<float> scatter_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<half> scatter_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<int32_t> scatter_layer(const SimpleTensor<int32_t> &src, const SimpleTensor<int32_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<uint32_t> scatter_layer(const SimpleTensor<uint32_t> &src, const SimpleTensor<uint32_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<int16_t> scatter_layer(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<uint16_t> scatter_layer(const SimpleTensor<uint16_t> &src, const SimpleTensor<uint16_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<int8_t> scatter_layer(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
+template SimpleTensor<uint8_t> scatter_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &updates, const SimpleTensor<int32_t> &indices, const TensorShape &out_shape, const ScatterInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

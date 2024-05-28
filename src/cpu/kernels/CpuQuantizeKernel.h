@@ -76,31 +76,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using QuantizeFunctionExecutorPtr = void (CpuQuantizeKernel::*)(const ITensor *src,
-                                                                    ITensor       *dst,
-                                                                    const Window  &window);
-    /** Function to apply QASYMM8 or QASYMM8_SIGNED quantization on a tensor.
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    template <typename TIn, typename TOut>
-    void run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window);
-    /** Function to apply QASYMM16 quantization on a tensor.
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    template <typename T>
-    void run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window);
-
-    template <typename TIn, typename TOut>
-    void run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window);
-
-    template <typename TIn, typename TOut>
-    void run_requantize_offset_only(const ITensor *src, ITensor *dst, const Window &window);
-
-    template <typename TIn, typename TOut>
-    void run_requantize_offset_only_convert(const ITensor *src, ITensor *dst, const Window &window);
-
+    using QuantizeFunctionExecutorPtr = void (*)(const ITensor *src, ITensor *dst, const Window &window);
     QuantizeFunctionExecutorPtr _func{nullptr};
     size_t                      _split_dimension{Window::DimY};
 };

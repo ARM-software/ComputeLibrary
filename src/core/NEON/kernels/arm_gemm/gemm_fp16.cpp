@@ -69,19 +69,19 @@ static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
+    "sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL",
+    [](const GemmArgs &args) { return args._ci->has_sme2(); },
+    [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
+                               return args._Nsize >= 8*VL || args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL, __fp16, __fp16, Nothing, false, false, false, true>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
     "sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL",
     [](const GemmArgs &args) { return args._ci->has_sme2(); },
     [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
                                return args._Nsize <= VL || (2*VL < args._Nsize && args._Nsize <= 3*VL); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL, __fp16, __fp16, Nothing, false, false, false, true>(args); }
-},
-{
-    GemmMethod::GEMM_INTERLEAVED,
-    "sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL",
-    [](const GemmArgs &args) { return args._ci->has_sme2(); },
-    [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
-                               return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
-    [](const GemmArgs &args) { return new GemmInterleaved<cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL, __fp16, __fp16, Nothing, false, false, false, true>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,

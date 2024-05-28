@@ -82,7 +82,7 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
     "sme2_interleaved_nomerge_s8q_mopa_1VLx4VL",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && ((qp.per_channel_requant && (qp.per_channel_left_shifts == nullptr)) || (!qp.per_channel_requant && (qp.per_layer_left_shift == 0)));},
     [](const GemmArgs &args, const Requantize32 &) { const auto VL = sme::get_vector_length<int32_t>();
-                               return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
+                               return args._Nsize >= 8*VL || args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedPretransposedNoMergeQuantizedInline<cls_sme2_interleaved_nomerge_s8q_mopa_1VLx4VL, int8_t, int8_t>(args, qp); }
 },
 {

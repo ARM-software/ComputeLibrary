@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_CPUINFO_H
-#define SRC_COMMON_CPUINFO_H
+#ifndef ACL_SRC_COMMON_CPUINFO_CPUINFO_H
+#define ACL_SRC_COMMON_CPUINFO_CPUINFO_H
 
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/common/cpuinfo/CpuModel.h"
@@ -120,6 +120,7 @@ public:
     CpuModel cpu_model(uint32_t cpuid) const;
     CpuModel cpu_model() const;
     uint32_t num_cpus() const;
+    uint32_t not_little_num_cpus() const;
 
 private:
     CpuIsaInfo            _isa{};
@@ -135,4 +136,4 @@ private:
 uint32_t num_threads_hint();
 } // namespace cpuinfo
 } // namespace arm_compute
-#endif /* SRC_COMMON_CPUINFO_H */
+#endif // ACL_SRC_COMMON_CPUINFO_CPUINFO_H

@@ -32,8 +32,8 @@ import json
 import codecs
 import platform
 
-VERSION = "v24.04"
-LIBRARY_VERSION_MAJOR = 36
+VERSION = "v24.05"
+LIBRARY_VERSION_MAJOR = 37
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -429,6 +429,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/fill_border.cl',
                        'src/core/CL/cl_kernels/common/floor.cl',
                        'src/core/CL/cl_kernels/common/gather.cl',
+                       'src/core/CL/cl_kernels/common/scatter.cl',
                        'src/core/CL/cl_kernels/common/gemm.cl',
                        'src/core/CL/cl_kernels/common/gemm_reshaped_only_rhs_mmul.cl',
                        'src/core/CL/cl_kernels/common/gemm_utils.cl',

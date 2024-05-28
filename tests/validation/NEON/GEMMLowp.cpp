@@ -360,13 +360,21 @@ TEST_SUITE_END() // DynamicQuantization
 // Deqaunt tests involve returning F32 from the MatrixMultiplyCore kernels and is only implemented in aarch64
 TEST_SUITE(Dequant)
 constexpr AbsoluteTolerance<float> tolerance_dequantized(0.01f);
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallGEMMLowpDataset(),
+        make("accumulate", {true, false})
+    ))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_dequantized);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpDataset())
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::NIGHTLY,
+    combine(
+        datasets::LargeGEMMLowpDataset(),
+        make("accumulate", {false})
+    ))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_dequantized);

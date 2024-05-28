@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,19 @@ namespace validation
 {
 TEST_SUITE(NEON)
 TEST_SUITE(UNIT)
+#if defined(ARM_COMPUTE_OPENMP_SCHEDULER) && !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+    (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)
+TEST_CASE(CpuCapacity, framework::DatasetMode::ALL)
+{
+    CPUInfo& ci =  arm_compute::Scheduler::get().cpu_info();
+    const uint32_t nonlittle_num_cpus = ci.get_cpu_num_excluding_little();
+    const uint32_t num_threads = arm_compute::Scheduler::get().num_threads();
+
+    ARM_COMPUTE_EXPECT(num_threads<=nonlittle_num_cpus , framework::LogLevel::ERRORS);
+}
+#endif /* defined(ARM_COMPUTE_OPENMP_SCHEDULER) && !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+    (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)*/
+
 TEST_SUITE(RuntimeContext)
 
 TEST_CASE(Scheduler, framework::DatasetMode::ALL)

@@ -113,13 +113,113 @@ private:
     std::vector<TensorShape> _dst_shapes{};
 };
 
+
+// 1D dataset for simple scatter tests.
 class Small1DScatterDataset final : public ScatterDataset
 {
 public:
     Small1DScatterDataset()
     {
-        add_config(TensorShape(6U), TensorShape(6U), TensorShape(6U), TensorShape(6U));
-        add_config(TensorShape(10U), TensorShape(2U), TensorShape(2U), TensorShape(10U));
+        add_config(TensorShape(6U), TensorShape(6U), TensorShape(1U, 6U), TensorShape(6U));
+        add_config(TensorShape(10U), TensorShape(2U), TensorShape(1U, 2U), TensorShape(10U));
+    }
+};
+
+// This dataset represents the (m+1)-D updates/dst case.
+class SmallScatterMultiDimDataset final : public ScatterDataset
+{
+public:
+    SmallScatterMultiDimDataset()
+    {
+        // NOTE: Config is src, updates, indices, output.
+        //      - In this config, the dim replaced is the final number (largest tensor dimension)
+        //      - Largest "updates" dim should match y-dim of indices.
+        //      - src/updates/dst should all have same number of dims. Indices should be 2D.
+        add_config(TensorShape(6U, 5U), TensorShape(6U, 2U), TensorShape(1U, 2U), TensorShape(6U, 5U));
+        add_config(TensorShape(9U, 3U, 4U), TensorShape(9U, 3U, 2U), TensorShape(1U, 2U), TensorShape(9U, 3U, 4U));
+        add_config(TensorShape(17U, 3U, 2U, 4U), TensorShape(17U, 3U, 2U, 7U), TensorShape(1U, 7U), TensorShape(17U, 3U, 2U, 4U));
+    }
+};
+
+// This dataset represents the (m+1)-D updates tensor, (m+n)-d output tensor cases
+class SmallScatterMultiIndicesDataset final : public ScatterDataset
+{
+public:
+    SmallScatterMultiIndicesDataset()
+    {
+        // NOTE: Config is src, updates, indices, output.
+        // NOTE: indices.shape.x = src.num_dimensions - updates.num_dimensions + 1
+
+        // index length is 2
+        add_config(TensorShape(6U, 5U, 2U), TensorShape(6U, 4U), TensorShape(2U, 4U), TensorShape(6U, 5U, 2U));
+        add_config(TensorShape(17U, 3U, 3U, 2U), TensorShape(17U, 3U, 2U), TensorShape(2U, 2U), TensorShape(17U, 3U, 3U, 2U));
+        add_config(TensorShape(11U, 3U, 3U, 2U, 4U), TensorShape(11U, 3U, 3U, 4U), TensorShape(2U, 4U), TensorShape(11U, 3U, 3U, 2U, 4U));
+        add_config(TensorShape(5U, 4U, 3U, 3U, 2U, 4U), TensorShape(5U, 4U, 3U, 3U, 5U), TensorShape(2U, 5U), TensorShape(5U, 4U, 3U, 3U, 2U, 4U));
+
+        // index length is 3
+        add_config(TensorShape(4U, 3U, 2U, 2U), TensorShape(4U, 2U), TensorShape(3U, 2U), TensorShape(4U, 3U, 2U, 2U));
+        add_config(TensorShape(17U, 4U, 3U, 2U, 2U), TensorShape(17U, 4U, 4U), TensorShape(3U, 4U), TensorShape(17U, 4U, 3U, 2U, 2U));
+        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 4U, 5U, 3U), TensorShape(3U, 3U), TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
+
+        // index length is 4
+        add_config(TensorShape(35U, 4U, 3U, 2U, 2U), TensorShape(35U, 4U), TensorShape(4U, 4U), TensorShape(35U, 4U, 3U, 2U, 2U));
+        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 4U, 3U), TensorShape(4U, 3U), TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
+
+        // index length is 5
+        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 3U), TensorShape(5U, 3U), TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
+    }
+};
+
+// This dataset represents the (m+k)-D updates tensor, (k+1)-d indices tensor and (m+n)-d output tensor cases
+class SmallScatterBatchedDataset final : public ScatterDataset
+{
+public:
+    SmallScatterBatchedDataset()
+    {
+        // NOTE: Config is src, updates, indices, output.
+        // NOTE: Updates/Indices tensors are now batched.
+        // NOTE: indices.shape.x = (updates_batched) ? (src.num_dimensions - updates.num_dimensions) + 2 : (src.num_dimensions - updates.num_dimensions) + 1
+        // k is the number of batch dimensions
+        // k = 2
+        add_config(TensorShape(6U, 5U), TensorShape(6U, 2U, 2U), TensorShape(1U, 2U, 2U), TensorShape(6U, 5U));
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 5U, 6U, 2U), TensorShape(3U, 6U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+
+        // k = 3
+        add_config(TensorShape(6U, 5U), TensorShape(6U, 2U, 2U, 2U), TensorShape(1U, 2U, 2U, 2U), TensorShape(6U, 5U));
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 5U, 3U, 6U, 2U), TensorShape(3U, 3U, 6U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+
+        // k = 4
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 6U, 2U, 3U, 2U), TensorShape(4U, 6U, 2U, 3U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+
+        // k = 5
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 3U, 4U, 3U, 2U, 2U), TensorShape(4U, 3U, 4U, 3U, 2U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+    }
+};
+
+class SmallScatterScalarDataset final : public ScatterDataset
+{
+public:
+    // batched scalar case
+    SmallScatterScalarDataset()
+    {
+        add_config(TensorShape(6U, 5U), TensorShape(6U), TensorShape(2U, 6U), TensorShape(6U, 5U));
+        add_config(TensorShape(6U, 5U), TensorShape(6U, 6U), TensorShape(2U, 6U, 6U), TensorShape(6U, 5U));
+        add_config(TensorShape(3U, 3U, 6U, 5U), TensorShape(6U, 6U), TensorShape(4U, 6U, 6U), TensorShape(3U, 3U, 6U, 5U));
+    }
+};
+
+// This dataset is for data types that does not require full testing. It contains selected tests from the above.
+class SmallScatterMixedDataset final : public ScatterDataset
+{
+public:
+    SmallScatterMixedDataset()
+    {
+        add_config(TensorShape(10U), TensorShape(2U), TensorShape(1U, 2U), TensorShape(10U));
+        add_config(TensorShape(9U, 3U, 4U), TensorShape(9U, 3U, 2U), TensorShape(1U, 2U), TensorShape(9U, 3U, 4U));
+        add_config(TensorShape(6U, 5U), TensorShape(6U, 6U), TensorShape(2U, 6U, 6U), TensorShape(6U, 5U));
+        add_config(TensorShape(35U, 4U, 3U, 2U, 2U), TensorShape(35U, 4U), TensorShape(4U, 4U), TensorShape(35U, 4U, 3U, 2U, 2U));
+        add_config(TensorShape(11U, 3U, 3U, 2U, 4U), TensorShape(11U, 3U, 3U, 4U), TensorShape(2U, 4U), TensorShape(11U, 3U, 3U, 2U, 4U));
+        add_config(TensorShape(6U, 5U, 2U), TensorShape(6U, 2U, 2U), TensorShape(2U, 2U, 2U), TensorShape(6U, 5U, 2U));
     }
 };
 } // namespace datasets

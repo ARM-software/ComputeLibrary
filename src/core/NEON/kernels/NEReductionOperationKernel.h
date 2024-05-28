@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEREDUCTIONOPERATIONKERNEL_H
-#define ARM_COMPUTE_NEREDUCTIONOPERATIONKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NEREDUCTIONOPERATIONKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NEREDUCTIONOPERATIONKERNEL_H
 
 #include "src/core/NEON/INEKernel.h"
 
@@ -80,14 +80,24 @@ public:
     static Status
     validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
 
+private:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
+    /** Common signature for all the specialized Reduction functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using ReductionFunction = void (*)(const Window &window, const ITensor *in, ITensor *out, ReductionOperation op);
 
-private:
+    /** Populate the _func with the right reduction operation handler
+    */
+    void reduce_op();
+
+    ReductionFunction  _func;
     const ITensor     *_input;
     ITensor           *_output;
     unsigned int       _reduction_axis;
     ReductionOperation _op;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEREDUCTIONOPERATIONKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NEREDUCTIONOPERATIONKERNEL_H
