@@ -219,6 +219,37 @@ public:
         return wf != arm_compute::WeightFormat::UNSPECIFIED && wf != arm_compute::WeightFormat::ANY;
     }
 
+    void update_quantization_parameters(const GEMMLowpOutputStageInfo &output_info,
+                                        const QuantizationInfo        &a,
+                                        const QuantizationInfo        &b,
+                                        const bool                     is_prepared,
+                                        const bool                     negated_offsets) override
+    {
+        const int32_t negation = negated_offsets ? 1 : -1;
+        const int32_t a_offset = -a.uniform().offset * negation;
+        const int32_t b_offset = -b.uniform().offset * negation;
+
+        arm_gemm::Requantize32 gemm_requant_info{};
+        if (output_info.gemmlowp_shifts.size() > 1)
+        {
+            const auto requantize_data =
+                this->set_requantize_data(output_info.gemmlowp_multipliers, output_info.gemmlowp_shifts);
+            gemm_requant_info = arm_gemm::Requantize32(
+                nullptr, 0, a_offset, b_offset, output_info.gemmlowp_offset,
+                (std::get<0>(requantize_data)) ? std::get<1>(requantize_data) : nullptr, std::get<2>(requantize_data),
+                std::get<3>(requantize_data), output_info.gemmlowp_min_bound, output_info.gemmlowp_max_bound);
+        }
+        else
+        {
+            gemm_requant_info = arm_gemm::Requantize32(nullptr, 0, a_offset, b_offset, output_info.gemmlowp_offset,
+                                                       -output_info.gemmlowp_shift, output_info.gemmlowp_multiplier,
+                                                       output_info.gemmlowp_min_bound, output_info.gemmlowp_max_bound);
+        }
+
+        _gemm_kernel_asm->update_quantization_parameters(gemm_requant_info);
+        _is_prepared = is_prepared;
+    }
+
 private:
     enum AuxTensorIdx
     {
@@ -1149,6 +1180,16 @@ experimental::MemoryRequirements CpuGemmAssemblyDispatch::workspace() const
 {
     ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
     return _arm_gemm->workspace();
+}
+
+void CpuGemmAssemblyDispatch::update_quantization_parameters(const GEMMLowpOutputStageInfo &output_info,
+                                                             const QuantizationInfo        &a,
+                                                             const QuantizationInfo        &b,
+                                                             const bool                     is_prepared,
+                                                             const bool                     negated_offsets)
+{
+    ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
+    _arm_gemm->update_quantization_parameters(output_info, a, b, is_prepared, negated_offsets);
 }
 } // namespace cpu
 } // namespace arm_compute

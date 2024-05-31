@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
 #endif // ARM_COMPUTE_OPENCL_ENABLED
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/graph/mutators/MutatorUtils.h"
 #include "tests/AssetsLibrary.h"
@@ -123,7 +124,7 @@ public:
 public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
                DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
-               bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false)
+               bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false, bool updated_sq_info_after_config = false)
     {
         if(std::is_same<TensorType, Tensor>::value &&  // Cpu
             (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
@@ -157,7 +158,15 @@ public:
             _use_dynamic_output_quant = true;
         }
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer, padded_weights);
+        if (updated_sq_info_after_config)
+        {
+            _target = compute_gemmlowp_target_for_updated_sq_info_after_config(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer, padded_weights);
+        }
+        else
+        {
+            _target = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer, padded_weights);
+        }
+
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info, pre_pad_layer);
     }
 
@@ -307,7 +316,6 @@ protected:
         WeightsInfo weights_info(!reshape_weights, weights_shape[idx_width], weights_shape[idx_height], weights_shape[3]);
         TensorShape reshaped_weights_shape(weights_shape);
 
-        // Create tensors
         TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _quantization_info, _data_layout);
         TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _weights_data_type, 1, _weight_quantization_info, _data_layout);
         TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, QuantizationInfo() /*bias is not a quantized type*/, _data_layout);
@@ -339,6 +347,124 @@ protected:
         {
             detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info, num_groups);
         }
+
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+        // Test "add padding after configure" behavior. This behavior should not affect the correctness
+        add_padding_x({ &src, &bias, &dst }, _data_layout);
+        // Padding weights may affect code path in some backends
+        if (padded_weights)
+        {
+            add_padding_x({ &weights }, _data_layout);
+        }
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        weights.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!weights.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+
+        // Fill tensors
+        fill(AccessorType(src), 0 + _hash);
+        fill(AccessorType(weights), 1 + _hash);
+        fill(AccessorType(bias), 2 + _hash);
+
+        if(_mixed_layout)
+        {
+            mix_layout(conv, src, dst);
+        }
+        else
+        {
+            // Compute Convolution function
+            conv.run();
+        }
+
+        return dst;
+    }
+
+    // Compute the target when updating static quantization information after configuration.
+    TensorType compute_gemmlowp_target_for_updated_sq_info_after_config(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
+                              bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false)
+    {
+        ARM_COMPUTE_ASSERT((std::is_same<FunctionType, NEGEMMConvolutionLayer>::value == true));
+        ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
+
+        const unsigned int num_groups = input_shape[2] / weights_shape[2];
+
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+
+            if(pre_pad_layer.size() > 0)
+            {
+                // make sure paddings exist for each c,h,w dimensions
+                for(unsigned int i = 0; i < 3 - pre_pad_layer.size(); ++i)
+                {
+                    pre_pad_layer.push_back({ 0, 0 });
+                }
+
+                // rotate padding info from nchw to nhwc
+                std::rotate(pre_pad_layer.begin(), pre_pad_layer.begin() + 2, pre_pad_layer.begin() + 3);
+            }
+        }
+
+        const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+        const int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+
+        WeightsInfo weights_info(!reshape_weights, weights_shape[idx_width], weights_shape[idx_height], weights_shape[3]);
+        TensorShape reshaped_weights_shape(weights_shape);
+
+        // Create tensors with fake quantization info and defer to pass the correct ones to a later stage.
+        auto qi = QuantizationInfo(0.550721, 37, true);
+        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, qi, _data_layout);
+        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _weights_data_type, 1, qi, _data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, _output_data_type, 1, qi, _data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, QuantizationInfo() /*bias is not a quantized type*/, _data_layout);
+
+        // Create and configure function
+        FunctionType conv;
+
+        const unsigned int height_index = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::HEIGHT);
+        const unsigned int width_index  = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::WIDTH);
+
+        const PaddingInfo pad_w = width_index < pre_pad_layer.size() ? pre_pad_layer[width_index] : PaddingInfo(0, 0);
+        const PaddingInfo pad_h = height_index < pre_pad_layer.size() ? pre_pad_layer[height_index] : PaddingInfo(0, 0);
+
+        if(pre_pad_layer.size() > 0 && arm_compute::graph::is_padding_in_height_or_width(_data_layout, pre_pad_layer))
+        {
+            // this is the logic implemented in NodeFusionMutator -> fuse_pad_with_convolution
+            const PadStrideInfo new_conv_info(
+                info.stride().first,
+                info.stride().second,
+                info.pad_left() + pad_w.first,
+                info.pad_right() + pad_w.second,
+                info.pad_top() + pad_h.first,
+                info.pad_bottom() + pad_h.second,
+                info.round());
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, new_conv_info, weights_info, dilation, act_info, num_groups);
+        }
+        else
+        {
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info, num_groups);
+        }
+
+        // After calling configure, we appropriately set the correct quantization info and update ACL.
+        src.info()->set_quantization_info(QuantizationInfo(_quantization_info.scale(), _quantization_info.offset(), true));
+        weights.info()->set_quantization_info(QuantizationInfo(_weight_quantization_info.scale(), _weight_quantization_info.offset(), true));
+        dst.info()->set_quantization_info(QuantizationInfo(_dst_q_info.scale(), _dst_q_info.offset(), true));
+
+        // propagate trough ACL the correct quantization info
+        NEGEMMConvolutionLayer *lp = reinterpret_cast<NEGEMMConvolutionLayer *>(&conv);
+        lp->update_quantization_parameters();
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
@@ -485,6 +611,19 @@ public:
     {
         ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
                                                                                                  data_type, data_type, data_layout, quantization_info, quantization_info, act_info, mixed_layout);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
+class ConvolutionValidationForUpdatedStaticQuantInfoAfterConfigureFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+{
+public:
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
+               DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+    {
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
+                                                                                                 data_type, data_type, data_layout, quantization_info, quantization_info, act_info, mixed_layout,
+                                                                                                 PaddingList({}), false, true);
     }
 };
 

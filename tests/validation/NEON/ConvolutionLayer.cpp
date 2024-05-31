@@ -1340,6 +1340,8 @@ TEST_SUITE_END() // Float
 
 // TODO(COMPMID-6573): Extend quantized tests with at least one suite where the weight is padded (the legacy case, see floating point's RunPaddedWeights)
 template <typename T>
+using NEGEMMConvolutionLayerForUpdatedStaticQuantInfoAfterConfigureFixture = ConvolutionValidationForUpdatedStaticQuantInfoAfterConfigureFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
+template <typename T>
 using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedMixedDataLayoutFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
@@ -1361,6 +1363,37 @@ TEST_SUITE(Quantized)
 /// separate quantization info for each input and the output tensor.
 /// When we can also support dynamic quantization with the presence of activation, these two versions should be merged
 /// again, with the explicitly specified quantization info removed
+
+#ifdef __aarch64__
+TEST_SUITE(UpdateStaticQuantInfoAfterConfigure)
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerForUpdatedStaticQuantInfoAfterConfigureFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                      framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(0.01f, -10) })),
+                                                                                                                      QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerForUpdatedStaticQuantInfoAfterConfigureFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                       framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                                                                                       QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // UpdateStaticQuantInfoAfterConfigure
+#endif // __aarch64__
+
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),

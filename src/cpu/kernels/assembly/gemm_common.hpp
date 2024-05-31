@@ -35,6 +35,7 @@ namespace arm_gemm
 {
 // Avoid circular dependency with arm_gemm.hpp
 struct GemmConfig;
+struct Requantize32;
 
 // Abstract class for the GEMM/GEMV functions.
 //
@@ -157,6 +158,12 @@ public:
     /* Set the indirect table.  This comprises a number of values per kernel point, and a densely packed array of pointers,
      * multis * batches * kernel_points */
     virtual void set_indirect_parameters_generic(size_t, const void *const *const *)
+    {
+    }
+
+    /*** "Quantization update" interface (optional) ***/
+    /* Update quantization parameters at run time */
+    virtual void update_quantization_parameters(const Requantize32 &)
     {
     }
 

@@ -133,6 +133,11 @@ public:
     void                             run(ITensorPack &tensors) override;
     void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
+    void                             update_quantization_parameters(const GEMMLowpOutputStageInfo &output_info,
+                                                                    const QuantizationInfo        &a,
+                                                                    const QuantizationInfo        &b,
+                                                                    const bool                     is_prepared,
+                                                                    const bool                     negated_offsets);
 
 private:
     enum AuxTensorIdx

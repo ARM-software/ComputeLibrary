@@ -575,9 +575,12 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
                     kernels::CpuGemmLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output));
             }
             // Validate offset contribution kernel
-            ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuGemmLowpOffsetContributionKernel::validate(
-                output, a_offset_kernel_needed ? &info_vector_sum_col : nullptr,
-                b_offset_kernel_needed ? &info_vector_sum_row : nullptr, a_offset, b_offset));
+            if (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::QASYMM8_SIGNED)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuGemmLowpOffsetContributionKernel::validate(
+                    output, a_offset_kernel_needed ? &info_vector_sum_col : nullptr,
+                    b_offset_kernel_needed ? &info_vector_sum_row : nullptr, a_offset, b_offset));
+            }
         }
     }
 
@@ -633,7 +636,6 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
     if (_asm_glue->is_configured())
     {
         ITensorPack asm_glue_tensors = tensors;
-        auto        output_to_use    = (_fuse_output_stage ? mm_result_s32.get() : dst);
         if (is_data_type_quantized_asymmetric(a_to_use->info()->data_type()) &&
             _gemm_info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
         {
@@ -644,6 +646,7 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
         }
         else
         {
+            auto output_to_use = (_fuse_output_stage ? mm_result_s32.get() : dst);
             asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
             asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_1, b);
             asm_glue_tensors.add_tensor(TensorType::ACL_DST, output_to_use);
@@ -793,6 +796,18 @@ void CpuGemmLowpMatrixMultiplyCore::prepare(ITensorPack &tensors)
 experimental::MemoryRequirements CpuGemmLowpMatrixMultiplyCore::workspace() const
 {
     return _aux_mem;
+}
+
+void CpuGemmLowpMatrixMultiplyCore::update_quantization_parameters(const GEMMLowpOutputStageInfo &output_info,
+                                                                   const QuantizationInfo        &a,
+                                                                   const QuantizationInfo        &b,
+                                                                   const bool                     is_prepared,
+                                                                   const bool                     negated_offsets)
+{
+    auto lowp_os = output_info;
+    _gemm_info.set_gemmlowp_output_stage(lowp_os);
+    _asm_glue->update_quantization_parameters(output_info, a, b, is_prepared, negated_offsets);
+    _is_prepared = is_prepared;
 }
 } // namespace cpu
 } // namespace arm_compute

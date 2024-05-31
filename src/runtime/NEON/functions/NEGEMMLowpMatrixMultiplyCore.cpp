@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -31,6 +32,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/core/helpers/MemoryHelpers.h"
+#include "src/core/utils/quantization/AsymmHelpers.h"
 #include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
 
 using namespace arm_compute::experimental;
@@ -99,6 +101,34 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
     }
 
     return cpu::CpuGemmLowpMatrixMultiplyCore::validate(a, b_info_to_use.get(), c, output, gemm_info);
+}
+
+void NEGEMMLowpMatrixMultiplyCore::update_quantization_parameters()
+{
+    auto src = _impl->run_pack.get_const_tensor(ACL_SRC_0);
+    auto wei = _impl->run_pack.get_const_tensor(ACL_SRC_1);
+    auto dst = _impl->run_pack.get_tensor(ACL_DST);
+
+    const QuantizationInfo iqinfo = src->info()->quantization_info();
+    const QuantizationInfo wqinfo = wei->info()->quantization_info();
+    const QuantizationInfo oqinfo = (dst->info()->total_size() == 0) ? iqinfo : dst->info()->quantization_info();
+
+    int32_t min_activation = 0;
+    int32_t max_activation = 0;
+    std::tie(min_activation, max_activation) =
+        quantization::get_quantized_asymmetric_output_min_max(wqinfo, ActivationLayerInfo(), wei->info()->data_type());
+
+    GEMMLowpOutputStageInfo output_info;
+    output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    output_info.gemmlowp_offset          = oqinfo.uniform().offset;
+    output_info.gemmlowp_min_bound       = min_activation;
+    output_info.gemmlowp_max_bound       = max_activation;
+    output_info.is_quantized_per_channel = false;
+    output_info.output_data_type         = dst->info()->data_type();
+    quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
+
+    _impl->op->update_quantization_parameters(output_info, src->info()->quantization_info(),
+                                              wei->info()->quantization_info(), true, true);
 }
 
 void NEGEMMLowpMatrixMultiplyCore::run()

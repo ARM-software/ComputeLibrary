@@ -28,6 +28,7 @@
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
+#include "src/cpu/kernels/assembly/arm_gemm.hpp"
 
 namespace arm_compute
 {
@@ -81,12 +82,17 @@ public:
     class IFallback
     {
     public:
-        virtual void                             run(ITensorPack &tensors)     = 0;
-        virtual void                             prepare(ITensorPack &tensors) = 0;
-        virtual experimental::MemoryRequirements workspace() const             = 0;
-        virtual bool                             is_configured() const         = 0;
-        virtual bool                             isVarWeightsKernel() const    = 0;
-        virtual ~IFallback()                                                   = default;
+        virtual void                             run(ITensorPack &tensors)                  = 0;
+        virtual void                             prepare(ITensorPack &tensors)              = 0;
+        virtual experimental::MemoryRequirements workspace() const                          = 0;
+        virtual bool                             is_configured() const                      = 0;
+        virtual bool                             isVarWeightsKernel() const                 = 0;
+        virtual void                             update_quantization_parameters(const GEMMLowpOutputStageInfo &,
+                                                                                const QuantizationInfo &,
+                                                                                const QuantizationInfo &,
+                                                                                const bool,
+                                                                                const bool) = 0;
+        virtual ~IFallback()                                                                = default;
     };
 
 public:
@@ -184,6 +190,12 @@ public:
     {
         return _arm_gemm && _arm_gemm->isVarWeightsKernel();
     }
+
+    void update_quantization_parameters(const GEMMLowpOutputStageInfo &output_info,
+                                        const QuantizationInfo        &a,
+                                        const QuantizationInfo        &b,
+                                        const bool                     is_prepared,
+                                        const bool                     negated_offsets);
 
     // Inherited methods overridden:
     void                             prepare(ITensorPack &tensors) override;

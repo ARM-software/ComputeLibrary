@@ -360,6 +360,50 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreDynamicQuantization
 TEST_SUITE_END() // DynamicQuantization
 
 #ifdef __aarch64__
+TEST_SUITE(UpdateStaticQuantInfoAfterConfigure)
+TEST_SUITE(QASYMM8_SIGNED)
+using NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureInt8Fixture =
+    GEMMLowpGenericMatrixMultiplyCoreFusedOffsetOutputValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, int8_t, int8_t, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureInt8Fixture, framework::DatasetMode::ALL,
+    combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8_SIGNED }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureInt8Fixture, framework::DatasetMode::NIGHTLY,
+    combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8_SIGNED }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE(QASYMM8)
+using NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureUInt8Fixture =
+    GEMMLowpGenericMatrixMultiplyCoreFusedOffsetOutputValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, uint8_t, uint8_t, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureUInt8Fixture, framework::DatasetMode::ALL,
+    combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8 }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureUInt8Fixture, framework::DatasetMode::NIGHTLY,
+    combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8 }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // UpdateStaticQuantInfoAfterConfigure
+
 // Deqaunt tests involve returning F32 from the MatrixMultiplyCore kernels and is only implemented in aarch64
 TEST_SUITE(Dequant)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(

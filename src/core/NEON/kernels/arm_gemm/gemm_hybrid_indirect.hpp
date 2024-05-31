@@ -276,8 +276,8 @@ class GemmHybridIndirect : public GemmCommon<To, Tw, Tr> {
     const unsigned int _rounded_Ksize;
 
     /* Blocking info */
+    unsigned int _n_block;
     const unsigned int _k_block;
-    const unsigned int _n_block;
     const unsigned int _Mround;
 
     /* Pretransposed buffer. */
@@ -389,7 +389,7 @@ public:
     GemmHybridIndirect(const GemmArgs &args, const OutputStage &os)
               : _args(args), _os(os), _Ktotal(get_ktotal(args)),
                 _rounded_Ksize(roundup(args._Ksize, strategy::k_unroll())),
-                _k_block(compute_k_block(args)), _n_block(compute_n_block(args, os)),
+                _n_block(compute_n_block(args, os)), _k_block(compute_k_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), args._nbatches,
                               iceildiv(args._Nsize, _n_block), args._nmulti)
@@ -403,7 +403,7 @@ public:
     GemmHybridIndirect(const GemmArgs &args)
               : _args(args), _Ktotal(get_ktotal(args)),
                 _rounded_Ksize(roundup(args._Ksize, strategy::k_unroll())),
-                _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
+                _n_block(compute_n_block(args)), _k_block(compute_k_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), args._nbatches,
                               iceildiv(args._Nsize, _n_block), args._nmulti)
@@ -831,6 +831,26 @@ public:
         c.weight_format = get_weight_format(kernel_weight_format<strategy, FixedFormat>::get(), sizeof(To));
 
         return c;
+    }
+
+    void update_quantization_parameters(const Requantize32 &re) override {
+        if (std::is_same<OutputStage, Requantize32>::value) {
+            Requantize32 *qp = reinterpret_cast<Requantize32 *>(&_os);
+            qp->bias = re.bias;
+            qp->a_offset = re.a_offset;
+            qp->b_offset = re.b_offset;
+            qp->c_offset = re.c_offset;
+            qp->per_layer_left_shift = re.per_layer_left_shift;
+            qp->per_layer_right_shift = re.per_layer_right_shift;
+            qp->per_layer_mul = re.per_layer_mul;
+            qp->per_channel_requant = re.per_channel_requant;
+            qp->per_channel_left_shifts = re.per_channel_left_shifts;
+            qp->per_channel_right_shifts = re.per_channel_right_shifts;
+            qp->per_channel_muls = re.per_channel_muls;
+            qp->minval = re.minval;
+            qp->maxval = re.maxval;
+            _n_block = compute_n_block(_args, _os);
+        }
     }
 };
 
