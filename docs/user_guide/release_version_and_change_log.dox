@@ -49,6 +49,13 @@ v24.07 Public major release
  - Expose CpuTranspose functionality using the experimental operators api
  - Expose CpuWinogradConv2d functionality using the experimental operators api
  - Optimize CPU operator memory management.
+ - Add support for mixed sign quantized convolution.
+ - Add support for mixed sign dequantized GEMM.
+ - Add SME FP16 GEMV kernel.
+ - Change SME vector length function to use RDSVL instead of static variable.
+ - Remove unused "get_default_activation_values" functions.
+ - Add SVE fixed format interleaved BF16 DOT kernel.
+ - Updates and optimizations to assembly kernels.
 
 v24.06 Public minor release
  - Enable FP16 in multiple Neon™ kernels for multi_isa + v8a

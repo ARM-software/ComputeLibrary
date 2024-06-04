@@ -39,6 +39,14 @@ private:
 public:
     barrier(unsigned int threads) : m_threads(threads), m_waiters(0), m_leavers(0) { }
 
+    // Add a move constructor because these objects might be moved around at setup time.
+    // Moving while the barrier is active won't work.
+    barrier(barrier &&other) : m_threads(other.m_threads), m_waiters(0), m_leavers(0) {
+        // This doesn't make it safe, but will have a chance of firing if something odd is occurring.
+        assert(other.m_waiters==0);
+        assert(other.m_leavers==0);
+    }
+
     /* This isn't safe if any thread is waiting... */
     void set_nthreads(unsigned int nthreads) {
         m_threads = nthreads;

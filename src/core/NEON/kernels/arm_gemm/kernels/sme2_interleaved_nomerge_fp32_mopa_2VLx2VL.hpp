@@ -37,7 +37,8 @@ void sme2_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const floa
 class cls_sme2_interleaved_nomerge_fp32_mopa_2VLx2VL
 {
 public:
-  typedef float operand_type;
+  typedef float lhs_operand_type;
+  typedef float rhs_operand_type;
   typedef float result_type;
 
   typedef void (*kern_type)(const float *const A, const float *const B, float *const C, int ldc, const int M, const int N, const int K, const float *const bias, const Activation act, bool accumulate, float *const accumulator_buffer);
@@ -81,7 +82,7 @@ public:
   // Default to the generic kernel
   kern_type kernel = sme2_interleaved_nomerge_fp32_mopa_2VLx2VL;
 
-  StdTransformsSME<operand_type, result_type, 2, 2, 1> transforms = {};
+  StdTransformsSME<lhs_operand_type, result_type, 2, 2, 1> transforms = {};
 
   cls_sme2_interleaved_nomerge_fp32_mopa_2VLx2VL(const CPUInfo *)
   {

@@ -41,7 +41,8 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx( ARGLIST );
 class cls_sve_ffinterleaved_fp16_mla_8x3VL
 {
 public:
-    typedef __fp16 operand_type;
+    typedef __fp16 lhs_operand_type;
+    typedef __fp16 rhs_operand_type;
     typedef __fp16 result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -72,8 +73,8 @@ public:
     }
 
 
-    StdTransformsSVE<operand_type, result_type, 8, 3, 1, 1> transforms = {};
-    StdTransformsSVE<operand_type, result_type, 8, 3, 1, 1, true> transforms_quantized = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 3, 1, 1> transforms = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 3, 1, 1, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

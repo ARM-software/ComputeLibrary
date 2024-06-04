@@ -37,7 +37,8 @@ void sme2_interleaved_nomerge_u8q_mopa_2VLx2VL(const uint8_t *const A, const uin
 class cls_sme2_interleaved_nomerge_u8q_mopa_2VLx2VL
 {
 public:
-  typedef uint8_t operand_type;
+  typedef uint8_t lhs_operand_type;
+  typedef uint8_t rhs_operand_type;
   typedef uint8_t result_type;
 
   typedef void (*kern_type)(const uint8_t *const A, const uint8_t *const B, uint8_t *const C, int ldc, const int M, const int N, const int K, const int32_t *const bias, const Requantize32 &rq, const int n_0, bool accumulate, int32_t *const accumulator_buffer);
@@ -60,7 +61,7 @@ public:
 
   static constexpr bool supports_accumulate()
   {
-    return false;
+    return true;
   }
 
   static constexpr bool supports_bias()
@@ -81,7 +82,7 @@ public:
   // Default to the generic kernel
   kern_type kernel = sme2_interleaved_nomerge_u8q_mopa_2VLx2VL;
 
-  StdTransformsSME<operand_type, result_type, 2, 2, 4, true> transforms = {};
+  StdTransformsSME<lhs_operand_type, result_type, 2, 2, 4, true> transforms = {};
 
   cls_sme2_interleaved_nomerge_u8q_mopa_2VLx2VL(const CPUInfo *)
   {

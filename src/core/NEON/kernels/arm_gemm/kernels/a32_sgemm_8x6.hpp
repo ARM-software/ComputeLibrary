@@ -44,7 +44,8 @@ void a32_sgemm_8x6_a55r1(const float *, const float *, float *, int, int, int);
 // structure.
 class sgemm_8x6 {
 public:
-    typedef float operand_type;
+    typedef float lhs_operand_type;
+    typedef float rhs_operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)(const float *, const float *, float *, int, int, int);
@@ -63,7 +64,7 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsFixed<operand_type, result_type, 6, 8> transforms = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 6, 8> transforms = {};
 
     kern_type kernel = a32_sgemm_8x6;
 

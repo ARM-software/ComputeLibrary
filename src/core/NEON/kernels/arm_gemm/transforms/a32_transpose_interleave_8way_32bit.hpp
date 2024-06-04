@@ -61,8 +61,8 @@ void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
 template <>
 void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x1(const uint16_t *&in0, uint16_t *out) {
   __asm volatile (
-    "VLD1.32	{d0-d3}, [%[in0]]!\n"
-    "VST1.32	{d0-d3}, [%[out]]\n"
+    "VLD1.32    {d0-d3}, [%[in0]]!\n"
+    "VST1.32    {d0-d3}, [%[out]]\n"
     ASM_PREFETCH("[%[in0], #192]")
     : [in0] "+r" (in0),
       [out] "+r" (out)
@@ -74,13 +74,13 @@ void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x1(const uint
 template <>
 void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x2(const uint16_t *&in0, const uint16_t *&in1, uint16_t *out) {
   __asm volatile (
-    "VLD1.32	{d0-d3}, [%[in0]]!\n"
-    "VST1.32	{d0-d3}, [%[out]]!\n"
+    "VLD1.32    {d0-d3}, [%[in0]]!\n"
+    "VST1.32    {d0-d3}, [%[out]]!\n"
     ASM_PREFETCH("[%[in0], #192]")
-    "VLD1.32	{d0-d3}, [%[in1]]!\n"
-    "VST1.32	{d0-d3}, [%[out]]\n"
+    "VLD1.32    {d0-d3}, [%[in1]]!\n"
+    "VST1.32    {d0-d3}, [%[out]]\n"
     ASM_PREFETCH("[%[in1], #192]")
-    "SUB	%[out], %[out], #32\n"
+    "SUB    %[out], %[out], #32\n"
     : [in0] "+r" (in0),
       [in1] "+r" (in1),
       [out] "+r" (out)
@@ -92,19 +92,19 @@ void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x2(const uint
 template <>
 void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x4(const uint16_t *&in0, const uint16_t *&in1, const uint16_t *&in2, const uint16_t *&in3, uint16_t *out) {
   __asm __volatile (
-    "VLD1.32	{d0-d3}, [%[in0]]!\n"
-    "VST1.32	{d0-d3}, [%[out]]!\n"
+    "VLD1.32    {d0-d3}, [%[in0]]!\n"
+    "VST1.32    {d0-d3}, [%[out]]!\n"
     ASM_PREFETCH("[%[in0], #192]")
-    "VLD1.32	{d0-d3}, [%[in1]]!\n"
-    "VST1.32	{d0-d3}, [%[out]]!\n"
+    "VLD1.32    {d0-d3}, [%[in1]]!\n"
+    "VST1.32    {d0-d3}, [%[out]]!\n"
     ASM_PREFETCH("[%[in1], #192]")
-    "VLD1.32	{d0-d3}, [%[in2]]!\n"
-    "VST1.32	{d0-d3}, [%[out]]!\n"
+    "VLD1.32    {d0-d3}, [%[in2]]!\n"
+    "VST1.32    {d0-d3}, [%[out]]!\n"
     ASM_PREFETCH("[%[in2], #192]")
-    "VLD1.32	{d0-d3}, [%[in3]]!\n"
-    "VST1.32	{d0-d3}, [%[out]]\n"
+    "VLD1.32    {d0-d3}, [%[in3]]!\n"
+    "VST1.32    {d0-d3}, [%[out]]\n"
     ASM_PREFETCH("[%[in3], #192]")
-    "SUB	%[out], %[out], #96\n"
+    "SUB    %[out], %[out], #96\n"
     : [in0] "+r" (in0),
       [in1] "+r" (in1),
       [in2] "+r" (in2),

@@ -180,7 +180,7 @@ public:
      *
      * @return Vector length if sme2 is enabled, otherwise returns 0.
      */
-    unsigned long get_sme2_vector_length() const;
+    uint64_t get_sme2_vector_length() const;
 
 private:
     struct Impl;

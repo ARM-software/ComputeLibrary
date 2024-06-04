@@ -111,11 +111,11 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
 
                 "1:\n"
                 ".word 0x4fa0e049 // sdot v9.4s , %[b0].16b, %[a0].4b[1]\n"
-                "ldr	x20, [%[b_ptr], #40]\n"
+                "ldr    x20, [%[b_ptr], #40]\n"
                 ".word 0x4f80e84a // sdot v10.4s, %[b0].16b, %[a0].4b[2]\n"
-                "subs	%w[k], %w[k], #1\n"
+                "subs    %w[k], %w[k], #1\n"
                 ".word 0x4fa0e84b // sdot v11.4s, %[b0].16b, %[a0].4b[3]\n"
-                "ldr	%d[a0a], [%[a_ptr], #32]\n"
+                "ldr    %d[a0a], [%[a_ptr], #32]\n"
 
                 ".word 0x4f81e04c // sdot v12.4s, %[b0].16b, %[a1].4b[0]\n"
                 "ins    %[b2].d[1], x20\n"
@@ -123,7 +123,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[a_ptr], #40]\n"
                 ".word 0x4f81e84e // sdot v14.4s, %[b0].16b, %[a1].4b[2]\n"
                 ".word 0x4fa1e84f // sdot v15.4s, %[b0].16b, %[a1].4b[3]\n"
-                "ldr	%d[a1a], [%[a_ptr], #48]\n"
+                "ldr    %d[a1a], [%[a_ptr], #48]\n"
 
                 ".word 0x4f80e070 // sdot v16.4s, %[b1].16b, %[a0].4b[0]\n"
                 "ins    %[a0a].d[1], x20\n"
@@ -131,7 +131,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[a_ptr], #56]\n"
                 ".word 0x4f80e872 // sdot v18.4s, %[b1].16b, %[a0].4b[2]\n"
                 ".word 0x4fa0e873 // sdot v19.4s, %[b1].16b, %[a0].4b[3]\n"
-                "ldr	%d[b0], [%[b_ptr], #48]\n"
+                "ldr    %d[b0], [%[b_ptr], #48]\n"
 
                 ".word 0x4f81e074 // sdot v20.4s, %[b1].16b, %[a1].4b[0]\n"
                 "ins    %[a1a].d[1], x20\n"
@@ -139,7 +139,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[b_ptr], #56]\n"
                 ".word 0x4f81e876 // sdot v22.4s, %[b1].16b, %[a1].4b[2]\n"
                 ".word 0x4fa1e877 // sdot v23.4s, %[b1].16b, %[a1].4b[3]\n"
-                "ldr	%d[b1], [%[b_ptr], #64]\n"
+                "ldr    %d[b1], [%[b_ptr], #64]\n"
 
                 ".word 0x4f80e098 // sdot v24.4s, %[b2].16b, %[a0].4b[0]\n"
                 "ins    %[b0].d[1], x20\n"
@@ -155,8 +155,8 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 ".word 0x4f81e89e // sdot v30.4s, %[b2].16b, %[a1].4b[2]\n"
                 ".word 0x4fa1e89f // sdot v31.4s, %[b2].16b, %[a1].4b[3]\n"
 
-		// Unroll 1
-                "ldr	%d[b2], [%[b_ptr], #80]\n"
+        // Unroll 1
+                "ldr    %d[b2], [%[b_ptr], #80]\n"
 
                 ".word 0x4f85e048 // sdot v8.4s , %[b0].16b, %[a0a].4b[0]\n"
                 "ins    %[b1].d[1], x20\n"
@@ -164,7 +164,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[b_ptr], #88]\n"
                 ".word 0x4f85e84a // sdot v10.4s, %[b0].16b, %[a0a].4b[2]\n"
                 ".word 0x4fa5e84b // sdot v11.4s, %[b0].16b, %[a0a].4b[3]\n"
-                "ldr	%d[a0], [%[a_ptr], #64]\n"
+                "ldr    %d[a0], [%[a_ptr], #64]\n"
 
                 ".word 0x4f86e04c // sdot v12.4s, %[b0].16b, %[a1a].4b[0]\n"
                 "ins    %[b2].d[1], x20\n"
@@ -172,7 +172,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[a_ptr], #72]\n"
                 ".word 0x4f86e84e // sdot v14.4s, %[b0].16b, %[a1a].4b[2]\n"
                 ".word 0x4fa6e84f // sdot v15.4s, %[b0].16b, %[a1a].4b[3]\n"
-                "ldr	%d[a1], [%[a_ptr], #80]\n"
+                "ldr    %d[a1], [%[a_ptr], #80]\n"
 
                 ".word 0x4f85e070 // sdot v16.4s, %[b1].16b, %[a0a].4b[0]\n"
                 "ins    %[a0].d[1], x20\n"
@@ -180,7 +180,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[a_ptr], #88]\n"
                 ".word 0x4f85e872 // sdot v18.4s, %[b1].16b, %[a0a].4b[2]\n"
                 ".word 0x4fa5e873 // sdot v19.4s, %[b1].16b, %[a0a].4b[3]\n"
-                "ldr	%d[b0], [%[b_ptr], #96]\n"
+                "ldr    %d[b0], [%[b_ptr], #96]\n"
 
                 ".word 0x4f86e074 // sdot v20.4s, %[b1].16b, %[a1a].4b[0]\n"
                 "ins    %[a1].d[1], x20\n"
@@ -188,7 +188,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[b_ptr], #104]\n"
                 ".word 0x4f86e876 // sdot v22.4s, %[b1].16b, %[a1a].4b[2]\n"
                 ".word 0x4fa6e877 // sdot v23.4s, %[b1].16b, %[a1a].4b[3]\n"
-                "ldr	%d[b1], [%[b_ptr], #112]\n"
+                "ldr    %d[b1], [%[b_ptr], #112]\n"
 
                 ".word 0x4f85e098 // sdot v24.4s, %[b2].16b, %[a0a].4b[0]\n"
                 "ins    %[b0].d[1], x20\n"
@@ -196,19 +196,19 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[b_ptr], #120]\n"
                 ".word 0x4f85e89a // sdot v26.4s, %[b2].16b, %[a0a].4b[2]\n"
                 ".word 0x4fa5e89b // sdot v27.4s, %[b2].16b, %[a0a].4b[3]\n"
-                "add	%[a_ptr], %[a_ptr], #64\n"
+                "add    %[a_ptr], %[a_ptr], #64\n"
 
                 ".word 0x4f86e09c // sdot v28.4s, %[b2].16b, %[a1a].4b[0]\n"
                 ASM_PREFETCH("[%[b_ptr], #640]")
                 ".word 0x4fa6e09d // sdot v29.4s, %[b2].16b, %[a1a].4b[1]\n"
-                "add	%[b_ptr], %[b_ptr], #96\n"
+                "add    %[b_ptr], %[b_ptr], #96\n"
                 ".word 0x4f86e89e // sdot v30.4s, %[b2].16b, %[a1a].4b[2]\n"
                 "ins    %[b1].d[1], x20\n"
                 ".word 0x4fa6e89f // sdot v31.4s, %[b2].16b, %[a1a].4b[3]\n"
                 "ldr    %d[b2], [%[b_ptr], #32]\n"
 
                 ".word 0x4f80e048 // sdot v8.4s , %[b0].16b, %[a0].4b[0]\n"
-                "b.ne	1b\n"
+                "b.ne    1b\n"
 
                 // Branch here if K=1 or 2.  Do the right thing for odd/even at the end.
                 "4:\n"
@@ -221,7 +221,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
 
                 // Even K continuation
                 ".word 0x4fa0e84b // sdot v11.4s, %[b0].16b, %[a0].4b[3]\n"
-                "ldr	%d[a0a], [%[a_ptr], #32]\n"
+                "ldr    %d[a0a], [%[a_ptr], #32]\n"
 
                 ".word 0x4f81e04c // sdot v12.4s, %[b0].16b, %[a1].4b[0]\n"
                 "ins    %[b2].d[1], x20\n"
@@ -230,7 +230,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 ".word 0x4f81e84e // sdot v14.4s, %[b0].16b, %[a1].4b[2]\n"
                 ASM_PREFETCHW("[%[c_ptr]]")
                 ".word 0x4fa1e84f // sdot v15.4s, %[b0].16b, %[a1].4b[3]\n"
-                "ldr	%d[a1a], [%[a_ptr], #48]\n"
+                "ldr    %d[a1a], [%[a_ptr], #48]\n"
 
                 ".word 0x4f80e070 // sdot v16.4s, %[b1].16b, %[a0].4b[0]\n"
                 "ins    %[a0a].d[1], x20\n"
@@ -238,7 +238,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 "ldr    x20, [%[a_ptr], #56]\n"
                 ".word 0x4f80e872 // sdot v18.4s, %[b1].16b, %[a0].4b[2]\n"
                 ".word 0x4fa0e873 // sdot v19.4s, %[b1].16b, %[a0].4b[3]\n"
-                "ldr	%d[b0], [%[b_ptr], #48]\n"
+                "ldr    %d[b0], [%[b_ptr], #48]\n"
 
                 ".word 0x4f81e074 // sdot v20.4s, %[b1].16b, %[a1].4b[0]\n"
                 "ins    %[a1a].d[1], x20\n"
@@ -253,7 +253,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 ASM_PREFETCHW("[%[c_ptr], #128]")
                 ".word 0x4f80e89a // sdot v26.4s, %[b2].16b, %[a0].4b[2]\n"
                 ".word 0x4fa0e89b // sdot v27.4s, %[b2].16b, %[a0].4b[3]\n"
-                "ldr	%d[b1], [%[b_ptr], #64]\n"
+                "ldr    %d[b1], [%[b_ptr], #64]\n"
 
                 ".word 0x4f81e09c // sdot v28.4s, %[b2].16b, %[a1].4b[0]\n"
                 "ins    %[b0].d[1], x20\n"
@@ -262,7 +262,7 @@ void a64_gemm_s8_8x12_a55r1(const int8_t *Apanel, const int8_t *Bpanel, int32_t 
                 ".word 0x4f81e89e // sdot v30.4s, %[b2].16b, %[a1].4b[2]\n"
                 ASM_PREFETCHW("[%[c_ptr], #192]")
                 ".word 0x4fa1e89f // sdot v31.4s, %[b2].16b, %[a1].4b[3]\n"
-                "ldr	%d[b2], [%[b_ptr], #80]\n"
+                "ldr    %d[b2], [%[b_ptr], #80]\n"
 
                 ".word 0x4f85e048 // sdot v8.4s , %[b0].16b, %[a0a].4b[0]\n"
                 "ins    %[b1].d[1], x20\n"

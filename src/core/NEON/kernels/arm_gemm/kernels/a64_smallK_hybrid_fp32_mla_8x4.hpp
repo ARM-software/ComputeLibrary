@@ -72,7 +72,7 @@ public:
         return true;
     }
 
-    StdTransformsFixed<operand_type, result_type, 8, 4, 1> transforms = {};
+    StdTransformsFixed<operand_type, operand_type, result_type, 8, 4, 1> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel=a64_smallK_hybrid_fp32_mla_8x4;
