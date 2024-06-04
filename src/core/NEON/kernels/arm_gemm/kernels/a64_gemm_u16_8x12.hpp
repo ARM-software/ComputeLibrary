@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,8 @@ void a64_gemm_u16_asimd_8x12(const uint16_t *, const uint16_t *, uint32_t *, int
 
 class cls_a64_gemm_u16_8x12 {
 public:
-    typedef uint16_t operand_type;
+    typedef uint16_t lhs_operand_type;
+    typedef uint16_t rhs_operand_type;
     typedef uint32_t result_type;
 
     typedef void (*kern_type)(const uint16_t *, const uint16_t *, uint32_t *, int, int, int);
@@ -53,8 +54,8 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsFixed<operand_type, result_type, 8, 12> transforms = {};
-    StdTransformsFixed<operand_type, result_type, 8, 12, 1, true> transforms_quantized = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12> transforms = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 1, true> transforms_quantized = {};
 
     kern_type kernel = a64_gemm_u16_asimd_8x12;
 

@@ -97,8 +97,7 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
                                    bool accumulate = false, bool dynamic_qinfo = false, DataType data_type_output = DataType::UNKNOWN)
 {
     ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_a));
-    ARM_COMPUTE_ASSERT(data_type_a == data_type_b);
-    // If unknown, set to sensible defaults
+        // If unknown, set to sensible defaults
     if (data_type_output == DataType::UNKNOWN) {
         data_type_output = output_stage.type == GEMMLowpOutputStageType::NONE ? DataType::S32 : data_type_a;
     }
@@ -185,7 +184,6 @@ SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, con
                                                  DataType data_type_a = DataType::QASYMM8, DataType data_type_b = DataType::QASYMM8, const TensorFillInfo& finfo = TensorFillInfo())
 {
     ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_a));
-    ARM_COMPUTE_ASSERT(data_type_a == data_type_b);
     TensorShape shape_a_to_use = shape_a;
     if(reinterpret_input_as_3d)
     {
@@ -472,29 +470,59 @@ template <typename TensorType, typename AccessorType, typename FunctionType, boo
 class GEMMLowpDequantizedMatrixMultiplyValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, bool accumulate)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, DataType data_type_a, DataType data_type_b, bool accumulate)
     {
         const bool dynamic_qinfo = false;
         const auto a_qinfo = QuantizationInfo(1.0f / 255, a_offset);
         const auto b_qinfo = QuantizationInfo(5.0f / 255, b_offset);
         TensorFillInfo finfo;
-        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, finfo, accumulate, dynamic_qinfo);
-        _reference = compute_reference(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, finfo, accumulate, dynamic_qinfo);
+        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, finfo,
+                                    accumulate, dynamic_qinfo);
+        _reference = compute_reference(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b,
+                                       finfo, accumulate, dynamic_qinfo);
     }
 
 protected:
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, const TensorFillInfo& finfo, const bool accumulate, const bool dynamic_qinfo)
+    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, DataType data_type_a, DataType data_type_b, const TensorFillInfo& finfo, const bool accumulate, const bool dynamic_qinfo)
     {
         const auto output_qinfo = QuantizationInfo();
-        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, int32_t, false, run_twice>(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, output_qinfo, DataType::QASYMM8_SIGNED, DataType::QASYMM8_SIGNED, GEMMLowpOutputStageInfo(), false, finfo, accumulate, dynamic_qinfo, DataType::F32);
+        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, int32_t, false, run_twice>(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, output_qinfo, data_type_a, data_type_b, GEMMLowpOutputStageInfo(), false, finfo, accumulate, dynamic_qinfo, DataType::F32);
     }
 
-    SimpleTensor<float> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, const TensorFillInfo& finfo, bool accumulate, const bool dynamic_qinfo)
+    SimpleTensor<float> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, DataType data_type_a, DataType data_type_b, const TensorFillInfo& finfo, bool accumulate, const bool dynamic_qinfo)
     {
         QuantizationInfo s32_ref_output_quant_info = QuantizationInfo(a_qinfo.uniform().scale * b_qinfo.uniform().scale, 0, dynamic_qinfo);
 
-        SimpleTensor<int32_t> s32_ref_output =  compute_gemmlowp_reference<reinterpret_input_as_3d, int8_t, int8_t, false, false, run_twice>(shape_a, shape_b, shape_output, a_qinfo, b_qinfo,
-        DataType::QASYMM8_SIGNED, DataType::QASYMM8_SIGNED, finfo);
+        SimpleTensor<int32_t> s32_ref_output;
+        if (data_type_a == DataType::QASYMM8)
+        {
+            if (data_type_b == DataType::QASYMM8)
+            {
+                s32_ref_output = compute_gemmlowp_reference<reinterpret_input_as_3d, uint8_t, uint8_t, false, false, run_twice>(
+                    shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, finfo);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR_ON(data_type_b != DataType::QASYMM8_SIGNED);
+                s32_ref_output = compute_gemmlowp_reference<reinterpret_input_as_3d, uint8_t, int8_t, false, false, run_twice>(
+                    shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, finfo);
+            }
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR_ON(data_type_a != DataType::QASYMM8_SIGNED);
+            if (data_type_b == DataType::QASYMM8)
+            {
+                ARM_COMPUTE_ERROR("QASYMM8_SIGNED input with QASYMM8 weights not supported");
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR_ON(data_type_b != DataType::QASYMM8_SIGNED);
+                s32_ref_output = compute_gemmlowp_reference<reinterpret_input_as_3d, int8_t, int8_t, false, false, run_twice>(
+                    shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, finfo);
+            }
+        }
+
         s32_ref_output.quantization_info(s32_ref_output_quant_info);
 
         SimpleTensor<float> f32_ref_output(s32_ref_output.shape(), DataType::F32);

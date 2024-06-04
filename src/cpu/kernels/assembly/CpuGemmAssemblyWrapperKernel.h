@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
-#define ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H
+#define ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H
 
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -52,7 +52,7 @@ namespace kernel
   *
   *
   */
-template <typename TypeInput, typename TypeOutput>
+template <typename TypeInput, typename TypeWeight, typename TypeOutput>
 class CpuGemmAssemblyWrapperKernel final : public INEKernel
 {
 public:
@@ -101,7 +101,7 @@ public:
      * @param[in] kernel          Pointer to an assembly kernel implementation.
      * @param[in] kernel_name_tag Tag to be attacehd to the kernel's name.
      */
-    void configure(arm_gemm::GemmCommon<TypeInput, TypeOutput> *kernel, std::string kernel_name_tag)
+    void configure(arm_gemm::GemmCommon<TypeInput, TypeWeight, TypeOutput> *kernel, std::string kernel_name_tag)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(kernel)));
         _kernel = kernel;
@@ -131,10 +131,10 @@ public:
     }
 
 private:
-    arm_gemm::GemmCommon<TypeInput, TypeOutput> *_kernel;
-    std::string                                  _name;
+    arm_gemm::GemmCommon<TypeInput, TypeWeight, TypeOutput> *_kernel;
+    std::string                                              _name;
 };
 } // namespace kernel
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H

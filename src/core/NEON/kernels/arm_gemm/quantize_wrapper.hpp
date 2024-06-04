@@ -35,9 +35,9 @@ namespace arm_gemm {
 /* Quantized wrapper - do an integer GEMM and wrap around the quantization. */
 
 template<typename To, typename Tr, typename Tgemm>
-class QuantizeWrapper : public GemmCommon<To, Tr> {
+class QuantizeWrapper : public GemmCommon<To, To, Tr> {
 private:
-    UniqueGemmCommon<To, Tgemm>  _subgemm = nullptr;
+    UniqueGemmCommon<To, To, Tgemm>  _subgemm = nullptr;
     int32_t                     *_row_sums = nullptr;
     int32_t                     *_col_sums = nullptr;
     Requantize32                 _params;
@@ -111,7 +111,7 @@ public:
 
     QuantizeWrapper(const GemmArgs &args, const Requantize32 &qp) : _params(qp), _args(args), _barrier(args._maxthreads) {
         GemmArgs newargs = GemmArgs(args._ci, args._Msize, args._Nsize, args._Ksize, args._Ksections, args._nbatches, args._nmulti, args._indirect_input, Activation(), args._maxthreads);
-        _subgemm = gemm<To, Tgemm>(newargs);
+        _subgemm = gemm<To, To, Tgemm>(newargs);
 
         if (_subgemm == nullptr) {
             return;
@@ -122,7 +122,7 @@ public:
                     const To *B, const int ldb, const int B_multi_stride,
                           Tr *C, const int ldc, const int C_batch_stride, const int C_multi_stride,
                     const Tr *bias, const int bias_multi_stride) override {
-        GemmCommon<To, Tr>::set_arrays(A, lda, A_batch_stride, A_multi_stride, B, ldb, B_multi_stride, C, ldc, C_batch_stride, C_multi_stride, bias, bias_multi_stride);
+        GemmCommon<To, To, Tr>::set_arrays(A, lda, A_batch_stride, A_multi_stride, B, ldb, B_multi_stride, C, ldc, C_batch_stride, C_multi_stride, bias, bias_multi_stride);
 
         arrays_set = true;
         set_child_arrays();

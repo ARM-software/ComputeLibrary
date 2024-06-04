@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,7 +73,7 @@ public:
         return false;
     }
 
-    StdTransformsFixed<operand_type, result_type, 8, 4, 4> transforms = {};
+    StdTransformsFixed<operand_type, operand_type, result_type, 8, 4, 4> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel=a64_smallK_hybrid_u8u32_dot_8x4;

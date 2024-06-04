@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,8 @@ void sme2_interleaved_nomerge_s8q_mopa_1VLx4VL(const int8_t *const A, const int8
 class cls_sme2_interleaved_nomerge_s8q_mopa_1VLx4VL
 {
 public:
-  typedef int8_t operand_type;
+  typedef int8_t lhs_operand_type;
+  typedef int8_t rhs_operand_type;
   typedef int8_t result_type;
 
   typedef void (*kern_type)(const int8_t *const A, const int8_t *const B, int8_t *const C, int ldc, const int M, const int N, const int K, const int32_t *const bias, const Requantize32 &rq, const int n_0, bool accumulate, int32_t *const accumulator_buffer);
@@ -60,7 +61,7 @@ public:
 
   static constexpr bool supports_accumulate()
   {
-    return false;
+    return true;
   }
 
   static constexpr bool supports_bias()
@@ -81,7 +82,7 @@ public:
   // Default to the generic kernel
   kern_type kernel = sme2_interleaved_nomerge_s8q_mopa_1VLx4VL;
 
-  StdTransformsSME<operand_type, result_type, 1, 4, 4, true> transforms = {};
+  StdTransformsSME<lhs_operand_type, result_type, 1, 4, 4, true> transforms = {};
 
   cls_sme2_interleaved_nomerge_s8q_mopa_1VLx4VL(const CPUInfo *)
   {

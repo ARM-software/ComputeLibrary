@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CPU_OPERATORS_CPUCONV2D_H
+#define ACL_SRC_CPU_OPERATORS_CPUCONV2D_H
+
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "src/core/common/Macros.h"
@@ -81,6 +85,7 @@ public:
      * |F16            |F16                |F16    |F16            |
      * |F32            |F32                |F32    |F32            |
      * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
+     * |QASYMM8        |QASYMM8_SIGNED     |S32    |QASYMM8        |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32    |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32    |QASYMM8_SIGNED |
@@ -89,7 +94,7 @@ public:
      *                              while every optional dimension from 4 and above represent a batch of inputs.
      *                              Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights          Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                              Data type supported: Same as @p src, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
+     *                              Data type supported: Same as @p src, also could be QSYMM8_PER_CHANNEL or QASYMM8_SIGNED if input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  biases           Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                              Data type supported: Same as @p src, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[out] dst              Destination tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
@@ -135,7 +140,7 @@ public:
      *                             while every optional dimension from 4 and above represent a batch of inputs.
      *                             Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] weights          Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                             Data type supported:Same as @p src, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
+     *                             Data type supported:Same as @p src, also could be QSYMM8_PER_CHANNEL or QASYMM8_SIGNED if input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] dst              Destination tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                             Data types supported: Same as @p src.
      * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo.
@@ -167,3 +172,5 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
+
+#endif // ACL_SRC_CPU_OPERATORS_CPUCONV2D_H

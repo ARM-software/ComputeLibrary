@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,13 +32,13 @@
 
 namespace arm_gemm {
 
-static const GemmImplementation<int16_t, int32_t> gemm_s16_methods[] = {
+static const GemmImplementation<int16_t, int16_t, int32_t> gemm_s16_methods[] = {
 {
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_s16_8x12",
     nullptr,
     nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_s16_8x12, int16_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_s16_8x12, int16_t, int16_t, int32_t>(args); }
 },
 {
     GemmMethod::DEFAULT,
@@ -50,15 +50,15 @@ static const GemmImplementation<int16_t, int32_t> gemm_s16_methods[] = {
 };
 
 template<>
-const GemmImplementation<int16_t, int32_t> *gemm_implementation_list<int16_t, int32_t>() {
+const GemmImplementation<int16_t, int16_t, int32_t> *gemm_implementation_list<int16_t, int16_t, int32_t>() {
     return gemm_s16_methods;
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<int16_t, int32_t> gemm<int16_t, int32_t, Nothing>(const GemmArgs &args, const Nothing &);
-template bool has_opt_gemm<int16_t, int32_t, Nothing>(WeightFormat &weight_format, const GemmArgs &args, const Nothing &);
-template KernelDescription get_gemm_method<int16_t, int32_t, Nothing>(const GemmArgs &args, const Nothing &);
-template std::vector<KernelDescription> get_compatible_kernels<int16_t, int32_t, Nothing> (const GemmArgs &args, const Nothing &);
+template UniqueGemmCommon<int16_t, int16_t, int32_t> gemm<int16_t, int16_t, int32_t, Nothing>(const GemmArgs &args, const Nothing &);
+template bool has_opt_gemm<int16_t, int16_t, int32_t, Nothing>(WeightFormat &weight_format, const GemmArgs &args, const Nothing &);
+template KernelDescription get_gemm_method<int16_t, int16_t, int32_t, Nothing>(const GemmArgs &args, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<int16_t, int16_t, int32_t, Nothing> (const GemmArgs &args, const Nothing &);
 
 } // namespace arm_gemm
 

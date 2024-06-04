@@ -40,7 +40,8 @@ void sme2_interleaved_nomerge_s8qfp32_mopa_2VLx2VL(const int8_t *const A, const 
       const int8_t *const B,
       float *const C, const int ldc,
       const int M, const int N, const int K,
-      const int32_t *const bias, const float *const late_bias, const Activation act,
+      const int32_t *const bias,
+      const DequantizeFloat &, const float *const late_bias, const Activation act,
       bool accumulate,
       int32_t *const accumulator_buffer
     ) : A(A),
@@ -94,7 +95,7 @@ void sme2_interleaved_nomerge_s8qfp32_mopa_2VLx2VL(const int8_t *const A, const 
   };
 
   // Construct arguments for this kernel
-  KernelArgs args(A, B, C, ldc, M, N, K, bias, late_bias, act, accumulate, accumulator_buffer);
+  KernelArgs args(A, B, C, ldc, M, N, K, bias, dq, late_bias, act, accumulate, accumulator_buffer);
 
   __asm__ __volatile__(
       "ldr x16, [%x[args], %[offsetof_flags]]\n"

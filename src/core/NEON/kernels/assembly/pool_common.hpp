@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOL_COMMON_HPP
+#define ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOL_COMMON_HPP
 
 #pragma once
 #ifdef CYCLE_PROFILING
@@ -65,7 +68,8 @@ public:
     virtual ~IPoolingCommon() = default;
 
     // Determine the amount of working space required.
-    virtual size_t get_working_size(unsigned int num_threads) const = 0;
+    virtual size_t get_working_size(unsigned int num_threads) const                          = 0;
+    virtual size_t get_working_size(unsigned int num_threads, unsigned int n_channels) const = 0;
 
     // Execute pooling over the specified area of memory.
     virtual void execute(const void *const input,
@@ -108,3 +112,5 @@ public:
 
 } // namespace pooling
 } // namespace arm_conv
+
+#endif // ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOL_COMMON_HPP

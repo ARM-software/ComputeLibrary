@@ -147,6 +147,45 @@ const auto QuantizationData = make("QuantizationInfo",
 
 TEST_SUITE(NEON)
 TEST_SUITE(ConvolutionLayer)
+DATA_TEST_CASE(SupportedTypes, framework::DatasetMode::ALL, zip(
+                make("DataType", {
+                    DataType::F32,
+                    DataType::QASYMM8,
+                    DataType::QASYMM8,
+                    DataType::QASYMM8_SIGNED
+                }),
+                make("WeightsDataType", {
+                    DataType::F32,
+                    DataType::QASYMM8,
+                    DataType::QASYMM8_SIGNED,
+                    DataType::QASYMM8
+                }),
+                make("Expected",
+                {
+                    true,
+                    true,
+                    true,
+                    false
+                })),
+data_type_const, weights_data_type_const, expected_const)
+{
+    TensorInfo input_info   = TensorInfo(TensorShape(3U, 3U, 1U), 1, data_type_const);
+    TensorInfo weights_info = TensorInfo(TensorShape(2U, 2U, 1U, 1U), 1, weights_data_type_const);
+    TensorInfo output_info  = TensorInfo(TensorShape(2U, 2U, 1U), 1, data_type_const);
+
+    input_info.set_quantization_info(arm_compute::QuantizationInfo(1, 0));
+    weights_info.set_quantization_info(arm_compute::QuantizationInfo(1, 0));
+    output_info.set_quantization_info(arm_compute::QuantizationInfo(1, 0));
+
+    Status status = NEConvolutionLayer::validate(
+                        &input_info,
+                        &weights_info,
+                        nullptr,
+                        &output_info,
+                        PadStrideInfo());
+
+    ARM_COMPUTE_EXPECT(bool(status) == expected_const, framework::LogLevel::ERRORS);
+}
 
 // *INDENT-OFF*
 // clang-format off
@@ -257,7 +296,7 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
 
     for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] == reinterpret_cast<float *>(result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
 
@@ -303,7 +342,7 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
 
     for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] == reinterpret_cast<float *>(result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
 
@@ -580,7 +619,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, frame
 
 /// It's enough to run the activations for a single weight/input combination and data type because
 /// activation function is called on top of the winograd output as a separate operator
-/// TODO: Enable after COMPMID-6573 is resolved
+/// TODO(COMPMID-6573): Enable after COMPMID-6573 is resolved
 FIXTURE_DATA_TEST_CASE(RunActivations, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::DISABLED,
                        combine(
                            make("Input", TensorShape(3U, 3U, 32U)),
@@ -1119,7 +1158,7 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
     auto result_1 = run_conv();
     for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] == reinterpret_cast<float *>(result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
 
@@ -1160,7 +1199,7 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
     auto result_1 = run_conv();
     for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] == reinterpret_cast<float *>(result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
 
@@ -1251,11 +1290,13 @@ FIXTURE_DATA_TEST_CASE(RunVeryLarge, NEGEMMConvolutionLayerFixture<float>, frame
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
-// TODO: COMPMID-6596 Extend quantized tests with at least one suite where the weight is padded (the legacy case, see floating point's RunPaddedWeights)
+// TODO(COMPMID-6573): Extend quantized tests with at least one suite where the weight is padded (the legacy case, see floating point's RunPaddedWeights)
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedMixedDataLayoutFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
+
+using NEGEMMConvolutionLayerQuantizedMixedSignFixture = ConvolutionValidationQuantizedMixedTypeFixture<Tensor, Accessor, NEConvolutionLayer, uint8_t, int8_t>;
 
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedPerChannelFixture = ConvolutionValidationQuantizedPerChannelFixture<Tensor, Accessor, NEConvolutionLayer, T, int8_t>;
@@ -1331,6 +1372,50 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixtur
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE(QASYMM8_MIXED)
+FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    NEGEMMConvolutionLayerQuantizedMixedSignFixture,
+    framework::DatasetMode::ALL,
+    combine(combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                            framework::dataset::make("ReshapeWeights", {true})),
+                                                    framework::dataset::make("DataType", DataType::QASYMM8)),
+                                            framework::dataset::make("WeightsDataType", DataType::QASYMM8_SIGNED)),
+                                    framework::dataset::make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})),
+                            framework::dataset::make("QuantizationInfoIfActivationEnabled",
+{QuantizationInfo(2.f / 255.f, 10)})),
+framework::dataset::make("WeightQuantizationInfoIfActivationEnabled",
+{QuantizationInfo(2.f / 255.f, 10)})),
+QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(
+    RunMixedDataLayout,
+    NEGEMMConvolutionLayerQuantizedMixedSignFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U)),
+        framework::dataset::make("Bias", TensorShape(2U)),
+        framework::dataset::make("Output", TensorShape(11U, 25U, 2U)),
+        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
+        framework::dataset::make("Dilation", Size2D(1, 1)),
+        framework::dataset::make("ReshapeWeights", {true}),
+        framework::dataset::make("DataType", DataType::QASYMM8),
+        framework::dataset::make("WeightsDataType", DataType::QASYMM8_SIGNED),
+        framework::dataset::make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+        framework::dataset::make("QuantizationInfoIfActivationEnabled", {QuantizationInfo(2.f / 255.f, 10)}),
+        framework::dataset::make("WeightQuantizationInfoIfActivationEnabled", {QuantizationInfo(2.f / 255.f, 10)}),
+        QuantizedActivationFunctionsDataset)
+    )
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8_MIXED
 
 TEST_SUITE(QSYMM8_PER_CHANNEL)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::ALL,
@@ -1436,7 +1521,7 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
     auto result_1 = run_conv();
     for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] == reinterpret_cast<float *>(result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
 
@@ -1476,7 +1561,7 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
     auto result_1 = run_conv();
     for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] == reinterpret_cast<float *>(result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
 

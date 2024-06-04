@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#ifdef ARM_COMPUTE_ENABLE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SME2
 
 
 #include "../std_transforms_sme.hpp"
@@ -37,7 +37,8 @@ void sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL(const __fp16 *const A, c
 class cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL
 {
 public:
-  typedef __fp16 operand_type;
+  typedef __fp16 lhs_operand_type;
+  typedef __fp16 rhs_operand_type;
   typedef __fp16 result_type;
 
   typedef void (*kern_type)(const __fp16 *const A, const __fp16 *const B, __fp16 *const C, int ldc, const int M, const int N, const int K, const __fp16 *const bias, const Activation act, bool accumulate, float *const accumulator_buffer);
@@ -81,7 +82,7 @@ public:
   // Default to the generic kernel
   kern_type kernel = sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL;
 
-  StdTransformsSME<operand_type, result_type, 1, 4, 2> transforms = {};
+  StdTransformsSME<lhs_operand_type, result_type, 1, 4, 2> transforms = {};
 
   cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL(const CPUInfo *)
   {
@@ -90,4 +91,4 @@ public:
 
 } // namespace arm_gemm
 
-#endif // ARM_COMPUTE_ENABLE_SVE
+#endif // ARM_COMPUTE_ENABLE_SME2

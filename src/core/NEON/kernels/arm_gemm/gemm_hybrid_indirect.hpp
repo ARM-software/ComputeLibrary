@@ -260,8 +260,8 @@ struct kernel_weight_format<strategy, false> {
 } // anonymous namespace
 
 // Implementation of the GemmCommon abstract class.
-template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing, bool SeparateQuantize=false, bool FixedFormat=false>
-class GemmHybridIndirect : public GemmCommon<To, Tr> {
+template<typename strategy, typename To, typename Tw, typename Tr, typename OutputStage=Nothing, bool SeparateQuantize=false, bool FixedFormat=false>
+class GemmHybridIndirect : public GemmCommon<To, Tw, Tr> {
     typedef typename strategy::lhs_operand_type Tloi;
     typedef typename strategy::rhs_operand_type Troi;
     typedef typename strategy::result_type Tri;
@@ -618,7 +618,7 @@ public:
         return _args._nmulti * iceildiv(_args._Nsize, strategy::out_width());
     }
 
-    void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void requantize_bias(void *in_buffer, const Tw *B, const int ldb, const int B_multi_stride) override {
         if (std::is_same<OutputStage, Requantize32>::value) {
             _col_bias = reinterpret_cast<int32_t *>(in_buffer);
 
@@ -636,11 +636,11 @@ public:
         return strat.transforms.PrepareB_supports_transpose();
     }
 
-    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+    void pretranspose_B_array(void *in_buffer, const Tw *B, const int ldb, const int B_multi_stride, bool transposed) override {
         pretranspose_B_array_part(in_buffer, B, ldb, B_multi_stride, transposed, 0, get_B_pretranspose_window_size());
     }
 
-    void pretranspose_B_array_part(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed, size_t start, size_t end) override {
+    void pretranspose_B_array_part(void *in_buffer, const Tw *B, const int ldb, const int B_multi_stride, bool transposed, size_t start, size_t end) override {
         if (end >= get_B_pretranspose_window_size()) {
             requantize_bias(in_buffer, B, ldb, B_multi_stride);
         }
@@ -835,7 +835,7 @@ public:
 };
 
 template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
-using GemmHybridIndirectFixedFormat = GemmHybridIndirect<strategy, To, Tr, OutputStage, false, true>;
+using GemmHybridIndirectFixedFormat = GemmHybridIndirect<strategy, To, To, Tr, OutputStage, false, true>;
 
 } // namespace arm_gemm
 

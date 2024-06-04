@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,7 @@ public:
      * |F32            |F32                |F32      |F32            |
      * |BFLOAT16       |BFLOAT16           |BFLOAT16 |BFLOAT16       |
      * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QASYMM8_SIGNED     |S32      |QASYMM8        |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |

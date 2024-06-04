@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Arm Limited.
+ * Copyright (c) 2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,7 +71,7 @@ public:
         return true;
     }
 
-    StdTransformsSVE<rhs_operand_type, result_type, 6, 4, 4> transforms = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 6, 4, 4> transforms = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

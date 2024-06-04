@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,8 @@ void sve_interleaved_fp32_mla_8x3VL_a64fx( ARGLIST );
 class cls_sve_interleaved_fp32_mla_8x3VL
 {
 public:
-    typedef float operand_type;
+    typedef float lhs_operand_type;
+    typedef float rhs_operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -62,8 +63,8 @@ public:
     }
 
 
-    StdTransformsSVE<operand_type, result_type, 8, 3, 1, 1> transforms = {};
-    StdTransformsSVE<operand_type, result_type, 8, 3, 1, 1, true> transforms_quantized = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 3, 1, 1> transforms = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 3, 1, 1, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

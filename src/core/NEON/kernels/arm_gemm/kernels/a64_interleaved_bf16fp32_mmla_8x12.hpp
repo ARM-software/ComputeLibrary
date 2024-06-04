@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,8 @@ void a64_interleaved_bf16fp32_mmla_8x12_a510( ARGLIST );
 class cls_a64_interleaved_bf16fp32_mmla_8x12
 {
 public:
-    typedef bfloat16 operand_type;
+    typedef bfloat16 lhs_operand_type;
+    typedef bfloat16 rhs_operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -63,8 +64,8 @@ public:
     }
 
 
-    StdTransformsFixed<operand_type, result_type, 8, 12, 4> transforms = {};
-    StdTransformsFixed<operand_type, result_type, 8, 12, 4, true> transforms_quantized = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 4> transforms = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 4, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

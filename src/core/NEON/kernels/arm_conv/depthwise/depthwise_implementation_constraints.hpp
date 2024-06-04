@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -133,7 +133,7 @@ bool has_channel_multiplier(const DepthwiseArgs &args, const void *)
 bool no_prime_right_pad(const DepthwiseArgs &args, const void *) __attribute__ ((unused));
 bool no_prime_right_pad(const DepthwiseArgs &args, const void *)
 {
-  return (args.input_cols + args.padding.left) >= (args.kernel_cols - 1);
+  return ((args.input_cols + args.padding.left) / args.dilation_cols) >= (args.kernel_cols - 1);
 }
 
 bool qp_has_no_left_shift(const DepthwiseArgs &args, const void *_qp) __attribute__ ((unused));

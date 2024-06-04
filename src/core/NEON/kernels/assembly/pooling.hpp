@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOLING_HPP
+#define ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOLING_HPP
 
 #pragma once
 
@@ -136,7 +139,11 @@ public:
     PoolingCommon(PoolingCommon &)            = delete;
     PoolingCommon &operator=(PoolingCommon &) = delete;
 
-    size_t get_working_size(unsigned int) const override = 0;
+    size_t get_working_size(unsigned int, unsigned int) const override = 0;
+    size_t get_working_size(unsigned int n_threads) const override
+    {
+        return this->get_working_size(n_threads, m_args.n_channels);
+    }
 
     // Execute pooling over the specified area of memory.
     void execute(const void *const input,
@@ -223,3 +230,5 @@ UniquePoolingCommon<TInput, TOutput> pooling(const PoolingArgs &, const OutputSt
 
 } // namespace pooling
 } // namespace arm_conv
+
+#endif // ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOLING_HPP

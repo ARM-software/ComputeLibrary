@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -683,6 +683,10 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::S8,
                                                          DataType::U8);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->data_type() == DataType::QASYMM8_SIGNED &&
+                                        src1->data_type() == DataType::QASYMM8,
+                                    "QASYMM8_SIGNED input with QASYMM8 weights not supported");
 
     TensorShape in0_shape = src0->tensor_shape();
     TensorShape in1_shape = src1->tensor_shape();

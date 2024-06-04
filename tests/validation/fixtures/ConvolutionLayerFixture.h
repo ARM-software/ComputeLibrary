@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -476,6 +476,31 @@ public:
     {
         ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
                                                                                                  data_type, data_type, data_layout, quantization_info, quantization_info, act_info, mixed_layout);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW>
+class ConvolutionValidationQuantizedMixedTypeFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>
+{
+public:
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataType            weights_data_type,
+               DataLayout          data_layout,
+               QuantizationInfo    quantization_info,
+               QuantizationInfo    weight_quantization_info,
+               ActivationLayerInfo act_info)
+    {
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type,
+            weights_data_type, data_layout, quantization_info, weight_quantization_info, act_info);
     }
 };
 
