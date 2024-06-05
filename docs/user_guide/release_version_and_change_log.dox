@@ -46,6 +46,7 @@ v24.07 Public major release
  - Expose CpuGemm functionality using the experimental operators api
  - Expose CpuTranspose functionality using the experimental operators api
  - Optimize CPU operator memory management.
+ - Add SME FP32 kernel for logistic activation function
 
 v24.06 Public minor release
  - Enable FP16 in multiple Neon™ kernels for multi_isa + v8a

@@ -919,6 +919,7 @@
             "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ]
           },
           "sve2":{
+            "fp32":["src/cpu/kernels/logistic/generic/sme2/fp32.cpp"],
             "qasymm8": [
               "src/cpu/kernels/activation/generic/sve2/qasymm8.cpp",
               "src/cpu/kernels/activation/generic/sve2/lut.cpp"

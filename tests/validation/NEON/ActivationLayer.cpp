@@ -370,6 +370,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::Dat
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
+// Run only on SME Devices to stress Logistic SME kernel
+#ifdef ARM_COMPUTE_ENABLE_SME2
+const auto LogsisticDataset =  combine(framework::dataset::make("InPlace", { false }), framework::dataset::make("Function", ActivationLayerInfo::ActivationFunction::LOGISTIC), framework::dataset::make("AlphaBeta", { 1.f }));
+FIXTURE_DATA_TEST_CASE(RunLogistic5D, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::Tiny5dShapes(), LogsisticDataset, framework::dataset::make("DataType",
+                                                                                                       DataType::F32)))
+
+{
+    // Validate output
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+}
+
+FIXTURE_DATA_TEST_CASE(RunLogisticSME, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::LogisticSMEStressShapesFp32(), LogsisticDataset, framework::dataset::make("DataType",
+                                                                                                       DataType::F32)))
+
+{
+    // Validate output
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+}
+#endif // ARM_COMPUTE_ENABLE_SME2
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
