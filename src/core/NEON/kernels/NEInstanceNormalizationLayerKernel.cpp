@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,10 +70,10 @@ struct InstanceNormKernel
 static const InstanceNormKernel available_kernels[] = {
     {"fp32_neon_instancenorm", [](const InstanceNormSelectorData &data) { return data.dt == DataType::F32; },
      REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_instancenorm)},
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
     {"fp16_neon_instancenorm", [](const InstanceNormSelectorData &data) { return data.dt == DataType::F16; },
      REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_instancenorm)},
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 };
 
 /** Micro-kernel selector

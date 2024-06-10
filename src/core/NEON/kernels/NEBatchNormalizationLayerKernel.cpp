@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,11 +78,11 @@ static const BatchNormalizationKernel available_kernels[] = {
      REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_batch_normalization)},
 #endif /* !defined(ARM_COMPUTE_ENABLE_SVE) */
 #if defined(ARM_COMPUTE_ENABLE_NEON)
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if ARM_COMPUTE_ENABLE_FP16
     {"neon_fp16_batch_normalization",
      [](const BatchNormalizationSelectorData &data) { return data.dt == DataType::F16; },
      REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_batch_normalization)},
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
     {"neon_fp32_batch_normalization",
      [](const BatchNormalizationSelectorData &data) { return data.dt == DataType::F32; },
      REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_batch_normalization)},

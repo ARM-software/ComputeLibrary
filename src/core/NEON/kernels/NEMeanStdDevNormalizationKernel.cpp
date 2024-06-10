@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,10 +60,10 @@ struct MeanStdDevNormKernel
 static const std::vector<MeanStdDevNormKernel> available_kernels = {
     {"fp32_neon_meanstddevnorm", [](const MeanStdDevNormSelectorData &data) { return data.dt == DataType::F32; },
      REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_meanstddevnorm)},
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
     {"fp16_neon_meanstddevnorm", [](const MeanStdDevNormSelectorData &data) { return data.dt == DataType::F16; },
      REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_meanstddevnorm)},
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
     {"qasymm8_neon_meanstddevnorm", [](const MeanStdDevNormSelectorData &data) { return data.dt == DataType::QASYMM8; },
      REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_meanstddevnorm)},
 };
