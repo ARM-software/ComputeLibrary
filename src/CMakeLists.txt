@@ -1014,4 +1014,5 @@ target_sources(
 	runtime/TensorAllocator.cpp
 	runtime/Utils.cpp
 	runtime/experimental/operators/CpuGemm.cpp
+	runtime/experimental/operators/CpuTranspose.cpp
 )

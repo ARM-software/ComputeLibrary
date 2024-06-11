@@ -1593,7 +1593,8 @@
             "src/runtime/NEON/functions/NEGEMM.cpp",
             "src/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.cpp",
             "src/runtime/NEON/functions/NEGEMMLowpOutputStage.cpp",
-            "src/runtime/experimental/operators/CpuGemm.cpp"
+            "src/runtime/experimental/operators/CpuGemm.cpp",
+            "src/runtime/experimental/operators/CpuTranspose.cpp"
           ],
           "neon": {
             "common": [

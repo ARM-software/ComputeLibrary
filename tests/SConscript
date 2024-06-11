@@ -117,6 +117,9 @@ files_validation += Glob('validation/UNIT/*.cpp')
 filter_pattern = test_env['test_filter']
 files_validation += Glob('validation/CPP/' + filter_pattern)
 
+# Add wrapper tests
+files_validation += Glob('validation/runtime/*/' + filter_pattern)
+
 if env['opencl']:
     if env['experimental_dynamic_fusion']:
         files_validation += Glob('validation/dynamic_fusion/gpu/' + filter_pattern)
