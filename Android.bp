@@ -1010,6 +1010,7 @@ cc_library_static {
         "src/runtime/Tensor.cpp",
         "src/runtime/TensorAllocator.cpp",
         "src/runtime/Utils.cpp",
+        "src/runtime/experimental/operators/CpuActivation.cpp",
         "src/runtime/experimental/operators/CpuGemm.cpp",
         "src/runtime/experimental/operators/CpuTranspose.cpp",
         "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigBifrost.cpp",

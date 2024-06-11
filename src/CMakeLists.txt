@@ -1000,6 +1000,7 @@ target_sources(
 	runtime/Tensor.cpp
 	runtime/TensorAllocator.cpp
 	runtime/Utils.cpp
+	runtime/experimental/operators/CpuActivation.cpp
 	runtime/experimental/operators/CpuGemm.cpp
 	runtime/experimental/operators/CpuTranspose.cpp
 )

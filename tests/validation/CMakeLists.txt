@@ -143,6 +143,7 @@ if(ENABLE_NEON)
             NEON/UNIT/TensorAllocator.cpp
             NEON/UNIT/MemoryManager.cpp
             NEON/UNIT/RuntimeContext.cpp
+            runtime/experimental/operators/CpuActivation.cpp
             runtime/experimental/operators/CpuGemm.cpp
             runtime/experimental/operators/CpuTranspose.cpp)
 endif()

@@ -42,6 +42,7 @@ If there is more than one release in a month then an extra sequential number is 
 @section S2_2_changelog Changelog
 
 v24.07 Public major release
+ - Expose CpuActivation functionality using the experimental operators api
  - Expose CpuGemm functionality using the experimental operators api
  - Expose CpuTranspose functionality using the experimental operators api
  - Optimize CPU operator memory management.
