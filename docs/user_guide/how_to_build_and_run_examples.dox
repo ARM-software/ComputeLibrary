@@ -212,6 +212,7 @@ Configurations supported are limited to the configurations supported by our CMak
 For Android, the library was successfully built and tested using Google's standalone toolchains:
  - clang++ from NDK r20b for armv8a
  - clang++ from NDK r20b for armv8.2-a with FP16 support
+ - clang++ from NDK r26d for building with OpenMP® support
 
 (From 23.02, NDK >= r20b is highly recommended) For NDK r18 or older, here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>:
 - Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html to directory $NDK

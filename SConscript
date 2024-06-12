@@ -33,7 +33,7 @@ import codecs
 import platform
 import SCons
 
-VERSION = "v24.06"
+VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 38
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
