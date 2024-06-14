@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,7 +81,7 @@ void vector_matrix_multiply_f16(
             // window_end_x is computed above which may cause out-of-bound writes to the dst.
             for (; x < (window_end_x - window_step_x); x += window_step_x)
             {
-                if (x > width_matrix_b)
+                if (x >= width_matrix_b)
                 {
                     return;
                 }
@@ -176,7 +176,7 @@ void vector_matrix_multiply_f16(
 
             for (; x < window_end_x; ++x)
             {
-                if (x > width_matrix_b)
+                if (x >= width_matrix_b)
                 {
                     return;
                 }
