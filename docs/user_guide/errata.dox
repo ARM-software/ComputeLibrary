@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019-2023 Arm Limited.
+/// Copyright (c) 2019-2024 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -29,6 +29,14 @@ namespace arm_compute
 @tableofcontents
 
 @section S7_1_errata Errata
+
+- (COMPMID-6904) Fix out-of-bound memory write for non-optimized FP16 GeMM kernel.
+    - Versions: >= v17.09 && < v24.06
+    - Oses: Linux, Android, MacOS, Windows.
+    - Conditions:
+        - Compile the latest Arm Compute Library for armv8.2-a or multi_isa
+        - Device with FP16 support
+        - GeMM with beta coefficient != 0 or 1
 
 - (COMPMID-6493) Crash when running Arm Compute Library compiled for SVE2 on a computer that support SVE only.
     - Versions: >= v21.02 && <=v23.08
