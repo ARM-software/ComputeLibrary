@@ -38,19 +38,23 @@ namespace arm_compute
 struct LUTInfo
 {
     ActivationLayerInfo::ActivationFunction act;
+    float                                   alpha;
+    float                                   beta;
     DataType                                dt;
-    QuantizationInfo                        qinfo;
+    UniformQuantizationInfo                 qinfo;
+
     // Operators enable use of map with Lutinfo as key
     friend bool operator<(const LUTInfo &l, const LUTInfo &r)
     {
-        return (l.act < r.act) || ((l.act == r.act) && (l.dt < r.dt)) ||
-               ((l.act == r.act) && (l.dt == r.dt) && (l.qinfo.scale() < r.qinfo.scale())) ||
-               ((l.act == r.act) && (l.dt == r.dt) && (l.qinfo.scale() == r.qinfo.scale()) &&
-                (l.qinfo.offset() < l.qinfo.offset()));
+        const auto l_tup = std::make_tuple(l.act, l.alpha, l.beta, l.dt, l.qinfo.scale, l.qinfo.offset);
+        const auto r_tup = std::make_tuple(r.act, r.alpha, r.beta, r.dt, r.qinfo.scale, r.qinfo.offset);
+
+        return l_tup < r_tup;
     }
-    bool operator==(const LUTInfo &l)
+    bool operator==(const LUTInfo &l) const
     {
-        return this->act == l.act && this->dt == l.dt && this->qinfo == l.qinfo;
+        return this->act == l.act && this->alpha == l.alpha && this->beta == l.beta && this->dt == l.dt &&
+               this->qinfo == l.qinfo;
     }
 };
 

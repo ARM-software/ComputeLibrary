@@ -118,9 +118,15 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     }
 
     ThreadInfo info;
-    info.cpu_info    = &cpu_info();
+    info.cpu_info = &cpu_info();
+
+#if !defined(__ANDROID__)
+    info.num_threads = _num_threads;
+#else  /* !__ANDROID__ */
     info.num_threads = num_threads_to_use;
-#pragma omp parallel for firstprivate(info) num_threads(num_threads_to_use) default(shared) proc_bind(close) \
+#endif /* __ANDROID__ */
+
+#pragma omp parallel for firstprivate(info) num_threads(info.num_threads) default(shared) proc_bind(close) \
     schedule(static, 1)
     for (unsigned int wid = 0; wid < amount_of_work; ++wid)
     {

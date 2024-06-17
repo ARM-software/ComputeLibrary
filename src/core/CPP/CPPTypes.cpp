@@ -140,7 +140,10 @@ unsigned int CPUInfo::get_L2_cache_size() const
 unsigned long CPUInfo::get_sme2_vector_length() const
 {
 #ifdef ARM_COMPUTE_ENABLE_SME2
-    return arm_gemm::utils::sme::get_vector_length<int8_t>();
+    if (this->has_sme2())
+        return arm_gemm::utils::sme::get_vector_length<int8_t>();
+    else
+        return 0;
 #else  // ARM_COMPUTE_ENABLE_SME2
     return 0;
 #endif // ARM_COMPUTE_ENABLE_SME2

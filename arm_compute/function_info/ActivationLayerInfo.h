@@ -121,6 +121,20 @@ public:
         _lut_fp16 = lut;
     }
 #endif // __aarch64__
+
+    // The < and == are added to be able to use this data type as an attribute for LUTInfo
+    friend bool operator<(const ActivationLayerInfo &l, const ActivationLayerInfo &r)
+    {
+        const auto l_tup = std::make_tuple(l._act, l._a, l._b, l._enabled);
+        const auto r_tup = std::make_tuple(r._act, r._a, r._b, r._enabled);
+
+        return l_tup < r_tup;
+    }
+    bool operator==(const ActivationLayerInfo &l) const
+    {
+        return this->_act == l._act && this->_a == l._a && this->_b == l._b && this->_enabled == l._enabled;
+    }
+
 private:
     ActivationFunction _act     = {ActivationLayerInfo::ActivationFunction::IDENTITY};
     float              _a       = {};

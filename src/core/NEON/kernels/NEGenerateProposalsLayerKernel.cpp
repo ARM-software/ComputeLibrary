@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,10 +61,10 @@ static const ComputeAllAnchorsKernel available_kernels[] = {
     {"neon_qu16_computeallanchors", [](const ComputeAllAnchorsData &data) { return data.dt == DataType::QSYMM16; },
      REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qu16_computeallanchors)},
 #endif //defined(ARM_COMPUTE_ENABLE_NEON)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
     {"neon_fp16_computeallanchors", [](const ComputeAllAnchorsData &data) { return data.dt == DataType::F16; },
      REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_computeallanchors)},
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
     {"neon_fp32_computeallanchors", [](const ComputeAllAnchorsData &data) { return data.dt == DataType::F32; },
      REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_computeallanchors)},
 };

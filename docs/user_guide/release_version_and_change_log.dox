@@ -41,6 +41,12 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v24.06 Public minor release
+ - Enable FP16 in multiple Neon™ kernels for multi_isa + v8a
+ - Fix OpenMP® thread scheduling for large machine
+ - Optimize CPU activation functions using LUT-based implementation:
+   - Tanh function for FP16.
+
 v24.05 Public major release
  - Add @ref CLScatter operator for FP32/16, S32/16/8, U32/16/8 data types
  - Various fixes to enable FP16 kernels in armv8a multi_isa builds.
