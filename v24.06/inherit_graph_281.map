@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1cl__direct__conv_1_1_i_cl_direct_conv_kernel_config.xhtml" title="Basic interface for the Direct convolution kernel configuration." alt="" coords="5,46,199,73"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__direct__conv_1_1_cl_direct_conv_default_config_bifrost.xhtml" title="Bifrost based OpenCL direct convolution configuration." alt="" coords="247,5,443,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cl__direct__conv_1_1_cl_direct_conv_default_config_valhall.xhtml" title="Valhall based OpenCL direct convolution configuration." alt="" coords="247,71,443,112"/>
+</map>

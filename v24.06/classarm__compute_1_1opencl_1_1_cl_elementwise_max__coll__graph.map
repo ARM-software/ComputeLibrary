@@ -1,0 +1,5 @@
+<map id="ClElementwiseMax" name="ClElementwiseMax">
+<area shape="rect" id="node1" title="Basic function to run opencl::kernels::ClArithmeticKernel for max." alt="" coords="5,155,152,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1experimental_1_1_i_c_l_operator.xhtml" title="Basic interface for functions which have a single async CL kernel." alt="" coords="31,80,127,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1experimental_1_1_i_operator.xhtml" title="Base class for all async functions." alt="" coords="37,5,120,32"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="CpuFloorKernel" name="CpuFloorKernel">
+<area shape="rect" id="node1" title="Cpu accelarated kernel to perform a floor operation." alt="" coords="55,323,177,349"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="5,247,227,273"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="65,81,157,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="132,157,305,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="77,5,144,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="GEMMConfigResult" name="GEMMConfigResult">
+<area shape="rect" id="node1" title="Result of querying about GEMM config ( GEMMLHSMatrixInfo and GEMMRHSMatrixInfo)" alt="" coords="101,95,247,121"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml" title="GEMM LHS (Left Hand Side) matrix information." alt="" coords="5,5,161,32"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml" title="GEMM RHS (Right Hand Side) matrix information." alt="" coords="185,5,344,32"/>
+</map>
