@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -142,5 +142,6 @@ if(ENABLE_NEON)
             NEON/UNIT/DynamicTensor.cpp
             NEON/UNIT/TensorAllocator.cpp
             NEON/UNIT/MemoryManager.cpp
-            NEON/UNIT/RuntimeContext.cpp)
+            NEON/UNIT/RuntimeContext.cpp
+            runtime/experimental/operators/CpuGemm.cpp)
 endif()

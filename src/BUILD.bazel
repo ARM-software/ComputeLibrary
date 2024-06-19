@@ -1021,7 +1021,8 @@ filegroup(
 	"runtime/SubTensor.cpp",
 	"runtime/Tensor.cpp",
 	"runtime/TensorAllocator.cpp",
-	"runtime/Utils.cpp"]  +
+	"runtime/Utils.cpp",
+	"runtime/experimental/operators/CpuGemm.cpp"]  +
     glob(["**/*.h",
     "**/*.hpp",
     "**/*.inl"]),

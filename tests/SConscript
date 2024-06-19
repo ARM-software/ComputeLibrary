@@ -157,6 +157,9 @@ if env['neon']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/NEON/' + filter_pattern)
     files_validation += Glob('validation/cpu/unit/*.cpp')
 
+    # Add wrapper tests
+    files_validation += Glob('validation/runtime/experimental/*/' + filter_pattern)
+
 extra_link_flags = []
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
