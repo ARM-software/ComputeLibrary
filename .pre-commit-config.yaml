@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -68,6 +68,12 @@ repos:
         language: python
         entry: python ./scripts/check_header_guards.py --extensions=h,hh,hpp,inl --comment_style=double_slash --prefix=ACL --exclude=compute_kernel_writer/,src/core/NEON/kernels/convolution/,src/core/NEON/kernels/arm_gemm/,src/core/NEON/kernels/arm_conv/,include/ --add_extension
         pass_filenames: true
+      - id: pre-push-check
+        name: Commit Message Check
+        language: python
+        always_run: true
+        entry: bash -c "pip install -q commitizen && git log -1 --pretty=%s | cz check"
+        stages: [pre-push]
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.6
     hooks:
@@ -77,6 +83,7 @@ repos:
             (?x)^(
               tests/.*
             )$
+        stages: [commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -87,6 +94,7 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
         description: Forces to replace line ending by the UNIX 'lf' character.
+        stages: [commit]
       - id: check-added-large-files
         args: ['--maxkb=100']
         stages: [commit]

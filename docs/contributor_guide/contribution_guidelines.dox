@@ -355,6 +355,15 @@ Another way of running the checks is using `pre-commit` (https://pre-commit.com/
 
 This will create the hooks that perform the formatting checks mentioned above and will automatically run just before committing to flag issues.
 
+Following conventional commits https://www.conventionalcommits.org/en/v1.0.0/#specification each commit must have a type from the following:
+build, ci, docs, feat, fix, perf, refactor, style, test, chore, revert, bump. In this format: `<type>[optional scope]: <description>`.
+
+Commitizen (https://commitizen-tools.github.io/commitizen/) is used to do check that this standard is followed and is used in the `pre-commit`
+framework:
+    pre-commit install --hook-type pre-push
+
+This will create the pre-push hook that is going to check the commit message format before pushing to remote.
+
 @subsection S5_1_3_library_size_guidelines Library size: best practices and guidelines
 
 @subsubsection S5_1_3_1_template_suggestions Template suggestions
