@@ -75,23 +75,25 @@ if not framework_env['mali']:
 else:
     framework_env.Append(CPPDEFINES = ['MALI_ENABLED'])
 
-#Set up to use temp file for long command when building and linking libraries
-framework_env['TEMPFILE'] = SCons.Platform.TempFileMunge
+#The following set up only works for posix system, RANLIBCOM env variable isn't available on win32 HOST_OS
+if framework_env['HOST_OS'] == 'posix':
+    #Set up to use temp file for long command when building and linking libraries
+    framework_env['TEMPFILE'] = SCons.Platform.TempFileMunge
 
-#To use temp file for any command, the following pattern should be used:
-#   env['COMMAND'] = "{$TEMPFILE('$COMMANDSTRING')}"
-#See: https://github.com/SCons/scons/blob/05f2992377844bbfec9bcd4a9c7f5479c634b91b/SCons/Platform/__init__.py#L147
-#The commands' string are taken from https://github.com/SCons/scons
-#The commands' explanations are taken from Scons userguide
+    #To use temp file for any command, the following pattern should be used:
+    #   env['COMMAND'] = "{$TEMPFILE('$COMMANDSTRING')}"
+    #See: https://github.com/SCons/scons/blob/05f2992377844bbfec9bcd4a9c7f5479c634b91b/SCons/Platform/__init__.py#L147
+    #The commands' string are taken from https://github.com/SCons/scons
+    #The commands' explanations are taken from Scons userguide
 
-#The command line used to compile C++ source file to an object file
-framework_env['CXXCOM'] = "${TEMPFILE('"+ framework_env['CXXCOM'] + "')}"
-#The command line used to generate a static library from object files
-framework_env['ARCOM'] = "${TEMPFILE('"+ framework_env['ARCOM'] + "')}"
-#The command line used to index a static library archive
-framework_env['RANLIBCOM'] = "${TEMPFILE('"+ framework_env['RANLIBCOM'] + "')}"
-#Set up directory for temp files. To prevent permission issue, the temp files are in the same directory with output files
-framework_env['TEMPFILEDIR'] = framework_env['build_dir']
+    #The command line used to compile C++ source file to an object file
+    framework_env['CXXCOM'] = "${TEMPFILE('"+ framework_env['CXXCOM'] + "')}"
+    #The command line used to generate a static library from object files
+    framework_env['ARCOM'] = "${TEMPFILE('"+ framework_env['ARCOM'] + "')}"
+    #The command line used to index a static library archive
+    framework_env['RANLIBCOM'] = "${TEMPFILE('"+ framework_env['RANLIBCOM'] + "')}"
+    #Set up directory for temp files. To prevent permission issue, the temp files are in the same directory with output files
+    framework_env['TEMPFILEDIR'] = framework_env['build_dir']
 
 arm_compute_test_framework = framework_env.StaticLibrary('arm_compute_test_framework', files)
 
