@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,15 +97,12 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 template <typename T>
 void run_permute(const Window &window, const ITensor *src, const ITensor *dst, const PermutationVector &perm)
 {
-    const DataLayout src_layout = src->info()->data_layout();
-
     // Source window
     Window window_src = window;
 
     // we only support these two configs in src/core/NEON/kernels/convolution/common/shims.hpp, for all others
     // we have to fall back to C++
-    if ((src_layout == DataLayout::NCHW && perm == PermutationVector{2U, 0U, 1U}) ||
-        (src_layout == DataLayout::NHWC && perm == PermutationVector{1U, 2U, 0U}))
+    if (perm == PermutationVector{2U, 0U, 1U} || perm == PermutationVector{1U, 2U, 0U})
     {
         window_src.set(Window::DimX,
                        Window::Dimension(window.x().start(), window.x().end(), window.x().end() - window.x().start()));
@@ -128,49 +125,16 @@ void run_permute(const Window &window, const ITensor *src, const ITensor *dst, c
     Iterator src_it(src, window_src);
     Iterator dst_it(dst, window_dst);
 
-    int in_row_stride     = 0;
-    int in_col_stride     = 0;
-    int in_channel_stride = 0;
-    int in_batch_stride   = 0;
-    int n_cols            = 0;
-    int n_rows            = 0;
-    int n_channels        = 0;
-    int n_batches         = 0;
-
-    switch (src_layout)
-    {
-        case DataLayout::NCHW:
-        {
-            in_row_stride     = src->info()->strides_in_bytes().y() / sizeof(T);
-            in_channel_stride = src->info()->strides_in_bytes().z() / sizeof(T);
-            in_batch_stride   = src->info()->strides_in_bytes()[3] / sizeof(T);
-            n_cols            = src->info()->tensor_shape().x();
-            n_rows            = window_src.y().step();
-            n_channels        = src->info()->tensor_shape().z();
-            n_batches         = src->info()->tensor_shape()[3];
-            break;
-        }
-        case DataLayout::NHWC:
-        {
-            in_col_stride   = src->info()->strides_in_bytes().y() / sizeof(T);
-            in_row_stride   = src->info()->strides_in_bytes().z() / sizeof(T);
-            in_batch_stride = src->info()->strides_in_bytes()[3] / sizeof(T);
-            n_channels      = src->info()->tensor_shape().x();
-            n_cols          = window_src.y().step();
-            n_rows          = src->info()->tensor_shape().z();
-            n_batches       = src->info()->tensor_shape()[3];
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Invalid source data layout.");
-            break;
-        }
-    }
-
     // CHW -> HWC
-    if (src_layout == DataLayout::NCHW && perm == PermutationVector{2U, 0U, 1U})
+    if (perm == PermutationVector{2U, 0U, 1U})
     {
+        const int in_row_stride      = src->info()->strides_in_bytes().y() / sizeof(T);
+        const int in_channel_stride  = src->info()->strides_in_bytes().z() / sizeof(T);
+        const int in_batch_stride    = src->info()->strides_in_bytes()[3] / sizeof(T);
+        const int n_cols             = src->info()->tensor_shape().x();
+        const int n_rows             = window_src.y().step();
+        const int n_channels         = src->info()->tensor_shape().z();
+        const int n_batches          = src->info()->tensor_shape()[3];
         const int out_channel_stride = dst->info()->strides_in_bytes().x() / sizeof(T);
         const int out_col_stride     = dst->info()->strides_in_bytes().y() / sizeof(T);
         const int out_row_stride     = dst->info()->strides_in_bytes().z() / sizeof(T);
@@ -188,8 +152,15 @@ void run_permute(const Window &window, const ITensor *src, const ITensor *dst, c
             src_it, dst_it);
     }
     // HWC -> CHW
-    else if (src_layout == DataLayout::NHWC && perm == PermutationVector{1U, 2U, 0U})
+    else if (perm == PermutationVector{1U, 2U, 0U})
     {
+        const int in_col_stride      = src->info()->strides_in_bytes().y() / sizeof(T);
+        const int in_row_stride      = src->info()->strides_in_bytes().z() / sizeof(T);
+        const int in_batch_stride    = src->info()->strides_in_bytes()[3] / sizeof(T);
+        const int n_channels         = src->info()->tensor_shape().x();
+        const int n_cols             = window_src.y().step();
+        const int n_rows             = src->info()->tensor_shape().z();
+        const int n_batches          = src->info()->tensor_shape()[3];
         const int out_col_stride     = dst->info()->strides_in_bytes().x() / sizeof(T);
         const int out_row_stride     = dst->info()->strides_in_bytes().y() / sizeof(T);
         const int out_channel_stride = dst->info()->strides_in_bytes().z() / sizeof(T);
