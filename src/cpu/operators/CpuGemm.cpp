@@ -174,8 +174,8 @@ void CpuGemm::configure(const ITensorInfo *a,
             // Configure rhs transpose1xw kernel
             _transpose1xW_b_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
             _transpose1xW_b_kernel->configure(b_to_use, &_tmp_b);
-            _aux_mem[Transposed1xWRHS] =
-                MemoryInfo(offset_int_vec(Transposed1xWRHS), MemoryLifetime::Persistent, _tmp_b.total_size());
+            const auto lifetime = _reshape_b_only_on_first_run ? MemoryLifetime::Persistent : MemoryLifetime::Temporary;
+            _aux_mem[Transposed1xWRHS] = MemoryInfo(offset_int_vec(Transposed1xWRHS), lifetime, _tmp_b.total_size());
 
             // Use a and b here instead of _tmp_a and _tmp_b because CpuGemmMatrixMultiplyKernel requires the original m,n,k in case of interleaved a and transposed1xw b
             const int m = a->dimension(1);

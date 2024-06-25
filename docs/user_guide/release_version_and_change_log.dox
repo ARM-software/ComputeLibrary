@@ -50,6 +50,7 @@ v24.07 Public major release
  - Add SVE fixed format interleaved BF16 DOT kernel.
  - Updates and optimizations to assembly kernels.
  - Expose CpuGemm functionality using the experimental operators api
+ - Optimize CPU operator memory management.
 
 v24.06 Public minor release
  - Enable FP16 in multiple Neon™ kernels for multi_isa + v8a
