@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -278,12 +278,6 @@ template <>
 svint32_t elementwise_pow<svint32_t>(svbool_t &pg, const svint32_t &a, const svint32_t &b)
 {
     return svcvt_s32_z(pg, svpow_z(pg, svcvt_f32_z(pg, a), svcvt_f32_z(pg, b)));
-}
-
-template <>
-svint32_t elementwise_div<svint32_t>(svbool_t &pg, const svint32_t &a, const svint32_t &b)
-{
-    return svcvt_s32_z(pg, svdiv_z(pg, svcvt_f32_z(pg, a), svcvt_f32_z(pg, b)));
 }
 
 template <>
