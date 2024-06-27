@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -166,6 +166,11 @@ void CLTensorAllocator::free()
     _memory.set_region(nullptr);
     clear_quantization_arrays(_scale, _offset);
     info().set_is_resizable(true);
+}
+
+bool CLTensorAllocator::is_allocated() const
+{
+    return _memory.region() != nullptr;
 }
 
 Status CLTensorAllocator::import_memory(cl::Buffer buffer)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLTENSORALLOCATOR_H
-#define ARM_COMPUTE_CLTENSORALLOCATOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_CLTENSORALLOCATOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_CLTENSORALLOCATOR_H
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -106,6 +106,9 @@ public:
      *
      */
     void free() override;
+
+    bool is_allocated() const override;
+
     /** Import an existing memory as a tensor's backing memory
      *
      * @warning memory should have been created under the same context that Compute Library uses.
@@ -156,4 +159,4 @@ private:
     CLInt32Array       _offset;                  /**< Offsets array in case of quantized per channel data type */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLTENSORALLOCATOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_CLTENSORALLOCATOR_H

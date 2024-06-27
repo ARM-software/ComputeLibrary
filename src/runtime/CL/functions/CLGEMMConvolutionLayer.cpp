@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,9 +109,9 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext    &compile_contex
         {TensorType::ACL_SRC_1, weights},
         {TensorType::ACL_SRC_2, biases},
     };
-    _impl->aux_mem_req = _impl->op->workspace();
-    _impl->workspace_tensors =
-        manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->aux_mem_req       = _impl->op->workspace();
+    _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
+                                                          _impl->prep_pack, /* allocate_now */ false);
 }
 
 Status CLGEMMConvolutionLayer::validate(const ITensorInfo         *input,
@@ -139,6 +139,7 @@ void CLGEMMConvolutionLayer::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace_tensors);
         _impl->op->prepare(_impl->prep_pack);
         auto has_reshape =
             std::find_if(_impl->aux_mem_req.begin(), _impl->aux_mem_req.end(),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,6 +149,11 @@ void TensorAllocator::free()
 {
     _memory.set_region(nullptr);
     info().set_is_resizable(true);
+}
+
+bool TensorAllocator::is_allocated() const
+{
+    return _memory.region() != nullptr;
 }
 
 Status TensorAllocator::import_memory(void *memory)

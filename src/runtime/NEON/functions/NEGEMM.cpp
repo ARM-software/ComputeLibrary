@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,8 +92,8 @@ void NEGEMM::configure(const ITensor  *a,
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack    = {{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_SRC_2, c}, {ACL_DST, d}};
     _impl->prep_pack   = {{ACL_SRC_1, b}, {ACL_SRC_2, c}};
-    _impl->workspace =
-        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
+                                                _impl->prep_pack, /* allocate_now */ false);
 }
 
 Status NEGEMM::validate(const ITensorInfo *a,
@@ -139,6 +139,7 @@ void NEGEMM::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace);
         _impl->op->prepare(_impl->prep_pack);
 
         auto has_reshape =

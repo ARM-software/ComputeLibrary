@@ -69,6 +69,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor             *input,
                                            const ActivationLayerInfo &act_info,
                                            bool                       enable_fast_math)
 {
+    _impl->is_prepared      = false;
     _impl->original_weights = weights;
     _impl->op               = std::make_unique<cpu::CpuWinogradConv2d>();
     _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(),
@@ -77,8 +78,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor             *input,
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack    = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
     _impl->prep_pack   = {{ACL_SRC_1, weights}, {ACL_SRC_2, biases}};
-    _impl->workspace =
-        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
+                                                _impl->prep_pack, /* allocate_now */ false);
 }
 
 void NEWinogradConvolutionLayer::run()
@@ -104,6 +105,7 @@ void NEWinogradConvolutionLayer::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace);
         _impl->op->prepare(_impl->prep_pack);
         _impl->original_weights->mark_as_unused();
 

@@ -69,18 +69,19 @@ void NEGEMMConvolutionLayer::configure(const ITensor             *input,
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
-    _impl->weights = weights;
-    _impl->op      = std::make_unique<cpu::CpuGemmConv2d>();
+    _impl->is_prepared = false;
+    _impl->weights     = weights;
+    _impl->op          = std::make_unique<cpu::CpuGemmConv2d>();
     _impl->op->configure(input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(),
                          conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
 
-    _impl->run_pack    = {{TensorType::ACL_SRC_0, input},
-                          {TensorType::ACL_SRC_1, weights},
-                          {TensorType::ACL_SRC_2, biases},
-                          {TensorType::ACL_DST, output}};
-    _impl->aux_mem_req = _impl->op->workspace();
-    _impl->workspace_tensors =
-        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+    _impl->run_pack          = {{TensorType::ACL_SRC_0, input},
+                                {TensorType::ACL_SRC_1, weights},
+                                {TensorType::ACL_SRC_2, biases},
+                                {TensorType::ACL_DST, output}};
+    _impl->aux_mem_req       = _impl->op->workspace();
+    _impl->workspace_tensors = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
+                                                        _impl->run_pack, /* allocate_now */ false);
 }
 
 Status NEGEMMConvolutionLayer::validate(const ITensorInfo         *input,
@@ -129,6 +130,7 @@ void NEGEMMConvolutionLayer::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace_tensors);
         _impl->op->prepare(_impl->run_pack);
 
         // Release temporary tensors that are only used in prepare stage
