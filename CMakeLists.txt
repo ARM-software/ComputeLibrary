@@ -159,6 +159,10 @@ target_include_directories(
          src/cpu/kernels/assembly
          src/core/NEON/kernels/arm_gemm/merges)
 
+if(QNX)
+  install(TARGETS arm_compute_sve DESTINATION lib/)
+endif()
+
 # ---------------------------------------------------------------------
 # SVE2 Library
 
@@ -181,6 +185,9 @@ target_include_directories(
          src/core/cpu/kernels/assembly
          src/cpu/kernels/assembly
          src/core/NEON/kernels/arm_gemm/merges)
+if(QNX)
+  install(TARGETS arm_compute_sve2 DESTINATION lib/)
+endif()
 
 # ---------------------------------------------------------------------
 # Core Library
@@ -205,8 +212,14 @@ target_include_directories(
 target_compile_options(arm_compute PUBLIC ${COMMON_CXX_FLAGS})
 
 add_library(ArmCompute::Core ALIAS arm_compute)
-target_link_libraries(
-  arm_compute PUBLIC arm_compute_sve arm_compute_sve2)
+if(QNX)
+  target_link_libraries(
+    arm_compute PUBLIC arm_compute_sve arm_compute_sve2 regex gomp)
+  install(TARGETS arm_compute DESTINATION lib/)
+else()
+  target_link_libraries(
+    arm_compute PUBLIC arm_compute_sve arm_compute_sve2)
+endif()
 
 # ---------------------------------------------------------------------
 # Graph Library
@@ -230,6 +243,9 @@ target_include_directories(
           src/core/NEON/kernels/arm_conv/depthwise
           src/core/NEON/kernels/convolution/winograd)
 target_compile_options(arm_compute_graph PUBLIC ${COMMON_CXX_FLAGS})
+if(QNX)
+  install(TARGETS arm_compute_graph DESTINATION lib/)
+endif()
 
 add_library(ArmCompute::Graph ALIAS arm_compute_graph)
 
@@ -257,6 +273,9 @@ if(ARM_COMPUTE_BUILD_TESTING)
                         target_link_libraries(
                           arm_compute_validation_framework
       PUBLIC arm_compute arm_compute_graph)
+  if(QNX)
+    install(TARGETS arm_compute_validation_framework DESTINATION lib)
+  endif()
 
   # ---------------------------------------------------------------------
   # Validation Binary
@@ -280,6 +299,9 @@ if(ARM_COMPUTE_BUILD_TESTING)
     PUBLIC arm_compute arm_compute_graph arm_compute_validation_framework
            arm_compute_sve)
   target_link_directories(arm_compute_validation PUBLIC tests)
+  if(QNX)
+    install(TARGETS arm_compute_validation DESTINATION bin/ComputeLibrary_tests)
+  endif()
 
   # ---------------------------------------------------------------------
   # Benchmark Binary
@@ -295,6 +317,9 @@ if(ARM_COMPUTE_BUILD_TESTING)
   target_link_libraries(
     arm_compute_benchmark PUBLIC arm_compute arm_compute_graph
                                  arm_compute_validation_framework)
+  if(QNX)
+    install(TARGETS arm_compute_validation DESTINATION bin/ComputeLibrary_tests)
+  endif()
 
 endif() # ARM_COMPUTE_BUILD_TESTING
 # ---------------------------------------------------------------------
@@ -315,6 +340,9 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
                               "${CMAKE_BINARY_DIR}/examples")
     target_link_libraries(${test_name} PUBLIC arm_compute
                                               arm_compute_graph arm_compute_sve)
+    if(QNX)
+      install(TARGETS ${test_name} DESTINATION bin/ComputeLibrary_tests)
+    endif()
   endforeach()
 
   # NEON Examples
@@ -325,6 +353,13 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
       ${test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                               "${CMAKE_BINARY_DIR}/examples")
     target_link_libraries(${test_name} PUBLIC arm_compute)
+    if(QNX)
+      install(TARGETS ${test_name} DESTINATION bin/ComputeLibrary_tests)
+    endif()
   endforeach()
 
 endif() # ARM_COMPUTE_BUILD_EXAMPLES
+
+if(QNX)
+  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/arm_compute DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()

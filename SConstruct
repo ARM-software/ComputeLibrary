@@ -99,7 +99,7 @@ vars.AddVariables(
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8.6-a-sve2-sme2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS. With bare metal selected, only Arm® Neon™ (not OpenCL) can be used, static libraries get built and Neon™'s multi-threading support is disabled.", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows")),
+    EnumVariable("os", "Target OS. With bare metal selected, only Arm® Neon™ (not OpenCL) can be used, static libraries get built and Neon™'s multi-threading support is disabled.", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows", "qnx")),
     EnumVariable("build", "Either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
@@ -177,15 +177,22 @@ def install_lib( lib ):
     # If there is no install folder, then there is nothing to do:
     if install_path == "":
         return lib
+    if env['os'] == 'qnx':
+        return env.Install( "%s/aarch64le/usr/lib/" % install_path, lib)
     return env.Install( "%s/lib/" % install_path, lib)
+
 def install_bin( bin ):
     # If there is no install folder, then there is nothing to do:
     if install_path == "":
         return bin
+    if env['os'] == 'qnx':
+        return env.Install( "%s/aarch64le/usr/bin/" % install_path, bin)
     return env.Install( "%s/bin/" % install_path, bin)
 def install_include( inc ):
     if install_path == "":
         return inc
+    if env['os'] == 'qnx':
+        return env.Install( "%s/usr/include/" % install_path, inc)
     return env.Install( "%s/include/" % install_path, inc)
 
 Export('install_lib')
@@ -251,11 +258,11 @@ if not 'windows' in env['os']:
 
 cpp_tool = {'linux': 'g++', 'android' : 'clang++',
              'tizen': 'g++', 'macos':'clang++',
-             'bare_metal':'g++', 'openbsd':'g++','windows':'clang-cl'}
+             'bare_metal':'g++', 'openbsd':'g++','windows':'clang-cl', 'qnx':'qcc -Vgcc_ntoaarch64le'}
 
 c_tool = {'linux':'gcc', 'android': 'clang', 'tizen':'gcc',
           'macos':'clang','bare_metal':'gcc',
-          'openbsd':'gcc','windows':'clang-cl'}
+          'openbsd':'gcc','windows':'clang-cl', 'qnx':'qcc -Vgcc_ntoaarch64le'}
 
 default_cpp_compiler = cpp_tool[env['os']]
 default_c_compiler = c_tool[env['os']]
@@ -474,6 +481,8 @@ if not GetOption("help"):
     try:
         if env['os'] == 'windows':
             compiler_ver = subprocess.check_output("clang++ -dumpversion").decode().strip()
+        elif env['os'] == 'qnx':
+            compiler_ver = '8'
         else:
             compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
     except OSError:
@@ -581,12 +590,17 @@ if env['opencl']:
         print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
         Exit(1)
 
-if env["os"] not in ["windows","android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
+if env["os"] not in ["windows","android", "bare_metal", "qnx"] and (env['opencl'] or env['cppthreads']):
     env.Append(LIBS = ['pthread'])
 
 if env['os'] == 'openbsd':
     env.Append(LIBS = ['c'])
     env.Append(CXXFLAGS = ['-fPIC'])
+
+if env['os'] == 'qnx':
+    env.Append(LIBS = ['c++'])
+    env.Append(LIBS = ['m'])
+    env.Append(LIBS = ['regex'])
 
 if env['opencl']:
     if env['embed_kernels']:

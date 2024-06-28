@@ -546,7 +546,7 @@ if not env['thread_sanitizer'] and not env['address_sanitizer'] and not env['und
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env['os'] != 'openbsd':
-    if env['os'] == 'windows':
+    if env['os'] == 'windows' or env['os'] == 'qnx':
         arm_compute_env.Append(LIBS = [])
     else:
         arm_compute_env.Append(LIBS = ['dl'])

@@ -159,7 +159,7 @@ if env['neon']:
 extra_link_flags = []
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
-elif env['os'] not in ['windows','bare_metal', 'macos']:
+elif env['os'] not in ['windows','bare_metal', 'macos', 'qnx']:
     test_env.Append(LIBS = ["rt"])
     extra_link_flags += ['-fstack-protector-strong']
 
