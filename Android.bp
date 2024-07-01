@@ -1016,6 +1016,7 @@ cc_library_static {
         "src/runtime/Utils.cpp",
         "src/runtime/experimental/operators/CpuActivation.cpp",
         "src/runtime/experimental/operators/CpuGemm.cpp",
+        "src/runtime/experimental/operators/CpuGemmDirectConv2d.cpp",
         "src/runtime/experimental/operators/CpuTranspose.cpp",
         "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigBifrost.cpp",
         "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigValhall.cpp",

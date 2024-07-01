@@ -145,5 +145,6 @@ if(ENABLE_NEON)
             NEON/UNIT/RuntimeContext.cpp
             runtime/experimental/operators/CpuActivation.cpp
             runtime/experimental/operators/CpuGemm.cpp
+            runtime/experimental/operators/CpuGemmDirectConv2d.cpp
             runtime/experimental/operators/CpuTranspose.cpp)
 endif()

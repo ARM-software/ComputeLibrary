@@ -1007,5 +1007,6 @@ target_sources(
 	runtime/Utils.cpp
 	runtime/experimental/operators/CpuActivation.cpp
 	runtime/experimental/operators/CpuGemm.cpp
+	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
 	runtime/experimental/operators/CpuTranspose.cpp
 )
