@@ -745,10 +745,6 @@ template void requantize_block_32(const Requantize32 &qp, unsigned int width, un
                          const uint32_t *input, unsigned int in_stride, uint8_t *output, unsigned int out_stride,
                          const int32_t *row_bias, const int32_t *col_bias, unsigned int start_col);
 
-template void requantize_block_32(const Requantize32 &qp, unsigned int width, unsigned int height,
-                         const int32_t *input, unsigned int in_stride, uint8_t *output, unsigned int out_stride,
-                         const int32_t *row_bias, const int32_t *col_bias, unsigned int start_col);
-
 /*
  * Routine (and helpers) to compute row sums needed for offset correction.
  *

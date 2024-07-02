@@ -42,8 +42,7 @@ void a64_gemm_s16_asimd_8x12(const int16_t *, const int16_t *, int32_t *, int, i
 // structure.
 class cls_a64_gemm_s16_8x12 {
 public:
-    typedef int16_t lhs_operand_type;
-    typedef int16_t rhs_operand_type;
+    typedef int16_t operand_type;
     typedef int32_t result_type;
 
     typedef void (*kern_type)(const int16_t *, const int16_t *, int32_t *, int, int, int);
@@ -62,8 +61,8 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12> transforms = {};
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 1, true> transforms_quantized = {};
+    StdTransformsFixed<operand_type, result_type, 8, 12> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 8, 12, 1, true> transforms_quantized = {};
 
     kern_type kernel = a64_gemm_s16_asimd_8x12;
 

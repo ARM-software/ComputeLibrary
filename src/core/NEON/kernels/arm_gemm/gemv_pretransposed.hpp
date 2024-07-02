@@ -85,7 +85,7 @@ void run_gemv_kernel<Requantize32>::run(
 //
 // batches are not supported as a batched GEMV makes no sense (can be converted to a GEMM).
 template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
-class GemvPretransposed : public GemmCommon<To, To, Tr> {
+class GemvPretransposed : public GemmCommon<To, Tr> {
     typedef typename strategy::operand_type Toi;
     typedef typename strategy::result_type Tri;
 

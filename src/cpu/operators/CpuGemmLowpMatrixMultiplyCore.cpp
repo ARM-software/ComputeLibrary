@@ -128,31 +128,24 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
                        _reshape_b_only_on_first_run;
     _gemm_info = gemm_info;
 
-    const ITensorInfo *a_to_use = a;
-
-    // Initialize assembly kernel meta-data
-    const cpu::AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);
-
-    const int32_t                 offset_correction = 128;
-    const DataType                dt                = DataType::QASYMM8_SIGNED;
-    const UniformQuantizationInfo iqinfo            = a_to_use->quantization_info().uniform();
-
-    _signed_a = a_to_use->clone()->set_data_type(dt).set_quantization_info(
-        QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction));
-
-    // If inputs are mixed-sign but this machine does not support mixed sign kernels,
-    // flip the sign so matched-sign kernels can be used.
-    if (!_flip_signedness && a->data_type() == DataType::QASYMM8 && b->data_type() == DataType::QASYMM8_SIGNED &&
-        !bool(CpuGemmAssemblyDispatch::validate(a_to_use, b, c, dst, asm_info)))
-    {
-        _flip_signedness = true;
-    }
+    // Offset kernel is need if offset is non-zero or it may change (i.e. dynamic).
+    // It is not needed if the datatype is symmetric, because there is no offset
+    bool a_offset_kernel_needed = _a_offset != 0 || a->quantization_info().is_dynamic();
+    bool b_offset_kernel_needed = _b_offset != 0 || b->quantization_info().is_dynamic();
 
     _asm_glue = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
+
+    const ITensorInfo *a_to_use = a;
 
     // Convert to QASYMM8 -> QASYMM8_SIGNED and back
     if (_flip_signedness)
     {
+        const int32_t                 offset_correction = 128;
+        const DataType                dt                = DataType::QASYMM8_SIGNED;
+        const UniformQuantizationInfo iqinfo            = a_to_use->quantization_info().uniform();
+
+        _signed_a = a_to_use->clone()->set_data_type(dt).set_quantization_info(
+            QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction));
         _convert_to_signed_asymm = std::make_unique<kernels::CpuConvertQuantizedSignednessKernel>();
         _convert_to_signed_asymm->configure(a_to_use, &_signed_a);
         a_to_use  = &_signed_a;
@@ -173,11 +166,6 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
         matrix_a = &_signed_a;
     }
 
-    // Offset kernel is need if offset is non-zero or it may change (i.e. dynamic).
-    // It is not needed if the datatype is symmetric, because there is no offset
-    bool a_offset_kernel_needed = _a_offset != 0 || a->quantization_info().is_dynamic();
-    bool b_offset_kernel_needed = _b_offset != 0 || b->quantization_info().is_dynamic();
-
     // If GEMMLowpOutputStage != NONE, fuse the offset contribution with the output stage
     if (info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE)
     {
@@ -185,6 +173,8 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
         _mm_result_s32     = TensorInfo(dst->tensor_shape(), 1, DataType::S32);
     }
 
+    // Initialize assembly kernel meta-data
+    const cpu::AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);
 #ifdef __aarch64__
     if (!(!b->are_values_constant() &&
           b->tensor_shape().z() > 1)) // Disable batch matmul as optimized GeMM handles batching differently.
@@ -385,6 +375,10 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
     int32_t a_offset = a->quantization_info().uniform().offset;
     int32_t b_offset = b->quantization_info().uniform().offset;
 
+    // Offset kernel is need if offset is non-zero or it may change (i.e. dynamic).
+    bool a_offset_kernel_needed = a_offset != 0 || a->quantization_info().is_dynamic();
+    bool b_offset_kernel_needed = b_offset != 0 || b->quantization_info().is_dynamic();
+
     bool fuse_output_stage = info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;
     if (fuse_output_stage)
     {
@@ -392,31 +386,19 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
                            a->clone()->set_tensor_shape(output->tensor_shape()).set_data_type(DataType::S32));
     }
 
-    // Initialize assembly kernel meta-data
-    const AsmGemmInfo asm_info = init_assembly_metadata(info);
-
     // Convert QASYMM8->QASYMM8_SIGNED
-    const int32_t                 offset_correction = 128;
-    const DataType                dt                = DataType::QASYMM8_SIGNED;
-    const UniformQuantizationInfo iqinfo            = a_to_use->quantization_info().uniform();
-
-    TensorInfo signed_a = a_to_use->clone()->set_data_type(dt).set_quantization_info(
-        QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction));
+    TensorInfo signed_a{};
     TensorInfo signed_output{};
-
-    bool flip_signedness = is_data_type_quantized_per_channel(b->data_type()) &&
+    bool       flip_signedness = is_data_type_quantized_per_channel(b->data_type()) &&
                            (a->data_type() == DataType::QASYMM8) && info.reshape_b_only_on_first_run();
-
-    // If inputs are mixed-sign but this machine does not support mixed sign kernels,
-    // flip the sign so matched-sign kernels can be used.
-    if (!flip_signedness && a->data_type() == DataType::QASYMM8 && b->data_type() == DataType::QASYMM8_SIGNED &&
-        !bool(CpuGemmAssemblyDispatch::validate(a_to_use, b, c, output, asm_info)))
-    {
-        flip_signedness = true;
-    }
-
     if (flip_signedness)
     {
+        const int32_t                 offset_correction = 128;
+        const DataType                dt                = DataType::QASYMM8_SIGNED;
+        const UniformQuantizationInfo iqinfo            = a_to_use->quantization_info().uniform();
+
+        signed_a = a_to_use->clone()->set_data_type(dt).set_quantization_info(
+            QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction));
         ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuConvertQuantizedSignednessKernel::validate(a_to_use, &signed_a));
         a_to_use = &signed_a;
         a_offset = signed_a.quantization_info().uniform().offset;
@@ -436,9 +418,8 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         matrix_a_info = &signed_a;
     }
 
-    // Offset kernel is need if offset is non-zero or it may change (i.e. dynamic).
-    bool a_offset_kernel_needed = a_offset != 0 || a->quantization_info().is_dynamic();
-    bool b_offset_kernel_needed = b_offset != 0 || b->quantization_info().is_dynamic();
+    // Initialize assembly kernel meta-data
+    const AsmGemmInfo asm_info = init_assembly_metadata(info);
 
     // Check if we need to run the optimized assembly kernel
     bool run_optimised             = false;

@@ -40,8 +40,7 @@ void a64_ffinterleaved_fp32_mla_8x12( ARGLIST );
 class cls_a64_ffinterleaved_fp32_mla_8x12
 {
 public:
-    typedef float lhs_operand_type;
-    typedef float rhs_operand_type;
+    typedef float operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -72,8 +71,8 @@ public:
     }
 
 
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 1> transforms = {};
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 1, true> transforms_quantized = {};
+    StdTransformsFixed<operand_type, result_type, 8, 12, 1> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 8, 12, 1, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

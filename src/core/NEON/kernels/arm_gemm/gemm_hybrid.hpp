@@ -41,7 +41,7 @@ namespace arm_gemm {
 
 // Implementation of the GemmCommon abstract class.
 template<typename strategy, typename To, typename Tr>
-class GemmHybrid : public GemmCommon<To, To, Tr> {
+class GemmHybrid : public GemmCommon<To, Tr> {
     typedef typename strategy::operand_type Toi;
     typedef typename strategy::result_type Tri;
 

@@ -40,8 +40,7 @@ void a64_ffinterleaved_fp16_mla_8x24( ARGLIST );
 class cls_a64_ffinterleaved_fp16_mla_8x24
 {
 public:
-    typedef __fp16 lhs_operand_type;
-    typedef __fp16 rhs_operand_type;
+    typedef __fp16 operand_type;
     typedef __fp16 result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -72,8 +71,8 @@ public:
     }
 
 
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 24, 1> transforms = {};
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 24, 1, true> transforms_quantized = {};
+    StdTransformsFixed<operand_type, result_type, 8, 24, 1> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 8, 24, 1, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

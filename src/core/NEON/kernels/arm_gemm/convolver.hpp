@@ -231,8 +231,8 @@ public:
         for (unsigned int ky=0; ky<params.kernel_height; ky++) {
             for (unsigned int kx=0; kx<params.kernel_width; kx++) {
                 unsigned int n = (ky * params.kernel_width) + kx;
-                m_kernel_y[n] = (ky * params.dilation_h) - params.padding_top;
-                m_kernel_x[n] = (kx * params.dilation_w) - params.padding_left;
+                m_kernel_y[n] = ky - params.padding_top;
+                m_kernel_x[n] = kx - params.padding_left;
             }
         }
     }

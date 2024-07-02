@@ -49,8 +49,7 @@ void a64_sgemm_asimd_8x12_x1(const float *, const float *, float *, int, int, in
 // structure.
 class cls_a64_sgemm_8x12 {
 public:
-    typedef float lhs_operand_type;
-    typedef float rhs_operand_type;
+    typedef float operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)(const float *, const float *, float *, int, int, int);
@@ -69,7 +68,7 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsFixedTRB<lhs_operand_type, rhs_operand_type, result_type, 8, 12> transforms = {};
+    StdTransformsFixedTRB<operand_type, result_type, 8, 12> transforms = {};
 
     template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {

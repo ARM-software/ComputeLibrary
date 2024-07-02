@@ -42,13 +42,6 @@ If there is more than one release in a month then an extra sequential number is 
 @section S2_2_changelog Changelog
 
 v24.07 Public major release
- - Add support for mixed sign quantized convolution.
- - Add support for mixed sign dequantized GEMM.
- - Add SME FP16 GEMV kernel.
- - Change SME vector length function to use RDSVL instead of static variable.
- - Remove unused "get_default_activation_values" functions.
- - Add SVE fixed format interleaved BF16 DOT kernel.
- - Updates and optimizations to assembly kernels.
  - Expose CpuGemm functionality using the experimental operators api
  - Expose CpuTranspose functionality using the experimental operators api
  - Optimize CPU operator memory management.

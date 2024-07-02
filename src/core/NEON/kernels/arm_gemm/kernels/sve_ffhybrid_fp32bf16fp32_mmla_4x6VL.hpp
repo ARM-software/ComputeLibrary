@@ -82,14 +82,16 @@ public:
         return true;
     }
 
-    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 4, 12, 4> transforms = {};
+    StdTransformsSVE<rhs_operand_type, result_type, 4, 12, 4> transforms = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {
         if (std::is_same<T, float>::value) {
             switch (ci->get_cpu_model()) {
+                case CPUModel::V1:
+                    return { 28.74 };
                 default:
-                    return { 32.35 };
+                    return { 15.27 };
             }
         }
 

@@ -41,8 +41,7 @@ void a64_hgemm_asimd_8x24_x1(const __fp16 *, const __fp16 *, __fp16 *, int, int,
 // the constructor to pick a kernel implementation).
 class cls_a64_hgemm_8x24 {
 public:
-    typedef __fp16 lhs_operand_type;
-    typedef __fp16 rhs_operand_type;
+    typedef __fp16 operand_type;
     typedef __fp16 result_type;
 
     typedef void (*kern_type)(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
@@ -61,7 +60,7 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 24> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 8, 24> transforms = {};
 
     template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {

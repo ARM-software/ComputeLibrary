@@ -33,13 +33,13 @@ namespace output_transform {
 void arm_fp32_2x2_5x5(
   unsigned int n_channels,
   const float* inptr,
-  const size_t matrix_stride,
+  size_t matrix_stride,
   const float* bptr,
   float *outptr,
-  const size_t output_row_stride,
-  const size_t output_col_stride,
-  const float output_min,
-  const float output_max
+  size_t output_row_stride,
+  size_t output_col_stride,
+  float output_min,
+  float output_max
 )
 {
   constexpr auto output_tile_rows = 2u, output_tile_cols = 2u;

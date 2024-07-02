@@ -105,7 +105,7 @@ struct SoftmaxKernelDataTypeISASelectorData
     cpuinfo::CpuIsaInfo isa;
     bool                is_log;
     int                 axis;
-    uint64_t            sme2_vector_length;
+    unsigned long       sme2_vector_length;
 };
 
 // Selector pointer types

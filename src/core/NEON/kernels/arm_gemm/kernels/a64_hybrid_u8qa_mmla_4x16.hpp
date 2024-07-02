@@ -70,7 +70,7 @@ public:
         return false;
     }
 
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 4, 16, 8> transforms = {};
+    StdTransformsFixed<rhs_operand_type, result_type, 4, 16, 8> transforms = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

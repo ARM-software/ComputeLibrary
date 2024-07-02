@@ -35,8 +35,7 @@ void sve_interleaved_fp32_mmla_8x3VL(const float *, const float *, float *, int,
 
 class cls_sve_interleaved_fp32_mmla_8x3VL {
 public:
-    typedef float lhs_operand_type;
-    typedef float rhs_operand_type;
+    typedef float operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)(const float *, const float *, float *, int, int, int);
@@ -58,7 +57,7 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 6, 2, 2> transforms = {};
+    StdTransformsSVE<operand_type, result_type, 8, 6, 2, 2> transforms = {};
 
     kern_type kernel=sve_interleaved_fp32_mmla_8x3VL;
 

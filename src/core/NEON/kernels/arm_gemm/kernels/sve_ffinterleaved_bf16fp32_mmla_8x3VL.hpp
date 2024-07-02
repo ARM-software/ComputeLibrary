@@ -41,8 +41,7 @@ void sve_ffinterleaved_bf16fp32_mmla_8x3VL( ARGLIST );
 class cls_sve_ffinterleaved_bf16fp32_mmla_8x3VL
 {
 public:
-    typedef bfloat16 lhs_operand_type;
-    typedef bfloat16 rhs_operand_type;
+    typedef bfloat16 operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -73,8 +72,8 @@ public:
     }
 
 
-    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 6, 4, 2> transforms = {};
-    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 6, 4, 2, true> transforms_quantized = {};
+    StdTransformsSVE<operand_type, result_type, 8, 6, 4, 2> transforms = {};
+    StdTransformsSVE<operand_type, result_type, 8, 6, 4, 2, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {
@@ -89,8 +88,10 @@ public:
 
         if (std::is_same<T, float>::value) {
             switch (ci->get_cpu_model()) {
-                default:
-                    return { 39.66, 5.18, 4.37 };
+                case CPUModel::V1:
+                    return { 53.48, 4.23, 6.53 };
+                default:                
+                    return { 29.07, 2.76, 5.39 };
             }
         }
 

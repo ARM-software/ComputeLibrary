@@ -37,8 +37,7 @@ void a64_gemm_s8_4x4(const int8_t *, const int8_t *, int32_t *, int, int, int);
 
 class cls_a64_gemm_s8_4x4 {
 public:
-    typedef int8_t lhs_operand_type;
-    typedef int8_t rhs_operand_type;
+    typedef int8_t operand_type;
     typedef int32_t result_type;
 
     typedef void (*kern_type)(const int8_t *, const int8_t *, int32_t *, int, int, int);
@@ -57,8 +56,8 @@ public:
     }
 
     // Use the standard fixed size transforms.
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 4, 4, 16> transforms = {};
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 4, 4, 16, true> transforms_quantized = {};
+    StdTransformsFixed<operand_type, result_type, 4, 4, 16> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 4, 4, 16, true> transforms_quantized = {};
 
     template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {

@@ -50,8 +50,8 @@ void a64_ffhybrid_fp32bf16fp32_mmla_6x16 (
         size_t output_offset = {};
         size_t input_initial_col = {};
         size_t input_offset = {};
-        void *output_ptr = {};
-        const float *bias = {};
+        void *output_ptr = nullptr;
+        const float *bias = nullptr;
     } ka;
 
     unsigned long flags=0;

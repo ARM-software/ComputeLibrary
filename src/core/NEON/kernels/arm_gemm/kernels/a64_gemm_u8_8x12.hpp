@@ -37,8 +37,7 @@ void a64_gemm_u8_8x12_x1(const uint8_t *, const uint8_t *, uint32_t *, int, int,
 
 class cls_a64_gemm_u8_8x12 {
 public:
-    typedef uint8_t lhs_operand_type;
-    typedef uint8_t rhs_operand_type;
+    typedef uint8_t operand_type;
     typedef uint32_t result_type;
 
     typedef void (*kern_type)(const uint8_t *, const uint8_t *, uint32_t *, int, int, int);
@@ -67,8 +66,8 @@ public:
     }
 
     // Use the standard fixed sized transforms.
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 4> transforms = {};
-    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 4, true> transforms_quantized = {};
+    StdTransformsFixed<operand_type, result_type, 8, 12, 4> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 8, 12, 4, true> transforms_quantized = {};
 
     template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {

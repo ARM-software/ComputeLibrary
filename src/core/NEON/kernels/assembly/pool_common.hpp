@@ -68,8 +68,7 @@ public:
     virtual ~IPoolingCommon() = default;
 
     // Determine the amount of working space required.
-    virtual size_t get_working_size(unsigned int num_threads) const                          = 0;
-    virtual size_t get_working_size(unsigned int num_threads, unsigned int n_channels) const = 0;
+    virtual size_t get_working_size(unsigned int num_threads) const = 0;
 
     // Execute pooling over the specified area of memory.
     virtual void execute(const void *const input,

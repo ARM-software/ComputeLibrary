@@ -277,8 +277,8 @@ struct Nothing
 {
 };
 
-template <typename Tlop, typename Trop, typename Tret>
-using UniqueGemmCommon = std::unique_ptr<GemmCommon<Tlop, Trop, Tret>>;
+template <typename Top, typename Tret>
+using UniqueGemmCommon = std::unique_ptr<GemmCommon<Top, Tret>>;
 
 /* Low level API calls.
  * These are implemented as 'GemmArgs' versions, or with the arguments explicitly listed. */
@@ -288,13 +288,13 @@ using UniqueGemmCommon = std::unique_ptr<GemmCommon<Tlop, Trop, Tret>>;
 template <typename Top, typename Tret, class OutputStage = Nothing>
 KernelDescription get_gemm_method(const GemmArgs &args, const OutputStage & = {});
 
-template <typename Tlop, typename Trop, typename Tret, class OutputStage = Nothing>
-UniqueGemmCommon<Tlop, Trop, Tret> gemm(const GemmArgs &args, const OutputStage & = {});
+template <typename Top, typename Tret, class OutputStage = Nothing>
+UniqueGemmCommon<Top, Tret> gemm(const GemmArgs &args, const OutputStage & = {});
 
-template <typename Tlop, typename Trop, typename Tret, class OutputStage = Nothing>
+template <typename Top, typename Tret, class OutputStage = Nothing>
 std::vector<KernelDescription> get_compatible_kernels(const GemmArgs &args, const OutputStage & = {});
 
-template <typename Tlop, typename Trop, typename Tret, class OutputStage = Nothing>
+template <typename Top, typename Tret, class OutputStage = Nothing>
 bool has_opt_gemm(WeightFormat &weight_format, const GemmArgs &args, const OutputStage & = {});
 
 } // namespace arm_gemm
