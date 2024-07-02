@@ -30,6 +30,16 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- (COMPMID-7109) Under certain conditions, Quantized GEMM may result in very few mismatches due to 16-bit accumuation overflow
+    - Versions: >= v17.09
+    - Oses: Linux, Android, MacOS, Windows.
+    - Conditions:
+        - Compile the latest Arm Compute Library for armv8a
+        - Device without dot product support
+        - In the matrix multiplication
+            - Lhs matrix must have -128 values eight positions apart from each other in its row
+            - Rhs matrix must have -128 values at the same positions as Lhs
+
 - (COMPMID-6904) Fix out-of-bound memory write for non-optimized FP16 GeMM kernel.
     - Versions: >= v17.09 && < v24.06
     - Oses: Linux, Android, MacOS, Windows.

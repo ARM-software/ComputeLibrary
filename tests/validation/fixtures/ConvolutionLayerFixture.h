@@ -204,7 +204,10 @@ protected:
             {
                 if(_use_dynamic_output_quant)
                 {
-                    std::uniform_int_distribution<int32_t> distribution(-128, 127);
+                    // Using -127 as the lower bound because of possible overflow.
+                    // This is a known issue and reported in the errata.
+                    // See COMPMID-7109 for more details
+                    std::uniform_int_distribution<int32_t> distribution(-127, 127);
                     library->fill(tensor, distribution, i);
                 }
                 else
