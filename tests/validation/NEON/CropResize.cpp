@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,7 +92,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // *INDENT-ON*
 
 TEST_SUITE(Float)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<half>,
@@ -101,11 +101,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                combine(framework::dataset::make("IsOutOfBounds", { true, false }),
                                        framework::dataset::make("DataType", DataType::F16))))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // F16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall,

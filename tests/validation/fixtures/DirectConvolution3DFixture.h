@@ -54,6 +54,12 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(data_layout != DataLayout::NDHWC);
 
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const TensorShape weights_shape(num_kernels, input_shape[0], kernel_width, kernel_height, kernel_depth);
         const TensorShape bias_shape(num_kernels);
         const DataType    bias_data_type = is_data_type_quantized(data_type) ? DataType::S32 : data_type;

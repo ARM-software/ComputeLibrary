@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE
-#define ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_CROPRESIZEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_CROPRESIZEFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -49,6 +49,12 @@ public:
     void setup(TensorShape src_shape, TensorShape boxes_shape, Coordinates2D crop_size, InterpolationPolicy method,
                float extrapolation_value, bool is_outside_bounds, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(src_shape, boxes_shape, crop_size, method, extrapolation_value, is_outside_bounds, data_type);
         _reference = compute_reference(src_shape, boxes_shape, crop_size, method, extrapolation_value, is_outside_bounds, data_type);
     }
@@ -131,4 +137,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_CROPRESIZEFIXTURE_H

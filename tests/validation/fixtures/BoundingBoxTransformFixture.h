@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_BOUNDINGBOXTRANSFORM_FIXTURE
-#define ARM_COMPUTE_TEST_BOUNDINGBOXTRANSFORM_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_BOUNDINGBOXTRANSFORMFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_BOUNDINGBOXTRANSFORMFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -104,6 +104,12 @@ public:
 
     void setup(TensorShape deltas_shape, const BoundingBoxTransformInfo &info, DataType data_type, QuantizationInfo deltas_qinfo)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const bool is_qasymm16 = data_type == DataType::QASYMM16;
         _data_type_deltas      = (is_qasymm16) ? DataType::QASYMM8 : data_type;
         _boxes_qinfo           = (is_qasymm16) ? QuantizationInfo(.125f, 0) : QuantizationInfo();
@@ -234,4 +240,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_BOUNDINGBOXTRANSFORM_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_BOUNDINGBOXTRANSFORMFIXTURE_H

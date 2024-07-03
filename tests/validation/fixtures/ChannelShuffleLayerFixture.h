@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_FIXTURE
-#define ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_CHANNELSHUFFLELAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_CHANNELSHUFFLELAYERFIXTURE_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
@@ -47,6 +47,12 @@ class ChannelShuffleLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, unsigned int num_groups, DataType data_type, DataLayout data_layout)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, data_type, num_groups, data_layout);
         _reference = compute_reference(shape, data_type, num_groups);
     }
@@ -110,4 +116,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_CHANNELSHUFFLELAYERFIXTURE_H

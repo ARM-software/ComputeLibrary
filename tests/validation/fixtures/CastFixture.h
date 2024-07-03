@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CAST_FIXTURE
-#define ARM_COMPUTE_TEST_CAST_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_CASTFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_CASTFIXTURE_H
 
 #include "tests/validation/fixtures/DepthConvertLayerFixture.h"
 
@@ -38,6 +38,12 @@ class CastValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (dt_in == DataType::F16 || dt_out == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, dt_in, dt_out, policy);
         _reference = compute_reference(shape, dt_in, dt_out, policy);
     }
@@ -151,4 +157,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CAST_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_CASTFIXTURE_H

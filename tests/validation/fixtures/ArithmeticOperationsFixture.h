@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_FIXTURE
-#define ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ARITHMETICOPERATIONSFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ARITHMETICOPERATIONSFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -48,6 +48,12 @@ public:
     void setup(reference::ArithmeticOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, ActivationLayerInfo act_info, bool is_inplace)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _op         = op;
         _act_info   = act_info;
         _is_inplace = is_inplace;
@@ -284,4 +290,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ARITHMETICOPERATIONSFIXTURE_H

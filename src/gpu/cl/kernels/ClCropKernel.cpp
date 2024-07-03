@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,6 @@ Status ClCropKernel::validate(const ITensorInfo *src,
                               Window            *dst_window)
 {
     ARM_COMPUTE_UNUSED(extrapolation_value, dst_window);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().num_dimensions() > 4);
