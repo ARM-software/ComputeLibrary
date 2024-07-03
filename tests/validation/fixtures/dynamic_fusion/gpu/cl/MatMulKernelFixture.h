@@ -255,7 +255,6 @@ protected:
         // We reshape the gemm output back if the tensor is high dimensional
         if (output_shape_collapsed != output_shape)
         {
-            // std::cout << "called reshape: \n";
             result = reference::reshape_layer(result, output_shape);
         }
 

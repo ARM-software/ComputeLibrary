@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_REDUCTION_OPERATION_FIXTURE
-#define ARM_COMPUTE_TEST_REDUCTION_OPERATION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_REDUCTIONOPERATIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_REDUCTIONOPERATIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -47,6 +47,12 @@ class ReductionOperationValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info, bool keep_dims = false)
     {
+        if(std::is_same<TensorType, Tensor>::value && // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const bool is_arg_min_max = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
         _keep_dims                = keep_dims && !is_arg_min_max;
 
@@ -166,4 +172,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_REDUCTION_OPERATION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_REDUCTIONOPERATIONFIXTURE_H

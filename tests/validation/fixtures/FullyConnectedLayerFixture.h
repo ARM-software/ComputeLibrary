@@ -92,6 +92,12 @@ public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo activation_info, bool mixed_layout = false)
     {
+        if(std::is_same<TensorType, Tensor>::value && // Cpu
+            data_type==DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         ARM_COMPUTE_UNUSED(weights_shape);
         ARM_COMPUTE_UNUSED(bias_shape);
 
@@ -459,6 +465,12 @@ public:
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
                DataType data_type, ActivationLayerInfo activation_info, bool constant_weights, bool constant_bias, bool weights_reshaped, bool remove_bias = false)
     {
+        if(std::is_same<TensorType, Tensor>::value && // Cpu
+            data_type==DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _data_type = data_type;
 
         const bool     is_quantized   = is_data_type_quantized(data_type);

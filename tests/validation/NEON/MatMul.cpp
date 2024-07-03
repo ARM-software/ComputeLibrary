@@ -264,7 +264,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 TEST_SUITE_END() // BF16
 #endif           /* ARM_COMPUTE_ENABLE_BF16 */
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEMatMulFixture<half>,
@@ -279,8 +279,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
 })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEMatMulFixture<half>,
@@ -295,8 +303,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
 })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunStressDynamicTensors,
                        NEMatMulDynamicTensorsFixture<half>,
@@ -312,11 +328,19 @@ FIXTURE_DATA_TEST_CASE(RunStressDynamicTensors,
 }),
 make("NumberOfRuns", 5)))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE_END() // Float
 

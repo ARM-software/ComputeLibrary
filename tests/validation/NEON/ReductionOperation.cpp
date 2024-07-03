@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,10 +45,10 @@ namespace
 /** Tolerance for float operations */
 AbsoluteTolerance<float> tolerance_f32(0.0001f);
 RelativeTolerance<float> rel_tolerance_f32(0.0001f);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 AbsoluteTolerance<float> tolerance_f16(0.2f);
 RelativeTolerance<float> rel_tolerance_f16(0.1f);
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 /** Tolerance for quantized operations */
 RelativeTolerance<float> tolerance_quantized(1.f);
 
@@ -149,22 +149,38 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<float>, framework::
 }
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<half>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F16)), Axises), ReductionOperations), KeepDims))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F16)), Axises), ReductionOperations), KeepDims))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, 0, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, 0, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 template <typename T>
 using NEReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<Tensor, Accessor, NEReductionOperation, T>;
