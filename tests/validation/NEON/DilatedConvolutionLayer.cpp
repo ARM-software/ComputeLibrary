@@ -45,19 +45,19 @@ namespace validation
 namespace
 {
 const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.3f);                   /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr float                           tolerance_num_f16 = 0.07f;                 /**< Tolerance number for FP16 */
-#endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
 constexpr AbsoluteTolerance<int32_t> tolerance_qasymm8(1);                           /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
     DataType::F16,
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
     DataType::F32,
     DataType::QASYMM8,
 });
@@ -113,7 +113,7 @@ template <typename T>
 using NEGEMMDilatedConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
                                                                                                                         framework::dataset::make("ReshapeWeights", { true })),
@@ -121,8 +121,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, fra
                                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                         framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
@@ -130,11 +138,19 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, fra
                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                       framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),

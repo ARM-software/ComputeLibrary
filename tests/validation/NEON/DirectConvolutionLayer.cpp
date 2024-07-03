@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,11 +46,11 @@ namespace validation
 {
 namespace
 {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
 constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
-#endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);                           /**< Tolerance for floating point tests */
 
 /** Direct convolution data set.for FP32 */
@@ -335,25 +335,41 @@ template <typename T>
 using NEDirectConvolutionLayerMixedDataLayoutFixture = DirectConvolutionValidationFixture<Tensor, Accessor, NEDirectConvolutionLayer, T, true>;
 
 TEST_SUITE(Float)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
                                                                                                                    DataType::F16)),
                                                                                                                    ActivationFunctionsDataset),
                                                                                                                    framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_f16_nightly, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                  ActivationFunctionsDataset),
                                                                                                                  framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",

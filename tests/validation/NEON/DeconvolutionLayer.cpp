@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,10 +45,10 @@ namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);    /**< Tolerance for floating point tests */
 constexpr AbsoluteTolerance<float> tolerance_quantized(1.0f); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 const RelativeTolerance<half_float::half> tolerance_fp16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr float                           tolerance_num_fp16 = 0.02f;             /**< Tolerance number for FP16 tests -- follows a slightly stricter approach compared to ConvolutionLayer tests */
-#endif                                                                            /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
+#endif                                                                            /* ARM_COMPUTE_ENABLE_FP16*/
 constexpr float tolerance_num_quant = 0.07f;                                      /**< Tolerance number for quantized types */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
@@ -276,15 +276,23 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture5x1<float>, framework::Da
 TEST_SUITE_END() // W5x1
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    data_layouts_dataset),
                                                                                                            add_bias_dataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // W4x4
 TEST_SUITE(W3x3)
@@ -293,15 +301,31 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerFixture3x3<half>, framework
                                                                                                                   data_layouts_dataset),
                                                                                                                   add_bias_dataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                         data_layouts_dataset),
                                                                                                                 add_bias_dataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // W3x3
 TEST_SUITE(W1x1)
@@ -309,8 +333,16 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture1x1<half>, framework::Dat
                                                                                                                    data_layouts_dataset),
                                                                                                            add_bias_dataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // W1x1
 TEST_SUITE(W5x1)
@@ -318,12 +350,20 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture5x1<half>, framework::Dat
                                                                                                                    data_layouts_dataset),
                                                                                                            add_bias_dataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16, tolerance_num_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // W5x1
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE_END() // Float
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,6 +93,12 @@ public:
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout, bool mixed_layout = false)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         // This hash is used by random generators. There may be hash collisions but
         // this is intentional as it's a very easy way to make the the current
         // random generation process almost different for many test configurations,
@@ -132,6 +138,12 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
         ARM_COMPUTE_UNUSED(dilation);
+
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
 
         // This hash is used by random generators. There may be hash collisions but
         // this is intentional as it's a very easy way to make the the current
