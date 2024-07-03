@@ -1603,7 +1603,8 @@
             "src/runtime/experimental/operators/CpuGemm.cpp",
             "src/runtime/experimental/operators/CpuGemmConv2d.cpp",
             "src/runtime/experimental/operators/CpuGemmDirectConv2d.cpp",
-            "src/runtime/experimental/operators/CpuTranspose.cpp"
+            "src/runtime/experimental/operators/CpuTranspose.cpp",
+            "src/runtime/experimental/operators/CpuWinogradConv2d.cpp"
           ],
           "neon": {
             "common": [
