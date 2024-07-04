@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,13 @@ public:
                DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace = false, bool use_dynamic_shape = false)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (data_type0 == DataType::F16 || data_type1 == DataType::F16 || output_data_type == DataType::F16) &&
+            !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _op                = op;
         _use_dynamic_shape = use_dynamic_shape;
         _is_inplace        = is_inplace;

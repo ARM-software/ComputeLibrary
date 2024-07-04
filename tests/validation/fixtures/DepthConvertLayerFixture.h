@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DEPTH_CONVERT_FIXTURE
-#define ARM_COMPUTE_TEST_DEPTH_CONVERT_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DEPTHCONVERTLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DEPTHCONVERTLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -47,6 +47,12 @@ class DepthConvertLayerValidationBaseFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, QuantizationInfo quantization_info)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (dt_in == DataType::F16 || dt_out == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _shift             = shift;
         _quantization_info = quantization_info;
         _target            = compute_target(shape, dt_in, dt_out, policy, shift);
@@ -149,4 +155,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DEPTH_CONVERT_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DEPTHCONVERTLAYERFIXTURE_H
