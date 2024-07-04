@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,19 +95,28 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<float>, framework::DatasetMode
 }
 TEST_SUITE_END() // F32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<half>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * framework::dataset::make("DataType", { DataType::F16 }))
 {
     ARM_COMPUTE_ERROR_ON(_target.size() != _reference.size());
-    // Validate output
-    for(size_t k = 0; k < _target.size(); ++k)
+
+    if(CPUInfo::get().has_fp16())
     {
-        validate(Accessor(_target[k]), _reference[k]);
+        // Validate output
+        for(size_t k = 0; k < _target.size(); ++k)
+        {
+            validate(Accessor(_target[k]), _reference[k]);
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
 TEST_SUITE_END() // F16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(Quantized)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * framework::dataset::make("DataType", { DataType::QASYMM8 }))

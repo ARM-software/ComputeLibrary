@@ -40,10 +40,10 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_f32(0.001f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half> tolerance_f16(half(0.1)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
 constexpr float         abs_tolerance_f16(0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
-#endif                                            /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif                                            /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -134,15 +134,23 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NERNNLayerFixture<float>, framework::DatasetMod
 }
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NERNNLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallRNNLayerDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16, 0.02f, abs_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f16, 0.02f, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 TEST_SUITE_END() // RNNLayer
 TEST_SUITE_END() // Neon
 } // namespace validation

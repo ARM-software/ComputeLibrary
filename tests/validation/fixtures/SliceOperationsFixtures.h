@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE
-#define ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SLICEOPERATIONSFIXTURES_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SLICEOPERATIONSFIXTURES_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -47,6 +47,12 @@ class SliceFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, Coordinates starts, Coordinates ends, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, starts, ends, data_type);
         _reference = compute_reference(shape, starts, ends, data_type);
     }
@@ -112,6 +118,12 @@ public:
                int32_t begin_mask, int32_t end_mask, int32_t shrink_mask,
                DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, starts, ends, strides, begin_mask, end_mask, shrink_mask, data_type);
         _reference = compute_reference(shape, starts, ends, strides, begin_mask, end_mask, shrink_mask, data_type);
     }
@@ -176,4 +188,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SLICEOPERATIONSFIXTURES_H

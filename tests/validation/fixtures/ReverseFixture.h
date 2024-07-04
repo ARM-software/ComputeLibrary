@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,12 @@ class ReverseValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, TensorShape axis_shape, DataType data_type, bool use_negative_axis = false, bool use_inverted_axis = false)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _num_dims  = shape.num_dimensions();
         _target    = compute_target(shape, axis_shape, data_type, use_negative_axis, use_inverted_axis);
         _reference = compute_reference(shape, axis_shape, data_type, use_negative_axis, use_inverted_axis);

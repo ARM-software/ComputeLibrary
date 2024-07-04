@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_RNN_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_RNN_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_RNNLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_RNNLAYERFIXTURE_H
 
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
@@ -45,6 +45,12 @@ public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape recurrent_weights_shape, TensorShape bias_shape, TensorShape output_shape, ActivationLayerInfo info,
                DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(input_shape, weights_shape, recurrent_weights_shape, bias_shape, output_shape, info, data_type);
         _reference = compute_reference(input_shape, weights_shape, recurrent_weights_shape, bias_shape, output_shape, info, data_type);
     }
@@ -144,4 +150,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_RNN_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_RNNLAYERFIXTURE_H

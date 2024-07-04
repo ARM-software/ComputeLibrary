@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SPLIT_FIXTURE
-#define ARM_COMPUTE_TEST_SPLIT_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SPLITFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SPLITFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -49,6 +49,12 @@ class SplitFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, unsigned int axis, unsigned int splits, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, axis, splits, data_type);
         _reference = compute_reference(shape, axis, splits, data_type);
     }
@@ -150,6 +156,12 @@ class SplitShapesFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, axis, split_shapes, data_type);
         _reference = compute_reference(shape, axis, split_shapes, data_type);
     }
@@ -254,4 +266,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SPLIT_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SPLITFIXTURE_H
