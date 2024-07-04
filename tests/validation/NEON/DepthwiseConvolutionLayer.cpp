@@ -50,10 +50,10 @@ namespace
 constexpr RelativeTolerance<float>   tolerance_f32(0.01f);        /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);        /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1); /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8_SIGNED */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.02)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr float                     tolerance_num = 0.05f;                 /**< Tolerance number */
-#endif                                                                     // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif                                                                     // ARM_COMPUTE_ENABLE_FP16
 
 const auto depth_multipliers       = make("DepthMultiplier", { 1, 2, 8 });
 const auto large_depth_multipliers = make("DepthMultiplier", { 5, 32 });
@@ -469,7 +469,7 @@ FIXTURE_DATA_TEST_CASE_NEW(RunVariableWeightsLarge3x3, NEDepthwiseConvolutionLay
 TEST_SUITE_END() // Optimized
 TEST_SUITE_END() // F32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
 
 FIXTURE_DATA_TEST_CASE_NEW(RunActivations, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
@@ -483,7 +483,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunActivations, NEDepthwiseConvolutionLayerFixture<ha
         make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW }),
         ActivationFunctionsDatasetNightly))
 {
-    validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 TEST_SUITE(Generic)
@@ -494,7 +502,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, NEDepthwiseConvolutionLayerFixture<half>, f
                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                            ActivationFunctionsDataset))
 {
-    validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
                                                                                                                         large_depth_multipliers),
@@ -503,7 +519,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, f
                                                                                                                         make("DataLayout", { DataLayout::NHWC })),
                                                                                                                         make("ActivationInfo", { ActivationLayerInfo() })))
 {
-    validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 TEST_SUITE(Dilation)
@@ -514,7 +538,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, NEDepthwiseConvolutionLayerFixture<half>, f
                                            make("DataLayout", { DataLayout::NHWC })),
                                    ActivationFunctionsDataset))
 {
-    validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
                            combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset(),
@@ -523,7 +555,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, f
                                            make("DataLayout", { DataLayout::NHWC })),
                                    make("ActivationInfo", { ActivationLayerInfo() })))
 {
-    validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // Dilation
 
@@ -538,7 +578,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, NEDepthwiseConvolutionLayerFixture<half>, f
                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                            ActivationFunctionsDataset))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
                            combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
@@ -548,7 +596,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, f
                                            make("DataLayout", { DataLayout::NHWC })),
                                    make("ActivationInfo", { ActivationLayerInfo() })))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 TEST_SUITE(Dilation)
@@ -561,7 +617,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, NEDepthwiseConvolutionLayerFixture<half>, f
                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                    ActivationFunctionsDataset))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
                            combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
@@ -571,7 +635,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, f
                                            make("DataLayout", { DataLayout::NHWC })),
                                    make("ActivationInfo", { ActivationLayerInfo() })))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 TEST_SUITE_END() // Dilation
@@ -586,7 +658,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmallW3x3, NEDepthwiseConvolutionLayerFixture<half
                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                    ActivationFunctionsDataset))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunSmallW5x5, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
                            combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset5x5(),
@@ -596,7 +676,15 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmallW5x5, NEDepthwiseConvolutionLayerFixture<half
                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                    ActivationFunctionsDataset))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunLargeW3x3, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
                            combine(combine(combine(combine(datasets::LargeOptimizedDepthwiseConvolutionLayerDataset3x3(),
@@ -606,11 +694,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLargeW3x3, NEDepthwiseConvolutionLayerFixture<half
                                            make("DataLayout", { DataLayout::NHWC })),
                                    make("ActivationInfo", { ActivationLayerInfo() })))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // Optimized
 TEST_SUITE_END() // FP16
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // Float
 
