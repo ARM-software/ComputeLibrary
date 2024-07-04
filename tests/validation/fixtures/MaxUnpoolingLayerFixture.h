@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 Arm Limited.
+ * Copyright (c) 2020-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_POOLING_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_POOLING_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_MAXUNPOOLINGLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_MAXUNPOOLINGLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -48,6 +48,12 @@ class MaxUnpoolingLayerValidationGenericFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, PoolingLayerInfo pool_info, DataType data_type, DataLayout data_layout)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         std::mt19937                    gen(library->seed());
         std::uniform_int_distribution<> offset_dis(0, 20);
         const float                     scale     = data_type == DataType::QASYMM8_SIGNED ? 1.f / 127.f : 1.f / 255.f;
@@ -159,4 +165,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_POOLING_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_MAXUNPOOLINGLAYERFIXTURE_H

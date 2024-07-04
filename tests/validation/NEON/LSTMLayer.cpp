@@ -192,9 +192,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<half>, framework::DatasetMod
         make("UseLayerNorm", { true, false }),
         make("UseMemoryManager", { true, false })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
-    validate(Accessor(_target_scratch), _reference_scratch, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f16);
+        validate(Accessor(_target_scratch), _reference_scratch, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */

@@ -51,6 +51,12 @@ class GEMMGenericValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type, bool accumulate=false)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         ARM_COMPUTE_UNUSED(pretranspose);
         _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, accumulate);
         _reference = compute_reference(shape_a, shape_b, output_shape, alpha, beta, data_type, accumulate);

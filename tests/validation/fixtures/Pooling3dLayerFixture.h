@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_POOLING_3D_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_POOLING_3D_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_POOLING3DLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_POOLING3DLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -47,6 +47,12 @@ class Pooling3dLayerValidationGenericFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, Pooling3dLayerInfo pool_info, DataType data_type, QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo())
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, pool_info, data_type, input_qinfo, output_qinfo);
         _reference = compute_reference(shape, pool_info, data_type, input_qinfo, output_qinfo);
     }
@@ -161,4 +167,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_POOLING_3D_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_POOLING3DLAYERFIXTURE_H

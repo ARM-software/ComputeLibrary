@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,7 +101,17 @@ const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
                            framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)),                               \
                            (INPLACE_DATASET)))                                                                            \
     {                                                                                                                     \
-        VALIDATE                                                                                                          \
+        if((DataType::DT1 != DataType::F16 &&                                                                             \
+            DataType::DT2 != DataType::F16 &&                                                                             \
+            DataType::DT3 != DataType::F16) || CPUInfo::get().has_fp16())                                                 \
+        {                                                                                                                 \
+            VALIDATE                                                                                                      \
+        }                                                                                                                 \
+        else                                                                                                              \
+        {                                                                                                                 \
+            ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");                       \
+            framework::ARM_COMPUTE_PRINT_INFO();                                                                          \
+        }                                                                                                                 \
     }
 
 // *INDENT-ON*
@@ -531,7 +541,7 @@ TEST_SUITE_END() // Broadcast
 
 TEST_SUITE_END() // S32toS32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16toF16)
 
 TEST_SUITE(Scale255)
@@ -539,7 +549,7 @@ PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF16Fixture<half_flo
 TEST_SUITE_END() // Scale255
 
 TEST_SUITE_END() // F16toF16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(F32toF32)
 

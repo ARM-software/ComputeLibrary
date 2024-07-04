@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,13 +44,13 @@ namespace
 {
 /** Tolerance for float operations */
 AbsoluteTolerance<float> tolerance_f32(0.0015f);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 // This precision is chosen based on the precision float16_t can provide
 // for the decimal numbers between 16 and 32 and decided based on multiple
 // times of execution of tests. Although, with randomly generated numbers
 // there is no gaurantee that this tolerance will be always large enough.
 AbsoluteTolerance<half> tolerance_f16(static_cast<half>(0.015625f));
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 } // namespace
 
 TEST_SUITE(NEON)
@@ -108,7 +108,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<float>, fra
 
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallShapes(),
@@ -116,11 +116,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<half>, fram
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                framework::dataset::make("InPlace", { false, true })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // InstanceNormalizationLayer
 TEST_SUITE_END() // Neon

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MEAN_STDDEV_NORMALIZATION_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_MEAN_STDDEV_NORMALIZATION_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_MEANSTDDEVNORMALIZATIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_MEANSTDDEVNORMALIZATIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -46,6 +46,12 @@ class MeanStdDevNormalizationLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType dt, bool in_place, float epsilon = 1e-8)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            dt == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         QuantizationInfo qi = QuantizationInfo(0.5f, 10);
         _data_type          = dt;
         _target             = compute_target(shape, dt, in_place, epsilon, qi);
@@ -128,4 +134,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MEAN_STDDEV_NORMALIZATION_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_MEANSTDDEVNORMALIZATIONLAYERFIXTURE_H
