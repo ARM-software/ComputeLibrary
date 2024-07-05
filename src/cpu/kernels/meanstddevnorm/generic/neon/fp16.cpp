@@ -53,23 +53,24 @@ void mean_stddev_normalization<float16_t, 8>(ITensor *input, ITensor *output, fl
             auto in_ptr  = reinterpret_cast<const float16_t *>(input_itr.ptr());
             auto out_ptr = reinterpret_cast<float16_t *>(output_itr.ptr());
 
-            float16x8_t sum_vec    = vdupq_n_f16(static_cast<float16_t>(0.0f));
+            float32x4x2_t sum_vec = {vdupq_n_f32(0.0f), vdupq_n_f32(0.0f)};
+
             float32x4_t sum_sq_vec = vdupq_n_f32(0.0f);
 
             for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 float16x8_t data = vld1q_f16(in_ptr + x);
-                sum_vec          = vaddq_f16(sum_vec, data);
                 float32x4_t dl   = vcvt_f32_f16(vget_low_f16(data));
                 float32x4_t dh   = vcvt_f32_f16(vget_high_f16(data));
+                sum_vec.val[0]   = vaddq_f32(sum_vec.val[0], dl);
+                sum_vec.val[1]   = vaddq_f32(sum_vec.val[1], dh);
                 sum_sq_vec       = vaddq_f32(sum_sq_vec, vmulq_f32(dl, dl));
                 sum_sq_vec       = vaddq_f32(sum_sq_vec, vmulq_f32(dh, dh));
             }
 
-            float32x4_t sum_carry_res =
-                vpaddq_f32(vcvt_f32_f16(vget_high_f16(sum_vec)), vcvt_f32_f16(vget_low_f16(sum_vec)));
-            float sum    = vaddvq_f32(sum_carry_res);
-            float sum_sq = vaddvq_f32(sum_sq_vec);
+            float32x4_t sum_carry_res = vpaddq_f32(sum_vec.val[0], sum_vec.val[1]);
+            float       sum           = vaddvq_f32(sum_carry_res);
+            float       sum_sq        = vaddvq_f32(sum_sq_vec);
 
             // Compute left-over elements
             for (; x < window_end_x; ++x)

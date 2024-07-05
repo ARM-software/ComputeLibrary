@@ -95,7 +95,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, fr
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
                                                                                                                        framework::dataset::make("InPlace", { false, true })),
                                                                                                                        framework::dataset::make("Epsilon", { 1e-8 })))
@@ -123,7 +123,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<float>, f
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                                                                                         framework::dataset::make("InPlace", { false, true })),
                                                                                                                         framework::dataset::make("Epsilon", { 1e-8 })))
