@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,10 +67,8 @@ struct ROIAlignKernel
 static const ROIAlignKernel available_kernels[] = {
     {"fp32_neon_roialign", [](const ROIAlignSelectorData &data) { return data.dt == DataType::F32; },
      REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_roialign)},
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     {"fp16_neon_roialign", [](const ROIAlignSelectorData &data) { return data.dt == DataType::F16; },
      REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_roialign)},
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {"qu8_neon_roialign", [](const ROIAlignSelectorData &data) { return data.dt == DataType::QASYMM8; },
      REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qu8_roialign)},
