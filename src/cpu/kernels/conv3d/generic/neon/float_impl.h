@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,21 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_CONV3D_LIST_H
-#define SRC_CORE_NEON_KERNELS_CONV3D_LIST_H
+#ifndef ACL_SRC_CPU_KERNELS_CONV3D_GENERIC_NEON_FLOAT_IMPL_H
+#define ACL_SRC_CPU_KERNELS_CONV3D_GENERIC_NEON_FLOAT_IMPL_H
 
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Traits.h"
+#include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/cpu/kernels/conv3d/neon/quantized.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
+namespace kernels
+{
+
 template <typename T>
 void directconv3d_float_neon_ndhwc(const ITensor    *src0,
                                    const ITensor    *src1,
@@ -192,6 +196,7 @@ void directconv3d_float_neon_ndhwc(const ITensor    *src0,
         out);
 }
 
+} // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif // SRC_CORE_NEON_KERNELS_CONV3D_LIST_H
+#endif // ACL_SRC_CPU_KERNELS_CONV3D_GENERIC_NEON_FLOAT_IMPL_H

@@ -43,11 +43,11 @@ namespace validation
 {
 namespace
 {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
 constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 constexpr AbsoluteTolerance<float>   tolerance_fp32(0.001f);                         /**< Tolerance for floating point tests */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);                           /**< Tolerance for quantized tests */
 
@@ -140,7 +140,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DFixture<float>, framework:
 }
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(data_precommit,
                                                                                                                         framework::dataset::make("DataType", DataType::F16)),
@@ -158,7 +158,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DFixture<half>, framework::
     }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE_END() // Float
 
