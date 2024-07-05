@@ -43,9 +43,15 @@ If there is more than one release in a month then an extra sequential number is 
 
 v24.07 Public major release
  - Expose CpuActivation functionality using the experimental operators api
+ - Expose CpuAdd functionality using the experimental operators api
+ - Expose CpuElementwiseDivision functionality using the experimental operators api
+ - Expose CpuElementwiseMax functionality using the experimental operators api
+ - Expose CpuElementwiseMin functionality using the experimental operators api
  - Expose CpuGemm functionality using the experimental operators api
  - Expose CpuGemmConv2d functionality using the experimental operators api
  - Expose CpuGemmDirectConv2d functionality using the experimental operators api
+ - Expose CpuMul functionality using the experimental operators api
+ - Expose CpuSub functionality using the experimental operators api
  - Expose CpuTranspose functionality using the experimental operators api
  - Expose CpuWinogradConv2d functionality using the experimental operators api
  - Optimize CPU operator memory management.

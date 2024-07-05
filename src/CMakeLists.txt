@@ -1018,9 +1018,13 @@ target_sources(
 	runtime/TensorAllocator.cpp
 	runtime/Utils.cpp
 	runtime/experimental/operators/CpuActivation.cpp
+	runtime/experimental/operators/CpuAdd.cpp
+	runtime/experimental/operators/CpuElementwise.cpp
 	runtime/experimental/operators/CpuGemm.cpp
 	runtime/experimental/operators/CpuGemmConv2d.cpp
 	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
+	runtime/experimental/operators/CpuMul.cpp
+	runtime/experimental/operators/CpuSub.cpp
 	runtime/experimental/operators/CpuTranspose.cpp
 	runtime/experimental/operators/CpuWinogradConv2d.cpp
 )
