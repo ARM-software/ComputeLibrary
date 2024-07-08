@@ -966,7 +966,7 @@ void compute_row_sums(const Requantize32 &qp, unsigned int width, unsigned int h
     const unsigned int odds = width % 16;
 
     /* Generate a mask to use on the last iteration, if necessary. */
-    uint64x2_t mask;
+    uint64x2_t mask = vdupq_n_u64(0);
     unsigned int mask_mode = 0;
 
     if (odds > 0 && odds <= 8) {
