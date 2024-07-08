@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_RESHAPE_KERNEL_H
-#define ARM_COMPUTE_CPU_RESHAPE_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPURESHAPEKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPURESHAPEKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
@@ -74,21 +74,10 @@ public:
      */
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
-    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
-      *
-      * @return The split dimension.
-      */
-    size_t get_split_dimension() const
-    {
-        return _split_dimension;
-    }
-
 private:
-    size_t _split_dimension{Window::DimY};
-
     std::function<void(const Window &window, const ITensor *src, ITensor *dst)> _reshape_tensor_fn{};
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_RESHAPE_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPURESHAPEKERNEL_H
