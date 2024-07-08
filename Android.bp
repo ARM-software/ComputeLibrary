@@ -1023,6 +1023,7 @@ cc_library_static {
         "src/runtime/Tensor.cpp",
         "src/runtime/TensorAllocator.cpp",
         "src/runtime/Utils.cpp",
+        "src/runtime/experimental/low_level/CpuGemmAssemblyDispatch.cpp",
         "src/runtime/experimental/operators/CpuActivation.cpp",
         "src/runtime/experimental/operators/CpuAdd.cpp",
         "src/runtime/experimental/operators/CpuDepthwiseConv2d.cpp",

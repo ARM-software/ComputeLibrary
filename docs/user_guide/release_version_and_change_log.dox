@@ -43,6 +43,7 @@ If there is more than one release in a month then an extra sequential number is 
 
 v24.08 Public major release
  - Expose CpuDepthwiseConv2d functionality using the experimental operators api
+ - Expose CpuGemmAssemblyDispatch functionality using the experimental operators low-level api
 
 v24.07 Public major release
  - Expose CpuActivation functionality using the experimental operators api

@@ -31,7 +31,7 @@ namespace arm_compute
 
 namespace experimental
 {
-namespace ops
+namespace op
 {
 
 struct CpuGemm::Impl
@@ -91,6 +91,6 @@ experimental::MemoryRequirements CpuGemm::workspace() const
     return _impl->cpu_gemm->workspace();
 }
 
-} // namespace ops
+} // namespace op
 } // namespace experimental
 } // namespace arm_compute

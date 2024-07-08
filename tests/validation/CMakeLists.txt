@@ -143,6 +143,7 @@ if(ENABLE_NEON)
             NEON/UNIT/TensorAllocator.cpp
             NEON/UNIT/MemoryManager.cpp
             NEON/UNIT/RuntimeContext.cpp
+            runtime/experimental/low_level/CpuGemmAssemblyDispatch.cpp
             runtime/experimental/operators/CpuActivation.cpp
             runtime/experimental/operators/CpuAdd.cpp
             runtime/experimental/operators/CpuDepthwiseConv2d.cpp

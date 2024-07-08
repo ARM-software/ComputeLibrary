@@ -1026,6 +1026,7 @@ target_sources(
 	runtime/Tensor.cpp
 	runtime/TensorAllocator.cpp
 	runtime/Utils.cpp
+	runtime/experimental/low_level/CpuGemmAssemblyDispatch.cpp
 	runtime/experimental/operators/CpuActivation.cpp
 	runtime/experimental/operators/CpuAdd.cpp
 	runtime/experimental/operators/CpuDepthwiseConv2d.cpp

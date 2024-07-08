@@ -1608,6 +1608,7 @@
             "src/runtime/NEON/functions/NEGEMM.cpp",
             "src/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.cpp",
             "src/runtime/NEON/functions/NEGEMMLowpOutputStage.cpp",
+            "src/runtime/experimental/low_level/CpuGemmAssemblyDispatch.cpp",
             "src/runtime/experimental/operators/CpuActivation.cpp",
             "src/runtime/experimental/operators/CpuAdd.cpp",
             "src/runtime/experimental/operators/CpuDepthwiseConv2d.cpp",
