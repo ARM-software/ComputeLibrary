@@ -62,6 +62,7 @@ v24.07 Public major release
  - Remove unused "get_default_activation_values" functions.
  - Add SVE fixed format interleaved BF16 DOT kernel.
  - Updates and optimizations to assembly kernels.
+ - Add Optimized SME kernel for QASYMM8_SIGNED elementwise multiplication operation
 
 v24.06 Public minor release
  - Enable FP16 in multiple Neon™ kernels for multi_isa + v8a

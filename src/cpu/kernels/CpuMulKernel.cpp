@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "src/core/NEON/NESymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/mul/generic/neon/list.h"
+#include "src/cpu/kernels/mul/generic/sme2/list.h"
 
 #include <arm_neon.h>
 
@@ -315,6 +316,41 @@ void mul_saturate_quantized_8(const ITensor *src1, const ITensor *src2, ITensor 
             },
             input1, input2, dst);
     }
+}
+
+bool mul_q8_sme_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, float scale)
+{
+    const auto        &in0_shape = src0->tensor_shape();
+    const auto        &in1_shape = src1->tensor_shape();
+    const unsigned int dst_dims  = dst->num_dimensions();
+
+    // Calculate Scale
+    const auto iq0        = src0->quantization_info().uniform();
+    const auto iq1        = src1->quantization_info().uniform();
+    const auto oq         = dst->quantization_info().uniform();
+    const auto multiplier = ((iq0.scale * iq1.scale) / oq.scale) * scale;
+    const auto max_result = multiplier * (127) * (127) + static_cast<float>(oq.offset);
+    const auto min_result = multiplier * (-128) * (-128) + static_cast<float>(oq.offset);
+
+    // Does not support broadcasting on x
+    // Does not support dims > 4D output, unless input shapes are identical (therefore collapsible)
+    // Checks whether CPU has SME2 Available
+    if (in0_shape.x() == in1_shape.x() && CPUInfo::get().has_sme2() && (in0_shape == in1_shape || dst_dims <= 4))
+    {
+        // Check if multiplier cannot be stored as a 14.18 signed fixed-point number
+        if (multiplier < -8191.f || multiplier > 8191.f)
+        {
+            return false;
+        }
+        // It might not be possible to store the result as a 14.18 signed fixed-point number.
+        if (max_result > 8191.f || min_result < -8191.f)
+        {
+            return false;
+        }
+        // Passed all checks
+        return true;
+    }
+    return false;
 }
 
 bool mul_q8_neon_fixedpoint_possible(const ITensorInfo *src0,
@@ -1563,7 +1599,11 @@ void CpuMulKernel::configure(ITensorInfo   *src1,
         case DataType::QASYMM8_SIGNED:
             if (dt_input2 == DataType::QASYMM8_SIGNED)
             {
-                if (mul_q8_neon_fixedpoint_possible(src1, src2, dst, scale))
+                if (mul_q8_sme_possible(src1, src2, dst, scale) && rounding_policy == RoundingPolicy::TO_ZERO)
+                {
+                    _func_quantized = REGISTER_QASYMM8_SIGNED_SME2(arm_compute::cpu::sme2_q8_signed_mul);
+                }
+                else if (mul_q8_neon_fixedpoint_possible(src1, src2, dst, scale))
                 {
                     _func_quantized = &mul_q8_neon_fixedpoint<int8_t>;
                 }

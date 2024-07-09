@@ -1982,6 +1982,9 @@
         "neon":{
           "fp16":["src/cpu/kernels/mul/generic/neon/fp16.cpp"],
           "fp32":["src/cpu/kernels/mul/generic/neon/fp32.cpp"]
+        },
+        "sve2": {
+          "qasymm8_signed": ["src/cpu/kernels/mul/generic/sme2/qasymm8_signed.cpp"]
         }
         }
       },

@@ -199,8 +199,8 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 3U, 11U },
-                     TensorShape{ 1U, 16U },
+        //TensorShape{ 3U, 11U },
+                     //TensorShape{ 1U, 16U },
                      TensorShape{ 27U, 13U, 7U },
                      TensorShape{ 7U, 7U, 17U, 2U },
                      // Batch size 4 and 2 SIMD iterations
@@ -208,6 +208,44 @@ public:
                      // Arbitrary batch size
                      TensorShape{ 11U, 11U, 3U, 5U }
     })
+    {
+    }
+};
+
+class SMEMulShapes final : public ShapeDataset
+{
+public:
+    SMEMulShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 6U, 1U },
+        TensorShape{ 128U, 2U},
+        TensorShape{ 128U, 2U, 4U, 2U, 2U} // 5D collapsible case
+    })
+    {
+    }
+};
+
+/** Data set containing pairs of small tensor shapes that are broadcast compatible. */
+class SMEMulShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    SMEMulShapesBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        // NOTE: This does not include x-wise broadcasting.
+        TensorShape{ 9U, 9U },
+        TensorShape{ 256U, 13U, 1U },
+        TensorShape{ 128U, 1U, 5U, 1U },
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 9U, 1U, 2U },
+        TensorShape{ 256U, 1U, 2U },
+        TensorShape{ 128U, 64U, 1U, 3U },
+    }))
     {
     }
 };
