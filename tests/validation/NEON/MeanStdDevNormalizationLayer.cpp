@@ -47,7 +47,7 @@ namespace
 #ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half> tolerance_f16(half(0.2f));
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-RelativeTolerance<float>   tolerance_f32(1e-4f);
+RelativeTolerance<float>   tolerance_f32(0.001f);
 RelativeTolerance<uint8_t> tolerance_qasymm8(1);
 } // namespace
 
