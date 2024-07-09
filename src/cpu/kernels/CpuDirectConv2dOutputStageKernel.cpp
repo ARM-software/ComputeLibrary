@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,7 @@
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/directconv2d_output_stage/list.h"
 
 #include <arm_neon.h>
 #include <cstddef>
@@ -95,316 +96,6 @@ Status validate_arguments(const ITensorInfo                                 *src
 
     return Status{};
 }
-
-template <typename T>
-typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-output_stage_nchw(ITensor       *src,
-                  const ITensor *bias,
-                  const Window  &window,
-                  ITensor       *dst,
-                  int            result_fixedpoint_multiplier,
-                  int            result_shift,
-                  int            result_offset_after_shift)
-{
-    const bool has_bias = bias != nullptr;
-    /** SIMD vector tag type. */
-    using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
-
-    ARM_COMPUTE_ERROR_ON(src->info()->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_UNUSED(result_fixedpoint_multiplier);
-    ARM_COMPUTE_UNUSED(result_shift);
-    ARM_COMPUTE_UNUSED(result_offset_after_shift);
-
-    const int window_start_x = window.x().start();
-    const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / src->info()->element_size();
-    Window    win            = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator in(src, win);
-    Iterator out(dst, win);
-    execute_window_loop(
-        win,
-        [&](const Coordinates &id)
-        {
-            int x = window_start_x;
-            for (; x <= (window_end_x - window_step_x); x += window_step_x)
-            {
-                // Get bias and pointer to input
-                const auto in_ptr = reinterpret_cast<const T *>(in.ptr()) + x;
-                auto       v_in   = wrapper::vloadq(in_ptr);
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto vb = wrapper::vdup_n(
-                        *reinterpret_cast<const T *>(bias->ptr_to_element(Coordinates(id.z()))), ExactTagType{});
-                    v_in = wrapper::vadd(v_in, vb);
-                }
-
-                const auto out_ptr = reinterpret_cast<T *>(out.ptr()) + x;
-                wrapper::vstore(out_ptr, v_in);
-            }
-
-            // Left-overs loop
-            for (; x < window_end_x; ++x)
-            {
-                // Get bias and pointer to input
-                auto s_in = *(reinterpret_cast<const T *>(in.ptr()) + x);
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto b = *reinterpret_cast<const T *>(bias->ptr_to_element(Coordinates(id.z())));
-                    s_in += b;
-                }
-
-                *(reinterpret_cast<T *>(out.ptr()) + x) = s_in;
-            }
-        },
-        in, out);
-}
-
-template <typename T>
-typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-output_stage_nhwc(ITensor       *src,
-                  const ITensor *bias,
-                  const Window  &window,
-                  ITensor       *dst,
-                  int            result_fixedpoint_multiplier,
-                  int            result_shift,
-                  int            result_offset_after_shift)
-{
-    const bool has_bias = bias != nullptr;
-    ARM_COMPUTE_UNUSED(result_fixedpoint_multiplier);
-    ARM_COMPUTE_UNUSED(result_shift);
-    ARM_COMPUTE_UNUSED(result_offset_after_shift);
-
-    Window window_bias = window;
-    window_bias.set(Window::DimX, Window::Dimension(0, 1, 1));
-    window_bias.set(Window::DimY, Window::Dimension(0, 0, 0));
-    window_bias.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    window_bias.set(3, Window::Dimension(0, 0, 0));
-
-    const int window_start_x = window.x().start();
-    const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / src->info()->element_size();
-    Window    win            = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator in(src, win);
-    Iterator bi(bias, window_bias);
-    Iterator out(dst, win);
-
-    execute_window_loop(
-        win,
-        [&](const Coordinates &)
-        {
-            int x = window_start_x;
-            for (; x <= (window_end_x - window_step_x); x += window_step_x)
-            {
-                // Get bias and pointer to input
-                const auto in_ptr = reinterpret_cast<const T *>(in.ptr());
-                auto       v_in   = wrapper::vloadq(in_ptr + x);
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto bias_ptr = reinterpret_cast<T *>(bi.ptr()) + x;
-                    v_in                = wrapper::vadd(v_in, wrapper::vloadq(bias_ptr));
-                }
-
-                const auto out_ptr = reinterpret_cast<T *>(out.ptr());
-                wrapper::vstore(out_ptr + x, v_in);
-            }
-
-            // Left-overs loop
-            for (; x < window_end_x; ++x)
-            {
-                // Get bias and pointer to input
-                auto s_in = *(reinterpret_cast<const T *>(in.ptr()) + x);
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto bias_ptr = reinterpret_cast<T *>(bi.ptr()) + x;
-                    s_in += *bias_ptr;
-                }
-
-                const auto out_ptr = reinterpret_cast<T *>(out.ptr());
-                *(out_ptr + x)     = s_in;
-            }
-        },
-        in, bi, out);
-}
-
-// Quantized case
-template <
-    typename TOut,
-    typename std::enable_if<std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int>::type = 0>
-void output_stage_nchw(ITensor       *src,
-                       const ITensor *bias,
-                       const Window  &window,
-                       ITensor       *dst,
-                       int            result_fixedpoint_multiplier,
-                       int            result_shift,
-                       int            result_offset_after_shift)
-{
-    const bool has_bias = bias != nullptr;
-    using VectorType    = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
-    using TagType       = typename wrapper::traits::neon_bitvector_tag_t<TOut, wrapper::traits::BitWidth::W128>;
-
-    const int32x4_t result_offset_after_shift_s32 = vdupq_n_s32(result_offset_after_shift);
-
-    const VectorType min = wrapper::vdup_n(std::numeric_limits<TOut>::lowest(), TagType{});
-    const VectorType max = wrapper::vdup_n(std::numeric_limits<TOut>::max(), TagType{});
-
-    const int window_start_x = window.x().start();
-    const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / src->info()->element_size();
-    Window    win            = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator in(src, win);
-    Iterator out(dst, win);
-
-    execute_window_loop(
-        win,
-        [&](const Coordinates &id)
-        {
-            int x = window_start_x;
-            for (; x <= (window_end_x - window_step_x); x += window_step_x)
-            {
-                // Get bias and pointer to input
-                const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
-                int32x4x4_t v_in = {{wrapper::vloadq(in_ptr), wrapper::vloadq(in_ptr + 4), wrapper::vloadq(in_ptr + 8),
-                                     wrapper::vloadq(in_ptr + 12)}};
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto vb = wrapper::vdup_n(
-                        *reinterpret_cast<const int32_t *>(bias->ptr_to_element(Coordinates(id.z()))), TagType{});
-                    v_in = {{wrapper::vadd(v_in.val[0], vb), wrapper::vadd(v_in.val[1], vb),
-                             wrapper::vadd(v_in.val[2], vb), wrapper::vadd(v_in.val[3], vb)}};
-                }
-
-                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-                wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift,
-                                                               result_offset_after_shift_s32, min, max, false));
-            }
-
-            // Left-overs loop
-            for (; x < window_end_x; ++x)
-            {
-                // Get bias and pointer to input
-                int32_t s_in = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto b = *reinterpret_cast<const int32_t *>(bias->ptr_to_element(Coordinates(id.z())));
-                    s_in += b;
-                }
-
-                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-                *out_ptr =
-                    finalize_quantization(s_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift,
-                                          std::numeric_limits<TOut>::lowest(), std::numeric_limits<TOut>::max(), false);
-            }
-        },
-        in, out);
-}
-template <
-    typename TOut,
-    typename std::enable_if<std::is_same<TOut, uint8_t>::value || std::is_same<TOut, int8_t>::value, int>::type = 0>
-void output_stage_nhwc(ITensor       *src,
-                       const ITensor *bias,
-                       const Window  &window,
-                       ITensor       *dst,
-                       int            result_fixedpoint_multiplier,
-                       int            result_shift,
-                       int            result_offset_after_shift)
-{
-    const bool has_bias = bias != nullptr;
-    using VectorType    = typename wrapper::traits::neon_bitvector_t<TOut, wrapper::traits::BitWidth::W128>;
-    using TagType       = typename wrapper::traits::neon_bitvector_tag_t<TOut, wrapper::traits::BitWidth::W128>;
-
-    const int32x4_t result_offset_after_shift_s32 = vdupq_n_s32(result_offset_after_shift);
-
-    const VectorType min = wrapper::vdup_n(std::numeric_limits<TOut>::lowest(), TagType{});
-    const VectorType max = wrapper::vdup_n(std::numeric_limits<TOut>::max(), TagType{});
-
-    Window window_bias = window;
-    window_bias.set(Window::DimX, Window::Dimension(0, 1, 1));
-    window_bias.set(Window::DimY, Window::Dimension(0, 0, 0));
-    window_bias.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    window_bias.set(3, Window::Dimension(0, 0, 0));
-
-    const int window_start_x = window.x().start();
-    const int window_end_x   = window.x().end();
-    const int window_step_x  = 16 / src->info()->element_size();
-    Window    win            = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator in(src, win);
-    Iterator bi(bias, window_bias);
-    Iterator out(dst, win);
-
-    execute_window_loop(
-        win,
-        [&](const Coordinates &)
-        {
-            int x = window_start_x;
-            for (; x <= (window_end_x - window_step_x); x += window_step_x)
-            {
-                // Get bias and pointer to input
-                const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
-                int32x4x4_t v_in   = {{
-                      wrapper::vloadq(in_ptr),
-                      wrapper::vloadq(in_ptr + 4),
-                      wrapper::vloadq(in_ptr + 8),
-                      wrapper::vloadq(in_ptr + 12),
-                }};
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto bias_ptr = reinterpret_cast<int32_t *>(bi.ptr()) + x;
-
-                    wrapper::vadd(v_in.val[0], wrapper::vloadq(bias_ptr));
-                    wrapper::vadd(v_in.val[1], wrapper::vloadq(bias_ptr + 4));
-                    wrapper::vadd(v_in.val[2], wrapper::vloadq(bias_ptr + 8));
-                    wrapper::vadd(v_in.val[3], wrapper::vloadq(bias_ptr + 12));
-                }
-
-                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-                wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift,
-                                                               result_offset_after_shift_s32, min, max, false));
-            }
-
-            // Left-overs loop
-            for (; x < window_end_x; ++x)
-            {
-                // Get bias and pointer to input
-                const auto in_ptr = reinterpret_cast<int32_t *>(in.ptr()) + x;
-                int32_t    s_in   = *in_ptr;
-
-                // Accumulate bias
-                if (has_bias)
-                {
-                    const auto bias_ptr = reinterpret_cast<int32_t *>(bi.ptr()) + x;
-                    s_in += *bias_ptr;
-                }
-
-                const auto out_ptr = reinterpret_cast<TOut *>(out.ptr()) + x;
-                *out_ptr =
-                    finalize_quantization(s_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift,
-                                          std::numeric_limits<TOut>::lowest(), std::numeric_limits<TOut>::max(), false);
-            }
-        },
-        in, bi, out);
-}
 } // namespace
 
 void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo                                       *src,
@@ -447,24 +138,30 @@ void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo                    
             {
                 if (is_qasymm8_signed)
                 {
-                    _func = &output_stage_nchw<int8_t>;
+#ifdef ENABLE_QASYMM8_SIGNED_KERNELS
+                    _func = &output_stage_nchw_qs8;
+#endif // ENABLE_QASYMM8_SIGNED_KERNELS
                 }
                 else
                 {
-                    _func = &output_stage_nchw<uint8_t>;
+#ifdef ENABLE_QASYMM8_KERNELS
+                    _func = &output_stage_nchw_qu8;
+#endif // ENABLE_QASYMM8_KERNELS
                 }
                 break;
             }
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ENABLE_FP16_KERNELS
             case DataType::F16:
             {
-                _func = &output_stage_nchw<float16_t>;
+                _func = &output_stage_nchw_fp16;
                 break;
             }
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif // ENABLE_FP16_KERNELS
             case DataType::F32:
             {
-                _func = &output_stage_nchw<float>;
+#ifdef ENABLE_FP32_KERNELS
+                _func = &output_stage_nchw_fp32;
+#endif // ENABLE_FP32_KERNELS
                 break;
             }
             default:
@@ -481,24 +178,30 @@ void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo                    
             {
                 if (is_qasymm8_signed)
                 {
-                    _func = &output_stage_nhwc<int8_t>;
+#ifdef ENABLE_QASYMM8_SIGNED_KERNELS
+                    _func = &output_stage_nhwc_qs8;
+#endif // ENABLE_QASYMM8_SIGNED_KERNELS
                 }
                 else
                 {
-                    _func = &output_stage_nhwc<uint8_t>;
+#ifdef ENABLE_QASYMM8_KERNELS
+                    _func = &output_stage_nhwc_qu8;
+#endif // QASYMM8_SIGNED_KERNELS
                 }
                 break;
             }
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ENABLE_FP16_KERNELS
             case DataType::F16:
             {
-                _func = &output_stage_nhwc<float16_t>;
+                _func = &output_stage_nhwc_fp16;
                 break;
             }
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif // ENABLE_FP16_KERNELS
             case DataType::F32:
             {
-                _func = &output_stage_nhwc<float>;
+#ifdef ENABLE_FP32_KERNELS
+                _func = &output_stage_nhwc_fp32;
+#endif // ENABLE_FP32_KERNELS
                 break;
             }
             default:
