@@ -656,6 +656,21 @@ public:
     }
 };
 
+/** Data set containing tiny 5D tensor shapes. */
+class Tiny5dShapes final : public ShapeDataset
+{
+public:
+    Tiny5dShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 2U, 2U, 3U, 4U, 2U },
+                     TensorShape{ 2U, 3U, 4U, 6U, 2U },
+                     TensorShape{ 3U, 2U, 6U, 1U, 2U },
+    })
+    {
+    }
+};
+
 /** Data set containing small 5D tensor shapes. */
 class Small5dShapes final : public ShapeDataset
 {
@@ -1246,6 +1261,19 @@ public:
     }
 };
 
+/** Data set containing SME Stressing shapes for Logistic SME Kernel. */
+class LogisticSMEStressShapesFp32 final : public ShapeDataset
+{
+public:
+    LogisticSMEStressShapesFp32()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 130U, 2U },
+        TensorShape{ 256U, 1U },
+    })
+    {
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

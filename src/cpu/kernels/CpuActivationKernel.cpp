@@ -32,6 +32,7 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/activation/list.h"
+#include "src/cpu/kernels/logistic/list.h"
 
 #include <array>
 
@@ -71,6 +72,12 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
      },
      REGISTER_Q8_NEON(arm_compute::cpu::neon_q8_activation_lut)},
 #endif // __aarch64__
+    {"sme2_fp32_logistic",
+     [](const ActivationDataTypeISASelectorData &data) {
+         return data.dt == DataType::F32 && data.f == ActivationLayerInfo::ActivationFunction::LOGISTIC &&
+                data.isa.sme2;
+     },
+     REGISTER_FP32_SME2(arm_compute::cpu::sme2_fp32_logistic)},
     {"sve2_qu8_activation",
      [](const ActivationDataTypeISASelectorData &data) {
          return data.dt == DataType::QASYMM8 && data.isa.sve2 &&
@@ -316,6 +323,11 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 
     // Use squashed window
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
+    // Collapse window with SME kernels in Y-Dim
+    if (std::string(uk->name) == "sme2_fp32_logistic")
+    {
+        win = win.collapse(win, Window::DimY);
+    }
     ICPPKernel::configure(win);
 }
 

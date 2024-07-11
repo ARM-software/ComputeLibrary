@@ -57,6 +57,7 @@ v24.07 Public major release
  - Optimize CPU operator memory management.
  - Add support for mixed sign quantized convolution.
  - Add support for mixed sign dequantized GEMM.
+ - Add SME FP32 kernel for logistic activation function
  - Add SME FP16 GEMV kernel.
  - Change SME vector length function to use RDSVL instead of static variable.
  - Remove unused "get_default_activation_values" functions.
