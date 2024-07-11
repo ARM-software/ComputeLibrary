@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,7 +81,7 @@ void vector_matrix_multiply_f32(
             // window_end_x is computed above which may cause out-of-bound writes to the dst.
             for (; x < (window_end_x - window_step_x); x += window_step_x)
             {
-                if (x > width_matrix_b)
+                if (x >= width_matrix_b)
                 {
                     return;
                 }
@@ -203,7 +203,7 @@ void vector_matrix_multiply_f32(
             // Left-over loop
             for (; x < window_end_x; ++x)
             {
-                if (x > width_matrix_b)
+                if (x >= width_matrix_b)
                 {
                     return;
                 }
@@ -309,9 +309,21 @@ void matrix_matrix_multiply_f32(
     Iterator inb(rhs, win_b);
     Iterator out(dst, window);
 
-    const bool multiply_alpha = !(helpers::float_ops::is_one(alpha));
+    // End address of matrix B at batch number n
+    const float *end_addr_mtx_b_at_batch_n =
+        reinterpret_cast<const float *>(inb.ptr()) + rhs->info()->dimension(0) * rhs->info()->dimension(1);
+    std::vector<const float *> end_addr_mtx_b_per_batch = {};
+    const bool                 multiply_alpha           = !(helpers::float_ops::is_one(alpha));
+    const float32x4_t          alpha_f32                = vdupq_n_f32(alpha);
+    const size_t               out_dim2                 = static_cast<int>(dst->info()->dimension(2));
 
-    const float32x4_t alpha_f32 = vdupq_n_f32(alpha);
+    for (size_t b = 0; b < out_dim2; ++b)
+    {
+        // Store the ptrs to the last elem in the tensor for each batch
+        end_addr_mtx_b_per_batch.push_back(end_addr_mtx_b_at_batch_n);
+        end_addr_mtx_b_at_batch_n +=
+            rhs->info()->dimension(2) != 1 ? rhs->info()->dimension(0) * rhs->info()->dimension(1) : 0;
+    }
 
     // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with CpuGemmInterleave4x4 and CpuGemmTranspose1xW
     // The reshaping of the matrices helps to have a cache friendly implementation and helps to avoid the data re-arrangements needed for computing 16x4 elements per iteration
@@ -341,220 +353,374 @@ void matrix_matrix_multiply_f32(
 #endif /* __arm__ */
 
             auto mtx_b0_end_addr = mtx_b0 + num_elems_matrix_b_x;
-            for (; mtx_b0 <= (mtx_b0_end_addr - 32);)
+
+            ARM_COMPUTE_ERROR_ON(end_addr_mtx_b_per_batch.size() == 0);
+            if (mtx_b1 < end_addr_mtx_b_per_batch[id.z()])
             {
-                float32x4_t a0 = vld1q_dup_f32(mtx_a0 + 0);
-                float32x4_t a1 = vld1q_dup_f32(mtx_a0 + 1);
-                float32x4_t a2 = vld1q_dup_f32(mtx_a0 + 2);
-                float32x4_t a3 = vld1q_dup_f32(mtx_a0 + 3);
+                for (; mtx_b0 < (mtx_b0_end_addr - 32);)
+                {
+                    float32x4_t a0 = vld1q_dup_f32(mtx_a0 + 0);
+                    float32x4_t a1 = vld1q_dup_f32(mtx_a0 + 1);
+                    float32x4_t a2 = vld1q_dup_f32(mtx_a0 + 2);
+                    float32x4_t a3 = vld1q_dup_f32(mtx_a0 + 3);
 
-                float32x4_t b00 = vld1q_f32(mtx_b0);
-                float32x4_t b10 = vld1q_f32(mtx_b1);
-                float32x4_t b01 = vld1q_f32(mtx_b0 + 4);
-                float32x4_t b11 = vld1q_f32(mtx_b1 + 4);
-
-#if __arm__
-                asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
-                asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
-                asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b1)));
-#endif /* __arm__ */
-
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b00, a0);
-                acc10 = vmlaq_f32(acc10, b00, a1);
-                acc20 = vmlaq_f32(acc20, b00, a2);
-                acc30 = vmlaq_f32(acc30, b00, a3);
-
-                float32x4_t a4 = vld1q_dup_f32(mtx_a0 + 4);
-                float32x4_t a5 = vld1q_dup_f32(mtx_a0 + 5);
-                float32x4_t a6 = vld1q_dup_f32(mtx_a0 + 6);
-                float32x4_t a7 = vld1q_dup_f32(mtx_a0 + 7);
-
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b10, a0);
-                acc11 = vmlaq_f32(acc11, b10, a1);
-                acc21 = vmlaq_f32(acc21, b10, a2);
-                acc31 = vmlaq_f32(acc31, b10, a3);
-
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b01, a4);
-                acc10 = vmlaq_f32(acc10, b01, a5);
-                acc20 = vmlaq_f32(acc20, b01, a6);
-                acc30 = vmlaq_f32(acc30, b01, a7);
-
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b11, a4);
-                acc11 = vmlaq_f32(acc11, b11, a5);
-                acc21 = vmlaq_f32(acc21, b11, a6);
-                acc31 = vmlaq_f32(acc31, b11, a7);
-
-                mtx_a0 += 8;
-                mtx_b0 += 8;
-                mtx_b1 += 8;
-
-                a0 = vld1q_dup_f32(mtx_a0 + 0);
-                a1 = vld1q_dup_f32(mtx_a0 + 1);
-                a2 = vld1q_dup_f32(mtx_a0 + 2);
-                a3 = vld1q_dup_f32(mtx_a0 + 3);
-
-                b00 = vld1q_f32(mtx_b0);
-                b10 = vld1q_f32(mtx_b1);
-                b01 = vld1q_f32(mtx_b0 + 4);
-                b11 = vld1q_f32(mtx_b1 + 4);
-
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b00, a0);
-                acc10 = vmlaq_f32(acc10, b00, a1);
-                acc20 = vmlaq_f32(acc20, b00, a2);
-                acc30 = vmlaq_f32(acc30, b00, a3);
-
-                a4 = vld1q_dup_f32(mtx_a0 + 4);
-                a5 = vld1q_dup_f32(mtx_a0 + 5);
-                a6 = vld1q_dup_f32(mtx_a0 + 6);
-                a7 = vld1q_dup_f32(mtx_a0 + 7);
-
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b10, a0);
-                acc11 = vmlaq_f32(acc11, b10, a1);
-                acc21 = vmlaq_f32(acc21, b10, a2);
-                acc31 = vmlaq_f32(acc31, b10, a3);
-
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b01, a4);
-                acc10 = vmlaq_f32(acc10, b01, a5);
-                acc20 = vmlaq_f32(acc20, b01, a6);
-                acc30 = vmlaq_f32(acc30, b01, a7);
-
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b11, a4);
-                acc11 = vmlaq_f32(acc11, b11, a5);
-                acc21 = vmlaq_f32(acc21, b11, a6);
-                acc31 = vmlaq_f32(acc31, b11, a7);
-
-                mtx_a0 += 8;
-                mtx_b0 += 8;
-                mtx_b1 += 8;
-
-                a0  = vld1q_dup_f32(mtx_a0 + 0);
-                a1  = vld1q_dup_f32(mtx_a0 + 1);
-                a2  = vld1q_dup_f32(mtx_a0 + 2);
-                a3  = vld1q_dup_f32(mtx_a0 + 3);
-                b00 = vld1q_f32(mtx_b0);
-                b10 = vld1q_f32(mtx_b1);
-                b01 = vld1q_f32(mtx_b0 + 4);
-                b11 = vld1q_f32(mtx_b1 + 4);
+                    float32x4_t b00 = vld1q_f32(mtx_b0);
+                    float32x4_t b10 = vld1q_f32(mtx_b1);
+                    float32x4_t b01 = vld1q_f32(mtx_b0 + 4);
+                    float32x4_t b11 = vld1q_f32(mtx_b1 + 4);
 
 #if __arm__
-                asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
-                asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
-                asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b1)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b1)));
 #endif /* __arm__ */
 
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b00, a0);
-                acc10 = vmlaq_f32(acc10, b00, a1);
-                acc20 = vmlaq_f32(acc20, b00, a2);
-                acc30 = vmlaq_f32(acc30, b00, a3);
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
 
-                a4 = vld1q_dup_f32(mtx_a0 + 4);
-                a5 = vld1q_dup_f32(mtx_a0 + 5);
-                a6 = vld1q_dup_f32(mtx_a0 + 6);
-                a7 = vld1q_dup_f32(mtx_a0 + 7);
+                    float32x4_t a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    float32x4_t a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    float32x4_t a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    float32x4_t a7 = vld1q_dup_f32(mtx_a0 + 7);
 
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b10, a0);
-                acc11 = vmlaq_f32(acc11, b10, a1);
-                acc21 = vmlaq_f32(acc21, b10, a2);
-                acc31 = vmlaq_f32(acc31, b10, a3);
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b10, a0);
+                    acc11 = vmlaq_f32(acc11, b10, a1);
+                    acc21 = vmlaq_f32(acc21, b10, a2);
+                    acc31 = vmlaq_f32(acc31, b10, a3);
 
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b01, a4);
-                acc10 = vmlaq_f32(acc10, b01, a5);
-                acc20 = vmlaq_f32(acc20, b01, a6);
-                acc30 = vmlaq_f32(acc30, b01, a7);
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
 
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b11, a4);
-                acc11 = vmlaq_f32(acc11, b11, a5);
-                acc21 = vmlaq_f32(acc21, b11, a6);
-                acc31 = vmlaq_f32(acc31, b11, a7);
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b11, a4);
+                    acc11 = vmlaq_f32(acc11, b11, a5);
+                    acc21 = vmlaq_f32(acc21, b11, a6);
+                    acc31 = vmlaq_f32(acc31, b11, a7);
 
-                mtx_a0 += 8;
-                mtx_b0 += 8;
-                mtx_b1 += 8;
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+                    mtx_b1 += 8;
 
-                a0  = vld1q_dup_f32(mtx_a0 + 0);
-                a1  = vld1q_dup_f32(mtx_a0 + 1);
-                a2  = vld1q_dup_f32(mtx_a0 + 2);
-                a3  = vld1q_dup_f32(mtx_a0 + 3);
-                b00 = vld1q_f32(mtx_b0);
-                b10 = vld1q_f32(mtx_b1);
-                b01 = vld1q_f32(mtx_b0 + 4);
-                b11 = vld1q_f32(mtx_b1 + 4);
+                    a0 = vld1q_dup_f32(mtx_a0 + 0);
+                    a1 = vld1q_dup_f32(mtx_a0 + 1);
+                    a2 = vld1q_dup_f32(mtx_a0 + 2);
+                    a3 = vld1q_dup_f32(mtx_a0 + 3);
 
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b00, a0);
-                acc10 = vmlaq_f32(acc10, b00, a1);
-                acc20 = vmlaq_f32(acc20, b00, a2);
-                acc30 = vmlaq_f32(acc30, b00, a3);
+                    b00 = vld1q_f32(mtx_b0);
+                    b10 = vld1q_f32(mtx_b1);
+                    b01 = vld1q_f32(mtx_b0 + 4);
+                    b11 = vld1q_f32(mtx_b1 + 4);
 
-                a4 = vld1q_dup_f32(mtx_a0 + 4);
-                a5 = vld1q_dup_f32(mtx_a0 + 5);
-                a6 = vld1q_dup_f32(mtx_a0 + 6);
-                a7 = vld1q_dup_f32(mtx_a0 + 7);
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
 
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b10, a0);
-                acc11 = vmlaq_f32(acc11, b10, a1);
-                acc21 = vmlaq_f32(acc21, b10, a2);
-                acc31 = vmlaq_f32(acc31, b10, a3);
+                    a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    a7 = vld1q_dup_f32(mtx_a0 + 7);
 
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b01, a4);
-                acc10 = vmlaq_f32(acc10, b01, a5);
-                acc20 = vmlaq_f32(acc20, b01, a6);
-                acc30 = vmlaq_f32(acc30, b01, a7);
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b10, a0);
+                    acc11 = vmlaq_f32(acc11, b10, a1);
+                    acc21 = vmlaq_f32(acc21, b10, a2);
+                    acc31 = vmlaq_f32(acc31, b10, a3);
 
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b11, a4);
-                acc11 = vmlaq_f32(acc11, b11, a5);
-                acc21 = vmlaq_f32(acc21, b11, a6);
-                acc31 = vmlaq_f32(acc31, b11, a7);
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
 
-                mtx_a0 += 8;
-                mtx_b0 += 8;
-                mtx_b1 += 8;
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b11, a4);
+                    acc11 = vmlaq_f32(acc11, b11, a5);
+                    acc21 = vmlaq_f32(acc21, b11, a6);
+                    acc31 = vmlaq_f32(acc31, b11, a7);
+
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+                    mtx_b1 += 8;
+
+                    a0  = vld1q_dup_f32(mtx_a0 + 0);
+                    a1  = vld1q_dup_f32(mtx_a0 + 1);
+                    a2  = vld1q_dup_f32(mtx_a0 + 2);
+                    a3  = vld1q_dup_f32(mtx_a0 + 3);
+                    b00 = vld1q_f32(mtx_b0);
+                    b10 = vld1q_f32(mtx_b1);
+                    b01 = vld1q_f32(mtx_b0 + 4);
+                    b11 = vld1q_f32(mtx_b1 + 4);
+
+#if __arm__
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b1)));
+#endif /* __arm__ */
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
+
+                    a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    a7 = vld1q_dup_f32(mtx_a0 + 7);
+
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b10, a0);
+                    acc11 = vmlaq_f32(acc11, b10, a1);
+                    acc21 = vmlaq_f32(acc21, b10, a2);
+                    acc31 = vmlaq_f32(acc31, b10, a3);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
+
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b11, a4);
+                    acc11 = vmlaq_f32(acc11, b11, a5);
+                    acc21 = vmlaq_f32(acc21, b11, a6);
+                    acc31 = vmlaq_f32(acc31, b11, a7);
+
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+                    mtx_b1 += 8;
+
+                    a0  = vld1q_dup_f32(mtx_a0 + 0);
+                    a1  = vld1q_dup_f32(mtx_a0 + 1);
+                    a2  = vld1q_dup_f32(mtx_a0 + 2);
+                    a3  = vld1q_dup_f32(mtx_a0 + 3);
+                    b00 = vld1q_f32(mtx_b0);
+                    b10 = vld1q_f32(mtx_b1);
+                    b01 = vld1q_f32(mtx_b0 + 4);
+                    b11 = vld1q_f32(mtx_b1 + 4);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
+
+                    a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    a7 = vld1q_dup_f32(mtx_a0 + 7);
+
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b10, a0);
+                    acc11 = vmlaq_f32(acc11, b10, a1);
+                    acc21 = vmlaq_f32(acc21, b10, a2);
+                    acc31 = vmlaq_f32(acc31, b10, a3);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
+
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b11, a4);
+                    acc11 = vmlaq_f32(acc11, b11, a5);
+                    acc21 = vmlaq_f32(acc21, b11, a6);
+                    acc31 = vmlaq_f32(acc31, b11, a7);
+
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+                    mtx_b1 += 8;
+                }
+
+                // Only consider one row from matrix b if subsequent row is out of boundary.
+                for (; mtx_b0 < mtx_b0_end_addr;)
+                {
+                    float32x4_t a0  = vld1q_dup_f32(mtx_a0 + 0);
+                    float32x4_t a1  = vld1q_dup_f32(mtx_a0 + 1);
+                    float32x4_t a2  = vld1q_dup_f32(mtx_a0 + 2);
+                    float32x4_t a3  = vld1q_dup_f32(mtx_a0 + 3);
+                    float32x4_t b00 = vld1q_f32(mtx_b0);
+                    float32x4_t b10 = vld1q_f32(mtx_b1);
+
+#if __arm__
+                    asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
+                    asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
+                    asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b1)));
+#endif /* __arm__ */
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
+
+                    // 4x4 block 1
+                    acc01 = vmlaq_f32(acc01, b10, a0);
+                    acc11 = vmlaq_f32(acc11, b10, a1);
+                    acc21 = vmlaq_f32(acc21, b10, a2);
+                    acc31 = vmlaq_f32(acc31, b10, a3);
+
+                    mtx_a0 += 4;
+                    mtx_b0 += 4;
+                    mtx_b1 += 4;
+                }
             }
 
-            for (; mtx_b0 < mtx_b0_end_addr;)
+            // Leftover last row in matrix b, in case of there are odd number of rows in matrix B
+            else if (mtx_b0 < end_addr_mtx_b_per_batch[id.z()])
             {
-                float32x4_t a0  = vld1q_dup_f32(mtx_a0 + 0);
-                float32x4_t a1  = vld1q_dup_f32(mtx_a0 + 1);
-                float32x4_t a2  = vld1q_dup_f32(mtx_a0 + 2);
-                float32x4_t a3  = vld1q_dup_f32(mtx_a0 + 3);
-                float32x4_t b00 = vld1q_f32(mtx_b0);
-                float32x4_t b10 = vld1q_f32(mtx_b1);
+                for (; mtx_b0 < (mtx_b0_end_addr - 32);)
+                {
+                    float32x4_t a0 = vld1q_dup_f32(mtx_a0 + 0);
+                    float32x4_t a1 = vld1q_dup_f32(mtx_a0 + 1);
+                    float32x4_t a2 = vld1q_dup_f32(mtx_a0 + 2);
+                    float32x4_t a3 = vld1q_dup_f32(mtx_a0 + 3);
+
+                    float32x4_t b00 = vld1q_f32(mtx_b0);
+                    float32x4_t b01 = vld1q_f32(mtx_b0 + 4);
 
 #if __arm__
-                asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
-                asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
-                asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b1)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
 #endif /* __arm__ */
-                // 4x4 block 0
-                acc00 = vmlaq_f32(acc00, b00, a0);
-                acc10 = vmlaq_f32(acc10, b00, a1);
-                acc20 = vmlaq_f32(acc20, b00, a2);
-                acc30 = vmlaq_f32(acc30, b00, a3);
 
-                // 4x4 block 1
-                acc01 = vmlaq_f32(acc01, b10, a0);
-                acc11 = vmlaq_f32(acc11, b10, a1);
-                acc21 = vmlaq_f32(acc21, b10, a2);
-                acc31 = vmlaq_f32(acc31, b10, a3);
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
 
-                mtx_a0 += 4;
-                mtx_b0 += 4;
-                mtx_b1 += 4;
+                    float32x4_t a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    float32x4_t a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    float32x4_t a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    float32x4_t a7 = vld1q_dup_f32(mtx_a0 + 7);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
+
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+
+                    a0 = vld1q_dup_f32(mtx_a0 + 0);
+                    a1 = vld1q_dup_f32(mtx_a0 + 1);
+                    a2 = vld1q_dup_f32(mtx_a0 + 2);
+                    a3 = vld1q_dup_f32(mtx_a0 + 3);
+
+                    b00 = vld1q_f32(mtx_b0);
+                    b01 = vld1q_f32(mtx_b0 + 4);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
+
+                    a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    a7 = vld1q_dup_f32(mtx_a0 + 7);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
+
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+
+                    a0  = vld1q_dup_f32(mtx_a0 + 0);
+                    a1  = vld1q_dup_f32(mtx_a0 + 1);
+                    a2  = vld1q_dup_f32(mtx_a0 + 2);
+                    a3  = vld1q_dup_f32(mtx_a0 + 3);
+                    b00 = vld1q_f32(mtx_b0);
+                    b01 = vld1q_f32(mtx_b0 + 4);
+
+#if __arm__
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
+                    asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
+#endif /* __arm__ */
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
+
+                    a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    a7 = vld1q_dup_f32(mtx_a0 + 7);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
+
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+
+                    a0  = vld1q_dup_f32(mtx_a0 + 0);
+                    a1  = vld1q_dup_f32(mtx_a0 + 1);
+                    a2  = vld1q_dup_f32(mtx_a0 + 2);
+                    a3  = vld1q_dup_f32(mtx_a0 + 3);
+                    b00 = vld1q_f32(mtx_b0);
+                    b01 = vld1q_f32(mtx_b0 + 4);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
+
+                    a4 = vld1q_dup_f32(mtx_a0 + 4);
+                    a5 = vld1q_dup_f32(mtx_a0 + 5);
+                    a6 = vld1q_dup_f32(mtx_a0 + 6);
+                    a7 = vld1q_dup_f32(mtx_a0 + 7);
+
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b01, a4);
+                    acc10 = vmlaq_f32(acc10, b01, a5);
+                    acc20 = vmlaq_f32(acc20, b01, a6);
+                    acc30 = vmlaq_f32(acc30, b01, a7);
+
+                    mtx_a0 += 8;
+                    mtx_b0 += 8;
+                }
+                for (; mtx_b0 < mtx_b0_end_addr;)
+                {
+                    float32x4_t a0  = vld1q_dup_f32(mtx_a0 + 0);
+                    float32x4_t a1  = vld1q_dup_f32(mtx_a0 + 1);
+                    float32x4_t a2  = vld1q_dup_f32(mtx_a0 + 2);
+                    float32x4_t a3  = vld1q_dup_f32(mtx_a0 + 3);
+                    float32x4_t b00 = vld1q_f32(mtx_b0);
+
+#if __arm__
+                    asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_a0)));
+                    asm volatile("PLD [%0, #128*2]" ::"r"(reinterpret_cast<const uint8_t *>(mtx_b0)));
+#endif /* __arm__ */
+                    // 4x4 block 0
+                    acc00 = vmlaq_f32(acc00, b00, a0);
+                    acc10 = vmlaq_f32(acc10, b00, a1);
+                    acc20 = vmlaq_f32(acc20, b00, a2);
+                    acc30 = vmlaq_f32(acc30, b00, a3);
+
+                    mtx_a0 += 4;
+                    mtx_b0 += 4;
+                }
             }
 
             // Multiply by the weight of matrix product (alpha)

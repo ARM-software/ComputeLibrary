@@ -30,6 +30,13 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- (COMPMID-7191) Fix Memory violation in non-optimized Neon™ FP32 GeMM
+    - Versions: >= v17.09 && < v24.07
+    - Oses: Linux, Android, MacOS, Windows.
+    - Conditions:
+        - Compile the latest Arm Compute Library for armv8a
+        - RHS with batches
+
 - (COMPMID-7011) NELSTMLayer and CLSTMLayer crash when given a memory manager.
     - Versions: >= v18.11 && < 24.07
     - Oses: Linux, Android, MacOS, Windows.
@@ -37,7 +44,7 @@ namespace arm_compute
         - Compile the latest Arm Compute Library for armv8a
         - Use NELSTMLayer or CLLSTMLayer with a memory manager
 
-- (COMPMID-7109) Under certain conditions, Quantized GEMM may result in very few mismatches due to 16-bit accumuation overflow
+- (COMPMID-7109) Under certain conditions, Quantized GEMM may result in very few mismatches due to 16-bit accumulation overflow
     - Versions: >= v17.09
     - Oses: Linux, Android, MacOS, Windows.
     - Conditions:
