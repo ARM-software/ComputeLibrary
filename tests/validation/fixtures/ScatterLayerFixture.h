@@ -25,7 +25,6 @@
 #define ACL_TESTS_VALIDATION_FIXTURES_SCATTERLAYERFIXTURE_H
 
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"

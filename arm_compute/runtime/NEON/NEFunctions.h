@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,6 +98,7 @@
 #include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
+#include "arm_compute/runtime/NEON/functions/NEScatter.h"
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
 #include "arm_compute/runtime/NEON/functions/NESlice.h"
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"

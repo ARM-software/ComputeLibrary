@@ -722,6 +722,7 @@ target_sources(
 	cpu/kernels/CpuQuantizeKernel.cpp
 	cpu/kernels/CpuReshapeKernel.cpp
 	cpu/kernels/CpuScaleKernel.cpp
+	cpu/kernels/CpuScatterKernel.cpp
 	cpu/kernels/CpuSoftmaxKernel.cpp
 	cpu/kernels/CpuSubKernel.cpp
 	cpu/kernels/CpuTransposeKernel.cpp
@@ -898,6 +899,7 @@ target_sources(
 	cpu/operators/CpuQuantize.cpp
 	cpu/operators/CpuReshape.cpp
 	cpu/operators/CpuScale.cpp
+	cpu/operators/CpuScatter.cpp
 	cpu/operators/CpuSoftmax.cpp
 	cpu/operators/CpuSub.cpp
 	cpu/operators/CpuTranspose.cpp
@@ -998,6 +1000,7 @@ target_sources(
 	runtime/NEON/functions/NEReshapeLayer.cpp
 	runtime/NEON/functions/NEReverse.cpp
 	runtime/NEON/functions/NEScale.cpp
+	runtime/NEON/functions/NEScatter.cpp
 	runtime/NEON/functions/NESelect.cpp
 	runtime/NEON/functions/NESlice.cpp
 	runtime/NEON/functions/NESoftmaxLayer.cpp
