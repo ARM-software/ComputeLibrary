@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -195,18 +195,23 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
 
     // Run kernel
     inject_memory ? kernel.run_op(tensors, kernel.window(), _queue) : kernel.run(kernel.window(), _queue);
-    if (_job_chaining_enabled)
-    {
-        ++_job_chaining_count;
-    }
 
     flush_queue(flush);
 }
 
 void CLScheduler::flush_queue(bool flush)
 {
+    if (flush)
+    {
+        _queue.flush();
+        _job_chaining_count = 0;
+        return;
+    }
+
     if (_job_chaining_enabled)
     {
+        ++_job_chaining_count;
+
         if (_job_chaining_count >= _job_chaining_size)
         {
             _job_chaining_count = 0;
@@ -222,10 +227,6 @@ void CLScheduler::flush_queue(bool flush)
             }
             _queue.flush();
         }
-    }
-    else if (flush)
-    {
-        _queue.flush();
     }
 }
 
