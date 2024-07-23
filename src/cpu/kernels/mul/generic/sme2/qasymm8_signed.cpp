@@ -125,16 +125,16 @@ loop_2_start%=:
             b.eq loop_2_end%=
             sub x14, x14, #1
 
-            ldr x18, [%[args_ptr], %[offset_shape_1]]
+            ldr x7, [%[args_ptr], %[offset_shape_1]]
             mov x20, x15
             mov x21, x16
             mov x22, x17
 
 loop_1_start%=:
             // for index_1 in shape_2 downto 1
-            cmp x18, #0
+            cmp x7, #0
             b.eq loop_1_end%=
-            sub x18, x18, #1
+            sub x7, x7, #1
 
             mov x9, #0                                                         // x9: index/count
 
@@ -330,7 +330,7 @@ loop_3_end%=:
         [offset_C] "r"(args.offsetC14p18), //
         [length] "r"(win_shape[0])
         : "cc", "memory", //
-          "p0", "p1", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x20", "x21", "x22",
+          "p0", "p1", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x20", "x21", "x22",
           "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7",         //
           "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15",   //
           "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", //
