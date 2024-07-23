@@ -1586,7 +1586,7 @@
         }
       },
       "Gemm": {
-        "deps": [ "Quantize", "Add"],
+        "deps": [ "Quantize", "Add", "Sub"],
           "files": {
           "common": [
             "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp",
