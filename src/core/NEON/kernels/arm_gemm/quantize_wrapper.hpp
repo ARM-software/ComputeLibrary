@@ -216,6 +216,22 @@ public:
 
         return c;
     }
+
+    void update_quantization_parameters(const Requantize32 &re) override {
+        _params.bias = re.bias;
+        _params.a_offset = re.a_offset;
+        _params.b_offset = re.b_offset;
+        _params.c_offset = re.c_offset;
+        _params.per_layer_left_shift = re.per_layer_left_shift;
+        _params.per_layer_right_shift = re.per_layer_right_shift;
+        _params.per_layer_mul = re.per_layer_mul;
+        _params.per_channel_requant = re.per_channel_requant;
+        _params.per_channel_left_shifts = re.per_channel_left_shifts;
+        _params.per_channel_right_shifts = re.per_channel_right_shifts;
+        _params.per_channel_muls = re.per_channel_muls;
+        _params.minval = re.minval;
+        _params.maxval = re.maxval;
+    }
 };
 
 } // namespace arm_gemm
