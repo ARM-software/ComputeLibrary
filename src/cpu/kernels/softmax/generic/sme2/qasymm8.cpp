@@ -105,7 +105,6 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             mov x20, %x[shape_3]
             mov x21, %x[src]
             mov x22, %x[dst]
-            mov x19, %x[lut]
             mov x29, %x[tmp]
 
             // Load the LUT to the register file.
@@ -548,16 +547,16 @@ loop_3_end%=:
           [src_stride_1] "r"(src_strides[1]), [src_stride_2] "r"(src_strides[2]),
           [src_stride_3] "r"(src_strides[3]), //
           [dst_stride_1] "r"(dst_strides[1]), [dst_stride_2] "r"(dst_strides[2]),
-          [dst_stride_3] "r"(dst_strides[3]),                                   //
-          [length] "r"(shape[0])                                                //
-        : "cc", "memory",                                                       //
-          "p0", "p1", "p2", "p3", "p4",                                         //
-          "x2", "x9", "x13",                                                    //
-          "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x19", //
-          "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7",                       //
-          "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15",                 //
-          "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23",               //
-          "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"                //
+          [dst_stride_3] "r"(dst_strides[3]),                            //
+          [length] "r"(shape[0])                                         //
+        : "cc", "memory",                                                //
+          "p0", "p1", "p2", "p3", "p4",                                  //
+          "x2", "x9", "x13",                                             //
+          "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", //
+          "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7",                //
+          "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15",          //
+          "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23",        //
+          "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"         //
     );
 }
 
