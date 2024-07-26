@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,8 +144,15 @@ public:
 
     void setup(const TensorShape &shape, DataType data_type, ActivationLayerInfo act_info)
     {
-        Parent::setup(shape, data_type, act_info, interm_out);
-        compute_reference(shape, data_type, act_info);
+        const bool is_not_cpu = !std::is_same<TensorType, Tensor>::value;
+        const bool is_not_fp16 = data_type != DataType::F16;
+        const bool device_has_fp16 = CPUInfo::get().has_fp16();
+
+        if(is_not_cpu || is_not_fp16 || device_has_fp16)
+        {
+            Parent::setup(shape, data_type, act_info, interm_out);
+            compute_reference(shape, data_type, act_info);
+        }
     }
 
     // Compute Reference is moved outside of the generic fixture because with the quantized data types,
@@ -202,6 +209,12 @@ public:
                QuantizationInfo input1_qinfo, QuantizationInfo input2_qinfo, QuantizationInfo bn_mul_qinfo,
                QuantizationInfo bn_add_qinfo, QuantizationInfo add_output_qinfo, QuantizationInfo final_output_qinfo)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         // Quantization arguments moved to class attributes to prevent long function declerations
         Parent::_input1_qinfo       = input1_qinfo;
         Parent::_input2_qinfo       = input2_qinfo;

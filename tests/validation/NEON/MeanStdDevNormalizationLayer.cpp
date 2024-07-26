@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,10 +44,10 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half> tolerance_f16(half(0.2f));
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-RelativeTolerance<float>   tolerance_f32(1e-4f);
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+RelativeTolerance<float>   tolerance_f32(0.001f);
 RelativeTolerance<uint8_t> tolerance_qasymm8(1);
 } // namespace
 
@@ -77,26 +77,42 @@ template <typename T>
 using NEMeanStdDevNormalizationLayerFixture = MeanStdDevNormalizationLayerValidationFixture<Tensor, Accessor, NEMeanStdDevNormalizationLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
                        framework::dataset::make("DataType", DataType::F16)),
                        framework::dataset::make("InPlace", { false, true })),
                        framework::dataset::make("Epsilon", { 1e-3 })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
                                                                                                                        framework::dataset::make("InPlace", { false, true })),
                                                                                                                        framework::dataset::make("Epsilon", { 1e-8 })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
@@ -107,7 +123,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<float>, f
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                                                                                         framework::dataset::make("InPlace", { false, true })),
                                                                                                                         framework::dataset::make("Epsilon", { 1e-8 })))

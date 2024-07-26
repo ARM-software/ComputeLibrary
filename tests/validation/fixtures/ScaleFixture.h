@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,12 @@ public:
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
                bool align_corners, bool mixed_layout, QuantizationInfo output_quantization_info)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _shape                    = shape;
         _policy                   = policy;
         _border_mode              = border_mode;

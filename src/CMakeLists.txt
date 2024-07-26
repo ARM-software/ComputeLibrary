@@ -734,6 +734,10 @@ target_sources(
 	cpu/kernels/boundingboxtransform/generic/neon/impl.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/qsymm16.cpp
 	cpu/kernels/cast/generic/neon/fp16.cpp
+	cpu/kernels/conv3d/generic/neon/fp16.cpp
+	cpu/kernels/conv3d/generic/neon/fp32.cpp
+	cpu/kernels/conv3d/generic/neon/qasymm8.cpp
+	cpu/kernels/conv3d/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/crop/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp32.cpp
 	cpu/kernels/crop/generic/neon/integer.cpp
@@ -1000,4 +1004,10 @@ target_sources(
 	runtime/Tensor.cpp
 	runtime/TensorAllocator.cpp
 	runtime/Utils.cpp
+	runtime/experimental/operators/CpuActivation.cpp
+	runtime/experimental/operators/CpuGemm.cpp
+	runtime/experimental/operators/CpuGemmConv2d.cpp
+	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
+	runtime/experimental/operators/CpuTranspose.cpp
+	runtime/experimental/operators/CpuWinogradConv2d.cpp
 )

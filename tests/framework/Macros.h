@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FRAMEWORK_MACROS
-#define ARM_COMPUTE_TEST_FRAMEWORK_MACROS
+#ifndef ACL_TESTS_FRAMEWORK_MACROS_H
+#define ACL_TESTS_FRAMEWORK_MACROS_H
 
 #include "Framework.h"
 #include "Registrars.h"
@@ -133,12 +133,16 @@
     void do_setup() override                                    \
     {                                                           \
         framework::Framework::get().set_new_fixture_call(true); \
-        apply(this, &FIXTURE::setup, _data);             \
-        configure_target();                                     \
-        if(!framework::Framework::get().configure_only())       \
+        apply(this, &FIXTURE::setup, _data);                    \
+                                                                \
+        if(!_skip_test)                                         \
         {                                                       \
-            allocate_and_run_target();                          \
-            compute_reference();                                \
+            configure_target();                                 \
+            if(!framework::Framework::get().configure_only())   \
+            {                                                   \
+                allocate_and_run_target();                      \
+                compute_reference();                            \
+            }                                                   \
         }                                                       \
     }
 #define FIXTURE_RUN(FIXTURE) \
@@ -324,4 +328,4 @@
 //
 // TEST CASE MACROS END
 //
-#endif /* ARM_COMPUTE_TEST_FRAMEWORK_MACROS */
+#endif // ACL_TESTS_FRAMEWORK_MACROS_H

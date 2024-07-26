@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_RANGE_FIXTURE
-#define ARM_COMPUTE_TEST_RANGE_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_RANGEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_RANGEFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -57,6 +57,12 @@ class RangeFixture : public framework::Fixture
 public:
     void setup(const DataType data_type0, float start, float step, const QuantizationInfo qinfo0 = QuantizationInfo())
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type0 == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(data_type0, qinfo0, start, step);
         _reference = compute_reference(data_type0, qinfo0, start, step);
     }
@@ -138,4 +144,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_RANGE_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_RANGEFIXTURE_H

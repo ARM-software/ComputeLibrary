@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_REDUCE_MEAN_FIXTURE
-#define ARM_COMPUTE_TEST_REDUCE_MEAN_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_REDUCEMEANFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_REDUCEMEANFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -49,6 +49,12 @@ class ReduceMeanValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type, Coordinates axis, bool keep_dims, QuantizationInfo quantization_info_input, QuantizationInfo quantization_info_output)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
         _reference = compute_reference(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
     }
@@ -172,4 +178,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_REDUCE_MEAN_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_REDUCEMEANFIXTURE_H

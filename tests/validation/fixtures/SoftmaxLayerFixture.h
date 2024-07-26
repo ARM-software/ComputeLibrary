@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SOFTMAX_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_SOFTMAX_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SOFTMAXLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SOFTMAXLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -48,6 +48,12 @@ class SoftmaxValidationGenericFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta, size_t axis)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _quantization_info = quantization_info;
 
         _reference = compute_reference(shape, data_type, quantization_info, beta, axis);
@@ -157,4 +163,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SOFTMAX_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SOFTMAXLAYERFIXTURE_H

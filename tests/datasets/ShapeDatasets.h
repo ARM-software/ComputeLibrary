@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SHAPE_DATASETS_H
-#define ARM_COMPUTE_TEST_SHAPE_DATASETS_H
+#ifndef ACL_TESTS_DATASETS_SHAPEDATASETS_H
+#define ACL_TESTS_DATASETS_SHAPEDATASETS_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -1194,7 +1194,21 @@ public:
     }
 };
 
+/** Data set containing large 2D tensor shapes. */
+class Large2DMeanStdDevNormalizationShapes final : public ShapeDataset
+{
+public:
+    Large2DMeanStdDevNormalizationShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1245U, 652U },
+        TensorShape{ 1048576U, 32U }
+    })
+    {
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SHAPE_DATASETS_H */
+#endif // ACL_TESTS_DATASETS_SHAPEDATASETS_H

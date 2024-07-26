@@ -65,6 +65,12 @@ public:
                QuantizationInfo    b_qinfo = QuantizationInfo(),
                QuantizationInfo    o_qinfo = QuantizationInfo())
     {
+        if(std::is_same<TensorType, Tensor>::value && // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         // For brevity, the input shapes are assumed to be not-transposed for both a and b matrices.
         if (transpose_a)
         {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FLATTEN_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_FLATTEN_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_FLATTENLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_FLATTENLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -52,6 +52,12 @@ class FlattenLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         TensorShape shape_flatten;
         TensorInfo  input_info(shape, 1, data_type);
         shape_flatten = compute_flatten_shape(&input_info);
@@ -118,4 +124,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FLATTEN_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_FLATTENLAYERFIXTURE_H

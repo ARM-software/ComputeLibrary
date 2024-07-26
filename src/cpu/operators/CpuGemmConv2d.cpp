@@ -589,8 +589,14 @@ void CpuGemmConv2d::configure(const ITensorInfo         *src,
         // WeightsReshaped in prepare
         // Otherwise WeightsReshaped is the final transformation of weights and needs to persist
         bool gemm_trans_wei = _aux_mem[GemmAsmPretransposedRHS].size > 0;
-        gemm_trans_wei      = _mm_gemm != nullptr ? _aux_mem[GemmTransposed1xWRHS].size > 0 : gemm_trans_wei;
-        gemm_trans_wei      = _mm_gemmlowp != nullptr ? _aux_mem[GemmLowpTransposed1xWRHS].size > 0 : gemm_trans_wei;
+        if (_mm_gemm != nullptr)
+        {
+            gemm_trans_wei |= _aux_mem[GemmTransposed1xWRHS].size > 0;
+        }
+        if (_mm_gemmlowp != nullptr)
+        {
+            gemm_trans_wei |= _aux_mem[GemmLowpTransposed1xWRHS].size > 0;
+        }
 
         _aux_mem[WeightsReshaped] = MemoryInfo(offset_int_vec(WeightsReshaped),
                                                gemm_trans_wei ? MemoryLifetime::Prepare : MemoryLifetime::Persistent,

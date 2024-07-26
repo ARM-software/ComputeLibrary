@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_COMPUTEALLANCHORS_FIXTURE
-#define ARM_COMPUTE_TEST_COMPUTEALLANCHORS_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_COMPUTEALLANCHORSFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_COMPUTEALLANCHORSFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -46,6 +46,12 @@ class ComputeAllAnchorsGenericFixture : public framework::Fixture
 public:
     void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type, QuantizationInfo qinfo)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(num_anchors, data_type, info, qinfo);
         _reference = compute_reference(num_anchors, data_type, info, qinfo);
     }
@@ -124,4 +130,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_COMPUTEALLANCHORS_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_COMPUTEALLANCHORSFIXTURE_H

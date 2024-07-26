@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ARG_MIN_MAX_FIXTURE
-#define ARM_COMPUTE_TEST_ARG_MIN_MAX_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ARGMINMAXFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ARGMINMAXFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -48,6 +48,12 @@ class ArgMinMaxValidationBaseFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType input_type, DataType output_type, int axis, ReductionOperation op, QuantizationInfo q_info)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            input_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, input_type, output_type, axis, op, q_info);
         _reference = compute_reference(shape, input_type, output_type, axis, op, q_info);
     }
@@ -168,4 +174,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARG_MIN_MAX_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ARGMINMAXFIXTURE_H

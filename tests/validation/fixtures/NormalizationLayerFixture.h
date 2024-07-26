@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_NORMALIZATION_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_NORMALIZATION_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_NORMALIZATIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_NORMALIZATIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -48,6 +48,12 @@ class NormalizationValidationGenericFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, DataLayout data_layout)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         NormalizationLayerInfo info(norm_type, norm_size, 5, beta, 1.f, is_scaled);
 
         _target    = compute_target(shape, info, data_type, data_layout);
@@ -126,4 +132,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NORMALIZATION_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_NORMALIZATIONLAYERFIXTURE_H

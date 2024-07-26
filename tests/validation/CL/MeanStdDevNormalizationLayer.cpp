@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ namespace
 {
 /** Tolerance for float operations */
 RelativeTolerance<half>  tolerance_f16(half(0.2f));
-RelativeTolerance<float> tolerance_f32(1e-8f);
+RelativeTolerance<float> tolerance_f32(0.001f);
 } // namespace
 
 TEST_SUITE(CL)
@@ -83,7 +83,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevNormalizationLayerFixture<half>, fr
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
                                                                                                                        framework::dataset::make("InPlace", { false, true })),
                                                                                                                        framework::dataset::make("Epsilon", { 1e-8 })))
@@ -102,7 +102,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevNormalizationLayerFixture<float>, f
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                                                                                         framework::dataset::make("InPlace", { false, true })),
                                                                                                                         framework::dataset::make("Epsilon", { 1e-8 })))

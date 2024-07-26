@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CONVERT_FULLY_CONNECTED_WEIGHTS_FIXTURE
-#define ARM_COMPUTE_TEST_CONVERT_FULLY_CONNECTED_WEIGHTS_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_CONVERTFULLYCONNECTEDWEIGHTSFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_CONVERTFULLYCONNECTEDWEIGHTSFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -45,6 +45,12 @@ class ConvertFullyConnectedWeightsValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, unsigned int weights_w, DataLayout training_data_layout, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const unsigned int height = input_shape.x() * input_shape.y() * input_shape.z();
         const TensorShape  weights_shape(weights_w, height);
 
@@ -128,4 +134,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CONVERT_FULLY_CONNECTED_WEIGHTS_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_CONVERTFULLYCONNECTEDWEIGHTSFIXTURE_H

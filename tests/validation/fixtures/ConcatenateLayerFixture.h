@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_WIDTHCONCATENATE_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_WIDTHCONCATENATE_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_CONCATENATELAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_CONCATENATELAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -52,6 +52,12 @@ private:
 public:
     void setup(TensorShape shape, DataType data_type, unsigned int axis)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         // Create input shapes
         std::mt19937                    gen(library->seed());
         std::uniform_int_distribution<> num_dis(2, 8);
@@ -170,4 +176,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_WIDTHCONCATENATE_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_CONCATENATELAYERFIXTURE_H

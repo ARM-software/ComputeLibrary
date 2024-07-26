@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Arm Limited.
+ * Copyright (c) 2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,12 +46,19 @@ class DirectConvolution3DValidationGenericFixture : public framework::Fixture
 {
 public:
     using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
+    using TAcc = typename std::conditional < std::is_integral<T>::value, int32_t, float >::type;
 
     void setup(const TensorShape &input_shape, int stride_x, int stride_y, int stride_z, int pad_x, int pad_y, int pad_z, unsigned int kernel_width, int kernel_height, int kernel_depth,
                unsigned int num_kernels, bool has_bias, const ActivationLayerInfo &act_info, const DataType &data_type, const DataLayout &data_layout,
                const QuantizationInfo &src_qinfo = QuantizationInfo(), const QuantizationInfo &weights_qinfo = QuantizationInfo(), const QuantizationInfo &dst_qinfo = QuantizationInfo())
     {
         ARM_COMPUTE_ERROR_ON(data_layout != DataLayout::NDHWC);
+
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
 
         const TensorShape weights_shape(num_kernels, input_shape[0], kernel_width, kernel_height, kernel_depth);
         const TensorShape bias_shape(num_kernels);
@@ -150,7 +157,7 @@ protected:
             fill(bias, 2);
         }
 
-        return reference::activation_layer(reference::conv3d<T, TBias>(src, weights, bias, dst, conv3d_info), conv3d_info.act_info);
+        return reference::activation_layer(reference::conv3d<T, TBias, TAcc>(src, weights, bias, dst, conv3d_info), conv3d_info.act_info);
     }
 
     TensorType      _target{};

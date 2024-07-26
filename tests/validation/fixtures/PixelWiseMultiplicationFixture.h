@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PIXEL_WISE_MULTIPLICATION_FIXTURE
-#define ARM_COMPUTE_TEST_PIXEL_WISE_MULTIPLICATION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_PIXELWISEMULTIPLICATIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_PIXELWISEMULTIPLICATIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -58,6 +58,13 @@ public:
                ActivationLayerInfo act_info,
                bool                is_inplace)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (dt_in1 == DataType::F16 || dt_in2 == DataType::F16 || dt_out == DataType::F16) &&
+            !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _is_inplace = is_inplace;
         _target     = compute_target(shape0, shape1, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy, qinfo0, qinfo1, qinfo_out, act_info);
         _reference  = compute_reference(shape0, shape1, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy, qinfo0, qinfo1, qinfo_out, act_info);
@@ -233,4 +240,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PIXEL_WISE_MULTIPLICATION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_PIXELWISEMULTIPLICATIONFIXTURE_H

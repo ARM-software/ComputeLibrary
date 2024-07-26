@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLLSTMLAYER_H
-#define ARM_COMPUTE_CLLSTMLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLLSTMLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLLSTMLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -322,7 +322,6 @@ private:
     CLTensor                                            _forget_gate_out3;
     CLTensor                                            _forget_gate_out4;
     CLTensor                                            _forget_gate_out5;
-    CLTensor                                            _forget_gate_out6;
     CLTensor                                            _cell_state_out1;
     CLTensor                                            _cell_state_out2;
     CLTensor                                            _cell_state_out3;
@@ -353,4 +352,4 @@ private:
     const ICLTensor                                    *_recurrent_to_cell_weights{nullptr};
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLLSTMLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLLSTMLAYER_H

@@ -531,8 +531,8 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
         const unsigned int alignment           = 128;
         const size_t       B_pretranspose_size = _gemm_kernel_asm->get_B_pretransposed_array_size();
         _pretranspose_info                     = TensorInfo(TensorShape(B_pretranspose_size), 1, DataType::U8);
-        _aux_mem[Pretranspose] =
-            MemoryInfo(offset_int_vec(Pretranspose), MemoryLifetime::Persistent, B_pretranspose_size, alignment);
+        MemoryLifetime lifetime = _is_b_constant ? MemoryLifetime::Persistent : MemoryLifetime::Temporary;
+        _aux_mem[Pretranspose]  = MemoryInfo(offset_int_vec(Pretranspose), lifetime, B_pretranspose_size, alignment);
     }
 
     // Handle indirect GEMM convolution

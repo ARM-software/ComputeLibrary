@@ -59,6 +59,12 @@ public:
                DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout)
 
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         ARM_COMPUTE_UNUSED(dilation);
         _mixed_layout = mixed_layout;
         _target       = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
@@ -244,6 +250,12 @@ class WinogradInputTransformValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataLayout data_layout, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         TensorShape output_shape = compute_winograd_input_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
         _mixed_layout            = mixed_layout;
         _target                  = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
@@ -355,6 +367,12 @@ class WinogradFilterTransformValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, Size2D output_tile, DataLayout data_layout, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         WinogradInfo winograd_info(output_tile, Size2D(input_shape[0], input_shape[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, DataLayout::NCHW /* Not needed */);
         TensorShape  output_shape = compute_winograd_filter_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
 
@@ -469,6 +487,12 @@ class WinogradOutputTransformValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataType data_type, ActivationLayerInfo act_info = ActivationLayerInfo())
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(input_shape, winograd_info, data_type, act_info);
         _reference = compute_reference(input_shape, winograd_info, data_type, act_info);
     }

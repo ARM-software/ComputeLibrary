@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2022 Arm Limited.
+ * Copyright (c) 2019, 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,29 +36,27 @@ namespace reference
 template <typename T>
 SimpleTensor<T> mean_std_normalization_layer(const SimpleTensor<T> &src, float epsilon)
 {
-    // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
-
-    const int cols       = src.shape()[0];
-    const int batch_size = src.shape()[1];
-
-    for(int i = 0; i < batch_size; ++i)
-    {
-        T sum    = static_cast<T>(0.f);
-        T sum_sq = static_cast<T>(0.f);
-        for(int j = 0; j < cols; ++j)
-        {
-            const T value = src[j + i * cols];
-            sum += value;
-            sum_sq += value * value;
-        }
-        const T mean       = sum / static_cast<T>(cols);
-        const T var        = ((sum_sq / static_cast<T>(cols)) - (mean * mean)) + static_cast<T>(epsilon);
-        const T stddev_inv = static_cast<T>(1.f) / static_cast<T>(std::sqrt(var));
-        for(int j = 0; j < cols; ++j)
-        {
-            dst[j + i * cols] = (src[j + i * cols] - mean) * stddev_inv;
-        }
+   SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
+   const int cols       = src.shape()[0];
+   const int batch_size = src.shape()[1];
+   for(int i = 0; i < batch_size; ++i)
+   {
+         float sum    = static_cast<T>(0.f);
+         float  sum_sq = static_cast<T>(0.f);
+         for(int j = 0; j < cols; ++j)
+         {
+             const T value = src[j + i * cols];
+             sum += value;
+             sum_sq += value * value;
+         }
+         const float  mean       = sum / cols;
+         const float var        =  (((sum_sq / cols) - (mean * mean)) + epsilon);
+         const float stddev_inv =     1.f / std::sqrt(var);
+         for(int j = 0; j < cols; ++j)
+         {
+             const float res = (src[j + i * cols] - mean) * stddev_inv;
+             dst[j + i * cols] = static_cast<T>(res);
+         }
     }
     return dst;
 }

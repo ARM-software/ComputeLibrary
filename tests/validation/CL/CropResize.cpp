@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,7 +91,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // *INDENT-ON*
 
 TEST_SUITE(Float)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<half>,
@@ -104,7 +103,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
 }
 TEST_SUITE_END() // F16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall,

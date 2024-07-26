@@ -74,16 +74,16 @@ const RelativeTolerance<float> rel_tolerance_winograd_3x3_f32(0.05f); /**< Relat
 const AbsoluteTolerance<float> abs_tolerance_f32(0.002f);             /**< Absolute tolerance for FP32 types */
 const AbsoluteTolerance<float> abs_tolerance_1xN_f32(0.0041f);        /**< Absolute tolerance for FP32 types */
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
 constexpr float               tolerance_num_f16 = 0.15f;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
 constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
-#endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
 
 #ifdef ARM_COMPUTE_ENABLE_SME
 // TODO(COMPMID-6011): SME kernels and the reference model use different rounding mode.
@@ -96,9 +96,9 @@ constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value 
 /** CNN data types */
 const auto CNNDataTypes = make("DataType",
 {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
     DataType::F16,
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
     DataType::F32,
     DataType::QASYMM8,
 });
@@ -648,9 +648,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallNoBias, NEWinogradConvolutionLayerNoBiasFixture<f
 
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-using CLWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, half, float>;
+using NEWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, half, float>;
 
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(
                    make("InputInfo", { TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F16),
@@ -673,37 +673,61 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(
 make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD })),
 input_info, weights_info, output_info, conv_info, fast_math, expected)
 {
-    ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
-                                                                            &weights_info.clone()->set_is_resizable(true),
-                                                                            &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
-    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+    if(CPUInfo::get().has_fp16())
+    {
+        ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
+                                                                                &weights_info.clone()->set_is_resizable(true),
+                                                                                &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
+        ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 TEST_SUITE(Conv3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
                                make("DataType", { DataType::F16 }),
                                ActivationFunctionsDataset,
                                make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
                                make("DataType", { DataType::F16 }),
                                make("ActivationInfo", { ActivationLayerInfo() }),
                                make("DataLayout", { DataLayout::NHWC })))
 
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // Conv3x3
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 TEST_SUITE_END() // WinogradLayer
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
@@ -990,16 +1014,24 @@ FIXTURE_DATA_TEST_CASE(RunSmallFloat, VarWidth<float>, framework::DatasetMode::A
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if defined(ARM_COMPUTE_ENABLE_FP16)
 FIXTURE_DATA_TEST_CASE(RunSmallHalf, VarWidth<half>, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallConvolutionLayerDataset(),
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                framework::dataset::make("ACL Scalar type", { DataType::F16 })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 template <typename ScalarType>
@@ -1031,16 +1063,24 @@ FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallFloat, NEGEMMVarWidth<float>, framework::Da
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if defined(ARM_COMPUTE_ENABLE_FP16)
 FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallHalf, NEGEMMVarWidth<half>, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallConvolutionLayerDataset(),
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                framework::dataset::make("ACL Scalar type", { DataType::F16 })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 template <typename ScalarType>
@@ -1179,7 +1219,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework
 TEST_SUITE_END() // BFLOAT16
 #endif           /* defined(ARM_COMPUTE_ENABLE_BF16) */
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                    framework::dataset::make("ReshapeWeights", { true })),
@@ -1187,11 +1227,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<half>, framework:
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                            ActivationFunctionsDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),

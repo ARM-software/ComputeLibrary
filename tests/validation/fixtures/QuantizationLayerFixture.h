@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_QUANTIZATION_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_QUANTIZATION_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_QUANTIZATIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_QUANTIZATIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -48,6 +48,12 @@ class QuantizationValidationGenericFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo, QuantizationInfo qinfo_in)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (data_type_in == DataType::F16 || data_type_out == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(shape, data_type_in, data_type_out, qinfo, qinfo_in);
         _reference = compute_reference(shape, data_type_in, data_type_out, qinfo, qinfo_in);
     }
@@ -116,4 +122,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_QUANTIZATION_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_QUANTIZATIONLAYERFIXTURE_H

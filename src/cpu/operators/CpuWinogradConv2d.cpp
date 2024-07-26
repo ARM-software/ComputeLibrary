@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -309,7 +309,7 @@ void CpuWinogradConv2d::configure(const ITensorInfo         *src,
                                                  std::max(input_workspace_size, output_workspace_size));
         _aux_mem[PermutedWeights] =
             MemoryInfo(offset_int_vec(PermutedWeights), MemoryLifetime::Prepare, _weights_hwio.total_size());
-        _aux_mem[TransformedWeights] = MemoryInfo(offset_int_vec(TransformedWeights), MemoryLifetime::Persistent,
+        _aux_mem[TransformedWeights] = MemoryInfo(offset_int_vec(TransformedWeights), MemoryLifetime::Prepare,
                                                   wds.weight_matrix_size_bytes, storage_alignment);
         if (_data_layout == DataLayout::NCHW)
         {

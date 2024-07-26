@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,10 +45,10 @@ namespace
 {
 RelativeTolerance<float> relative_tolerance_f32(0.01f);
 AbsoluteTolerance<float> absolute_tolerance_f32(0.001f);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half>  relative_tolerance_f16(half(0.2));
 AbsoluteTolerance<float> absolute_tolerance_f16(half(0.02f));
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 
 constexpr AbsoluteTolerance<uint16_t> tolerance_qasymm16(1);
 
@@ -124,16 +124,24 @@ FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformFixture<float>, framew
 }
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformFixture<half>, framework::DatasetMode::ALL,
                        combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::F16 })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance_f16, 0.03f, absolute_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, relative_tolerance_f16, 0.03f, absolute_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // Float
 

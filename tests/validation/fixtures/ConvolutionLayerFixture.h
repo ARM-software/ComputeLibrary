@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -125,6 +125,12 @@ public:
                DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
                bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         // This hash is used by random generators. There may be hash collisions but
         // this is intentional as it's a very easy way to make the the current
         // random generation process almost different for many test configurations,
@@ -204,7 +210,10 @@ protected:
             {
                 if(_use_dynamic_output_quant)
                 {
-                    std::uniform_int_distribution<int32_t> distribution(-128, 127);
+                    // Using -127 as the lower bound because of possible overflow.
+                    // This is a known issue and reported in the errata.
+                    // See COMPMID-7109 for more details
+                    std::uniform_int_distribution<int32_t> distribution(-127, 127);
                     library->fill(tensor, distribution, i);
                 }
                 else
@@ -597,6 +606,12 @@ public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataLayout data_layout,
                const DataType data_type)
     {
+        if(std::is_same<TensorClass, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         conv = std::make_unique<ConvolutionFunction>();
         // prepare data
         _data_layout = data_layout;
@@ -783,6 +798,12 @@ class HasOptImplFixture : public framework::Fixture
 public:
     void setup(DataType data_type, arm_compute::WeightFormat query_weight_format)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         auto              conv        = std::make_unique<ConvolutionClass>();
         const auto        src_info    = TensorInfo(TensorShape(56U, 56U, 64U), 1, data_type, DataLayout::NHWC);
         const auto        weight_info = TensorInfo(TensorShape(64, 3U, 3U, 64U), 1, enable_fast_math ? DataType::BFLOAT16 : data_type, DataLayout::NHWC);

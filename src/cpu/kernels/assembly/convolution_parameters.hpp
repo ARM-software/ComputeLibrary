@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CPU_KERNELS_ASSEMBLY_CONVOLUTION_PARAMETERS_HPP
+#define ACL_SRC_CPU_KERNELS_ASSEMBLY_CONVOLUTION_PARAMETERS_HPP
+
 #pragma once
 
 #include <cstdint>
@@ -63,3 +67,5 @@ struct ConvolutionParameters
 };
 
 } // namespace arm_gemm
+
+#endif // ACL_SRC_CPU_KERNELS_ASSEMBLY_CONVOLUTION_PARAMETERS_HPP

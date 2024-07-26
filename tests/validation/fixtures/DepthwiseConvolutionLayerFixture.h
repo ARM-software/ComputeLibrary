@@ -91,6 +91,15 @@ public:
                DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false, bool in_place = false, bool run_twice = false)
     {
         ARM_COMPUTE_ERROR_ON(mixed_layout && in_place);
+
+        _skip_test = false;
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (input_data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            _skip_test = true;
+            return;
+        }
+
         // This hash is used by random generators. There may be hash collisions but
         // this is intentional as it's a very easy way to make the the current
         // random generation process almost different for many test configurations,
@@ -374,6 +383,7 @@ protected:
     bool                _in_place{ false };
     bool                _run_twice{ false };
     bool                _use_dynamic_output_quant{false};
+    bool                _skip_test{false};
 
     int32_t _hash{0};
     // Random initialization limits

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
-#define ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H
+#define ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H
 
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -137,4 +137,4 @@ private:
 } // namespace kernel
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H

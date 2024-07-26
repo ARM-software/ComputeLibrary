@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOLING_HPP
+#define ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOLING_HPP
 
 #pragma once
 
@@ -223,3 +226,5 @@ UniquePoolingCommon<TInput, TOutput> pooling(const PoolingArgs &, const OutputSt
 
 } // namespace pooling
 } // namespace arm_conv
+
+#endif // ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_POOLING_HPP

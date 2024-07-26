@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -72,6 +72,7 @@ cc_binary(
         "NEON/*.h",
         "validation/NEON/**/*.cpp",
         "validation/NEON/**/*.h",
+        "validation/runtime/experimental/**/*.cpp",
         "*.cpp",
         "datasets/*.h",
         "instruments/*.h",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,13 +54,13 @@ const auto PReluLayerQASYMM8SignedDataset = combine(combine(framework::dataset::
 const auto PReluLayerFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
                                            framework::dataset::make("DataType", DataType::F32));
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<float> tolerance_fp16(0.001f);
 
 const auto PReluLayerFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
                                            framework::dataset::make("DataType", DataType::F16));
 
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 
 } // namespace
 
@@ -157,21 +157,37 @@ TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE(Float)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPReluLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), PReluLayerFP16Dataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16, 0.01);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16, 0.01);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPReluLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), PReluLayerFP16Dataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16, 0.01);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_fp16, 0.01);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPReluLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), PReluLayerFP32Dataset))

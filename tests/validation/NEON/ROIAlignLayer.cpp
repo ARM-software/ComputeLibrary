@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,10 +47,10 @@ namespace
 RelativeTolerance<float> relative_tolerance_f32(0.01f);
 AbsoluteTolerance<float> absolute_tolerance_f32(0.001f);
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<float> relative_tolerance_f16(0.01f);
 AbsoluteTolerance<float> absolute_tolerance_f16(0.001f);
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_s(1);
@@ -115,17 +115,25 @@ FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerFloat, NEROIAlignLayerFloatFixture, fra
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
 }
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 using NEROIAlignLayerHalfFixture = ROIAlignLayerFixture<Tensor, Accessor, NEROIAlignLayer, half, half>;
 FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf, NEROIAlignLayerHalfFixture, framework::DatasetMode::ALL,
                        framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
                                                                                framework::dataset::make("DataType", { DataType::F16 })),
                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance_f16, .02f, absolute_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, relative_tolerance_f16, .02f, absolute_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // Float
 

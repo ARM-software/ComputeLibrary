@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,9 +39,9 @@ namespace validation
 namespace
 {
 AbsoluteTolerance<float> absolute_tolerance_f32(0.001f);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 AbsoluteTolerance<float> absolute_tolerance_f16(0.2f);
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
 template <typename T>
@@ -108,7 +108,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationConvFixture<float>, fra
     validate(Accessor(_target_b), _reference_b, absolute_tolerance_f32);
 }
 TEST_SUITE_END() // FP32
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::PRECOMMIT,
                                         combine(combine(combine(combine(combine(combine(
@@ -120,9 +120,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<half>, fram
                                                         with_gamma_values),
                                                         with_beta_values))
 {
-    // Validate outputs
-    validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
-    validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
+        validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::NIGHTLY,
@@ -135,12 +143,20 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationConvFixture<half>, fram
                                                         with_gamma_values),
                                                         with_beta_values))
 {
-    // Validate outputs
-    validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
-    validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
+        validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // Convolution
 TEST_SUITE(DepthwiseConvolution)
@@ -177,7 +193,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationDWCFixture<float>, fram
 }
 
 TEST_SUITE_END() // FP32
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::PRECOMMIT,
                                         combine(combine(combine(combine(combine(combine(
@@ -189,9 +205,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<half>, frame
                                                         with_gamma_values),
                                                         with_beta_values))
 {
-    // Validate outputs
-    validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
-    validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
+        validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::NIGHTLY,
@@ -204,13 +228,21 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationDWCFixture<half>, frame
                                                         with_gamma_values),
                                                         with_beta_values))
 {
-    // Validate outputs
-    validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
-    validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target_w), _reference_w, absolute_tolerance_f16);
+        validate(Accessor(_target_b), _reference_b, absolute_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 TEST_SUITE_END() // FP16
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // DepthwiseConvolution
 TEST_SUITE_END() // FuseBatchNormalization

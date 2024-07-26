@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NELSTMLAYER_H
-#define ARM_COMPUTE_NELSTMLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
@@ -245,7 +245,6 @@ private:
     Tensor                         _forget_gate_out3;
     Tensor                         _forget_gate_out4;
     Tensor                         _forget_gate_out5;
-    Tensor                         _forget_gate_out6;
     Tensor                         _cell_state_out1;
     Tensor                         _cell_state_out2;
     Tensor                         _cell_state_out3;
@@ -275,4 +274,4 @@ private:
     bool                           _is_layer_norm_lstm;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NELSTMLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYER_H

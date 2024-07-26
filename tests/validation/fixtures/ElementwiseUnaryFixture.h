@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ELEMENTWISE_UNARY_FIXTURE
-#define ARM_COMPUTE_TEST_ELEMENTWISE_UNARY_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ELEMENTWISEUNARYFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ELEMENTWISEUNARYFIXTURE_H
 
 #include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/TensorShape.h"
@@ -53,6 +53,12 @@ public:
     void setup(TensorShape input_shape, DataType input_data_type, bool in_place, ElementWiseUnary op,
                bool use_dynamic_shape = false, QuantizationInfo qinfo = QuantizationInfo(), QuantizationInfo qinfo_out = QuantizationInfo())
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            input_data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _op                = op;
         _target            = compute_target(input_shape, input_data_type, in_place, qinfo, qinfo_out);
         _reference         = compute_reference(input_shape, input_data_type, qinfo, qinfo_out);
@@ -444,4 +450,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ELEMENTWISE_UNARY_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ELEMENTWISEUNARYFIXTURE_H

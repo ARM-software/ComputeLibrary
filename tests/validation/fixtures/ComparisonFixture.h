@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_COMPARISON_FIXTURE
-#define ARM_COMPUTE_TEST_COMPARISON_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_COMPARISONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_COMPARISONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -46,6 +46,12 @@ class ComparisonValidationGenericFixture : public framework::Fixture
 public:
     void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(op, shape0, shape1, data_type, qinfo0, qinfo1);
         _reference = compute_reference(op, shape0, shape1, data_type, qinfo0, qinfo1);
     }
@@ -155,4 +161,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_COMPARISON_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_COMPARISONFIXTURE_H

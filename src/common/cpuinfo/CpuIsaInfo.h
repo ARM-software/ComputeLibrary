@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_CPUINFO_CPUISAINFO_H
-#define SRC_COMMON_CPUINFO_CPUISAINFO_H
+#ifndef ACL_SRC_COMMON_CPUINFO_CPUISAINFO_H
+#define ACL_SRC_COMMON_CPUINFO_CPUISAINFO_H
 
 #include <cstdint>
 
@@ -81,4 +81,4 @@ init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t p
 } // namespace cpuinfo
 } // namespace arm_compute
 
-#endif /* SRC_COMMON_CPUINFO_CPUISAINFO_H */
+#endif // ACL_SRC_COMMON_CPUINFO_CPUISAINFO_H

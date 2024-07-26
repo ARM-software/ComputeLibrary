@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,26 +144,42 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<float>, framework::DatasetMode
 }
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<half>, framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::F16 })),
                                        PaddingSizesDataset),
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<half>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F16 })),
                                        PaddingSizesDataset),
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)

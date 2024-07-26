@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SELECT_FIXTURE
-#define ARM_COMPUTE_TEST_SELECT_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SELECTFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SELECTFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -65,6 +65,12 @@ class SelectValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, bool has_same_same_rank, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         TensorShape condition_shape = detail::select_condition_shape(shape, has_same_same_rank);
 
         _target    = compute_target(shape, condition_shape, data_type);
@@ -144,4 +150,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SELECT_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SELECTFIXTURE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CPU_OPERATORS_CPUCONV2D_H
+#define ACL_SRC_CPU_OPERATORS_CPUCONV2D_H
+
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "src/core/common/Macros.h"
@@ -167,3 +171,5 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
+
+#endif // ACL_SRC_CPU_OPERATORS_CPUCONV2D_H

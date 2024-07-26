@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PADLAYER_FIXTURE
-#define ARM_COMPUTE_TEST_PADLAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_PADLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_PADLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -46,6 +46,12 @@ class PaddingFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type, const PaddingList &padding, const PaddingMode mode)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         PaddingList clamped_padding = padding;
         if(mode != PaddingMode::CONSTANT)
         {
@@ -132,4 +138,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PADLAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_PADLAYERFIXTURE_H

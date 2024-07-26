@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ROIALIGNLAYER_FIXTURE
-#define ARM_COMPUTE_TEST_ROIALIGNLAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ROIALIGNLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ROIALIGNLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -47,6 +47,12 @@ class ROIAlignLayerGenericFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout, QuantizationInfo qinfo, QuantizationInfo output_qinfo)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _rois_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::QASYMM16 : data_type;
         _target         = compute_target(input_shape, data_type, data_layout, pool_info, rois_shape, qinfo, output_qinfo);
         _reference      = compute_reference(input_shape, data_type, pool_info, rois_shape, qinfo, output_qinfo);
@@ -209,4 +215,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ROIALIGNLAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ROIALIGNLAYERFIXTURE_H

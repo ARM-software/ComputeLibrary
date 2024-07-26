@@ -50,6 +50,12 @@ public:
 
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         ActivationLayerInfo info(function, alpha_beta, alpha_beta);
 
         _in_place                 = in_place;

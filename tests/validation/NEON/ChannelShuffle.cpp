@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,26 +92,42 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<uint8_t>, framewor
 TEST_SUITE_END() // U8
 
 TEST_SUITE(Float)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),
                                                                                                                         framework::dataset::make("DataType",
                                                                                                                                 DataType::F16)),
                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeRandomChannelShuffleLayerDataset(),
                                                                                                                       framework::dataset::make("DataType",
                                                                                                                               DataType::F16)),
                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),

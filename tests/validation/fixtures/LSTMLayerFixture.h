@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LSTM_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_LSTM_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_LSTMLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_LSTMLAYERFIXTURE_H
+
+#include "arm_compute/runtime/Allocator.h"
+#include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/CL/CLBufferAllocator.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/PoolManager.h"
 
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
@@ -48,10 +54,16 @@ class LSTMLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, TensorShape input_weights_shape, TensorShape recurrent_weights_shape, TensorShape cell_bias_shape, TensorShape output_cell_shape, TensorShape output_shape,
                TensorShape scratch_shape, ActivationLayerInfo info, float cell_threshold, float projection_threshold, DataType data_type, bool projection_opt, bool peephole_opt,
-               bool use_layer_norm)
+               bool use_layer_norm, bool use_memory_manager)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target = compute_target(input_shape, input_weights_shape, recurrent_weights_shape, cell_bias_shape, output_cell_shape, output_shape, scratch_shape, info, cell_threshold, projection_threshold,
-                                 data_type, projection_opt, peephole_opt, use_layer_norm);
+                                 data_type, projection_opt, peephole_opt, use_layer_norm, use_memory_manager);
         _reference = compute_reference(input_shape, input_weights_shape, recurrent_weights_shape, cell_bias_shape, output_cell_shape, output_shape, scratch_shape, info, cell_threshold, projection_threshold,
                                        data_type, projection_opt, peephole_opt, use_layer_norm);
     }
@@ -77,7 +89,7 @@ protected:
     }
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &input_weights_shape, const TensorShape &recurrent_weights_shape, const TensorShape &cell_bias_shape,
                               const TensorShape &output_cell_shape, const TensorShape &output_shape, const TensorShape &scratch_shape, ActivationLayerInfo info, float cell_threshold,
-                              float projection_threshold, DataType data_type, bool projection_opt, bool peephole_opt, bool use_layer_norm)
+                              float projection_threshold, DataType data_type, bool projection_opt, bool peephole_opt, bool use_layer_norm, bool use_memory_manager)
     {
         const unsigned int num_cells   = input_weights_shape.y();
         const unsigned int num_outputs = recurrent_weights_shape.x();
@@ -159,7 +171,17 @@ protected:
         }
 
         // Create and configure function
-        FunctionType lstm;
+        std::shared_ptr<MemoryManagerOnDemand> mm = nullptr;
+
+        if(use_memory_manager)
+        {
+            auto lifetime_mgr = std::make_shared<BlobLifetimeManager>();
+            auto pool_mgr = std::make_shared<PoolManager>();
+            mm = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
+        }
+
+        FunctionType lstm(mm);
+
         lstm.configure(&input, &input_to_forget_w, &input_to_cell_w, &input_to_output_w, &recurrent_to_forget_w,
                        &recurrent_to_cell_w, &recurrent_to_output_w, &forget_gate_bias, &cell_bias, &output_gate_bias,
                        &output_state_in, &cell_state_in,
@@ -314,7 +336,26 @@ protected:
         }
 
         // Compute function
+        if(use_memory_manager)
+        {
+            if(std::is_same<TensorType, Tensor>::value)
+            {
+                Allocator alloc{};
+                mm->populate(alloc, 1);
+            }
+            else
+            {
+                CLBufferAllocator alloc{};
+                mm->populate(alloc, 1);
+            }
+        }
+
         lstm.run();
+
+        if(use_memory_manager)
+        {
+            mm->clear();
+        }
 
         _target_scratch = std::move(scratch);
         return output;
@@ -535,4 +576,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LSTM_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_LSTMLAYERFIXTURE_H

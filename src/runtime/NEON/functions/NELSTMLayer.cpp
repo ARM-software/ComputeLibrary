@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,7 +95,6 @@ NELSTMLayer::NELSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
       _forget_gate_out3(),
       _forget_gate_out4(),
       _forget_gate_out5(),
-      _forget_gate_out6(),
       _cell_state_out1(),
       _cell_state_out2(),
       _cell_state_out3(),
@@ -177,49 +176,48 @@ void NELSTMLayer::configure(const ITensor             *input,
     // forget_gate = Activation(input * input_to_forget_weights + output_state_in * recurrent_to_forget_weights + PixelWiseMul(cell_state, cell_to_forget_weights) + forget_gate_bias)
     // We optimize this as follows:
     // forget_gate = Activation( (input,output_state_in) * (input_to_forget_weights,recurrent_to_forget_weights) + PixelWiseMul(cell_state, cell_to_forget_weights) + forget_gate_bias)
-    _forget_gate_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-    _forget_gate_out3.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-    _forget_gate_out5.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+    _forget_gate_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+    _forget_gate_out4.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
     std::vector<const ITensor *> inputs_vector;
     inputs_vector.emplace_back(input);
     inputs_vector.emplace_back(output_state_in);
 
-    _memory_group.manage(&_forget_gate_out2);
-    _concat_inputs_forget_gate.configure(inputs_vector, &_forget_gate_out2, Window::DimX);
+    _memory_group.manage(&_forget_gate_out1);
+    _concat_inputs_forget_gate.configure(inputs_vector, &_forget_gate_out1, Window::DimX);
 
     std::vector<const ITensor *> weights_vector;
 
     weights_vector.emplace_back(input_to_forget_weights);
     weights_vector.emplace_back(recurrent_to_forget_weights);
 
-    _concat_weights_forget_gate.configure(weights_vector, &_forget_gate_out6, Window::DimX);
+    _concat_weights_forget_gate.configure(weights_vector, &_forget_gate_out5, Window::DimX);
 
-    _memory_group.manage(&_forget_gate_out5);
-    _fully_connected_forget_gate.configure(&_forget_gate_out2, &_forget_gate_out6,
-                                           (_is_layer_norm_lstm) ? nullptr : forget_gate_bias, &_forget_gate_out5);
-    _memory_group.manage(&_forget_gate_out1);
-    _memory_group.manage(&_forget_gate_out3);
-    _forget_gate_out6.allocator()->allocate();
+    _memory_group.manage(&_forget_gate_out4);
+    _fully_connected_forget_gate.configure(&_forget_gate_out1, &_forget_gate_out5,
+                                           (_is_layer_norm_lstm) ? nullptr : forget_gate_bias, &_forget_gate_out4);
 
-    Tensor *forget_gate_out = &_forget_gate_out5;
+    _memory_group.manage(&_forget_gate_out2);
+    _forget_gate_out5.allocator()->allocate();
+
+    Tensor *forget_gate_out = &_forget_gate_out4;
     if (lstm_params.has_peephole_opt())
     {
-        _forget_gate_out4.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _forget_gate_out3.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
         _run_peephole_opt = true;
-        _memory_group.manage(&_forget_gate_out4);
-        _pixelwise_mul_forget_gate.configure(cell_state_in, lstm_params.cell_to_forget_weights(), &_forget_gate_out4, 1,
+        _memory_group.manage(&_forget_gate_out3);
+        _pixelwise_mul_forget_gate.configure(cell_state_in, lstm_params.cell_to_forget_weights(), &_forget_gate_out3, 1,
                                              ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-        _accum_forget_gate1.configure(&_forget_gate_out5, &_forget_gate_out4, &_forget_gate_out3,
+        _accum_forget_gate1.configure(&_forget_gate_out4, &_forget_gate_out3, &_forget_gate_out2,
                                       ConvertPolicy::SATURATE);
+        _forget_gate_out3.allocator()->allocate();
         _forget_gate_out4.allocator()->allocate();
-        _forget_gate_out5.allocator()->allocate();
-        forget_gate_out = &_forget_gate_out3;
+        forget_gate_out = &_forget_gate_out2;
     }
     else
     {
-        _forget_gate_out3.allocator()->allocate();
+        _forget_gate_out2.allocator()->allocate();
     }
     if (_is_layer_norm_lstm)
     {
@@ -268,9 +266,8 @@ void NELSTMLayer::configure(const ITensor             *input,
         _concat_weights_input_gate.configure(lstm_weights, &_input_gate_out2, Window::DimX);
 
         _memory_group.manage(&_input_gate_out1);
-        _memory_group.manage(&_input_gate_out4);
 
-        _fully_connected_input_gate.configure(&_forget_gate_out2, &_input_gate_out2,
+        _fully_connected_input_gate.configure(&_forget_gate_out1, &_input_gate_out2,
                                               (_is_layer_norm_lstm) ? nullptr : lstm_params.input_gate_bias(),
                                               &_input_gate_out3);
         _input_gate_out2.allocator()->allocate();
@@ -384,11 +381,11 @@ void NELSTMLayer::configure(const ITensor             *input,
     _memory_group.manage(&_output1);
     _memory_group.manage(&_output4);
 
-    _fully_connected_output.configure(&_forget_gate_out2, &_output2, (_is_layer_norm_lstm) ? nullptr : output_gate_bias,
+    _fully_connected_output.configure(&_forget_gate_out1, &_output2, (_is_layer_norm_lstm) ? nullptr : output_gate_bias,
                                       &_output4);
 
     _output2.allocator()->allocate();
-    _forget_gate_out2.allocator()->allocate();
+    _forget_gate_out1.allocator()->allocate();
 
     Tensor *output_gate_out = &_output4;
     if (lstm_params.has_peephole_opt())
@@ -447,7 +444,6 @@ void NELSTMLayer::configure(const ITensor             *input,
     _pixelwise_mul_output_state2.configure(&_cell_state_activation, output_gate_out, output_state_out_tmp, 1,
                                            ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _cell_state_activation.allocator()->allocate();
-    output_gate_out->allocator()->allocate();
 
     if (lstm_params.has_projection())
     {

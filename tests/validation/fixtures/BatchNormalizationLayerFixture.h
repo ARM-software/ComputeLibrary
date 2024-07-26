@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_BATCHNORMALIZATIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_BATCHNORMALIZATIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -46,10 +46,15 @@ class BatchNormalizationLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            dt == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _data_type = dt;
         _use_beta  = use_beta;
         _use_gamma = use_gamma;
-
         _target    = compute_target(shape0, shape1, epsilon, act_info, dt, data_layout);
         _reference = compute_reference(shape0, shape1, epsilon, act_info, dt);
     }
@@ -165,4 +170,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_BATCHNORMALIZATIONLAYERFIXTURE_H

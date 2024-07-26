@@ -41,6 +41,16 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v24.07 Public major release
+ - Fix overflow issue in NEMeanStdDevNormalizationLayer for Fp16
+ - Expose CpuActivation functionality using the experimental operators api
+ - Expose CpuGemm functionality using the experimental operators api
+ - Expose CpuGemmConv2d functionality using the experimental operators api
+ - Expose CpuGemmDirectConv2d functionality using the experimental operators api
+ - Expose CpuTranspose functionality using the experimental operators api
+ - Expose CpuWinogradConv2d functionality using the experimental operators api
+ - Optimize CPU operator memory management.
+
 v24.06 Public minor release
  - Enable FP16 in multiple Neon™ kernels for multi_isa + v8a
  - Fix OpenMP® thread scheduling for large machine

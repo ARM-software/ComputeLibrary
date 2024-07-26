@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DECONVOLUTIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DECONVOLUTIONLAYERFIXTURE_H
+
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -53,6 +57,12 @@ public:
                DataType data_type, DataType weights_data_type, DataLayout data_layout,
                QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, QuantizationInfo weights_quantization_info, bool add_bias)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _data_type                 = data_type;
         _weights_data_type         = weights_data_type;
         _bias_data_type            = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
@@ -248,6 +258,12 @@ public:
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
                unsigned int num_kernels, DataType data_type, DataLayout data_layout, bool add_bias)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
@@ -267,6 +283,12 @@ public:
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int pad_left, unsigned int pad_right, unsigned int pad_top,
                unsigned int pad_bottom, unsigned int num_kernels, DataType data_type, DataLayout data_layout, bool add_bias)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, pad_left, pad_right, pad_top, pad_bottom, DimensionRoundingType::CEIL);
@@ -286,6 +308,12 @@ public:
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
                unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, bool add_bias)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
@@ -307,6 +335,12 @@ public:
                unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, bool add_bias,
                DataType weights_data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
@@ -331,3 +365,5 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DECONVOLUTIONLAYERFIXTURE_H

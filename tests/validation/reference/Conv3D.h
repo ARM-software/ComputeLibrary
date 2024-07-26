@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CONV3D_LAYER_H
-#define ARM_COMPUTE_TEST_CONV3D_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_CONV3D_H
+#define ACL_TESTS_VALIDATION_REFERENCE_CONV3D_H
 
 #include "Utils.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -37,11 +37,11 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename TB>
+template <typename T, typename TB, typename TACC>
 SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst,
                        const Conv3dInfo &conv3d_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CONV3D_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_CONV3D_H

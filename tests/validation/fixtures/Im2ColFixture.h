@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_IM2COL_FIXTURE
-#define ARM_COMPUTE_TEST_IM2COL_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_IM2COLFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_IM2COLFIXTURE_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
@@ -51,6 +51,12 @@ public:
     void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout,
                unsigned int num_groups)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _kernel_dims = kernel_dims;
         _conv_info   = conv_info;
         _quant_info  = quant_info;
@@ -136,4 +142,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_IM2COL_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_IM2COLFIXTURE_H

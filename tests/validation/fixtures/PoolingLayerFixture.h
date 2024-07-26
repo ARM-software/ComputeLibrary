@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_POOLING_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_POOLING_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_POOLINGLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_POOLINGLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -48,6 +48,12 @@ public:
     void setup(TensorShape shape, PoolingLayerInfo pool_info, DataType data_type, DataLayout data_layout, bool indices = false,
                QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo(), bool mixed_layout = false)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _mixed_layout = mixed_layout;
         _pool_info    = pool_info;
         _target       = compute_target(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo, indices);
@@ -225,4 +231,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_POOLING_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_POOLINGLAYERFIXTURE_H

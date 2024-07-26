@@ -31,9 +31,10 @@ import zlib
 import json
 import codecs
 import platform
+import SCons
 
-VERSION = "v24.06"
-LIBRARY_VERSION_MAJOR = 38
+VERSION = "v24.07"
+LIBRARY_VERSION_MAJOR = 39
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -151,6 +152,33 @@ def get_ckw_obj_list():
 
 def build_library(name, build_env, sources, static=False, libs=[]):
     cloned_build_env = build_env.Clone()
+
+    #The following set up only works for posix system, RANLIBCOM isn't available on win32 HOST_OS
+    if cloned_build_env['HOST_OS'] == 'posix':
+        #Set up to use temp file for long command when building and linking libraries
+        cloned_build_env['TEMPFILE'] = SCons.Platform.TempFileMunge
+
+        #To use temp file for any command, the following pattern should be used:
+        #   env['COMMAND'] = "{$TEMPFILE('$COMMANDSTRING')}"
+        #See: https://github.com/SCons/scons/blob/05f2992377844bbfec9bcd4a9c7f5479c634b91b/SCons/Platform/__init__.py#L147
+        #The commands' string are taken from https://github.com/SCons/scons
+        #The commands' explanations are taken from Scons userguide
+
+        #The command line used to compile C++ source file to an object file
+        cloned_build_env['CXXCOM'] = "${TEMPFILE('"+ cloned_build_env['CXXCOM'] + "')}"
+        #The command line used to compile C++ source file to a shared-library object file
+        cloned_build_env['SHCXXCOM'] = "${TEMPFILE('"+ cloned_build_env['SHCXXCOM'] + "')}"
+        #The command line used to generate a static library from object files
+        cloned_build_env['ARCOM'] = "${TEMPFILE('"+ cloned_build_env['ARCOM'] + "')}"
+        #The command line used to link object files into an executable
+        cloned_build_env['LINKCOM'] = "${TEMPFILE('"+ cloned_build_env['LINKCOM'] + "')}"
+        #The command line used to link programs using shared libraries
+        cloned_build_env['SHLINKCOM'] = "${TEMPFILE('"+ cloned_build_env['SHLINKCOM'] + "')}"
+        #The command line used to index a static library archive
+        cloned_build_env['RANLIBCOM'] = "${TEMPFILE('"+ cloned_build_env['RANLIBCOM'] + "')}"
+        #Set up directory for temp files. To prevent permission issue, the temp files are in the same directory with output files
+        cloned_build_env['TEMPFILEDIR'] = cloned_build_env['build_dir']
+
     if env['os'] == 'android' and static == False:
         cloned_build_env["LINKFLAGS"].remove('-pie')
         cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')

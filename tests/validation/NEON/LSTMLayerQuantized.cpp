@@ -21,15 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/runtime/Allocator.h"
+#include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/PoolManager.h"
 
 #include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/Utils.h"
-#include "tests/datasets/LSTMLayerDataset.h"
 #include "tests/framework/Asserts.h"
+#include "tests/framework/DatasetModes.h"
 #include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 
 #include <vector>
@@ -212,6 +214,154 @@ TEST_CASE(RunSmall, framework::DatasetMode::PRECOMMIT)
                                                         128, 130, 6, 138 });
     lstmq.run();
     validate(Accessor(output_state), expected_output, tolerance_qsymm16);
+}
+
+TEST_CASE(RunSmallWithMemoryManager, framework::DatasetMode::PRECOMMIT)
+{
+    const int batch_size  = 2;
+    const int input_size  = 2;
+    const int output_size = 4;
+
+
+    QuantizationInfo qasymm(1.f / 128.f, 128);
+    QuantizationInfo qweights(1.f / 128.f, 128);
+    QuantizationInfo qsymm_3(8.f / 32768.f, 0);
+    QuantizationInfo qsymm_4(16.f / 32768.f, 0);
+
+    TensorShape input_shape{ input_size, batch_size };
+    TensorShape input_weights_shape{ input_size, output_size };
+    TensorShape recurrent_weights_shape{ output_size, output_size };
+    TensorShape output_shape{ output_size, batch_size};
+    TensorShape bias_shape{ output_size };
+
+    auto input_to_input_weights      = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_forget_weights     = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_cell_weights       = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_output_weights     = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_input_weights  = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_forget_weights = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_cell_weights   = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_output_weights = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_gate_bias             = create_tensor<Tensor>(bias_shape, DataType::S32);
+    auto forget_gate_bias            = create_tensor<Tensor>(bias_shape, DataType::S32);
+    auto cell_gate_bias              = create_tensor<Tensor>(bias_shape, DataType::S32);
+    auto output_gate_bias            = create_tensor<Tensor>(bias_shape, DataType::S32);
+
+    // LSTM input
+    auto input = create_tensor<Tensor>(input_shape, DataType::QASYMM8, 1, qasymm);
+
+    // LSTM output state
+    auto output_state = create_tensor<Tensor>(output_shape, DataType::QASYMM8, 1, qasymm);
+
+    // LSTM cell state
+    auto cell_state = create_tensor<Tensor>(output_shape, DataType::QSYMM16, 1, qsymm_4);
+
+    auto lifetime_mgr = std::make_shared<BlobLifetimeManager>();
+    auto pool_mgr = std::make_shared<PoolManager>();
+    auto mm = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
+
+    NELSTMLayerQuantized lstmq(mm);
+
+    lstmq.configure(&input, &input_to_input_weights, &input_to_forget_weights, &input_to_cell_weights, &input_to_output_weights,
+                    &recurrent_to_input_weights, &recurrent_to_forget_weights, &recurrent_to_cell_weights, &recurrent_to_output_weights,
+                    &input_gate_bias, &forget_gate_bias, &cell_gate_bias, &output_gate_bias, &cell_state, &output_state, &cell_state, &output_state);
+
+    input.allocator()->allocate();
+    input_to_input_weights.allocator()->allocate();
+    input_to_forget_weights.allocator()->allocate();
+    input_to_cell_weights.allocator()->allocate();
+    input_to_output_weights.allocator()->allocate();
+    recurrent_to_input_weights.allocator()->allocate();
+    recurrent_to_forget_weights.allocator()->allocate();
+    recurrent_to_cell_weights.allocator()->allocate();
+    recurrent_to_output_weights.allocator()->allocate();
+    input_gate_bias.allocator()->allocate();
+    forget_gate_bias.allocator()->allocate();
+    cell_gate_bias.allocator()->allocate();
+    output_gate_bias.allocator()->allocate();
+    cell_state.allocator()->allocate();
+    output_state.allocator()->allocate();
+
+    // Fill weights and biases
+    fill_tensor(input_to_input_weights, std::vector<uint8_t>{ 47,  168,
+                                                              66,  239,
+                                                               6,   42,
+                                                             237,  236 });
+
+    fill_tensor(input_to_forget_weights, std::vector<uint8_t> { 204,  193,
+                                                                148,  59,
+                                                                113,  17,
+                                                                 66, 197 });
+
+    fill_tensor(input_to_cell_weights, std::vector<uint8_t> { 172,  101,
+                                                              184, 209,
+                                                              165,  82,
+                                                              108, 209 });
+
+    fill_tensor(input_to_output_weights, std::vector<uint8_t> { 203, 244,
+                                                                219, 114,
+                                                                130,  16,
+                                                                163, 222 });
+
+    fill_tensor(recurrent_to_input_weights, std::vector<uint8_t> { 162, 168,  7,  95,
+                                                                    91, 155, 108, 216,
+                                                                   255, 100,  48, 188,
+                                                                    58,  37, 186, 147 });
+
+    fill_tensor(recurrent_to_forget_weights, std::vector<uint8_t> {  46,  58,  47, 170,
+                                                                    246,  96,  12,  99,
+                                                                     68,  23, 186, 161,
+                                                                    237, 164,  89,   6 });
+
+    fill_tensor(recurrent_to_cell_weights, std::vector<uint8_t> { 234,  99,   71, 206,
+                                                                  205, 159,   64, 253,
+                                                                  191, 148,  116,   8,
+                                                                  209, 136,   59, 138 });
+
+    fill_tensor(recurrent_to_output_weights, std::vector<uint8_t> {  23, 241, 137, 36,
+                                                                    206,   5, 227, 56,
+                                                                    254, 176, 231, 47,
+                                                                     18, 201, 161, 11 });
+
+    fill_tensor(input_gate_bias, std::vector<int>  {-103038,   30525,  115255, -38154 });
+    fill_tensor(forget_gate_bias, std::vector<int> { -23428,  126970,  116806,  46307 });
+    fill_tensor(cell_gate_bias, std::vector<int>   { 128006,   69949,  -42808,  42568 });
+    fill_tensor(output_gate_bias, std::vector<int> { -67066,  -53607,   47233,  7300  });
+
+    SimpleTensor<uint8_t> expected_output(output_shape, DataType::QASYMM8, 1, qasymm);
+
+    // Initialize state
+    fill_tensor(output_state, std::vector<uint8_t> { 128, 128, 128, 128,
+                                                     128, 128, 128, 128 });
+    fill_tensor(cell_state, std::vector<int16_t> { 0, 0, 0, 0,
+                                                   0, 0, 0, 0 });
+
+    // First input
+    fill_tensor(input, std::vector<uint8_t> { 106,  193,
+                                              155,  150 });
+
+    fill_tensor(expected_output, std::vector<uint8_t> { 128, 130,  36, 134,
+                                                        128, 131,  35, 133 });
+
+    Allocator alloc{};
+    mm->populate(alloc, 1);
+
+    lstmq.run();
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
+
+    // Second input
+    fill_tensor(expected_output, std::vector<uint8_t> { 128, 129, 12, 137,
+                                                        128, 131, 10, 136 });
+    lstmq.run();
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
+
+    // Third input
+    fill_tensor(expected_output, std::vector<uint8_t> { 128, 129, 8, 140,
+                                                        128, 130, 6, 138 });
+    lstmq.run();
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
+
+    mm->clear();
 }
 
 TEST_CASE(RunLarge, framework::DatasetMode::PRECOMMIT)

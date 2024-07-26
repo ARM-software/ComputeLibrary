@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -127,27 +127,42 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<float>, framework::Data
 
 TEST_SUITE_END() // F32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                                                            ActivationFunctionsDataset))
 {
-    // Validate outputs
-    validate(Accessor(_interm_target), _interm_reference); // Arithmetic Addition has more strict tolerance
-    validate(Accessor(_target), _reference, tolerance_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate outputs
+        validate(Accessor(_interm_target), _interm_reference); // Arithmetic Addition has more strict tolerance
+        validate(Accessor(_target), _reference, tolerance_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
                                                                                                          ActivationFunctionsDataset))
 {
-    // Validate outputs
-    validate(Accessor(_interm_target), _interm_reference); // Arithmetic Addition has more strict tolerance
-    validate(Accessor(_target), _reference, tolerance_fp16);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate outputs
+        validate(Accessor(_interm_target), _interm_reference); // Arithmetic Addition has more strict tolerance
+        validate(Accessor(_target), _reference, tolerance_fp16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // F16
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // Float
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNSTACK_FIXTURE
-#define ARM_COMPUTE_TEST_UNSTACK_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNSTACKFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNSTACKFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -49,6 +49,12 @@ class UnstackValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, int axis, int num, DataType data_type)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         _target    = compute_target(input_shape, axis, num, data_type);
         _reference = compute_reference(input_shape, axis, num, data_type);
     }
@@ -114,4 +120,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNSTACK_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNSTACKFIXTURE_H

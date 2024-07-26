@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,9 +74,9 @@ const auto DepthConvertLayerZeroShiftDataset    = framework::dataset::make("Shif
 
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 constexpr AbsoluteTolerance<int32_t> tolerance_one_int32(1);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 constexpr AbsoluteTolerance<uint8_t> tolerance_one_uint8(1);
-#endif /*  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /*  ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -250,25 +250,41 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF32Fixture<uint8_t>, frame
 }
 TEST_SUITE_END() // U8_to_F32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(U8_to_F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerU8toF16Dataset),
                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerU8toF16Dataset),
                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // U8_to_F36
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(U16_to_U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerU16toU8Dataset),
@@ -338,7 +354,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS32Fixture<int16_t>, frame
 }
 TEST_SUITE_END() // S16_to_S32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16_to_QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToQASYMM8Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                        DepthConvertLayerF16toQASYMM8Dataset),
@@ -346,8 +362,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToQASYMM8Fixture<half>, fram
                                                                                                                        DepthConvertLayerZeroShiftDataset),
                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_qasymm8);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToQASYMM8Fixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
                                                                                                                      DepthConvertLayerF16toQASYMM8Dataset),
@@ -355,8 +379,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToQASYMM8Fixture<half>, fram
                                                                                                                      DepthConvertLayerZeroShiftDataset),
                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_qasymm8);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // F16_to_QASYMM8
 
@@ -365,15 +397,31 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<half>, framework
                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                   DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_one_uint8);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_one_uint8);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU8Fixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerF16toU8Dataset),
                                                                                                                         framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                 DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_one_uint8);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_one_uint8);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // F16_to_U8
 
@@ -382,15 +430,31 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<half>, framewor
                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                    DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF32Fixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerF16toF32Dataset),
                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                  DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // F16_to_F32
 
@@ -399,15 +463,31 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<half>, framewor
                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                    DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_one_int32);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_one_int32);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS32Fixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerF16toS32Dataset),
                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                  DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_one_int32);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_one_int32);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 TEST_SUITE_END() // F16_to_S32
@@ -419,8 +499,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerQuantizedToF16Fixture<uint8_
                        DepthConvertLayerZeroShiftDataset),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerQuantizedToF16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
                        DepthConvertLayerQASYMM8toF16Dataset),
@@ -428,8 +516,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerQuantizedToF16Fixture<uint8_
                        DepthConvertLayerZeroShiftDataset),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // QASYMM8_to_F16
 
@@ -438,15 +534,31 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<float>, framewo
                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF16Fixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerF32toF16Dataset),
                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                   DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // F32_to_F16
 
@@ -455,19 +567,35 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<int32_t>, frame
                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF16Fixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerS32toF16Dataset),
                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // S32_to_F16
 
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(F32_to_S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerF32toS32Dataset),

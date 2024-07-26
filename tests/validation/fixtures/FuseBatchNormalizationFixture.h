@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FUSEBATCHNORMALIZATION_FIXTURE
-#define ARM_COMPUTE_TEST_FUSEBATCHNORMALIZATION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_FUSEBATCHNORMALIZATIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_FUSEBATCHNORMALIZATIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -49,6 +49,12 @@ class FuseBatchNormalizationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape_w, DataType data_type, DataLayout data_layout, bool in_place, bool with_bias, bool with_gamma, bool with_beta)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         std::tie(_target_w, _target_b)       = compute_target(shape_w, data_type, data_layout, in_place, with_bias, with_gamma, with_beta);
         std::tie(_reference_w, _reference_b) = compute_reference(shape_w, data_type, with_bias, with_gamma, with_beta);
     }
@@ -202,4 +208,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FUSEBATCHNORMALIZATION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_FUSEBATCHNORMALIZATIONFIXTURE_H
