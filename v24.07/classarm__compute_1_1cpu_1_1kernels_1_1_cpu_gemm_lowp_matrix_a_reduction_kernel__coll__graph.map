@@ -1,0 +1,7 @@
+<map id="CpuGemmLowpMatrixAReductionKernel" name="CpuGemmLowpMatrixAReductionKernel">
+<area shape="rect" id="node1" title="Kernel used to compute the row&#45;vectors of sums of all the entries in each row of Matrix A." alt="" coords="11,352,252,393"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="5,261,257,303"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="80,81,172,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="147,157,321,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="93,5,159,32"/>
+</map>

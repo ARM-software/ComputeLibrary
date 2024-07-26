@@ -1,0 +1,4 @@
+var structarm__conv_1_1depthwise_1_1_generic_depthfirst_kernel_strategy_function_type_3_01_t_input_078319fdd1a8adfae8613a2c0dcd548f2 =
+[
+    [ "KernelType", "structarm__conv_1_1depthwise_1_1_generic_depthfirst_kernel_strategy_function_type_3_01_t_input_078319fdd1a8adfae8613a2c0dcd548f2.xhtml#a99e6c4f672845f6d58205565ac58a69a", null ]
+];

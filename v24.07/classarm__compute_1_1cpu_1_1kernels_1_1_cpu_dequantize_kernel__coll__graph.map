@@ -1,0 +1,7 @@
+<map id="CpuDequantizeKernel" name="CpuDequantizeKernel">
+<area shape="rect" id="node1" title="Interface for the dequantization layer kernel." alt="" coords="27,337,190,364"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="5,247,212,288"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="57,81,149,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="125,157,298,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="70,5,137,32"/>
+</map>
