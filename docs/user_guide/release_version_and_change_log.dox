@@ -41,6 +41,9 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v24.08 Public major release
+ - Expose CpuDepthwiseConv2d functionality using the experimental operators api
+
 v24.07 Public major release
  - Expose CpuActivation functionality using the experimental operators api
  - Expose CpuAdd functionality using the experimental operators api
