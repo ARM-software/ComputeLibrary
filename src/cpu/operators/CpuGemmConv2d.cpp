@@ -1028,6 +1028,9 @@ void CpuGemmConv2d::prepare(ITensorPack &tensors)
                 }
                 case (WeightTransformMethod::ReinterpretThenTranspose):
                 {
+                    // Ensure reinterpret is done correctly when weights tensor has an offset to the first element and no padding.
+                    _weights_reshaped.set_offset_first_element_in_bytes(
+                        weights->info()->offset_first_element_in_bytes());
                     gemm_pack.add_const_tensor(TensorType::ACL_SRC_1, reinterpreted_wei.get());
                     // Nothing to run
                     break;
