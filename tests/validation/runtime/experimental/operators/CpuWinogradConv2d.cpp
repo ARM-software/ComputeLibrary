@@ -67,7 +67,7 @@ TEST_SUITE(CpuWinogradConv2d)
  */
 TEST_CASE(OpCpuWinogradConv2dMemoryInjection, framework::DatasetMode::ALL)
 {
-    auto                winograd = std::make_unique<cpu::CpuWinogradConv2d>();
+    auto                winograd = std::make_unique<experimental::op::CpuWinogradConv2d>();
     const auto          src_info = TensorInfo(TensorShape(8U, 8U, 32U), 1, DataType::F32);
     const auto          w_info   = TensorInfo(TensorShape(1U), 1, DataType::F32);
     const auto          b_info   = TensorInfo(TensorShape(1U, 3U, 32U, 1U), 1, DataType::F32);
