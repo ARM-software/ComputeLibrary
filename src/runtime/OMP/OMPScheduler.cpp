@@ -118,15 +118,21 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     }
 
     ThreadInfo info;
-    info.cpu_info = &cpu_info();
+    info.cpu_info    = &cpu_info();
+    info.num_threads = num_threads_to_use;
 
 #if !defined(__ANDROID__)
-    info.num_threads = _num_threads;
+    // Use fixed number of omp threads in the thread pool because changing this
+    // in-between kernel execution negatively affects the scheduler performance,
+    // possibly switching between X and Y number of threads, causing reconfiguration
+    // of the synchronization mechanism. This has been only tested in a subset of
+    // operating systems, thus we limit the change using guards.
+    const unsigned int omp_num_threads = _num_threads;
 #else  /* !__ANDROID__ */
-    info.num_threads = num_threads_to_use;
+    const unsigned int omp_num_threads = num_threads_to_use;
 #endif /* __ANDROID__ */
 
-#pragma omp parallel for firstprivate(info) num_threads(info.num_threads) default(shared) proc_bind(close) \
+#pragma omp parallel for firstprivate(info) num_threads(omp_num_threads) default(shared) proc_bind(close) \
     schedule(static, 1)
     for (unsigned int wid = 0; wid < amount_of_work; ++wid)
     {
