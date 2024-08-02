@@ -72,6 +72,7 @@ Status CpuWinogradConv2d::validate(const ITensorInfo         *src,
 
 void CpuWinogradConv2d::run(ITensorPack &tensors)
 {
+    prepare(tensors);
     _impl->op->run(tensors);
 }
 

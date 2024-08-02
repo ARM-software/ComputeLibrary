@@ -92,6 +92,7 @@ Status CpuGemmConv2d::has_opt_impl(arm_compute::WeightFormat &expected_weight_fo
 
 void CpuGemmConv2d::run(ITensorPack &tensors)
 {
+    prepare(tensors);
     _impl->op->run(tensors);
 }
 
