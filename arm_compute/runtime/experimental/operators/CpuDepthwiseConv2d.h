@@ -48,8 +48,12 @@ public:
     CpuDepthwiseConv2d();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CpuDepthwiseConv2d(const CpuDepthwiseConv2d &) = delete;
+    /** Prevent copy assignment */
+    CpuDepthwiseConv2d &operator=(const CpuDepthwiseConv2d &) = delete;
     /** Default move constructor */
     CpuDepthwiseConv2d(CpuDepthwiseConv2d &&) = default;
+    /** Default move assignment */
+    CpuDepthwiseConv2d &operator=(CpuDepthwiseConv2d &&) = default;
     /** Default destructor */
     ~CpuDepthwiseConv2d();
 

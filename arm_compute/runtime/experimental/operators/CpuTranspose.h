@@ -27,6 +27,7 @@
 
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/NEON/INEOperator.h"
 
 namespace arm_compute
 {
@@ -37,17 +38,21 @@ namespace op
 /** Wrapper class for CpuTranspose. For information on the functions,
  * see "src/cpu/operators/CpuTranspose.h"
 */
-class CpuTranspose
+class CpuTranspose : INEOperator
 {
 public:
     /** Constructor **/
     CpuTranspose();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CpuTranspose(const CpuTranspose &) = delete;
+    /** Prevent copy assignment */
+    CpuTranspose &operator=(const CpuTranspose &) = delete;
     /** Default move constructor */
     CpuTranspose(CpuTranspose &&) = default;
+    /** Default move assignment */
+    CpuTranspose &operator=(CpuTranspose &&) = default;
     /** Default destructor */
-    ~CpuTranspose();
+    ~CpuTranspose() override;
 
     /** Configure kernel for a given list of arguments
      *
@@ -63,7 +68,7 @@ public:
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
-    void run(ITensorPack &tensors);
+    void run(ITensorPack &tensors) override;
 
 private:
     struct Impl;

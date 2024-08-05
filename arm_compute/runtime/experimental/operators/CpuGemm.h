@@ -52,10 +52,14 @@ public:
     CpuGemm();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CpuGemm(const CpuGemm &) = delete;
+    /** Prevent copy assignment */
+    CpuGemm operator=(const CpuGemm &) = delete;
     /** Default move constructor */
     CpuGemm(CpuGemm &&) = default;
+    /** Default move assignment */
+    CpuGemm &operator=(CpuGemm &&) = default;
     /** Default destructor */
-    ~CpuGemm();
+    ~CpuGemm() override;
 
     /** Configure operator for a given list of arguments
      *
@@ -119,9 +123,9 @@ public:
                                const ITensorInfo         *d,
                                const GEMMInfo            &gemm_info = GEMMInfo());
 
-    void                             run(ITensorPack &tensors);
-    void                             prepare(ITensorPack &constants);
-    experimental::MemoryRequirements workspace() const;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
     struct Impl;

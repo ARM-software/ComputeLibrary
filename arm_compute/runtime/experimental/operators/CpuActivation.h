@@ -27,6 +27,7 @@
 
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/NEON/INEOperator.h"
 
 namespace arm_compute
 {
@@ -37,17 +38,21 @@ namespace op
 /** Wrapper class for CpuActivation. For information on the functions,
  * see "src/cpu/operators/CpuActivation.h"
 */
-class CpuActivation
+class CpuActivation : INEOperator
 {
 public:
     /** Constructor **/
     CpuActivation();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CpuActivation(const CpuActivation &) = delete;
+    /** Prevent copy assignment */
+    CpuActivation &operator=(const CpuActivation &) = delete;
     /** Default move constructor */
     CpuActivation(CpuActivation &&) = default;
+    /** Default move assignment */
+    CpuActivation &operator=(CpuActivation &&) = default;
     /** Default destructor */
-    ~CpuActivation();
+    ~CpuActivation() override;
 
     /** Configure operator for a given list of arguments
      *
@@ -65,7 +70,7 @@ public:
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info);
 
-    void run(ITensorPack &tensors);
+    void run(ITensorPack &tensors) override;
 
 private:
     struct Impl;

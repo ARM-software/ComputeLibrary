@@ -48,10 +48,14 @@ public:
     CpuGemmDirectConv2d();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CpuGemmDirectConv2d(const CpuGemmDirectConv2d &) = delete;
+    /** Prevent copy assignment */
+    CpuGemmDirectConv2d &operator=(const CpuGemmDirectConv2d &) = delete;
     /** Default move constructor */
     CpuGemmDirectConv2d(CpuGemmDirectConv2d &&) = default;
+    /** Default move assignment */
+    CpuGemmDirectConv2d &operator=(CpuGemmDirectConv2d &&) = default;
     /** Default destructor */
-    ~CpuGemmDirectConv2d();
+    ~CpuGemmDirectConv2d() override;
 
     /** Set the input and output tensors.
      *
