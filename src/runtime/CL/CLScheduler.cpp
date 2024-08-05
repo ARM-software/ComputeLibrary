@@ -105,7 +105,9 @@ CLScheduler::CLScheduler()
       _backend_type(CLBackendType::Native),
       _job_chaining_enabled(true),
       _job_chaining_size(1),
-      _job_chaining_count(0)
+      _job_chaining_count(0),
+      _enqueue_count(0),
+      _flush_count(0)
 {
 }
 
@@ -201,14 +203,11 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
 
 void CLScheduler::flush_queue(bool flush)
 {
-    if (flush)
-    {
-        _queue.flush();
-        _job_chaining_count = 0;
-        return;
-    }
+    _enqueue_count++;
+    _flush_count += flush;
+    const float flush_ratio = _flush_count / (float)_enqueue_count;
 
-    if (_job_chaining_enabled)
+    if (_enqueue_count > 100 && flush_ratio > 0.5f && _job_chaining_enabled)
     {
         ++_job_chaining_count;
 
@@ -227,6 +226,11 @@ void CLScheduler::flush_queue(bool flush)
             }
             _queue.flush();
         }
+    }
+    else if (flush)
+    {
+        _job_chaining_count = 0;
+        _queue.flush();
     }
 }
 
