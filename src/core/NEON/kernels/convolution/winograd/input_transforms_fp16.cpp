@@ -38,14 +38,13 @@ void a64_fp16_6x6(unsigned int, const __fp16 *, size_t, size_t, __fp16 *, size_t
 
 #define IMPL(HEIGHT, WIDTH, FUNC, DRIVER) new Transform ## DRIVER <__fp16, __fp16>(#FUNC, HEIGHT, WIDTH, FUNC)
 
-static const TransformImplementation<__fp16> transforms_fp16[] = {
-  { IMPL(6, 6, a64_fp16_6x6, Unpadded) },
-  { nullptr },
-};
-
 template <>
 const TransformImplementation<__fp16> *implementation_list(void)
 {
+  static const TransformImplementation<__fp16> transforms_fp16[] = {
+    { IMPL(6, 6, a64_fp16_6x6, Unpadded) },
+    { nullptr },
+  };
   return transforms_fp16;
 }
 
