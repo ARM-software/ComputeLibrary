@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEROIPOOLINGLAYER_H
-#define ARM_COMPUTE_NEROIPOOLINGLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEROIPOOLINGLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEROIPOOLINGLAYER_H
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -36,7 +36,7 @@ class ITensorInfo;
 class NEROIPoolingLayerKernel;
 class ROIPoolingLayerInfo;
 
-/** Basic function to run @ref NEROIPoolingLayerKernel. */
+/** Basic function to run NEROIPoolingLayerKernel. */
 class NEROIPoolingLayer : public IFunction
 {
 public:
@@ -80,7 +80,7 @@ public:
     // Inherited methods overridden:
     void run() override;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEROIPoolingLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of NEROIPoolingLayerKernel
      *
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/F32.
      * @param[in] rois      TensorInfo for rois tensor which is a 2D tensor of size [5,N] (where 5 is the number ROIs). Data types supported: U16
@@ -102,4 +102,4 @@ private:
     std::unique_ptr<NEROIPoolingLayerKernel> _roi_kernel;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEROIPOOLINGLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEROIPOOLINGLAYER_H

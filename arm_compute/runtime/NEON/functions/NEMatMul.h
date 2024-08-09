@@ -72,7 +72,7 @@ class Status;
 
 /** Basic function to run the following operators:
  *
- * -# @ref cpu::CpuMatMul
+ * -# cpu::CpuMatMul
  */
 class NEMatMul : public IFunction
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLReverseKernel */
+/** Basic function to run CLReverseKernel */
 class CLReverse : public ICLSimpleFunction
 {
 public:
@@ -66,7 +66,7 @@ public:
                    ICLTensor              *output,
                    const ICLTensor        *axis,
                    bool                    use_inverted_axis);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLReverseKernel
+    /** Static function to check if given info will lead to a valid configuration of CLReverseKernel
      *
      * @param[in] input             Input tensor info. Data types supported: All.
      * @param[in] output            Output tensor info. Data type supported: Same as @p input

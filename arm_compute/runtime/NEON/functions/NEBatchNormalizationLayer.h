@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEBATCHNORMALIZATIONLAYER_H
-#define ARM_COMPUTE_NEBATCHNORMALIZATIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -35,7 +35,7 @@ namespace arm_compute
 class ITensor;
 class NEBatchNormalizationLayerKernel;
 
-/** Basic function to run @ref NENormalizationLayerKernel and simulate a batch normalization layer.
+/** Basic function to run NENormalizationLayerKernel and simulate a batch normalization layer.
  *
  * Batch normalization is calculated by:
  * @f[ out_i = \gamma * (\frac{in_i - \mu_{B}}{\sqrt{\sigma^2_{B} + \epsilon}}) + \beta \equiv BN_{\gamma,\beta}(in_i) @f]
@@ -120,4 +120,4 @@ private:
     std::unique_ptr<NEBatchNormalizationLayerKernel> _norm_kernel; /**< Batch normalization layer kernel */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEBATCHNORMALIZATIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER_H

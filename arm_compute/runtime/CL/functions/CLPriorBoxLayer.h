@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLPRIORBOXLAYER_H
-#define ARM_COMPUTE_CLPRIORBOXLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPRIORBOXLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPRIORBOXLAYER_H
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Types.h"
@@ -35,7 +35,7 @@ class CLPriorBoxLayerKernel;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLPriorBoxLayerKernel. */
+/** Basic function to run CLPriorBoxLayerKernel. */
 class CLPriorBoxLayer : public ICLSimpleFunction
 {
 public:
@@ -91,4 +91,4 @@ private:
     cl::Buffer _aspect_ratios;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLPRIORBOXLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPRIORBOXLAYER_H

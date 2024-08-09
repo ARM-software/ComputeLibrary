@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
-#define ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFULLYCONNECTEDLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/function_info/FullyConnectedLayerInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -34,9 +34,9 @@ namespace arm_compute
 {
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref opencl::kernels::ClIm2ColKernel (called when the input comes from a convolutional layer)
+ *  -# opencl::kernels::ClIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref CLTranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
- *  -# @ref opencl::ClGemm or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
+ *  -# opencl::ClGemm or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -119,4 +119,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFULLYCONNECTEDLAYER_H

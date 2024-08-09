@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCONVOLUTION3DLAYER_H
-#define ARM_COMPUTE_CLCONVOLUTION3DLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONV3D_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONV3D_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -38,7 +38,7 @@ class Status;
 
 /** Basic function to compute the convolution3d layer. This function calls the following OpenCL kernels/functions:
  *
- * -# @ref opencl::ClDirectConv3d
+ * -# opencl::ClDirectConv3d
  */
 class CLConv3D : public IFunction
 {
@@ -113,4 +113,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLCONVOLUTION3DLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONV3D_H

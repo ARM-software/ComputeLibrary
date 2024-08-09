@@ -31,7 +31,7 @@ namespace arm_compute
 @section architecture_compute_library Compute Library architecture
 
 The Compute Library is a collection of low level algorithm implementations known as kernels @ref IKernel.
-These kernels are implemented as operators @ref IOperator that do not allocate any memory (i.e. all the memory allocations/mappings have to be handled by the caller)
+These kernels are implemented as operators IOperator that do not allocate any memory (i.e. all the memory allocations/mappings have to be handled by the caller)
 and are are designed to be embedded in existing projects and applications.
 
 A higher-level interface wraps the operators into functions @ref IFunction that:

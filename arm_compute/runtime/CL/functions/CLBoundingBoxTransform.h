@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLBOUNDINGBOXTRANSOFORM_H
-#define ARM_COMPUTE_CLBOUNDINGBOXTRANSOFORM_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBOUNDINGBOXTRANSFORM_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBOUNDINGBOXTRANSFORM_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -35,10 +35,10 @@ class BoundingBoxTransformInfo;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLBoundingBoxTransformKernel.
+/** Basic function to run CLBoundingBoxTransformKernel.
  *
  * This function calls the following OpenCL kernels:
- * -# @ref CLBoundingBoxTransformKernel
+ * -# CLBoundingBoxTransformKernel
  */
 class CLBoundingBoxTransform : public ICLSimpleFunction
 {
@@ -103,4 +103,4 @@ public:
                            const BoundingBoxTransformInfo &info);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLBOUNDINGBOXTRANSFORM_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBOUNDINGBOXTRANSFORM_H

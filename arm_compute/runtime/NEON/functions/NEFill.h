@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEFILL_H
-#define ARM_COMPUTE_NEFILL_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFILL_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFILL_H
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
@@ -34,7 +34,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref cpu::kernels::CpuFillKernel */
+/** Basic function to run cpu::kernels::CpuFillKernel */
 class NEFill : public IFunction
 {
 public:
@@ -73,4 +73,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_FILL_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFILL_H

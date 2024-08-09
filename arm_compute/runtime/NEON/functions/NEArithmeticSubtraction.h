@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEARITHMETICSUBTRACTION_H
-#define ARM_COMPUTE_NEARITHMETICSUBTRACTION_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARITHMETICSUBTRACTION_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARITHMETICSUBTRACTION_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -33,13 +33,13 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref cpu::kernels::CpuSubKernel
+/** Basic function to run cpu::kernels::CpuSubKernel
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/S16/S32/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
  *
  *  This function calls the following kernels:
- * -# @ref cpu::kernels::CpuSubKernel
+ * -# cpu::kernels::CpuSubKernel
  */
 class NEArithmeticSubtraction : public IFunction
 {
@@ -109,4 +109,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEARITHMETICSUBTRACTION_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARITHMETICSUBTRACTION_H

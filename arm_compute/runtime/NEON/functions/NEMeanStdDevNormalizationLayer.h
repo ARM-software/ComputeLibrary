@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEMEANSTDDEVNORMALIZATIONLAYER_H
-#define ARM_COMPUTE_NEMEANSTDDEVNORMALIZATIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMEANSTDDEVNORMALIZATIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMEANSTDDEVNORMALIZATIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
@@ -32,7 +32,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to execute mean and standard deviation normalization by calling @ref NEMeanStdDevNormalizationKernel */
+/** Basic function to execute mean and standard deviation normalization by calling NEMeanStdDevNormalizationKernel */
 class NEMeanStdDevNormalizationLayer : public INESimpleFunctionNoBorder
 {
 public:
@@ -67,7 +67,7 @@ public:
      * @param[in]      epsilon (Optional) Small float to avoid division by zero in case of zero standard deviation. Defaults to 1e-8.
      */
     void configure(ITensor *input, ITensor *output = nullptr, float epsilon = 1e-8f);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEMeanStdDevNormalizationKernel
+    /** Static function to check if given info will lead to a valid configuration of NEMeanStdDevNormalizationKernel
      *
      * @param[in] input   Source tensor info with 2 dimensions. In case of @p output tensor info = nullptr,
      *                    this tensor will store the result of the normalization. Data types supported: F16/F32.
@@ -79,4 +79,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output = nullptr, float epsilon = 1e-8f);
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEMEANSTDDEVNORMALIZATIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMEANSTDDEVNORMALIZATIONLAYER_H

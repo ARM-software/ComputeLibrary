@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_NEGATHER_H
-#define ARM_COMPUTE_NEGATHER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGATHER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGATHER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEGatherKernel */
+/** Basic function to run NEGatherKernel */
 class NEGather : public INESimpleFunctionNoBorder
 {
 public:
@@ -67,4 +67,4 @@ public:
 };
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_NEGATHER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGATHER_H

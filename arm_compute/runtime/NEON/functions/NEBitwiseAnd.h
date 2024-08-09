@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEBITWISEAND_H
-#define ARM_COMPUTE_NEBITWISEAND_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBITWISEAND_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBITWISEAND_H
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref NEBitwiseAndKernel */
+/** Basic function to run NEBitwiseAndKernel */
 class NEBitwiseAnd : public INESimpleFunctionNoBorder
 {
 public:
@@ -63,4 +63,4 @@ public:
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEBITWISEAND_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBITWISEAND_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H
-#define ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDIRECTCONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDIRECTCONVOLUTIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -40,7 +40,7 @@ class ITensorInfo;
  *
  *  This function calls the following:
  *
- * -# @ref cpu::CpuDirectConv2d
+ * -# cpu::CpuDirectConv2d
  */
 class NEDirectConvolutionLayer : public IFunction
 {
@@ -127,4 +127,4 @@ private:
     std::unique_ptr<Impl>           _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDIRECTCONVOLUTIONLAYER_H

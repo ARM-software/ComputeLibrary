@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLRANGE_H
-#define ARM_COMPUTE_CLRANGE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLRANGE_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLRANGE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -33,7 +33,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLRangeKernel
+/** Basic function to run CLRangeKernel
  *
  * @note The tensor data type for the output must be U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
  * @note The function performs generates a sequence with the given start, end and step.
@@ -87,4 +87,4 @@ public:
     static Status validate(const ITensorInfo *output, float start, float end, float step = 1.f);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLRANGE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLRANGE_H

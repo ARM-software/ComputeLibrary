@@ -41,7 +41,7 @@ class ITensorInfo;
  *
  *  This function calls the following:
  *
- * -# @ref cpu::CpuGemmLowpMatrixMultiplyCore
+ * -# cpu::CpuGemmLowpMatrixMultiplyCore
  */
 class NEGEMMLowpMatrixMultiplyCore : public IFunction
 {

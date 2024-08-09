@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLQLSTMLAYER_H
-#define ARM_COMPUTE_CLQLSTMLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLQLSTMLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLQLSTMLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -58,7 +58,7 @@ class ClGemmLowpMatrixAReductionKernel;
  * -# @ref CLArithmeticAddition                                  Elementwise addition and subtraction
  * -# @ref CLGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref CLGEMMLowpOutputStage   Convert 32-bit integers into QSYMM16
- * -# @ref opencl::kernels::ClGemmLowpMatrixAReductionKernel                      For precomputing effective biases to use
+ * -# opencl::kernels::ClGemmLowpMatrixAReductionKernel                      For precomputing effective biases to use
  * -# @ref CLPixelWiseMultiplication                             Elementwise multiplication
  * -# @ref CLTranspose                                           Transpose function for reshaping the weights
  * */
@@ -529,4 +529,4 @@ private:
     bool _projection_tensor_copy_required{false};
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLQLSTMLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLQLSTMLAYER_H

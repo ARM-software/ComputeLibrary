@@ -40,7 +40,7 @@ class ITensorInfo;
 
 /** Basic function to compute the convolution layer. This function calls the following kernels/functions:
  *
- * -# @ref cpu::CpuGemmConv2d
+ * -# cpu::CpuGemmConv2d
  *
  */
 class NEGEMMConvolutionLayer : public IFunction

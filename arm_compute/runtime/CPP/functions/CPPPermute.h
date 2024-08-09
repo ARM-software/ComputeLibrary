@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPPPERMUTE_H
-#define ARM_COMPUTE_CPPPERMUTE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPPERMUTE_H
+#define ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPPERMUTE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref CPPPermuteKernel */
+/** Basic function to run CPPPermuteKernel */
 class CPPPermute : public ICPPSimpleFunction
 {
 public:
@@ -53,4 +53,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPPPERMUTE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPPERMUTE_H

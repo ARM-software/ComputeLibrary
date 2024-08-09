@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NECONV3D_H
-#define ARM_COMPUTE_NECONV3D_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONV3D_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONV3D_H
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -37,7 +37,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to simulate a 3d convolution. This function calls one of the following functions:
- * -# @ref cpu::CpuDirectConv3d
+ * -# cpu::CpuDirectConv3d
  *
  */
 class NEConv3D : public IFunction
@@ -97,4 +97,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NECONV3D_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONV3D_H

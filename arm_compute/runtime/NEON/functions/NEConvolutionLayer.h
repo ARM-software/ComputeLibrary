@@ -38,9 +38,9 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls one of the following functions:
- * -# @ref cpu::CpuGemmConv2d     (executed only in case GEMM is required for the operation)
- * -# @ref cpu::CpuWinogradConv2d (executed only in case Winograd is required for the operation)
- * -# @ref cpu::CpuDirectConv2d   (executed only in case Direct Convolution is required for the operation)
+ * -# cpu::CpuGemmConv2d     (executed only in case GEMM is required for the operation)
+ * -# cpu::CpuWinogradConv2d (executed only in case Winograd is required for the operation)
+ * -# cpu::CpuDirectConv2d   (executed only in case Direct Convolution is required for the operation)
  * -# @ref NEFFTConvolutionLayer      (executed only in case FFT is required for the operation)
  *
  *

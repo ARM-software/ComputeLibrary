@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCONCATENATELAYER_H
-#define ARM_COMPUTE_CLCONCATENATELAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONCATENATELAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONCATENATELAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -41,10 +41,10 @@ class Status;
 
 /** Basic function to execute concatenate tensors along a given axis. This function calls the following kernels:
  *
- * -# @ref opencl::kernels::ClWidthConcatenateKernel (if underlying concatenation axis is 0).
- * -# @ref opencl::kernels::ClHeightConcatenateKernel (if underlying concatenation axis is 1).
- * -# @ref opencl::kernels::ClDepthConcatenateKernel (if underlying concatenation axis is 2).
- * -# @ref opencl::kernels::ClBatchConcatenateKernel (if underlying concatenation axis is 3).
+ * -# opencl::kernels::ClWidthConcatenateKernel (if underlying concatenation axis is 0).
+ * -# opencl::kernels::ClHeightConcatenateKernel (if underlying concatenation axis is 1).
+ * -# opencl::kernels::ClDepthConcatenateKernel (if underlying concatenation axis is 2).
+ * -# opencl::kernels::ClBatchConcatenateKernel (if underlying concatenation axis is 3).
  */
 class CLConcatenateLayer : public IFunction
 {
@@ -75,8 +75,8 @@ public:
      * |F32            |F32            |
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref opencl::kernels::ClWidthConcatenateKernel,
-     *       @ref opencl::kernels::ClHeightConcatenateKernel and @ref opencl::kernels::ClDepthConcatenateKernel.
+     * @note Preconditions can be found respectively at opencl::kernels::ClWidthConcatenateKernel,
+     *       opencl::kernels::ClHeightConcatenateKernel and opencl::kernels::ClDepthConcatenateKernel.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
@@ -86,8 +86,8 @@ public:
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref opencl::kernels::ClWidthConcatenateKernel,
-     *       @ref opencl::kernels::ClHeightConcatenateKernel and @ref opencl::kernels::ClDepthConcatenateKernel.
+     * @note Preconditions can be found respectively at opencl::kernels::ClWidthConcatenateKernel,
+     *       opencl::kernels::ClHeightConcatenateKernel and opencl::kernels::ClDepthConcatenateKernel.
      *
      * @param[in]     compile_context The compile context to be used.
      * @param[in,out] inputs_vector   The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -101,8 +101,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref opencl::kernels::ClWidthConcatenateKernel,
-     *       @ref opencl::kernels::ClHeightConcatenateKernel and @ref opencl::kernels::ClDepthConcatenateKernel.
+     * @note Preconditions can be found respectively at opencl::kernels::ClWidthConcatenateKernel,
+     *       opencl::kernels::ClHeightConcatenateKernel and opencl::kernels::ClDepthConcatenateKernel.
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
@@ -121,4 +121,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLCONCATENATELAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONCATENATELAYER_H

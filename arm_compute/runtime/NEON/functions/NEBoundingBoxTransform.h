@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H
-#define ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBOUNDINGBOXTRANSFORM_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBOUNDINGBOXTRANSFORM_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
@@ -32,7 +32,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEBoundingBoxTransformKernel. */
+/** Basic function to run NEBoundingBoxTransformKernel. */
 class NEBoundingBoxTransform : public INESimpleFunctionNoBorder
 {
 public:
@@ -78,4 +78,4 @@ public:
                            const BoundingBoxTransformInfo &info);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEBOUNDINGBOXTRANSFORM_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBOUNDINGBOXTRANSFORM_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEPOOLINGLAYER_H
-#define ARM_COMPUTE_NEPOOLINGLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEPOOLINGLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEPOOLINGLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -39,7 +39,7 @@ class ITensorInfo;
 
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following kernels:
  *
- * -# @ref cpu::CpuPool2d
+ * -# cpu::CpuPool2d
  */
 class NEPoolingLayer : public IFunction
 {
@@ -104,4 +104,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEPOOLINGLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEPOOLINGLAYER_H

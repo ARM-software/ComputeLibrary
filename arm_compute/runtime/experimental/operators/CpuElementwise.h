@@ -105,7 +105,7 @@ public:
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to @ref CpuElementwiseArithmetic::configure()
+     * Similar to @ref CpuElementwiseMax::configure()
      *
      * @return a status
      */
@@ -145,7 +145,7 @@ public:
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to @ref CpuElementwiseArithmetic::configure()
+     * Similar to @ref CpuElementwiseMin::configure()
      *
      * @return a status
      */

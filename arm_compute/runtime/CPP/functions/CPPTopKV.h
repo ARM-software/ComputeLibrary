@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPPTOPKV_H
-#define ARM_COMPUTE_CPPTOPKV_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPTOPKV_H
+#define ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPTOPKV_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref CPPTopKVKernel */
+/** Basic function to run CPPTopKVKernel */
 class CPPTopKV : public ICPPSimpleFunction
 {
 public:
@@ -57,4 +57,4 @@ public:
     validate(const ITensorInfo *predictions, const ITensorInfo *targets, ITensorInfo *output, const unsigned int k);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPPTOPKV_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPTOPKV_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NESPACETODEPTHLAYER_H
-#define ARM_COMPUTE_NESPACETODEPTHLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESPACETODEPTHLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESPACETODEPTHLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -35,7 +35,7 @@ class ITensor;
 class ITensorInfo;
 class NESpaceToDepthLayerKernel;
 
-/** Basic function to run @ref NESpaceToDepthLayerKernel. */
+/** Basic function to run NESpaceToDepthLayerKernel. */
 class NESpaceToDepthLayer : public IFunction
 {
 public:
@@ -84,4 +84,4 @@ private:
     std::unique_ptr<NESpaceToDepthLayerKernel> _space_to_depth_kernel; /**< SpaceToDepth kernel to run */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NESPACETODEPTHLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESPACETODEPTHLAYER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H
-#define ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONVERTFULLYCONNECTEDWEIGHTS_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONVERTFULLYCONNECTEDWEIGHTS_H
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -37,7 +37,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run an @ref opencl::kernels::ClConvertFullyConnectedWeightsKernel. */
+/** Basic function to run an opencl::kernels::ClConvertFullyConnectedWeightsKernel. */
 class CLConvertFullyConnectedWeights : public IFunction
 {
 public:
@@ -169,4 +169,4 @@ private:
 };
 } // namespace weights_transformations
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCONVERTFULLYCONNECTEDWEIGHTS_H

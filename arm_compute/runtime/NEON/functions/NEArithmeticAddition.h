@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEARITHMETICADDITION_H
-#define ARM_COMPUTE_NEARITHMETICADDITION_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARITHMETICADDITION_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARITHMETICADDITION_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -35,7 +35,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref cpu::kernels::CpuAddKernel */
+/** Basic function to run cpu::kernels::CpuAddKernel */
 class NEArithmeticAddition : public IFunction
 {
 public:
@@ -104,4 +104,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEARITHMETICADDITION_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARITHMETICADDITION_H

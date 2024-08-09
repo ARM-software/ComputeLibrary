@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLBATCHTOSPACELAYER_H
-#define ARM_COMPUTE_CLBATCHTOSPACELAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBATCHTOSPACELAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBATCHTOSPACELAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -36,7 +36,7 @@ class ITensorInfo;
 class CLBatchToSpaceLayerKernel;
 class ICLTensor;
 
-/** Basic function to run @ref CLBatchToSpaceLayerKernel. */
+/** Basic function to run CLBatchToSpaceLayerKernel. */
 class CLBatchToSpaceLayer : public IFunction
 {
 public:
@@ -148,4 +148,4 @@ private:
     std::unique_ptr<CLBatchToSpaceLayerKernel> _batch_to_space_kernel; /**< CLBatchToSpaceLayerKernel to run */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLBATCHTOSPACELAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBATCHTOSPACELAYER_H

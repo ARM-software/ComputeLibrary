@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H
-#define ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGEMMLOWPOUTPUTSTAGE_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGEMMLOWPOUTPUTSTAGE_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -49,9 +49,9 @@ struct GEMMLowpOutputStageInfo;
  *
  *  This function calls the following CL kernels:
  *
- * -# @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleKernel
- * -# @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFloatKernel
- * -# @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel
+ * -# opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleKernel
+ * -# opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFloatKernel
+ * -# opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel
 */
 class CLGEMMLowpOutputStage : public IFunction
 {
@@ -101,7 +101,7 @@ public:
                    const ICLTensor               *bias,
                    ICLTensor                     *output,
                    const GEMMLowpOutputStageInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel
+    /** Static function to check if given info will lead to a valid configuration of opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel
      *
      * @param[in] input  Input tensor. It is the output of @ref CLGEMMLowpMatrixMultiplyCore function. Data type supported: S32
      * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
@@ -124,4 +124,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGEMMLOWPOUTPUTSTAGE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLLOGICALOR_H
-#define ARM_COMPUTE_CLLOGICALOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLLOGICALOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLLOGICALOR_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
@@ -34,7 +34,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref arm_compute::opencl::kernels::ClLogicalBinaryKernel.
+/** Basic function to run arm_compute::opencl::kernels::ClLogicalBinaryKernel.
  *
  * @note The tensor data type for the inputs must be U8.
  * @note The function performs a logical OR operation using the two input tensors.
@@ -113,7 +113,7 @@ public:
      */
     void
     configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref arm_compute::opencl::kernels::ClLogicalBinaryKernel
+    /** Static function to check if given info will lead to a valid configuration of arm_compute::opencl::kernels::ClLogicalBinaryKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: U8.
      * @param[in] input2 Second tensor input info. Data types supported: same as @p input1.
@@ -127,4 +127,4 @@ public:
 };
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLLOGICALOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLLOGICALOR_H

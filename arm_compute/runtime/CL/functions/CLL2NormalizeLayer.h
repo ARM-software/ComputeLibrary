@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLL2NORMALIZELAYER_H
-#define ARM_COMPUTE_CLL2NORMALIZELAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLL2NORMALIZELAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLL2NORMALIZELAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -45,7 +45,7 @@ class ITensorInfo;
  *
  * This function runs the following kernels:
  * -# @ref CLReductionOperation
- * -# @ref CLL2NormalizeLayerKernel
+ * -# CLL2NormalizeLayerKernel
  */
 class CLL2NormalizeLayer : public IFunction
 {
@@ -113,4 +113,4 @@ private:
     CLTensor                                  _sumsq;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLL2NORMALIZELAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLL2NORMALIZELAYER_H

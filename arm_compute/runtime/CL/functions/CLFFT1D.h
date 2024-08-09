@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLFFT1D_H
-#define ARM_COMPUTE_CLFFT1D_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFFT1D_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFFT1D_H
 
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -39,9 +39,9 @@ class ICLTensor;
 
 /** Basic function to execute one dimensional FFT. This function calls the following OpenCL kernels:
  *
- * -# @ref CLFFTDigitReverseKernel Performs digit reverse.
- * -# @ref CLFFTRadixStageKernel   A list of FFT kernels depending on the radix decomposition.
- * -# @ref CLFFTScaleKernel        Performs output scaling in case of in inverse FFT.
+ * -# CLFFTDigitReverseKernel Performs digit reverse.
+ * -# CLFFTRadixStageKernel   A list of FFT kernels depending on the radix decomposition.
+ * -# CLFFTScaleKernel        Performs output scaling in case of in inverse FFT.
  */
 class CLFFT1D : public IFunction
 {
@@ -109,4 +109,4 @@ protected:
     bool                                                _run_scale;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLFFT1D_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFFT1D_H

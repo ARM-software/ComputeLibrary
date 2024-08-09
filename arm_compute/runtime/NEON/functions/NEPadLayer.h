@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEPADLAYER_H
-#define ARM_COMPUTE_NEPADLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEPADLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEPADLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -41,7 +41,7 @@ class NEPadLayerKernel;
 /** Basic function to pad a tensor. This function calls the following functions/kernels:
  *
  *  - For padding mode = PaddingMode::CONSTANT:
- *      -# @ref NEPadLayerKernel
+ *      -# NEPadLayerKernel
  *  - Otherwise:
  *      -# @ref NECopy
  *      -# @ref NEStridedSlice
@@ -140,4 +140,4 @@ private:
     std::vector<Tensor>               _concat_results;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEPADLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEPADLAYER_H

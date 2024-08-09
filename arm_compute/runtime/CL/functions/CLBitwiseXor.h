@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLBITWISEXOR_H
-#define ARM_COMPUTE_CLBITWISEXOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBITWISEXOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBITWISEXOR_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -31,7 +31,7 @@ namespace arm_compute
 class CLCompileContext;
 class ICLTensor;
 
-/** Basic function to perform bitwise XOR by running @ref CLBitwiseKernel.
+/** Basic function to perform bitwise XOR by running CLBitwiseKernel.
  *
  * @note The tensor data type for the inputs must be U8.
  * @note The function performs a bitwise XOR operation using the two input tensors.
@@ -67,4 +67,4 @@ public:
                    ICLTensor              *output);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLBITWISEXOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBITWISEXOR_H

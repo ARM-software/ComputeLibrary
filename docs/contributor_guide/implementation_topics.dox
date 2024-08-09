@@ -41,7 +41,7 @@ For example, some assembly kernels are located in the folders:
 The assembly kernels are written using assembly mnemonics and the .inst directive which inserts the machine code to the output directly.
 
 Below you can see a code block from one of the kernels in the library which uses the .inst directive to generate the sdot instruction.
-This code can be found in the kernel @ref src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8qa_dot_4x16/a55.cpp
+This code can be found in the kernel src/core/NEON/kernels/arm_gemm/kernels/a64_hybrid_s8qa_dot_4x16/a55.cpp
 
 @code{.cpp}
 ".inst 0x4f80eb10  // sdot v16.4s, v24.16b, v0.4b[2]\n"
