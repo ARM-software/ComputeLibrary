@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLPADLAYER_H
-#define ARM_COMPUTE_CLPADLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPADLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPADLAYER_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -38,7 +38,7 @@ class ICLTensor;
 
 /** Basic function to pad a tensor. This function calls the following OpenCL functions/kernels:
  *
- *  -# @ref CLPadLayerKernel if there is padding to be added
+ *  -# CLPadLayerKernel if there is padding to be added
  *  -# @ref CLCopy otherwise
  */
 class CLPadLayer : public IFunction
@@ -126,4 +126,4 @@ private:
     bool                              _perform_pad;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_PADLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPADLAYER_H

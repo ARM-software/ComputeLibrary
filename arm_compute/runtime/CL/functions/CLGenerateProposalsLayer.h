@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGENERATEPROPOSALSLAYER_H
-#define ARM_COMPUTE_CLGENERATEPROPOSALSLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGENERATEPROPOSALSLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGENERATEPROPOSALSLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -50,11 +50,11 @@ class ITensorInfo;
 /** Basic function to generate proposals for a RPN (Region Proposal Network)
  *
  * This function calls the following OpenCL kernels:
- * -# @ref CLComputeAllAnchorsKernel
+ * -# CLComputeAllAnchorsKernel
  * -# @ref CLPermute x 2
  * -# @ref CLReshapeLayer x 2
  * -# @ref CLBoundingBoxTransform
- * -# @ref CLPadLayerKernel
+ * -# CLPadLayerKernel
  * -# @ref CLDequantizationLayer x 2
  * -# @ref CLQuantizationLayer
  * And the following CPP functions:
@@ -204,4 +204,4 @@ private:
     void run_cpp_nms_kernel();
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLGENERATEPROPOSALSLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGENERATEPROPOSALSLAYER_H

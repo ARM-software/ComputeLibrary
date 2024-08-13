@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -370,14 +370,15 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src,
                         // indirect conv2d should be called when:
                         // 1- When the kernel size is greater than 1x1 and less than or equal to 9x9 (81)
                         // 2- When the kernel size is odd
-                        // 3- When the Gpu target is Arm Mali-G77
+                        // 3- When the Gpu target is Arm Mali-G77 or Arm Mali-G78
                         if (is_indirect_valid)
                         {
                             const bool is_kernel_sz_odd = kernel_sz % 2;
-                            const bool is_g77           = gpu_target == GPUTarget::G77;
-                            preferred_conv_method = (kernel_sz > 1) && (kernel_sz <= 81) && is_kernel_sz_odd && is_g77
-                                                        ? ConvolutionMethod::INDIRECT
-                                                        : ConvolutionMethod::DIRECT;
+                            const bool is_g77_or_g78    = gpu_target == GPUTarget::G77 || gpu_target == GPUTarget::G78;
+                            preferred_conv_method =
+                                (kernel_sz > 1) && (kernel_sz <= 81) && is_kernel_sz_odd && is_g77_or_g78
+                                    ? ConvolutionMethod::INDIRECT
+                                    : ConvolutionMethod::DIRECT;
                         }
 
                         // Direct/indirect convolution used for the first layer of the network

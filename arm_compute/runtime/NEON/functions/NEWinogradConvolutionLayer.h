@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,9 +38,9 @@ class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls the following kernels:
  *
- * -# @ref cpu::CpuWinogradConv2dTransformInputKernel
- * -# @ref cpu::CpuWinogradConv2dTransformOutputKernel
- * -# @ref cpu::CpuGemmAssemblyDispatch
+ * -# cpu::CpuWinogradConv2dTransformInputKernel
+ * -# cpu::CpuWinogradConv2dTransformOutputKernel
+ * -# cpu::CpuGemmAssemblyDispatch
  * -# @ref CPPPermute (three times: weights, input and output)
  *
  * @note  Some Winograd configurations (i.e. F(2x2, 5x5), F(4x4, 5x5)) are supported only with enable_fast_math = true

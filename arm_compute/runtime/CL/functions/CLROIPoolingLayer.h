@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLROIPOOLINGLAYER_H
-#define ARM_COMPUTE_CLROIPOOLINGLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLROIPOOLINGLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLROIPOOLINGLAYER_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -34,10 +34,10 @@ class ICLTensor;
 class ROIPoolingLayerInfo;
 class ITensorInfo;
 
-/** Basic function to run @ref CLROIPoolingLayerKernel.
+/** Basic function to run CLROIPoolingLayerKernel.
  *
  * This function calls the following OpenCL kernels:
- * -# @ref CLROIPoolingLayerKernel
+ * -# CLROIPoolingLayerKernel
  *
  */
 class CLROIPoolingLayer : public ICLSimpleFunction
@@ -108,4 +108,4 @@ public:
                            const ROIPoolingLayerInfo &pool_info);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLROIPOOLINGLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLROIPOOLINGLAYER_H

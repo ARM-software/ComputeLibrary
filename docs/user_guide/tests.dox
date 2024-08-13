@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021 Arm Limited.
+/// Copyright (c) 2017-2021, 2024 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -53,14 +53,14 @@ multiple test cases. For that purpose a fixture can define a `setup`,
 also be customized.
 
 An instance of the fixture is created immediately before the actual test is
-executed. After construction the @ref framework::Fixture::setup method is called. Then the test
+executed. After construction the framework::Fixture::setup method is called. Then the test
 function or the fixtures `run` method is invoked. After test execution the
-@ref framework::Fixture::teardown method is called and lastly the fixture is destructed.
+framework::Fixture::teardown method is called and lastly the fixture is destructed.
 
 @subsubsection tests_overview_fixtures_fixture Fixture
 
 Fixtures for non-parameterized test are straightforward. The custom fixture
-class has to inherit from @ref framework::Fixture and choose to implement any of the
+class has to inherit from framework::Fixture and choose to implement any of the
 `setup`, `teardown` or `run` methods. None of the methods takes any arguments
 or returns anything.
 

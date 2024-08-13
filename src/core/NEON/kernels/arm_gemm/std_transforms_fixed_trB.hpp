@@ -42,24 +42,24 @@ namespace arm_gemm {
  * The optional 'block' parameter is for kernels using dot-product type
  * instructions like UDOT and SDOT.
  */
-template<typename TOperand, typename TResult, unsigned int height, unsigned int width, unsigned int block=1, bool integrate_sums=false>
+template<typename TInput, typename TWeight, typename TResult, unsigned int height, unsigned int width, unsigned int block=1, bool integrate_sums=false>
 class StdTransformsFixedTRB
 {
 public:
     template<typename TIn>
-    void PrepareA(TOperand *out, const TIn *in, const int stride, const int y0,
+    void PrepareA(TInput *out, const TIn *in, const int stride, const int y0,
                   const int ymax, const int k0, const int kmax, int32_t row_sum_multiplier) const {
         Interleave<height, block, VLType::None>(out, in, stride, y0, ymax, k0, kmax, integrate_sums, row_sum_multiplier);
     }
 
     template<typename TIn>
-    void PrepareA_indirect(TOperand *out, const TIn * const * const *ptr, size_t stringlen, size_t rounded_stringlen, const int y0,
+    void PrepareA_indirect(TInput *out, const TIn * const * const *ptr, size_t stringlen, size_t rounded_stringlen, const int y0,
                            const int ymax, const int k0, const int kmax, int32_t row_sum_multiplier) {
         IndirectInterleave<height, block, VLType::None>(out, ptr, stringlen, rounded_stringlen, y0, ymax, k0, kmax, integrate_sums, row_sum_multiplier);
     }
 
     template<typename TIn>
-    void PrepareA_convolution(TOperand *out, const TIn *ptr, size_t stride, const convolver<TIn> &conv, size_t rounded_stringlen,
+    void PrepareA_convolution(TInput *out, const TIn *ptr, size_t stride, const convolver<TIn> &conv, size_t rounded_stringlen,
                               const int y0, const int ymax, const int k0, const int kmax, int32_t row_sum_multiplier) {
         ConvolutionInterleave<height, block, VLType::None>(out, ptr, stride, conv, rounded_stringlen, y0, ymax, k0, kmax, integrate_sums, row_sum_multiplier);
     }
@@ -69,7 +69,7 @@ public:
     }
 
     template<typename TIn>
-    void PrepareB(TOperand *out, const TIn *in, const int stride, const int x0,
+    void PrepareB(TWeight *out, const TIn *in, const int stride, const int x0,
                   const int xmax, const int k0, const int kmax, bool transposed) const {
         if (transposed) {
             Transform<width, block, false>(out, in, stride, x0, xmax, k0, kmax);

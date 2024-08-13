@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ class ITensor;
 class ITensorInfo;
 class NEDepthToSpaceLayerKernel;
 
-/** Basic function to run @ref NEDepthToSpaceLayerKernel. */
+/** Basic function to run NEDepthToSpaceLayerKernel. */
 class NEDepthToSpaceLayer : public IFunction
 {
 public:

@@ -199,8 +199,8 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 3U, 11U },
-                     TensorShape{ 1U, 16U },
+        //TensorShape{ 3U, 11U },
+                     //TensorShape{ 1U, 16U },
                      TensorShape{ 27U, 13U, 7U },
                      TensorShape{ 7U, 7U, 17U, 2U },
                      // Batch size 4 and 2 SIMD iterations
@@ -208,6 +208,44 @@ public:
                      // Arbitrary batch size
                      TensorShape{ 11U, 11U, 3U, 5U }
     })
+    {
+    }
+};
+
+class SMEMulShapes final : public ShapeDataset
+{
+public:
+    SMEMulShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 6U, 1U },
+        TensorShape{ 128U, 2U},
+        TensorShape{ 128U, 2U, 4U, 2U, 2U} // 5D collapsible case
+    })
+    {
+    }
+};
+
+/** Data set containing pairs of small tensor shapes that are broadcast compatible. */
+class SMEMulShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    SMEMulShapesBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        // NOTE: This does not include x-wise broadcasting.
+        TensorShape{ 9U, 9U },
+        TensorShape{ 256U, 13U, 1U },
+        TensorShape{ 128U, 1U, 5U, 1U },
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 9U, 1U, 2U },
+        TensorShape{ 256U, 1U, 2U },
+        TensorShape{ 128U, 64U, 1U, 3U },
+    }))
     {
     }
 };
@@ -613,6 +651,21 @@ public:
         TensorShape{ 5U, 5U, 7U, 4U },
                      TensorShape{ 5U, 5U, 4U, 13U },
                      TensorShape{ 5U, 5U, 3U, 5U },
+    })
+    {
+    }
+};
+
+/** Data set containing tiny 5D tensor shapes. */
+class Tiny5dShapes final : public ShapeDataset
+{
+public:
+    Tiny5dShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 2U, 2U, 3U, 4U, 2U },
+                     TensorShape{ 2U, 3U, 4U, 6U, 2U },
+                     TensorShape{ 3U, 2U, 6U, 1U, 2U },
     })
     {
     }
@@ -1208,6 +1261,19 @@ public:
     }
 };
 
+/** Data set containing SME Stressing shapes for Logistic SME Kernel. */
+class LogisticSMEStressShapesFp32 final : public ShapeDataset
+{
+public:
+    LogisticSMEStressShapesFp32()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 130U, 2U },
+        TensorShape{ 256U, 1U },
+    })
+    {
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

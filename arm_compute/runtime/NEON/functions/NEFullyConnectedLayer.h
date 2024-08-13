@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H
-#define ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFULLYCONNECTEDLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/function_info/FullyConnectedLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -76,10 +76,10 @@ private:
 } // namespace weights_transformations
 
 /** Basic function to compute a Fully Connected layer. This function calls the following kernels:
- *  -# @ref cpu::kernels::CpuIm2ColKernel (called when the input comes from a convolutional layer)
+ *  -# cpu::kernels::CpuIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NETranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref NEGEMM or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- *  -# @ref cpu::kernels::CpuGemmMatrixAdditionKernel or @ref NEGEMMLowpOutputStage (if quantized asymmetric) (if @p biases is not equal to nullptr)
+ *  -# cpu::kernels::CpuGemmMatrixAdditionKernel or @ref NEGEMMLowpOutputStage (if quantized asymmetric) (if @p biases is not equal to nullptr)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -174,4 +174,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFULLYCONNECTEDLAYER_H

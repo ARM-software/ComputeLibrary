@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLQUANTIZATIONLAYER_H
-#define ARM_COMPUTE_CLQUANTIZATIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLQUANTIZATIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLQUANTIZATIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -37,7 +37,7 @@ class ITensorInfo;
 
 /** Basic function to simulate a quantization layer. This function calls the following CL kernels:
  *
- * -# @ref opencl::ClQuantize
+ * -# opencl::ClQuantize
  *
  * @note The implementation supports only 3D input tensors.
  *
@@ -102,4 +102,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } //namespace arm_compute
-#endif /* ARM_COMPUTE_CLQUANTIZATIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLQUANTIZATIONLAYER_H

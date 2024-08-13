@@ -71,7 +71,7 @@ public:
         return true;
     }
 
-    StdTransformsFixed<rhs_operand_type, result_type, 6, 32, 1> transforms = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 6, 32, 1> transforms = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

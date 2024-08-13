@@ -31,6 +31,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
 
 namespace arm_compute
 {

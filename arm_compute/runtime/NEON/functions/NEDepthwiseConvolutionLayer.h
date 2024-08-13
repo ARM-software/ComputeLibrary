@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
-#define ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHWISECONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHWISECONVOLUTIONLAYER_H
 
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -123,10 +123,10 @@ private:
     *
     * @note At the moment 3x3 and 5x5 convolution of stride 1, 2 are supported
     *
-    * -# @ref NEFillBorderKernel (if pad_x or pad_y > 0) and no assembly kernel implementation is present
-    * -# @ref NEDepthwiseConvolutionLayer3x3Kernel if 3x3 and no assembly kernel implementation is present
-    * -# @ref cpu::CpuDepthwiseConvolutionAssemblyDispatch if assembly kernel implementation is present
-    * -# @ref NEDirectConvolutionLayerOutputStageKernel if re-quantization of output is required
+    * -# NEFillBorderKernel (if pad_x or pad_y > 0) and no assembly kernel implementation is present
+    * -# NEDepthwiseConvolutionLayer3x3Kernel if 3x3 and no assembly kernel implementation is present
+    * -# cpu::CpuDepthwiseConvolutionAssemblyDispatch if assembly kernel implementation is present
+    * -# NEDirectConvolutionLayerOutputStageKernel if re-quantization of output is required
     * -# @ref NEActivationLayer if fused activation is required
     *
     */
@@ -279,4 +279,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHWISECONVOLUTIONLAYER_H

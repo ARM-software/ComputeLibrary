@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NESPACETOBATCHLAYER_H
-#define ARM_COMPUTE_NESPACETOBATCHLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESPACETOBATCHLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESPACETOBATCHLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -39,7 +39,7 @@ class NEFill;
 /** Basic function to spatial divide a tensor. This function calls the following kernels/functions:
  *
  *  -# @ref NEFill
- *  -# @ref NESpaceToBatchLayerKernel
+ *  -# NESpaceToBatchLayerKernel
  */
 class NESpaceToBatchLayer : public IFunction
 {
@@ -128,4 +128,4 @@ private:
     bool                                       _has_padding;           /**< Flag to check if the output has padding */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NESPACETOBATCHLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESPACETOBATCHLAYER_H

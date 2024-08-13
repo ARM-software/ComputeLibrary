@@ -82,7 +82,7 @@ public:
         return true;
     }
 
-    StdTransformsSVE<rhs_operand_type, result_type, 6, 4, 1> transforms = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 6, 4, 1> transforms = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

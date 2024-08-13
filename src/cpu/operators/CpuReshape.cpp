@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Arm Limited.
+ * Copyright (c) 2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,8 +53,8 @@ void CpuReshape::run(ITensorPack &tensors)
         static_cast<kernels::CpuReshapeKernel *>(_kernel.get())->prepare(tensors);
         _is_prepared = true;
     }
-    const auto split_dimension = static_cast<kernels::CpuReshapeKernel *>(_kernel.get())->get_split_dimension();
-    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
+
+    ICpuOperator::run(tensors);
 }
 } // namespace cpu
 } // namespace arm_compute

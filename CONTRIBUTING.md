@@ -1,4 +1,4 @@
-Please read https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml
+Please read https://artificial-intelligence.sites.arm.com/computelibrary/latest/contribution_guidelines.xhtml
 
 Here on github we only publish a snapshot of the main development branch for each release, that's the reason why we don't accept pull requests.
 

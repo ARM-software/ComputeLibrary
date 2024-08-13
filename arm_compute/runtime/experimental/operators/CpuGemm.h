@@ -33,14 +33,14 @@
 /*
  * A shallow wrapper for arm_compute::cpu::CpuGemm.
  * Any new features should be added to arm_compute::cpu::CpuGemm and
- * arm_compute::experimental::ops::CpuGemm should remain a shallow wrapper.
+ * arm_compute::experimental::op::CpuGemm should remain a shallow wrapper.
 */
 
 namespace arm_compute
 {
 namespace experimental
 {
-namespace ops
+namespace op
 {
 /** Wrapper class for CpuGemm. For information on the operators,
  * see "src/cpu/operators/CpuGemm.h"
@@ -52,10 +52,14 @@ public:
     CpuGemm();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CpuGemm(const CpuGemm &) = delete;
+    /** Prevent copy assignment */
+    CpuGemm operator=(const CpuGemm &) = delete;
     /** Default move constructor */
     CpuGemm(CpuGemm &&) = default;
+    /** Default move assignment */
+    CpuGemm &operator=(CpuGemm &&) = default;
     /** Default destructor */
-    ~CpuGemm();
+    ~CpuGemm() override;
 
     /** Configure operator for a given list of arguments
      *
@@ -119,15 +123,15 @@ public:
                                const ITensorInfo         *d,
                                const GEMMInfo            &gemm_info = GEMMInfo());
 
-    void                             run(ITensorPack &tensors);
-    void                             prepare(ITensorPack &constants);
-    experimental::MemoryRequirements workspace() const;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-} // namespace ops
+} // namespace op
 } // namespace experimental
 } // namespace arm_compute
 

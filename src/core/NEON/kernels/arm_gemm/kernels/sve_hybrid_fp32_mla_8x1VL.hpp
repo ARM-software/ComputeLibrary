@@ -70,7 +70,7 @@ public:
         return true;
     }
 
-    StdTransformsSVE<rhs_operand_type, result_type, 8, 1, 1> transforms = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 1, 1> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_fp32_mla_8x1VL;

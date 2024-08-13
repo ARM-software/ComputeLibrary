@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NECONCATENATELAYER_H
-#define ARM_COMPUTE_NECONCATENATELAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONCATENATELAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONCATENATELAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -66,8 +66,8 @@ public:
      * |F32            |F32            |
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref cpu::kernels::CpuConcatenateWidthKernel, @ref cpu::kernels::CpuConcatenateHeightKernel,
-     *       @ref cpu::kernels::CpuConcatenateDepthKernel and @ref cpu::kernels::CpuConcatenateBatchKernel.
+     * @note Preconditions can be found respectively at cpu::kernels::CpuConcatenateWidthKernel, cpu::kernels::CpuConcatenateHeightKernel,
+     *       cpu::kernels::CpuConcatenateDepthKernel and cpu::kernels::CpuConcatenateBatchKernel.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
@@ -77,8 +77,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref cpu::kernels::CpuConcatenateWidthKernel, @ref cpu::kernels::CpuConcatenateHeightKernel,
-     *       @ref cpu::kernels::CpuConcatenateDepthKernel and @ref cpu::kernels::CpuConcatenateBatchKernel.
+     * @note Preconditions can be found respectively at cpu::kernels::CpuConcatenateWidthKernel, cpu::kernels::CpuConcatenateHeightKernel,
+     *       cpu::kernels::CpuConcatenateDepthKernel and cpu::kernels::CpuConcatenateBatchKernel.
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
@@ -97,4 +97,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NECONCATENATELAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONCATENATELAYER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,6 +118,11 @@ void NEGEMMConvolutionLayer::run()
     prepare();
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->op->run(_impl->run_pack);
+}
+
+void NEGEMMConvolutionLayer::update_quantization_parameters()
+{
+    _impl->op->update_quantization_parameters(_impl->run_pack);
 }
 
 void NEGEMMConvolutionLayer::prepare()

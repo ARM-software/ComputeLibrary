@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
-#define ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLDEPTHWISECONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLDEPTHWISECONVOLUTIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -39,7 +39,7 @@ class ICLTensor;
 
 /** Function to execute a depthwise convolution
  *
- * -# @ref CLDepthwiseConvolutionLayerNativeKernel
+ * -# CLDepthwiseConvolutionLayerNativeKernel
  * -# @ref CLPermute (if the data layout is NCHW)
  *
  */
@@ -86,7 +86,7 @@ public:
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
-     * @note: For in-place support, please check @ref CLDepthwiseConvolutionLayerNativeKernel
+     * @note: For in-place support, please check CLDepthwiseConvolutionLayerNativeKernel
      */
     void configure(const CLCompileContext &compile_context,
                    ICLTensor              *input,
@@ -157,4 +157,4 @@ private:
     bool _is_quantized;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLDEPTHWISECONVOLUTIONLAYER_H

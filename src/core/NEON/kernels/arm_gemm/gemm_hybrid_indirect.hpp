@@ -260,8 +260,8 @@ struct kernel_weight_format<strategy, false> {
 } // anonymous namespace
 
 // Implementation of the GemmCommon abstract class.
-template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing, bool SeparateQuantize=false, bool FixedFormat=false>
-class GemmHybridIndirect : public GemmCommon<To, Tr> {
+template<typename strategy, typename To, typename Tw, typename Tr, typename OutputStage=Nothing, bool SeparateQuantize=false, bool FixedFormat=false>
+class GemmHybridIndirect : public GemmCommon<To, Tw, Tr> {
     typedef typename strategy::lhs_operand_type Tloi;
     typedef typename strategy::rhs_operand_type Troi;
     typedef typename strategy::result_type Tri;
@@ -276,8 +276,8 @@ class GemmHybridIndirect : public GemmCommon<To, Tr> {
     const unsigned int _rounded_Ksize;
 
     /* Blocking info */
+    unsigned int _n_block;
     const unsigned int _k_block;
-    const unsigned int _n_block;
     const unsigned int _Mround;
 
     /* Pretransposed buffer. */
@@ -389,7 +389,7 @@ public:
     GemmHybridIndirect(const GemmArgs &args, const OutputStage &os)
               : _args(args), _os(os), _Ktotal(get_ktotal(args)),
                 _rounded_Ksize(roundup(args._Ksize, strategy::k_unroll())),
-                _k_block(compute_k_block(args)), _n_block(compute_n_block(args, os)),
+                _n_block(compute_n_block(args, os)), _k_block(compute_k_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), args._nbatches,
                               iceildiv(args._Nsize, _n_block), args._nmulti)
@@ -403,7 +403,7 @@ public:
     GemmHybridIndirect(const GemmArgs &args)
               : _args(args), _Ktotal(get_ktotal(args)),
                 _rounded_Ksize(roundup(args._Ksize, strategy::k_unroll())),
-                _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
+                _n_block(compute_n_block(args)), _k_block(compute_k_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), args._nbatches,
                               iceildiv(args._Nsize, _n_block), args._nmulti)
@@ -618,7 +618,7 @@ public:
         return _args._nmulti * iceildiv(_args._Nsize, strategy::out_width());
     }
 
-    void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void requantize_bias(void *in_buffer, const Tw *B, const int ldb, const int B_multi_stride) override {
         if (std::is_same<OutputStage, Requantize32>::value) {
             _col_bias = reinterpret_cast<int32_t *>(in_buffer);
 
@@ -636,11 +636,11 @@ public:
         return strat.transforms.PrepareB_supports_transpose();
     }
 
-    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+    void pretranspose_B_array(void *in_buffer, const Tw *B, const int ldb, const int B_multi_stride, bool transposed) override {
         pretranspose_B_array_part(in_buffer, B, ldb, B_multi_stride, transposed, 0, get_B_pretranspose_window_size());
     }
 
-    void pretranspose_B_array_part(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed, size_t start, size_t end) override {
+    void pretranspose_B_array_part(void *in_buffer, const Tw *B, const int ldb, const int B_multi_stride, bool transposed, size_t start, size_t end) override {
         if (end >= get_B_pretranspose_window_size()) {
             requantize_bias(in_buffer, B, ldb, B_multi_stride);
         }
@@ -832,10 +832,30 @@ public:
 
         return c;
     }
+
+    void update_quantization_parameters(const Requantize32 &re) override {
+        if (std::is_same<OutputStage, Requantize32>::value) {
+            Requantize32 *qp = reinterpret_cast<Requantize32 *>(&_os);
+            qp->bias = re.bias;
+            qp->a_offset = re.a_offset;
+            qp->b_offset = re.b_offset;
+            qp->c_offset = re.c_offset;
+            qp->per_layer_left_shift = re.per_layer_left_shift;
+            qp->per_layer_right_shift = re.per_layer_right_shift;
+            qp->per_layer_mul = re.per_layer_mul;
+            qp->per_channel_requant = re.per_channel_requant;
+            qp->per_channel_left_shifts = re.per_channel_left_shifts;
+            qp->per_channel_right_shifts = re.per_channel_right_shifts;
+            qp->per_channel_muls = re.per_channel_muls;
+            qp->minval = re.minval;
+            qp->maxval = re.maxval;
+            _n_block = compute_n_block(_args, _os);
+        }
+    }
 };
 
 template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
-using GemmHybridIndirectFixedFormat = GemmHybridIndirect<strategy, To, Tr, OutputStage, false, true>;
+using GemmHybridIndirectFixedFormat = GemmHybridIndirect<strategy, To, To, Tr, OutputStage, false, true>;
 
 } // namespace arm_gemm
 

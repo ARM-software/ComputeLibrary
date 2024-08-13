@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_STRIDED_SLICE_H
-#define ARM_COMPUTE_CL_STRIDED_SLICE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSTRIDEDSLICE_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSTRIDEDSLICE_H
 
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
@@ -33,7 +33,7 @@ namespace arm_compute
 // Forward Declarations
 class ICLTensor;
 
-/** Basic function to run @ref CLStridedSliceKernel */
+/** Basic function to run CLStridedSliceKernel */
 class CLStridedSlice : public IFunction
 {
 public:
@@ -140,7 +140,7 @@ private:
 
 namespace experimental
 {
-/** Basic function to run @ref CLStridedSliceKernel */
+/** Basic function to run CLStridedSliceKernel */
 class CLStridedSlice : public ICLOperator
 {
 public:
@@ -194,4 +194,4 @@ public:
 };
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_STRIDED_SLICE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSTRIDEDSLICE_H

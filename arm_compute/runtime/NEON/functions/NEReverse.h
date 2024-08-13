@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEReverseKernel */
+/** Basic function to run NEReverseKernel */
 class NEReverse : public INESimpleFunctionNoBorder
 {
 public:
@@ -58,7 +58,7 @@ public:
      *
      */
     void configure(const ITensor *input, ITensor *output, const ITensor *axis, const bool use_inverted_axis = false);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEReverseKernel
+    /** Static function to check if given info will lead to a valid configuration of NEReverseKernel
      *
      * @param[in] input             Input tensor info. Data types supported: All
      * @param[in] output            Output tensor info. Data type supported: Same as @p input

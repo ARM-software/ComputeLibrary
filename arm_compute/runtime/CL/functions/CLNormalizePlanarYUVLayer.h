@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2023 Arm Limited.
+ * Copyright (c) 2018-2020, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLNormalizePlanarYUVLayerKernel
+/** Basic function to run CLNormalizePlanarYUVLayerKernel
  *
  *  @note The function simulates a NormalizePlanarYUV layer.
  */

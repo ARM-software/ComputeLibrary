@@ -40,7 +40,8 @@ void a64_interleaved_u8u32_mmla_8x12_a510( ARGLIST );
 class cls_a64_interleaved_u8u32_mmla_8x12
 {
 public:
-    typedef uint8_t operand_type;
+    typedef uint8_t lhs_operand_type;
+    typedef uint8_t rhs_operand_type;
     typedef uint32_t result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -62,8 +63,8 @@ public:
     }
 
 
-    StdTransformsFixed<operand_type, result_type, 8, 12, 8> transforms = {};
-    StdTransformsFixed<operand_type, result_type, 8, 12, 8, true> transforms_quantized = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 8> transforms = {};
+    StdTransformsFixed<lhs_operand_type, rhs_operand_type, result_type, 8, 12, 8, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

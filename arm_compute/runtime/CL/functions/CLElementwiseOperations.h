@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H
-#define ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLELEMENTWISEOPERATIONS_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLELEMENTWISEOPERATIONS_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
@@ -34,7 +34,7 @@ class ICLTensor;
 class CLCompileContext;
 class ITensorInfo;
 
-/** Basic function to run @ref opencl::kernels::ClSaturatedArithmeticKernel for addition
+/** Basic function to run opencl::kernels::ClSaturatedArithmeticKernel for addition
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
  * @note The function performs an arithmetic addition between two tensors.
@@ -118,7 +118,7 @@ public:
                    ICLTensor                 *output,
                    ConvertPolicy              policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClSaturatedArithmeticKernel for addition
+    /** Static function to check if given info will lead to a valid configuration of opencl::kernels::ClSaturatedArithmeticKernel for addition
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
@@ -156,7 +156,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref opencl::kernels::ClSaturatedArithmeticKernel for subtraction
+/** Basic function to run opencl::kernels::ClSaturatedArithmeticKernel for subtraction
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
@@ -240,7 +240,7 @@ public:
                    ICLTensor                 *output,
                    ConvertPolicy              policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClSaturatedArithmeticKernel for subtraction
+    /** Static function to check if given info will lead to a valid configuration of opencl::kernels::ClSaturatedArithmeticKernel for subtraction
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
@@ -278,7 +278,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref opencl::kernels::ClSaturatedArithmeticKernel for division
+/** Basic function to run opencl::kernels::ClSaturatedArithmeticKernel for division
  *
  * @note The tensor data type for the inputs must be F16/F32.
  * @note The function performs an arithmetic division between two tensors.
@@ -357,7 +357,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref opencl::kernels::ClArithmeticKernel for max
+/** Basic function to run opencl::kernels::ClArithmeticKernel for max
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
  * @note The function performs a max operation between two tensors.
@@ -421,7 +421,7 @@ public:
                    ICLTensor                 *input2,
                    ICLTensor                 *output,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for max
+    /** Static function to check if given info will lead to a valid configuration of opencl::kernels::ClArithmeticKernel for max
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      * @param[in] input2   Second tensor input info. Data types supported: same as @p input1.
@@ -443,7 +443,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref opencl::kernels::ClArithmeticKernel for min
+/** Basic function to run opencl::kernels::ClArithmeticKernel for min
  *
  * @note The tensor data type for the inputs must be U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
  * @note The function performs a max operation between two tensors.
@@ -507,7 +507,7 @@ public:
                    ICLTensor                 *input2,
                    ICLTensor                 *output,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for min
+    /** Static function to check if given info will lead to a valid configuration of opencl::kernels::ClArithmeticKernel for min
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      * @param[in] input2   Second tensor input info. Data types supported: same as @p input1.
@@ -529,7 +529,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref opencl::kernels::ClArithmeticKernel for squared difference
+/** Basic function to run opencl::kernels::ClArithmeticKernel for squared difference
  *
  * @note The tensor data type for the inputs must be QASYMM8/U8/S16/QSYMM16/F16/F32.
  * @note The function performs a squared different operation between two tensors (i.e., out[i] = (in1[i] - in2[i])^2
@@ -591,7 +591,7 @@ public:
                    ICLTensor                 *input2,
                    ICLTensor                 *output,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for squared difference
+    /** Static function to check if given info will lead to a valid configuration of opencl::kernels::ClArithmeticKernel for squared difference
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in] input2   Second tensor input info. Data types supported: same as @p input1.
@@ -613,7 +613,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-/** Basic function to run @ref opencl::kernels::ClArithmeticKernel for power
+/** Basic function to run opencl::kernels::ClArithmeticKernel for power
  *
  * @note The tensor data type for the inputs must be F16/F32.
  * @note The function performs an elementwise power of in1 to in2 (i.e., out[i] = in1[i] ^ in2[i])
@@ -670,7 +670,7 @@ public:
                    ICLTensor                 *input2,
                    ICLTensor                 *output,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for power
+    /** Static function to check if given info will lead to a valid configuration of opencl::kernels::ClArithmeticKernel for power
      *
      * @param[in] input1   First tensor input info. Data types supported: F16/F32.
      * @param[in] input2   Second tensor input info. Data types supported: F16/F32.
@@ -692,4 +692,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLELEMENTWISEOPERATIONS_H

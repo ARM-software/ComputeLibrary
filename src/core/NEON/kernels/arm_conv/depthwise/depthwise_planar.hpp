@@ -210,13 +210,30 @@ struct OutputRowPtrsElement
     T *output_padding_buffer;
   };
 
+  // On some implementations there is a significant performance benefit to
+  // aligning the padding buffer to a 1024 byte boundary.  This routine
+  // adds as much padding as needed to an arbitrary input pointer and
+  // returns an aligned void *.
+  static constexpr intptr_t BUFFER_ALIGNMENT=1024;
+
+  template <typename ptr_T>
+  static void *do_align(ptr_T in)
+  {
+    intptr_t v = reinterpret_cast<intptr_t>(in);
+    intptr_t odds = v & (BUFFER_ALIGNMENT-1);
+    intptr_t pad = odds ? (BUFFER_ALIGNMENT - odds) : 0;
+
+    return reinterpret_cast<void *>(v + pad);
+  }
+
   template <typename OutputStage>
   static size_t get_element_size(const WorkspaceArgs<IPlanarStrategy<OutputStage>, OutputStage> &args)
   {
-    // We need one pointer and stride for each row of output, and an additional
-    // blob of memory into which padded stores can go.
+    // We need one pointer and stride for each row of output, and an
+    // additional blob of memory into which padded stores can go.  Allow
+    // extra space so that this padding buffer can be aligned at both ends.
     return args.strategy->get_output_rows() * (sizeof(T *) + 2*sizeof(size_t)) +
-           get_vector_length<char>(args.strategy->get_vl_type());
+           get_vector_length<char>(args.strategy->get_vl_type()) + BUFFER_ALIGNMENT*2;
   }
 
   template <typename WorkspaceType, typename OutputStage>
@@ -227,8 +244,8 @@ struct OutputRowPtrsElement
     ws->output_row_ptrs = reinterpret_cast<T **>(buffer);
     ws->output_ld_cols = reinterpret_cast<size_t *>(ws->output_row_ptrs + n_rows);
     ws->output_ld_vls = ws->output_ld_cols + n_rows;
-    ws->output_padding_buffer = reinterpret_cast<T *>(ws->output_ld_vls + n_rows);
-    return ws->output_padding_buffer + get_vector_length<T>(args.strategy->get_vl_type());
+    ws->output_padding_buffer = reinterpret_cast<T *>(do_align(ws->output_ld_vls + n_rows));
+    return do_align(ws->output_padding_buffer + get_vector_length<T>(args.strategy->get_vl_type()));
   }
 };
 

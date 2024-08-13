@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEQLSTMLAYER_H
-#define ARM_COMPUTE_NEQLSTMLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEQLSTMLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEQLSTMLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
@@ -62,7 +62,7 @@ class CpuGemmLowpMatrixAReductionKernel;
  * -# @ref NECopy                                                Copy kernel for copying output_state_out to output
  * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref NEGEMMLowpOutputStage                                 Convert 32-bit integers into QSYMM16
- * -# @ref cpu::kernels::CpuGemmLowpMatrixAReductionKernel            For precomputing effective biases to use
+ * -# cpu::kernels::CpuGemmLowpMatrixAReductionKernel            For precomputing effective biases to use
  * -# @ref NEPixelWiseMultiplication                             Elementwise multiplication
  * -# @ref NETranspose                                           Transpose function for reshaping the weights
  * */
@@ -482,4 +482,4 @@ private:
     bool _convert_input_to_forget_weights_to_qsymm8{false};
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEQLSTMLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEQLSTMLAYER_H

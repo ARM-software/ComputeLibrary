@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLPRELULAYER_H
-#define ARM_COMPUTE_CLPRELULAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPRELULAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPRELULAYER_H
 
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -32,7 +32,7 @@ namespace arm_compute
 class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
-/** Basic function to run @ref opencl::kernels::ClArithmeticKernel for PRELU
+/** Basic function to run opencl::kernels::ClArithmeticKernel for PRELU
  *
  * @note The function implements an activation layer with the PRELU activation function.
  */
@@ -99,4 +99,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLPRELULAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLPRELULAYER_H

@@ -30,6 +30,14 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- (COMPMID-7536) NEDepthwiseConvolutionLayer and NEPoolingLayer may produce wrong results with OpenMP® scheduler
+    - Versions: >= v24.05 && < v24.08
+    - Oses: All
+    - Conditions:
+        - Compile for any architecture with openmp=1 neon=1 option
+        - Use NEDepthwiseConvolutionLayer and/or NEPoolingLayer with multiple threads
+        - Number of threads provided is greater than the number of required threads computed by the operator
+
 - (COMPMID-7191) Fix Memory violation in non-optimized Neon™ FP32 GeMM
     - Versions: >= v17.09 && < v24.07
     - Oses: Linux, Android, MacOS, Windows.

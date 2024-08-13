@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLDECONVOLUTIONLAYER_H
-#define ARM_COMPUTE_CLDECONVOLUTIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLDECONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLDECONVOLUTIONLAYER_H
 
 #include "arm_compute/runtime/CL/functions/CLDirectDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMDeconvolutionLayer.h"
@@ -67,7 +67,7 @@ public:
      * @param[in]     bias         (Optional) The biases have one dimension. Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
      * @param[out]    output       Output tensor. The output has the same number of dimensions as the @p input.
      * @param[in]     deconv_info  Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo.
-     * @param[in]     weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
+     * @param[in]     weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with opencl::kernels::ClWeightsReshapeKernel.
      *
      */
     void configure(ICLTensor           *input,
@@ -84,7 +84,7 @@ public:
      * @param[in]     bias            (Optional) The biases have one dimension. Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
      * @param[out]    output          Output tensor. The output has the same number of dimensions as the @p input.
      * @param[in]     deconv_info     Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo.
-     * @param[in]     weights_info    (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
+     * @param[in]     weights_info    (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with opencl::kernels::ClWeightsReshapeKernel.
      *
      */
     void configure(const CLCompileContext &compile_context,
@@ -101,7 +101,7 @@ public:
      * @param[in] bias         (Optional) The biases have one dimension. Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
      * @param[in] output       Output tensor info. The output has the same number of dimensions as the @p input.
      * @param[in] deconv_info  Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo.
-     * @param[in] weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref opencl::kernels::ClWeightsReshapeKernel.
+     * @param[in] weights_info (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with opencl::kernels::ClWeightsReshapeKernel.
      *
      * @return a status
      */
@@ -130,4 +130,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLDECONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLDECONVOLUTIONLAYER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NERANGE_H
-#define ARM_COMPUTE_NERANGE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NERANGE_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NERANGE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -35,7 +35,7 @@ class ITensor;
 class ITensorInfo;
 class NERangeKernel;
 
-/** Basic function to run @ref NERangeKernel
+/** Basic function to run NERangeKernel
  *
  * @note The tensor data type for the output must be U8/S8/U16/S16/U32/S32/F16/F32.
  * @note The function performs generates a sequence with the given start, end and step.
@@ -97,4 +97,4 @@ private:
     std::unique_ptr<NERangeKernel> _kernel;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NERANGE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NERANGE_H

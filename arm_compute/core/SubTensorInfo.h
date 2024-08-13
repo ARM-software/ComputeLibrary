@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_SUBTENSORINFO_H
-#define ARM_COMPUTE_SUBTENSORINFO_H
+#ifndef ACL_ARM_COMPUTE_CORE_SUBTENSORINFO_H
+#define ACL_ARM_COMPUTE_CORE_SUBTENSORINFO_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
@@ -253,6 +253,12 @@ public:
         _parent->set_id(id);
         return *this;
     }
+    ITensorInfo &set_offset_first_element_in_bytes(const size_t offset) override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->set_offset_first_element_in_bytes(offset);
+        return *this;
+    }
 
 private:
     ITensorInfo    *_parent;
@@ -264,4 +270,4 @@ private:
     bool            _lock_paddings;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_SUBTENSORINFO_H */
+#endif // ACL_ARM_COMPUTE_CORE_SUBTENSORINFO_H

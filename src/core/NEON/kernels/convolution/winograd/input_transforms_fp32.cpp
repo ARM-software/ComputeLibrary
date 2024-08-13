@@ -44,7 +44,7 @@ void a64_fp32_6x6(unsigned int, const float *, size_t, size_t, float *, size_t);
 void arm_fp32_6x6(unsigned int, const float *, size_t, size_t, float *, size_t);
 #endif  // defined(__aarch64__)
 void arm_fp32_4x4(unsigned int, const float *, size_t, size_t, float *, size_t);
-void arm_fp32_1x8(unsigned int, const float *, size_t, size_t, float *, size_t);
+void arm_fp32_1x8(const unsigned int, const float *const, size_t, const size_t, float *, const size_t);
 
 #define IMPL(HEIGHT, WIDTH, FUNC, DRIVER) new Transform ## DRIVER <float, float>(#FUNC, HEIGHT, WIDTH, FUNC)
 

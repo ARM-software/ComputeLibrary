@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -154,6 +154,20 @@ public:
         add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         // Padding greater than kernel size.
         add_config(TensorShape(128, 56, 56), Size2D(4, 4), PadStrideInfo(2, 2, 0, 10, 0, 10, DimensionRoundingType::FLOOR));
+    }
+};
+
+/** Dataset containing large depthwise convolution shapes that the optimised depthwise kernels can handle. */
+class LargeCpuDepthwiseConv2dDataset final : public DepthwiseConvolutionLayerDataset
+{
+public:
+    LargeCpuDepthwiseConv2dDataset()
+    {
+        add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 4U), PadStrideInfo(1, 2, 0, 1));
+        // Asymmetric padding
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
+        // Unlike LargeDepthwiseConvolutionLayerDataset, this does not have padding greater than kernel size.
     }
 };
 

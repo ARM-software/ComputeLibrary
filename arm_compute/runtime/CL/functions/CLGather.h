@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_CLGATHER_H
-#define ARM_COMPUTE_CLGATHER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGATHER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGATHER_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -34,7 +34,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLGatherKernel */
+/** Basic function to run CLGatherKernel */
 class CLGather : public ICLSimpleFunction
 {
 public:
@@ -68,7 +68,7 @@ public:
                    ICLTensor              *output,
                    int                     axis = 0);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGatherKernel
+    /** Static function to check if given info will lead to a valid configuration of CLGatherKernel
      *
      * @param[in] input   Source tensor info. Supported tensor rank: up to 4. Data type supported: All.
      * @param[in] indices Indices tensor info. Supported tensor rank: up to 4. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis]), otherwise the result will become unpredictable.
@@ -81,4 +81,4 @@ public:
     validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis = 0);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLGATHER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLGATHER_H

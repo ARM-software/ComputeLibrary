@@ -39,7 +39,8 @@ void sve_interleaved_u8u32_mmla_8x3VL( ARGLIST );
 class cls_sve_interleaved_u8u32_mmla_8x3VL
 {
 public:
-    typedef uint8_t operand_type;
+    typedef uint8_t lhs_operand_type;
+    typedef uint8_t rhs_operand_type;
     typedef uint32_t result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -61,8 +62,8 @@ public:
     }
 
 
-    StdTransformsSVE<operand_type, result_type, 8, 6, 8, 2> transforms = {};
-    StdTransformsSVE<operand_type, result_type, 8, 6, 8, 2, true> transforms_quantized = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 6, 8, 2> transforms = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 6, 8, 2, true> transforms_quantized = {};
     template<typename T>
     static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {

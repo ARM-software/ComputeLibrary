@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLBATCHNORMALIZATIONLAYER_H
-#define ARM_COMPUTE_CLBATCHNORMALIZATIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBATCHNORMALIZATIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBATCHNORMALIZATIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -37,7 +37,7 @@ class ICLTensor;
 class ITensorInfo;
 class CLBatchNormalizationLayerKernel;
 
-/** Basic function to run @ref CLNormalizationLayerKernel and simulate a batch normalization layer.
+/** Basic function to run CLNormalizationLayerKernel and simulate a batch normalization layer.
  *
  * Batch normalization is calculated by:
  * @f[ out_i = \gamma * (\frac{in_i - \mu_{B}}{\sqrt{\sigma^2_{B} + \epsilon}}) + \beta \equiv BN_{\gamma,\beta}(in_i) @f]
@@ -147,4 +147,4 @@ private:
     std::unique_ptr<CLBatchNormalizationLayerKernel> _norm_kernel; /**< BatchNormalization layer kernel to run */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLBATCHNORMALIZATIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLBATCHNORMALIZATIONLAYER_H

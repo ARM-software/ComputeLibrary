@@ -58,7 +58,6 @@
 
 #include "gemm_hybrid_indirect.hpp"
 #include "gemm_hybrid_quantized.hpp"
-#include "gemm_hybrid_quantized_inline.hpp"
 #include "gemm_interleaved.hpp"
 #include "gemv_pretransposed.hpp"
 #include "quantize_wrapper.hpp"
@@ -66,7 +65,7 @@
 
 namespace arm_gemm {
 
-static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods[] =
+static const GemmImplementation<int8_t, int8_t, int8_t, Requantize32> gemm_qint8_methods[] =
 {
 #ifdef ARM_COMPUTE_ENABLE_SVE
 #ifdef ARM_COMPUTE_ENABLE_SME2
@@ -101,90 +100,90 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedPretransposedNoMergeQuantizedInline<cls_sme2_interleaved_nomerge_s8q_mopa_2VLx2VL, int8_t, int8_t>(args, qp); }
 },
 #endif // ARM_COMPUTE_ENABLE_SME2
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qa_mmla_4x4VL",
     [](const GemmArgs &args, const Requantize32 &qp) { return quant_hybrid_asymmetric(qp) && args._ci->has_sve2() && args._ci->has_svei8mm(); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qa_mmla_4x4VL, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qa_mmla_4x4VL, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qa_mmla_4x4VL, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qa_mmla_4x4VL, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qs_mmla_6x4VL",
     [](const GemmArgs &args, const Requantize32 &qp) { return quant_hybrid_symmetric(qp) && args._ci->has_sve2() && args._ci->has_svei8mm(); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qs_mmla_6x4VL, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qs_mmla_6x4VL, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qs_mmla_6x4VL, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qs_mmla_6x4VL, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_s8s32_mmla_8x3VL",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_svei8mm() && (args._Ksize>8); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int8_t, int8_t>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "sve_hybrid_s8s32_mmla_6x4VL",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_svei8mm(); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8s32_mmla_6x4VL, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_mmla_6x4VL, int8_t, int8_t, Requantize32, true>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8s32_mmla_6x4VL, int8_t, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_mmla_6x4VL, int8_t, int8_t, int8_t, Requantize32, true>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qs_dot_6x4VL",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sve2() && quant_hybrid_symmetric(qp); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qs_dot_6x4VL, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qs_dot_6x4VL, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qs_dot_6x4VL, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qs_dot_6x4VL, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qa_dot_4x4VL",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sve2() && quant_hybrid_asymmetric(qp); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qa_dot_4x4VL, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qa_dot_4x4VL, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8qa_dot_4x4VL, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8qa_dot_4x4VL, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8s32_dot_6x4VL",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_sve(); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8s32_dot_6x4VL, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_dot_6x4VL, int8_t, int8_t, Requantize32, true>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8s32_dot_6x4VL, int8_t, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_dot_6x4VL, int8_t, int8_t, int8_t, Requantize32, true>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_s8s32_dot_8x3VL",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_sve() && (args._Ksize>4); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_sve_interleaved_s8s32_dot_8x3VL, int8_t, int8_t, int8_t>(args, qp); }
 ),
 #endif // ARM_COMPUTE_ENABLE_SVE
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_s8qa_mmla_4x16",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_i8mm() && quant_hybrid_asymmetric(qp); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qa_mmla_4x16, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qa_mmla_4x16, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qa_mmla_4x16, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qa_mmla_4x16, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_s8qs_mmla_6x16",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_i8mm() && quant_hybrid_symmetric(qp); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qs_mmla_6x16, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qs_mmla_6x16, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qs_mmla_6x16, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qs_mmla_6x16, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_interleaved_s8s32_mmla_8x12",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_i8mm() && (args._Ksize>8); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_interleaved_s8s32_mmla_8x12, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_interleaved_s8s32_mmla_8x12, int8_t, int8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_interleaved_s8s32_mmla_8x12, int8_t, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_interleaved_s8s32_mmla_8x12, int8_t, int8_t, int8_t>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_hybrid_s8s32_mmla_6x16",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_i8mm(); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8s32_mmla_6x16, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8s32_mmla_6x16, int8_t, int8_t, Requantize32, true>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8s32_mmla_6x16, int8_t, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8s32_mmla_6x16, int8_t, int8_t, int8_t, Requantize32, true>(args, qp); }
 ),
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
@@ -205,42 +204,42 @@ GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
     "a64_gemm_s16_8x12",
     nullptr,
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->get_cpu_model() == CPUModel::A53 && ((args._Msize > 28) || ((args._Msize % 8) > 4)); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s16_8x12, int8_t, int8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s16_8x12, int8_t, int8_t, int8_t>(args, qp); }
 },
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_s8qs_dot_6x16",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_dotprod() && quant_hybrid_symmetric(qp); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qs_dot_6x16, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qs_dot_6x16, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qs_dot_6x16, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qs_dot_6x16, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_s8qa_dot_4x16",
     [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_dotprod() && quant_hybrid_asymmetric(qp); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qa_dot_4x16, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qa_dot_4x16, int8_t, int8_t, Requantize32>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8qa_dot_4x16, int8_t, int8_t, int8_t, Requantize32>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8qa_dot_4x16, int8_t, int8_t, int8_t, Requantize32>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_s8s32_dot_6x16",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod(); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8s32_dot_6x16, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8s32_dot_6x16, int8_t, int8_t, Requantize32, true>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_a64_hybrid_s8s32_dot_6x16, int8_t, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_a64_hybrid_s8s32_dot_6x16, int8_t, int8_t, int8_t, Requantize32, true>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_s8_8x12",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod(); },
-    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_gemm_s8_8x12, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s8_8x12, int8_t, int8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_gemm_s8_8x12, int8_t, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s8_8x12, int8_t, int8_t, int8_t>(args, qp); }
 ),
-GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
+GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_gemm_s8_4x4",
     nullptr,
-    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_gemm_s8_4x4, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s8_4x4, int8_t, int8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_gemm_s8_4x4, int8_t, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s8_4x4, int8_t, int8_t, int8_t>(args, qp); }
 ),
 {
     GemmMethod::QUANTIZE_WRAPPER,
@@ -259,14 +258,14 @@ GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
 };
 
 template<>
-const GemmImplementation<int8_t, int8_t, Requantize32> *gemm_implementation_list<int8_t, int8_t, Requantize32>() {
+const GemmImplementation<int8_t, int8_t, int8_t, Requantize32> *gemm_implementation_list<int8_t, int8_t, int8_t, Requantize32>() {
     return gemm_qint8_methods;
 }
 
-template UniqueGemmCommon<int8_t, int8_t> gemm<int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
-template bool has_opt_gemm<int8_t, int8_t, Requantize32>(WeightFormat &weight_format, const GemmArgs &args, const Requantize32 &os);
-template KernelDescription get_gemm_method<int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
-template std::vector<KernelDescription> get_compatible_kernels<int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
+template UniqueGemmCommon<int8_t, int8_t, int8_t> gemm<int8_t, int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
+template bool has_opt_gemm<int8_t, int8_t, int8_t, Requantize32>(WeightFormat &weight_format, const GemmArgs &args, const Requantize32 &os);
+template KernelDescription get_gemm_method<int8_t, int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
+template std::vector<KernelDescription> get_compatible_kernels<int8_t, int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
 
 } // namespace arm_gemm
 

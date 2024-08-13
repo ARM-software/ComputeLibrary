@@ -37,9 +37,9 @@ void sme_fp32_mopa_4x4_3x3(unsigned int, const float *, size_t, const float *, f
 void arm_fp32_4x4_3x3(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
 void arm_fp32_2x2_3x3(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
 void arm_fp32_2x2_5x5(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
-void arm_fp32_1x6_1x3(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
-void arm_fp32_1x4_1x5(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
-void arm_fp32_1x2_1x7(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
+void arm_fp32_1x6_1x3(unsigned int, const float *, const size_t, const float *, float *, size_t, const size_t, const float, const float);
+void arm_fp32_1x4_1x5(unsigned int, const float *, const size_t, const float *, float *, size_t, const size_t, const float, const float);
+void arm_fp32_1x2_1x7(unsigned int, const float *, const size_t, const float *, float *, size_t, const size_t, const float, const float);
 
 #define IMPL(OUT_HEIGHT, OUT_WIDTH, KERN_HEIGHT, KERN_WIDTH, FUNC, DRIVER) \
   new Transform ## DRIVER <float, float>(#FUNC, OUT_HEIGHT, OUT_WIDTH, KERN_HEIGHT, KERN_WIDTH, FUNC)

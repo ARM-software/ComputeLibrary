@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLACTIVATIONLAYER_H
-#define ARM_COMPUTE_CLACTIVATIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLACTIVATIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLACTIVATIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -35,7 +35,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref opencl::kernels::ClActivationKernel
+/** Basic function to run opencl::kernels::ClActivationKernel
  *
  * @note The function simulates an activation layer with the specified activation function.
  */
@@ -113,4 +113,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLACTIVATIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLACTIVATIONLAYER_H

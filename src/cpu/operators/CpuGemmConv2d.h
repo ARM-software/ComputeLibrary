@@ -76,6 +76,7 @@ public:
      * |F32            |F32                |F32      |F32            |
      * |BFLOAT16       |BFLOAT16           |BFLOAT16 |BFLOAT16       |
      * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QASYMM8_SIGNED     |S32      |QASYMM8        |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |
@@ -141,6 +142,12 @@ public:
                                const Size2D              &dilation         = Size2D(1U, 1U),
                                const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
                                const bool                 enable_fast_math = false);
+
+    /** Update of quantization information at the run stage for convolution so that the quantization multipliers can be properly calculated.
+     *
+     * @param[in] tensors Vector that contains the tensors to operate on.
+     */
+    void update_quantization_parameters(ITensorPack &tensors);
 
     // Inherited methods overridden:
     void                             run(ITensorPack &tensors) override;
@@ -292,6 +299,7 @@ private:
     bool                  _is_prepared;
     WeightTransformMethod _wt_method;
     bool                  _run_wt;
+    ActivationLayerInfo   _act_info;
 
     experimental::MemoryRequirements _aux_mem{Count};
 };

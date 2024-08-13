@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TENSORINFO_H
-#define ARM_COMPUTE_TENSORINFO_H
+#ifndef ACL_ARM_COMPUTE_CORE_TENSORINFO_H
+#define ACL_ARM_COMPUTE_CORE_TENSORINFO_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
@@ -318,6 +318,11 @@ public:
         _id = id;
         return *this;
     }
+    ITensorInfo &set_offset_first_element_in_bytes(const size_t offset) override
+    {
+        _offset_first_element_in_bytes = offset;
+        return *this;
+    }
     inline friend bool operator==(const TensorInfo &lhs, const TensorInfo &rhs);
 
 private:
@@ -365,4 +370,4 @@ inline bool operator==(const TensorInfo &lhs, const TensorInfo &rhs)
            (lhs._id == rhs._id);
 }
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_TENSORINFO_H */
+#endif // ACL_ARM_COMPUTE_CORE_TENSORINFO_H

@@ -31,11 +31,11 @@ namespace input_transform {
 
 void arm_fp32_1x8(
   const unsigned int n_channels,
-  const float * input_base,
+  const float *const input_base,
   size_t,  // We don't need to stride over rows
-  size_t input_col_stride,
+  const size_t input_col_stride,
   float *outptr,
-  size_t matrix_stride
+  const size_t matrix_stride
 )
 {
   constexpr int inner_tile_cols = 8;

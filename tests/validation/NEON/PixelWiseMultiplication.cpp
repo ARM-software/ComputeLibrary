@@ -296,6 +296,20 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8SignedFixture, 
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+#ifdef ARM_COMPUTE_ENABLE_SME2
+FIXTURE_DATA_TEST_CASE(RunSMEMul, NEPixelWiseMultiplicationQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(datasets::SMEMulShapes(),
+                                                                                                                     framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED),
+                                                                                                                     framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED),
+                                                                                                                     framework::dataset::make("DataTypeOut", DataType::QASYMM8_SIGNED),
+                                                                                                                     framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                     PixelWiseMultiplicationPolicySTZDataset,
+                                                                                                                     PixelWiseMultiplicationQASYMM8QuantDataset,
+                                                                                                                     OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+#endif // ARM_COMPUTE_ENABLE_SME2
 FIXTURE_DATA_TEST_CASE(RunSmallInPlace, NEPixelWiseMultiplicationQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED)),
@@ -308,6 +322,22 @@ FIXTURE_DATA_TEST_CASE(RunSmallInPlace, NEPixelWiseMultiplicationQASYMM8SignedFi
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+TEST_SUITE(Broadcast)
+#ifdef ARM_COMPUTE_ENABLE_SME2
+FIXTURE_DATA_TEST_CASE(RunSMEMul, NEPixelWiseMultiplicationBroadcastQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(datasets::SMEMulShapesBroadcast(),
+                                                                                                                     framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED),
+                                                                                                                     framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED),
+                                                                                                                     framework::dataset::make("DataTypeOut", DataType::QASYMM8_SIGNED),
+                                                                                                                     framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                     PixelWiseMultiplicationPolicySTZDataset,
+                                                                                                                     PixelWiseMultiplicationQASYMM8QuantDataset,
+                                                                                                                     OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+#endif // ARM_COMPUTE_ENABLE_SME2
+TEST_SUITE_END() // Broadcast
 TEST_SUITE_END() // ScaleUnity
 TEST_SUITE_END() // QASYMM8_SIGNED
 

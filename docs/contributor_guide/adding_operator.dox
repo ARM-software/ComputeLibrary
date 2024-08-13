@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2018-2022 Arm Limited.
+/// Copyright (c) 2018-2022, 2024 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -67,7 +67,7 @@ And for printing:
 
 @snippet utils/TypePrinter.h Print DataLayout type
 
-In Compute Library, we use namespaces to group all the operators, functions, classes and interfaces. The main namespace to use is arm_compute. In the test suite, the test framework and the individual tests use nested namespaces like @ref test::validation or @ref test::benchmark to group the different purposes of various parts of the suite.
+In Compute Library, we use namespaces to group all the operators, functions, classes and interfaces. The main namespace to use is arm_compute. In the test suite, the test framework and the individual tests use nested namespaces like test::validation or test::benchmark to group the different purposes of various parts of the suite.
 Utility functions like conversion or type cast operators, that are shared by multiple operators are in arm_compute/core/Utils.h. Non-inlined function definitions go in the corresponding .cpp files in the src folder.
 Similarly, all common functions that process shapes, like calculating output shapes of an operator or shape conversions etc are in arm_compute/core/utils/misc/ShapeCalculator.h.
 
@@ -75,12 +75,12 @@ Similarly, all common functions that process shapes, like calculating output sha
 @subsection S4_1_2_add_kernel Add a kernel
 As we mentioned at the beginning, the kernel is the implementation of the operator or algorithm partially using a specific programming language related to the backend we want to use. Adding a kernel in the library means implementing the algorithm in a SIMD technology like Arm® Neon™ or OpenCL. All kernels in Compute Library must implement a common interface IKernel or one of the specific subinterfaces.
 IKernel is the common interface for all the kernels in the core library, it contains the main methods for configure and run the kernel itself, such as window()  that return the maximum window the kernel can be executed on or is_parallelisable() for indicate whether or not the kernel is parallelizable. If the kernel is parallelizable then the window returned by the window() method can be split into sub-windows which can then be run in parallel, in the other case, only the window returned by window() can be passed to the run method.
-There are specific interfaces for OpenCL and Neon™: @ref ICLKernel, INEKernel (using INEKernel = @ref ICPPKernel).
+There are specific interfaces for OpenCL and Neon™: ICLKernel, INEKernel (using INEKernel = @ref ICPPKernel).
 
-- @ref ICLKernel is the common interface for all the OpenCL kernels. It implements the inherited methods and adds all the methods necessary to configure the CL kernel, such as set/return the Local-Workgroup-Size hint, add single, array or tensor argument, set the targeted GPU architecture according to the CL device. All these methods are used during the configuration and the run of the operator.
+- ICLKernel is the common interface for all the OpenCL kernels. It implements the inherited methods and adds all the methods necessary to configure the CL kernel, such as set/return the Local-Workgroup-Size hint, add single, array or tensor argument, set the targeted GPU architecture according to the CL device. All these methods are used during the configuration and the run of the operator.
 - INEKernel inherits from @ref IKernel as well and it's the common interface for all kernels implemented in Neon™, it adds just the run and the name methods.
 
-There are two others implementation of @ref IKernel called @ref ICLSimpleKernel and INESimpleKernel, they are the interface for simple kernels that have just one input tensor and one output tensor.
+There are two others implementation of @ref IKernel called ICLSimpleKernel and INESimpleKernel, they are the interface for simple kernels that have just one input tensor and one output tensor.
 Creating a new kernel implies adding new files:
 - src/core/CL/kernels/CLReshapeLayerKernel.h
 - src/core/CL/cl_kernels/reshape_layer.cl

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021,2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,10 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *biases, con
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(),
                                                            get_output_shape(src, biases != nullptr));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        if (!src->quantization_info().is_dynamic())
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+        }
     }
 
     return Status{};

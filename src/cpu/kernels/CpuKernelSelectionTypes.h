@@ -105,6 +105,13 @@ struct SoftmaxKernelDataTypeISASelectorData
     cpuinfo::CpuIsaInfo isa;
     bool                is_log;
     int                 axis;
+    uint64_t            sme2_vector_length;
+};
+
+struct ScatterKernelDataTypeISASelectorData
+{
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
     unsigned long       sme2_vector_length;
 };
 
@@ -124,6 +131,8 @@ using ScaleKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const ScaleKernelDataTypeISASelectorData &data)>::type;
 using SoftmaxKernelDataTypeISASelectorDataPtr =
     std::add_pointer<bool(const SoftmaxKernelDataTypeISASelectorData &data)>::type;
+using ScatterKernelDataTypeISASelectorDataPtr =
+    std::add_pointer<bool(const ScatterKernelDataTypeISASelectorData &data)>::type;
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

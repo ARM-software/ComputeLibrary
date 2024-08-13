@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019,2021 Arm Limited.
+ * Copyright (c) 2017-2019,2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -263,6 +263,26 @@ public:
     void set_quantized_bias(const int32_t *bias, size_t bias_multi_stride) override {
         _qp.bias = bias;
         _qp.bias_multi_stride = bias_multi_stride;
+    }
+
+    void update_quantization_parameters(const Requantize32 &re) override {
+        if (std::is_same<OutputStage, Requantize32>::value) {
+            Requantize32 *qp = reinterpret_cast<Requantize32 *>(&_os);
+            qp->bias = re.bias;
+            qp->a_offset = re.a_offset;
+            qp->b_offset = re.b_offset;
+            qp->c_offset = re.c_offset;
+            qp->per_layer_left_shift = re.per_layer_left_shift;
+            qp->per_layer_right_shift = re.per_layer_right_shift;
+            qp->per_layer_mul = re.per_layer_mul;
+            qp->per_channel_requant = re.per_channel_requant;
+            qp->per_channel_left_shifts = re.per_channel_left_shifts;
+            qp->per_channel_right_shifts = re.per_channel_right_shifts;
+            qp->per_channel_muls = re.per_channel_muls;
+            qp->minval = re.minval;
+            qp->maxval = re.maxval;
+            _n_block = compute_n_block(_args, _os);
+        }
     }
 };
 

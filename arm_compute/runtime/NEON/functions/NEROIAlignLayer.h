@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEROIALIGNLAYER_H
-#define ARM_COMPUTE_NEROIALIGNLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEROIALIGNLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEROIALIGNLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
@@ -32,7 +32,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEROIAlignLayerKernel. */
+/** Basic function to run NEROIAlignLayerKernel. */
 class NEROIAlignLayer : public INESimpleFunctionNoBorder
 {
 public:
@@ -62,7 +62,7 @@ public:
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      */
     void configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEROIAlignLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of NEROIAlignLayerKernel
      *
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] rois      ROIs tensor info. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p input is QASYMM8/QASYMM8_SIGNED,
@@ -83,4 +83,4 @@ public:
                            const ROIPoolingLayerInfo &pool_info);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEROIALIGNLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEROIALIGNLAYER_H

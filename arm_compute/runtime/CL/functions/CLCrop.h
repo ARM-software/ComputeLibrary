@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCROP_H
-#define ARM_COMPUTE_CLCROP_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCROP_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCROP_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
@@ -36,7 +36,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref opencl::kernels::ClCropKernel */
+/** Basic function to run opencl::kernels::ClCropKernel */
 class CLCrop : public IFunction
 {
 public:
@@ -101,7 +101,7 @@ public:
                    float                   extrapolation_value = 0,
                    Window                 *output_window       = nullptr);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel
+    /** Static function to check if given info will lead to a valid configuration of CLStridedSliceKernel
      *
      * @note Supported tensor rank: up to 4
      *
@@ -129,4 +129,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLCROP_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCROP_H

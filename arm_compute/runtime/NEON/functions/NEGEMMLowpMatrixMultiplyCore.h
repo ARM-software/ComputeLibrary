@@ -41,7 +41,7 @@ class ITensorInfo;
  *
  *  This function calls the following:
  *
- * -# @ref cpu::CpuGemmLowpMatrixMultiplyCore
+ * -# cpu::CpuGemmLowpMatrixMultiplyCore
  */
 class NEGEMMLowpMatrixMultiplyCore : public IFunction
 {
@@ -69,11 +69,13 @@ public:
      * |src0           |src1               |src2     |dst            |
      * |:--------------|:------------------|:--------|:--------------|
      * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QASYMM8_SIGNED     |S32      |QASYMM8        |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
      * |QASYMM8        |QSYMM8             |S32      |QASYMM8        |
      * |QASYMM8        |QASYMM8            |S32      |S32            |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |S32            |
      * |QASYMM8        |QSYMM8             |S32      |S32            |
+     * |QASYMM8        |QASYMM8_SIGNED     |F32      |F32            |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8             |S32      |QASYMM8_SIGNED |
@@ -111,6 +113,10 @@ public:
                            const ITensorInfo *c,
                            const ITensorInfo *output,
                            const GEMMInfo    &gemm_info = GEMMInfo());
+
+    // Update of quantization information at the run stage so that the quantization multipliers can be properly calculated.
+    // Please have a look at NEGEMMConvolutionLayer.h for a more in-depth explanation and example.
+    void update_quantization_parameters();
 
     // Inherited methods overridden
     void run() override;

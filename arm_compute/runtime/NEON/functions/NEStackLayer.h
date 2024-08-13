@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ class NEStackLayerKernel;
 
 /** Basic function to stack tensors along an axis. This function calls the following kernel:
  *
- * -# @ref NEStackLayerKernel
+ * -# NEStackLayerKernel
  *
  */
 class NEStackLayer : public IFunction
@@ -74,7 +74,7 @@ public:
      * @param[out] output Output tensor. Data types supported: Same as @p input.
      */
     void configure(const std::vector<ITensor *> &input, int axis, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEStackLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of NEStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4
      *

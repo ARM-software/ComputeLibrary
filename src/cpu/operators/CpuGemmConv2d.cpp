@@ -227,6 +227,7 @@ CpuGemmConv2d::CpuGemmConv2d()
       _is_prepared(false),
       _wt_method(WeightTransformMethod::ReshapeThenTranspose),
       _run_wt(true),
+      _act_info(),
       _aux_mem(AuxTensorIdx::Count)
 {
 }
@@ -278,6 +279,7 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo         *src,
         int32_t min_activation       = type_min.get<int32_t>();
         int32_t max_activation       = type_max.get<int32_t>();
 
+        _act_info = act_info;
         if (supported_acts.count(act_info.activation()) != 0)
         {
             std::tie(min_activation, max_activation) = get_quantized_activation_min_max(act_info, data_type, uoqinfo);
@@ -291,11 +293,14 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo         *src,
         output_info.is_quantized_per_channel = (tmp_weights.data_type() == DataType::QSYMM8_PER_CHANNEL);
         quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
 
+        const GEMMInfo gemm_info =
+            GEMMInfo(false /* is_a_reshaped */, false /* is_b_reshaped */, true /* reshape_b_only_on_first_run */,
+                     gemm_3d_depth, _skip_im2col, false /* retain_internal_weights */, output_info,
+                     false /* fp_mixed_precision */, enable_fast_math, false /* broadcast_bias */, act_info,
+                     fixed_format, weight_format, false /* pretranspose_B. TODO: COMPMID-6596 */);
+
         _mm_gemmlowp = std::make_unique<CpuGemmLowpMatrixMultiplyCore>();
-        _mm_gemmlowp->configure(&tmp_src, &tmp_weights, biases, dst,
-                                GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info, false,
-                                         enable_fast_math, false, act_info, fixed_format, weight_format,
-                                         false /* pretranspose_B. TODO: COMPMID-6596 */));
+        _mm_gemmlowp->configure(&tmp_src, &tmp_weights, biases, dst, gemm_info);
 
         auto mm_mem_req = _mm_gemmlowp->workspace();
         for (unsigned int cont = 0; cont < mm_mem_req.size(); ++cont)
@@ -306,7 +311,7 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo         *src,
     else
     {
         // Create GEMMInfo structure
-        const GEMMInfo &gemm_info =
+        const GEMMInfo gemm_info =
             GEMMInfo(false, false, true /* Reshape weights only for the first run */, gemm_3d_depth,
                      _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */, false,
                      GEMMLowpOutputStageInfo(), false, enable_fast_math, false, act_info, fixed_format, weight_format,
@@ -800,6 +805,58 @@ Status CpuGemmConv2d::validate(const ITensorInfo         *src,
     return Status{};
 }
 
+void CpuGemmConv2d::update_quantization_parameters(ITensorPack &tensors)
+{
+    // Supported activations in GEMM
+    const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = {
+        ActivationLayerInfo::ActivationFunction::RELU, ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU};
+
+    auto src = tensors.get_const_tensor(ACL_SRC_0);
+    auto dst = tensors.get_tensor(ACL_DST);
+
+    auto       wei = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    TensorInfo tmp_src{*src->info()};
+    TensorInfo tmp_weights{*wei->info()};
+
+    const QuantizationInfo        iqinfo = src->info()->quantization_info();
+    const QuantizationInfo        wqinfo = wei->info()->quantization_info();
+    const QuantizationInfo        oqinfo = (dst->info()->total_size() == 0) ? iqinfo : dst->info()->quantization_info();
+    const UniformQuantizationInfo uiqinfo   = iqinfo.uniform();
+    const UniformQuantizationInfo uoqinfo   = oqinfo.uniform();
+    const DataType                data_type = src->info()->data_type();
+
+    tmp_src.set_quantization_info(QuantizationInfo(uiqinfo.scale, -uiqinfo.offset));
+    if (!is_data_type_quantized_per_channel(tmp_weights.data_type()))
+    {
+        const UniformQuantizationInfo uwqinfo = wqinfo.uniform();
+        tmp_weights.set_quantization_info(QuantizationInfo(uwqinfo.scale, -uwqinfo.offset));
+    }
+
+    // Merge activation with output stage
+    PixelValue type_min{};
+    PixelValue type_max{};
+    std::tie(type_min, type_max) = get_min_max(data_type);
+    int32_t min_activation       = type_min.get<int32_t>();
+    int32_t max_activation       = type_max.get<int32_t>();
+
+    if (supported_acts.count(_act_info.activation()) != 0)
+    {
+        std::tie(min_activation, max_activation) = get_quantized_activation_min_max(_act_info, data_type, uoqinfo);
+    }
+
+    GEMMLowpOutputStageInfo output_info;
+    output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    output_info.gemmlowp_offset          = uoqinfo.offset;
+    output_info.gemmlowp_min_bound       = min_activation;
+    output_info.gemmlowp_max_bound       = max_activation;
+    output_info.is_quantized_per_channel = (tmp_weights.data_type() == DataType::QSYMM8_PER_CHANNEL);
+    quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
+
+    _mm_gemmlowp->update_quantization_parameters(output_info, tmp_src.quantization_info(),
+                                                 tmp_weights.quantization_info(), _is_prepared, true);
+}
+
 void CpuGemmConv2d::run(ITensorPack &tensors)
 {
     prepare(tensors);
@@ -971,6 +1028,9 @@ void CpuGemmConv2d::prepare(ITensorPack &tensors)
                 }
                 case (WeightTransformMethod::ReinterpretThenTranspose):
                 {
+                    // Ensure reinterpret is done correctly when weights tensor has an offset to the first element and no padding.
+                    _weights_reshaped.set_offset_first_element_in_bytes(
+                        weights->info()->offset_first_element_in_bytes());
                     gemm_pack.add_const_tensor(TensorType::ACL_SRC_1, reinterpreted_wei.get());
                     // Nothing to run
                     break;

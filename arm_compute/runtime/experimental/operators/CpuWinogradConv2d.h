@@ -24,9 +24,8 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUWINOGRADCONV2D_H
 #define ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUWINOGRADCONV2D_H
 
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/runtime/IOperator.h"
-
-#include "src/cpu/operators/CpuWinogradConv2d.h"
 
 #include <memory>
 

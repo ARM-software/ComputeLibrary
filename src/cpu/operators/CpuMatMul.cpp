@@ -215,6 +215,8 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
         // Setup transpose LHS
         _transpose_kernel_lhs = std::make_unique<cpu::kernels::CpuTransposeKernel>();
         _transpose_kernel_lhs->configure(&lhs_to_use, &_lhs_transposed);
+
+        _aux_mem[TransposeLHS] = MemoryInfo(offset_int_vec(TransposeLHS), MemoryLifetime::Temporary, lhs->total_size());
     }
 
     if (_adj_rhs)
@@ -222,6 +224,8 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
         // Setup transpose RHS
         _transpose_kernel_rhs = std::make_unique<cpu::kernels::CpuTransposeKernel>();
         _transpose_kernel_rhs->configure(&rhs_to_use, &_rhs_transposed);
+
+        _aux_mem[TransposeRHS] = MemoryInfo(offset_int_vec(TransposeRHS), MemoryLifetime::Temporary, rhs->total_size());
     }
 
     // 3. Configure assembly kernel using transposed tensors.
@@ -269,9 +273,6 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
         _aux_mem[idx] = aux;
         idx++;
     }
-    // Memory requirements for transposed tensors
-    _aux_mem[TransposeLHS] = MemoryInfo(offset_int_vec(TransposeLHS), MemoryLifetime::Temporary, lhs->total_size());
-    _aux_mem[TransposeRHS] = MemoryInfo(offset_int_vec(TransposeRHS), MemoryLifetime::Temporary, rhs->total_size());
 }
 
 void CpuMatMul::run(ITensorPack &tensors)

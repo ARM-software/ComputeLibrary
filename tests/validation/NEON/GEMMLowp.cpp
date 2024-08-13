@@ -141,11 +141,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                              TensorInfo(TensorShape(20U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Invalid dimensions
                                              TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Invalid dimensions
                                              TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),
+                                             TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/255, 10)), // Invalid types
                                           }),
     make("InputBInfo",{ TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
                                             TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
                                             TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
                                             TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
+                                            TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
                                             TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
                                           }),
     make("OutputInfo",{ TensorInfo(TensorShape(33U, 13U), 1, DataType::S32),
@@ -153,8 +155,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                             TensorInfo(TensorShape(33U, 13U), 1, DataType::S32),
                                             TensorInfo(TensorShape(8U, 11U), 1, DataType::S32),
                                             TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
                                            }),
-    make("Expected", { true, false, false, false, true })),
+    make("Expected", { true, false, false, false, true, false })),
     a_info, b_info, output_info, expected)
 {
     // Lock tensors
@@ -357,12 +360,85 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreDynamicQuantization
 TEST_SUITE_END() // DynamicQuantization
 
 #ifdef __aarch64__
+TEST_SUITE(UpdateStaticQuantInfoAfterConfigure)
+TEST_SUITE(QASYMM8_SIGNED)
+using NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureInt8Fixture =
+    GEMMLowpGenericMatrixMultiplyCoreFusedOffsetOutputValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, int8_t, int8_t, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureInt8Fixture, framework::DatasetMode::ALL,
+    combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8_SIGNED }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureInt8Fixture, framework::DatasetMode::NIGHTLY,
+    combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8_SIGNED }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE(QASYMM8)
+using NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureUInt8Fixture =
+    GEMMLowpGenericMatrixMultiplyCoreFusedOffsetOutputValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, uint8_t, uint8_t, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureUInt8Fixture, framework::DatasetMode::ALL,
+    combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8 }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQuantInfoAfterConfigureUInt8Fixture, framework::DatasetMode::NIGHTLY,
+    combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
+        make("DataType", { DataType::QASYMM8 }),
+        make("reshape_b_only_on_first_run", { false }),
+        make("updated_sq_info_after_config", { true })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // UpdateStaticQuantInfoAfterConfigure
+
 // Deqaunt tests involve returning F32 from the MatrixMultiplyCore kernels and is only implemented in aarch64
 TEST_SUITE(Dequant)
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+    make("InputAInfo", {
+        TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),
+        TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/255, 10)),
+        TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/255, 10)), // Invalid types
+    }),
+    make("InputBInfo",{
+        TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/256, 10)),
+        TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/256, 10)),
+        TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
+    }),
+    make("OutputInfo",{
+        TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
+        TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
+        TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
+    }),
+    make("Expected", { true, true, false })),
+    a_info, b_info, output_info, expected)
+{
+    // Lock tensors
+    Status status =  NEGEMMLowpMatrixMultiplyCore::validate(&a_info.clone()->set_is_resizable(false),
+                                                            &b_info.clone()->set_is_resizable(false),
+                                                            nullptr,
+                                                            &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+
 constexpr AbsoluteTolerance<float> tolerance_dequantized(0.01f);
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::ALL,
     combine(
         datasets::SmallGEMMLowpDataset(),
+        make("DataTypeA", {DataType::QASYMM8_SIGNED, DataType::QASYMM8}),
+        make("DataTypeB", DataType::QASYMM8_SIGNED),
         make("accumulate", {true, false})
     ))
 {
@@ -373,6 +449,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFi
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::NIGHTLY,
     combine(
         datasets::LargeGEMMLowpDataset(),
+        make("DataTypeA", {DataType::QASYMM8_SIGNED, DataType::QASYMM8}),
+        make("DataTypeB", DataType::QASYMM8_SIGNED),
         make("accumulate", {false})
     ))
 {

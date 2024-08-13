@@ -85,7 +85,7 @@ void run_gemv_kernel<Requantize32>::run(
 //
 // batches are not supported as a batched GEMV makes no sense (can be converted to a GEMM).
 template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
-class GemvPretransposed : public GemmCommon<To, Tr> {
+class GemvPretransposed : public GemmCommon<To, To, Tr> {
     typedef typename strategy::operand_type Toi;
     typedef typename strategy::result_type Tri;
 
@@ -255,6 +255,25 @@ public:
         c.filter = get_type_name<strategy>();
 
         return c;
+    }
+
+    void update_quantization_parameters(const Requantize32 &re) override {
+        if (std::is_same<OutputStage, Requantize32>::value) {
+            Requantize32 *qp = reinterpret_cast<Requantize32 *>(&_os);
+            qp->bias = re.bias;
+            qp->a_offset = re.a_offset;
+            qp->b_offset = re.b_offset;
+            qp->c_offset = re.c_offset;
+            qp->per_layer_left_shift = re.per_layer_left_shift;
+            qp->per_layer_right_shift = re.per_layer_right_shift;
+            qp->per_layer_mul = re.per_layer_mul;
+            qp->per_channel_requant = re.per_channel_requant;
+            qp->per_channel_left_shifts = re.per_channel_left_shifts;
+            qp->per_channel_right_shifts = re.per_channel_right_shifts;
+            qp->per_channel_muls = re.per_channel_muls;
+            qp->minval = re.minval;
+            qp->maxval = re.maxval;
+        }
     }
 };
 

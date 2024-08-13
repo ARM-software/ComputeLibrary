@@ -29,9 +29,9 @@
 #include "tests/validation/fixtures/GEMMFixture.h"
 
 /*
- * Tests for arm_compute::experimental::ops::CpuGemm which is a shallow wrapper for
+ * Tests for arm_compute::experimental::op::CpuGemm which is a shallow wrapper for
  * arm_compute::cpu::CpuGemm. Any future testing to the functionalities of cpu::CpuGemm will
- * be tested in tests/NEON/GEMM.cpp given that ops::CpuGemm remain a shallow wrapper.
+ * be tested in tests/NEON/GEMM.cpp given that op::CpuGemm remain a shallow wrapper.
 */
 
 namespace arm_compute
@@ -55,16 +55,16 @@ TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 
 TEST_SUITE(CPUGEMM)
-/** Test case for memory injection in @ref arm_compute::experimental::ops::CpuGemm.
+/** Test case for memory injection in @ref arm_compute::experimental::op::CpuGemm.
  *
  * Configure the operator once and inject memory at run-time in multiple executions.
  *
  * Checks performed in order:
  * - Both runs compute the same output
  */
-TEST_CASE(OpsCpuGemmMemoryInjection, framework::DatasetMode::ALL)
+TEST_CASE(OpCpuGemmMemoryInjection, framework::DatasetMode::ALL)
 {
-    auto       gemm      = std::make_unique<arm_compute::experimental::ops::CpuGemm>();
+    auto       gemm      = std::make_unique<arm_compute::experimental::op::CpuGemm>();
     const auto lhs_info  = TensorInfo(TensorShape(3U, 3U), 1, DataType::F32);
     const auto rhs_info  = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
     const auto c_info    = TensorInfo(TensorShape(4U, 3U), 1, DataType::F32);
@@ -108,7 +108,7 @@ TEST_CASE(OpsCpuGemmMemoryInjection, framework::DatasetMode::ALL)
     }
 }
 
-DATA_TEST_CASE(OpsCpuGemmValidateAccumulate, framework::DatasetMode::ALL, combine(
+DATA_TEST_CASE(OpCpuGemmValidateAccumulate, framework::DatasetMode::ALL, combine(
                                                                      zip(make("In0",{ TensorShape(21U, 13U) }),
                                                                      make("In1", { TensorShape(33U, 21U) }),
                                                                      make("Dst", { TensorShape(33U, 13U) })),
@@ -130,7 +130,7 @@ DATA_TEST_CASE(OpsCpuGemmValidateAccumulate, framework::DatasetMode::ALL, combin
     gemm_info.set_accumulate(true);
 
     // Validate accumulation
-    arm_compute::experimental::ops::CpuGemm gemm;
+    arm_compute::experimental::op::CpuGemm gemm;
     Status status = gemm.validate(&in_a, &in_b, (is_c_null ? nullptr : &in_c), &dst, alpha, beta, gemm_info);
     ARM_COMPUTE_EXPECT((expected ==  bool(status)), framework::LogLevel::ERRORS);
 }

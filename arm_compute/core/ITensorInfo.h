@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ITENSORINFO_H
-#define ARM_COMPUTE_ITENSORINFO_H
+#ifndef ACL_ARM_COMPUTE_CORE_ITENSORINFO_H
+#define ACL_ARM_COMPUTE_CORE_ITENSORINFO_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Strides.h"
@@ -279,6 +279,13 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_are_values_constant(bool are_values_constant) = 0;
+    /** Set the offset from the beginning of the memory allocation to the first element of the tensor.
+     *
+     * @param[in] offset Offset in bytes to first element in tensor.
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_offset_first_element_in_bytes(const size_t offset) = 0;
     /** Valid region of the tensor. All elements in the valid region have defined values, i.e. are not undefined.
      *
      * @return The valid region.
@@ -364,4 +371,4 @@ private:
     static constexpr int32_t _static_dimension  = 0;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_TENSORINFO_H */
+#endif // ACL_ARM_COMPUTE_CORE_ITENSORINFO_H

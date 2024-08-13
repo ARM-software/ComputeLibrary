@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCHANNELSHUFFLELAYER_H
-#define ARM_COMPUTE_CLCHANNELSHUFFLELAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCHANNELSHUFFLELAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCHANNELSHUFFLELAYER_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -33,7 +33,7 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLChannelShuffleLayerKernel
+/** Basic function to run CLChannelShuffleLayerKernel
  *
  * @note The function performs a channel shuffle operation on the input tensor. Given NCHW tensor with group G, it will
  * first divide the channels into G groups, C = (G * C'), and perform a transpose of the channel, which gives C = (C' * G).
@@ -69,7 +69,7 @@ public:
                    const ICLTensor        *input,
                    ICLTensor              *output,
                    unsigned int            num_groups);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLChannelShuffleLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of CLChannelShuffleLayerKernel
      *
      * @param[in] input      Input tensor info. Data types supported: All.
      * @param[in] output     Output tensor info. Data type supported: Same as @p input
@@ -80,4 +80,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_groups);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLCHANNELSHUFFLELAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCHANNELSHUFFLELAYER_H

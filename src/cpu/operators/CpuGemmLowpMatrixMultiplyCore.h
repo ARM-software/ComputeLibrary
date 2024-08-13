@@ -81,11 +81,13 @@ public:
      * |src0           |src1               |src2     |dst            |
      * |:--------------|:------------------|:--------|:--------------|
      * |QASYMM8        |QASYMM8            |S32      |QASYMM8        |
+     * |QASYMM8        |QASYMM8_SIGNED     |S32      |QASYMM8        |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |QASYMM8        |
      * |QASYMM8        |QSYMM8             |S32      |QASYMM8        |
      * |QASYMM8        |QASYMM8            |S32      |S32            |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32      |S32            |
      * |QASYMM8        |QSYMM8             |S32      |S32            |
+     * |QASYMM8        |QASYMM8_SIGNED     |F32      |F32            |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32      |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8             |S32      |QASYMM8_SIGNED |
@@ -131,6 +133,11 @@ public:
     void                             run(ITensorPack &tensors) override;
     void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
+    void                             update_quantization_parameters(const GEMMLowpOutputStageInfo &output_info,
+                                                                    const QuantizationInfo        &a,
+                                                                    const QuantizationInfo        &b,
+                                                                    const bool                     is_prepared,
+                                                                    const bool                     negated_offsets);
 
 private:
     enum AuxTensorIdx

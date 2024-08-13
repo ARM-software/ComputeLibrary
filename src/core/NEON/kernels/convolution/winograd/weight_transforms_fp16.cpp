@@ -36,14 +36,13 @@ void *a64_fp16_4x4_3x3(unsigned int, const __fp16 *, size_t, size_t, __fp16 *, s
 #define IMPL(KERN_ROWS, KERN_COLS, TRANS_ROWS, TRANS_COLS, KERN) \
   new Transform<__fp16>(#KERN, KERN_ROWS, KERN_COLS, TRANS_ROWS, TRANS_COLS, KERN)
 
-static const TransformImplementation<__fp16> transforms_fp16[] = {
-  { IMPL(3, 3, 6, 6, a64_fp16_4x4_3x3) },
-  { nullptr }
-};
-
 template <>
 const TransformImplementation<__fp16> *implementation_list(void)
 {
+  static const TransformImplementation<__fp16> transforms_fp16[] = {
+    { IMPL(3, 3, 6, 6, a64_fp16_4x4_3x3) },
+    { nullptr }
+  };
   return transforms_fp16;
 }
 

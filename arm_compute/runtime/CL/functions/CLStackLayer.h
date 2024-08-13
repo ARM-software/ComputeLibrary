@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLSTACKLAYER_H
-#define ARM_COMPUTE_CLSTACKLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSTACKLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSTACKLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -39,7 +39,7 @@ class ITensorInfo;
 
 /** Basic function to stack tensors along an axis. This function calls the following kernel:
  *
- * -# @ref CLStackLayerKernel
+ * -# CLStackLayerKernel
  *
  */
 class CLStackLayer : public IFunction
@@ -89,7 +89,7 @@ public:
                    const std::vector<ICLTensor *> &input,
                    int                             axis,
                    ICLTensor                      *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of CLStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4
      *
@@ -111,4 +111,4 @@ private:
     unsigned int                                     _num_inputs;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLSTACKLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSTACKLAYER_H

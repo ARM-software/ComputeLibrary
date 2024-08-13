@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2024 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -35,4 +35,17 @@ if(NOT GIT_FOUND OR RESULT)
   set(ACL_VERSION_HASH "Unknown")
 endif()
 
-file(WRITE "arm_compute_version.embed" "\"${ACL_VERSION_SHA}\"")
+file(WRITE "${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp" "\"${ACL_VERSION_SHA}\"")
+
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E compare_files
+  ${PROJECT_SOURCE_DIR}/arm_compute_version.embed
+  ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp
+  RESULT_VARIABLE is_same
+)
+
+if(is_same EQUAL 0)
+    file(REMOVE ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp)
+else()
+    file(RENAME ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp ${PROJECT_SOURCE_DIR}/arm_compute_version.embed)
+endif()

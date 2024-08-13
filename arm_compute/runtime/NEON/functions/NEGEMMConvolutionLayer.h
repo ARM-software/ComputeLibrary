@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEGEMMCONVOLUTIONLAYER_H
-#define ARM_COMPUTE_NEGEMMCONVOLUTIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGEMMCONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGEMMCONVOLUTIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -40,7 +40,7 @@ class ITensorInfo;
 
 /** Basic function to compute the convolution layer. This function calls the following kernels/functions:
  *
- * -# @ref cpu::CpuGemmConv2d
+ * -# cpu::CpuGemmConv2d
  *
  */
 class NEGEMMConvolutionLayer : public IFunction
@@ -202,6 +202,27 @@ public:
                                const Size2D              &dilation         = Size2D(1U, 1U),
                                const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
                                bool                       enable_fast_math = false);
+
+    /** Update of quantization information at the run stage for convolution so that the quantization multipliers can be properly calculated.
+     *
+     * Quantization information is usually required at configure time, that is, when we call configure(). However, this information is not always available at this stage.
+     * Quantization parameters are sometimes only available in the run() stage. But at this stage it is too late, as the operator was already configured everything based on the
+     * wrong quantization parameters. One could call configure() again when the correct information is available, but that is a huge overhead. Therefore, this solution
+     * that correctly and efficiently propagates the quantization information (multipliers and offsets) to the kernel.
+     *
+     * Example:
+     *
+     * op->configure(...)
+     * make sure to set the correct parameters in the tensors by updating QuantizationInfo before calling update_quantization_parameters.
+     * op->update_quantization_parameters()
+     * op->run(...)
+     *
+     * Please have a look at examples/neon_gemm_qasymm8_signed.cpp for an example realization.
+     *
+     * This API is experimental and it can be changed in the future.
+     */
+    void update_quantization_parameters();
+
     // Inherited methods overridden:
     void run() override;
     void prepare() override;
@@ -211,4 +232,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEGEMMCONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGEMMCONVOLUTIONLAYER_H
