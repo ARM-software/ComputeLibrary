@@ -31,17 +31,9 @@ namespace arm_conv {
 namespace winograd {
 namespace output_transform {
 
-void a64_fp16_4x4_3x3(
-    unsigned int n_channels,
-    const __fp16* inptr,
-    const size_t matrix_stride,
-    const __fp16* bptr,
-    __fp16* const output,
-    const size_t output_row_stride,
-    const size_t output_col_stride,
-    const __fp16 output_min,
-    const __fp16 output_max
-)
+void a64_fp16_4x4_3x3(unsigned int n_channels,
+        const __fp16 * inptr, size_t matrix_stride, const __fp16 * bptr, __fp16 *output,
+        size_t output_row_stride, size_t output_col_stride, __fp16 output_min, __fp16 output_max)
 {
     constexpr int output_tile_rows = 4, output_tile_cols = 4;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,14 +30,9 @@ namespace arm_conv {
 namespace winograd {
 namespace input_transform {
 
-void a64_fp16_6x6(
-    const unsigned int n_channels,
-    const __fp16* const input_base,
-    const size_t input_row_stride,
-    const size_t input_col_stride,
-    __fp16* outptr,
-    const size_t matrix_stride
-)
+void a64_fp16_6x6(unsigned int n_channels, const __fp16 * input_base,
+        size_t input_row_stride, size_t input_col_stride,
+        __fp16 * outptr, size_t matrix_stride)
 {
     constexpr int inner_tile_rows = 6;
     constexpr int inner_tile_cols = 6;

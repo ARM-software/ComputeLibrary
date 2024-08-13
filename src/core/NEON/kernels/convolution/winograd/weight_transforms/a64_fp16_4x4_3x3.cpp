@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-
 #include <cstddef>
 #include <arm_neon.h>
 
@@ -30,14 +29,9 @@ namespace arm_conv {
 namespace winograd {
 namespace weight_transform {
 
-void a64_fp16_4x4_3x3(
-    unsigned int n_channels,
-    const __fp16* inptr,  // NOTE: Data in HWIO order
-    const size_t ld_weight_row,
-    const size_t ld_weight_col,
-    __fp16* outptr,
-    const size_t matrix_stride
-)
+void a64_fp16_4x4_3x3(unsigned int n_channels, const __fp16 * inptr,
+                      size_t ld_weight_row, size_t ld_weight_col, __fp16 * outptr,
+                      size_t matrix_stride)
 {
 #ifdef __aarch64__
     for (; n_channels >= 8; n_channels -= 8)
