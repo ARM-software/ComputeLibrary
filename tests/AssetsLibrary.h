@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TENSOR_LIBRARY_H
-#define ARM_COMPUTE_TEST_TENSOR_LIBRARY_H
+#ifndef ACL_TESTS_ASSETSLIBRARY_H
+#define ACL_TESTS_ASSETSLIBRARY_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
@@ -75,6 +75,12 @@ public:
      * @return the path to the assets directory.
      */
     std::string path() const;
+
+    /** Set the seed that is used to fill tensors with random values.
+     *
+     * @param[in] the initial random seed to set.
+     */
+    void set_seed(std::random_device::result_type);
 
     /** Seed that is used to fill tensors with random values.
      *
@@ -1057,4 +1063,4 @@ void AssetsLibrary::fill_tensor_value(T &&tensor, D value) const
 }
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TENSOR_LIBRARY_H */
+#endif // ACL_TESTS_ASSETSLIBRARY_H

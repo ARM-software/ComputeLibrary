@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -265,6 +265,11 @@ std::string AssetsLibrary::path() const
 std::random_device::result_type AssetsLibrary::seed() const
 {
     return _seed;
+}
+
+void AssetsLibrary::set_seed(std::random_device::result_type seed)
+{
+    _seed = seed;
 }
 
 void AssetsLibrary::fill(RawTensor &raw, const std::string &name, Format format) const

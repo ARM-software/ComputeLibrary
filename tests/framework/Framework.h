@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FRAMEWORK
-#define ARM_COMPUTE_TEST_FRAMEWORK
+#ifndef ACL_TESTS_FRAMEWORK_FRAMEWORK_H
+#define ACL_TESTS_FRAMEWORK_FRAMEWORK_H
 
 #include "DatasetModes.h"
 #include "Exceptions.h"
@@ -323,6 +323,31 @@ public:
      */
     void set_new_fixture_call(bool val);
 
+    /** Prepare functions is called before each test run.
+     *
+     * The difference between the prepare_function and on_setup() callback
+     * from TestCase is that the prepare_function is global for the framework,
+     * but the on_setup() is individual for each TestCase.
+     */
+    using PrepareFunc = std::function<void(void)>;
+
+    /** Set prepare function.
+     *
+     * The prepare_function is called before calling on_run() for each test case.
+     * The difference between the prepare function and on_setup() callback from
+     * TestCase is that the prepare function is global for the framework, but
+     * the on_setup() callback is individual for each TestCase.
+     *
+     * @param[in] prepare The prepare function.
+     */
+    void set_prepare_function(const PrepareFunc &prepare);
+
+    /** Set random seed reported by the framework.
+     *
+     * @param[in] seed Random seed reported by the framework.
+     */
+    void set_seed(unsigned int seed);
+
 private:
     Framework();
     ~Framework() = default;
@@ -360,6 +385,7 @@ private:
     bool                   _new_fixture_call{ false };
     bool                   _print_rerun_cmd{ false };
     unsigned int           _seed{ 0 };
+    PrepareFunc            _prepare_function{};
 
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentsDescription, create_function *> _available_instruments{};
@@ -391,4 +417,4 @@ inline void Framework::add_data_test_case(std::string test_name, DatasetMode mod
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FRAMEWORK */
+#endif // ACL_TESTS_FRAMEWORK_FRAMEWORK_H

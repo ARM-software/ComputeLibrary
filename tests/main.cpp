@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,8 +118,8 @@ int main(int argc, char **argv)
     filter_id->set_help("List of test ids. ... can be used to define a range.");
     auto stop_on_error = parser.add_option<utils::ToggleOption>("stop-on-error");
     stop_on_error->set_help("Stop execution after the first failed test (useful for debugging)");
-    auto seed = parser.add_option<utils::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
-    seed->set_help("Global seed for random number generation");
+    auto seed = parser.add_option<utils::SimpleOption<std::random_device::result_type>>("seed");
+    seed->set_help("Global seed for random number generation. When not set, each test iteration will use different random seed");
     auto list_tests = parser.add_option<utils::ToggleOption>("list-tests", false);
     list_tests->set_help("List all test names");
     auto test_instruments = parser.add_option<utils::ToggleOption>("test-instruments", false);
@@ -220,13 +220,17 @@ int main(int argc, char **argv)
             }
         }
 
+        const std::random_device::result_type seed_value = (seed->is_set()) ? seed->value(): std::random_device()();
+        const bool randomize_seeds = !seed->is_set() && (options.iterations->value() > 1);
+
         if(options.log_level->value() >= framework::LogLevel::CONFIG)
         {
             for(auto &p : printers)
             {
                 p->print_entry("Version", build_information());
                 p->print_entry("CommandLine", command_line(argc, argv));
-                p->print_entry("Seed", support::cpp11::to_string(seed->value()));
+                auto seed_str = randomize_seeds ? "Dynamic" : support::cpp11::to_string(seed_value);
+                p->print_entry("Seed", seed_str);
 #ifdef ARM_COMPUTE_CL
                 if(opencl_is_available())
                 {
@@ -282,7 +286,7 @@ int main(int argc, char **argv)
         fconfig.cooldown_sec    = cooldown_sec->value();
         fconfig.configure_only  = configure_only->value();
         fconfig.print_rerun_cmd = print_rerun_command->value();
-        fconfig.seed            = seed->value();
+        fconfig.seed            = seed_value;
         framework.init(fconfig);
 
         for(auto &p : printers)
@@ -292,6 +296,14 @@ int main(int argc, char **argv)
         framework.set_throw_errors(options.throw_errors->value());
         framework.set_stop_on_error(stop_on_error->value());
         framework.set_error_on_missing_assets(error_on_missing_assets->value());
+        if (randomize_seeds)
+        {
+            framework.set_prepare_function([&] (){
+                    std::random_device::result_type seed = std::random_device()();
+                    library->set_seed(seed);
+                    framework.set_seed(seed);
+            });
+        }
 
         bool success = true;
 
@@ -319,7 +331,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        library       = std::make_unique<AssetsLibrary>(assets->value(), seed->value());
+        library       = std::make_unique<AssetsLibrary>(assets->value(), seed_value);
         fixed_library = std::make_unique<AssetsLibrary>(assets->value(), fixed_seed);
 
         if(!parser.validate())
