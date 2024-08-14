@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,9 +92,12 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
                                                          DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &src1);
 
-    const auto can_use_fixedpoint = sub_q8_neon_fixedpoint_possible(&src0, &src1, &dst);
-    const auto uk                 = CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(
-        CpuSubKernelDataTypeISASelectorData{src0.data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint});
+    const auto can_use_fixedpoint    = sub_q8_neon_fixedpoint_possible(&src0, &src1, &dst);
+    const auto can_use_sme2_add_impl = false;
+
+    const auto uk =
+        CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(CpuSubKernelDataTypeISASelectorData{
+            src0.data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint, can_use_sme2_add_impl});
 
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
@@ -126,9 +129,11 @@ void CpuSubKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     set_shape_if_empty(*dst, out_shape);
     set_data_type_if_unknown(*dst, src0->data_type());
 
-    const auto can_use_fixedpoint = sub_q8_neon_fixedpoint_possible(src0, src1, dst);
-    const auto uk                 = CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(
-        CpuSubKernelDataTypeISASelectorData{src0->data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint});
+    const auto can_use_fixedpoint    = sub_q8_neon_fixedpoint_possible(src0, src1, dst);
+    const auto can_use_sme2_add_impl = false;
+    const auto uk =
+        CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(CpuSubKernelDataTypeISASelectorData{
+            src0->data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint, can_use_sme2_add_impl});
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,12 @@ namespace kernels
 namespace
 {
 static const std::vector<CpuAddKernel::AddKernel> available_kernels = {
+    {"sme2_qs8_add_fixedpoint",
+     [](const CpuAddKernelDataTypeISASelectorData &data) {
+         return (data.dt == DataType::QASYMM8_SIGNED) && data.isa.sme2 && data.can_use_fixedpoint &&
+                data.can_use_sme2_impl;
+     },
+     REGISTER_QASYMM8_SIGNED_SME2(arm_compute::cpu::add_qasymm8_signed_sme2)},
     {"neon_qu8_add_fixedpoint",
      [](const CpuAddKernelDataTypeISASelectorData &data)
      { return (data.dt == DataType::QASYMM8) && data.can_use_fixedpoint; },
@@ -134,8 +140,15 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
     }
 
     const auto can_use_fixedpoint = add_q8_neon_fixedpoint_possible(&src0, &src1, &dst);
-    const auto uk                 = CpuAddKernel::get_implementation<CpuAddKernelDataTypeISASelectorData>(
-        CpuAddKernelDataTypeISASelectorData{src0.data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint});
+#ifdef ARM_COMPUTE_ENABLE_SME2
+    const auto can_use_sme2_impl = add_q8_sme2_fixedpoint_possible(&src0, &src1, &dst);
+#else  /* ARM_COMPUTE_ENABLE_SME2 */
+    const auto can_use_sme2_impl = false;
+#endif /* ARM_COMPUTE_ENABLE_SME2 */
+    const auto uk =
+        CpuAddKernel::get_implementation<CpuAddKernelDataTypeISASelectorData>(CpuAddKernelDataTypeISASelectorData{
+            src0.data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint, can_use_sme2_impl});
+
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     return Status{};
@@ -148,8 +161,14 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
 
     const auto can_use_fixedpoint = add_q8_neon_fixedpoint_possible(src0, src1, dst);
-    const auto uk                 = CpuAddKernel::get_implementation<CpuAddKernelDataTypeISASelectorData>(
-        CpuAddKernelDataTypeISASelectorData{src0->data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint});
+#ifdef ARM_COMPUTE_ENABLE_SME2
+    const auto can_use_sme2_impl = add_q8_sme2_fixedpoint_possible(src0, src1, dst);
+#else  /* ARM_COMPUTE_ENABLE_SME2 */
+    const auto can_use_sme2_impl = false;
+#endif /* ARM_COMPUTE_ENABLE_SME2 */
+    const auto uk =
+        CpuAddKernel::get_implementation<CpuAddKernelDataTypeISASelectorData>(CpuAddKernelDataTypeISASelectorData{
+            src0->data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint, can_use_sme2_impl});
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
@@ -191,7 +210,6 @@ void CpuAddKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
     const ITensor *src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     const ITensor *src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     ITensor       *dst  = tensors.get_tensor(TensorType::ACL_DST);
-
     _run_method(src0, src1, dst, _policy, window);
 }
 

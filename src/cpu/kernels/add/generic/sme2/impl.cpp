@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, 2024 Arm Limited.
+ * Copyright (c) 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,41 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_CPU_KERNELS_ADD_LIST_H
-#define ACL_SRC_CPU_KERNELS_ADD_LIST_H
 
-#include "src/cpu/kernels/add/generic/neon/impl.h"
 #include "src/cpu/kernels/add/generic/sme2/impl.h"
-#include "src/cpu/kernels/add/generic/sve/impl.h"
+
+#include "arm_compute/core/Helpers.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ADD_KERNEL(func_name)                                                                   \
-    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, \
-                   const Window &window)
 
-DECLARE_ADD_KERNEL(add_qasymm8_neon);
-DECLARE_ADD_KERNEL(add_qasymm8_signed_neon);
-DECLARE_ADD_KERNEL(add_qsymm16_neon);
-DECLARE_ADD_KERNEL(add_fp32_neon);
-DECLARE_ADD_KERNEL(add_fp16_neon);
-DECLARE_ADD_KERNEL(add_u8_neon);
-DECLARE_ADD_KERNEL(add_s16_neon);
-DECLARE_ADD_KERNEL(add_s32_neon);
-DECLARE_ADD_KERNEL(add_fp32_sve);
-DECLARE_ADD_KERNEL(add_fp16_sve);
-DECLARE_ADD_KERNEL(add_u8_sve);
-DECLARE_ADD_KERNEL(add_s16_sve);
-DECLARE_ADD_KERNEL(add_s32_sve);
-DECLARE_ADD_KERNEL(add_qasymm8_sve2);
-DECLARE_ADD_KERNEL(add_qasymm8_signed_sve2);
-DECLARE_ADD_KERNEL(add_qsymm16_sve2);
-DECLARE_ADD_KERNEL(add_qasymm8_signed_sme2);
+bool add_q8_sme2_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
+{
+    return add_sub_q8_sme2_fixedpoint_possible(src0, src1, dst);
+}
 
-#undef DECLARE_ADD_KERNEL
+bool add_sub_q8_sme2_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
+{
+    const auto        &in0_shape = src0->tensor_shape();
+    const auto        &in1_shape = src1->tensor_shape();
+    const unsigned int dst_dims  = dst->num_dimensions();
+    // Does not support broadcasting on x
+    // Does not support dims > 4D output, unless input shapes are identical (therefore collapsible)
+    if (in0_shape.x() == in1_shape.x() && (in0_shape == in1_shape || dst_dims <= 4))
+    {
+        return true;
+    }
+    return false;
+}
 
 } // namespace cpu
 } // namespace arm_compute
-#endif // ACL_SRC_CPU_KERNELS_ADD_LIST_H

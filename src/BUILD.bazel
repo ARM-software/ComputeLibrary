@@ -110,6 +110,8 @@ filegroup(
 	"cpu/kernels/activation/generic/sve2/qasymm8.cpp",
 	"cpu/kernels/activation/generic/sve2/qasymm8_signed.cpp",
 	"cpu/kernels/activation/generic/sve2/qsymm16.cpp",
+	"cpu/kernels/add/generic/sme2/impl.cpp",
+	"cpu/kernels/add/generic/sme2/qasymm8_signed.cpp",
 	"cpu/kernels/add/generic/sve2/qasymm8.cpp",
 	"cpu/kernels/add/generic/sve2/qasymm8_signed.cpp",
 	"cpu/kernels/add/generic/sve2/qsymm16.cpp",

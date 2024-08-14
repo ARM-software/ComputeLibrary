@@ -956,8 +956,10 @@
             "fp16":["src/cpu/kernels/add/generic/sve/fp16.cpp"]
           },
           "sve2": {
+            "common": ["src/cpu/kernels/add/generic/sme2/impl.cpp"],
             "qasymm8": [ "src/cpu/kernels/add/generic/sve2/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/add/generic/sve2/qasymm8_signed.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/add/generic/sve2/qasymm8_signed.cpp",
+                                "src/cpu/kernels/add/generic/sme2/qasymm8_signed.cpp" ],
             "qsymm16": [ "src/cpu/kernels/add/generic/sve2/qsymm16.cpp" ]
           }
         }
