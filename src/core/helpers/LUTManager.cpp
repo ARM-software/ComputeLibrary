@@ -24,13 +24,22 @@
 
 #include "src/core/helpers/LUTManager.h"
 
+#include "src/common/utils/Validate.h"
+#include "support/Bfloat16.h"
+
 namespace arm_compute
 {
 #ifdef __aarch64__
 namespace
 {
 
-float16_t activation(float16_t x, const LUTInfo &info)
+union Element
+{
+    uint16_t  i = 0;
+    float16_t fp;
+};
+
+inline float16_t activation(float16_t x, const LUTInfo &info)
 {
     float16_t out = 0.f;
     switch (info.act)
@@ -50,26 +59,51 @@ float16_t activation(float16_t x, const LUTInfo &info)
     return out;
 }
 
-void init_lut_fp16(ActivationLayerInfo::LookupTable65536 *lut, const LUTInfo &info)
+// Read bf16 value as u16, convert to fp32.
+// Calculate exp in fp32, return as bf16
+inline uint16_t exponential(uint16_t x, const LUTInfo &info)
 {
-    union Element
-    {
-        uint16_t  i = 0;
-        float16_t fp;
-    } item;
+    float fp = bf16_to_float(x);
+    fp       = std::exp(fp * info.beta * -1);
+    return float_to_bf16(fp);
+}
 
-    // Fill lut by iterating over all 16 bit values using the union.
+void init_lut_16bit(LookupTable65536 *lut, const LUTInfo &info)
+{
+    // assert lut is valid config.
+    ARM_COMPUTE_ASSERT((info.type == LUTType::Activation && info.dt == DataType::F16) ||
+                       (info.type == LUTType::Exponential && info.dt == DataType::BFLOAT16));
+
+    Element item = {0}; // Fill lut by iterating over all 16 bit values using the union.
+    Element bf16 = {0}; // Temporary object used to store bf16 values as fp16 in lut
     while (true)
     {
-        (*lut)[item.i] = activation(item.fp, info);
+        switch (info.type)
+        {
+            case LUTType::Activation:
+            {
+                (*lut)[item.i] = activation(item.fp, info);
+                break;
+            }
+            case LUTType::Exponential:
+            {
+                bf16.i         = exponential(item.i, info);
+                (*lut)[item.i] = bf16.fp;
+                break;
+            }
+            default:
+                ARM_COMPUTE_ERROR("Unsupported Activation for 16-bit LUT table");
+                break;
+        }
         if (item.i == 65535)
             break;
         item.i++;
     }
 }
+
 } // namespace
 
-std::shared_ptr<ActivationLayerInfo::LookupTable65536> LUTManager::get_lut_table(LUTInfo info)
+std::shared_ptr<LookupTable65536> LUTManager::get_lut_table(LUTInfo info)
 {
     const auto itr   = map_fp16.find(info);
     auto       s_ptr = (itr != map_fp16.end()) ? itr->second.lock() : nullptr; // nullptr if invalid or not found.
@@ -82,8 +116,8 @@ std::shared_ptr<ActivationLayerInfo::LookupTable65536> LUTManager::get_lut_table
     {
         // Not found, or pointer not valid
         // We do not use make_shared to prevent the weak_ptr keeping the control block alive
-        std::shared_ptr<ActivationLayerInfo::LookupTable65536> ptr(new ActivationLayerInfo::LookupTable65536);
-        init_lut_fp16(ptr.get(), info);
+        std::shared_ptr<LookupTable65536> ptr(new LookupTable65536);
+        init_lut_16bit(ptr.get(), info);
         map_fp16[info] = ptr;
         return ptr;
     }

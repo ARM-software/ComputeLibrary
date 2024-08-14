@@ -220,6 +220,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 
     if (std::string(uk->name) == "sve_fp16_activation_lut")
     {
+        // Create info using init list.
         const LUTInfo info = {activation_info.activation(), activation_info.a(), activation_info.b(), src->data_type(),
                               src->quantization_info().uniform()};
         activation_info.setLookupTable65536((lut_manager.get_lut_table(info)));

@@ -31,7 +31,7 @@ namespace cpu
 #define DECLARE_SOFTMAX_KERNEL(func_name)                                                                              \
     template <bool IS_LOG>                                                                                             \
     void func_name(const ITensor *in, void *const tmp, ITensor *out, const float beta, int axis, const Window &window, \
-                   const float *lut_ptr)
+                   const void *lut_ptr)
 
 DECLARE_SOFTMAX_KERNEL(neon_fp32_softmax);
 DECLARE_SOFTMAX_KERNEL(neon_fp16_softmax);
@@ -46,7 +46,7 @@ void sme2_fp32_softmax(const ITensor *in,
                        const float    beta,
                        int            axis,
                        const Window  &window,
-                       const float   *lut_ptr);
+                       const void    *lut_ptr);
 
 void sme2_fp16_softmax(const ITensor *in,
                        void *const    tmp,
@@ -54,7 +54,7 @@ void sme2_fp16_softmax(const ITensor *in,
                        const float    beta,
                        int            axis,
                        const Window  &window,
-                       const float   *lut_ptr);
+                       const void    *lut_ptr);
 
 void sme2_qasymm8_softmax_lut_512VL(const ITensor *in,
                                     void *const    tmp,
@@ -62,7 +62,7 @@ void sme2_qasymm8_softmax_lut_512VL(const ITensor *in,
                                     const float    beta,
                                     int            axis,
                                     const Window  &window,
-                                    const float   *lut_ptr);
+                                    const void    *lut_ptr);
 
 void sme2_qasymm8_signed_softmax_lut_512VL(const ITensor *in,
                                            void *const    tmp,
@@ -70,7 +70,7 @@ void sme2_qasymm8_signed_softmax_lut_512VL(const ITensor *in,
                                            const float    beta,
                                            int            axis,
                                            const Window  &window,
-                                           const float   *lut_ptr);
+                                           const void    *lut_ptr);
 
 #endif // ARM_COMPUTE_ENABLE_SME2
 
