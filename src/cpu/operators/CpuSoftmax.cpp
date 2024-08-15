@@ -49,7 +49,7 @@ void CpuSoftmaxGeneric::configure(const ITensorInfo *src, ITensorInfo *dst, floa
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(CpuSoftmaxGeneric::validate(src, dst, beta, axis));
+    ARM_COMPUTE_ERROR_THROW_ON(CpuSoftmaxGeneric::validate(src, dst, beta, axis, is_log));
     ARM_COMPUTE_LOG_PARAMS(src, dst, beta, axis);
 
     const unsigned int actual_axis =
