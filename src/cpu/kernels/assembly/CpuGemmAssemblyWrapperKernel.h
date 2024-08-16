@@ -96,6 +96,15 @@ public:
         _kernel->execute(ndc_win, ndc_tlc, info.thread_id);
     }
 
+    /** Configure window of the kernel
+     *
+     * @param[in] window Region on which to execute the kernel
+     */
+    void configure_window(const Window &win)
+    {
+        INEKernel::configure(win);
+    }
+
     /** Initialise the kernel's input and output.
      *
      * @param[in] kernel          Pointer to an assembly kernel implementation.

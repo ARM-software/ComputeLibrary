@@ -292,7 +292,7 @@ class GemmHybridIndirect : public GemmCommon<To, Tw, Tr> {
     // Array of pointers to output rows
 //    Tr * const *        _output_ptrs;
 
-    const NDRange<4> _window_range;
+    NDRange<4> _window_range;
 
     unsigned int get_col_sum_size() const {
         if (std::is_same<OutputStage, Requantize32>::value) {
@@ -850,6 +850,18 @@ public:
             qp->minval = re.minval;
             qp->maxval = re.maxval;
             _n_block = compute_n_block(_args, _os);
+
+            // Also update the window range because computation of n_block may change wrt B's offset
+            NDRange<4> window_range(iceildiv(_args._Msize, strategy::out_height()), _args._nbatches,
+                              iceildiv(_args._Nsize, _n_block), _args._nmulti);
+
+            // The updated window range should be propagated to kernel execution window
+            // after this method has been called. Otherwise, the window set up at configure time
+            // of the associated kernel will remain.
+            //
+            // See Fallback::update_quantization_parameters() in src/cpu/operators/internal/CpuGemmAssemblyDispatch.cpp
+            // for how this is done.
+            _window_range = window_range;
         }
     }
 };
