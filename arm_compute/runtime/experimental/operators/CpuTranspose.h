@@ -38,7 +38,7 @@ namespace op
 /** Wrapper class for CpuTranspose. For information on the functions,
  * see "src/cpu/operators/CpuTranspose.h"
 */
-class CpuTranspose : INEOperator
+class CpuTranspose : public INEOperator
 {
 public:
     /** Constructor **/

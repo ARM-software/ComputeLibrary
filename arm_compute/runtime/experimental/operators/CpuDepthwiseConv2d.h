@@ -41,7 +41,7 @@ namespace op
  * Any new features should be added to arm_compute::cpu::CpuDepthwiseConv2d and
  * arm_compute::experimental::op::CpuDepthwiseConv2d should remain a shallow wrapper.
 */
-class CpuDepthwiseConv2d : IOperator
+class CpuDepthwiseConv2d : public IOperator
 {
 public:
     /** Constructor **/
@@ -55,7 +55,7 @@ public:
     /** Default move assignment */
     CpuDepthwiseConv2d &operator=(CpuDepthwiseConv2d &&) = default;
     /** Default destructor */
-    ~CpuDepthwiseConv2d();
+    ~CpuDepthwiseConv2d() override;
 
     /** Initialize the function's source, destination, weights and convolution information.
      *

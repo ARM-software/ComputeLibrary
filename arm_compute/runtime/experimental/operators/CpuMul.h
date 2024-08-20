@@ -39,7 +39,7 @@ namespace op
 /** Wrapper class for CpuMul. For information on the functions,
  * see "src/cpu/operators/CpuMul.h"
 */
-class CpuMul : INEOperator
+class CpuMul : public INEOperator
 {
 public:
     /** Constructor */

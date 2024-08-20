@@ -39,7 +39,7 @@ namespace op
 /** Wrapper class for CpuAdd. For information on the functions,
  * see "src/cpu/operators/CpuAdd.h"
 */
-class CpuAdd : INEOperator
+class CpuAdd : public INEOperator
 {
 public:
     /** Constructor */

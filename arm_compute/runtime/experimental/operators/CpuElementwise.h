@@ -41,7 +41,7 @@ namespace op
 /** Wrapper class for CpuElementwiseDivision. For information on the functions,
  * see "src/cpu/operators/CpuElementwise.h"
 */
-class CpuElementwiseDivision : INEOperator
+class CpuElementwiseDivision : public INEOperator
 {
 public:
     /** Constructor */
@@ -81,7 +81,7 @@ private:
 /** Wrapper class for CpuElementwiseMax. For information on the functions,
  * see "src/cpu/operators/CpuElementwise.h"
 */
-class CpuElementwiseMax : INEOperator
+class CpuElementwiseMax : public INEOperator
 {
 public:
     /** Constructor */
@@ -121,7 +121,7 @@ private:
 /** Wrapper class for CpuElementwiseMin. For information on the functions,
  * see "src/cpu/operators/CpuElementwise.h"
 */
-class CpuElementwiseMin : INEOperator
+class CpuElementwiseMin : public INEOperator
 {
 public:
     /** Constructor */
