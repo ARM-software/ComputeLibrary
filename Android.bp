@@ -463,6 +463,7 @@ cc_library_static {
         "src/cpu/kernels/activation/generic/neon/qasymm8.cpp",
         "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp",
         "src/cpu/kernels/activation/generic/neon/qsymm16.cpp",
+        "src/cpu/kernels/activation/heuristics/CpuActivationKernelHeuristics.cpp",
         "src/cpu/kernels/add/generic/neon/fp16.cpp",
         "src/cpu/kernels/add/generic/neon/fp32.cpp",
         "src/cpu/kernels/add/generic/neon/impl.cpp",

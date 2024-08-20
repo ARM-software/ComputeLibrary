@@ -896,6 +896,7 @@
           "common": [
             "src/cpu/operators/CpuActivation.cpp",
             "src/cpu/kernels/CpuActivationKernel.cpp",
+            "src/cpu/kernels/activation/heuristics/CpuActivationKernelHeuristics.cpp",
             "src/runtime/NEON/functions/NEActivationLayer.cpp"
           ],
           "neon": {

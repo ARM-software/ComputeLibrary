@@ -31,6 +31,7 @@
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/activation/heuristics/CpuActivationKernelHeuristics.h"
 #include "src/cpu/kernels/activation/list.h"
 #include "src/cpu/kernels/logistic/list.h"
 
@@ -44,87 +45,6 @@ namespace kernels
 {
 namespace
 {
-
-bool is_fp16_lut_supported(ActivationLayerInfo::ActivationFunction func)
-{
-    return func == ActivationLayerInfo::ActivationFunction::LOGISTIC ||
-           func == ActivationLayerInfo::ActivationFunction::TANH;
-}
-
-static const std::vector<CpuActivationKernel::ActivationKernel> available_kernels = {
-#ifdef ARM_COMPUTE_ENABLE_SVE
-    {"sve2_q8_activation_lut",
-     [](const ActivationDataTypeISASelectorData &data)
-     {
-         return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) &&
-                data.cpumodel == CPUModel::A510 && data.isa.sve2 &&
-                data.f != ActivationLayerInfo::ActivationFunction::RELU;
-     },
-     REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_q8_activation_lut)},
-#endif // ARM_COMPUTE_ENABLE_SVE
-#ifdef __aarch64__
-    {// Neon LUT implementantion takes precedence
-     "neon_q8_activation_lut",
-     [](const ActivationDataTypeISASelectorData &data)
-     {
-         return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) &&
-                data.f != ActivationLayerInfo::ActivationFunction::RELU;
-     },
-     REGISTER_Q8_NEON(arm_compute::cpu::neon_q8_activation_lut)},
-#endif // __aarch64__
-    {"sme2_fp32_logistic",
-     [](const ActivationDataTypeISASelectorData &data) {
-         return data.dt == DataType::F32 && data.f == ActivationLayerInfo::ActivationFunction::LOGISTIC &&
-                data.isa.sme2;
-     },
-     REGISTER_FP32_SME2(arm_compute::cpu::sme2_fp32_logistic)},
-    {"sve2_qu8_activation",
-     [](const ActivationDataTypeISASelectorData &data) {
-         return data.dt == DataType::QASYMM8 && data.isa.sve2 &&
-                data.f != ActivationLayerInfo::ActivationFunction::GELU;
-     },
-     REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_qasymm8_activation)},
-    {"sve2_qs8_activation",
-     [](const ActivationDataTypeISASelectorData &data)
-     {
-         return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2 &&
-                data.f != ActivationLayerInfo::ActivationFunction::GELU;
-     },
-     REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::sve2_qasymm8_signed_activation)},
-    {"sve2_qs16_activation",
-     [](const ActivationDataTypeISASelectorData &data) {
-         return data.dt == DataType::QSYMM16 && data.isa.sve2 &&
-                data.f != ActivationLayerInfo::ActivationFunction::GELU;
-     },
-     REGISTER_QSYMM16_SVE2(arm_compute::cpu::sve2_qsymm16_activation)},
-    {"sve_fp16_activation_lut",
-     [](const ActivationDataTypeISASelectorData &data)
-     { return data.dt == DataType::F16 && data.isa.fp16 && data.isa.sve && is_fp16_lut_supported(data.f); },
-     REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_activation_lut)},
-    {"sve_fp16_activation",
-     [](const ActivationDataTypeISASelectorData &data)
-     {
-         return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16 &&
-                data.f != ActivationLayerInfo::ActivationFunction::GELU;
-     },
-     REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_activation)},
-    {"sve_fp32_activation",
-     [](const ActivationDataTypeISASelectorData &data)
-     { return data.dt == DataType::F32 && data.isa.sve && data.f != ActivationLayerInfo::ActivationFunction::GELU; },
-     REGISTER_FP32_SVE(arm_compute::cpu::sve_fp32_activation)},
-    {"neon_fp16_activation",
-     [](const ActivationDataTypeISASelectorData &data) { return data.dt == DataType::F16 && data.isa.fp16; },
-     REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_activation)},
-    {"neon_fp32_activation", [](const ActivationDataTypeISASelectorData &data) { return data.dt == DataType::F32; },
-     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_activation)},
-    {"neon_qu8_activation", [](const ActivationDataTypeISASelectorData &data) { return data.dt == DataType::QASYMM8; },
-     REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation)},
-    {"neon_qs8_activation",
-     [](const ActivationDataTypeISASelectorData &data) { return data.dt == DataType::QASYMM8_SIGNED; },
-     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qasymm8_signed_activation)},
-    {"neon_qs16_activation", [](const ActivationDataTypeISASelectorData &data) { return data.dt == DataType::QSYMM16; },
-     REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qsymm16_activation)},
-};
 
 /* Supported activation in the 8-bit integer domain */
 static const std::array<ActivationLayerInfo::ActivationFunction, 8> qasymm8_activations = {
@@ -144,8 +64,8 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8,
                                                          DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    const auto *uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{
-        src->data_type(), CPUInfo::get().get_cpu_model(), CPUInfo::get().get_isa(), activation_info.activation()});
+    heuristics::CpuActivationKernelHeuristics heuristics(src, dst, activation_info);
+    const auto                               *uk = heuristics.kernel();
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     const DataType          data_type = src->data_type();
@@ -193,19 +113,6 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, ITensorInfo *dst)
-{
-    // Configure kernel window
-    Window win = calculate_max_window(*src, Steps());
-
-    if (dst != nullptr)
-    {
-        // dst auto inizialitation if not yet initialized
-        auto_init_if_empty(*dst, *src->clone());
-    }
-
-    return std::make_pair(Status{}, win);
-}
 #ifdef __aarch64__
 void init_lut(ActivationLayerInfo::ActivationFunction act_func,
               DataType                                data_type,
@@ -281,20 +188,21 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 {
     ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
+    ARM_COMPUTE_ERROR_THROW_ON(CpuActivationKernel::validate(src, dst, activation_info));
 
-    const auto uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{
-        src->data_type(), CPUInfo::get().get_cpu_model(), CPUInfo::get().get_isa(), activation_info.activation()});
+    heuristics::CpuActivationKernelHeuristics heuristics(src, dst, activation_info);
+    _heuristics = std::move(heuristics);
+
     if (dst != nullptr)
     {
         // dst auto inizialitation if not yet initialized
         auto_init_if_empty(*dst, *src->clone());
     }
 
+    const auto *uk = heuristics.kernel();
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
-    _run_method = uk->ukernel;
-    _name       = std::string("CpuActivationKernel").append("/").append(uk->name);
+    _name = std::string("CpuActivationKernel").append("/").append(uk->name);
 
 #ifdef __aarch64__
     // Initialise lut_manager
@@ -319,16 +227,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 #endif // __aarch64__
     _act_info = activation_info;
 
-    Window win;
-
-    // Use squashed window
-    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
-    // Collapse window with SME kernels in Y-Dim
-    if (std::string(uk->name) == "sme2_fp32_logistic")
-    {
-        win = win.collapse(win, Window::DimY);
-    }
-    ICPPKernel::configure(win);
+    ICPPKernel::configure(heuristics.window());
 }
 
 Status
@@ -336,8 +235,6 @@ CpuActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, co
 {
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(
-        validate_and_configure_window(src->clone().get(), (dst != nullptr) ? dst->clone().get() : nullptr).first);
 
     return Status{};
 }
@@ -347,13 +244,7 @@ size_t CpuActivationKernel::get_mws(const CPUInfo &platform, size_t thread_count
     ARM_COMPUTE_UNUSED(thread_count);
     ARM_COMPUTE_UNUSED(platform);
 
-    if (_split_dimension == Window::DimX)
-    {
-        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
-        // This number is loosely chosen as threading overhead in each platform varies wildly.
-        return 1536;
-    }
-    return default_mws;
+    return _heuristics.mws();
 }
 
 void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
@@ -369,22 +260,19 @@ void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, con
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
-    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
+
+    ActivationKernelPtr run_method = _heuristics.kernel()->ukernel;
+    ARM_COMPUTE_ERROR_ON(run_method == nullptr);
 
     const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    _run_method(src, dst, _act_info, window);
+    run_method(src, dst, _act_info, window);
 }
 
 const char *CpuActivationKernel::name() const
 {
     return _name.c_str();
-}
-
-const std::vector<CpuActivationKernel::ActivationKernel> &CpuActivationKernel::get_available_kernels()
-{
-    return available_kernels;
 }
 } // namespace kernels
 } // namespace cpu
