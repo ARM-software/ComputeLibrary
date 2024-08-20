@@ -35,6 +35,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DepthwiseConvolutionLayerFixture.h"
+#include "tests/datasets/DatatypeDataset.h"
 
 namespace arm_compute
 {
@@ -204,6 +205,100 @@ DATA_TEST_CASE(Validate3x3, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip
     bool is_valid = bool(NEDepthwiseConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false),
      &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, depth_multiplier, ActivationLayerInfo(), dilation));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+
+void validate_data_types(DataType input_dtype, DataType weight_dtype, DataType bias_dtype, DataType output_dtype)
+{
+    const int depth_multiplier = 1;
+    const auto dilation = Size2D(1U, 1U);
+    const auto conv_info = PadStrideInfo(1, 1, 0, 0);
+
+    const auto input = TensorInfo(TensorShape(27U, 13U, 2U), 1, input_dtype);
+    std::vector<float> scales(input.tensor_shape().z() * depth_multiplier);
+
+    const auto weights = TensorInfo(TensorShape(3U, 3U, 2U), 1, weight_dtype, QuantizationInfo(scales));
+    const auto bias = TensorInfo(TensorShape(2U), 1, bias_dtype);
+    auto output = TensorInfo(TensorShape(25U, 11U, 2U), 1, output_dtype);
+
+
+    bool is_valid = bool(NEDepthwiseConvolutionLayer::validate(&input.clone()->set_is_resizable(false), &weights.clone()->set_is_resizable(false), &bias.clone()->set_is_resizable(false), &output.clone()->set_is_resizable(false),
+        conv_info, depth_multiplier, ActivationLayerInfo(), dilation));
+
+    const auto supported_configs = {
+        std::make_tuple(DataType::F32,DataType::F32,DataType::F32,DataType::F32),
+        std::make_tuple(DataType::F16,DataType::F16,DataType::F16,DataType::F16),
+        std::make_tuple(DataType::QASYMM8,DataType::QASYMM8,DataType::S32,DataType::QASYMM8),
+        std::make_tuple(DataType::QASYMM8,DataType::QSYMM8_PER_CHANNEL,DataType::S32,DataType::QASYMM8),
+        std::make_tuple(DataType::QASYMM8_SIGNED,DataType::QASYMM8_SIGNED,DataType::S32,DataType::QASYMM8_SIGNED),
+        std::make_tuple(DataType::QASYMM8_SIGNED,DataType::QSYMM8_PER_CHANNEL,DataType::S32,DataType::QASYMM8_SIGNED),
+    };
+
+    const auto config = std::make_tuple(input_dtype, weight_dtype, bias_dtype, output_dtype);
+
+    const bool cpu_has_bf16 = CPUInfo::get().has_bf16();
+    const bool cpu_has_fp16 = CPUInfo::get().has_fp16();
+    const bool config_has_fp16 = (input_dtype == DataType::F16 ||
+                                  weight_dtype == DataType::F16 ||
+                                  bias_dtype == DataType::F16 ||
+                                  output_dtype == DataType::F16);
+
+    const bool config_has_bf16 = (input_dtype == DataType::BFLOAT16 ||
+                                  weight_dtype == DataType::BFLOAT16 ||
+                                  bias_dtype == DataType::BFLOAT16 ||
+                                  output_dtype == DataType::BFLOAT16);
+
+    bool expected = false;
+
+#ifndef ARM_COMPUTE_ENABLE_FP16
+    const bool fp16_enabled = false;
+#else // ARM_COMPUTE_ENABLE_FP16
+    const bool fp16_enabled = true;
+#endif // ARM_COMPUTE_ENABLE_FP16
+
+#ifndef ARM_COMPUTE_ENABLE_BF16
+    const bool bf16_enabled = false;
+#else // ARM_COMPUTE_ENABLE_BF16
+    const bool bf16_enabled = true;
+#endif // ARM_COMPUTE_ENABLE_BF16
+
+    if(!(config_has_fp16 && (!cpu_has_fp16 || !fp16_enabled)) &&
+       !(config_has_bf16 && (!cpu_has_bf16 || !bf16_enabled)))
+    {
+        // hardware supports the data types
+        for(auto supported_config : supported_configs)
+        {
+            if(config == supported_config)
+            {
+                expected = true;
+                break;
+            }
+        }
+    }
+
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+
+/// @note: Do not modify. Validating all data types is pretty fast.
+DATA_TEST_CASE(ValidateAllDataTypes, framework::DatasetMode::NIGHTLY,
+    combine(
+        datasets::AllDataTypes("InputDataType"),
+        datasets::AllDataTypes("WeightDataType"),
+        datasets::AllDataTypes("BiasDataType"),
+        datasets::AllDataTypes("OutputDataType")),
+        input_dtype, weight_dtype, bias_dtype, output_dtype)
+{
+    validate_data_types(input_dtype, weight_dtype, bias_dtype, output_dtype);
+}
+
+DATA_TEST_CASE(ValidateCommonDataTypes, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::CommonDataTypes("InputDataType"),
+        datasets::CommonDataTypes("WeightDataType"),
+        datasets::CommonDataTypes("BiasDataType"),
+        datasets::CommonDataTypes("OutputDataType")),
+        input_dtype, weight_dtype, bias_dtype, output_dtype)
+{
+    validate_data_types(input_dtype, weight_dtype, bias_dtype, output_dtype);
 }
 
 DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
