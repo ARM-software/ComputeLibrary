@@ -322,11 +322,9 @@ In this case the first argument of LeNet (like all the graph examples) is the ta
 
 @section S1_4_macos Building for macOS
 
-The library was successfully natively built for Apple Silicon under macOS 11.1 using clang v12.0.0.
-
 To natively compile the library with accelerated CPU support:
 
-	scons Werror=1 -j8 neon=1 opencl=0 os=macos arch=armv8a build=native
+	scons Werror=1 -j8 neon=1 opencl=0 os=macos arch=armv8.2-a build=native
 
 @note Initial support disables feature discovery through HWCAPS and thread scheduling affinity controls
 
