@@ -38,7 +38,7 @@ namespace op
 /** Wrapper class for CpuActivation. For information on the functions,
  * see "src/cpu/operators/CpuActivation.h"
 */
-class CpuActivation : INEOperator
+class CpuActivation : public INEOperator
 {
 public:
     /** Constructor **/

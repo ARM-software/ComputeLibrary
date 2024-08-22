@@ -41,7 +41,7 @@ namespace op
  * Any new features should be added to arm_compute::cpu::CpuGemmDirectConv2d and
  * arm_compute::experimental::op::CpuGemmDirectConv2d should remain a shallow wrapper.
 */
-class CpuGemmDirectConv2d : IOperator
+class CpuGemmDirectConv2d : public IOperator
 {
 public:
     /** Constructor **/

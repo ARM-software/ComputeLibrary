@@ -247,6 +247,13 @@ public:
         }
 
         _gemm_kernel_asm->update_quantization_parameters(gemm_requant_info);
+
+        // After update_quantization_parameters(), window may change, reconfigure it.
+        auto *opt = reinterpret_cast<kernel::CpuGemmAssemblyWrapperKernel<TypeInput, TypeWeight, TypeOutput> *>(
+            _optimised_kernel.get());
+        const Window win = to_window(_gemm_kernel_asm->get_window_size());
+        opt->configure_window(win);
+
         _is_prepared = is_prepared;
     }
 

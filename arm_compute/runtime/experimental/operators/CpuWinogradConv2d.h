@@ -40,7 +40,7 @@ namespace op
  * Any new features should be added to arm_compute::cpu::CpuWinogradConv2d and
  * arm_compute::experimental::op::CpuWinogradConv2d should remain a shallow wrapper.
 */
-class CpuWinogradConv2d : IOperator
+class CpuWinogradConv2d : public IOperator
 {
 public:
     /** Constructors */
@@ -55,7 +55,7 @@ public:
     CpuWinogradConv2d &operator=(CpuWinogradConv2d &&) = default;
 
     /** Destructor */
-    ~CpuWinogradConv2d();
+    ~CpuWinogradConv2d() override;
 
     /** Set the input and output tensors.
      *

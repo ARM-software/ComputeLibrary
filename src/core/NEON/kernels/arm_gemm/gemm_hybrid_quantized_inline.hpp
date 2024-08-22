@@ -281,7 +281,6 @@ public:
             qp->per_channel_muls = re.per_channel_muls;
             qp->minval = re.minval;
             qp->maxval = re.maxval;
-            _n_block = compute_n_block(_args, _os);
         }
     }
 };

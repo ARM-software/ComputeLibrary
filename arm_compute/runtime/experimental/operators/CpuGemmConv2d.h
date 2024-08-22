@@ -42,7 +42,7 @@ namespace op
  * Any new features should be added to arm_compute::cpu::CpuGemmConv2d and
  * arm_compute::experimental::op::CpuGemmConv2d should remain a shallow wrapper.
 */
-class CpuGemmConv2d : IOperator
+class CpuGemmConv2d : public IOperator
 {
 public:
     /** Constructor */
@@ -135,7 +135,7 @@ public:
                                const WeightsInfo         &weights_info     = WeightsInfo(),
                                const Size2D              &dilation         = Size2D(1U, 1U),
                                const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
-                               const bool                 enable_fast_math = false);
+                               bool                       enable_fast_math = false);
 
     void                             run(ITensorPack &tensors) override;
     void                             prepare(ITensorPack &tensors) override;

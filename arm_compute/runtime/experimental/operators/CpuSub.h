@@ -41,7 +41,7 @@ namespace op
 /** Wrapper class for CpuSub. For information on the functions,
  * see "src/cpu/operators/CpuSub.h"
 */
-class CpuSub : INEOperator
+class CpuSub : public INEOperator
 {
 public:
     /** Constructor */

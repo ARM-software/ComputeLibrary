@@ -45,7 +45,7 @@ namespace op
 /** Wrapper class for CpuGemm. For information on the operators,
  * see "src/cpu/operators/CpuGemm.h"
 */
-class CpuGemm : IOperator
+class CpuGemm : public IOperator
 {
 public:
     /** Constructor **/
