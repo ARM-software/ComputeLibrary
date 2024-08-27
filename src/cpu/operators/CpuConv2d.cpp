@@ -233,10 +233,9 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo         *i
             return ConvolutionMethod::GEMM;
         }
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        // This heuristics only applies to F16 data type on A55r1
-        if (NEScheduler::get().cpu_info().get_cpu_model() == CPUModel::A55r1 && enable_fast_math &&
-            input->data_type() == DataType::F16)
+#if ARM_COMPUTE_ENABLE_FP16
+        // This heuristics only applies to F16
+        if (CPUInfo::get().has_fp16() && enable_fast_math && input->data_type() == DataType::F16)
         {
             // Exclude known bad winograd configs (and defaults to GEMM)
             const std::vector<ConvolutionConfiguration> known_bad_winograd_f16_with_fastmath_configs = {
@@ -270,7 +269,7 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo         *i
                 return ConvolutionMethod::GEMM;
             }
         }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif // ARM_COMPUTE_ENABLE_FP16
 
         // For 1x1 convolutions run the default GEMM
         if (weights->dimension(idx_w) == 1 && weights->dimension(idx_h) == 1)
