@@ -84,6 +84,18 @@ Status CpuGemmAssemblyDispatch::validate(
     {
         return Status(ErrorCode::RUNTIME_ERROR);
     }
+    bool a_data_type_ok = a->data_type() == DataType::F32 || a->data_type() == DataType::F16;
+    bool b_data_type_ok = b->data_type() == DataType::F32 || b->data_type() == DataType::F16;
+    bool d_data_type_ok = d->data_type() == DataType::F32 || d->data_type() == DataType::F16;
+    bool fixed_format_dtype_ok =
+        (!gemm_info.fixed_format() ||
+         (a->data_type() == DataType::F32 && b->data_type() == DataType::F32 && d->data_type() == DataType::F32));
+
+    if (!(a_data_type_ok && b_data_type_ok && d_data_type_ok && fixed_format_dtype_ok))
+    {
+        return Status(ErrorCode::RUNTIME_ERROR);
+    }
+
     return cpu::CpuGemmAssemblyDispatch::validate(a, b, c, d, init_assembly_metadata(gemm_info));
 }
 

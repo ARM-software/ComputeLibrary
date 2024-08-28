@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/experimental/low_level/CpuGemmAssemblyDispatch.h"
 
 #include "src/core/helpers/MemoryHelpers.h"
+#include "tests/datasets/DatatypeDataset.h"
 #include "tests/datasets/LargeGEMMDataset.h"
 #include "tests/datasets/SmallGEMMDataset.h"
 #include "tests/framework/Asserts.h"
@@ -49,7 +50,7 @@ constexpr AbsoluteTolerance<float> tolerance_f(
 RelativeTolerance<half_float::half> rel_tolerance_f16(half(
     0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for FP16 data types */
 const AbsoluteTolerance<float>      abs_tolerance_f16(
-    0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
+         0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
 constexpr float tolerance_num = 0.07f; /**< Tolerance number for FP16 data types */
 #endif                                 /* ARM_COMPUTE_ENABLE_FP16 */
 /** CNN data types */
@@ -137,7 +138,8 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
     auto result_1 = run_conv();
     for (size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] == reinterpret_cast<float *>(result_1.buffer())[i],
+        ARM_COMPUTE_EXPECT(reinterpret_cast<float *>(result_0.buffer())[i] ==
+                               reinterpret_cast<float *>(result_1.buffer())[i],
                            framework::LogLevel::ERRORS);
     }
 }
@@ -192,45 +194,64 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
     auto result_1 = run_conv();
     for (size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT((reinterpret_cast<float *>(result_0.buffer()))[i] == (reinterpret_cast<float *>(result_1.buffer()))[i],
+        ARM_COMPUTE_EXPECT((reinterpret_cast<float *>(result_0.buffer()))[i] ==
+                               (reinterpret_cast<float *>(result_1.buffer()))[i],
                            framework::LogLevel::ERRORS);
     };
 }
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               make("LhsInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::S32), // Unsupported data type
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),
-                                                     }),
-               make("RhsInfo",{ TensorInfo(TensorShape(8U, 27U), 1, DataType::S32),
-                                                        TensorInfo(TensorShape(8U, 27U), 1, DataType::F32),
-                                                     }),
-               make("OutputInfo",{ TensorInfo(TensorShape(8U, 13U), 1, DataType::S32),
-                                                        TensorInfo(TensorShape(8U, 13U), 1, DataType::F32),
-                                                     }),
-               make("Expected", { false, true })),
-               lhs_info, rhs_info, output_info, expected)
+DATA_TEST_CASE(ValidateAllDataTypes,
+               framework::DatasetMode::ALL,
+               combine(
+                    datasets::AllDataTypes("DataType"),
+                    make("fixed_format", {true, false})),
+               data_type, fixed_format)
 {
-    const auto gemm_info = GEMMInfo();
+    auto gemm_info = GEMMInfo();
+    auto lhs_info = TensorInfo(TensorShape(21U, 13U), 1, data_type);
+    auto rhs_info = TensorInfo(TensorShape(33U, 21U), 1, data_type);
+    auto output_info = TensorInfo(TensorShape(33U, 13U), 1, data_type);
+    gemm_info.set_fixed_format(fixed_format);
+
+    if (fixed_format) {
+        gemm_info.set_weight_format(WeightFormat::OHWIo4);
+        rhs_info.set_data_layout(DataLayout::NCHW);
+    }
+
+    bool expected = (data_type == DataType::F32) && !fixed_format;
+
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
+    expected = expected || (data_type == DataType::F32);
+#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    expected = expected || ((data_type == DataType::F16) && cpu_supports_dtypes({DataType::F16}) && !fixed_format);
+#endif // ARM_COMPUTE_ENABLE_FP16
+
     bool is_valid = bool(experimental::op::ll::CpuGemmAssemblyDispatch::validate(&lhs_info.clone()->set_is_resizable(true), &rhs_info.clone()->set_is_resizable(true), nullptr, &output_info.clone()->set_is_resizable(true), gemm_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 
 template <typename T>
-using CpuGemmAssemblyDispatchFixture = CpuGemmAssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T, false /* accumulate */>;
+using CpuGemmAssemblyDispatchFixture = CpuGemmAssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T>;
+
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 template <typename T>
-using CpuGemmAccumulateFixture = CpuGemmAssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T, true /* accumulate */>;
+using CpuGemmFixedFormatFixture = CpuGemmAssemblyDispatchFixedFormatFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T>;
+#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 
 TEST_SUITE(Float)
 
-DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
-                                                                     zip(make("In0",{ TensorShape(21U, 13U) }),
-                                                                     make("In1", { TensorShape(33U, 21U) }),
-                                                                     make("Dst", { TensorShape(33U, 13U) })),
-                                                                     zip(
-                                                                     make("is_c_null", { false, false, false, true }),
-                                                                     make("Expected", { true, true, true, true }))),
+DATA_TEST_CASE(ValidateAccumulate,
+               framework::DatasetMode::ALL,
+               combine(
+                    zip(make("In0",{ TensorShape(21U, 13U) }),
+                    make("In1", { TensorShape(33U, 21U) }),
+                    make("Dst", { TensorShape(33U, 13U) })),
+                    zip(
+                    make("is_c_null", { false, false, false, true }),
+                    make("Expected", { true, true, true, true }))),
                shape_a, shape_b, shape_dst, is_c_null, expected)
 {
     ARM_COMPUTE_UNUSED(is_c_null);
@@ -251,8 +272,19 @@ DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmAssemblyDispatchFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
-                                                                                                         make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmAssemblyDispatchFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMDataset(),
+                            make("DataType", DataType::F16),
+                            make("Accumulate", false),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                            ActivationLayerInfo(),
+                            ActivationLayerInfo(ActivationFunction::RELU),
+                            ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                            ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                        })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -265,8 +297,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmAssemblyDispatchFixture<half>, framework
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuGemmAssemblyDispatchFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
-                                                                                                       make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CpuGemmAssemblyDispatchFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeGEMMDataset(),
+                            make("DataType", DataType::F16),
+                            make("Accumulate", false),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                                ActivationLayerInfo(),
+                                ActivationLayerInfo(ActivationFunction::RELU),
+                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                            })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -279,40 +322,75 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CpuGemmAssemblyDispatchFixture<half>, framework
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-
 
 TEST_SUITE_END() // FP16
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmAssemblyDispatchFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
-                                                                                                            make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmAssemblyDispatchFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMDataset(),
+                            make("DataType", DataType::F32),
+                            make("Accumulate", {false, true}),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                                ActivationLayerInfo(),
+                                ActivationLayerInfo(ActivationFunction::RELU),
+                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                       })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuGemmAssemblyDispatchFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
-                                                                                                        make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CpuGemmAssemblyDispatchFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeGEMMDataset(),
+                            make("DataType", DataType::F32),
+                            make("Accumulate", {false, true}),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                                ActivationLayerInfo(),
+                                ActivationLayerInfo(ActivationFunction::RELU),
+                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                       })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
 
 
-TEST_SUITE(ACCUMULATE)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmAccumulateFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallAccumulateGEMMDataset(),
-                                                                                                        make("DataType", DataType::F32)))
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
+
+TEST_SUITE(FIXED_FORMAT)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmFixedFormatFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(
+                            datasets::SmallGEMMDataset(),
+                            make("DataType", DataType::F32)
+                        ))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuGemmAccumulateFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeAccumulateGEMMDataset(),
-                                                                                                        make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CpuGemmFixedFormatFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(
+                            datasets::LargeGEMMDataset(),
+                            make("DataType", DataType::F32)
+                        ))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-TEST_SUITE_END() // ACCUMULATE
+TEST_SUITE_END() // FIXED_FORMAT
+#endif // ARM_COMPUTE_FIXED_FORMAT_KERNELS
+
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
