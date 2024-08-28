@@ -2319,8 +2319,9 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>U8<td>S16<td>S16
     <tr><td>S16<td>U8<td>S16
     <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
     <tr><td>F16<td>F16<td>F16
-    <tr><td>F32<td>S32<td>F32
+    <tr><td>F32<td>F32<td>F32
     </table>
 <tr>
   <td>CLPixelWiseMultiplication

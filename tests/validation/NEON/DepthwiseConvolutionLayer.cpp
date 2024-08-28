@@ -37,6 +37,9 @@
 #include "tests/validation/fixtures/DepthwiseConvolutionLayerFixture.h"
 #include "tests/datasets/DatatypeDataset.h"
 
+#include <algorithm>
+#include <tuple>
+
 namespace arm_compute
 {
 namespace test
@@ -224,7 +227,7 @@ void validate_data_types(DataType input_dtype, DataType weight_dtype, DataType b
     bool is_valid = bool(NEDepthwiseConvolutionLayer::validate(&input.clone()->set_is_resizable(false), &weights.clone()->set_is_resizable(false), &bias.clone()->set_is_resizable(false), &output.clone()->set_is_resizable(false),
         conv_info, depth_multiplier, ActivationLayerInfo(), dilation));
 
-    const auto supported_configs = {
+    const auto supports = {
         std::make_tuple(DataType::F32,DataType::F32,DataType::F32,DataType::F32),
         std::make_tuple(DataType::F16,DataType::F16,DataType::F16,DataType::F16),
         std::make_tuple(DataType::QASYMM8,DataType::QASYMM8,DataType::S32,DataType::QASYMM8),
@@ -234,45 +237,12 @@ void validate_data_types(DataType input_dtype, DataType weight_dtype, DataType b
     };
 
     const auto config = std::make_tuple(input_dtype, weight_dtype, bias_dtype, output_dtype);
-
-    const bool cpu_has_bf16 = CPUInfo::get().has_bf16();
-    const bool cpu_has_fp16 = CPUInfo::get().has_fp16();
-    const bool config_has_fp16 = (input_dtype == DataType::F16 ||
-                                  weight_dtype == DataType::F16 ||
-                                  bias_dtype == DataType::F16 ||
-                                  output_dtype == DataType::F16);
-
-    const bool config_has_bf16 = (input_dtype == DataType::BFLOAT16 ||
-                                  weight_dtype == DataType::BFLOAT16 ||
-                                  bias_dtype == DataType::BFLOAT16 ||
-                                  output_dtype == DataType::BFLOAT16);
+    const std::initializer_list<DataType> dtypes_list = {input_dtype, weight_dtype, bias_dtype, output_dtype};
 
     bool expected = false;
-
-#ifndef ARM_COMPUTE_ENABLE_FP16
-    const bool fp16_enabled = false;
-#else // ARM_COMPUTE_ENABLE_FP16
-    const bool fp16_enabled = true;
-#endif // ARM_COMPUTE_ENABLE_FP16
-
-#ifndef ARM_COMPUTE_ENABLE_BF16
-    const bool bf16_enabled = false;
-#else // ARM_COMPUTE_ENABLE_BF16
-    const bool bf16_enabled = true;
-#endif // ARM_COMPUTE_ENABLE_BF16
-
-    if(!(config_has_fp16 && (!cpu_has_fp16 || !fp16_enabled)) &&
-       !(config_has_bf16 && (!cpu_has_bf16 || !bf16_enabled)))
+    if(cpu_supports_dtypes(dtypes_list))
     {
-        // hardware supports the data types
-        for(auto supported_config : supported_configs)
-        {
-            if(config == supported_config)
-            {
-                expected = true;
-                break;
-            }
-        }
+        expected = (std::find(supports.begin(), supports.end(), config) != supports.end());
     }
 
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);

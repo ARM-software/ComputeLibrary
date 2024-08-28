@@ -30,6 +30,11 @@
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/PixelWiseMultiplicationFixture.h"
+#include "tests/datasets/DatatypeDataset.h"
+#include "tests/validation/Helpers.h"
+
+#include <algorithm>
+#include <tuple>
 
 namespace arm_compute
 {
@@ -37,6 +42,9 @@ namespace test
 {
 namespace validation
 {
+
+using framework::dataset::make;
+
 namespace
 {
 const float scale_unity = 1.f;
@@ -87,7 +95,6 @@ const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
 #define VALIDATE(TYPE, TOLERANCE) validate(Accessor(_target), _reference, AbsoluteTolerance<TYPE>(TOLERANCE), 0.f);
 #define WRAP_VALIDATE(TYPE, TOLERANCE) validate_wrap(Accessor(_target), _reference, AbsoluteTolerance<TYPE>(TOLERANCE), 0.f);
 
-// *INDENT-OFF*
 // clang-format off
 #define PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, SHAPES, DT1, DT2, DT3, SCALE, RP, INPLACE_DATASET, VALIDATE) \
     FIXTURE_DATA_TEST_CASE(TEST_NAME, NEPixelWiseMultiplication##FIXTURE, framework::DatasetMode::MODE,                        \
@@ -114,8 +121,43 @@ const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
         }                                                                                                                 \
     }
 
-// *INDENT-ON*
 // clang-format on
+
+void validate_data_types(DataType input1_dtype, DataType input2_dtype, DataType output_dtype)
+{
+    const auto input1 = TensorInfo(TensorShape(27U, 13U, 2U), 1, input1_dtype);
+    const auto input2 = TensorInfo(TensorShape(27U, 13U, 2U), 1, input2_dtype);
+    auto output = TensorInfo(TensorShape(27U, 13U, 2U), 1, output_dtype);
+
+    bool is_valid = static_cast<bool>(NEPixelWiseMultiplication::validate(&input1, &input2, &output, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+
+    const auto supports = {
+        std::make_tuple(DataType::F32,DataType::F32,DataType::F32),
+        std::make_tuple(DataType::F16,DataType::F16,DataType::F16),
+        std::make_tuple(DataType::U8,DataType::U8,DataType::U8),
+        std::make_tuple(DataType::U8,DataType::U8,DataType::S16),
+        std::make_tuple(DataType::U8,DataType::S16,DataType::S16),
+        std::make_tuple(DataType::S16,DataType::U8,DataType::S16),
+        std::make_tuple(DataType::S16,DataType::S16,DataType::S16),
+        std::make_tuple(DataType::S32,DataType::S32,DataType::S32),
+        std::make_tuple(DataType::QSYMM16,DataType::QSYMM16,DataType::QSYMM16),
+        std::make_tuple(DataType::QSYMM16,DataType::QSYMM16,DataType::S32),
+        std::make_tuple(DataType::QASYMM8,DataType::QASYMM8,DataType::QASYMM8),
+        std::make_tuple(DataType::QASYMM8_SIGNED,DataType::QASYMM8_SIGNED,DataType::QASYMM8_SIGNED)
+    };
+
+    const auto config = std::make_tuple(input1_dtype, input2_dtype, output_dtype);
+    const std::initializer_list<DataType> dtypes_list = {input1_dtype, input2_dtype, output_dtype};
+
+    bool expected = false;
+    if(cpu_supports_dtypes(dtypes_list))
+    {
+        expected = (std::find(supports.begin(), supports.end(), config) != supports.end());
+    }
+
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+
 } // namespace
 
 using NEPixelWiseMultiplicationQASYMM8Fixture       = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t>;
@@ -137,11 +179,14 @@ template <typename T>
 using NEPixelWiseMultiplicationBroadcastFixture              = PixelWiseMultiplicationBroadcastValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, T>;
 using NEPixelWiseMultiplicationBroadcastQASYMM8Fixture       = PixelWiseMultiplicationBroadcastValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t>;
 using NEPixelWiseMultiplicationBroadcastQASYMM8SignedFixture = PixelWiseMultiplicationBroadcastValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int8_t, int8_t>;
+using NEPixelWiseMultiplicationBroadcastQSYMM16Fixture = PixelWiseMultiplicationBroadcastValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int16_t, int16_t>;
+using NEPixelWiseMultiplicationBroadcastQSYMM16ToS32Fixture  = PixelWiseMultiplicationBroadcastValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int16_t, int16_t, int32_t>;
+using NEPixelWiseMultiplicationBroadcastU8U8ToS16Fixture = PixelWiseMultiplicationBroadcastValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t, int16_t>;
+using NEPixelWiseMultiplicationBroadcastToS16Fixture = PixelWiseMultiplicationBroadcastValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, int16_t, int16_t>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(PixelWiseMultiplication)
 
-// *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //1 Ok
@@ -227,7 +272,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
-// *INDENT-ON*
+
+/// @note: Do not modify. Validating all data types is pretty fast.
+DATA_TEST_CASE(ValidateAllDataTypes, framework::DatasetMode::ALL,
+    combine(
+        datasets::AllDataTypes("Input1DataType"),
+        datasets::AllDataTypes("Input2DataType"),
+        datasets::AllDataTypes("OutputDataType")),
+        input1_dtype, input2_dtype, output_dtype)
+{
+    validate_data_types(input1_dtype, input2_dtype, output_dtype);
+}
 
 TEST_SUITE(InPlaceValidate)
 TEST_CASE(SingleTensor, framework::DatasetMode::ALL)
@@ -455,7 +510,24 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framew
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qsymm16);
 }
+
 TEST_SUITE_END() // ScaleOther
+TEST_SUITE(NonXBroadcast)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastQSYMM16Fixture,
+    framework::DatasetMode::ALL,
+    combine(datasets::SmallShapesNonXBroadcast(),
+            make("DataTypeIn1", DataType::QSYMM16),
+            make("DataTypeIn2", DataType::QSYMM16),
+            make("DataTypeOut", DataType::QSYMM16),
+            make("Scale", { scale_unity }),
+            PixelWiseMultiplicationPolicySTZDataset,
+            PixelWiseMultiplicationQSYMM16QuantDataset,
+    OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // NonXBroadcast
 TEST_SUITE_END() // QSYMM16
 TEST_SUITE(QSYMM16toS32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16ToS32Fixture, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
@@ -470,6 +542,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16ToS32Fixture, f
     // Validate output
     validate(Accessor(_target), _reference);
 }
+TEST_SUITE(NonXBroadcast)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastQSYMM16ToS32Fixture, framework::DatasetMode::ALL,
+    combine(datasets::SmallShapesNonXBroadcast(),
+        make("DataTypeIn1", DataType::QSYMM16),
+        make("DataTypeIn2", DataType::QSYMM16),
+        make("DataTypeOut", DataType::S32),
+        make("Scale", { scale_unity }),
+        PixelWiseMultiplicationPolicySTZDataset,
+        PixelWiseMultiplicationQSYMM16QuantDataset,
+        OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // NonXBroadcast
 TEST_SUITE_END() // QSYMM16toS32
 TEST_SUITE_END() // Quantized
 
@@ -487,6 +574,22 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationU8U8ToS16Fixture, fram
     // Validate output
     validate_wrap(Accessor(_target), _reference, AbsoluteTolerance<int16_t>(1), 0.f);
 }
+
+TEST_SUITE(NonXBroadcast)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastU8U8ToS16Fixture, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallShapesNonXBroadcast(),
+        framework::dataset::make("DataTypeIn1", DataType::U8),
+        framework::dataset::make("DataTypeIn2", DataType::U8),
+        framework::dataset::make("DataTypeOut", DataType::S16),
+        framework::dataset::make("Scale", { scale_255 }),
+        datasets::ConvertPolicies(),
+        framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_UP),
+        OutOfPlaceDataSet))
+{
+    // Validate output
+    validate_wrap(Accessor(_target), _reference, AbsoluteTolerance<int16_t>(1), 0.f);
+}
+TEST_SUITE_END() // NonXBroadcast
 
 FIXTURE_DATA_TEST_CASE(RunSmall1, NEPixelWiseMultiplicationU8U8ToS16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                         framework::dataset::make("DataTypeIn1", DataType::U8)),
@@ -511,6 +614,9 @@ TEST_SUITE_END() // Scale255
 
 TEST_SUITE(ScaleUnity)
 PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToU8Fixture<uint8_t>, ALL, SmallShapes(), U8, U8, U8, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+TEST_SUITE(NonXBroadcast)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<uint8_t>, ALL, SmallShapesNonXBroadcast(), U8, U8, U8, scale_unity, TO_ZERO, OutOfPlaceDataSet, DEFAULT_VALIDATE)
+TEST_SUITE_END() // NonXBroadcast
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE(ScaleOther)
@@ -529,6 +635,11 @@ TEST_SUITE_END() // Scale255
 TEST_SUITE(ScaleUnity)
 PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<uint8_t>, ALL, SmallShapes(), U8, S16, S16, scale_unity, TO_ZERO, OutOfPlaceDataSet,
                                                  DEFAULT_VALIDATE)
+
+TEST_SUITE(NonXBroadcast)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastToS16Fixture, ALL, SmallShapesNonXBroadcast(), U8, S16, S16, scale_unity, TO_ZERO, OutOfPlaceDataSet,
+                                                 DEFAULT_VALIDATE)
+TEST_SUITE_END() // NonXBroadcast
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE(ScaleOther)
@@ -546,6 +657,10 @@ TEST_SUITE_END() // Scale255
 
 TEST_SUITE(ScaleUnity)
 PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<int16_t>, ALL, SmallShapes(), S16, S16, S16, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+TEST_SUITE(NonXBroadcast)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<int16_t>, ALL, SmallShapesNonXBroadcast(), S16, S16, S16, scale_unity, TO_ZERO, OutOfPlaceDataSet, DEFAULT_VALIDATE)
+TEST_SUITE_END() // NonXBroadcast
+
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE(ScaleOther)

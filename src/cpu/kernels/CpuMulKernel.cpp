@@ -128,6 +128,16 @@ inline Status validate_arguments(const ITensorInfo *src1,
                                         "Scale value not supported (Should be 1/(2^n) or 1/255");
     }
 
+    // Certain data types do not support x-dimension broadcasting
+    const bool broadcast_x = src1->tensor_shape().x() != src2->tensor_shape().x();
+    if (broadcast_x)
+    {
+        const DataType dtype1 = src1->data_type();
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dtype1 == DataType::QSYMM16 || dtype1 == DataType::U8 ||
+                                            dtype1 == DataType::S16,
+                                        "X-broadcasting is not supported in certain data type configurations.");
+    }
+
     return Status{};
 }
 

@@ -34,6 +34,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <initializer_list>
 #include <random>
 #include <type_traits>
 #include <utility>
@@ -308,6 +309,14 @@ QuantizationHint suggest_mac_dst_q_info_and_bias(const QuantizationInfo &lhs_q_i
                                                  DataType                data_type,
                                                  float                   bias_fraction,
                                                  int                     num_sd = 2);
+
+/** Check if Cpu supports the vectoral operations for the data types in the parameters
+ *
+ * @param[in] types an initializeer list that contain data types
+ *
+ * @return true if the current cpu supports the vectoral operations for the data types
+ */
+bool cpu_supports_dtypes(const std::initializer_list<DataType> &types);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
