@@ -25,6 +25,7 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ConvertPolicyDataset.h"
@@ -32,8 +33,10 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ArithmeticOperationsFixture.h"
+#include "tests/datasets/DatatypeDataset.h"
 
 namespace arm_compute
 {
@@ -41,6 +44,9 @@ namespace test
 {
 namespace validation
 {
+
+using framework::dataset::make;
+
 namespace
 {
 #ifdef __aarch64__
@@ -60,11 +66,47 @@ const auto ArithmeticSubtractionQuantizationInfoSignedDataset = combine(combine(
 const auto ArithmeticSubtractionQuantizationInfoSignedInPlaceDataset = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(0.8f, 10) }),
                                                                                        framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(0.8f, 10) })),
                                                                                framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(0.8f, 10) }));
-const auto ArithmeticSubtractionQuantizationInfoSymmetric = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(0.3f, 0) }),
-                                                                            framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(0.7f, 0) })),
-                                                                    framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(0.2f, 0) }));
+const auto ArithmeticSubtractionQuantizationInfo16bitSymmetric =
+    combine(
+        make("QuantizationInfoIn1", { QuantizationInfo(0.003f, 0) }),
+        make("QuantizationInfoIn2", { QuantizationInfo(0.007f, 0) }),
+        make("QuantizationInfoOut", { QuantizationInfo(0.2f, 0),
+                                      QuantizationInfo(0.002f, 0) /* for more saturation */ })
+    );
+
 const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
 const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
+
+void validate_data_types(DataType input1_dtype, DataType input2_dtype, DataType output_dtype)
+{
+    const auto input1 = TensorInfo(TensorShape(27U, 13U, 2U), 1, input1_dtype);
+    const auto input2 = TensorInfo(TensorShape(27U, 13U, 2U), 1, input2_dtype);
+    auto output = TensorInfo(TensorShape(27U, 13U, 2U), 1, output_dtype);
+
+    const bool is_valid = static_cast<bool>(NEArithmeticSubtraction::validate(&input1, &input2, &output,
+        ConvertPolicy::SATURATE));
+
+    const auto supports = {
+        std::make_tuple(DataType::F32,DataType::F32,DataType::F32),
+        std::make_tuple(DataType::F16,DataType::F16,DataType::F16),
+        std::make_tuple(DataType::U8,DataType::U8,DataType::U8),
+        std::make_tuple(DataType::S16,DataType::S16,DataType::S16),
+        std::make_tuple(DataType::S32,DataType::S32,DataType::S32),
+        std::make_tuple(DataType::QSYMM16,DataType::QSYMM16,DataType::QSYMM16),
+        std::make_tuple(DataType::QASYMM8,DataType::QASYMM8,DataType::QASYMM8),
+        std::make_tuple(DataType::QASYMM8_SIGNED,DataType::QASYMM8_SIGNED,DataType::QASYMM8_SIGNED)
+    };
+    const auto config = std::make_tuple(input1_dtype, input2_dtype, output_dtype);
+    const std::initializer_list<DataType> dtypes_list = {input1_dtype, input2_dtype, output_dtype};
+
+    bool expected = false;
+    if(cpu_supports_dtypes(dtypes_list))
+    {
+        expected = (std::find(supports.begin(), supports.end(), config) != supports.end());
+    }
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+
 } // namespace
 
 TEST_SUITE(NEON)
@@ -72,6 +114,8 @@ TEST_SUITE(ArithmeticSubtraction)
 
 template <typename T>
 using NEArithmeticSubtractionFixture = ArithmeticSubtractionValidationFixture<Tensor, Accessor, NEArithmeticSubtraction, T>;
+template <typename T>
+using NEArithmeticSubtractionBroadcastFixture = ArithmeticSubtractionBroadcastValidationFixture<Tensor, Accessor, NEArithmeticSubtraction, T>;
 
 // *INDENT-OFF*
 // clang-format off
@@ -160,6 +204,18 @@ TEST_CASE(InvalidBroadcastBoth, framework::DatasetMode::ALL)
 }
 TEST_SUITE_END() // InPlaceValidate
 
+/// @note: Do not modify. Validating all data types is pretty fast.
+DATA_TEST_CASE(ValidateAllDataTypes, framework::DatasetMode::ALL,
+    combine(
+        datasets::AllDataTypes("Input1DataType"),
+        datasets::AllDataTypes("Input2DataType"),
+        datasets::AllDataTypes("OutputDataType")),
+        input1_dtype, input2_dtype, output_dtype)
+{
+    validate_data_types(input1_dtype, input2_dtype, output_dtype);
+}
+
+
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                      DataType::U8)),
@@ -169,12 +225,24 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<uint8_t>, framew
     // Validate output
     validate(Accessor(_target), _reference);
 }
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionBroadcastFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SmallShapesBroadcast(),
+        make("DataType", DataType::U8),
+        make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+        OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
 TEST_SUITE_END() // U8
 
 using NEArithmeticSubtractionQASYMM8Fixture                = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, uint8_t>;
 using NEArithmeticSubtractionQASYMM8SignedFixture          = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int8_t>;
-using NEArithmeticSubtractionQASYMM8SignedBroadcastFixture = ArithmeticSubtractionValidationQuantizedBroadcastFixture<Tensor, Accessor, NEArithmeticSubtraction, int8_t>;
 using NEArithmeticSubtractionQSYMM16Fixture                = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int16_t>;
+
+template<typename T>
+using NEArithmeticSubtractionQuantizedBroadcastFixture = ArithmeticSubtractionValidationQuantizedBroadcastFixture<Tensor, Accessor, NEArithmeticSubtraction, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -183,6 +251,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQASYMM8Fixture, framewor
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                                                                                                                      ArithmeticSubtractionQuantizationInfoDataset),
                                                                                                              OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionQuantizedBroadcastFixture<uint8_t>, framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapesBroadcast(),
+        make("DataType", DataType::QASYMM8),
+        make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+        ArithmeticSubtractionQuantizationInfoDataset,
+        OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -199,7 +278,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQASYMM8SignedFixture, fr
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionQASYMM8SignedBroadcastFixture, framework::DatasetMode::ALL, combine(combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionQuantizedBroadcastFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(
                            datasets::SmallShapesBroadcast(),
                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -209,7 +288,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionQASYMM8SignedBr
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEArithmeticSubtractionQASYMM8SignedBroadcastFixture, framework::DatasetMode::ALL, combine(combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEArithmeticSubtractionQuantizedBroadcastFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(
                            datasets::TinyShapesBroadcastInplace(),
                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
@@ -222,12 +301,24 @@ FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEArithmeticSubtractionQASYMM8Si
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE(QSYMM16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQSYMM16Fixture, framework::DatasetMode::ALL, combine(combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQSYMM16Fixture, framework::DatasetMode::ALL,
+    combine(
         datasets::SmallShapes(),
-        framework::dataset::make("DataType", DataType::QSYMM16)),
-                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-                                                                                                                     ArithmeticSubtractionQuantizationInfoSymmetric),
-                                                                                                             OutOfPlaceDataSet))
+        make("DataType", DataType::QSYMM16),
+        make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+        ArithmeticSubtractionQuantizationInfo16bitSymmetric,
+        OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionQuantizedBroadcastFixture<int16_t>, framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapesBroadcast(),
+        make("DataType", DataType::QSYMM16),
+        make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+        ArithmeticSubtractionQuantizationInfo16bitSymmetric,
+        OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qsymm16);
@@ -240,6 +331,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<int16_t>, framew
                                                                                                                      DataType::S16)),
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                      OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionBroadcastFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallShapesBroadcast(),
+        make("DataType",
+        DataType::S16),
+        make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+        OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -260,6 +362,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<int32_t>, framew
                                                                                                                      DataType::S32)),
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                      OutOfPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionBroadcastFixture<int32_t>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SmallShapesBroadcast(),
+        make("DataType", DataType::S32),
+        make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+        OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -315,9 +428,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticSubtractionFixture<float>, framewor
     // Validate output
     validate(Accessor(_target), _reference);
 }
-
-template <typename T>
-using NEArithmeticSubtractionBroadcastFixture = ArithmeticSubtractionBroadcastValidationFixture<Tensor, Accessor, NEArithmeticSubtraction, T>;
 
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapesBroadcast(),
                        framework::dataset::make("DataType", DataType::F32)),

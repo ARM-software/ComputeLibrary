@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,30 +91,45 @@ void sub_same_neon(
 
                 // Compute S elements per iteration
                 int x = window_start_x;
-                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                if (is_broadcast_input_2)
                 {
-                    const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
-                    auto       res             = is_sat ? wrapper::vqsub(broadcast_value_vec, non_broadcast_v)
-                                                        : wrapper::vsub(broadcast_value_vec, non_broadcast_v);
-                    if (is_broadcast_input_2)
+                    for (; x <= (window_end_x - window_step_x); x += window_step_x)
                     {
-                        res = wrapper::vmul(res, wrapper::vdup_n(static_cast<T>(-1), ExactTagType{}));
+                        const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
+                        auto       res             = is_sat ? wrapper::vqsub(non_broadcast_v, broadcast_value_vec)
+                                                            : wrapper::vsub(non_broadcast_v, broadcast_value_vec);
+                        wrapper::vstore(output_ptr + x, res);
                     }
-                    wrapper::vstore(output_ptr + x, res);
+
+                    // Compute left-over elements
+                    for (; x < window_end_x; ++x)
+                    {
+                        const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
+                        auto       res             = is_sat ? wrapper::sub_sat(non_broadcast_v, broadcast_value)
+                                                            : non_broadcast_v - broadcast_value;
+
+                        *(output_ptr + x) = res;
+                    }
                 }
-
-                // Compute left-over elements
-                for (; x < window_end_x; ++x)
+                else
                 {
-                    const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
-                    auto       res =
-                        is_sat ? wrapper::sub_sat(broadcast_value, non_broadcast_v) : broadcast_value - non_broadcast_v;
-                    if (is_broadcast_input_2)
+                    for (; x <= (window_end_x - window_step_x); x += window_step_x)
                     {
-                        res = static_cast<T>(-1) * res;
+                        const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
+                        auto       res             = is_sat ? wrapper::vqsub(broadcast_value_vec, non_broadcast_v)
+                                                            : wrapper::vsub(broadcast_value_vec, non_broadcast_v);
+                        wrapper::vstore(output_ptr + x, res);
                     }
 
-                    *(output_ptr + x) = res;
+                    // Compute left-over elements
+                    for (; x < window_end_x; ++x)
+                    {
+                        const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
+                        auto       res             = is_sat ? wrapper::sub_sat(broadcast_value, non_broadcast_v)
+                                                            : broadcast_value - non_broadcast_v;
+
+                        *(output_ptr + x) = res;
+                    }
                 }
             },
             broadcast_input, non_broadcast_input, output);

@@ -208,7 +208,6 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
     <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
-    <tr><td>QSYMM16<td>QSYMM16<td>S32
     <tr><td>U8<td>U8<td>U8
     <tr><td>S16<td>S16<td>S16
     <tr><td>S32<td>S32<td>S32

@@ -67,7 +67,6 @@ public:
      * |QASYMM8        |QASYMM8        |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED |QASYMM8_SIGNED |
      * |QSYMM16        |QSYMM16        |QASYMM16       |
-     * |QSYMM16        |QSYMM16        |S32            |
      * |U8             |U8             |U8             |
      * |S16            |S16            |S16            |
      * |S32            |S32            |S32            |
