@@ -81,7 +81,13 @@ void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Win
 
     const Window      &max_window     = window;
     const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
-    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
+    const unsigned int mws            = kernel->get_mws(CPUInfo::get(), _num_threads);
+
+    // Ensure each thread has mws amount of work to do (i.e. ceil(num_iterations / mws) threads)
+    const unsigned int candidate_num_threads = (num_iterations + mws - 1) / mws;
+
+    // Cap the number of threads to be spawn with the size of the thread pool
+    const unsigned int num_threads = std::min(candidate_num_threads, _num_threads);
 
     if (!kernel->is_parallelisable() || num_threads == 1)
     {
