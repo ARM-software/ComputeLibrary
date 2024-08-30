@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Arm Limited.
+* Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_HELPERS_POOLINGHELPERS_H
-#define SRC_CORE_HELPERS_POOLINGHELPERS_H
+#ifndef ACL_SRC_CORE_HELPERS_POOLINGHELPERS_H
+#define ACL_SRC_CORE_HELPERS_POOLINGHELPERS_H
 
 #include "src/core/NEON/NEAsymm.h"
 
@@ -122,6 +122,25 @@ inline int32x4_t vcvtq_q32_f32(float32x4_t values)
     return vcvtq_s32_f32(values);
 }
 
+#ifdef __aarch64__
+
+template <typename T>
+inline T vcvtnq_q32_f32(float32x4_t values);
+
+template <>
+inline uint32x4_t vcvtnq_q32_f32(float32x4_t values)
+{
+    return vcvtnq_u32_f32(values);
+}
+
+template <>
+inline int32x4_t vcvtnq_q32_f32(float32x4_t values)
+{
+    return vcvtnq_s32_f32(values);
+}
+
+#endif // __aarch64__
+
 template <typename T>
 inline float32x4_t vcvtq_f32_q32(T values);
 
@@ -216,4 +235,4 @@ inline int8x8_t vrequantize_pooling(int8x8_t &vec, const UniformQuantizationInfo
 } // namespace
 } // namespace cpu
 } // namespace arm_compute
-#endif /* SRC_CORE_HELPERS_POOLINGHELPERS_H */
+#endif // ACL_SRC_CORE_HELPERS_POOLINGHELPERS_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_QUANTIZED_H
-#define SRC_CORE_NEON_KERNELS_QUANTIZED_H
+#ifndef ACL_SRC_CPU_KERNELS_POOL2D_NEON_QUANTIZED_H
+#define ACL_SRC_CPU_KERNELS_POOL2D_NEON_QUANTIZED_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
@@ -80,13 +80,10 @@ void poolingMxN_q8_neon_nhwc(const ITensor    *src,
     const int upper_bound_w = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = src->info()->dimension(2) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
 
-    const float32x4_t             half_scale_v = vdupq_n_f32(0.5f);
-    const UniformQuantizationInfo src_qinfo    = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo dst_qinfo    = dst0->info()->quantization_info().uniform();
+    const UniformQuantizationInfo src_qinfo = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo dst_qinfo = dst0->info()->quantization_info().uniform();
 
-    const float quant_rescale = dst_qinfo.scale / src_qinfo.scale;
-    // "new_offset" doesn't have to consider the "half_scale_v" in its computation
-    // With a requantization performed in a single step there won't be uncertainties introduced
+    const float   quant_rescale = dst_qinfo.scale / src_qinfo.scale;
     const int32_t new_offset =
         dst_qinfo.offset - static_cast<int32_t>(static_cast<float>(src_qinfo.offset) / quant_rescale);
 
@@ -163,11 +160,18 @@ void poolingMxN_q8_neon_nhwc(const ITensor    *src,
                     else
                     {
                         const float32x4_t scale_v = vdupq_n_f32(scale);
-                        // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
-                        vres1 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres1), scale_v));
-                        vres2 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres2), scale_v));
-                        vres3 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres3), scale_v));
-                        vres4 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres4), scale_v));
+
+#ifdef __aarch64__
+                        vres1 = vcvtnq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres1), scale_v));
+                        vres2 = vcvtnq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres2), scale_v));
+                        vres3 = vcvtnq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres3), scale_v));
+                        vres4 = vcvtnq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres4), scale_v));
+#else  // __aarch64__
+                        vres1 = vcvtq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres1), scale_v));
+                        vres2 = vcvtq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres2), scale_v));
+                        vres3 = vcvtq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres3), scale_v));
+                        vres4 = vcvtq_q32_f32<q32x4_t>(wrapper::vmul(vcvtq_f32_q32(vres4), scale_v));
+#endif // __aarch64__
 
                         const q8x8_t res1 =
                             wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres1), wrapper::vmovn(vres2)));
@@ -268,8 +272,11 @@ void poolingMxN_q8_neon_nhwc(const ITensor    *src,
                     }
                     else
                     {
-                        // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
-                        res = static_cast<T>(0.5f + static_cast<float>(res) * scale);
+#ifdef __aarch64__
+                        res = arm_compute::round(static_cast<float>(res) * scale, RoundingPolicy::TO_NEAREST_EVEN);
+#else  // __aarch64__
+                        res   = arm_compute::round(static_cast<float>(res) * scale, RoundingPolicy::TO_ZERO);
+#endif // __aarch64__
 
                         // Store result
                         *(reinterpret_cast<T *>(out.ptr()) + x_off) = res;
@@ -829,4 +836,4 @@ void poolingMxN_quantized_neon_nchw(const ITensor    *src,
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // SRC_CORE_NEON_KERNELS_QUANTIZED_H
+#endif // ACL_SRC_CPU_KERNELS_POOL2D_NEON_QUANTIZED_H
