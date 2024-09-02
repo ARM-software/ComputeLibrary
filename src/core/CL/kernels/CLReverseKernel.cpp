@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,12 @@ validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const IT
 {
     ARM_COMPUTE_UNUSED(use_inverted_axis);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+
+#ifndef __aarch64__
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->element_size() > 4,
+                                    "Only 32-bit and lower data types are supported in 32-bit builds");
+#endif // __aarch64__
+
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->num_dimensions() > 1, "Axis must be a 1D tensor");

@@ -47,12 +47,6 @@ class ReverseValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, TensorShape axis_shape, DataType data_type, bool use_negative_axis = false, bool use_inverted_axis = false)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
-            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
-        {
-            return;
-        }
-
         _num_dims  = shape.num_dimensions();
         _target    = compute_target(shape, axis_shape, data_type, use_negative_axis, use_inverted_axis);
         _reference = compute_reference(shape, axis_shape, data_type, use_negative_axis, use_inverted_axis);
@@ -85,7 +79,17 @@ protected:
     TensorType compute_target(const TensorShape &shape, const TensorShape &axis_shape, DataType data_type, bool use_negative_axis, bool use_inverted_axis = false)
     {
         // Create tensors
-        TensorType src  = create_tensor<TensorType>(shape, data_type, 1);
+        QuantizationInfo qinfo = QuantizationInfo();
+        if(data_type == DataType::QSYMM8_PER_CHANNEL)
+        {
+            // We need dummy scale and offset values for tensor buffer allocation
+            const std::vector<float> scales(1);
+            const std::vector<int> offsets(1);
+
+            qinfo = QuantizationInfo(scales, offsets);
+        }
+
+        TensorType src  = create_tensor<TensorType>(shape, data_type, 1, qinfo);
         TensorType axis = create_tensor<TensorType>(axis_shape, DataType::U32, 1);
         TensorType dst;
 

@@ -594,7 +594,6 @@ void AssetsLibrary::fill_with_generator(T &&tensor, const GeneratorFunctionType<
 {
     const bool  is_nhwc = tensor.data_layout() == DataLayout::NHWC;
     TensorShape shape(tensor.shape());
-
     if(is_nhwc)
     {
         // Ensure that the equivalent tensors will be filled for both data layouts
@@ -745,6 +744,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::U16:
+        case DataType::QASYMM16:
         {
             std::uniform_int_distribution<uint16_t> distribution_u16(std::numeric_limits<uint16_t>::lowest(), std::numeric_limits<uint16_t>::max());
             fill(tensor, distribution_u16, seed_offset);
@@ -784,7 +784,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::BFLOAT16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
-            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16{ -1000.f, 1000.f };
+            arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution_bf16{ -1000.f, 1000.f, true /* portable */ };
             fill(tensor, distribution_bf16, seed_offset);
             break;
         }

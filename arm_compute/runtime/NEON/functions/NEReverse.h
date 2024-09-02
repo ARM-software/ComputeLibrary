@@ -42,11 +42,11 @@ public:
      * - All
      *
      * Valid data type configurations:
-     * |src0           |src1           |dst            |
-     * |:--------------|:--------------|:--------------|
-     * |All            |U32, S32       |All            |
+     * |src0                        |src1           |dst                         |
+     * |:---------------------------|:--------------|:---------------------------|
+     * |All except SIZET <= 32-bits |U32, S32       |All except SIZET <= 32-bits |
      *
-     * @param[in]  input             Input tensor. Data types supported: All
+     * @param[in]  input             Input tensor. Data types supported: All except SIZET <= 32-bit data types
      * @param[out] output            Output tensor. Data type supported: Same as @p input
      * @param[in]  axis              Axis tensor. Contains the indices of the dimensions to reverse. Data type supported: U32/S32
      * @param[in]  use_inverted_axis Reverse ACL axis indices convention, if true, (inverted)axis = (tensor_rank - 1) - axis
@@ -60,12 +60,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const ITensor *axis, const bool use_inverted_axis = false);
     /** Static function to check if given info will lead to a valid configuration of NEReverseKernel
      *
-     * @param[in] input             Input tensor info. Data types supported: All
-     * @param[in] output            Output tensor info. Data type supported: Same as @p input
-     * @param[in] axis              Axis tensor info. Contains the indices of the dimensions to reverse. Data type supported: U32/S32
-     * @param[in] use_inverted_axis Reverse ACL axis indices convention, if true, (inverted)axis = (tensor_rank - 1) - axis
-     *
-     * @return a status
+     * Similar to @ref NEReverse::configure()
      */
     static Status validate(const ITensorInfo *input,
                            const ITensorInfo *output,
