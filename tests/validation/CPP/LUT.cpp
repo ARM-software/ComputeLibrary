@@ -88,7 +88,7 @@ TEST_CASE(LUTValueTest, framework::DatasetMode::ALL)
     constexpr float beta = 1.0f;
     constexpr float rel_tolerance = 0.01f;
     constexpr int num_elements = 65536;
-    int num_mismatches = 0;
+    unsigned int num_mismatches = 0;
 
     // Create lutinfo, use to get lut
     LUTInfo info = {LUTType::Exponential, beta, DataType::BFLOAT16, UniformQuantizationInfo()};
