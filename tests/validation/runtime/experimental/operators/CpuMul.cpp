@@ -62,6 +62,7 @@ using CpuMulU8U8toS16Fixture =
     CpuMulValidationFixture<Tensor, Accessor, experimental::op::CpuMul, uint8_t, uint8_t, int16_t>;
 
 TEST_SUITE(NEON)
+TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuMul)
 
 TEST_SUITE(U8U8toS16)
@@ -101,6 +102,7 @@ FIXTURE_DATA_TEST_CASE(
 TEST_SUITE_END() // U8U8toS16
 
 TEST_SUITE_END() // CpuMul
+TEST_SUITE_END() // OPERATORS
 TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test

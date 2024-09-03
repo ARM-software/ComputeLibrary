@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/experimental/operators/CpuGemm.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
 
 /*
@@ -42,19 +43,10 @@ namespace validation
 {
 using framework::dataset::make;
 
-namespace
-{
-/** CNN data types */
-const auto CNNDataTypes = make("DataType",
-{
-    DataType::F32,
-});
-} // namespace
-
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 
-TEST_SUITE(CPUGEMM)
+TEST_SUITE(CpuGemm)
 /** Test case for memory injection in @ref arm_compute::experimental::op::CpuGemm.
  *
  * Configure the operator once and inject memory at run-time in multiple executions.
@@ -80,8 +72,8 @@ TEST_CASE(OpCpuGemmMemoryInjection, framework::DatasetMode::ALL)
     rhs.allocator()->allocate();
     c.allocator()->allocate();
 
-    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &lhs }, { TensorType::ACL_SRC_1, &rhs }, { TensorType::ACL_SRC_2, &c } };
-    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &rhs }, { TensorType::ACL_SRC_2, &c } };
+    ITensorPack run_pack{{TensorType::ACL_SRC_0, &lhs}, {TensorType::ACL_SRC_1, &rhs}, {TensorType::ACL_SRC_2, &c}};
+    ITensorPack prep_pack{{TensorType::ACL_SRC_1, &rhs}, {TensorType::ACL_SRC_2, &c}};
 
     auto mg = MemoryGroup{};
     auto ws = manage_workspace<Tensor>(gemm->workspace(), mg, run_pack, prep_pack);
@@ -102,22 +94,29 @@ TEST_CASE(OpCpuGemmMemoryInjection, framework::DatasetMode::ALL)
     };
     auto result_0 = run_conv();
     auto result_1 = run_conv();
-    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    for (size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i],
+                           framework::LogLevel::ERRORS);
     }
 }
 
-DATA_TEST_CASE(OpCpuGemmValidateAccumulate, framework::DatasetMode::ALL, combine(
-                                                                     zip(make("In0",{ TensorShape(21U, 13U) }),
-                                                                     make("In1", { TensorShape(33U, 21U) }),
-                                                                     make("Dst", { TensorShape(33U, 13U) })),
-                                                                     zip(
-                                                                     make("alpha", { 1.0, 100.0, 1.0, 1.0 }),
-                                                                     make("beta", { 0.0, 0.0, 1.0, 1.0 }),
-                                                                     make("is_c_null", { false, false, false, true }),
-                                                                     make("Expected", { true, false, false, true }))),
-               shape_a, shape_b, shape_dst, alpha, beta, is_c_null, expected)
+DATA_TEST_CASE(OpCpuGemmValidateAccumulate,
+               framework::DatasetMode::ALL,
+               combine(zip(make("In0", {TensorShape(21U, 13U)}),
+                           make("In1", {TensorShape(33U, 21U)}),
+                           make("Dst", {TensorShape(33U, 13U)})),
+                       zip(make("alpha", {1.0, 100.0, 1.0, 1.0}),
+                           make("beta", {0.0, 0.0, 1.0, 1.0}),
+                           make("is_c_null", {false, false, false, true}),
+                           make("Expected", {true, false, false, true}))),
+               shape_a,
+               shape_b,
+               shape_dst,
+               alpha,
+               beta,
+               is_c_null,
+               expected)
 {
     /* Accumulation test for GEMM kernels */
     // Create tensors
@@ -132,10 +131,10 @@ DATA_TEST_CASE(OpCpuGemmValidateAccumulate, framework::DatasetMode::ALL, combine
     // Validate accumulation
     arm_compute::experimental::op::CpuGemm gemm;
     Status status = gemm.validate(&in_a, &in_b, (is_c_null ? nullptr : &in_c), &dst, alpha, beta, gemm_info);
-    ARM_COMPUTE_EXPECT((expected ==  bool(status)), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT((expected == bool(status)), framework::LogLevel::ERRORS);
 }
 
-TEST_SUITE_END() // CPUGEMM
+TEST_SUITE_END() // CpuGemm
 TEST_SUITE_END() // OPERATORS
 TEST_SUITE_END() // NEON
 } // namespace validation
