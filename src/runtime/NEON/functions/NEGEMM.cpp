@@ -76,8 +76,9 @@ void NEGEMM::configure(const ITensor  *a,
 
     // Check if we need to reshape the matrix B only on the first run
     _impl->is_prepared = false;
-    _impl->original_b  = b;
-    _impl->op          = std::make_unique<cpu::CpuGemm>();
+    _impl->memory_group.mappings().clear();
+    _impl->original_b = b;
+    _impl->op         = std::make_unique<cpu::CpuGemm>();
 
     // Make the B matrix dynamic values.
     auto b_info_to_use = b->info()->clone();

@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -49,7 +50,10 @@ class NENormalizationLayer : public IFunction
 {
 public:
     /** Default constructor */
-    NENormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NENormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NENormalizationLayer() : NENormalizationLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NENormalizationLayer(const NENormalizationLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

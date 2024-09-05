@@ -74,8 +74,9 @@ void NEGEMMLowpMatrixMultiplyCore::configure(
     }
 
     _impl->is_prepared = false;
-    _impl->b           = b;
-    _impl->op          = std::make_unique<cpu::CpuGemmLowpMatrixMultiplyCore>();
+    _impl->memory_group.mappings().clear();
+    _impl->b  = b;
+    _impl->op = std::make_unique<cpu::CpuGemmLowpMatrixMultiplyCore>();
     _impl->op->configure(a->info(), b_info_to_use.get(), (c != nullptr ? c->info() : nullptr), output->info(),
                          gemm_info);
     _impl->run_pack          = {{TensorType::ACL_SRC_0, a},

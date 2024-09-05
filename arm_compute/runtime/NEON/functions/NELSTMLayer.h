@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
@@ -47,7 +48,10 @@ class NELSTMLayer : public IFunction
 {
 public:
     /** Default constructor */
-    NELSTMLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NELSTMLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NELSTMLayer() : NELSTMLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELSTMLayer(const NELSTMLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

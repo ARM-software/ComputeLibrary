@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -47,7 +48,10 @@ class NEL2NormalizeLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEL2NormalizeLayer() : NEL2NormalizeLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEL2NormalizeLayer(const NEL2NormalizeLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

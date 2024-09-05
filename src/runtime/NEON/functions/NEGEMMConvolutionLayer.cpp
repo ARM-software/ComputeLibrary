@@ -70,8 +70,9 @@ void NEGEMMConvolutionLayer::configure(const ITensor             *input,
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     _impl->is_prepared = false;
-    _impl->weights     = weights;
-    _impl->op          = std::make_unique<cpu::CpuGemmConv2d>();
+    _impl->memory_group.mappings().clear();
+    _impl->weights = weights;
+    _impl->op      = std::make_unique<cpu::CpuGemmConv2d>();
     _impl->op->configure(input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(),
                          conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
 
