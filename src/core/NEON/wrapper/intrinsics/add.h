@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_WRAPPER_ADD_H
-#define ARM_COMPUTE_WRAPPER_ADD_H
+#ifndef ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_ADD_H
+#define ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_ADD_H
 
 #include <arm_neon.h>
 
@@ -112,6 +112,28 @@ VADDW_IMPL(uint64x2_t, uint32x2_t, vaddw, u32)
 VADDW_IMPL(int64x2_t, int32x2_t, vaddw, s32)
 #undef VADDW_IMPL
 
+#ifdef __aarch64__
+// VADDW_HIGH: Vector widening add with upper half extraction
+#define VADDW_HIGH_IMPL(wtype, vtype, postfix)              \
+    inline wtype vaddw_high(const wtype &a, const vtype &b) \
+    {                                                       \
+        return vaddw_high_##postfix(a, b);                  \
+    }
+#else // __aarch64__
+#define VADDW_HIGH_IMPL(wtype, vtype, postfix)              \
+    inline wtype vaddw_high(const wtype &a, const vtype &b) \
+    {                                                       \
+        return vaddw(a, vget_high_##postfix(b));            \
+    }
+#endif // __aarch64__
+VADDW_HIGH_IMPL(uint16x8_t, uint8x16_t, u8)
+VADDW_HIGH_IMPL(int16x8_t, int8x16_t, s8)
+VADDW_HIGH_IMPL(uint32x4_t, uint16x8_t, u16)
+VADDW_HIGH_IMPL(int32x4_t, int16x8_t, s16)
+VADDW_HIGH_IMPL(uint64x2_t, uint32x4_t, u32)
+VADDW_HIGH_IMPL(int64x2_t, int32x4_t, s32)
+#undef VADDW_HIGH_IMPL
+
 // VADDL: Vector long add
 #define VADDL_IMPL(wtype, vtype, prefix, postfix)      \
     inline wtype vaddl(const vtype &a, const vtype &b) \
@@ -198,4 +220,4 @@ VPADD_IMPL(float16x4_t, float16x4_t, vpadd, f16)
 #undef VPADD_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_WRAPPER_ADD_H */
+#endif // ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_ADD_H

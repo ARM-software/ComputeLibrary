@@ -24,6 +24,9 @@
 #ifndef ACL_SRC_CORE_NEON_NEASYMM_H
 #define ACL_SRC_CORE_NEON_NEASYMM_H
 
+#include "arm_compute/core/QuantizationInfo.h"
+#include "arm_compute/core/Rounding.h"
+
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 
@@ -444,17 +447,14 @@ inline float32x4x2_t vdequantize(const int8x8_t &qv, const UniformQuantizationIn
 
 /** Dequantize a neon vector holding 16 quantized values.
  *
- * @param[in] qv Input values to be dequantized.
- * @param[in] qi Quantization information to be used in the computation.
+ * @param[in] qv      Input values to be dequantized.
+ * @param[in] voffset Vectorized dequantization offset.
+ * @param[in] vscale  Vectorized dequantization scale.
  *
  * @return Dequantized values in a neon vector
  */
-inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantizationInfo &qi)
+inline float32x4x4_t vdequantize(const uint8x16_t &qv, const int32x4_t &voffset, const float32x4_t &vscale)
 {
-    const float         scale              = qi.scale;
-    const int           offset             = qi.offset;
-    const int32x4_t     voffset            = vdupq_n_s32(offset);
-    const float32x4_t   vscale             = vdupq_n_f32(scale);
     const float32x4x4_t vdequantized_input = {{
         vmulq_f32(vcvtq_f32_s32(
                       vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(qv))))), voffset)),
@@ -472,6 +472,41 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantization
     return vdequantized_input;
 }
 
+/** Dequantize a neon vector holding 16 quantized values.
+ *
+ * @param[in] qv Input values to be dequantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float       scale   = qi.scale;
+    const int         offset  = qi.offset;
+    const int32x4_t   voffset = vdupq_n_s32(offset);
+    const float32x4_t vscale  = vdupq_n_f32(scale);
+    return vdequantize(qv, voffset, vscale);
+}
+
+/** Dequantize a neon vector holding 16 signed quantized values.
+ *
+ * @param[in] qv      Input values to be dequantized.
+ * @param[in] voffset Vectorized dequantization offset.
+ * @param[in] vscale  Vectorized dequantization scale.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const int8x16_t &qv, const int32x4_t &voffset, const float32x4_t &vscale)
+{
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+    }};
+    return vdequantized_input;
+}
+
 /** Dequantize a neon vector holding 16 signed quantized values.
  *
  * @param[in] qv Input values to be dequantized.
@@ -481,17 +516,11 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantization
  */
 inline float32x4x4_t vdequantize(const int8x16_t &qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale              = qi.scale;
-    const int           offset             = qi.offset;
-    const int32x4_t     voffset            = vdupq_n_s32(offset);
-    const float32x4_t   vscale             = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input = {{
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-    }};
-    return vdequantized_input;
+    const float       scale   = qi.scale;
+    const int         offset  = qi.offset;
+    const int32x4_t   voffset = vdupq_n_s32(offset);
+    const float32x4_t vscale  = vdupq_n_f32(scale);
+    return vdequantize(qv, voffset, vscale);
 }
 
 /** Dequantize following an asymmetric quantization scheme a neon vector holding 16 quantized values.

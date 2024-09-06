@@ -25,6 +25,9 @@
 #define ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_NEON_IMPL_H
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Window.h"
 
 #include "src/core/NEON/NEAsymm.h"
 
@@ -596,21 +599,33 @@ inline void store_quantized(uint8_t *output_ptr, const int32x4x4_t &out)
 }
 
 inline void
-store_quantized(uint8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4_t &invscale)
+store_quantized(uint8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4x4_t &invscale)
 {
     // Adjust offset with 0.5 to round to nearest.
     const float32x4_t adj_offset = vaddq_f32(offset, vdupq_n_f32(0.5f));
 
     const int32x4x4_t out = {{
-        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[0], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[1], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[2], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[3], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[0], invscale.val[0])),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[1], invscale.val[1])),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[2], invscale.val[2])),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[3], invscale.val[3])),
     }};
     store_quantized(output_ptr, out);
 }
 
-inline void store_quantized_signed(int8_t *output_ptr, const int32x4x4_t &out)
+inline void
+store_quantized(uint8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4_t &invscale)
+{
+    return store_quantized(output_ptr, rf, offset,
+                           float32x4x4_t{{
+                               invscale,
+                               invscale,
+                               invscale,
+                               invscale,
+                           }});
+}
+
+inline void store_quantized(int8_t *output_ptr, const int32x4x4_t &out)
 {
     const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(out.val[0]), vqmovn_s32(out.val[1])));
     const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(out.val[2]), vqmovn_s32(out.val[3])));
@@ -618,7 +633,7 @@ inline void store_quantized_signed(int8_t *output_ptr, const int32x4x4_t &out)
 }
 
 inline void
-store_quantized(int8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4_t &invscale)
+store_quantized(int8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4x4_t &invscale)
 {
     // Adjust offset to round to nearest.
     const uint32x4x4_t cmp = {{
@@ -644,21 +659,105 @@ store_quantized(int8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &
     }};
 
     const int32x4x4_t out = {{
-        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[0], rf.val[0], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[1], rf.val[1], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[2], rf.val[2], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[3], rf.val[3], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[0], rf.val[0], invscale.val[0])),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[1], rf.val[1], invscale.val[1])),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[2], rf.val[2], invscale.val[2])),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[3], rf.val[3], invscale.val[3])),
     }};
-    store_quantized_signed(output_ptr, out);
+    store_quantized(output_ptr, out);
 }
 
-template <ArithmeticOperation op,
-          typename Output,
-          typename = std::enable_if_t<std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value>>
-inline Output elementwise_arithm_op_quantized_scalar(const float &a, const float &b, UniformQuantizationInfo qinfo)
+inline void
+store_quantized(int8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4_t &invscale)
 {
-    const float res = elementwise_arithm_op_scalar<op>(a, b);
-    return Qasymm8QuantizationHelper<Output>::quantize(res, qinfo);
+    return store_quantized(output_ptr, rf, offset,
+                           float32x4x4_t{{
+                               invscale,
+                               invscale,
+                               invscale,
+                               invscale,
+                           }});
+}
+
+template <typename Input,
+          typename = std::enable_if_t<std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value>>
+union ElementwiseQuantizedScalarParams
+{
+    // For ops that expect dequantized inputs.
+    struct Generic
+    {
+        float                   a;
+        float                   b;
+        UniformQuantizationInfo qinfo; // Unused in comparison operations
+    } generic;
+
+    // The prelu implementation expects quantized inputs.
+    struct Prelu
+    {
+        Input   a;
+        Input   b;
+        float   s1;       // scale_out / scale_a
+        float   s2;       // s1 / scale_b
+        int32_t a_offset; // Input quantization offset
+        int32_t b_offset; // Input quantization offset
+        int32_t o_offset; // Output quantization offset
+    } prelu;
+};
+
+template <ArithmeticOperation op,
+          typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline Output elementwise_arithm_op_quantized_scalar(const ElementwiseQuantizedScalarParams<Input> &params)
+{
+    const auto &_   = params.generic;
+    const float res = elementwise_arithm_op_scalar<op>(_.a, _.b);
+    return Qasymm8QuantizationHelper<Output>::quantize(res, _.qinfo);
+}
+
+// Specialization that optimizes PReLU by fusing quantization logic into the operator logic.
+// Turns
+//   dequant(a) > 0 ? quant(dequant(a)) : quant(dequant(a) * dequant(b))
+// into
+//   a > offset_a ? quant_s1(a - offset_a) : quant_s2((a - offset_a) * (b - offset_b))
+// where quant_s1 and quant_s2 use the normal output offset, but scales s1 = scale_out / scale_a and s2 = s1 / scale_b respectively.
+template <typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline Output elementwise_prelu_quantized_scalar(
+    Input a, Input b, float s1, float s2, int32_t a_offset, int32_t b_offset, int32_t o_offset)
+{
+    int a_minus_offset = static_cast<int>(a) - a_offset;
+    if (a_minus_offset > 0)
+    {
+        return Qasymm8QuantizationHelper<Output>::quantize(static_cast<float>(a_minus_offset),
+                                                           UniformQuantizationInfo{s1, o_offset});
+    }
+    else
+    {
+        int b_minus_offset = static_cast<int>(b) - b_offset;
+        return Qasymm8QuantizationHelper<Output>::quantize(static_cast<float>(a_minus_offset) * b_minus_offset,
+                                                           UniformQuantizationInfo{s2, o_offset});
+    }
+}
+
+template <>
+inline uint8_t elementwise_arithm_op_quantized_scalar<ArithmeticOperation::PRELU, uint8_t, uint8_t>(
+    const ElementwiseQuantizedScalarParams<uint8_t> &params)
+{
+    const auto &_ = params.prelu;
+    return elementwise_prelu_quantized_scalar<uint8_t, uint8_t>(_.a, _.b, _.s1, _.s2, _.a_offset, _.b_offset,
+                                                                _.o_offset);
+}
+
+template <>
+inline int8_t elementwise_arithm_op_quantized_scalar<ArithmeticOperation::PRELU, int8_t, int8_t>(
+    const ElementwiseQuantizedScalarParams<int8_t> &params)
+{
+    const auto &_ = params.prelu;
+    return elementwise_prelu_quantized_scalar<int8_t, int8_t>(_.a, _.b, _.s1, _.s2, _.a_offset, _.b_offset, _.o_offset);
 }
 
 template <ArithmeticOperation op>
@@ -674,11 +773,13 @@ float32x4x4_t elementwise_arithm_op(const float32x4x4_t &a, const float32x4x4_t 
     return out;
 }
 
-template <ComparisonOperation op>
-inline uint8_t elementwise_comp_op_quantized_scalar(const float &a, const float &b, UniformQuantizationInfo qinfo)
+template <ComparisonOperation op,
+          typename Input,
+          typename = std::enable_if_t<std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value>>
+inline uint8_t elementwise_comp_op_quantized_scalar(const ElementwiseQuantizedScalarParams<Input> &params)
 {
-    ARM_COMPUTE_UNUSED(qinfo);
-    return elementwise_comp_op_scalar<op>(a, b);
+    const auto &_ = params.generic;
+    return elementwise_comp_op_scalar<op>(_.a, _.b);
 }
 
 template <ComparisonOperation op>
@@ -721,23 +822,189 @@ inline int elementwise_arithm_op_quantized_loop(int          window_start_x,
     return x;
 }
 
+inline int32x4x4_t widen_to_i32_and_offset(uint8x16_t q, int32x4_t offset)
+{
+    const int16x8_t low16x8  = vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(q)));
+    const int16x8_t high16x8 = vreinterpretq_s16_u16(wrapper::vmovl_high(q));
+    return {{
+        vaddw_s16(offset, vget_low_s16(low16x8)),
+        wrapper::vaddw_high(offset, low16x8),
+        vaddw_s16(offset, vget_low_s16(high16x8)),
+        wrapper::vaddw_high(offset, high16x8),
+    }};
+}
+
+inline int32x4x4_t widen_to_i32_and_offset(int8x16_t q, int32x4_t offset)
+{
+    const int16x8_t low16x8  = vmovl_s8(vget_low_s8(q));
+    const int16x8_t high16x8 = wrapper::vmovl_high(q);
+    return {{
+        vaddw_s16(offset, vget_low_s16(low16x8)),
+        wrapper::vaddw_high(offset, low16x8),
+        vaddw_s16(offset, vget_low_s16(high16x8)),
+        wrapper::vaddw_high(offset, high16x8),
+    }};
+}
+
+// Specialization that optimizes PReLU by fusing quantization logic into the operator logic.
+// Turns
+//   dequant(a) > 0 ? quant(dequant(a)) : quant(dequant(a) * dequant(b))
+// into
+//   a > offset_a ? quant_s1(a - offset_a) : quant_s2((a - offset_a) * (b - offset_b))
+// where quant_s1 and quant_s2 use the normal output offset, but scales s1 = scale_out / scale_a and s2 = s1 / scale_b respectively.
+template <typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline int elementwise_prelu_quantized_loop(int          window_start_x,
+                                            int          window_end_x,
+                                            int          window_step_x,
+                                            const Input *input1_ptr,
+                                            const Input *input2_ptr,
+                                            Output      *output_ptr,
+                                            int32x4_t    v_neg_offset1,
+                                            int32x4_t    v_neg_offset2,
+                                            float32x4_t  vinv_s1,
+                                            float32x4_t  vinv_s2,
+                                            float32x4_t  voffseto,
+                                            float32x4_t  invvscaleo)
+{
+    ARM_COMPUTE_UNUSED(invvscaleo);
+
+    int x = window_start_x;
+    for (; x <= (window_end_x - window_step_x); x += window_step_x)
+    {
+        const int32x4x4_t a_minus_offset = widen_to_i32_and_offset(wrapper::vloadq(input1_ptr + x), v_neg_offset1);
+        const int32x4x4_t b_minus_offset = widen_to_i32_and_offset(wrapper::vloadq(input2_ptr + x), v_neg_offset2);
+
+        // prelu: a > offset_a ? (a - offset_a) : ((a - offset_a) * (b - offset_b))
+        const uint32x4x4_t cmp = {{
+#ifdef __aarch64__
+            vcgtzq_s32(a_minus_offset.val[0]),
+            vcgtzq_s32(a_minus_offset.val[1]),
+            vcgtzq_s32(a_minus_offset.val[2]),
+            vcgtzq_s32(a_minus_offset.val[3]),
+#else  // __aarch64__
+            vcgtq_s32(a_minus_offset.val[0], vdupq_n_s32(0)),
+            vcgtq_s32(a_minus_offset.val[1], vdupq_n_s32(0)),
+            vcgtq_s32(a_minus_offset.val[2], vdupq_n_s32(0)),
+            vcgtq_s32(a_minus_offset.val[3], vdupq_n_s32(0)),
+#endif // __aarch64__
+        }};
+        const int32x4x4_t   prelu_false = {{
+              vmulq_s32(a_minus_offset.val[0], b_minus_offset.val[0]),
+              vmulq_s32(a_minus_offset.val[1], b_minus_offset.val[1]),
+              vmulq_s32(a_minus_offset.val[2], b_minus_offset.val[2]),
+              vmulq_s32(a_minus_offset.val[3], b_minus_offset.val[3]),
+        }};
+        const int32x4x4_t   prelui      = {{
+                   vbslq_s32(cmp.val[0], a_minus_offset.val[0], prelu_false.val[0]),
+                   vbslq_s32(cmp.val[1], a_minus_offset.val[1], prelu_false.val[1]),
+                   vbslq_s32(cmp.val[2], a_minus_offset.val[2], prelu_false.val[2]),
+                   vbslq_s32(cmp.val[3], a_minus_offset.val[3], prelu_false.val[3]),
+        }};
+        const float32x4x4_t preluf      = {{
+                 vcvtq_f32_s32(prelui.val[0]),
+                 vcvtq_f32_s32(prelui.val[1]),
+                 vcvtq_f32_s32(prelui.val[2]),
+                 vcvtq_f32_s32(prelui.val[3]),
+        }};
+
+        // quant(prelu)
+        const float32x4x4_t vinv_s = {{
+            vbslq_f32(cmp.val[0], vinv_s1, vinv_s2),
+            vbslq_f32(cmp.val[1], vinv_s1, vinv_s2),
+            vbslq_f32(cmp.val[2], vinv_s1, vinv_s2),
+            vbslq_f32(cmp.val[3], vinv_s1, vinv_s2),
+        }};
+        store_quantized(output_ptr + x, preluf, voffseto, vinv_s);
+    }
+    return x;
+}
+
+// Note: v_neg_offset1 and v_neg_offset2 are negated compared to the generic template.
+template <>
+inline int elementwise_arithm_op_quantized_loop<ArithmeticOperation::PRELU, uint8_t, uint8_t>(int window_start_x,
+                                                                                              int window_end_x,
+                                                                                              int window_step_x,
+                                                                                              const uint8_t *input1_ptr,
+                                                                                              const uint8_t *input2_ptr,
+                                                                                              uint8_t       *output_ptr,
+                                                                                              int32x4_t   v_neg_offset1,
+                                                                                              int32x4_t   v_neg_offset2,
+                                                                                              float32x4_t vinv_s1,
+                                                                                              float32x4_t vinv_s2,
+                                                                                              float32x4_t voffseto,
+                                                                                              float32x4_t invvscaleo)
+{
+    return elementwise_prelu_quantized_loop(window_start_x, window_end_x, window_step_x, input1_ptr, input2_ptr,
+                                            output_ptr, v_neg_offset1, v_neg_offset2, vinv_s1, vinv_s2, voffseto,
+                                            invvscaleo);
+}
+
+// Note: v_neg_offset1 and v_neg_offset2 are negated compared to the generic template.
+template <>
+inline int elementwise_arithm_op_quantized_loop<ArithmeticOperation::PRELU, int8_t, int8_t>(int window_start_x,
+                                                                                            int window_end_x,
+                                                                                            int window_step_x,
+                                                                                            const int8_t *input1_ptr,
+                                                                                            const int8_t *input2_ptr,
+                                                                                            int8_t       *output_ptr,
+                                                                                            int32x4_t     v_neg_offset1,
+                                                                                            int32x4_t     v_neg_offset2,
+                                                                                            float32x4_t   vinv_s1,
+                                                                                            float32x4_t   vinv_s2,
+                                                                                            float32x4_t   voffseto,
+                                                                                            float32x4_t   invvscaleo)
+{
+    return elementwise_prelu_quantized_loop(window_start_x, window_end_x, window_step_x, input1_ptr, input2_ptr,
+                                            output_ptr, v_neg_offset1, v_neg_offset2, vinv_s1, vinv_s2, voffseto,
+                                            invvscaleo);
+}
+
+template <typename Input,
+          typename = std::enable_if_t<std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value>>
+union ElementwiseQuantizedBroadcastParams
+{
+    // For ops that expect dequantized inputs.
+    struct Generic
+    {
+        float32x4x4_t broadcast_vector;
+        float32x4_t   vscale_non_broadcast;
+        float32x4_t   invvscaleo; // Not used by comparisons
+    } generic;
+
+    // The prelu implementation expects quantized inputs.
+    struct Prelu
+    {
+        Input       broadcast_value;
+        int32_t     offset_broadcast;
+        float       s1;      // scale_out / scale_a
+        float32x4_t vinv_s1; // scale_a / scale_out
+        float32x4_t vinv_s2; // vinv_s1 * scale_b
+        int32_t     o_offset;
+    } prelu;
+};
+
 template <ArithmeticOperation op,
           typename Input,
           typename Output,
           typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
                                       (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
-inline int elementwise_arithm_op_quantized_broadcast_loop(int           window_start_x,
-                                                          int           window_end_x,
-                                                          int           window_step_x,
-                                                          const Input  *non_broadcast_input_ptr,
-                                                          float32x4x4_t broadcast_vector,
-                                                          Output       *output_ptr,
-                                                          int32x4_t     voffset_non_broadcast,
-                                                          float32x4_t   vscale_non_broadcast,
-                                                          float32x4_t   voffseto,
-                                                          float32x4_t   invvscaleo,
-                                                          bool          reorder)
+inline int elementwise_arithm_op_quantized_broadcast_loop(int          window_start_x,
+                                                          int          window_end_x,
+                                                          int          window_step_x,
+                                                          const Input *non_broadcast_input_ptr,
+                                                          Output      *output_ptr,
+                                                          int32x4_t    voffset_non_broadcast,
+                                                          float32x4_t  voffseto,
+                                                          bool         reorder,
+                                                          const ElementwiseQuantizedBroadcastParams<Input> &params)
 {
+    const float32x4x4_t &broadcast_vector     = params.generic.broadcast_vector;
+    const float32x4_t   &vscale_non_broadcast = params.generic.vscale_non_broadcast;
+    const float32x4_t   &invvscaleo           = params.generic.invvscaleo;
+
     int x = window_start_x;
     for (; x <= (window_end_x - window_step_x); x += window_step_x)
     {
@@ -748,6 +1015,187 @@ inline int elementwise_arithm_op_quantized_broadcast_loop(int           window_s
         store_quantized(output_ptr + x, rf, voffseto, invvscaleo);
     }
     return x;
+}
+
+// Implements one vector worth of PReLU on quantized data where the first operand is broadcast.
+template <typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline void elementwise_prelu_quantized_broadcast_vector(int32_t      a_minus_offset,
+                                                         const Input *b_input_ptr,
+                                                         int32x4_t    b_neg_voffset,
+                                                         Output      *output_ptr,
+                                                         float        s1,
+                                                         float32x4_t  vinv_s2,
+                                                         float32x4_t  o_voffset,
+                                                         int32_t      o_offset)
+{
+    // a > offset_a ? (a - offset_a) : ((a - offset_a) * (b - offset_b))
+    if (a_minus_offset > 0)
+    {
+        const Output res   = Qasymm8QuantizationHelper<Output>::quantize(static_cast<float>(a_minus_offset),
+                                                                         UniformQuantizationInfo{s1, o_offset});
+        const auto   res_v = wrapper::vdup_n(res, wrapper::traits::vector_128_tag{});
+        wrapper::vstore(output_ptr, res_v);
+    }
+    else
+    {
+        const int32x4x4_t   b_minus_offset = widen_to_i32_and_offset(wrapper::vloadq(b_input_ptr), b_neg_voffset);
+        const int32x4x4_t   prelu_false    = {{
+                 vmulq_n_s32(b_minus_offset.val[0], a_minus_offset),
+                 vmulq_n_s32(b_minus_offset.val[1], a_minus_offset),
+                 vmulq_n_s32(b_minus_offset.val[2], a_minus_offset),
+                 vmulq_n_s32(b_minus_offset.val[3], a_minus_offset),
+        }};
+        const float32x4x4_t preluf         = {{
+                    vcvtq_f32_s32(prelu_false.val[0]),
+                    vcvtq_f32_s32(prelu_false.val[1]),
+                    vcvtq_f32_s32(prelu_false.val[2]),
+                    vcvtq_f32_s32(prelu_false.val[3]),
+        }};
+
+        store_quantized(output_ptr, preluf, o_voffset, vinv_s2);
+    }
+}
+
+// Implements one vector worth of PReLU on quantized data where the second operand is broadcast.
+template <typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline void elementwise_prelu_quantized_broadcast_vector(const Input *a_input_ptr,
+                                                         int32x4_t    a_neg_voffset,
+                                                         int32_t      b_minus_offset,
+                                                         Output      *output_ptr,
+                                                         float32x4_t  vinv_s1,
+                                                         float32x4_t  vinv_s2,
+                                                         float32x4_t  voffseto)
+{
+    const int32x4x4_t a_minus_offset = widen_to_i32_and_offset(wrapper::vloadq(a_input_ptr), a_neg_voffset);
+
+    // prelu: a > offset_a ? (a - offset_a) : ((a - offset_a) * (b - offset_b))
+    const uint32x4x4_t cmp = {{
+#ifdef __aarch64__
+        vcgtzq_s32(a_minus_offset.val[0]),
+        vcgtzq_s32(a_minus_offset.val[1]),
+        vcgtzq_s32(a_minus_offset.val[2]),
+        vcgtzq_s32(a_minus_offset.val[3]),
+#else  // __aarch64__
+        vcgtq_s32(a_minus_offset.val[0], vdupq_n_s32(0)),
+        vcgtq_s32(a_minus_offset.val[1], vdupq_n_s32(0)),
+        vcgtq_s32(a_minus_offset.val[2], vdupq_n_s32(0)),
+        vcgtq_s32(a_minus_offset.val[3], vdupq_n_s32(0)),
+#endif // __aarch64__
+    }};
+    const int32x4x4_t   prelu_false = {{
+          vmulq_n_s32(a_minus_offset.val[0], b_minus_offset),
+          vmulq_n_s32(a_minus_offset.val[1], b_minus_offset),
+          vmulq_n_s32(a_minus_offset.val[2], b_minus_offset),
+          vmulq_n_s32(a_minus_offset.val[3], b_minus_offset),
+    }};
+    const int32x4x4_t   prelui      = {{
+               vbslq_s32(cmp.val[0], a_minus_offset.val[0], prelu_false.val[0]),
+               vbslq_s32(cmp.val[1], a_minus_offset.val[1], prelu_false.val[1]),
+               vbslq_s32(cmp.val[2], a_minus_offset.val[2], prelu_false.val[2]),
+               vbslq_s32(cmp.val[3], a_minus_offset.val[3], prelu_false.val[3]),
+    }};
+    const float32x4x4_t preluf      = {{
+             vcvtq_f32_s32(prelui.val[0]),
+             vcvtq_f32_s32(prelui.val[1]),
+             vcvtq_f32_s32(prelui.val[2]),
+             vcvtq_f32_s32(prelui.val[3]),
+    }};
+
+    // quant(prelu)
+    const float32x4x4_t vinv_s = {{
+        vbslq_f32(cmp.val[0], vinv_s1, vinv_s2),
+        vbslq_f32(cmp.val[1], vinv_s1, vinv_s2),
+        vbslq_f32(cmp.val[2], vinv_s1, vinv_s2),
+        vbslq_f32(cmp.val[3], vinv_s1, vinv_s2),
+    }};
+    store_quantized(output_ptr, preluf, voffseto, vinv_s);
+}
+
+// Specialization that optimizes PReLU by fusing quantization logic into the operator logic.
+// Turns
+//   dequant(a) > 0 ? quant(dequant(a)) : quant(dequant(a) * dequant(b))
+// into
+//   a > offset_a ? quant_s1(a - offset_a) : quant_s2((a - offset_a) * (b - offset_b))
+// where quant_s1 and quant_s2 use the normal output offset, but scales s1 = scale_out / scale_a and s2 = s1 / scale_b respectively.
+template <typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline int elementwise_prelu_quantized_broadcast_loop(int          window_start_x,
+                                                      int          window_end_x,
+                                                      int          window_step_x,
+                                                      const Input *non_broadcast_input_ptr,
+                                                      Output      *output_ptr,
+                                                      int32x4_t    vnegoffset_non_broadcast,
+                                                      float32x4_t  voffseto,
+                                                      bool         reorder,
+                                                      const ElementwiseQuantizedBroadcastParams<Input> &params)
+{
+    const auto   &_                      = params.prelu;
+    const int32_t broadcast_q            = static_cast<int32_t>(_.broadcast_value);
+    const int32_t broadcast_minus_offset = broadcast_q - _.offset_broadcast;
+
+    int x = window_start_x;
+    for (; x <= (window_end_x - window_step_x); x += window_step_x)
+    {
+        if (reorder)
+        {
+            // With reorder, (a) is broadcast and (b) is non-broadcast.
+            elementwise_prelu_quantized_broadcast_vector(broadcast_minus_offset, non_broadcast_input_ptr + x,
+                                                         vnegoffset_non_broadcast, output_ptr + x, _.s1, _.vinv_s2,
+                                                         voffseto, _.o_offset);
+        }
+        else
+        {
+            // Without reorder, (a) is non-broadcast and (b) is broadcast.
+            elementwise_prelu_quantized_broadcast_vector(non_broadcast_input_ptr + x, vnegoffset_non_broadcast,
+                                                         broadcast_minus_offset, output_ptr + x, _.vinv_s1, _.vinv_s2,
+                                                         voffseto);
+        }
+    }
+    return x;
+}
+
+// Note: vnegoffset_non_broadcast is negated compared to the generic template.
+template <>
+inline int elementwise_arithm_op_quantized_broadcast_loop<ArithmeticOperation::PRELU, uint8_t, uint8_t>(
+    int                                                 window_start_x,
+    int                                                 window_end_x,
+    int                                                 window_step_x,
+    const uint8_t                                      *non_broadcast_input_ptr,
+    uint8_t                                            *output_ptr,
+    int32x4_t                                           vnegoffset_non_broadcast,
+    float32x4_t                                         voffseto,
+    bool                                                reorder,
+    const ElementwiseQuantizedBroadcastParams<uint8_t> &params)
+{
+    return elementwise_prelu_quantized_broadcast_loop(window_start_x, window_end_x, window_step_x,
+                                                      non_broadcast_input_ptr, output_ptr, vnegoffset_non_broadcast,
+                                                      voffseto, reorder, params);
+}
+
+// Note: vnegoffset_non_broadcast is negated compared to the generic template.
+template <>
+inline int elementwise_arithm_op_quantized_broadcast_loop<ArithmeticOperation::PRELU, int8_t, int8_t>(
+    int                                                window_start_x,
+    int                                                window_end_x,
+    int                                                window_step_x,
+    const int8_t                                      *non_broadcast_input_ptr,
+    int8_t                                            *output_ptr,
+    int32x4_t                                          vnegoffset_non_broadcast,
+    float32x4_t                                        voffseto,
+    bool                                               reorder,
+    const ElementwiseQuantizedBroadcastParams<int8_t> &params)
+{
+    return elementwise_prelu_quantized_broadcast_loop(window_start_x, window_end_x, window_step_x,
+                                                      non_broadcast_input_ptr, output_ptr, vnegoffset_non_broadcast,
+                                                      voffseto, reorder, params);
 }
 
 template <ComparisonOperation op,
@@ -781,19 +1229,21 @@ inline int elementwise_comp_op_quantized_loop(int          window_start_x,
 template <ComparisonOperation op,
           typename Input,
           typename = std::enable_if_t<std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value>>
-inline int elementwise_comp_op_quantized_broadcast_loop(int           window_start_x,
-                                                        int           window_end_x,
-                                                        int           window_step_x,
-                                                        const Input  *non_broadcast_input_ptr,
-                                                        float32x4x4_t broadcast_vector,
-                                                        uint8_t      *output_ptr,
-                                                        int32x4_t     voffset_non_broadcast,
-                                                        float32x4_t   vscale_non_broadcast,
-                                                        float32x4_t   voffseto,
-                                                        float32x4_t   invvscaleo,
-                                                        bool          reorder)
+inline int elementwise_comp_op_quantized_broadcast_loop(int          window_start_x,
+                                                        int          window_end_x,
+                                                        int          window_step_x,
+                                                        const Input *non_broadcast_input_ptr,
+                                                        uint8_t     *output_ptr,
+                                                        int32x4_t    voffset_non_broadcast,
+                                                        float32x4_t  voffseto,
+                                                        bool         reorder,
+                                                        const ElementwiseQuantizedBroadcastParams<Input> &params)
 {
-    ARM_COMPUTE_UNUSED(voffseto, invvscaleo);
+    ARM_COMPUTE_UNUSED(voffseto);
+
+    const float32x4_t   &vscale_non_broadcast = params.generic.vscale_non_broadcast;
+    const float32x4x4_t &broadcast_vector     = params.generic.broadcast_vector;
+
     int x = window_start_x;
     for (; x <= (window_end_x - window_step_x); x += window_step_x)
     {
@@ -814,18 +1264,16 @@ inline void elementwise_op_quantized(const ITensor *in1,
                                      const ITensor *in2,
                                      ITensor       *out,
                                      const Window  &window,
-                                     Output (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
+                                     Output (*scalar_func)(const ElementwiseQuantizedScalarParams<Input> &),
                                      int (*broadcast_func)(int,
                                                            int,
                                                            int,
                                                            const Input *,
-                                                           float32x4x4_t,
                                                            Output *,
                                                            int32x4_t,
                                                            float32x4_t,
-                                                           float32x4_t,
-                                                           float32x4_t,
-                                                           const bool),
+                                                           const bool,
+                                                           const ElementwiseQuantizedBroadcastParams<Input> &),
                                      int (*neon_func)(int,
                                                       int,
                                                       int,
@@ -839,7 +1287,15 @@ inline void elementwise_op_quantized(const ITensor *in1,
                                                       float32x4_t,
                                                       float32x4_t))
 {
-    using InputVector = wrapper::traits::neon_vector_t<Input, 16>;
+    bool is_prelu = scalar_func == &elementwise_arithm_op_quantized_scalar<ArithmeticOperation::PRELU, Input, Output>;
+    if (is_prelu)
+    {
+        ARM_COMPUTE_ERROR_ON(
+            broadcast_func !=
+            (&elementwise_arithm_op_quantized_broadcast_loop<ArithmeticOperation::PRELU, Input, Output>));
+        ARM_COMPUTE_ERROR_ON(neon_func !=
+                             (&elementwise_arithm_op_quantized_loop<ArithmeticOperation::PRELU, Input, Output>));
+    }
 
     // Create input windows
     Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
@@ -855,6 +1311,14 @@ inline void elementwise_op_quantized(const ITensor *in1,
     const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
 
     const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
+    const UniformQuantizationInfo input1_qinfo = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo input2_qinfo = in2->info()->quantization_info().uniform();
+
+    const float       prelu_s1      = is_prelu ? output_qinfo.scale / input1_qinfo.scale : 1.0f;
+    const float       prelu_s2      = is_prelu ? prelu_s1 / input2_qinfo.scale : 1.0f;
+    const float32x4_t prelu_vinv_s1 = is_prelu ? vdupq_n_f32(input1_qinfo.scale / output_qinfo.scale) : float32x4_t{};
+    const float32x4_t prelu_vinv_s2 =
+        is_prelu ? vdupq_n_f32(input1_qinfo.scale * input2_qinfo.scale / output_qinfo.scale) : float32x4_t{};
 
     const float32x4_t voffseto   = vdupq_n_f32(output_qinfo.offset);
     const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_qinfo.scale);
@@ -871,8 +1335,9 @@ inline void elementwise_op_quantized(const ITensor *in1,
         const UniformQuantizationInfo broadcast_qinfo     = broadcast_tensor->info()->quantization_info().uniform();
         const UniformQuantizationInfo non_broadcast_qinfo = non_broadcast_tensor->info()->quantization_info().uniform();
 
-        const int32x4_t   voffset_non_broadcast = vdupq_n_s32(non_broadcast_qinfo.offset);
-        const float32x4_t vscale_non_broadcast  = vdupq_n_f32(non_broadcast_qinfo.scale);
+        const int32x4_t voffset_non_broadcast =
+            vdupq_n_s32(is_prelu ? -non_broadcast_qinfo.offset : non_broadcast_qinfo.offset);
+        const float32x4_t vscale_non_broadcast = !is_prelu ? vdupq_n_f32(non_broadcast_qinfo.scale) : float32x4_t{};
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -888,37 +1353,77 @@ inline void elementwise_op_quantized(const ITensor *in1,
                 const auto non_broadcast_input_ptr = reinterpret_cast<const Input *>(non_broadcast_input.ptr());
                 const auto output_ptr              = reinterpret_cast<Output *>(output.ptr());
 
-                const Input       broadcast_value = *reinterpret_cast<const Input *>(broadcast_input.ptr());
-                const InputVector broadcast_value_v =
-                    wrapper::vdup_n(broadcast_value, wrapper::traits::vector_128_tag{});
-                const float32x4x4_t broadcast_vector = vdequantize(broadcast_value_v, broadcast_qinfo);
+                const Input broadcast_value = *reinterpret_cast<const Input *>(broadcast_input.ptr());
+                const float broadcast_value_deq =
+                    is_prelu ? 0.0f : Qasymm8QuantizationHelper<Input>::dequantize(broadcast_value, broadcast_qinfo);
+
+                ElementwiseQuantizedBroadcastParams<Input> params{};
+                if (is_prelu)
+                {
+                    params.prelu = {
+                        broadcast_value, broadcast_qinfo.offset, prelu_s1,
+                        prelu_vinv_s1,   prelu_vinv_s2,          output_qinfo.offset,
+                    };
+                }
+                else
+                {
+                    const float32x4x4_t broadcast_vector = {{
+                        vdupq_n_f32(broadcast_value_deq),
+                        vdupq_n_f32(broadcast_value_deq),
+                        vdupq_n_f32(broadcast_value_deq),
+                        vdupq_n_f32(broadcast_value_deq),
+                    }};
+                    params.generic                       = {
+                                              broadcast_vector,
+                                              vscale_non_broadcast,
+                                              invvscaleo,
+                    };
+                }
 
                 int x = (*broadcast_func)(window_start_x, window_end_x, window_step_x, non_broadcast_input_ptr,
-                                          broadcast_vector, output_ptr, voffset_non_broadcast, vscale_non_broadcast,
-                                          voffseto, invvscaleo, !is_broadcast_input_2);
+                                          output_ptr, voffset_non_broadcast, voffseto, !is_broadcast_input_2, params);
                 for (; x < window_end_x; ++x)
                 {
-                    const float afs   = Qasymm8QuantizationHelper<Input>::dequantize(*(non_broadcast_input_ptr + x),
-                                                                                     non_broadcast_qinfo);
-                    const float bfs   = Qasymm8QuantizationHelper<Input>::dequantize(broadcast_value, broadcast_qinfo);
-                    *(output_ptr + x) = (*scalar_func)(!is_broadcast_input_2 ? bfs : afs,
-                                                       !is_broadcast_input_2 ? afs : bfs, output_qinfo);
+                    const Input non_broadcast_value = *(non_broadcast_input_ptr + x);
+
+                    ElementwiseQuantizedScalarParams<Input> params{};
+                    if (is_prelu)
+                    {
+                        params.prelu = {
+                            !is_broadcast_input_2 ? broadcast_value : non_broadcast_value,
+                            !is_broadcast_input_2 ? non_broadcast_value : broadcast_value,
+                            prelu_s1,
+                            prelu_s2,
+                            input1_qinfo.offset,
+                            input2_qinfo.offset,
+                            output_qinfo.offset,
+                        };
+                    }
+                    else
+                    {
+                        const float non_broadcast_value_deq =
+                            Qasymm8QuantizationHelper<Input>::dequantize(non_broadcast_value, non_broadcast_qinfo);
+                        params.generic = {
+                            !is_broadcast_input_2 ? broadcast_value_deq : non_broadcast_value_deq,
+                            !is_broadcast_input_2 ? non_broadcast_value_deq : broadcast_value_deq,
+                            output_qinfo,
+                        };
+                    }
+
+                    *(output_ptr + x) = (*scalar_func)(params);
                 }
             },
             broadcast_input, non_broadcast_input, output);
     }
     else
     {
-        const UniformQuantizationInfo input1_qinfo = in1->info()->quantization_info().uniform();
-        const UniformQuantizationInfo input2_qinfo = in2->info()->quantization_info().uniform();
-
         // Input1 quantization info
-        const int32x4_t   voffset1 = vdupq_n_s32(input1_qinfo.offset);
-        const float32x4_t vscale1  = vdupq_n_f32(input1_qinfo.scale);
+        const int32x4_t   voffset1 = vdupq_n_s32(is_prelu ? -input1_qinfo.offset : input1_qinfo.offset);
+        const float32x4_t vscale1  = is_prelu ? prelu_vinv_s1 : vdupq_n_f32(input1_qinfo.scale);
 
         // Input2 quantization info
-        const int32x4_t   voffset2 = vdupq_n_s32(input2_qinfo.offset);
-        const float32x4_t vscale2  = vdupq_n_f32(input2_qinfo.scale);
+        const int32x4_t   voffset2 = vdupq_n_s32(is_prelu ? -input2_qinfo.offset : input2_qinfo.offset);
+        const float32x4_t vscale2  = is_prelu ? prelu_vinv_s2 : vdupq_n_f32(input2_qinfo.scale);
 
         // Clear X Dimension on execution window as we handle manually
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -940,9 +1445,27 @@ inline void elementwise_op_quantized(const ITensor *in1,
                                      voffset1, voffset2, vscale1, vscale2, voffseto, invvscaleo);
                 for (; x < window_end_x; ++x)
                 {
-                    const float afs   = Qasymm8QuantizationHelper<Input>::dequantize(*(input1_ptr + x), input1_qinfo);
-                    const float bfs   = Qasymm8QuantizationHelper<Input>::dequantize(*(input2_ptr + x), input2_qinfo);
-                    *(output_ptr + x) = (*scalar_func)(afs, bfs, output_qinfo);
+                    const Input input1_value = *(input1_ptr + x);
+                    const Input input2_value = *(input2_ptr + x);
+
+                    ElementwiseQuantizedScalarParams<Input> params{};
+                    if (is_prelu)
+                    {
+                        params.prelu = {
+                            input1_value,        input2_value,        prelu_s1, prelu_s2, input1_qinfo.offset,
+                            input2_qinfo.offset, output_qinfo.offset,
+                        };
+                    }
+                    else
+                    {
+                        params.generic = {
+                            Qasymm8QuantizationHelper<Input>::dequantize(input1_value, input1_qinfo),
+                            Qasymm8QuantizationHelper<Input>::dequantize(input2_value, input2_qinfo),
+                            output_qinfo,
+                        };
+                    }
+
+                    *(output_ptr + x) = (*scalar_func)(params);
                 }
             },
             input1, input2, output);
@@ -953,7 +1476,7 @@ template <ArithmeticOperation op>
 void elementwise_arithm_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     elementwise_op_quantized<uint8_t, uint8_t>(in1, in2, out, window,
-                                               &elementwise_arithm_op_quantized_scalar<op, uint8_t>,
+                                               &elementwise_arithm_op_quantized_scalar<op, uint8_t, uint8_t>,
                                                &elementwise_arithm_op_quantized_broadcast_loop<op, uint8_t, uint8_t>,
                                                &elementwise_arithm_op_quantized_loop<op, uint8_t, uint8_t>);
 }
@@ -961,7 +1484,8 @@ void elementwise_arithm_op_quantized(const ITensor *in1, const ITensor *in2, ITe
 template <ArithmeticOperation op>
 void elementwise_arithm_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    elementwise_op_quantized<int8_t, int8_t>(in1, in2, out, window, &elementwise_arithm_op_quantized_scalar<op, int8_t>,
+    elementwise_op_quantized<int8_t, int8_t>(in1, in2, out, window,
+                                             &elementwise_arithm_op_quantized_scalar<op, int8_t, int8_t>,
                                              &elementwise_arithm_op_quantized_broadcast_loop<op, int8_t, int8_t>,
                                              &elementwise_arithm_op_quantized_loop<op, int8_t, int8_t>);
 }
@@ -969,15 +1493,15 @@ void elementwise_arithm_op_quantized_signed(const ITensor *in1, const ITensor *i
 template <ComparisonOperation op>
 void elementwise_comp_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    elementwise_op_quantized<uint8_t, uint8_t>(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op>,
-                                               &elementwise_comp_op_quantized_broadcast_loop<op, uint8_t>,
-                                               &elementwise_comp_op_quantized_loop<op, uint8_t>);
+    elementwise_op_quantized<uint8_t, uint8_t>(
+        in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op, uint8_t>,
+        &elementwise_comp_op_quantized_broadcast_loop<op, uint8_t>, &elementwise_comp_op_quantized_loop<op, uint8_t>);
 }
 
 template <ComparisonOperation op>
 void elementwise_comp_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    elementwise_op_quantized<int8_t, uint8_t>(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op>,
+    elementwise_op_quantized<int8_t, uint8_t>(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op, int8_t>,
                                               &elementwise_comp_op_quantized_broadcast_loop<op, int8_t>,
                                               &elementwise_comp_op_quantized_loop<op, int8_t>);
 }

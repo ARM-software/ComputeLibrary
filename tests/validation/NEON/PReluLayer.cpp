@@ -102,6 +102,9 @@ using NEPReluLayerFixture = PReluLayerValidationFixture<Tensor, Accessor, NEPRel
 template <typename T>
 using NEPReluLayerQuantizedFixture = PReluLayerValidationQuantizedFixture<Tensor, Accessor, NEPReluLayer, T>;
 
+template <typename T>
+using NEPReluLayerQuantizedBroadcastFixture = PReluLayerQuantizedBroadcastValidationFixture<Tensor, Accessor, NEPReluLayer, T>;
+
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPReluLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(),
@@ -122,6 +125,28 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPReluLayerQuantizedFixture<uint8_t>, framewor
                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
 
+                      )
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEPReluLayerQuantizedBroadcastFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapesBroadcast(),
+                                                                                                                               PReluLayerQASYMM8Dataset),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
+                      )
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEPReluLayerQuantizedBroadcastFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapesBroadcast(),
+                                                                                                                               PReluLayerQASYMM8Dataset),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
                       )
 {
     // Validate output
@@ -148,6 +173,28 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPReluLayerQuantizedFixture<int8_t>, framework
                                                                                                                         framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                                                                                                 framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 5) }))
 
+                      )
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_s8, 0.01);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEPReluLayerQuantizedBroadcastFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapesBroadcast(),
+                                                                                                                               PReluLayerQASYMM8SignedDataset),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.2f, 127) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 64) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -128) }))
+                      )
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_s8, 0.01);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEPReluLayerQuantizedBroadcastFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapesBroadcast(),
+                                                                                                                               PReluLayerQASYMM8SignedDataset),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.2f, 127) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 64) })),
+                                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -128) }))
                       )
 {
     // Validate output
