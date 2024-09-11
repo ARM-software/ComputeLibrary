@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,48 @@ constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);        /**< Tolerance
 TEST_SUITE(CL)
 TEST_SUITE(Pooling3dLayer)
 
+TEST_CASE(RoundToNearestInteger, framework::DatasetMode::ALL)
+{
+    const auto pool_info = Pooling3dLayerInfo(PoolingType::AVG,
+        Size3D(3,1,1), Size3D(1,1,1), Padding3D(), true /* exclude padding */);
+
+    const auto shape = TensorShape(1U,3U,1U,1U);
+    const auto output_shape = TensorShape(1U,1U,1U,1U);
+
+    const auto dtype = DataType::QASYMM8_SIGNED;
+    const auto layout = DataLayout::NDHWC;
+    const auto qinfo = QuantizationInfo(1.f, 0);
+
+    CLTensor input = create_tensor<CLTensor>(shape, dtype, 1, qinfo, layout);
+    CLTensor output = create_tensor<CLTensor>(output_shape, dtype, 1, qinfo, layout);
+
+    CLPooling3dLayer pool;
+    pool.configure(&input, &output, pool_info);
+
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    std::vector<int8_t> values = {-10, -10, -9};
+    std::vector<int8_t> refs = {-10};
+
+    ARM_COMPUTE_EXPECT(values.size() == shape.total_size(), framework::LogLevel::ERRORS);
+
+    library->fill_static_values(CLAccessor(input), values);
+
+    pool.run();
+
+    output.map(true);
+    for(unsigned int i = 0; i < refs.size(); ++i)
+    {
+        const int8_t ref = refs[i];
+        const int8_t target = reinterpret_cast<int8_t *>(output.buffer())[i];
+
+        ARM_COMPUTE_EXPECT(ref == target, framework::LogLevel::ERRORS);
+    }
+
+    output.unmap();
+}
+
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
@@ -106,7 +148,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(5U,  1U, 1U, 1U, 4U), 1, DataType::F32, DataLayout::NDHWC),
                                                        TensorInfo(TensorShape(1U, 15U, 1U, 2U, 4U), 1, DataType::F32, DataLayout::NDHWC), // Output width larger than input
                                                        TensorInfo(TensorShape(5U, 6U, 6U, 2U, 3U),  1, DataType::F32, DataLayout::NDHWC),
-                                                       TensorInfo(TensorShape(5U, 6U, 6U, 2U, 2U),  1, DataType::F32, DataLayout::NDHWC), 
+                                                       TensorInfo(TensorShape(5U, 6U, 6U, 2U, 2U),  1, DataType::F32, DataLayout::NDHWC),
                                                        TensorInfo(TensorShape(5U, 6U, 6U, 2U, 3U),  1, DataType::F32, DataLayout::NDHWC),
                                                        TensorInfo(TensorShape(5U, 6U, 6U, 2U, 3U),  1, DataType::F32, DataLayout::NDHWC),
                                                      })),

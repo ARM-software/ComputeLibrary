@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,10 +85,67 @@ const auto                           pool_data_layout_dataset = framework::datas
 
 const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", { true, false });
 
+void RoundToNearestIntegerPoolTestBody(const DataLayout layout, const TensorShape &shape,
+    const TensorShape &output_shape)
+{
+    const auto pool_info = PoolingLayerInfo(PoolingType::AVG,
+        Size2D(3,1), layout, PadStrideInfo(), true /* exclude padding */);
+
+    const auto dtype = DataType::QASYMM8_SIGNED;
+    const auto qinfo = QuantizationInfo(1.f, 0);
+
+    CLTensor input = create_tensor<CLTensor>(shape, dtype, 1, qinfo, layout);
+    CLTensor output = create_tensor<CLTensor>(output_shape, dtype, 1, qinfo, layout);
+
+    CLPoolingLayer pool;
+    pool.configure(&input, &output, pool_info);
+
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    std::vector<int8_t> values = {-10, -10, -9};
+    std::vector<int8_t> refs = {-10};
+
+    ARM_COMPUTE_EXPECT(values.size() == shape.total_size(), framework::LogLevel::ERRORS);
+
+    library->fill_static_values(CLAccessor(input), values);
+
+    pool.run();
+
+    output.map(true);
+    for(unsigned int i = 0; i < refs.size(); ++i)
+    {
+        const int8_t ref = refs[i];
+        const int8_t target = reinterpret_cast<int8_t *>(output.buffer())[i];
+
+        ARM_COMPUTE_EXPECT(ref == target, framework::LogLevel::ERRORS);
+    }
+
+    output.unmap();
+}
+
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(PoolingLayer)
+
+TEST_CASE(RoundToNearestIntegerNHWC, framework::DatasetMode::ALL)
+{
+    const auto layout = DataLayout::NHWC;
+    const auto shape = TensorShape(1U,3U,1U);
+    const auto output_shape = TensorShape(1U,1U,1U);
+
+    RoundToNearestIntegerPoolTestBody(layout, shape, output_shape);
+}
+
+TEST_CASE(RoundToNearestIntegerNCHW, framework::DatasetMode::ALL)
+{
+    const auto layout = DataLayout::NCHW;
+    const auto shape = TensorShape(3U,1U,1U);
+    const auto output_shape = TensorShape(1U,1U,1U);
+
+    RoundToNearestIntegerPoolTestBody(layout, shape, output_shape);
+}
 
 // *INDENT-OFF*
 // clang-format off

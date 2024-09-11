@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,14 +32,16 @@
 
 #define SQRT_OP(x) sqrt((x))
 
+#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
+#define CONVERT_RTE_STR(x, type) (convert_##type##_rte((x)))
+#define CONVERT_RTE(x, type) CONVERT_RTE_STR(x, type)
+
 #if defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(SRC_DEPTH) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_DEPTH) && defined(DST_BATCH_SIZE) && defined(ACC_DATA_TYPE)
 
 #if defined(POOL_SIZE_X) && defined(POOL_SIZE_Y) && defined(POOL_SIZE_Z)
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
 #define VEC_FLOAT(VEC_SIZE) VEC_DATA_TYPE(float, VEC_SIZE)
-#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
-#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
 #define REQUANTIZE(VEC_SIZE, input, in_offset, out_offset, in_scale, out_scale, res)                                                                                 \
     {                                                                                                                                                                 \
@@ -169,7 +171,8 @@ __kernel void pooling_3d_layer_MxN_ndhwc_quantized(
     }
 
 #if defined(POOL_AVG)
-    res0 = (res0 + (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))(filter_size >> 1)) / filter_size;
+    // Compatible with Cpu backend: Round to nearest ties to even
+    res0 = CONVERT_RTE(CONVERT(res0, VEC_DATA_TYPE(float, VEC_SIZE)) / filter_size, VEC_INT(VEC_SIZE));
 #endif // defined(POOL_AVG)
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
