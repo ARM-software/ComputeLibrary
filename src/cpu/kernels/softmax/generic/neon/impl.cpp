@@ -40,8 +40,9 @@ void neon_softmax_x_quantized(
 
     const int input_width = in->info()->valid_region().shape.x();
 
-    const float       scale_beta     = -beta * in->info()->quantization_info().uniform().scale;
-    const float32x4_t scale_beta_vec = vdupq_n_f32(scale_beta);
+    const float                   scale_beta     = -beta * in->info()->quantization_info().uniform().scale;
+    const float32x4_t             scale_beta_vec = vdupq_n_f32(scale_beta);
+    const UniformQuantizationInfo out_qinfo      = out->info()->quantization_info().uniform();
 
     Iterator in_it(in, window);
     Iterator out_it(out, window);
@@ -198,18 +199,22 @@ void neon_softmax_x_quantized(
                 int x = 0;
                 for (; x <= (input_width - vec_size); x += vec_size)
                 {
-                    using int_vec_type   = wrapper::traits::neon_vector_t<T, 16>;
-                    float32x4x4_t vec_in = vld4q_f32(tmp_ptr + x);
-                    int_vec_type  normalized_value{};
+                    using int_vec_type         = wrapper::traits::neon_vector_t<T, 16>;
+                    const float32x4x4_t vec_in = vld4q_f32(tmp_ptr + x);
+                    int_vec_type        normalized_value{};
                     if (IS_LOG)
                     {
-                        const float32x4x4_t sub = {
-                            vsubq_f32(vec_in.val[0], sum_vec),
-                            vsubq_f32(vec_in.val[1], sum_vec),
-                            vsubq_f32(vec_in.val[2], sum_vec),
-                            vsubq_f32(vec_in.val[3], sum_vec),
+                        const float32x4_t out_offset    = vdupq_n_f32(static_cast<float>(out_qinfo.offset));
+                        const float32x4_t out_inv_scale = vdupq_n_f32(1.f / out_qinfo.scale);
+
+                        const float32x4x4_t normalized_value_f = {
+                            vmlaq_f32(out_offset, vsubq_f32(vec_in.val[0], sum_vec), out_inv_scale),
+                            vmlaq_f32(out_offset, vsubq_f32(vec_in.val[1], sum_vec), out_inv_scale),
+                            vmlaq_f32(out_offset, vsubq_f32(vec_in.val[2], sum_vec), out_inv_scale),
+                            vmlaq_f32(out_offset, vsubq_f32(vec_in.val[3], sum_vec), out_inv_scale),
                         };
-                        normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(sub);
+
+                        normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(normalized_value_f);
                     }
                     else
                     {
@@ -238,7 +243,13 @@ void neon_softmax_x_quantized(
                 {
                     if (IS_LOG)
                     {
-                        out_ptr[x] = utils::cast::saturate_cast<T>(tmp_ptr[x] - sum_transformed);
+                        const float diff = tmp_ptr[x] - sum_transformed;
+#ifdef __aarch64__
+                        constexpr auto policy = RoundingPolicy::TO_NEAREST_EVEN;
+#else  // __aarch64__
+                        constexpr auto policy = RoundingPolicy::TO_ZERO;
+#endif // __aarch64__
+                        out_ptr[x] = Qasymm8QuantizationHelper<T>::quantize(diff, out_qinfo, policy);
                     }
                     else
                     {
@@ -276,6 +287,8 @@ void neon_softmax_non_x_quantized(
     const int          tmp_axis_stride = in_axis_stride;
     const int          axis_width      = in_info->dimension(axis);
     const int          end_actual      = std::min(window[0].end(), x_width);
+
+    const UniformQuantizationInfo out_qinfo = out->info()->quantization_info().uniform();
 
     execute_window_loop(
         window,
@@ -488,13 +501,21 @@ void neon_softmax_non_x_quantized(
 
                         if (IS_LOG)
                         {
-                            const float32x4x4_t sub = {
-                                vsubq_f32(vec_in.val[0], vec_sum_transformed.val[0]),
-                                vsubq_f32(vec_in.val[1], vec_sum_transformed.val[1]),
-                                vsubq_f32(vec_in.val[2], vec_sum_transformed.val[2]),
-                                vsubq_f32(vec_in.val[3], vec_sum_transformed.val[3]),
+                            const float32x4_t out_offset    = vdupq_n_f32(static_cast<float>(out_qinfo.offset));
+                            const float32x4_t out_inv_scale = vdupq_n_f32(1.f / out_qinfo.scale);
+
+                            const float32x4x4_t normalized_value_f = {
+                                vmlaq_f32(out_offset, vsubq_f32(vec_in.val[0], vec_sum_transformed.val[0]),
+                                          out_inv_scale),
+                                vmlaq_f32(out_offset, vsubq_f32(vec_in.val[1], vec_sum_transformed.val[1]),
+                                          out_inv_scale),
+                                vmlaq_f32(out_offset, vsubq_f32(vec_in.val[2], vec_sum_transformed.val[2]),
+                                          out_inv_scale),
+                                vmlaq_f32(out_offset, vsubq_f32(vec_in.val[3], vec_sum_transformed.val[3]),
+                                          out_inv_scale),
                             };
-                            normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(sub);
+
+                            normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(normalized_value_f);
                         }
                         else
                         {
@@ -528,19 +549,28 @@ void neon_softmax_non_x_quantized(
                         float *const base_ptr_tmp = (i * tmp_axis_stride) + reinterpret_cast<float *>(tmp_ptr);
                         if (IS_LOG)
                         {
+#ifdef __aarch64__
+                            constexpr auto policy = RoundingPolicy::TO_NEAREST_EVEN;
+#else  // __aarch64__
+                            constexpr auto policy = RoundingPolicy::TO_ZERO;
+#endif // __aarch64__
+
                             for (int k = 0; k < num_remaining_full; ++k)
                             {
                                 for (int j = 0; j < 4; ++j)
                                 {
-                                    *(base_ptr_out + (4 * k + j)) = utils::cast::saturate_cast<T>(
-                                        (*(base_ptr_tmp + (4 * k + j)) - vec_sum_transformed.val[k][j]));
+                                    const float diff = *(base_ptr_tmp + (4 * k + j)) - vec_sum_transformed.val[k][j];
+
+                                    *(base_ptr_out + (4 * k + j)) =
+                                        Qasymm8QuantizationHelper<T>::quantize(diff, out_qinfo, policy);
                                 }
                             }
                             for (int j = 0; j < num_remaining_partial; ++j)
                             {
+                                const float diff = *(base_ptr_tmp + (4 * num_remaining_full + j)) -
+                                                   vec_sum_transformed.val[num_remaining_full][j];
                                 *(base_ptr_out + (4 * num_remaining_full + j)) =
-                                    utils::cast::saturate_cast<T>(*(base_ptr_tmp + (4 * num_remaining_full + j)) -
-                                                                  vec_sum_transformed.val[num_remaining_full][j]);
+                                    Qasymm8QuantizationHelper<T>::quantize(diff, out_qinfo, policy);
                             }
                         }
                         else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -423,7 +423,7 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
     // Note: Output quantization info for softmax should always have
     // * Softmax with QASYMM8: scale = 1/256, offset = 0
     // * Softmax with QASYMM8_SIGNED: scale = 1/256, offset = -128
-    // * LogSoftmax with QASYMM8: scale = 1/256, offset = 0
+    // * LogSoftmax with QASYMM8: scale = 16/256, offset = 255
     // * LogSoftmax with QASYMM8_SIGNED: scale = 16/256, offset = 127
     if (is_data_type_quantized_asymmetric_signed(input_type))
     {
@@ -436,7 +436,7 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
             return QuantizationInfo(1.f / 256, -128);
         }
     }
-    return QuantizationInfo(1.f / 256, 0);
+    return is_log ? QuantizationInfo(16.f / 256, 255) : QuantizationInfo(1.f / 256, 0);
 }
 
 std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo &act_info,
