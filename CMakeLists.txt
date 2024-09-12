@@ -138,11 +138,12 @@ if(ARM_COMPUTE_OPENMP)
 endif()
 
 # ---------------------------------------------------------------------
-# SVE Library
+# SVE Object Library
 
-add_library(arm_compute_sve "")
+add_library(arm_compute_sve OBJECT "")
 target_compile_options(arm_compute_sve
-                       PRIVATE "-march=armv8.2-a+sve+fp16+dotprod")
+                       PRIVATE "-march=armv8.2-a+sve+fp16+dotprod"
+                       PRIVATE "-fPIC")
 target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_BF16)
 target_compile_definitions(arm_compute_sve PRIVATE ENABLE_SVE)
 target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_SVE)
@@ -160,11 +161,12 @@ target_include_directories(
          src/core/NEON/kernels/arm_gemm/merges)
 
 # ---------------------------------------------------------------------
-# SVE2 Library
+# SVE2 Object Library
 
-add_library(arm_compute_sve2 "")
+add_library(arm_compute_sve2 OBJECT "")
 target_compile_options(arm_compute_sve2
-                       PRIVATE "-march=armv8.6-a+sve2+fp16+dotprod")
+                       PRIVATE "-march=armv8.6-a+sve2+fp16+dotprod"
+                       PRIVATE "-fPIC")
 target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_SVE2)
 target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_BF16)
 target_compile_definitions(arm_compute_sve2 PRIVATE ENABLE_SVE)
@@ -205,8 +207,11 @@ target_include_directories(
 target_compile_options(arm_compute PUBLIC ${COMMON_CXX_FLAGS})
 
 add_library(ArmCompute::Core ALIAS arm_compute)
+
+# arm_compute_sve and arm_compute_sve2 obj files will not be public in the arm_compute.so
 target_link_libraries(
-  arm_compute PUBLIC arm_compute_sve arm_compute_sve2)
+  arm_compute PRIVATE $<TARGET_OBJECTS:arm_compute_sve>
+              PRIVATE $<TARGET_OBJECTS:arm_compute_sve2>)
 
 # ---------------------------------------------------------------------
 # Graph Library
