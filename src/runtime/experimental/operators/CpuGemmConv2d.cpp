@@ -90,6 +90,11 @@ Status CpuGemmConv2d::has_opt_impl(arm_compute::WeightFormat &expected_weight_fo
                                             weights_info, dilation, act_info, enable_fast_math);
 }
 
+void CpuGemmConv2d::update_quantization_parameters(ITensorPack &tensors)
+{
+    _impl->op->update_quantization_parameters(tensors);
+}
+
 void CpuGemmConv2d::run(ITensorPack &tensors)
 {
     prepare(tensors);

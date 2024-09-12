@@ -137,6 +137,13 @@ public:
                                const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
                                bool                       enable_fast_math = false);
 
+    /** Update of quantization information at the run stage for convolution so that the quantization multipliers can be properly calculated.
+     * Please @ref NEGEMMConvolutionLayer for a more in-depth explanation and example.
+     *
+     * @param[in] tensors Vector that contains the tensors to operate on.
+     */
+    void update_quantization_parameters(ITensorPack &tensors);
+
     void                             run(ITensorPack &tensors) override;
     void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;

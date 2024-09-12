@@ -130,14 +130,17 @@ void quantize_down_scale_by_fixedpoint(const SimpleTensor<TIn> *in, const Simple
         }
         result += result_offset_after_shift;
 
-        // Bounded ReLu
-        if(min != max)
-        {
-            result = std::max(min, std::min(max, result));
-        }
+        result = std::max(min, std::min(max, result));
 
-        (*dst)[i] = static_cast<TOut>(std::max<TIn>(std::numeric_limits<TOut>::lowest(),
-                                                    std::min<TIn>(std::numeric_limits<TOut>::max(), result)));
+        if (min == std::numeric_limits<TIn>::min() && max == std::numeric_limits<TIn>::max())
+        {
+            (*dst)[i] = static_cast<TOut>(std::max<TIn>(std::numeric_limits<TOut>::lowest(),
+                                                                std::min<TIn>(std::numeric_limits<TOut>::max(), result)));
+        }
+        else
+        {
+            (*dst)[i] = static_cast<TOut>(result);
+        }
     }
 }
 

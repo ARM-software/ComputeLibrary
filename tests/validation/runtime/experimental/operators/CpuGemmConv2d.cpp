@@ -48,9 +48,18 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 const RelativeTolerance<float> rel_tolerance_f32(0.01f);
+#ifdef ARM_COMPUTE_ENABLE_SME
+// TODO(COMPMID-6011): SME kernels and the reference model use different rounding mode.
+// Temporarily increase the tolerance for quantized data.
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#else  // ARM_COMPUTE_ENABLE_SME
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#endif // ARM_COMPUTE_ENABLE_SME
 } // namespace
 
 TEST_SUITE(NEON)
@@ -117,6 +126,8 @@ TEST_CASE(OpCpuGemmConv2dMemoryInjection, framework::DatasetMode::ALL)
 }
 
 using CpuGemmConv2dFixture = CpuGemmConv2dValidationFixture<Tensor, Accessor, experimental::op::CpuGemmConv2d>;
+template <typename T>
+using CpuGemmConv2dStaticQuantFixture = CpuGemmConv2dForUpdatedStaticQuantInfoAfterConfigureFixture<Tensor, Accessor, experimental::op::CpuGemmConv2d, T>;
 
 TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(SmokeTest,
@@ -128,6 +139,48 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     validate(Accessor(_target), _reference, rel_tolerance_f32);
 }
 TEST_SUITE_END() // F32
+
+#ifdef __aarch64__
+
+const auto QuantizedActivationFunctionsDataset = make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
+});
+
+TEST_SUITE(Quantized)
+
+TEST_SUITE(UpdateStaticQuantInfoAfterConfigure)
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(SmokeTest, CpuGemmConv2dStaticQuantFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::TinyConvolutionLayerDataset(),
+                                                                                                                      make("ReshapeWeights", { true }),
+                                                                                                                      make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                      make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                                                                                                      make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(0.01f, -10) }),
+                                                                                                                      QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(SmokeTest, CpuGemmConv2dStaticQuantFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::TinyConvolutionLayerDataset(),
+                                                                                                                       make("ReshapeWeights", { true }),
+                                                                                                                       make("DataType", DataType::QASYMM8),
+                                                                                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                                                                                                       make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) }),
+                                                                                                                       QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // UpdateStaticQuantInfoAfterConfigure
+
+TEST_SUITE_END() // Quantized
+#endif // __aarch64__
 
 TEST_SUITE_END() // CpuGemmConv2d
 TEST_SUITE_END() // OPERATORS

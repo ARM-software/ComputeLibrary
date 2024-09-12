@@ -24,16 +24,19 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/quantization/AsymmHelpers.h"
 #include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
+
+#include <set>
 
 using namespace arm_compute::experimental;
 
@@ -49,6 +52,7 @@ struct NEGEMMLowpMatrixMultiplyCore::Impl
     IWeightsManager                                    *weights_manager{nullptr};
     MemoryRequirements                                  aux_mem_req{};
     WorkspaceData<Tensor>                               workspace_tensors{};
+    ActivationLayerInfo                                 act_info{};
     bool                                                is_prepared{false};
 };
 
@@ -85,6 +89,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(
                                 {TensorType::ACL_DST, output}};
     _impl->prep_pack         = {{TensorType::ACL_SRC_1, b}, {TensorType::ACL_SRC_2, c}};
     _impl->aux_mem_req       = _impl->op->workspace();
+    _impl->act_info          = gemm_info.activation_info();
     _impl->workspace_tensors = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
                                                         _impl->prep_pack, /* allocate_now */ false);
 }
@@ -107,6 +112,11 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
 
 void NEGEMMLowpMatrixMultiplyCore::update_quantization_parameters()
 {
+    // Supported activations in GEMM
+    const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = {
+        ActivationLayerInfo::ActivationFunction::RELU, ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU};
+
     auto src = _impl->run_pack.get_const_tensor(ACL_SRC_0);
     auto wei = _impl->run_pack.get_const_tensor(ACL_SRC_1);
     auto dst = _impl->run_pack.get_tensor(ACL_DST);
@@ -115,14 +125,23 @@ void NEGEMMLowpMatrixMultiplyCore::update_quantization_parameters()
     const QuantizationInfo wqinfo = wei->info()->quantization_info();
     const QuantizationInfo oqinfo = (dst->info()->total_size() == 0) ? iqinfo : dst->info()->quantization_info();
 
-    int32_t min_activation = 0;
-    int32_t max_activation = 0;
-    std::tie(min_activation, max_activation) =
-        quantization::get_quantized_asymmetric_output_min_max(wqinfo, ActivationLayerInfo(), wei->info()->data_type());
+    PixelValue     type_min{};
+    PixelValue     type_max{};
+    const DataType data_type     = src->info()->data_type();
+    std::tie(type_min, type_max) = get_min_max(data_type);
+    int32_t min_activation       = type_min.get<int32_t>();
+    int32_t max_activation       = type_max.get<int32_t>();
+
+    const UniformQuantizationInfo uoqinfo = oqinfo.uniform();
+    if (supported_acts.find(_impl->act_info.activation()) != supported_acts.end())
+    {
+        std::tie(min_activation, max_activation) =
+            get_quantized_activation_min_max(_impl->act_info, data_type, uoqinfo);
+    }
 
     GEMMLowpOutputStageInfo output_info;
     output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-    output_info.gemmlowp_offset          = oqinfo.uniform().offset;
+    output_info.gemmlowp_offset          = uoqinfo.offset;
     output_info.gemmlowp_min_bound       = min_activation;
     output_info.gemmlowp_max_bound       = max_activation;
     output_info.is_quantized_per_channel = false;

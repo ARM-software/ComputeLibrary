@@ -53,6 +53,12 @@ static const std::array<ActivationLayerInfo::ActivationFunction, 8> qasymm8_acti
     ActivationLayerInfo::ActivationFunction::TANH,         ActivationLayerInfo::ActivationFunction::HARD_SWISH,
     ActivationLayerInfo::ActivationFunction::LEAKY_RELU,   ActivationLayerInfo::ActivationFunction::GELU,
 };
+
+/* Static quantization can only, currently, support relu based activations */
+static const std::array<ActivationLayerInfo::ActivationFunction, 3> qasymm8_static_quant_activations = {
+    ActivationLayerInfo::ActivationFunction::RELU, ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU};
+
 /* Supported activation in the 16-bit integer domain */
 static const std::array<ActivationLayerInfo::ActivationFunction, 4> qsymm16_activations = {
     ActivationLayerInfo::ActivationFunction::LOGISTIC, ActivationLayerInfo::ActivationFunction::TANH,
@@ -71,6 +77,12 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     const DataType          data_type = src->data_type();
     const QuantizationInfo &oq_info   = (dst != nullptr) ? dst->quantization_info() : src->quantization_info();
     const ActivationLayerInfo::ActivationFunction f_act = activation_info.activation();
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        is_data_type_quantized_asymmetric_char(data_type) && oq_info.is_dynamic() &&
+            (std::find(std::begin(qasymm8_static_quant_activations), std::end(qasymm8_static_quant_activations),
+                       f_act) == std::end(qasymm8_static_quant_activations)),
+        "For QASYMM8 statically quantized, only relu and lower/upper bounded relu are supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
         is_data_type_quantized_asymmetric(data_type) &&
