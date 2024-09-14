@@ -69,6 +69,35 @@ inline size_t data_size_from_type(DataType data_type)
     }
 }
 
+/** Get underlying data type
+ *
+ * @param[in] data_type Input data type
+ *
+ * @return the underlying data type
+ */
+inline constexpr DataType get_underlying_data_type(DataType data_type)
+{
+    switch (data_type)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+            return DataType::U8;
+        case DataType::S8:
+        case DataType::QSYMM8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8_PER_CHANNEL:
+            return DataType::S8;
+        case DataType::U16:
+        case DataType::QASYMM16:
+            return DataType::U16;
+        case DataType::S16:
+        case DataType::QSYMM16:
+            return DataType::S16;
+        default:
+            return data_type;
+    }
+}
+
 /** The size in bytes of the data type
  *
  * @param[in] dt Input data type

@@ -65,6 +65,10 @@ protected:
                 case DataType::U8:
                 case DataType::QASYMM8:
                 case DataType::QASYMM8_SIGNED:
+                case DataType::QSYMM8:
+                case DataType::QSYMM8_PER_CHANNEL:
+                case DataType::QSYMM16:
+                case DataType::QASYMM16:
                 case DataType::S8:
                 case DataType::F32:
                 {
@@ -113,9 +117,13 @@ protected:
 
     TensorType compute_target(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
     {
+        // These are necessary but not used qinfo for creating tensor buffer for QSYMM8_PER_CHANNEL
+        QuantizationInfo src_not_used_qinfo(0.25f, 2);
+        QuantizationInfo dst_not_used_qinfo(0.5f, 2);
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, dt_in, 1);
-        TensorType dst = create_tensor<TensorType>(shape, dt_out, 1);
+        TensorType src = create_tensor<TensorType>(shape, dt_in, 1, src_not_used_qinfo);
+        TensorType dst = create_tensor<TensorType>(shape, dt_out, 1, dst_not_used_qinfo);
 
         // Create and configure function
         FunctionType cast;

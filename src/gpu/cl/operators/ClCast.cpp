@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,8 @@ void ClCast::configure(const ClCompileContext &compile_context,
                        ConvertPolicy           policy)
 {
     ARM_COMPUTE_LOG_PARAMS(src, dst, policy);
+    ARM_COMPUTE_ERROR_THROW_ON(validate(src, dst, policy));
+
     auto k = std::make_unique<kernels::ClCastKernel>();
     k->configure(compile_context, src, dst, policy);
     _kernel = std::move(k);
@@ -44,6 +46,12 @@ void ClCast::configure(const ClCompileContext &compile_context,
 
 Status ClCast::validate(const ITensorInfo *src, const ITensorInfo *dst, ConvertPolicy policy)
 {
+    // This operation mode is supported by ClCastKernel, however it has an unusual
+    // casting behavior, which is not like casting between Int8 & UInt8. Therefore,
+    // we do not expose this mode in the public api
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::QSYMM8_PER_CHANNEL &&
+                                dst->data_type() == DataType::QASYMM8);
+
     return kernels::ClCastKernel::validate(src, dst, policy);
 }
 } // namespace opencl
