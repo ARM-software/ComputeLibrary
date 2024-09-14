@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -224,7 +224,7 @@ void neon_fp16_to_other_dt_cast(
                     // Compute left-over elements
                     for (; x < window_end_x; ++x)
                     {
-                        *(dst_ptr + x) = utils::cast::saturate_cast<int8_t>(*(src_ptr + x));
+                        *(dst_ptr + x) = utils::cast::saturate_static_cast<int8_t>(*(src_ptr + x));
                     }
                 },
                 src, dst);
@@ -256,7 +256,7 @@ void neon_fp16_to_other_dt_cast(
                     // Compute left-over elements
                     for (; x < window_end_x; ++x)
                     {
-                        *(dst_ptr + x) = utils::cast::saturate_cast<uint8_t>(*(src_ptr + x));
+                        *(dst_ptr + x) = utils::cast::saturate_static_cast<uint8_t>(*(src_ptr + x));
                     }
                 },
                 src, dst);

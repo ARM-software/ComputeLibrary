@@ -35,14 +35,22 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/CastFixture.h"
+
+#include <cstdint>
+#include <vector>
+
 namespace arm_compute
 {
 namespace test
 {
 namespace validation
 {
+
+using framework::dataset::make;
+
 namespace
 {
 // Tolerance
@@ -56,60 +64,107 @@ constexpr AbsoluteTolerance<float> zero_tolerance(0);
 /** Input data sets **/
 
 // QASYMM8_SIGNED
-const auto CastQASYMM8_SIGNEDtoS16Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::S16));
-const auto CastQASYMM8_SIGNEDtoS32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::S32));
-const auto CastQASYMM8_SIGNEDtoF32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::F32));
-const auto CastQASYMM8_SIGNEDtoF16Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::F16));
+const auto CastQASYMM8_SIGNEDtoS16Dataset = combine(make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::S16));
+const auto CastQASYMM8_SIGNEDtoS32Dataset = combine(make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::S32));
+const auto CastQASYMM8_SIGNEDtoF32Dataset = combine(make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::F32));
+const auto CastQASYMM8_SIGNEDtoF16Dataset = combine(make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::F16));
 
 // QASYMM8
-const auto CastQASYMM8toF16Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F16));
-const auto CastQASYMM8toF32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F32));
-const auto CastQASYMM8toS32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::S32));
+const auto CastQASYMM8toF16Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::F16));
+const auto CastQASYMM8toF32Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::F32));
+const auto CastQASYMM8toS32Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::S32));
 
 // U8
-const auto CastU8toU16Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U16));
-const auto CastU8toS16Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S16));
-const auto CastU8toS32Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S32));
-const auto CastU8toF32Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::F32));
+const auto CastU8toU16Dataset = combine(make("DataType", DataType::U8), make("DataType", DataType::U16));
+const auto CastU8toS16Dataset = combine(make("DataType", DataType::U8), make("DataType", DataType::S16));
+const auto CastU8toS32Dataset = combine(make("DataType", DataType::U8), make("DataType", DataType::S32));
+const auto CastU8toF32Dataset = combine(make("DataType", DataType::U8), make("DataType", DataType::F32));
 
 // U16
-const auto CastU16toU8Dataset  = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U8));
-const auto CastU16toU32Dataset = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U32));
+const auto CastU16toU8Dataset  = combine(make("DataType", DataType::U16), make("DataType", DataType::U8));
+const auto CastU16toU32Dataset = combine(make("DataType", DataType::U16), make("DataType", DataType::U32));
 
 // S16
-const auto CastS16toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
-const auto CastS16toU8Dataset             = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8));
-const auto CastS16toS32Dataset            = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::S32));
+const auto CastS16toQASYMM8_SIGNEDDataset = combine(make("DataType", DataType::S16), make("DataType", DataType::QASYMM8_SIGNED));
+const auto CastS16toU8Dataset             = combine(make("DataType", DataType::S16), make("DataType", DataType::U8));
+const auto CastS16toS32Dataset            = combine(make("DataType", DataType::S16), make("DataType", DataType::S32));
 
 //S32
-const auto CastS32toF16Dataset            = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F16));
-const auto CastS32toU8Dataset             = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::U8));
-const auto CastS32toF32Dataset            = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F32));
-const auto CastS32toQASYMM8Dataset        = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::QASYMM8));
-const auto CastS32toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+const auto CastS32toF16Dataset            = combine(make("DataType", DataType::S32), make("DataType", DataType::F16));
+const auto CastS32toU8Dataset             = combine(make("DataType", DataType::S32), make("DataType", DataType::U8));
+const auto CastS32toF32Dataset            = combine(make("DataType", DataType::S32), make("DataType", DataType::F32));
+const auto CastS32toQASYMM8Dataset        = combine(make("DataType", DataType::S32), make("DataType", DataType::QASYMM8));
+const auto CastS32toQASYMM8_SIGNEDDataset = combine(make("DataType", DataType::S32), make("DataType", DataType::QASYMM8_SIGNED));
 
 // F16
-const auto CastF16toF32Dataset            = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F32));
-const auto CastF16toS32Dataset            = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::S32));
-const auto CastF16toQASYMM8Dataset        = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::QASYMM8));
-const auto CastF16toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+const auto CastF16toF32Dataset            = combine(make("DataType", DataType::F16), make("DataType", DataType::F32));
+const auto CastF16toS32Dataset            = combine(make("DataType", DataType::F16), make("DataType", DataType::S32));
+const auto CastF16toQASYMM8Dataset        = combine(make("DataType", DataType::F16), make("DataType", DataType::QASYMM8));
+const auto CastF16toQASYMM8_SIGNEDDataset = combine(make("DataType", DataType::F16), make("DataType", DataType::QASYMM8_SIGNED));
 
 // F32
-const auto CastF32toU8Dataset             = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::U8));
-const auto CastF32toF16Dataset            = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F16));
-const auto CastF32toS32Dataset            = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::S32));
-const auto CastF32toQASYMM8Dataset        = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8));
-const auto CastF32toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+const auto CastF32toU8Dataset             = combine(make("DataType", DataType::F32), make("DataType", DataType::U8));
+const auto CastF32toF16Dataset            = combine(make("DataType", DataType::F32), make("DataType", DataType::F16));
+const auto CastF32toS32Dataset            = combine(make("DataType", DataType::F32), make("DataType", DataType::S32));
+const auto CastF32toQASYMM8Dataset        = combine(make("DataType", DataType::F32), make("DataType", DataType::QASYMM8));
+const auto CastF32toQASYMM8_SIGNEDDataset = combine(make("DataType", DataType::F32), make("DataType", DataType::QASYMM8_SIGNED));
 
 // U64
-const auto CastU64toF32Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::F32));
+const auto CastU64toF32Dataset = combine(make("DataType", DataType::U64), make("DataType", DataType::F32));
 
 // S64
-const auto CastS64toF32Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::F32));
+const auto CastS64toF32Dataset = combine(make("DataType", DataType::S64), make("DataType", DataType::F32));
+
+template<typename T>
+void validate_static_cast(const TensorShape &shape, DataType src_dtype, DataType dst_dtype)
+{
+    Tensor input = create_tensor<Tensor>(shape, src_dtype, 1);
+    Tensor output = create_tensor<Tensor>(shape, dst_dtype, 1);
+
+    NECast cast;
+    cast.configure(&input, &output, ConvertPolicy::SATURATE);
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    library->fill_tensor_value(Accessor(input), 1.99f);
+    cast.run();
+
+    for(unsigned int i = 0; i < shape.x(); ++i)
+    {
+        const T ref = 1;
+        const T target = reinterpret_cast<T*>(output.buffer())[i];
+
+        ARM_COMPUTE_EXPECT(ref == target, framework::LogLevel::ERRORS);
+    }
+}
+
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(Cast)
+
+// Validate casting truncates floats to integer instead of rounding
+DATA_TEST_CASE(ValidateStaticCastBehavior, framework::DatasetMode::ALL,
+    combine(
+        make("InputDataType", {DataType::F32, DataType::F16}),
+        make("OutputDataType", {DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::U8})),
+        src_dtype, dst_dtype)
+{
+    const auto shape = TensorShape(18U); // > 16 for channel dim. to stress vector and leftover loops
+
+    if(src_dtype == DataType::F32 || (src_dtype == DataType::F16 && cpu_supports_dtypes({DataType::F16})))
+    {
+        if(dst_dtype == DataType::QASYMM8_SIGNED)
+        {
+            validate_static_cast<int8_t>(shape, src_dtype, dst_dtype);
+        }
+        else
+        {
+            validate_static_cast<uint8_t>(shape, src_dtype, dst_dtype);
+        }
+    }
+}
+
 template <typename T>
 using NECastToU8Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, uint8_t>;
 template <typename T>
@@ -206,7 +261,7 @@ CAST_SUITE(F32_to_QASYMM8, DataType::F32, DataType::QASYMM8, NECastToQASYMM8Fixt
 CAST_SUITE(F32_to_F16, DataType::F32, DataType::F16, NECastToF16Fixture<float>, CastF32toF16Dataset, zero_tolerance)
 #endif //  ARM_COMPUTE_ENABLE_FP16
 CAST_SUITE(F32_to_S32, DataType::F32, DataType::S32, NECastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
-CAST_SUITE(F32_to_U8, DataType::F32, DataType::S32, NECastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
+CAST_SUITE(F32_to_U8, DataType::F32, DataType::U8, NECastToU8Fixture<float>, CastF32toU8Dataset, one_tolerance)
 
 #ifdef __aarch64__
 // S64
@@ -217,8 +272,8 @@ CAST_SUITE(U64_to_F32, DataType::U64, DataType::F32, NECastToF32Fixture<uint64_t
 #endif // __aarch64__
 
 DATA_TEST_CASE(KernelSelectionDstFP16, framework::DatasetMode::ALL,
-               combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                       framework::dataset::make("DataType",
+               combine(make("CpuExt", std::string("NEON")),
+                       make("DataType",
 {
     DataType::F16,
     DataType::U8,
@@ -245,8 +300,8 @@ cpu_ext, data_type)
 }
 
 DATA_TEST_CASE(KernelSelectionSrcFP32, framework::DatasetMode::ALL,
-               combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                       framework::dataset::make("DataType",
+               combine(make("CpuExt", std::string("NEON")),
+                       make("DataType",
 {
     DataType::F16,
 })),
