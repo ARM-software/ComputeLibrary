@@ -1035,6 +1035,7 @@ target_sources(
 	runtime/experimental/operators/CpuDepthwiseConv2d.cpp
 	runtime/experimental/operators/CpuDequantize.cpp
 	runtime/experimental/operators/CpuElementwise.cpp
+	runtime/experimental/operators/CpuGEMMLowp.cpp
 	runtime/experimental/operators/CpuGemm.cpp
 	runtime/experimental/operators/CpuGemmConv2d.cpp
 	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
