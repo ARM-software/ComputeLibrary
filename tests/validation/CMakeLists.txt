@@ -147,6 +147,7 @@ if(ENABLE_NEON)
             runtime/experimental/operators/CpuActivation.cpp
             runtime/experimental/operators/CpuAdd.cpp
             runtime/experimental/operators/CpuDepthwiseConv2d.cpp
+            runtime/experimental/operators/CpuDequantize.cpp
             runtime/experimental/operators/CpuElementwise.cpp
             runtime/experimental/operators/CpuGemm.cpp
             runtime/experimental/operators/CpuGemmConv2d.cpp
