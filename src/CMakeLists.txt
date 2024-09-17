@@ -1039,6 +1039,7 @@ target_sources(
 	runtime/experimental/operators/CpuGemmConv2d.cpp
 	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
 	runtime/experimental/operators/CpuMul.cpp
+	runtime/experimental/operators/CpuQuantize.cpp
 	runtime/experimental/operators/CpuSoftmax.cpp
 	runtime/experimental/operators/CpuSub.cpp
 	runtime/experimental/operators/CpuTranspose.cpp
