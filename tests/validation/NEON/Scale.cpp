@@ -28,6 +28,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ScaleFixture.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -165,9 +166,23 @@ TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
     {
         const auto input  = TensorInfo{ input_shape, 1, kv.first, default_data_layout };
         const auto output = TensorInfo{ output_shape, 1, kv.first, default_data_layout };
-
-        result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
-        ARM_COMPUTE_EXPECT(bool(result) == kv.second, framework::LogLevel::ERRORS);
+        if(cpu_supports_dtypes({kv.first}))
+        {
+            result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode, PixelValue(), SamplingPolicy::CENTER, false });
+            ARM_COMPUTE_EXPECT_EQUAL(bool(result) , kv.second, framework::LogLevel::ERRORS);
+            if(bool(result) != kv.second)
+            {
+                std::string fail_reason = "For " + to_string(kv.first) + " validate() returns " + to_string(bool(result)) + " but expected answer is " + to_string(kv.second);
+                ARM_COMPUTE_TEST_INFO(fail_reason);
+                framework::ARM_COMPUTE_PRINT_INFO();
+            }
+        }
+        else
+        {
+            std::string skip_reason = "Skip supported datatype test because device does not support " + to_string(kv.first) + " vector operations.";
+            ARM_COMPUTE_TEST_INFO(skip_reason.c_str());
+            framework::ARM_COMPUTE_PRINT_INFO();
+        }
     }
 }
 
