@@ -328,6 +328,9 @@ public:
 private:
     /** Calculates strides, offset and total size resulting from the specified padding around the XY plane.
      *
+     * @note When interpreting the required_strides in the return value, only the values up to the corresponding dimension in the tensor is
+     *       valid. For example, 1D tensor should only refer to 1D in required_strides, 2D tensor up to 2D in required_strides, and so on.
+     *
      * @param[in] padding Padding around the XY plane in elements.
      */
     std::tuple<Strides, size_t, size_t> calculate_padding_requirements(const PaddingSize &padding);
