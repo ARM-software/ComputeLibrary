@@ -606,10 +606,5 @@ Supported data-types options are:
 
 The list of supported operators can be found in filelist.json in the root of Compute Library repo.
 
-@subsection architecture_experimental_build_high_priority_operators Build high priority operators
-
-Selecting high_priority when building Compute Library, one new library will be created: libarm_compute_hp and
-will contain a selected subset of the libary operators. Currently the operators are staticly set.
-
 */
 } // namespace arm_compute

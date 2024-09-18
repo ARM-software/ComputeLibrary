@@ -627,12 +627,8 @@ custom_operators = []
 custom_types = []
 custom_layouts = []
 
-use_custom_ops = env['high_priority'] or env['build_config']
+use_custom_ops = env['build_config']
 
-if env['high_priority']:
-    custom_operators = filelist['high_priority']
-    custom_types = ['all']
-    custom_layouts = ['all']
 
 if env['build_config']:
     custom_operators, custom_types, custom_layouts = read_build_config_json(env['build_config'])

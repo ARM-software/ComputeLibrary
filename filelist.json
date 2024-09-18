@@ -109,15 +109,6 @@
       "src/c/operators/AclActivation.cpp"
     ]
   },
-  "high_priority": [
-    "Activation",
-    "DepthwiseConv2d",
-    "Conv2d",
-    "Permute",
-    "Pool2d",
-    "Reshape",
-    "MatMul"
-  ],
   "gpu": {
     "common": [
       "src/core/CL/CLCompileContext.cpp",

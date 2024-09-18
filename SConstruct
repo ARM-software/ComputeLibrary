@@ -116,7 +116,6 @@ vars.AddVariables(
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
-    BoolVariable("high_priority", "Generate a library containing only the high priority operators", False),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
     PathVariable("external_tests_dir", """Add examples, benchmarks and tests to the tests suite from an external path. In order to use this option, the external tests directory must have the following structure:
     EXTERNAL_TESTS_DIR:
@@ -519,21 +518,11 @@ if not GetOption("help"):
             # Thus for backward compatibility, we include this flag only for NDK < r23
             env.Append(CXXFLAGS = ['-no-integrated-as'])
 
-if env['high_priority'] and env['build_config']:
-    print("The high priority library cannot be built in conjunction with a user-specified build configuration")
-    Exit(1)
-
-if not env['high_priority'] and not env['build_config']:
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_GRAPH_ENABLED'])
-
 data_types = []
 data_layouts = []
 
 # Set correct data types / layouts to build
-if env['high_priority']:
-    data_types = ['all']
-    data_layouts = ['all']
-elif env['build_config']:
+if env['build_config']:
     data_types, data_layouts = read_build_config_json(env['build_config'])
 else:
     data_types = env['data_type_support']
@@ -653,7 +642,7 @@ Export('version_at_least')
 
 SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
-if env['examples'] and (env['build_config'] or env['high_priority']):
+if env['examples'] and env['build_config']:
     print("WARNING: Building examples for selected operators not supported. Use examples=0")
     Return()
 
@@ -664,7 +653,7 @@ if env['examples'] and env['exceptions']:
     SConscript('./examples/SConscript', variant_dir='%s/examples' % build_path, duplicate=0)
 
 if env['exceptions']:
-    if env['build_config'] or env['high_priority']:
+    if env['build_config']:
         print("WARNING: Building tests for selected operators not supported")
         Return()
     if env['os'] == 'bare_metal' and env['arch'] == 'armv7a':
