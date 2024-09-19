@@ -49,6 +49,11 @@ public:
                DataType    data_type,
                bool        accumulate)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
         ARM_COMPUTE_UNUSED(alpha);
         ARM_COMPUTE_UNUSED(beta);
         _target    = compute_target(shape_a, shape_b, shape_c, output_shape, data_type, accumulate);
