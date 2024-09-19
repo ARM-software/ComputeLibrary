@@ -25,6 +25,7 @@
 #define ACL_SRC_CPU_KERNELS_CPUSOFTMAXKERNEL_H
 
 #include "src/core/common/Macros.h"
+#include "src/core/helpers/LUTManager.h"
 #include "src/cpu/ICpuKernel.h"
 
 namespace arm_compute
@@ -78,11 +79,13 @@ public:
     static const std::vector<SoftmaxKernel> &get_available_kernels();
 
 private:
-    float              _beta{1.0f};
-    SoftmaxKernelPtr   _run_method{nullptr};
-    std::string        _name{};
-    int                _axis{};
-    std::vector<float> _lut = {};
+    float            _beta{1.0f};
+    SoftmaxKernelPtr _run_method{nullptr};
+    std::string      _name{};
+    int              _axis{};
+#ifdef __aarch64__
+    std::shared_ptr<LookupTable256> _lut{nullptr};
+#endif // __aarch64__
 };
 } // namespace kernels
 } // namespace cpu

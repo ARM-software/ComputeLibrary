@@ -103,28 +103,6 @@ static const std::vector<typename CpuSoftmaxKernel::SoftmaxKernel> available_ker
      REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qasymm8_signed_softmax<true>)},
 };
 
-void init_lut(std::vector<float> &lut, DataType type, float scale, float beta)
-{
-    if (type == DataType::QASYMM8)
-    {
-        for (int i = 0; i < 256; ++i)
-        {
-            lut.push_back(std::exp(-scale * beta * i));
-        }
-    }
-    else if (type == DataType::QASYMM8_SIGNED)
-    {
-        for (int i = -128; i < 128; ++i)
-        {
-            lut.push_back(std::exp(-scale * beta * i));
-        }
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Invalid datatype for QASYMM8/QASYMM8_SIGNED softmax");
-    }
-}
-
 Status validate_arguments_softmax(
     const ITensorInfo &src, const ITensorInfo &dst, float beta, int axis, const ITensorInfo &tmp, bool is_log)
 {
@@ -232,12 +210,19 @@ void CpuSoftmaxKernel::configure(
 
     ICpuKernel<CpuSoftmaxKernel>::configure(win);
 
+#ifdef __aarch64__
     const std::string uk_name = uk->name;
     if (uk_name == "sme2_qu8_softmax_lut_512VL" || uk_name == "sme2_qs8_softmax_lut_512VL")
     {
-        const float scale = src->quantization_info().uniform().scale;
-        init_lut(_lut, src->data_type(), scale, beta);
+        UniformQuantizationInfo qinfo = src->quantization_info().uniform();
+        // What the ukernel is interested in looking up is exp(b * deq(q)). The
+        // quantization offset cancels out in softmax so we don't need it in
+        // the LUT.
+        qinfo.offset = 0;
+        const LUTInfo info{LUTType::Exponential, -beta, src->data_type(), qinfo};
+        _lut = LUTManager::get_instance().get_lut_table<LookupTable256>(info);
     }
+#endif // __aarch64__
 }
 
 Status CpuSoftmaxKernel::validate(
@@ -274,7 +259,16 @@ void CpuSoftmaxKernel::run_op(ITensorPack &tensors, const Window &window, const 
         const unsigned int tmp_size_for_thread = tmp->info()->element_size() * num_elems_processed_per_iteration;
 
         void *tmp_for_thread = tmp->buffer() + (info.thread_id * tmp_size_for_thread);
-        _run_method(src, tmp_for_thread, dst, _beta, _axis, window, _lut.data());
+#ifdef __aarch64__
+        if (_lut)
+        {
+            _run_method(src, tmp_for_thread, dst, _beta, _axis, window, _lut->data());
+        }
+        else
+#endif // __aarch64__
+        {
+            _run_method(src, tmp_for_thread, dst, _beta, _axis, window, nullptr);
+        }
     }
     else
     {

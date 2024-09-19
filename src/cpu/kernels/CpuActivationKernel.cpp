@@ -114,6 +114,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 }
 
 #ifdef __aarch64__
+// TODO (COMPMID-7511): delegate to LUTManager
 void init_lut(ActivationLayerInfo::ActivationFunction act_func,
               DataType                                data_type,
               const UniformQuantizationInfo          &qi_in,
@@ -208,6 +209,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     // Initialise lut_manager
     LUTManager &lut_manager = LUTManager::get_instance();
 
+    // TODO (COMPMID-7511): delegate to LUTManager
     if ((src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED) &&
         activation_info.activation() != ActivationFunction::RELU)
     {
@@ -223,7 +225,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
         // Create info using init list.
         const LUTInfo info = {activation_info.activation(), activation_info.a(), activation_info.b(), src->data_type(),
                               src->quantization_info().uniform()};
-        activation_info.setLookupTable65536((lut_manager.get_lut_table(info)));
+        activation_info.setLookupTable65536((lut_manager.get_lut_table<LookupTable65536>(info)));
     }
 #endif // __aarch64__
     _act_info = activation_info;
