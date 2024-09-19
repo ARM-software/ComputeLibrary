@@ -137,7 +137,7 @@ unsigned int CPUInfo::get_L2_cache_size() const
     return _impl->L2_cache_size;
 }
 
-uint64_t CPUInfo::get_sme2_vector_length() const
+uint64_t CPUInfo::get_sme2_vector_length_in_bytes() const
 {
 #ifdef ARM_COMPUTE_ENABLE_SME2
     if (this->has_sme2())
@@ -148,6 +148,12 @@ uint64_t CPUInfo::get_sme2_vector_length() const
     return 0;
 #endif // ARM_COMPUTE_ENABLE_SME2
 }
+
+uint64_t CPUInfo::get_sme2_vector_length_in_bits() const
+{
+    return get_sme2_vector_length_in_bytes() * 8;
+}
+
 unsigned int CPUInfo::get_cpu_num_excluding_little() const
 {
 #if defined(__ANDROID__)
