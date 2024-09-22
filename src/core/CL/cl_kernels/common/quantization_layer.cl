@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,6 +81,10 @@ __kernel void quantization_layer(
     // Create scale and offset vectors
     const VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE) vscale = SCALE;
     const VEC_DATA_TYPE(int, VEC_SIZE) voffset         = OFFSET;
+
+    // Quantize
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    res = CLAMP(CONVERT_RTE_VEC(val_float / vscale, int, VEC_SIZE) + voffset, MIN_QUANT_VAL, MAX_QUANT_VAL);
 #else  // defined(IS_FLOAT)
     // Load data
     VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
@@ -91,18 +95,25 @@ __kernel void quantization_layer(
 
     // Create scale and offset vectors
     const VEC_DATA_TYPE(float, VEC_SIZE) vscale = SCALE;
-    const VEC_DATA_TYPE(int, VEC_SIZE) voffset  = OFFSET;
-#endif // defined(IS_FLOAT)
+    const VEC_DATA_TYPE(float, VEC_SIZE) voffset = OFFSET;
 
     // Quantize
     VEC_DATA_TYPE(int, VEC_SIZE)
-    res = CLAMP(CONVERT_RTE_VEC(val_float / vscale, int, VEC_SIZE) + voffset, MIN_QUANT_VAL, MAX_QUANT_VAL);
+    res = CLAMP(CONVERT_RTE_VEC(val_float / vscale + voffset, int, VEC_SIZE), MIN_QUANT_VAL, MAX_QUANT_VAL);
+#endif // defined(IS_FLOAT)
 
     // Store result
     VSTORE(VEC_SIZE)
     (CONVERT(res, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)output.ptr);
 #else  //!defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
+
+    // Each thread computes a single element
+#if defined(IS_FLOAT)
     *((__global DATA_TYPE_OUT *)(output.ptr)) = (DATA_TYPE_OUT)CLAMP(CONVERT_RTE(((float) * (__global DATA_TYPE_IN *)input.ptr) / ((float)SCALE), int) + (int)OFFSET, MIN_QUANT_VAL, MAX_QUANT_VAL);
+#else // !defined(IS_FLOAT)
+    *((__global DATA_TYPE_OUT *)(output.ptr)) = (DATA_TYPE_OUT)CLAMP(CONVERT_RTE(((float) * (__global DATA_TYPE_IN *)input.ptr) / ((float)SCALE) + (float)OFFSET, int), MIN_QUANT_VAL, MAX_QUANT_VAL);
+#endif // defined(IS_FLOAT)
+
 #endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
 }
 #endif // defined(VEC_SIZE) && defined(DATA_TYPE_IN) && defined(DATA_TYPE_OUT) && defined(SCALE) && defined(OFFSET) && defined(MIN_QUANT_VAL) && defined(MAX_QUANT_VAL)

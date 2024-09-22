@@ -34,6 +34,7 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/QuantizationLayerFixture.h"
 
+#include <vector>
 
 namespace arm_compute
 {
@@ -44,8 +45,11 @@ namespace validation
 namespace
 {
 /** Tolerance for quantization */
+/// @note: We do not expect any difference between our reference and target implementations for UInt8 and Int8
 constexpr AbsoluteTolerance<uint8_t>  tolerance_u8(1);  /**< Tolerance value for comparing reference's output against implementation's output for QASYMM8 data types */
 constexpr AbsoluteTolerance<int8_t>   tolerance_s8(1);  /**< Tolerance value for comparing reference's output against implementation's output for QASYMM8_SIGNED data types */
+constexpr AbsoluteTolerance<int8_t>   zero_tolerance_s8(0);
+
 constexpr AbsoluteTolerance<uint16_t> tolerance_u16(1); /**< Tolerance value for comparing reference's output against implementation's output for QASYMM16 data types */
 const auto                            QuantizationSmallShapes = concat(datasets::Small3DShapes(), datasets::Small4DShapes());
 const auto                            QuantizationLargeShapes = concat(datasets::Large3DShapes(), datasets::Large4DShapes());
@@ -53,6 +57,38 @@ const auto                            QuantizationLargeShapes = concat(datasets:
 
 TEST_SUITE(NEON)
 TEST_SUITE(QuantizationLayer)
+
+TEST_CASE(ProperlyRoundedRequantization, framework::DatasetMode::ALL)
+{
+    // The test case here covers both Int8 and UInt8 because the underlying kernel is the same
+    const auto shape = TensorShape(18U); // > 16 for channel dim. to stress vector and leftover loops
+    const auto dtype = DataType::QASYMM8_SIGNED;
+    const auto in_qinfo = QuantizationInfo(0.5f, -1);
+    const auto out_qinfo = QuantizationInfo(1.f, -1);
+
+    Tensor input = create_tensor<Tensor>(shape, dtype, 1, in_qinfo);
+    Tensor output = create_tensor<Tensor>(shape, dtype, 1, out_qinfo);
+
+    NEQuantizationLayer quant_layer;
+    quant_layer.configure(&input, &output);
+
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    std::vector<int8_t> values =   {1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35};
+    std::vector<int8_t> expected = {0,1,2,3,4,5 ,6 ,7 ,8 ,9 ,10,11,12,13,14,15,16,17}; // (x + 1)/2 - 1
+
+    SimpleTensor<int8_t> ref {shape, dtype, 1, out_qinfo};
+
+    ARM_COMPUTE_EXPECT(values.size() == shape.x(), framework::LogLevel::ERRORS);
+
+    library->fill_static_values(Accessor(input), values);
+    library->fill_static_values(ref, expected);
+
+    quant_layer.run();
+
+    validate(Accessor(output), ref, zero_tolerance_s8);
+}
 
 // *INDENT-OFF*
 // clang-format off
