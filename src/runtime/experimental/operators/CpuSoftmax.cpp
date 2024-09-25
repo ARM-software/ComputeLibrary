@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,45 +22,54 @@
  * SOFTWARE.
  */
 
-#include "src/core/CL/CLCommandBuffer.h"
+#include "arm_compute/runtime/experimental/operators/CpuSoftmax.h"
 
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-
-#include "src/core/CL/CLCompatCommandBuffer.h"
-#include "src/core/CL/CLMutableCommandBuffer.h"
+#include "src/cpu/operators/CpuSoftmax.h"
 
 namespace arm_compute
 {
-
-std::unique_ptr<CLCommandBuffer> CLCommandBuffer::create(cl_command_queue queue)
+namespace experimental
 {
-    const auto &cl_device            = CLKernelLibrary::get().get_device();
-    const auto  has_mutable_dispatch = command_buffer_mutable_dispatch_supported(cl_device);
+namespace op
+{
 
-    if (has_mutable_dispatch)
-    {
-        return std::make_unique<CLMutableCommandBuffer>(queue);
-    }
-    else
-    {
-        return std::make_unique<CLCompatCommandBuffer>(queue);
-    }
+struct CpuSoftmax::Impl
+{
+    std::unique_ptr<arm_compute::cpu::CpuSoftmaxGeneric> op{nullptr};
+};
+
+CpuSoftmax::CpuSoftmax() : impl_(std::make_unique<Impl>())
+{
+    impl_->op = std::make_unique<cpu::CpuSoftmaxGeneric>();
 }
 
-CLCommandBuffer::CLCommandBuffer()  = default;
-CLCommandBuffer::~CLCommandBuffer() = default;
+CpuSoftmax::~CpuSoftmax() = default;
 
-CLCommandBuffer::State CLCommandBuffer::state() const
+void CpuSoftmax::configure(const ITensorInfo *src, ITensorInfo *dst, float beta, int32_t axis, bool is_log)
 {
-    return _state;
+    impl_->op->configure(src, dst, beta, axis, is_log);
 }
 
-CLCommandBuffer &CLCommandBuffer::state(CLCommandBuffer::State state)
+Status CpuSoftmax::validate(const ITensorInfo *src, const ITensorInfo *dst, float beta, int32_t axis, bool is_log)
 {
-    _state = state;
-
-    return *this;
+    return cpu::CpuSoftmaxGeneric::validate(src, dst, beta, axis, is_log);
 }
 
+void CpuSoftmax::run(ITensorPack &tensor)
+{
+    impl_->op->run(tensor);
+}
+
+experimental::MemoryRequirements CpuSoftmax::workspace() const
+{
+    return impl_->op->workspace();
+}
+
+void CpuSoftmax::prepare(ITensorPack &constants)
+{
+    ARM_COMPUTE_UNUSED(constants);
+}
+
+} // namespace op
+} // namespace experimental
 } // namespace arm_compute

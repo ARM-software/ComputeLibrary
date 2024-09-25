@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,8 +91,8 @@ void NEFullyConnectedLayer::configure(const ITensor          *input,
 
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack    = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
-    _impl->workspace =
-        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+    _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
+                                                _impl->run_pack, /* allocate_now */ false);
 
     _impl->dynamic_weights = !weights->info()->are_values_constant() && fc_info.transpose_weights &&
                              !fc_info.are_weights_reshaped && !fc_info.retain_internal_weights;
@@ -135,6 +135,7 @@ void NEFullyConnectedLayer::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace);
         _impl->op->prepare(_impl->run_pack);
 
         // Release temporary tensors that are only used in prepare stage

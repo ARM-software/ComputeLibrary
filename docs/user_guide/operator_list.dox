@@ -208,7 +208,6 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8<td>QASYMM8<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
     <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
-    <tr><td>QSYMM16<td>QSYMM16<td>S32
     <tr><td>U8<td>U8<td>U8
     <tr><td>S16<td>S16<td>S16
     <tr><td>S32<td>S32<td>S32
@@ -2319,8 +2318,9 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>U8<td>S16<td>S16
     <tr><td>S16<td>U8<td>S16
     <tr><td>S16<td>S16<td>S16
+    <tr><td>S32<td>S32<td>S32
     <tr><td>F16<td>F16<td>F16
-    <tr><td>F32<td>S32<td>F32
+    <tr><td>F32<td>F32<td>F32
     </table>
 <tr>
   <td>CLPixelWiseMultiplication
@@ -2752,7 +2752,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
   <td>
     <table>
     <tr><th>src0<th>src1<th>dst
-    <tr><td>All<td>U32, S32<td>All
+    <tr><td>All except SIZET <= 32-bits<td>U32, S32<td>All except SIZET <= 32-bits
     </table>
 <tr>
   <td>CLReverse

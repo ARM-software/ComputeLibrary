@@ -120,10 +120,7 @@
   ],
   "gpu": {
     "common": [
-      "src/core/CL/CLCommandBuffer.cpp",
-      "src/core/CL/CLCompatCommandBuffer.cpp",
       "src/core/CL/CLCompileContext.cpp",
-      "src/core/CL/CLMutableCommandBuffer.cpp",
       "src/core/CL/DefaultLWSHeuristics.cpp",
       "src/core/CL/CLHelpers.cpp",
       "src/core/CL/CLKernelLibrary.cpp",
@@ -899,6 +896,7 @@
           "common": [
             "src/cpu/operators/CpuActivation.cpp",
             "src/cpu/kernels/CpuActivationKernel.cpp",
+            "src/cpu/kernels/activation/heuristics/CpuActivationKernelHeuristics.cpp",
             "src/runtime/NEON/functions/NEActivationLayer.cpp"
           ],
           "neon": {
@@ -958,8 +956,10 @@
             "fp16":["src/cpu/kernels/add/generic/sve/fp16.cpp"]
           },
           "sve2": {
+            "common": ["src/cpu/kernels/add/generic/sme2/impl.cpp"],
             "qasymm8": [ "src/cpu/kernels/add/generic/sve2/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/add/generic/sve2/qasymm8_signed.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/add/generic/sve2/qasymm8_signed.cpp",
+                                "src/cpu/kernels/add/generic/sme2/qasymm8_signed.cpp" ],
             "qsymm16": [ "src/cpu/kernels/add/generic/sve2/qsymm16.cpp" ]
           }
         }
@@ -1586,7 +1586,7 @@
         }
       },
       "Gemm": {
-        "deps": [ "Quantize", "Add", "Sub"],
+        "deps": [ "Quantize", "Add", "Sub", "Softmax"],
           "files": {
           "common": [
             "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp",
@@ -1617,6 +1617,7 @@
             "src/runtime/experimental/operators/CpuGemmConv2d.cpp",
             "src/runtime/experimental/operators/CpuGemmDirectConv2d.cpp",
             "src/runtime/experimental/operators/CpuMul.cpp",
+            "src/runtime/experimental/operators/CpuSoftmax.cpp",
             "src/runtime/experimental/operators/CpuSub.cpp",
             "src/runtime/experimental/operators/CpuTranspose.cpp",
             "src/runtime/experimental/operators/CpuWinogradConv2d.cpp"

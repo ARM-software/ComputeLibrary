@@ -337,6 +337,8 @@ target_sources(
 	cpu/kernels/activation/generic/sve2/qasymm8.cpp
 	cpu/kernels/activation/generic/sve2/qasymm8_signed.cpp
 	cpu/kernels/activation/generic/sve2/qsymm16.cpp
+	cpu/kernels/add/generic/sme2/impl.cpp
+	cpu/kernels/add/generic/sme2/qasymm8_signed.cpp
 	cpu/kernels/add/generic/sve2/qasymm8.cpp
 	cpu/kernels/add/generic/sve2/qasymm8_signed.cpp
 	cpu/kernels/add/generic/sve2/qsymm16.cpp
@@ -734,6 +736,7 @@ target_sources(
 	cpu/kernels/activation/generic/neon/qasymm8.cpp
 	cpu/kernels/activation/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/activation/generic/neon/qsymm16.cpp
+	cpu/kernels/activation/heuristics/CpuActivationKernelHeuristics.cpp
 	cpu/kernels/add/generic/neon/fp16.cpp
 	cpu/kernels/add/generic/neon/fp32.cpp
 	cpu/kernels/add/generic/neon/impl.cpp
@@ -1035,6 +1038,7 @@ target_sources(
 	runtime/experimental/operators/CpuGemmConv2d.cpp
 	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
 	runtime/experimental/operators/CpuMul.cpp
+	runtime/experimental/operators/CpuSoftmax.cpp
 	runtime/experimental/operators/CpuSub.cpp
 	runtime/experimental/operators/CpuTranspose.cpp
 	runtime/experimental/operators/CpuWinogradConv2d.cpp

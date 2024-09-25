@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,8 +68,8 @@ void NEGEMMConv2d::configure(
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack  = {{TensorType::ACL_SRC_0, input}, {TensorType::ACL_SRC_2, biases}, {TensorType::ACL_DST, output}};
     _impl->prep_pack = {{TensorType::ACL_SRC_1, weights}, {TensorType::ACL_SRC_2, biases}};
-    _impl->workspace =
-        manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->workspace = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack,
+                                                _impl->prep_pack, /* allocate_now */ false);
 }
 
 Status NEGEMMConv2d::validate(const ITensorInfo *input,
@@ -93,6 +93,7 @@ void NEGEMMConv2d::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace);
         _impl->op->prepare(_impl->prep_pack);
 
         auto has_reshape =

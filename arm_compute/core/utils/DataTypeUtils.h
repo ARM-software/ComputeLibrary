@@ -97,9 +97,12 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::S32:
         case DataType::F32:
             return 4;
+        case DataType::F64:
         case DataType::U64:
         case DataType::S64:
             return 8;
+        case DataType::SIZET:
+            return sizeof(size_t); // portable
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
             return 0;

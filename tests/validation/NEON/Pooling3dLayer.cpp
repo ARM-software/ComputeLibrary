@@ -97,6 +97,40 @@ const auto qasymm8_signed_out_qinfo_dataset = framework::dataset::make("OutputQu
 TEST_SUITE(NEON)
 TEST_SUITE(Pooling3dLayer)
 
+TEST_CASE(SimpleIntegerAvgPooling, framework::DatasetMode::ALL)
+{
+    const auto pool_info = Pooling3dLayerInfo(PoolingType::AVG,
+        Size3D(1,1,1), Size3D(1,1,1), Padding3D(), true /* exclude padding */);
+    const auto shape = TensorShape(18U,1U,1U,1U); // > 16 for channel dim. to stress vector and leftover loops
+    const auto dtype = DataType::QASYMM8_SIGNED;
+    const auto layout = DataLayout::NDHWC;
+    const auto qinfo = QuantizationInfo(1.f, 0);
+
+    Tensor input = create_tensor<Tensor>(shape, dtype, 1, qinfo, layout);
+    Tensor output = create_tensor<Tensor>(shape, dtype, 1, qinfo, layout);
+
+    NEPooling3dLayer pool;
+    pool.configure(&input, &output, pool_info);
+
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    std::vector<int8_t> values = {-9, -8, -7, -6, -5, -4, -3, -2, -1,
+                                   0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+    ARM_COMPUTE_EXPECT(values.size() == shape.x(), framework::LogLevel::ERRORS);
+
+    library->fill_static_values(Accessor(input), values);
+
+    pool.run();
+    for(unsigned int i = 0; i < values.size(); ++i)
+    {
+        const int8_t ref = values[i];
+        const int8_t target = reinterpret_cast<int8_t *>(output.buffer())[i];
+        ARM_COMPUTE_EXPECT(ref == target, framework::LogLevel::ERRORS);
+    }
+}
+
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(

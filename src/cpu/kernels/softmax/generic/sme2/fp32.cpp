@@ -524,13 +524,8 @@ loop_3_end%=:
     );
 }
 
-void sme2_fp32_softmax(const ITensor *in,
-                       void *const,
-                       ITensor      *out,
-                       const float   beta,
-                       int           axis,
-                       const Window &window,
-                       const float  *lut_ptr)
+void sme2_fp32_softmax(
+    const ITensor *in, void *const, ITensor *out, const float beta, int axis, const Window &window, const void *lut_ptr)
 {
     ARM_COMPUTE_UNUSED(lut_ptr);
     ARM_COMPUTE_UNUSED(axis);

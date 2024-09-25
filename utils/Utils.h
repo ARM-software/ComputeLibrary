@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __UTILS_UTILS_H__
-#define __UTILS_UTILS_H__
+
+#ifndef ACL_UTILS_UTILS_H
+#define ACL_UTILS_UTILS_H
 
 /** @dir .
  *  brief Boiler plate code used by examples. Various utilities to print types, load / store assets, etc.
@@ -261,10 +262,12 @@ public:
     using result_type = T;
     /** Constructor
      *
-     * @param[in] min Minimum value of the distribution
-     * @param[in] max Maximum value of the distribution
+     * @param[in] min      Minimum value of the distribution
+     * @param[in] max      Maximum value of the distribution
+     * @param[in] portable Boolean to indicate portable conversion in-between 16-bit and other data types
      */
-    explicit uniform_real_distribution_16bit(float min = 0.f, float max = 1.0) : dist(min, max)
+    explicit uniform_real_distribution_16bit(float min = 0.f, float max = 1.0, bool portable = false)
+        : _dist(min, max), _portable(portable)
     {
     }
 
@@ -274,11 +277,24 @@ public:
      */
     T operator()(std::mt19937 &gen)
     {
-        return T(dist(gen));
+        return convert(_dist(gen));
     }
 
 private:
-    std::uniform_real_distribution<float> dist;
+    template <typename U = T>
+    inline typename std::enable_if<std::is_same<U, bfloat16>::value, bfloat16>::type convert(float x)
+    {
+        return bfloat16(x, _portable);
+    }
+
+    template <typename U = T>
+    inline typename std::enable_if<!std::is_same<U, bfloat16>::value, T>::type convert(float x)
+    {
+        return T(x);
+    }
+
+    std::uniform_real_distribution<float> _dist;
+    bool                                  _portable;
 };
 
 /** Numpy data loader */
@@ -857,4 +873,5 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
 }
 } // namespace utils
 } // namespace arm_compute
-#endif /* __UTILS_UTILS_H__*/
+
+#endif // ACL_UTILS_UTILS_H

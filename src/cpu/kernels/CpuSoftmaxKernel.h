@@ -37,8 +37,8 @@ namespace kernels
 class CpuSoftmaxKernel : public ICpuKernel<CpuSoftmaxKernel>
 {
 private:
-    using SoftmaxKernelPtr = std::add_pointer<void(
-        const ITensor *, void *const, ITensor *, float, int, const Window &, const float *)>::type;
+    using SoftmaxKernelPtr =
+        std::add_pointer<void(const ITensor *, void *const, ITensor *, float, int, const Window &, const void *)>::type;
 
 public:
     CpuSoftmaxKernel() = default;

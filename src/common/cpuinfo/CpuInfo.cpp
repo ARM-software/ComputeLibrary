@@ -39,6 +39,12 @@
 #if !defined(_WIN64)
 #include <regex.h> /* C++ std::regex takes up a lot of space in the standalone builds */
 #include <sched.h>
+#else  /*  !defined(_WIN64) */
+// clang-format off
+#include <windows.h>
+#include <sysinfoapi.h>
+#include <processthreadsapi.h>
+// clang-format on
 #endif /* !defined(_WIN64) */
 
 #include <thread>
@@ -411,7 +417,15 @@ CpuInfo CpuInfo::build()
 #elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
     CpuIsaInfo isainfo;
     isainfo.neon = true;
-    CpuInfo info(isainfo, {CpuModel::GENERIC});
+    if (IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE))
+    {
+        isainfo.dot = true;
+    }
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    const int             ncpus = sysinfo.dwNumberOfProcessors;
+    std::vector<CpuModel> cpus_model(ncpus);
+    CpuInfo               info(isainfo, cpus_model);
     return info;
 #else                                            /* #elif defined(__aarch64__) && defined(_WIN64) */
     CpuInfo info(CpuIsaInfo(), {CpuModel::GENERIC});

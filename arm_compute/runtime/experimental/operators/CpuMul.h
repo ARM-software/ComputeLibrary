@@ -56,27 +56,7 @@ public:
     ~CpuMul() override;
     /** Initialise the kernel's inputs, dst and convertion policy.
      *
-     * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
-     *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
-     *
-     * @param[in, out] src1            First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/QSYMM16/F16/F32
-     *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] src2            Second input tensor info. Data types supported: U8, QASYMM8 (only if @p src1 is QASYMM8), QASYMM8_SIGNED (only if @p src1 is QASYMM8_SIGNED), S16, S32, QSYMM16 (only if @p src1 is QSYMM16), F16 (only if @p src1 is F16), F32 (only if @p src1 is F32).
-     *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     dst             dst tensor info. Data types supported:
-     *                                 - U8, only if both inputs are U8.
-     *                                 - QASYMM8, only if both inputs are QASYMM8.
-     *                                 - QASYMM8_SIGNED, only if @p src1 is QASYMM8_SIGNED.
-     *                                 - S16.
-     *                                 - QSYMM16, only if both inputs are QSYMM16.
-     *                                 - S32, only if both inputs are S32 or both are QSYMM16.
-     *                                 - F16, only if @p src1 is F16.
-     *                                 - F32, only if both inputs are F32.
-     * @param[in]      scale           Scale to apply after multiplication.
-     *                                 Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     *                                 If both @p src1, @p src2 and @p dst are of datatype S32, scale cannot be 1/255
-     * @param[in]      overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if any of the inputs is of quantized datatype
-     * @param[in]      rounding_policy Rounding policy. @param[in]      act_info        (Optional) Activation layer information in case of a fused activation. Currently not supported.
+     * Similar to @ref NEPixelWiseMultiplication::configure()
      */
     void configure(ITensorInfo               *src1,
                    ITensorInfo               *src2,
@@ -87,7 +67,7 @@ public:
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to @ref CpuMul::configure()
+     * Similar to @ref NEPixelWiseMultiplication::validate()
      *
      * @return a status
      */

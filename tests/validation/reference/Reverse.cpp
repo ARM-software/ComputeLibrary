@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2023 Arm Limited.
+ * Copyright (c) 2018-2020, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,8 +97,20 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<int32_t> 
 }
 
 template SimpleTensor<uint8_t> reverse(const SimpleTensor<uint8_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<int8_t> reverse(const SimpleTensor<int8_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<int16_t> reverse(const SimpleTensor<int16_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<int32_t> reverse(const SimpleTensor<int32_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<uint16_t> reverse(const SimpleTensor<uint16_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<uint32_t> reverse(const SimpleTensor<uint32_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
 template SimpleTensor<half> reverse(const SimpleTensor<half> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
 template SimpleTensor<float> reverse(const SimpleTensor<float> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+
+#ifdef __aarch64__
+template SimpleTensor<int64_t> reverse(const SimpleTensor<int64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<uint64_t> reverse(const SimpleTensor<uint64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<float64_t> reverse(const SimpleTensor<float64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+#endif // __aarch64__
+
 } // namespace reference
 } // namespace validation
 } // namespace test

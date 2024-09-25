@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ITENSORALLOCATOR_H
-#define ARM_COMPUTE_ITENSORALLOCATOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_ITENSORALLOCATOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_ITENSORALLOCATOR_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -91,6 +91,12 @@ public:
      */
     virtual void free() = 0;
 
+    /** Return whether the tensor is currently allocated.
+     *
+     * @return true if the tensor is allocated, false otherwise.
+     */
+    virtual bool is_allocated() const = 0;
+
 protected:
     /** Interface to be implemented by the child class to lock the memory allocation for the CPU to access.
      *
@@ -106,4 +112,4 @@ private:
     size_t      _alignment{};            /**< Tensor's alignment in bytes */
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_ITENSORALLOCATOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_ITENSORALLOCATOR_H

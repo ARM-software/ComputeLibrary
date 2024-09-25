@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,6 +51,7 @@ struct NEConvolutionLayer::Impl
     WorkspaceData<Tensor>              workspace{};
     experimental::MemoryRequirements   aux_mem_req{};
     std::unique_ptr<IFunction>         func{nullptr};
+    bool                               is_prepared{false};
 };
 
 NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) : _impl(std::make_unique<Impl>())
@@ -113,9 +114,10 @@ void NEConvolutionLayer::configure(ITensor                   *input,
         _impl->aux_mem_req  = _impl->op->workspace();
         _impl->run_pack     = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
         _impl->prep_pack    = {{ACL_SRC_1, weights}, {ACL_SRC_2, biases}};
-        _impl->workspace =
-            manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+        _impl->workspace    = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
+                                                    _impl->prep_pack, /* allocate_now */ false);
     }
+    _impl->is_prepared = false;
 }
 
 Status NEConvolutionLayer::validate(const ITensorInfo         *input,
@@ -193,16 +195,22 @@ void NEConvolutionLayer::run()
 
 void NEConvolutionLayer::prepare()
 {
-    if (_impl->func)
+    if (!_impl->is_prepared)
     {
-        _impl->func->prepare();
-    }
-    else
-    {
-        _impl->op->prepare(_impl->prep_pack);
+        if (_impl->func)
+        {
+            _impl->func->prepare();
+        }
+        else
+        {
+            allocate_tensors(_impl->aux_mem_req, _impl->workspace);
+            _impl->op->prepare(_impl->prep_pack);
 
-        // Release temporary tensors that are only used in prepare stage
-        release_temporaries<Tensor>(_impl->aux_mem_req, _impl->workspace);
+            // Release temporary tensors that are only used in prepare stage
+            release_temporaries<Tensor>(_impl->aux_mem_req, _impl->workspace);
+        }
+
+        _impl->is_prepared = true;
     }
 }
 } // namespace arm_compute

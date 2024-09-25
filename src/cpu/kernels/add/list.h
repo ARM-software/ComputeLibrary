@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_KERNELS_ADD_LIST_H
-#define SRC_CORE_KERNELS_ADD_LIST_H
+#ifndef ACL_SRC_CPU_KERNELS_ADD_LIST_H
+#define ACL_SRC_CPU_KERNELS_ADD_LIST_H
 
 #include "src/cpu/kernels/add/generic/neon/impl.h"
+#include "src/cpu/kernels/add/generic/sme2/impl.h"
 #include "src/cpu/kernels/add/generic/sve/impl.h"
 
 namespace arm_compute
@@ -51,9 +52,10 @@ DECLARE_ADD_KERNEL(add_s32_sve);
 DECLARE_ADD_KERNEL(add_qasymm8_sve2);
 DECLARE_ADD_KERNEL(add_qasymm8_signed_sve2);
 DECLARE_ADD_KERNEL(add_qsymm16_sve2);
+DECLARE_ADD_KERNEL(add_qasymm8_signed_sme2);
 
 #undef DECLARE_ADD_KERNEL
 
 } // namespace cpu
 } // namespace arm_compute
-#endif // SRC_CORE_KERNELS_ADD_LIST_H
+#endif // ACL_SRC_CPU_KERNELS_ADD_LIST_H

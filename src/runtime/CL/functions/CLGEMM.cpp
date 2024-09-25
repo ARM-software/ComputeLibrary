@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,8 +102,8 @@ void CLGEMM::configure(const CLCompileContext &compile_context,
         _impl->run_pack  = {{ACL_SRC_0, a}, {ACL_SRC_2, c}, {ACL_DST, output}};
         _impl->prep_pack = {{ACL_SRC_1, _impl->b}};
 
-        _impl->workspace_tensors =
-            manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+        _impl->workspace_tensors = manage_workspace<CLTensor>(
+            _impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack, /* allocate_now */ false);
     }
 }
 
@@ -131,6 +131,7 @@ void CLGEMM::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace_tensors);
         _impl->op->prepare(_impl->prep_pack);
 
         auto has_reshape =

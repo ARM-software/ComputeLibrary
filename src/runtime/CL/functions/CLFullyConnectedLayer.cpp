@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,8 +97,8 @@ void CLFullyConnectedLayer::configure(const CLCompileContext &compile_context,
     {
         _impl->aux_mem_req = _impl->op->workspace();
         _impl->run_pack    = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
-        _impl->workspace =
-            manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+        _impl->workspace   = manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack,
+                                                      _impl->run_pack, /* allocate_now */ false);
     }
     else
     {
@@ -121,10 +121,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo      *input,
 
 void CLFullyConnectedLayer::run()
 {
-    if (!_impl->dynamic_weights)
-    {
-        prepare();
-    }
+    prepare();
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->op->run(_impl->run_pack);
@@ -134,26 +131,31 @@ void CLFullyConnectedLayer::prepare()
 {
     if (!_impl->is_prepared)
     {
-        _impl->op->prepare(_impl->run_pack);
-
-        // Release temporary tensors that are only used in prepare stage
-        release_temporaries<CLTensor>(_impl->aux_mem_req, _impl->workspace);
-        _impl->is_prepared = true;
-
-        // Handle weights managed infrastructure
-        if (_impl->weights_manager != nullptr && _impl->weights_manager->are_weights_managed(_impl->original_weights))
+        allocate_tensors(_impl->aux_mem_req, _impl->workspace);
+        if (!_impl->dynamic_weights)
         {
-            // Ensure that b gets marked as unused (memory released) only after the last function which uses b also finishes its prepare
-            // This is for cases where multiple functions share the same b (weights)
-            // Therefore when a function marks original b as unused, we pre-mark it in weights manager, and mark it back to used so that it doesn't get released before its last reference
-            const ITensor *original_b = _impl->original_weights;
-            if (!original_b->is_used())
+            _impl->op->prepare(_impl->run_pack);
+
+            // Release temporary tensors that are only used in prepare stage
+            release_temporaries<CLTensor>(_impl->aux_mem_req, _impl->workspace);
+
+            // Handle weights managed infrastructure
+            if (_impl->weights_manager != nullptr &&
+                _impl->weights_manager->are_weights_managed(_impl->original_weights))
             {
-                _impl->weights_manager->pre_mark_as_unused(original_b);
+                // Ensure that b gets marked as unused (memory released) only after the last function which uses b also finishes its prepare
+                // This is for cases where multiple functions share the same b (weights)
+                // Therefore when a function marks original b as unused, we pre-mark it in weights manager, and mark it back to used so that it doesn't get released before its last reference
+                const ITensor *original_b = _impl->original_weights;
+                if (!original_b->is_used())
+                {
+                    _impl->weights_manager->pre_mark_as_unused(original_b);
+                }
+                _impl->original_weights->mark_as_used();
+                _impl->weights_manager->release(_impl->original_weights);
             }
-            _impl->original_weights->mark_as_used();
-            _impl->weights_manager->release(_impl->original_weights);
         }
+        _impl->is_prepared = true;
     }
 }
 } // namespace arm_compute

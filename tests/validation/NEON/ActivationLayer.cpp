@@ -285,48 +285,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL, concat(concat(
-               combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                       framework::dataset::make("DataType", { DataType::F32,
-                                                              DataType::F16,
-                                                              DataType::QASYMM8,
-                                                              DataType::QASYMM8_SIGNED,
-                                                              DataType::QSYMM16
-                                                            })),
-                combine(framework::dataset::make("CpuExt", std::string("SVE")),
-                        framework::dataset::make("DataType", { DataType::F32,
-                                                               DataType::F16,
-                                                             }))),
-                combine(framework::dataset::make("CpuExt", std::string("SVE2")),
-                        framework::dataset::make("DataType", { DataType::QASYMM8,
-                                                               DataType::QASYMM8_SIGNED,
-                                                               DataType::QSYMM16
-                                                             }))),
-               cpu_ext, data_type)
-{
-    using namespace cpu::kernels;
-
-    cpuinfo::CpuIsaInfo cpu_isa{};
-    cpu_isa.neon = (cpu_ext == "NEON");
-    cpu_isa.sve  = (cpu_ext == "SVE");
-    cpu_isa.sve2 = (cpu_ext == "SVE2");
-    cpu_isa.fp16 = (data_type == DataType::F16);
-
-    const auto *selected_impl = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{data_type, CPUModel::GENERIC, cpu_isa,ActivationLayerInfo::ActivationFunction::BOUNDED_RELU}, cpu::KernelSelectionType::Preferred);
-
-    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
-    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_activation";
-    if( data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED)
-    {
-#ifdef __aarch64__
-        expected = "neon_q8_activation_lut";
-#else  // __aarch64__
-        expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_activation";
-#endif // __aarch64__
-    }
-    std::string actual   = selected_impl->name;
-    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
-}
 // clang-format on
 // *INDENT-ON*
 

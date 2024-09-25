@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,12 +86,12 @@ void CLWinogradConvolutionLayer::configure(const CLCompileContext    &compile_co
                          (biases != nullptr ? biases->info() : nullptr), output->info(), conv_info, act_info,
                          enable_fast_math);
 
-    _impl->run_pack = {{TensorType::ACL_SRC_0, _impl->src},
-                       {TensorType::ACL_SRC_1, _impl->weights},
-                       {TensorType::ACL_SRC_2, _impl->biases},
-                       {TensorType::ACL_DST, _impl->dst}};
-    _impl->workspace_tensors =
-        manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->run_pack);
+    _impl->run_pack          = {{TensorType::ACL_SRC_0, _impl->src},
+                                {TensorType::ACL_SRC_1, _impl->weights},
+                                {TensorType::ACL_SRC_2, _impl->biases},
+                                {TensorType::ACL_DST, _impl->dst}};
+    _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack,
+                                                          _impl->run_pack, /* allocate_now */ false);
 }
 
 Status CLWinogradConvolutionLayer::validate(const ITensorInfo         *input,
@@ -116,6 +116,7 @@ void CLWinogradConvolutionLayer::prepare()
 {
     if (!_impl->is_prepared)
     {
+        allocate_tensors(_impl->op->workspace(), _impl->workspace_tensors);
         _impl->op->prepare(_impl->run_pack);
 
         // Release Preparation tensors

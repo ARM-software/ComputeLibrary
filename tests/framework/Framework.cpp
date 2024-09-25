@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -342,6 +342,10 @@ TestResult::Status Framework::run_test(const TestInfo &info, TestCaseFactory &te
                 if(_num_iterations == 1 || i != 0)
                 {
                     profiler.start();
+                }
+                if (_prepare_function != nullptr)
+                {
+                    _prepare_function();
                 }
                 test_case->do_run();
                 test_case->do_sync();
@@ -725,6 +729,16 @@ bool Framework::new_fixture_call() const
 void Framework::set_new_fixture_call(bool val)
 {
     _new_fixture_call = val;
+}
+
+void Framework::set_prepare_function(const Framework::PrepareFunc &foo)
+{
+    _prepare_function = foo;
+}
+
+void Framework::set_seed(unsigned int seed)
+{
+    _seed = seed;
 }
 } // namespace framework
 } // namespace test

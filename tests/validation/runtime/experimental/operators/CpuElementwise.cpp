@@ -54,6 +54,7 @@ const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", {false});
 } // namespace
 
 TEST_SUITE(NEON)
+TEST_SUITE(OPERATORS)
 
 TEST_SUITE(CpuElementwiseDivision)
 template <typename T>
@@ -72,7 +73,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
 }
 TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
-TEST_SUITE_END() // CpuElementwiseMin
+TEST_SUITE_END() // CpuElementwiseDivision
 
 TEST_SUITE(CpuElementwiseMax)
 template <typename T>
@@ -91,7 +92,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
 }
 TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
-TEST_SUITE_END() // CpuElementwiseMin
+TEST_SUITE_END() // CpuElementwiseMax
 
 TEST_SUITE(CpuElementwiseMin)
 
@@ -113,7 +114,8 @@ TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // CpuElementwiseMin
 
-TEST_SUITE_END() // Neon
+TEST_SUITE_END() // OPERATORS
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

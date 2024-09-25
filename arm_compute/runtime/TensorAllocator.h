@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2019, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TENSORALLOCATOR_H
-#define ARM_COMPUTE_TENSORALLOCATOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_TENSORALLOCATOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_TENSORALLOCATOR_H
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/Memory.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -84,6 +84,8 @@ public:
      */
     void allocate() override;
 
+    bool is_allocated() const override;
+
     /** Free allocated CPU memory.
      *
      * @note The tensor must have been allocated when calling this function.
@@ -126,4 +128,4 @@ private:
     Memory             _memory;                  /**< CPU memory */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TENSORALLOCATOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_TENSORALLOCATOR_H

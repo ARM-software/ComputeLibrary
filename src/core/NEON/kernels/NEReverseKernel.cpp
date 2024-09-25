@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,8 +40,13 @@ validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const IT
 {
     ARM_COMPUTE_UNUSED(use_inverted_axis);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, axis);
-    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
+
+    // No need to check for fp16 or bf16 support in the cpu as this kernel will only use unsigned integer data types
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->element_size() > 4, "Only 32-bit and lower data types are supported");
+
+    // size_t is not a portable type
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN || input->data_type() == DataType::SIZET);
+
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->num_dimensions() > 1, "Axis must be a 1D tensor");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4,

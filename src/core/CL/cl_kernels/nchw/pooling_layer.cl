@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,9 @@
 #define POW2_OP(x, vec_size) (x)
 #endif /* defined(POOL_L2) */
 
+// Compatible with Cpu backend: Round to nearest ties to even
 #define DIV_OP(x, y) (x * (1.f / y))
+#define DIV_INT(x, y) convert_int_rte(DIV_OP(x, y))
 #define SQRT_OP(x) sqrt((x))
 
 #if defined(FP_MIXED_PRECISION) || defined(QUANTIZED)
@@ -132,7 +134,7 @@ __kernel void pooling_layer_MxN_nchw(
                 src_x = clamp(src_x, 0, SRC_WIDTH - 1);
                 VEC_DATA_TYPE(ACC_DATA_TYPE, 8)
                 data0               = VLOAD_AND_CONVERT_TO_ACC_DATA_TYPE(8, 0, (__global DATA_TYPE *)(src_addr + src_x.s0 * sizeof(DATA_TYPE) + y * src_stride_y));
-#endif // defined(POOL_AVG) || defined(POOL_L2
+#endif // defined(POOL_AVG) || defined(POOL_L2)
 
 #if defined(POOL_L2)
                 // Raise to power of 2 for L2 Pooling
@@ -176,7 +178,12 @@ __kernel void pooling_layer_MxN_nchw(
 
 #if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average pooling
-    res = DIV_OP(res, calculate_avg_scale(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
+    const ACC_DATA_TYPE avg_scale = calculate_avg_scale(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y);
+#if defined(QUANTIZED)
+    res = DIV_INT(res, avg_scale);
+#else // defined(QUANTIZED)
+    res = DIV_OP(res, avg_scale);
+#endif // defined(QUANTIZED)
 #endif /* defined(POOL_AVG) || defined(POOL_L2) */
 
 #if defined(QUANTIZED)

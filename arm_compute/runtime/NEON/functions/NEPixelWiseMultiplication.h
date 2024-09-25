@@ -69,8 +69,9 @@ public:
      * |U8             |S16            |S16            |
      * |S16            |U8             |S16            |
      * |S16            |S16            |S16            |
+     * |S32            |S32            |S32            |
      * |F16            |F16            |F16            |
-     * |F32            |S32            |F32            |
+     * |F32            |F32            |F32            |
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.

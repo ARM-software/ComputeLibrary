@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEMATH_H
-#define ARM_COMPUTE_NEMATH_H
+#ifndef ACL_SRC_CORE_NEON_NEMATH_H
+#define ACL_SRC_CORE_NEON_NEMATH_H
+
+#include "arm_compute/core/Rounding.h"
 
 #include <arm_neon.h>
 #include <array>
@@ -204,6 +206,7 @@ void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const float32x4x
  * @param[in]  in  Vector of float to be converted
  * @param[out] out Converted vector of uint8 to store the result
  */
+template <RoundingPolicy policy = RoundingPolicy::TO_ZERO>
 void convert_float32x4x4_to_uint8x16(const float32x4x4_t &in, uint8x16_t &out);
 
 /** Converts from float32x4x4_t to just one int8x16_t
@@ -211,9 +214,13 @@ void convert_float32x4x4_to_uint8x16(const float32x4x4_t &in, uint8x16_t &out);
  * @param[in]  in  Vector of float to be converted
  * @param[out] out Converted vector of uint8 to store the result
  */
+template <RoundingPolicy policy = RoundingPolicy::TO_ZERO>
 void convert_float32x4x4_to_int8x16(const float32x4x4_t &in, int8x16_t &out);
 
 /** Converts from float vector to integer vector
+ *
+ * @note: Default rounding mode is "Round to Nearest with Ties to Even"
+ *        if __aarch64__ is defined else "Round towards Zero"
  *
  * @param[in] in Float vector to converted
  *
@@ -353,4 +360,4 @@ float16_t vreduce(const float16x8_t &v);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #include "src/core/NEON/NEMath.inl"
-#endif /* ARM_COMPUTE_NEMATH_H */
+#endif // ACL_SRC_CORE_NEON_NEMATH_H

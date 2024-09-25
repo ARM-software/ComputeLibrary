@@ -40,6 +40,9 @@ namespace test
 {
 namespace validation
 {
+
+using framework::dataset::make;
+
 namespace
 {
 /** Tolerance for float operations */
@@ -48,6 +51,7 @@ RelativeTolerance<half>            tolerance_f16(half(0.2));
 
 /** Tolerance for quantized operations */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_signed(1);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -180,6 +184,39 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerQuantizedFixture<uint8_t>, fra
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() //QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall2D, NELogSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+    combine(datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::QASYMM8_SIGNED),
+        combine(make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                make("Beta", { 1.0f, 2.f })),
+        make("Axis", { 0, 1 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+    combine(datasets::Small4DShapes(),
+        make("DataType", DataType::QASYMM8_SIGNED),
+        combine(make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                make("Beta", { 1.0f, 2.f })),
+        make("Axis", { 0, -1, 1 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY,
+    combine(datasets::SoftmaxLayerLargeShapes(),
+        make("DataType", DataType::QASYMM8_SIGNED),
+        combine(make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                make("Beta", { 1.0f, 2.f })),
+        make("Axis", { 0 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() //Quantized
 
 TEST_SUITE_END() //LogSoftmaxLayer

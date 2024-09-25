@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/CPP/CPPTypes.h"
+
 #include "tests/validation/Helpers.h"
 #include "tests/framework/Asserts.h"
 
@@ -569,6 +571,40 @@ QuantizationHint suggest_mac_dst_q_info_and_bias(
     c_q_info = QuantizationInfo(scale_out, offset_out);
 
     return { c_q_info, min_bias, max_bias };
+}
+
+template<DataType data_type>
+bool config_has_dtype(const std::initializer_list<DataType> &types)
+{
+    bool dtype_exists = false;
+    for(DataType type : types)
+    {
+        dtype_exists |= (type == data_type);
+    }
+    return dtype_exists;
+}
+
+bool cpu_supports_dtypes(const std::initializer_list<DataType> &types)
+{
+    const bool cpu_has_bf16 = CPUInfo::get().has_bf16();
+    const bool cpu_has_fp16 = CPUInfo::get().has_fp16();
+    const bool config_has_fp16 = config_has_dtype<DataType::F16>(types);
+    const bool config_has_bf16 = config_has_dtype<DataType::BFLOAT16>(types);
+
+#ifndef ARM_COMPUTE_ENABLE_FP16
+    const bool fp16_enabled = false;
+#else // ARM_COMPUTE_ENABLE_FP16
+    const bool fp16_enabled = true;
+#endif // ARM_COMPUTE_ENABLE_FP16
+
+#ifndef ARM_COMPUTE_ENABLE_BF16
+    const bool bf16_enabled = false;
+#else // ARM_COMPUTE_ENABLE_BF16
+    const bool bf16_enabled = true;
+#endif // ARM_COMPUTE_ENABLE_BF16
+
+    return !(config_has_fp16 && (!cpu_has_fp16 || !fp16_enabled)) &&
+           !(config_has_bf16 && (!cpu_has_bf16 || !bf16_enabled));
 }
 
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);

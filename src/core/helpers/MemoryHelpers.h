@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_COMMON_MEMORY_HELPERS_H
-#define SRC_COMMON_MEMORY_HELPERS_H
+#ifndef ACL_SRC_CORE_HELPERS_MEMORYHELPERS_H
+#define ACL_SRC_CORE_HELPERS_MEMORYHELPERS_H
 
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/ITensorPack.h"
@@ -63,7 +63,8 @@ template <typename TensorType>
 WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirements &mem_reqs,
                                            MemoryGroup                            &mgroup,
                                            ITensorPack                            &run_pack,
-                                           ITensorPack                            &prep_pack)
+                                           ITensorPack                            &prep_pack,
+                                           bool                                    allocate_now = true)
 {
     WorkspaceData<TensorType> workspace_memory;
     for (const auto &req : mem_reqs)
@@ -94,8 +95,11 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
 
     for (auto &mem : workspace_memory)
     {
-        auto tensor = mem.tensor.get();
-        tensor->allocator()->allocate();
+        if (allocate_now || mem.lifetime == experimental::MemoryLifetime::Temporary)
+        {
+            auto tensor = mem.tensor.get();
+            tensor->allocator()->allocate();
+        }
     }
 
     return workspace_memory;
@@ -117,6 +121,28 @@ void release_prepare_tensors(WorkspaceData<TensorType> &workspace, ITensorPack &
                     workspace.end());
 }
 
+/** Allocate all tensors with Persistent or Prepare lifetime if not already allocated */
+template <typename TensorType>
+void allocate_tensors(const experimental::MemoryRequirements &mem_reqs, WorkspaceData<TensorType> &workspace)
+{
+    for (auto &ws : workspace)
+    {
+        const int slot = ws.slot;
+        for (auto &m : mem_reqs)
+        {
+            if (m.slot == slot && m.lifetime != experimental::MemoryLifetime::Temporary)
+            {
+                auto tensor = ws.tensor.get();
+                if (!tensor->allocator()->is_allocated())
+                {
+                    tensor->allocator()->allocate();
+                }
+                break;
+            }
+        }
+    }
+}
+
 /** Utility function to release tensors with lifetime marked as Prepare */
 template <typename TensorType>
 void release_temporaries(const experimental::MemoryRequirements &mem_reqs, WorkspaceData<TensorType> &workspace)
@@ -136,4 +162,4 @@ void release_temporaries(const experimental::MemoryRequirements &mem_reqs, Works
     }
 }
 } // namespace arm_compute
-#endif /* SRC_COMMON_MEMORY_HELPERS_H */
+#endif // ACL_SRC_CORE_HELPERS_MEMORYHELPERS_H

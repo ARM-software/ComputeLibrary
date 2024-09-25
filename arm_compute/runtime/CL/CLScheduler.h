@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLSCHEDULER_H
-#define ARM_COMPUTE_CLSCHEDULER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_CLSCHEDULER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_CLSCHEDULER_H
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLTypes.h"
@@ -211,6 +211,8 @@ private:
     bool                    _job_chaining_enabled;
     int                     _job_chaining_size;
     int                     _job_chaining_count;
+    unsigned int            _enqueue_count;
+    unsigned int            _flush_count;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLSCHEDULER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_CLSCHEDULER_H

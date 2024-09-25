@@ -31,6 +31,26 @@ namespace arm_compute
 {
 namespace
 {
+/** Convert float to bfloat16 in a portable way that works on older hardware
+ *
+ * @param[in] v Floating-point value to convert to bfloat
+ *
+ * @return Converted value
+ */
+inline uint16_t portable_float_to_bf16(const float v)
+{
+    const uint32_t *fromptr = reinterpret_cast<const uint32_t *>(&v);
+    uint16_t        res     = (*fromptr >> 16);
+    const uint16_t  error   = (*fromptr & 0x0000ffff);
+    uint16_t        bf_l    = res & 0x0001;
+
+    if ((error > 0x8000) || ((error == 0x8000) && (bf_l != 0)))
+    {
+        res += 1;
+    }
+    return res;
+}
+
 /** Convert float to bfloat16
  *
  * @param[in] v Floating-point value to convert to bfloat
@@ -39,9 +59,9 @@ namespace
  */
 inline uint16_t float_to_bf16(const float v)
 {
-    const uint32_t *fromptr = reinterpret_cast<const uint32_t *>(&v);
 #if defined(ARM_COMPUTE_ENABLE_BF16)
-    uint16_t res;
+    const uint32_t *fromptr = reinterpret_cast<const uint32_t *>(&v);
+    uint16_t        res;
 
     __asm __volatile("ldr    s0, [%[fromptr]]\n"
                      ".inst    0x1e634000\n" // BFCVT h0, s0
@@ -49,16 +69,10 @@ inline uint16_t float_to_bf16(const float v)
                      :
                      : [fromptr] "r"(fromptr), [toptr] "r"(&res)
                      : "v0", "memory");
-#else  /* defined(ARM_COMPUTE_ENABLE_BF16) */
-    uint16_t       res   = (*fromptr >> 16);
-    const uint16_t error = (*fromptr & 0x0000ffff);
-    uint16_t       bf_l  = res & 0x0001;
-    if ((error > 0x8000) || ((error == 0x8000) && (bf_l != 0)))
-    {
-        res += 1;
-    }
-#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
     return res;
+#else  /* defined(ARM_COMPUTE_ENABLE_BF16) */
+    return portable_float_to_bf16(v);
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 }
 
 /** Convert bfloat16 to float
@@ -90,6 +104,15 @@ public:
      */
     bfloat16(float v) : value(float_to_bf16(v))
     {
+    }
+    /** Constructor
+     *
+     * @param[in] v        Floating-point value
+     * @param[in] portable bool to indicate the conversion is to be done in a backward compatible way
+     */
+    bfloat16(float v, bool portable) : value(0)
+    {
+        value = portable ? portable_float_to_bf16(v) : float_to_bf16(v);
     }
     /** Assignment operator
      *

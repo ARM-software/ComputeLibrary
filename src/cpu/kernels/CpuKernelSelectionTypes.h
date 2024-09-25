@@ -90,6 +90,7 @@ struct CpuAddKernelDataTypeISASelectorData
     DataType            dt;
     cpuinfo::CpuIsaInfo isa;
     bool                can_use_fixedpoint;
+    bool                can_use_sme2_impl;
 };
 
 struct ScaleKernelDataTypeISASelectorData

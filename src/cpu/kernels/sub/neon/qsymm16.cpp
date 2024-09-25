@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,8 +55,6 @@ void sub_qsymm16_neon(
     const UniformQuantizationInfo iq2_info = src1->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info  = dst->info()->quantization_info().uniform();
 
-    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
-    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
     const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
 
     if (is_broadcast_across_x)
@@ -68,6 +66,9 @@ void sub_qsymm16_neon(
         const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? src1 : src0;
         const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
         const UniformQuantizationInfo non_broadcast_qinfo = non_broadcast_tensor->info()->quantization_info().uniform();
+
+        const float32x4_t vbroadcast_scale     = vdupq_n_f32(broadcast_qinfo.scale);
+        const float32x4_t vnon_broadcast_scale = vdupq_n_f32(non_broadcast_qinfo.scale);
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -87,8 +88,8 @@ void sub_qsymm16_neon(
                 const int16x8_t broadcast_value_vec = vdupq_n_s16(broadcast_value);
 
                 const float32x4x2_t bf  = {{
-                     vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(broadcast_value_vec))), vscale2),
-                     vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(broadcast_value_vec))), vscale2),
+                     vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(broadcast_value_vec))), vbroadcast_scale),
+                     vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(broadcast_value_vec))), vbroadcast_scale),
                 }};
                 const float         bfs = static_cast<int32_t>(broadcast_value) * broadcast_qinfo.scale;
 
@@ -98,24 +99,24 @@ void sub_qsymm16_neon(
                 {
                     const int16x8_t     a  = vld1q_s16(non_broadcast_input_ptr + x);
                     const float32x4x2_t af = {{
-                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(a))), vscale1),
-                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(a))), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(a))), vnon_broadcast_scale),
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(a))), vnon_broadcast_scale),
                     }};
 
                     const int32x4x4_t rf = {{
 #ifdef __aarch64__
-                        vcvtnq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(bf.val[0], af.val[0])
-                                                                      : vsubq_f32(af.val[0], bf.val[0]),
+                        vcvtnq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(af.val[0], bf.val[0])
+                                                                      : vsubq_f32(bf.val[0], af.val[0]),
                                                  invvscaleo)),
-                        vcvtnq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(bf.val[1], af.val[1])
-                                                                      : vsubq_f32(af.val[1], bf.val[1]),
+                        vcvtnq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(af.val[1], bf.val[1])
+                                                                      : vsubq_f32(bf.val[1], af.val[1]),
                                                  invvscaleo)),
 #else  //__aarch64__
-                        vcvtq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(bf.val[0], af.val[0])
-                                                                     : vsubq_f32(af.val[0], bf.val[0]),
+                        vcvtq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(af.val[0], bf.val[0])
+                                                                     : vsubq_f32(bf.val[0], af.val[0]),
                                                 invvscaleo)),
-                        vcvtq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(bf.val[1], af.val[1])
-                                                                     : vsubq_f32(af.val[1], bf.val[1]),
+                        vcvtq_s32_f32(vmulq_f32(is_broadcast_input_2 ? vsubq_f32(af.val[1], bf.val[1])
+                                                                     : vsubq_f32(bf.val[1], af.val[1]),
                                                 invvscaleo)),
 #endif //__aarch64__
                     }};
@@ -128,13 +129,16 @@ void sub_qsymm16_neon(
                 for (; x < window_end_x; ++x)
                 {
                     const float afs = static_cast<int32_t>(*(non_broadcast_input_ptr + x)) * non_broadcast_qinfo.scale;
-                    *(output_ptr + x) = quantize_qsymm16(is_broadcast_input_2 ? (bfs - afs) : (afs - bfs), oq_info);
+                    *(output_ptr + x) = quantize_qsymm16(is_broadcast_input_2 ? (afs - bfs) : (bfs - afs), oq_info);
                 }
             },
             broadcast_input, non_broadcast_input, output);
     }
     else
     {
+        const float32x4_t vscale1 = vdupq_n_f32(iq1_info.scale);
+        const float32x4_t vscale2 = vdupq_n_f32(iq2_info.scale);
+
         // Clear X Dimension on execution window as we handle manually
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));

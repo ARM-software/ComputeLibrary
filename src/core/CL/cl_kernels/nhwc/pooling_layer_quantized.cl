@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,10 +26,12 @@
 #if defined(DATA_TYPE) && defined(INITIAL_VALUE)
 #define VEC_TYPE(VEC_SIZE) VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
+#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
+#define CONVERT_RTE_STR(x, type) (convert_##type##_rte((x)))
+#define CONVERT_RTE(x, type) CONVERT_RTE_STR(x, type)
+
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
 #define VEC_FLOAT(VEC_SIZE) VEC_DATA_TYPE(float, VEC_SIZE)
-#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
-#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
 #define REQUANTIZE(VEC_SIZE, input, in_offset, out_offset, in_scale, out_scale, res)                                                                                  \
     {                                                                                                                                                                 \
@@ -148,7 +150,8 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     }
 
 #if defined(POOL_AVG)
-    res0 = (res0 + (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))(filter_size >> 1)) / filter_size;
+    // Compatible with Cpu backend: Round to nearest ties to even
+    res0 = CONVERT_RTE(CONVERT(res0, VEC_DATA_TYPE(float, VEC_SIZE)) / filter_size, VEC_INT(VEC_SIZE));
 #endif // defined(POOL_AVG)
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)

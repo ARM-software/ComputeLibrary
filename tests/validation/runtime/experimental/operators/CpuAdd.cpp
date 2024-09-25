@@ -52,6 +52,7 @@ const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", {false});
 } // namespace
 
 TEST_SUITE(NEON)
+TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuAdd)
 
 using CpuAddFixture = CpuArithmeticAdditionValidationFixture<Tensor, Accessor, experimental::op::CpuAdd>;
@@ -71,7 +72,8 @@ FIXTURE_DATA_TEST_CASE(
 TEST_SUITE_END() // U8
 
 TEST_SUITE_END() // CpuAdd
-TEST_SUITE_END() // Neon
+TEST_SUITE_END() // OPERATORS
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

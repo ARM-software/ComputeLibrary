@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CORE_NEON_NEMATH_INL
+#define ACL_SRC_CORE_NEON_NEMATH_INL
+
+#include "arm_compute/core/Error.h"
 
 #include "src/core/utils/Math.h"
 #include "support/ToolchainSupport.h"
@@ -492,25 +497,71 @@ inline void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const flo
     out.val[2] = vqmovn_u16(vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in1.val[2])), vqmovn_u32(vcvtq_u32_f32(in2.val[2]))));
 }
 
-inline void convert_float32x4x4_to_uint8x16(const float32x4x4_t &in, uint8x16_t &out)
+template <RoundingPolicy policy>
+inline uint32x4_t vconvert_to_uint(float32x4_t in)
 {
-    const auto low  = vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in.val[0])), vqmovn_u32(vcvtq_u32_f32(in.val[1])));
-    const auto high = vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in.val[2])), vqmovn_u32(vcvtq_u32_f32(in.val[3])));
-    out             = vcombine_u8(vqmovn_u16(low), vqmovn_u16(high));
+    switch (policy)
+    {
+        case RoundingPolicy::TO_ZERO:
+            return vcvtq_u32_f32(in);
+#ifdef __aarch64__
+        case RoundingPolicy::TO_NEAREST_EVEN:
+            return vcvtnq_u32_f32(in);
+        case RoundingPolicy::TO_NEAREST_UP:
+            return vcvtaq_u32_f32(in);
+#endif // __aarch64__
+        default:
+            ARM_COMPUTE_ERROR("Unsupported Rounding Policy");
+    }
 }
 
+template <RoundingPolicy policy>
+inline int32x4_t vconvert_to_int(float32x4_t in)
+{
+    switch (policy)
+    {
+        case RoundingPolicy::TO_ZERO:
+            return vcvtq_s32_f32(in);
+#ifdef __aarch64__
+        case RoundingPolicy::TO_NEAREST_EVEN:
+            return vcvtnq_s32_f32(in);
+        case RoundingPolicy::TO_NEAREST_UP:
+            return vcvtaq_s32_f32(in);
+#endif // __aarch64__
+        default:
+            ARM_COMPUTE_ERROR("Unsupported Rounding Policy");
+    }
+}
+
+template <RoundingPolicy policy>
+inline void convert_float32x4x4_to_uint8x16(const float32x4x4_t &in, uint8x16_t &out)
+{
+    const auto low =
+        vcombine_u16(vqmovn_u32(vconvert_to_uint<policy>(in.val[0])), vqmovn_u32(vconvert_to_uint<policy>(in.val[1])));
+    const auto high =
+        vcombine_u16(vqmovn_u32(vconvert_to_uint<policy>(in.val[2])), vqmovn_u32(vconvert_to_uint<policy>(in.val[3])));
+    out = vcombine_u8(vqmovn_u16(low), vqmovn_u16(high));
+}
+
+template <RoundingPolicy policy>
 inline void convert_float32x4x4_to_int8x16(const float32x4x4_t &in, int8x16_t &out)
 {
-    const auto low  = vcombine_s16(vqmovn_s32(vcvtq_s32_f32(in.val[0])), vqmovn_s32(vcvtq_s32_f32(in.val[1])));
-    const auto high = vcombine_s16(vqmovn_s32(vcvtq_s32_f32(in.val[2])), vqmovn_s32(vcvtq_s32_f32(in.val[3])));
-    out             = vcombine_s8(vqmovn_s16(low), vqmovn_s16(high));
+    const auto low =
+        vcombine_s16(vqmovn_s32(vconvert_to_int<policy>(in.val[0])), vqmovn_s32(vconvert_to_int<policy>(in.val[1])));
+    const auto high =
+        vcombine_s16(vqmovn_s32(vconvert_to_int<policy>(in.val[2])), vqmovn_s32(vconvert_to_int<policy>(in.val[3])));
+    out = vcombine_s8(vqmovn_s16(low), vqmovn_s16(high));
 }
 
 template <>
 inline uint8x16_t convert_float_to_int<float32x4x4_t, uint8x16_t>(const float32x4x4_t &in)
 {
     uint8x16_t out;
-    convert_float32x4x4_to_uint8x16(in, out);
+#ifdef __aarch64__
+    convert_float32x4x4_to_uint8x16<RoundingPolicy::TO_NEAREST_EVEN>(in, out);
+#else  //  __aarch64__
+    convert_float32x4x4_to_uint8x16<RoundingPolicy::TO_ZERO>(in, out);
+#endif //  __aarch64__
     return out;
 }
 
@@ -524,7 +575,11 @@ template <>
 inline int8x16_t convert_float_to_int<float32x4x4_t, int8x16_t>(const float32x4x4_t &in)
 {
     int8x16_t out;
-    convert_float32x4x4_to_int8x16(in, out);
+#ifdef __aarch64__
+    convert_float32x4x4_to_int8x16<RoundingPolicy::TO_NEAREST_EVEN>(in, out);
+#else  //  __aarch64__
+    convert_float32x4x4_to_int8x16<RoundingPolicy::TO_ZERO>(in, out);
+#endif //  __aarch64__
     return out;
 }
 
@@ -730,3 +785,5 @@ inline float16_t vreduce(const float16x8_t &v)
 #endif /* DOXYGEN_SKIP_THIS */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
+
+#endif // ACL_SRC_CORE_NEON_NEMATH_INL

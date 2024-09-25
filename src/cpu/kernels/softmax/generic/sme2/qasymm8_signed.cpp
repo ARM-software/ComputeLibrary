@@ -587,9 +587,11 @@ void sme2_qasymm8_signed_softmax_lut_512VL(const ITensor *in,
                                            const float    beta,
                                            int            axis,
                                            const Window  &window,
-                                           const float   *lut_ptr)
+                                           const void    *lut_ptr)
 {
     ARM_COMPUTE_UNUSED(axis);
+
+    auto lut_fp32_ptr = reinterpret_cast<const float *>(lut_ptr);
 
     const auto *src_info = in->info();
     const auto *dst_info = out->info();
@@ -645,7 +647,8 @@ void sme2_qasymm8_signed_softmax_lut_512VL(const ITensor *in,
     auto       *k_tmp         = reinterpret_cast<float *>(tmp_float_ptr + k_tmp_offset);
     auto       *k_dst         = reinterpret_cast<int8_t *>(out->buffer() + k_dst_offset);
 
-    sme2_qasymm8_signed_softmax_kernel_512VL(k_src, k_dst, beta, k_shape, k_src_strides, k_dst_strides, lut_ptr, k_tmp);
+    sme2_qasymm8_signed_softmax_kernel_512VL(k_src, k_dst, beta, k_shape, k_src_strides, k_dst_strides, lut_fp32_ptr,
+                                             k_tmp);
 }
 
 } // namespace cpu

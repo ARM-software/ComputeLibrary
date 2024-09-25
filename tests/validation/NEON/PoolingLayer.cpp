@@ -160,6 +160,40 @@ const auto PoolingLayerIndicesDatasetFPSmall = combine(combine(combine(framework
 const auto PoolingLayerKernelIndicesDatasetFPSmall = combine(combine(combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(7, 7) })),
                                                                      framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 1, 1, 1) })),
                                                              framework::dataset::make("ExcludePadding", { false }));
+
+TEST_CASE(SimpleIntegerAvgPooling, framework::DatasetMode::ALL)
+{
+    const auto pool_info = PoolingLayerInfo(PoolingType::AVG, Size2D(1,1), DataLayout::NHWC);
+    const auto shape = TensorShape(18U,1U,1U); // > 16 for channel dim. to stress vector and leftover loops
+    const auto dtype = DataType::QASYMM8_SIGNED;
+    const auto layout = DataLayout::NHWC;
+    const auto qinfo = QuantizationInfo(1.f, 0);
+
+    Tensor input = create_tensor<Tensor>(shape, dtype, 1, qinfo, layout);
+    Tensor output = create_tensor<Tensor>(shape, dtype, 1, qinfo, layout);
+
+    NEPoolingLayer pool;
+    pool.configure(&input, &output, pool_info);
+
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    std::vector<int8_t> values = {-9, -8, -7, -6, -5, -4, -3, -2, -1,
+                                   0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+    ARM_COMPUTE_EXPECT(values.size() == shape.x(), framework::LogLevel::ERRORS);
+
+    library->fill_static_values(Accessor(input), values);
+    pool.run();
+
+    for(unsigned int i = 0; i < values.size(); ++i)
+    {
+        const int8_t ref = values[i];
+        const int8_t target = reinterpret_cast<int8_t *>(output.buffer())[i];
+        ARM_COMPUTE_EXPECT(ref == target, framework::LogLevel::ERRORS);
+    }
+}
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallNoneUnitShapes(),

@@ -281,8 +281,12 @@ if env['cppthreads']:
 
 if env['openmp']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_OPENMP_SCHEDULER', 1)])
-    env.Append(CXXFLAGS = ['-fopenmp'])
-    env.Append(LINKFLAGS = ['-fopenmp'])
+    if not 'windows' in env['os']:
+        env.Append(CXXFLAGS = ['-fopenmp'])
+        env.Append(LINKFLAGS = ['-fopenmp'])
+    else:
+        env.Append(CXXFLAGS = ['-openmp'])
+        env.Append(LINKFLAGS = ['libomp.lib'])
 
 # Validate and define state
 if env['estate'] == 'auto':

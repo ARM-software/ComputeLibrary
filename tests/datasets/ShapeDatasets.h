@@ -339,6 +339,30 @@ public:
     }
 };
 
+/** Data set containing pairs of small tensor shapes that are broadcast compatible in non-x dimensions. */
+class SmallShapesNonXBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    SmallShapesNonXBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+    ShapeDataset("Shape0",
+    {
+        TensorShape{ 9U, 9U },
+        TensorShape{ 128U, 1U, 5U, 3U },
+        TensorShape{ 9U, 9U, 3U, 4U },
+        TensorShape{ 1U, 16U, 10U, 2U, 128U }
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 9U, 1U, 2U },
+        TensorShape{ 128U, 64U, 1U, 3U },
+        TensorShape{ 9U, 1U, 3U },
+        TensorShape{ 1U, 1U, 1U, 1U, 128U }
+    }))
+    {
+    }
+};
+
 class TemporaryLimitedSmallShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
 {
 public:

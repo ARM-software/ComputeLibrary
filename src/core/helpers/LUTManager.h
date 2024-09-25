@@ -34,28 +34,51 @@
 
 namespace arm_compute
 {
+#ifdef __aarch64__
+using LookupTable256   = std::array<qasymm8_t, 256>;
+using LookupTable65536 = std::array<float16_t, 65536>;
+#endif // __aarch64__
+
+enum class LUTType
+{
+    Activation,  // Determined by activation type
+    Exponential, // e^x
+};
 
 struct LUTInfo
 {
-    ActivationLayerInfo::ActivationFunction act;
-    float                                   alpha;
-    float                                   beta;
-    DataType                                dt;
-    UniformQuantizationInfo                 qinfo;
+    // For exponential lookup
+    LUTInfo(LUTType lut, float b, DataType type, UniformQuantizationInfo info)
+        : act(), alpha(1.0f), beta(b), dt(type), qinfo(info), type(lut)
+    {
+    }
+
+    // For activation functions
+    LUTInfo(ActivationFunction func, float a, float b, DataType type, UniformQuantizationInfo info)
+        : act(func), alpha(a), beta(b), dt(type), qinfo(info), type(LUTType::Activation)
+    {
+    }
 
     // Operators enable use of map with Lutinfo as key
     friend bool operator<(const LUTInfo &l, const LUTInfo &r)
     {
-        const auto l_tup = std::make_tuple(l.act, l.alpha, l.beta, l.dt, l.qinfo.scale, l.qinfo.offset);
-        const auto r_tup = std::make_tuple(r.act, r.alpha, r.beta, r.dt, r.qinfo.scale, r.qinfo.offset);
+        const auto l_tup = std::make_tuple(l.type, l.act, l.alpha, l.beta, l.dt, l.qinfo.scale, l.qinfo.offset);
+        const auto r_tup = std::make_tuple(r.type, r.act, r.alpha, r.beta, r.dt, r.qinfo.scale, r.qinfo.offset);
 
         return l_tup < r_tup;
     }
     bool operator==(const LUTInfo &l) const
     {
-        return this->act == l.act && this->alpha == l.alpha && this->beta == l.beta && this->dt == l.dt &&
-               this->qinfo == l.qinfo;
+        return this->type == l.type && this->act == l.act && this->alpha == l.alpha && this->beta == l.beta &&
+               this->dt == l.dt && this->qinfo == l.qinfo;
     }
+
+    ActivationLayerInfo::ActivationFunction act;
+    float                                   alpha;
+    float                                   beta;
+    DataType                                dt;
+    UniformQuantizationInfo                 qinfo;
+    LUTType                                 type; // Default is Activation.
 };
 
 /* Class to handle getting look up table */
@@ -66,10 +89,10 @@ public:
 
     static LUTManager &get_instance();
 #ifdef __aarch64__
-    std::shared_ptr<ActivationLayerInfo::LookupTable65536> get_lut_table(LUTInfo info);
+    std::shared_ptr<LookupTable65536> get_lut_table(LUTInfo info);
 
 private:
-    std::map<LUTInfo, std::weak_ptr<ActivationLayerInfo::LookupTable65536>> map_fp16{};
+    std::map<LUTInfo, std::weak_ptr<LookupTable65536>> map_fp16{};
 #endif // __aarch64__
 };
 
