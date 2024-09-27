@@ -85,7 +85,7 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             //   * pn9: all-true for 32 bit values
             //   * pn8: all-true for 8-bit values
             //
-            //   * z0-z15 the 256 LUT values of exp(-scale*beta*x) for x in QASYMM8, stored as FP32 values
+            //   * z0-z11, z20-z23 the 256 LUT values of exp(-scale*beta*x) for x in QASYMM8, stored as FP32 values
 
             // Prepares all constant values
 
@@ -115,8 +115,12 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             add x2, x2, #256
             .inst 0xa040c448 //ld1w    { z8.s - z11.s }, pn9/z, [x2]
             add x2, x2, #256
-            .inst 0xa040c44c //ld1w    { z12.s - z15.s }, pn9/z, [x2]
+            .inst 0xa040c454 //ld1w    { z20.s - z23.s }, pn9/z, [x2]
 
+            dup z24.b, #0
+            dup z25.b, #0
+            dup z26.b, #0
+            dup z27.b, #0
 
 loop_3_start%=:
             // for index_3 in shape_3 downto 1
@@ -156,8 +160,8 @@ loop_1_start%=:
 find_max_body_start%=:
             cmp x1, x13
             b.eq find_max_body_end%=
-            .inst 0xa0018374 // ld1b    { z20.b - z23.b }, pn8/z, [x27, x1]  z20-z23: x
-            .inst 0xc134b811 // umax    { z16.b - z19.b }, { z16.b - z19.b }, { z20.b - z23.b } z16-z19: max_value = max(max_value, x)
+            .inst 0xa001836c // ld1b    { z12.b - z15.b }, pn8/z, [x27, x1]  z12-z15: x
+            .inst 0xc12cb811 // umax    { z16.b - z19.b }, { z16.b - z19.b }, { z12.b - z15.b } z16-z19: max_value = max(max_value, x)
             add x1, x1, #256 // Advance index by 256 bytes/integers: Z registers = 2048-bit data = 256 8-bit integers.
             b find_max_body_start%=
 find_max_body_end%=:
@@ -181,12 +185,17 @@ find_max_leftover_end%=:
             dup z16.b, z16.b[0]
             uunpklo z16.h, z16.b // Using unpack instructions to align the max value with the FP32 entries in the LUT for use in the TBX instruction
             uunpklo z16.s, z16.h
+            mov z12.d, z16.d // Save to z12, as z16 will be overwritten.
 
             mov x1, #0 // reset index
-            dup z25.s, #0
+            dup z28.s, #0
 
             mov x1, #0
+            dup z13.s, #-16
 
+            // ==================================================
+            // Step 2: Exponentiation and Summation
+            // ==================================================
 regularize_start%=:
             whilelo p1.b, x1, %x[length]
             b.none regularize_end%=
@@ -201,192 +210,147 @@ regularize_start%=:
             punpkhi  p5.h, p4.b
             punpklo  p4.h, p4.b
 
-            ld1b z17.b, p1/z, [x27, x1] //z17: input data
+            ld1b z16.b, p1/z, [x27, x1] //z16: input data
 
-            uunpklo z18.h, z17.b //Using unpack instructions to align the input QASYMM8 values with the FP32 entries in the LUT for use in the TBX instruction
-            uunpkhi z19.h, z17.b
+            uunpklo z17.h, z16.b //Using unpack instructions to align the input QASYMM8 values with the FP32 entries in the LUT for use in the TBX instruction
+            uunpkhi z18.h, z16.b
 
-            uunpklo z17.s, z18.h // z17 = low  low  input QASYMM8 values
-            uunpkhi z18.s, z18.h // z18 = low  high input QASYMM8 values
+            uunpklo z16.s, z17.h // z16 = low  low  input QASYMM8 values
+            uunpkhi z17.s, z17.h // z17 = low  high input QASYMM8 values
 
-            uunpkhi z20.s, z19.h // z20 = high high input QASYMM8 values
-            uunpklo z19.s, z19.h // z19 = high low  input QASYMM8 values
+            uunpkhi z19.s, z18.h // z19 = high high input QASYMM8 values
+            uunpklo z18.s, z18.h // z18 = high low  input QASYMM8 values
 
-            sub z17.s, z16.s, z17.s                                          // z12: x =  max_value - input_data
-            sub z18.s, z16.s, z18.s                                          // z13: x =  max_value - input_data
-            sub z19.s, z16.s, z19.s                                          // z14: x =  max_value - input_data
-            sub z20.s, z16.s, z20.s                                          // z15: x =  max_value - input_data
+            sub z16.s, z12.s, z16.s                                          // z16: x =  max_value - input_data
+            sub z17.s, z12.s, z17.s                                          // z17: x =  max_value - input_data
+            sub z18.s, z12.s, z18.s                                          // z18: x =  max_value - input_data
+            sub z19.s, z12.s, z19.s                                          // z19: x =  max_value - input_data
 
-            tbx z21.s, z0.s, z17.s  // Look-up entries 0-15 in the LUT.
-            tbx z22.s, z0.s, z18.s
-            tbx z23.s, z0.s, z19.s
-            tbx z24.s, z0.s, z20.s
+            tbx z24.s, z0.s, z16.s  // Look-up entries 0-15 in the LUT.
+            tbx z25.s, z0.s, z17.s
+            tbx z26.s, z0.s, z18.s
+            tbx z27.s, z0.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z1.s, z17.s  // Look-up entries 16-31 in the LUT.
-            tbx z22.s, z1.s, z18.s
-            tbx z23.s, z1.s, z19.s
-            tbx z24.s, z1.s, z20.s
+            tbx z24.s, z1.s, z16.s  // Look-up entries 16-31 in the LUT.
+            tbx z25.s, z1.s, z17.s
+            tbx z26.s, z1.s, z18.s
+            tbx z27.s, z1.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z2.s, z17.s  // Look-up entries 32-47 in the LUT.
-            tbx z22.s, z2.s, z18.s
-            tbx z23.s, z2.s, z19.s
-            tbx z24.s, z2.s, z20.s
+            tbx z24.s, z2.s, z16.s  // Look-up entries 32-47 in the LUT.
+            tbx z25.s, z2.s, z17.s
+            tbx z26.s, z2.s, z18.s
+            tbx z27.s, z2.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z3.s, z17.s  // Look-up entries 48-63 in the LUT.
-            tbx z22.s, z3.s, z18.s
-            tbx z23.s, z3.s, z19.s
-            tbx z24.s, z3.s, z20.s
+            tbx z24.s, z3.s, z16.s  // Look-up entries 48-63 in the LUT.
+            tbx z25.s, z3.s, z17.s
+            tbx z26.s, z3.s, z18.s
+            tbx z27.s, z3.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z4.s, z17.s  // Look-up entries 64-79 in the LUT.
-            tbx z22.s, z4.s, z18.s
-            tbx z23.s, z4.s, z19.s
-            tbx z24.s, z4.s, z20.s
+            tbx z24.s, z4.s, z16.s  // Look-up entries 64-79 in the LUT.
+            tbx z25.s, z4.s, z17.s
+            tbx z26.s, z4.s, z18.s
+            tbx z27.s, z4.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z5.s, z17.s  // Look-up entries 80-95 in the LUT.
-            tbx z22.s, z5.s, z18.s
-            tbx z23.s, z5.s, z19.s
-            tbx z24.s, z5.s, z20.s
+            tbx z24.s, z5.s, z16.s  // Look-up entries 80-95 in the LUT.
+            tbx z25.s, z5.s, z17.s
+            tbx z26.s, z5.s, z18.s
+            tbx z27.s, z5.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z6.s, z17.s  // Look-up entries 96-111 in the LUT.
-            tbx z22.s, z6.s, z18.s
-            tbx z23.s, z6.s, z19.s
-            tbx z24.s, z6.s, z20.s
+            tbx z24.s, z6.s, z16.s  // Look-up entries 96-111 in the LUT.
+            tbx z25.s, z6.s, z17.s
+            tbx z26.s, z6.s, z18.s
+            tbx z27.s, z6.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z7.s, z17.s  // Look-up entries 112-127 in the LUT.
-            tbx z22.s, z7.s, z18.s
-            tbx z23.s, z7.s, z19.s
-            tbx z24.s, z7.s, z20.s
+            tbx z24.s, z7.s, z16.s  // Look-up entries 112-127 in the LUT.
+            tbx z25.s, z7.s, z17.s
+            tbx z26.s, z7.s, z18.s
+            tbx z27.s, z7.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z8.s, z17.s  // Look-up entries 128-143 in the LUT.
-            tbx z22.s, z8.s, z18.s
-            tbx z23.s, z8.s, z19.s
-            tbx z24.s, z8.s, z20.s
+            tbx z24.s, z8.s, z16.s  // Look-up entries 128-143 in the LUT.
+            tbx z25.s, z8.s, z17.s
+            tbx z26.s, z8.s, z18.s
+            tbx z27.s, z8.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z9.s, z17.s  // Look-up entries 144-159 in the LUT.
-            tbx z22.s, z9.s, z18.s
-            tbx z23.s, z9.s, z19.s
-            tbx z24.s, z9.s, z20.s
+            tbx z24.s, z9.s, z16.s  // Look-up entries 144-159 in the LUT.
+            tbx z25.s, z9.s, z17.s
+            tbx z26.s, z9.s, z18.s
+            tbx z27.s, z9.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z10.s, z17.s  // Look-up entries 160-175 in the LUT.
-            tbx z22.s, z10.s, z18.s
-            tbx z23.s, z10.s, z19.s
-            tbx z24.s, z10.s, z20.s
+            tbx z24.s, z10.s, z16.s  // Look-up entries 160-175 in the LUT.
+            tbx z25.s, z10.s, z17.s
+            tbx z26.s, z10.s, z18.s
+            tbx z27.s, z10.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z11.s, z17.s  // Look-up entries 176-191 in the LUT.
-            tbx z22.s, z11.s, z18.s
-            tbx z23.s, z11.s, z19.s
-            tbx z24.s, z11.s, z20.s
+            tbx z24.s, z11.s, z16.s  // Look-up entries 176-191 in the LUT.
+            tbx z25.s, z11.s, z17.s
+            tbx z26.s, z11.s, z18.s
+            tbx z27.s, z11.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z12.s, z17.s  // Look-up entries 192-207 in the LUT.
-            tbx z22.s, z12.s, z18.s
-            tbx z23.s, z12.s, z19.s
-            tbx z24.s, z12.s, z20.s
+            tbx z24.s, z20.s, z16.s  // Look-up entries 192-207 in the LUT.
+            tbx z25.s, z20.s, z17.s
+            tbx z26.s, z20.s, z18.s
+            tbx z27.s, z20.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z13.s, z17.s  // Look-up entries 208-223 in the LUT.
-            tbx z22.s, z13.s, z18.s
-            tbx z23.s, z13.s, z19.s
-            tbx z24.s, z13.s, z20.s
+            tbx z24.s, z21.s, z16.s  // Look-up entries 208-223 in the LUT.
+            tbx z25.s, z21.s, z17.s
+            tbx z26.s, z21.s, z18.s
+            tbx z27.s, z21.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z14.s, z17.s  // Look-up entries 224-239 in the LUT.
-            tbx z22.s, z14.s, z18.s
-            tbx z23.s, z14.s, z19.s
-            tbx z24.s, z14.s, z20.s
+            tbx z24.s, z22.s, z16.s  // Look-up entries 224-239 in the LUT.
+            tbx z25.s, z22.s, z17.s
+            tbx z26.s, z22.s, z18.s
+            tbx z27.s, z22.s, z19.s
 
-            sub z17.s, z17.s, #16
-            sub z18.s, z18.s, #16
-            sub z19.s, z19.s, #16
-            sub z20.s, z20.s, #16
+            .inst 0xc1adab10 //    add {z16.s-z19.s}, {z16.s-z19.s}, z13.s
 
-            tbx z21.s, z15.s, z17.s  // Look-up entries 240-255 in the LUT.
-            tbx z22.s, z15.s, z18.s
-            tbx z23.s, z15.s, z19.s
-            tbx z24.s, z15.s, z20.s
+            tbx z24.s, z23.s, z16.s  // Look-up entries 240-255 in the LUT.
+            tbx z25.s, z23.s, z17.s
+            tbx z26.s, z23.s, z18.s
+            tbx z27.s, z23.s, z19.s
 
 
-            st1w z21.s, p2, [x29, x1, LSL #2]// z21 store exp(-scale*beta*x) into the tmp tensor
-            fadd z25.s, p2/m, z25.s, z21.s
+            st1w z24.s, p2, [x29, x1, LSL #2]// z24 store exp(-scale*beta*x) into the tmp tensor
+            fadd z28.s, p2/m, z28.s, z24.s
             add x1, x1, #16
 
-            st1w z22.s, p3, [x29, x1, LSL #2]// z22 store exp(-scale*beta*x) into the tmp tensor
-            fadd z25.s, p3/m, z25.s, z22.s
+            st1w z25.s, p3, [x29, x1, LSL #2]// z25 store exp(-scale*beta*x) into the tmp tensor
+            fadd z28.s, p3/m, z28.s, z25.s
             add x1, x1, #16
 
-            st1w z23.s, p4, [x29, x1, LSL #2]// z23 store exp(-scale*beta*x) into the tmp tensor
-            fadd z25.s, p4/m, z25.s, z23.s
+            st1w z26.s, p4, [x29, x1, LSL #2]// z26 store exp(-scale*beta*x) into the tmp tensor
+            fadd z28.s, p4/m, z28.s, z26.s
             add x1, x1, #16
 
-            st1w z24.s, p5, [x29, x1, LSL #2]// z24 store exp(-scale*beta*x) into the tmp tensor
-            fadd z25.s, p5/m, z25.s, z24.s
+            st1w z27.s, p5, [x29, x1, LSL #2]// z27 store exp(-scale*beta*x) into the tmp tensor
+            fadd z28.s, p5/m, z28.s, z27.s
             add x1, x1, #16
 
             b regularize_start%=
@@ -395,9 +359,9 @@ regularize_end%=:
             mov w9, 0x0000
             movk w9, 0x4380, LSL #16 // Moving 256.f into w9 to scale - via multiplication (division by reciprocal) - the floating point [0,1] range of the results to the [0,255] integer range of QASYMM8
             dup z29.s, w9
-            faddv s25, p0, z25.s
-            fdiv s25, s29, s25
-            dup z25.s, z25.s[0] // z25: 256.f/sum. 256 is needed to get the full range and 1/sum is part of softmax.
+            faddv s28, p0, z28.s
+            fdiv s28, s29, s28
+            dup z28.s, z28.s[0] // z28: 256.f/sum. 256 is needed to get the full range and 1/sum is part of softmax.
 
             // ==================================================
             // Step 3: Normalize
@@ -408,36 +372,36 @@ normalize_body_start%=:
             b.eq normalize_body_end%=
 
             mov x2, x1       // Preserve the index into x2 for the final store to dst.
+            .inst 0xa001c7ac // ld1w    { z12.s - z15.s }, pn9/z, [x29, x1, lsl #2]
+            add x1, x1, #64
             .inst 0xa001c7b0 // ld1w    { z16.s - z19.s }, pn9/z, [x29, x1, lsl #2]
             add x1, x1, #64
-            .inst 0xa001c7b4 // ld1w    { z20.s - z23.s }, pn9/z, [x29, x1, lsl #2]
-            add x1, x1, #64
 
-            // z16-z23: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
-            fmul z16.s, z25.s, z16.s
-            fmul z17.s, z25.s, z17.s
-            fmul z18.s, z25.s, z18.s
-            fmul z19.s, z25.s, z19.s
-            fmul z20.s, z25.s, z20.s
-            fmul z21.s, z25.s, z21.s
-            fmul z22.s, z25.s, z22.s
-            fmul z23.s, z25.s, z23.s
+            // z12-z19: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
+            fmul z12.s, z28.s, z12.s
+            fmul z13.s, z28.s, z13.s
+            fmul z14.s, z28.s, z14.s
+            fmul z15.s, z28.s, z15.s
+            fmul z16.s, z28.s, z16.s
+            fmul z17.s, z28.s, z17.s
+            fmul z18.s, z28.s, z18.s
+            fmul z19.s, z28.s, z19.s
 
-            // z16-z23: convert the FP32 values from the tmp tensor to uint32.
+            // z12-z19: convert the FP32 values from the tmp tensor to uint32.
+            fcvtzu z12.s, p0/m, z12.s
+            fcvtzu z13.s, p0/m, z13.s
+            fcvtzu z14.s, p0/m, z14.s
+            fcvtzu z15.s, p0/m, z15.s
             fcvtzu z16.s, p0/m, z16.s
             fcvtzu z17.s, p0/m, z17.s
             fcvtzu z18.s, p0/m, z18.s
             fcvtzu z19.s, p0/m, z19.s
-            fcvtzu z20.s, p0/m, z20.s
-            fcvtzu z21.s, p0/m, z21.s
-            fcvtzu z22.s, p0/m, z22.s
-            fcvtzu z23.s, p0/m, z23.s
 
-            // z16-z17: narrow the uint32 values into uint8 and saturate them.
-            .inst 0xc133e230 // uqcvt    z16.b, { z16.s - z19.s }
-            .inst 0xc133e2b1 // uqcvt    z17.b, { z20.s - z23.s }
+            // z12-z13: narrow the uint32 values into uint8 and saturate them.
+            .inst 0xc133e1ac // uqcvt    z12.b, { z12.s - z15.s }
+            .inst 0xc133e22d // uqcvt    z13.b, { z16.s - z19.s }
 
-            dup z20.s, z25.s[0] // Juggling the value to z20 as z25 will be overwritten by the load below
+            dup z16.s, z28.s[0] // Juggling the value to z16 as z28 will be overwritten by the load below
 
             .inst 0xa001c7b8 // ld1w    { z24.s - z27.s }, pn9/z, [x29, x1, lsl #2]
             add x1, x1, #64
@@ -445,14 +409,14 @@ normalize_body_start%=:
             add x1, x1, #64
 
             // z24-z31: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
-            fmul z24.s, z20.s, z24.s
-            fmul z25.s, z20.s, z25.s
-            fmul z26.s, z20.s, z26.s
-            fmul z27.s, z20.s, z27.s
-            fmul z28.s, z20.s, z28.s
-            fmul z29.s, z20.s, z29.s
-            fmul z30.s, z20.s, z30.s
-            fmul z31.s, z20.s, z31.s
+            fmul z24.s, z16.s, z24.s
+            fmul z25.s, z16.s, z25.s
+            fmul z26.s, z16.s, z26.s
+            fmul z27.s, z16.s, z27.s
+            fmul z28.s, z16.s, z28.s
+            fmul z29.s, z16.s, z29.s
+            fmul z30.s, z16.s, z30.s
+            fmul z31.s, z16.s, z31.s
 
             // z24-z31: convert the FP32 values from the tmp tensor to uint32.
             fcvtzu z24.s, p0/m, z24.s
@@ -464,13 +428,13 @@ normalize_body_start%=:
             fcvtzu z30.s, p0/m, z30.s
             fcvtzu z31.s, p0/m, z31.s
 
-            // z18-z19: narrow the uint32 values into uint8 and saturate them.
-            .inst 0xc133e332 // uqcvt    z18.b, { z24.s - z27.s }
-            .inst 0xc133e3b3 // uqcvt    z19.b, { z28.s - z31.s }
+            // z14-z15: narrow the uint32 values into uint8 and saturate them.
+            .inst 0xc133e32e // uqcvt    z14.b, { z24.s - z27.s }
+            .inst 0xc133e3af // uqcvt    z15.b, { z28.s - z31.s }
 
-            .inst 0xa0228390 // st1b    { z16.b - z19.b }, pn8, [x28, x2]
+            .inst 0xa022838c // st1b    { z12.b - z15.b }, pn8, [x28, x2]
 
-            dup z25.s, z20.s[0] // Juggling the value back to z25 as z20 will be overwritten by the next iteration or z25 will be used below.
+            dup z28.s, z16.s[0] // Juggling the value back to z28 as z16 will be overwritten by the next iteration
 
 b normalize_body_start%=
 normalize_body_end%=:
@@ -491,32 +455,32 @@ normalize_leftover_start%=:
 
             mov x2, x1 // Preserve the index into x2 for the final store to dst.
 
-            // z20-z23: load exp(-scale*beta*x) from the tmp tensor
-            ld1w z20.s, p2/z, [x29, x1, LSL #2]
+            // z12-z15: load exp(-scale*beta*x) from the tmp tensor
+            ld1w z12.s, p2/z, [x29, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z21.s, p3/z, [x29, x1, LSL #2]
+            ld1w z13.s, p3/z, [x29, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z22.s, p4/z, [x29, x1, LSL #2]
+            ld1w z14.s, p4/z, [x29, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z23.s, p5/z, [x29, x1, LSL #2]
+            ld1w z15.s, p5/z, [x29, x1, LSL #2]
             add x1, x1, #16
 
-            // z20-z23: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
-            fmul z20.s, z25.s, z20.s
-            fmul z21.s, z25.s, z21.s
-            fmul z22.s, z25.s, z22.s
-            fmul z23.s, z25.s, z23.s
+            // z12-z15: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
+            fmul z12.s, z28.s, z12.s
+            fmul z13.s, z28.s, z13.s
+            fmul z14.s, z28.s, z14.s
+            fmul z15.s, z28.s, z15.s
 
-            // z20-23: convert the FP32 values from the tmp tensor to uint32.
-            fcvtzu z20.s, p0/m, z20.s
-            fcvtzu z21.s, p0/m, z21.s
-            fcvtzu z22.s, p0/m, z22.s
-            fcvtzu z23.s, p0/m, z23.s
+            // z12-z15: convert the FP32 values from the tmp tensor to uint32.
+            fcvtzu z12.s, p0/m, z12.s
+            fcvtzu z13.s, p0/m, z13.s
+            fcvtzu z14.s, p0/m, z14.s
+            fcvtzu z15.s, p0/m, z15.s
 
-            .inst 0xc133e2b3 // uqcvt    z19.b, { z20.s - z23.s }, narrow the uint32 values into uint8 and saturate them into z19.
+            .inst 0xc133e1b3 // uqcvt    z19.b, { z12.s - z15.s }, narrow the uint32 values into uint8 and saturate them into z19.
 
             st1b z19.b, p1, [x28, x2]
 
@@ -550,7 +514,7 @@ loop_3_end%=:
           [dst_stride_3] "r"(dst_strides[3]),                            //
           [length] "r"(shape[0])                                         //
         : "cc", "memory",                                                //
-          "p0", "p1", "p2", "p3", "p4",                                  //
+          "p0", "p1", "p2", "p3", "p4", "p5",                            //
           "x2", "x9", "x13",                                             //
           "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", //
           "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7",                //
