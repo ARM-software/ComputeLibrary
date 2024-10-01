@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -306,7 +306,7 @@ void CpuIm2ColKernel::configure(const ITensorInfo   *src,
     _kernel_height   = kernel_dims.height;
     _input_pad_right = input_pad_right;
     _dilation        = dilation;
-    _convolved_dims  = scaled_dimensions(src->dimension(width_idx), dst->dimension(height_idx), _kernel_width,
+    _convolved_dims  = scaled_dimensions(src->dimension(width_idx), src->dimension(height_idx), _kernel_width,
                                          _kernel_height, _conv_info, _dilation);
     _has_bias        = has_bias;
 
