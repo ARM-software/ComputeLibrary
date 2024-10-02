@@ -102,7 +102,7 @@ public:
      *
      * @param[in] v Floating-point value
      */
-    bfloat16(float v) : value(float_to_bf16(v))
+    explicit bfloat16(float v) : value(float_to_bf16(v))
     {
     }
     /** Constructor
