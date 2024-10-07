@@ -207,8 +207,14 @@
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 #define REGISTER_BF16_NEON(func_name) &(func_name)
-#else /* !(defined(ARM_COMPUTE_ENABLE_BF16))*/
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+#define REGISTER_BF16_SVE(func_name) &(func_name)
+#endif /* !defined(ARM_COMPUTE_ENABLE_SVE)*/
+#else  /* !(defined(ARM_COMPUTE_ENABLE_BF16))*/
 #define REGISTER_BF16_NEON(func_name) nullptr
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+#define REGISTER_BF16_SVE(func_name) nullptr
+#endif /* !defined(ARM_COMPUTE_ENABLE_SVE)*/
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16)*/
 
 #endif // ACL_SRC_CORE_COMMON_REGISTRARS_H

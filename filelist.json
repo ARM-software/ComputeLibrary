@@ -2306,7 +2306,7 @@
             "qasymm8_signed":["src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp"]
           },
           "sve": {
-            "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ]
+            "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp", "src/cpu/kernels/softmax/generic/sve/impl_bf16.cpp" ]
           },
           "sve2":{
             "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],

@@ -232,6 +232,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::Dataset
 }
 TEST_SUITE_END() //FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
+#ifdef ARM_COMPUTE_ENABLE_BF16
+constexpr AbsoluteTolerance<float> tolerance_bf16{0.02f};
+TEST_SUITE(BF16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<bfloat16>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SmallShapes(),
+        make("DataType", DataType::BFLOAT16),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0 })))
+{
+    if(CPUInfo::get().has_bf16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_bf16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+TEST_SUITE_END() //BF16
+#endif /* ARM_COMPUTE_ENABLE_BF16 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall2D, NESoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT,

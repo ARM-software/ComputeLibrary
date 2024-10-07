@@ -34,6 +34,7 @@
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/helpers/LUTManager.h"
 #include "src/core/helpers/Utils.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/softmax/list.h"
@@ -51,6 +52,14 @@ namespace
 
 /* Softmax */
 static const std::vector<typename CpuSoftmaxKernel::SoftmaxKernel> available_kernels = {
+#if defined(ARM_COMPUTE_ENABLE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+    {"sve_bf16_softmax",
+     [](const SoftmaxKernelDataTypeISASelectorData &data)
+     { return (!data.is_log && data.dt == DataType::BFLOAT16 && data.isa.sve && data.axis == 0); },
+     REGISTER_BF16_SVE(sve_softmax_bf16)},
+#endif // defined(ARM_COMPUTE_ENABLE_SVE)
+#endif // defined(ARM_COMPUTE_ENABLE_BF16)
     {"sme2_fp32_softmax",
      [](const SoftmaxKernelDataTypeISASelectorData &data)
      { return (!data.is_log && data.dt == DataType::F32 && data.isa.sme2 && data.axis == 0); },
@@ -110,7 +119,7 @@ Status validate_arguments_softmax(
     // Check input
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::F16, DataType::F32);
+                                                         DataType::F16, DataType::F32, DataType::BFLOAT16);
 
     ARM_COMPUTE_RETURN_ERROR_ON(axis < 0 || axis > 3);
 
@@ -212,6 +221,14 @@ void CpuSoftmaxKernel::configure(
 
 #ifdef __aarch64__
     const std::string uk_name = uk->name;
+
+    if (src->data_type() == DataType::BFLOAT16)
+    {
+        LUTManager &lutmanager = LUTManager::get_instance();
+        LUTInfo     info       = {LUTType::Exponential, beta, DataType::BFLOAT16, UniformQuantizationInfo()};
+        _lut_bf16              = lutmanager.get_lut_table<LookupTable65536>(info);
+    }
+
     if (uk_name == "sme2_qu8_softmax_lut_512VL" || uk_name == "sme2_qs8_softmax_lut_512VL")
     {
         UniformQuantizationInfo qinfo = src->quantization_info().uniform();
@@ -272,7 +289,11 @@ void CpuSoftmaxKernel::run_op(ITensorPack &tensors, const Window &window, const 
     }
     else
     {
+#ifdef __aarch64__
+        _run_method(src, nullptr, dst, _beta, _axis, window, _lut_bf16.get());
+#else  // __aarch64__
         _run_method(src, nullptr, dst, _beta, _axis, window, nullptr);
+#endif // __aarch64__
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,19 +103,97 @@ SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, in
     return dst;
 }
 
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+SimpleTensor<T> softmax_layer_bfloat16(const SimpleTensor<T> &src, float beta, int32_t axis, bool is_log)
+{
+    // Create reference
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
+
+    const int32_t n_dims = static_cast<int32_t>(src.shape().num_dimensions());
+    ARM_COMPUTE_ERROR_ON(axis < -n_dims || axis >= n_dims);
+
+    const unsigned int actual_axis = static_cast<unsigned int>(wrap_around(axis, n_dims));
+    Window             window;
+    window.use_tensor_dimensions(src.shape());
+    const unsigned int axis_dimension = src.shape()[actual_axis];
+    window.set(actual_axis, Window::Dimension(0, 1, 1));
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        // Find max along axis
+        Coordinates offset(id);
+        offset.set(actual_axis, 0);
+        T max = *reinterpret_cast<const T *>(src(offset));
+        float max_f = float(max);
+        for(unsigned int axis_id = 1; axis_id < axis_dimension; ++axis_id)
+        {
+            offset.set(actual_axis, axis_id);
+            const T val = *reinterpret_cast<const T *>(src(offset));
+            float val_f = float(val);
+
+            if(val_f > max_f)
+            {
+                max_f = val_f;
+            }
+        }
+
+        // Regularize
+        float sum(0.f);
+        for(unsigned int axis_id = 0; axis_id < axis_dimension; ++axis_id)
+        {
+            offset.set(actual_axis, axis_id);
+            const T val = *reinterpret_cast<const T *>(src(offset));
+
+            float val_f = float(val);
+            float beta_f = float(beta);
+            float       res{ (val_f - max_f) *beta_f };
+            if(is_log)
+            {
+                sum += std::exp(res);
+            }
+            else
+            {
+                res = std::exp(res);
+                sum += res;
+            }
+            *reinterpret_cast<T *>(dst(offset)) = res;
+        }
+
+        // Normalize
+        for(unsigned int axis_id = 0; axis_id < axis_dimension; ++axis_id)
+        {
+            offset.set(actual_axis, axis_id);
+            const T val = *reinterpret_cast<const T *>(dst(offset));
+            float val_f = float(val);
+            if(is_log)
+            {
+                *reinterpret_cast<T *>(dst(offset)) = val - static_cast<T>(std::log(sum));
+            }
+            else
+            {
+                *reinterpret_cast<T *>(dst(offset)) = (val_f / sum);
+            }
+        }
+    });
+    return dst;
+}
+
 template SimpleTensor<float> softmax_layer_generic(const SimpleTensor<float> &src, float beta, int32_t axis, bool is_log);
 template SimpleTensor<half> softmax_layer_generic(const SimpleTensor<half> &src, float beta, int32_t axis, bool is_log);
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis, bool is_log)
 {
-    return softmax_layer_generic<T>(src, beta, axis, is_log);
+    if(std::is_same<T, bfloat16>::value){
+        return softmax_layer_bfloat16<T>(src, beta, axis, is_log);
+    }else{
+        return softmax_layer_generic<T>(src, beta, axis, is_log);
+    }
 }
 
 template < typename T, typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type >
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis, bool is_log)
-{
-    const QuantizationInfo output_quantization_info = arm_compute::get_softmax_output_quantization_info(src.data_type(), is_log);
+{    const QuantizationInfo output_quantization_info = arm_compute::get_softmax_output_quantization_info(src.data_type(), is_log);
 
     SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float> dst_tmp = softmax_layer<float>(src_tmp, beta, axis, is_log);
@@ -127,6 +205,7 @@ template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float
 template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta, int32_t axis, bool is_log);
 template SimpleTensor<uint8_t> softmax_layer(const SimpleTensor<uint8_t> &src, float beta, int32_t axis, bool is_log);
 template SimpleTensor<int8_t> softmax_layer(const SimpleTensor<int8_t> &src, float beta, int32_t axis, bool is_log);
+template SimpleTensor<bfloat16> softmax_layer(const SimpleTensor<bfloat16> &src, float beta, int32_t axis, bool is_log);
 
 } // namespace reference
 } // namespace validation

@@ -84,7 +84,8 @@ private:
     std::string      _name{};
     int              _axis{};
 #ifdef __aarch64__
-    std::shared_ptr<LookupTable256> _lut{nullptr};
+    std::shared_ptr<LookupTable256>   _lut{nullptr};
+    std::shared_ptr<LookupTable65536> _lut_bf16 = nullptr;
 #endif // __aarch64__
 };
 } // namespace kernels

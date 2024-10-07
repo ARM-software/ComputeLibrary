@@ -328,6 +328,7 @@ target_sources(
 	cpu/kernels/scale/sve/qasymm8.cpp
 	cpu/kernels/scale/sve/qasymm8_signed.cpp
 	cpu/kernels/softmax/generic/sve/impl.cpp
+	cpu/kernels/softmax/generic/sve/impl_bf16.cpp
 )
 
 target_sources(
