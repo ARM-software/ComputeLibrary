@@ -602,7 +602,9 @@ else:
         env.Append(CXXFLAGS = ['-O3'])
     else:
         # on windows we use clang-cl which does not support the option -O3
-        env.Append(CXXFLAGS = ['-O2'])
+        if not version_at_least(compiler_ver, '17.0.0'):
+            # Disable optimizations in clang 17 or later because the compiler crashes with -O2
+            env.Append(CXXFLAGS = ['-O2'])
 
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
