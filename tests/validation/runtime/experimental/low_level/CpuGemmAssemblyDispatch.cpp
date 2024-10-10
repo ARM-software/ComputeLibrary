@@ -50,7 +50,7 @@ constexpr AbsoluteTolerance<float> tolerance_f(
 RelativeTolerance<half_float::half> rel_tolerance_f16(half(
     0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for FP16 data types */
 const AbsoluteTolerance<float>      abs_tolerance_f16(
-         0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
+    0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
 constexpr float tolerance_num = 0.07f; /**< Tolerance number for FP16 data types */
 #endif                                 /* ARM_COMPUTE_ENABLE_FP16 */
 /** CNN data types */
@@ -206,28 +206,42 @@ DATA_TEST_CASE(ValidateAllDataTypes,
                framework::DatasetMode::ALL,
                combine(
                     datasets::AllDataTypes("DataType"),
+                    datasets::AllDataTypes("DataType"),
+                    datasets::AllDataTypes("DataType"),
                     make("fixed_format", {true, false})),
-               data_type, fixed_format)
+               lhs_data_type, rhs_data_type, output_data_type, fixed_format)
 {
     auto gemm_info = GEMMInfo();
-    auto lhs_info = TensorInfo(TensorShape(21U, 13U), 1, data_type);
-    auto rhs_info = TensorInfo(TensorShape(33U, 21U), 1, data_type);
-    auto output_info = TensorInfo(TensorShape(33U, 13U), 1, data_type);
+    auto lhs_info = TensorInfo(TensorShape(21U, 13U), 1, lhs_data_type);
+    auto rhs_info = TensorInfo(TensorShape(33U, 21U), 1, rhs_data_type);
+    auto output_info = TensorInfo(TensorShape(33U, 13U), 1, output_data_type);
     gemm_info.set_fixed_format(fixed_format);
 
     if (fixed_format) {
-        gemm_info.set_weight_format(WeightFormat::OHWIo4);
+        WeightFormat wf = WeightFormat::ANY;
+        gemm_info.set_accumulate(false);
+        gemm_info.set_weight_format(wf);
+
+        experimental::op::ll::CpuGemmAssemblyDispatch::has_opt_impl(wf, &lhs_info, &rhs_info, nullptr, &output_info, gemm_info);
+        gemm_info.set_weight_format(wf);
+        gemm_info.set_fast_math(rhs_data_type == DataType::BFLOAT16);
         rhs_info.set_data_layout(DataLayout::NCHW);
     }
 
-    bool expected = (data_type == DataType::F32) && !fixed_format;
+#ifdef ARM_COMPUTE_ENABLE_BF16
+    bool expected = (lhs_data_type == DataType::F32 || lhs_data_type == DataType::BFLOAT16) && (lhs_data_type == rhs_data_type) &&
+                        (output_data_type == DataType::F32 || ((lhs_data_type == DataType::BFLOAT16) && (output_data_type == DataType::BFLOAT16) && fixed_format));
+#else // ARM_COMPUTE_ENABLE_BF16
+    bool expected = (lhs_data_type == DataType::F32) && (lhs_data_type == rhs_data_type) && (output_data_type == DataType::F32);
+#endif // ARM_COMPUTE_ENABLE_BF16
 
-#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
-    expected = expected || (data_type == DataType::F32);
-#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #ifdef ARM_COMPUTE_ENABLE_FP16
-    expected = expected || ((data_type == DataType::F16) && cpu_supports_dtypes({DataType::F16}) && !fixed_format);
+    expected = expected || ((lhs_data_type == DataType::F16) && (rhs_data_type == DataType::F16) && (output_data_type == DataType::F16) && cpu_supports_dtypes({DataType::F16}) && !fixed_format);
 #endif // ARM_COMPUTE_ENABLE_FP16
+
+#ifndef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
+    expected = expected && !fixed_format;
+#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 
     bool is_valid = bool(experimental::op::ll::CpuGemmAssemblyDispatch::validate(&lhs_info.clone()->set_is_resizable(true), &rhs_info.clone()->set_is_resizable(true), nullptr, &output_info.clone()->set_is_resizable(true), gemm_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
@@ -246,27 +260,23 @@ TEST_SUITE(Float)
 DATA_TEST_CASE(ValidateAccumulate,
                framework::DatasetMode::ALL,
                combine(
-                    zip(make("In0",{ TensorShape(21U, 13U) }),
+                    make("In0",{ TensorShape(21U, 13U) }),
                     make("In1", { TensorShape(33U, 21U) }),
-                    make("Dst", { TensorShape(33U, 13U) })),
-                    zip(
-                    make("is_c_null", { false, false, false, true }),
-                    make("Expected", { true, true, true, true }))),
-               shape_a, shape_b, shape_dst, is_c_null, expected)
+                    make("Dst", { TensorShape(33U, 13U) }),
+                    make("Expected", { true })),
+               shape_a, shape_b, shape_dst, expected)
 {
-    ARM_COMPUTE_UNUSED(is_c_null);
     /* Accumulation test for GEMM kernels */
     // Create tensors
     TensorInfo in_a(shape_a, 1, DataType::F32);
     TensorInfo in_b(shape_b, 1, DataType::F32);
-    TensorInfo in_c(shape_dst, 1, DataType::F32);
     TensorInfo dst(shape_dst, 1, DataType::F32);
 
     GEMMInfo gemm_info = GEMMInfo();
     gemm_info.set_accumulate(true);
 
     // Validate accumulation
-    Status status = experimental::op::ll::CpuGemmAssemblyDispatch::validate(&in_a, &in_b, (is_c_null ? nullptr : &in_c), &dst, gemm_info);
+    Status status = experimental::op::ll::CpuGemmAssemblyDispatch::validate(&in_a, &in_b, nullptr, &dst, gemm_info);
     ARM_COMPUTE_EXPECT((expected ==  bool(status)), framework::LogLevel::ERRORS);
 }
 
