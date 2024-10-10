@@ -340,13 +340,13 @@ protected:
         gemm_info.set_fixed_format(true);
         gemm_info.set_accumulate(false);
         gemm_info.set_weight_format(computed_weight_format);
-        gemm_info.set_fast_math(is_fixed_format_fast_math(computed_weight_format));
 
         const bool kernel_found = bool(
             FunctionType::has_opt_impl(computed_weight_format, a.info(), b.info(), nullptr, dst.info(), gemm_info));
 
         ARM_COMPUTE_ASSERT(kernel_found);
         gemm_info.set_weight_format(computed_weight_format);
+        gemm_info.set_fast_math(is_fixed_format_fast_math(computed_weight_format));
         TensorType b_transformed = create_tensor<TensorType>(prepare_weights(*b.info(), computed_weight_format));
 
         a.info()->set_are_values_constant(false);

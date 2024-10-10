@@ -79,21 +79,28 @@ void CpuGemmAssemblyDispatch::configure(
 Status CpuGemmAssemblyDispatch::validate(
     const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const GEMMInfo &gemm_info)
 {
-    if (gemm_info.reinterpret_input_as_3d() != false || gemm_info.depth_output_gemm3d() != false ||
-        gemm_info.reshape_b_only_on_first_run() != true)
+    if (gemm_info.reinterpret_input_as_3d() || gemm_info.depth_output_gemm3d() ||
+        !gemm_info.reshape_b_only_on_first_run())
     {
-        return Status(ErrorCode::RUNTIME_ERROR);
+        return Status(ErrorCode::RUNTIME_ERROR, "unsupported arguments in gemm_info");
     }
     bool a_data_type_ok = a->data_type() == DataType::F32 || a->data_type() == DataType::F16;
     bool b_data_type_ok = b->data_type() == DataType::F32 || b->data_type() == DataType::F16;
+    bool c_data_type_ok = c == nullptr;
     bool d_data_type_ok = d->data_type() == DataType::F32 || d->data_type() == DataType::F16;
+    bool bf16_ok        = ((a->data_type() == DataType::BFLOAT16 && b->data_type() == DataType::BFLOAT16) ||
+                    b->data_type() == DataType::BFLOAT16) &&
+                   (d->data_type() == DataType::BFLOAT16 || d->data_type() == DataType::F32);
+
     bool fixed_format_dtype_ok =
         (!gemm_info.fixed_format() ||
-         (a->data_type() == DataType::F32 && b->data_type() == DataType::F32 && d->data_type() == DataType::F32));
+         (a->data_type() == DataType::F32 && b->data_type() == DataType::F32 && d->data_type() == DataType::F32) ||
+         (a->data_type() == DataType::F16 && b->data_type() == DataType::F16 && d->data_type() == DataType::F16) ||
+         bf16_ok);
 
-    if (!(a_data_type_ok && b_data_type_ok && d_data_type_ok && fixed_format_dtype_ok))
+    if (!((a_data_type_ok && b_data_type_ok && c_data_type_ok && d_data_type_ok && fixed_format_dtype_ok) || bf16_ok))
     {
-        return Status(ErrorCode::RUNTIME_ERROR);
+        return Status(ErrorCode::RUNTIME_ERROR, "datatype is not supported");
     }
 
     return cpu::CpuGemmAssemblyDispatch::validate(a, b, c, d, init_assembly_metadata(gemm_info));

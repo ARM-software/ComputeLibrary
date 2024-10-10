@@ -111,6 +111,13 @@ public:
                    const GEMMInfo    &gemm_info = GEMMInfo());
 
     /** Indicates whether or not this function can be used to process the given parameters.
+     * Valid data type configurations:
+     * |src0         |src1        |src2      |dst            |
+     * |:------------|:-----------|:---------|:--------------|
+     * |F32          |F32         |nullptr   |F32            |
+     * |F16          |F16         |nullptr   |F16            |
+     * |BFLOAT16     |BFLOAT16    |nullptr   |BFLOAT16       |
+     * |BFLOAT16     |BFLOAT16    |nullptr   |BFLOAT32       |
      *
      * @param[in] a         Input tensor info (Matrix A)
      * @param[in] b         Input tensor info (Matrix B)
