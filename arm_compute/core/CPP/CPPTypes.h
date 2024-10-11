@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 
+#include <cstdint>
 #include <memory>
 
 namespace arm_compute

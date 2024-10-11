@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_RUNTIME_MEMORY_REGION_H
-#define ARM_COMPUTE_RUNTIME_MEMORY_REGION_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_MEMORYREGION_H
+#define ACL_ARM_COMPUTE_RUNTIME_MEMORYREGION_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IMemoryRegion.h"
 
 #include <cstddef>
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -100,4 +101,4 @@ protected:
     void                    *_ptr;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_RUNTIME_MEMORY_REGION_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_MEMORYREGION_H
