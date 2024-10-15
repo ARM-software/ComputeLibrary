@@ -53,13 +53,7 @@ using framework::dataset::make;
 namespace
 {
 const RelativeTolerance<float> rel_tolerance_f32(0.01f);
-#ifdef ARM_COMPUTE_ENABLE_SME
-// TODO(COMPMID-6011): SME kernels and the reference model use different rounding mode.
-// Temporarily increase the tolerance for quantized data.
-constexpr AbsoluteTolerance<float> tolerance_qasymm8(1.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#else  // ARM_COMPUTE_ENABLE_SME
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#endif // ARM_COMPUTE_ENABLE_SME
 } // namespace
 
 TEST_SUITE(NEON)

@@ -246,22 +246,16 @@ void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
 
 int32_t saturating_rounding_doubling_highmul(int32_t a, int32_t b)
 {
-    bool       overflow = a == b && a == std::numeric_limits<int32_t>::min();
-    int64_t    a_64(a);
-    int64_t    b_64(b);
-    int64_t    ab_64 = a_64 * b_64;
-    const bool is_positive_or_zero =
-        a == 0 || b == 0 || (std::signbit(static_cast<double>(a)) == std::signbit(static_cast<double>(b)));
-    int32_t nudge        = is_positive_or_zero ? (1 << 30) : (1 - (1 << 30));
-    int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
-    return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;
+    bool    overflow = a == b && a == std::numeric_limits<int32_t>::min();
+    int64_t a_64(a);
+    int64_t b_64(b);
+    int64_t ab_x2_64 = a_64 * b_64 * 2;
+    return overflow ? std::numeric_limits<int32_t>::max() : (ab_x2_64 >> 32);
 }
 
 inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
 {
-    const int32_t mask      = (1 << exponent) - 1;
-    const int32_t threshold = (mask >> 1) + (x < 0 ? 1 : 0);
-    return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
+    return (exponent == 0) ? x : ((x + (1 << (exponent - 1))) >> exponent);
 }
 
 int32_t multiply_by_quantized_multiplier(int32_t input, int32_t qmul, int32_t shift)

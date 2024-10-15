@@ -429,25 +429,19 @@ inline float32x2_t vsin_f32(float32x2_t val)
 
 inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int32x4_t exponent)
 {
-    const int32x4_t shift_vec  = vnegq_s32(exponent);
-    const int32x4_t fixup      = vshrq_n_s32(vandq_s32(x, shift_vec), 31);
-    const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
-    return vrshlq_s32(fixed_up_x, shift_vec);
+    const int32x4_t shift_vec = vnegq_s32(exponent);
+    return vrshlq_s32(x, shift_vec);
 }
 
 inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent)
 {
-    const int32x4_t shift_vec  = vdupq_n_s32(-exponent);
-    const int32x4_t fixup      = vshrq_n_s32(vandq_s32(x, shift_vec), 31);
-    const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
-    return vrshlq_s32(fixed_up_x, shift_vec);
+    const int32x4_t shift_vec = vdupq_n_s32(-exponent);
+    return vrshlq_s32(x, shift_vec);
 }
 
 inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
 {
-    const int32_t mask      = (1 << exponent) - 1;
-    const int32_t threshold = (mask >> 1) + (x < 0 ? 1 : 0);
-    return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
+    return (exponent == 0) ? x : ((x + (1 << (exponent - 1))) >> exponent);
 }
 
 inline float32x4x4_t convert_uint8x16_to_float32x4x4(const uint8x16_t &in)

@@ -46,9 +46,6 @@ void sme2_gemv_s8qa_dot_16VL (
 
     unsigned long flags=0;
     ka.B_ptr = B_ptr;
-    if (qp->c_offset > qp->minval) {
-        flags |= 0x20;
-    }
     __asm__ __volatile__(
       "ptrue p8.b\n"
       ".inst 0xd503477f  // SMSTART ZA\n"
@@ -189,7 +186,6 @@ void sme2_gemv_s8qa_dot_16VL (
       "uzp1 z12.b, z12.b, z19.b\n"
       "st1b { z12.b }, p1, [x25]\n"
       "addvl x25, x25, #1\n"
-      "13:"  // Width 1: Output done
       "b 44f\n"
       "14:"  // Width 2
       "mov x23, %x[A_ptr]\n"
@@ -317,7 +313,6 @@ void sme2_gemv_s8qa_dot_16VL (
       "st1b { z20.b }, p2, [x25]\n"
       "st1b { z12.b }, p1, [x25, #1, MUL VL]\n"
       "addvl x25, x25, #2\n"
-      "23:"  // Width 2: Output done
       "b 44f\n"
       "24:"  // Width 3
       "mov x20, #0x2\n"
@@ -473,7 +468,6 @@ void sme2_gemv_s8qa_dot_16VL (
       "st1b { z12.b }, p2, [x25, #1, MUL VL]\n"
       "st1b { z16.b }, p1, [x25, #2, MUL VL]\n"
       "addvl x25, x25, #3\n"
-      "33:"  // Width 3: Output done
       "b 44f\n"
       "34:"  // Width 4
       "mov x20, #0x3\n"
@@ -657,7 +651,6 @@ void sme2_gemv_s8qa_dot_16VL (
       "st1b { z24.b }, p2, [x25, #2, MUL VL]\n"
       "st1b { z20.b }, p1, [x25, #3, MUL VL]\n"
       "addvl x25, x25, #4\n"
-      "43:"  // Width 4: Output done
       "subs x26, x26, #0x4\n"
       "sub %x[N], %x[N], x28, LSL #2\n"
       "bgt 4b\n"

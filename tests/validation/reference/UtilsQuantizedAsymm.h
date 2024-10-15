@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H
-#define ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_UTILSQUANTIZEDASYMM_H
+#define ACL_TESTS_VALIDATION_REFERENCE_UTILSQUANTIZEDASYMM_H
 
 #include <cstdint>
 
@@ -48,24 +48,22 @@ inline int64_t to_int64(int32_t val)
 #endif // __clang__
 } // namespace
 
-/** Rounded to nearest division by a power-of-two. */
+/** Rounded to nearest division by a power-of-two.
+ * This implements the documented behaviour of SRSHL with a negative shift. */
 inline int32_t asymm_rounding_divide_by_pow2(int32_t x, int exponent)
 {
-    const int32_t mask      = (1 << exponent) - 1;
-    const int32_t threshold = (mask >> 1) + (x < 0 ? 1 : 0);
-    return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
+    return (exponent == 0) ? x : ((x + (1 << (exponent-1))) >> exponent);
 }
 
-/** Multiplication of two integers. The same as ARMv7 Arm® Neon™ VQRDMULH instruction. */
+/** Doubling multiplication of two integers, returning high half.
+ * This implements the documented behaviour of SQDMULH */
 inline int32_t asymm_int_mult(int32_t a, int32_t b)
 {
     const bool    overflow     = a == b && a == std::numeric_limits<int32_t>::min();
     const int64_t a_64         = to_int64(a);
     const int64_t b_64         = to_int64(b);
-    const int64_t ab_64        = a_64 * b_64;
-    const int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
-    const int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
-    return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;
+    const int64_t ab_x2_64     = a_64 * b_64 * 2;
+    return overflow ? std::numeric_limits<int32_t>::max() : (ab_x2_64 >> 32);
 }
 
 /** Quantize down the input value in range [min, max]. */
@@ -88,4 +86,4 @@ inline int32_t quantize_down_scale_by_fixedpoint(int32_t val, int32_t result_mul
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_UTILSQUANTIZEDASYMM_H

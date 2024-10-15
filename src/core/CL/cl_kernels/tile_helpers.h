@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
-#define ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
+#ifndef ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS_H
+#define ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS_H
 
 // *INDENT-OFF*
 // clang-format off
@@ -993,17 +993,12 @@
                 long a_64 = (long)(_src); \
                 long b_64 = (long)(DST_MULTIPLIER); \
                 long ab_64 = a_64 * b_64; \
-                long mask1 = 1 << 30; \
-                long mask2 = 1 - (1 << 30); \
-                long is_positive_or_zero = ab_64 >= 0; \
-                long nudge = select(mask2, mask1, is_positive_or_zero); \
-                SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
+                SRC_DATA_TYPE ab_x2_high32 = CONVERT(ab_64 >> 31, SRC_DATA_TYPE); \
                 _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                if(DST_SHIFT >= 0) \
+                if(DST_SHIFT > 0) \
                 { \
-                    long mask = ((((int)1) << DST_SHIFT) - (long)1); \
-                    long threshold = _tmp < (int)0 ? (mask >> 1) + (long)1 : (mask >> 1) + 0; \
-                    _tmp = (_tmp & mask) > threshold ? (_tmp >> DST_SHIFT) + (int)1 : (_tmp >> DST_SHIFT); \
+                    int rounding = (int)1 << (DST_SHIFT - (int)1); \
+                    _tmp = (_tmp + rounding) >> DST_SHIFT; \
                 } \
                 _tmp += DST_OFFSET; \
                 dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
@@ -1041,17 +1036,11 @@
                 long a_64 = (long)(_src); \
                 long b_64 = (long)(_dst_multiplier); \
                 long ab_64 = a_64 * b_64; \
-                long mask1 = 1 << 30; \
-                long mask2 = 1 - (1 << 30); \
-                long is_positive_or_zero = ab_64 >= 0; \
-                long nudge = select(mask2, mask1, is_positive_or_zero); \
-                SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
+                SRC_DATA_TYPE ab_x2_high32 = CONVERT(ab_64 >> 31, SRC_DATA_TYPE); \
                 _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                long mask = ((((int)1) << _dst_shift) - (int)1); \
-                long threshold = (mask >> 1) + any(_tmp); \
-                _tmp2 = _tmp >> _dst_shift; \
-                _tmp2 += select(0, 1, (_tmp & mask) > threshold); \
-                _tmp = select(_tmp, _tmp2, _dst_shift >= 0); \
+                int rounding = (int)1 << (_dst_shift - (int)1); \
+                _tmp2 = (_tmp + rounding) >> _dst_shift; \
+                _tmp = select(_tmp, _tmp2, _dst_shift > 0); \
                 _tmp += DST_OFFSET; \
                 dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
             })                                                                                                                                          \
@@ -1083,17 +1072,12 @@
                 long a_64 = (long)(_src); \
                 long b_64 = (long)(DST_MULTIPLIER); \
                 long ab_64 = a_64 * b_64; \
-                long mask1 = 1 << 30; \
-                long mask2 = 1 - (1 << 30); \
-                long is_positive_or_zero = ab_64 >= 0; \
-                long nudge = select(mask2, mask1, is_positive_or_zero); \
-                SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
+                SRC_DATA_TYPE ab_x2_high32 = CONVERT(ab_64 >> 31, SRC_DATA_TYPE); \
                 _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                if(DST_SHIFT >= 0) \
+                if(DST_SHIFT > 0) \
                 { \
-                    long mask = ((((int)1) << DST_SHIFT) - (int)1); \
-                    long threshold = _tmp < (int)0 ? (mask >> 1) + (long)1 : (mask >> 1) + 0; \
-                    _tmp = (_tmp & mask) > threshold ? (_tmp >> DST_SHIFT) + (int)1 : (_tmp >> DST_SHIFT); \
+                    int rounding = (int)1 << (DST_SHIFT - (int)1); \
+                    _tmp = (_tmp + rounding) >> DST_SHIFT; \
                 } \
                 _tmp += DST_OFFSET; \
                 dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
@@ -1448,4 +1432,4 @@
         })                                                                                             \
     })
 
-#endif /* ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS */
+#endif // ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS_H
