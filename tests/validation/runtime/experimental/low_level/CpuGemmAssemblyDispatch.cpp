@@ -221,16 +221,20 @@ DATA_TEST_CASE(ValidateAllDataTypes,
         WeightFormat wf = WeightFormat::ANY;
         gemm_info.set_accumulate(false);
         gemm_info.set_weight_format(wf);
+        gemm_info.set_fast_math(rhs_data_type == DataType::BFLOAT16 && fixed_format);
 
         experimental::op::ll::CpuGemmAssemblyDispatch::has_opt_impl(wf, &lhs_info, &rhs_info, nullptr, &output_info, gemm_info);
         gemm_info.set_weight_format(wf);
-        gemm_info.set_fast_math(rhs_data_type == DataType::BFLOAT16);
         rhs_info.set_data_layout(DataLayout::NCHW);
     }
 
 #ifdef ARM_COMPUTE_ENABLE_BF16
-    bool expected = (lhs_data_type == DataType::F32 || lhs_data_type == DataType::BFLOAT16) && (lhs_data_type == rhs_data_type) &&
-                        (output_data_type == DataType::F32 || ((lhs_data_type == DataType::BFLOAT16) && (output_data_type == DataType::BFLOAT16) && fixed_format));
+    bool expected = (lhs_data_type == DataType::F32 || ((lhs_data_type == DataType::BFLOAT16) && (rhs_data_type == DataType::BFLOAT16))) &&
+                    (rhs_data_type == DataType::F32 || rhs_data_type == DataType::BFLOAT16) &&
+                    (((rhs_data_type == DataType::F32) && (output_data_type == DataType::F32)) ||
+                        ((lhs_data_type == DataType::F32) && (rhs_data_type == DataType::BFLOAT16) && (output_data_type == DataType::F32) && fixed_format) ||
+                        ((lhs_data_type == DataType::BFLOAT16) && (rhs_data_type == DataType::BFLOAT16) && (output_data_type == DataType::BFLOAT16) && (fixed_format)) ||
+                        ((lhs_data_type == DataType::BFLOAT16) && (rhs_data_type == DataType::BFLOAT16) && (output_data_type == DataType::F32)));
 #else // ARM_COMPUTE_ENABLE_BF16
     bool expected = (lhs_data_type == DataType::F32) && (lhs_data_type == rhs_data_type) && (output_data_type == DataType::F32);
 #endif // ARM_COMPUTE_ENABLE_BF16

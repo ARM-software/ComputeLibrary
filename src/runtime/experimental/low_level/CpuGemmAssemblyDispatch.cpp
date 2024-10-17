@@ -88,8 +88,10 @@ Status CpuGemmAssemblyDispatch::validate(
     bool b_data_type_ok = b->data_type() == DataType::F32 || b->data_type() == DataType::F16;
     bool c_data_type_ok = c == nullptr;
     bool d_data_type_ok = d->data_type() == DataType::F32 || d->data_type() == DataType::F16;
-    bool bf16_ok        = (a->data_type() == DataType::BFLOAT16 && b->data_type() == DataType::BFLOAT16) &&
+    bool bf16_ok        = ((a->data_type() == DataType::BFLOAT16 && b->data_type() == DataType::BFLOAT16) ||
+                    b->data_type() == DataType::BFLOAT16) &&
                    (d->data_type() == DataType::BFLOAT16 || d->data_type() == DataType::F32);
+
     bool fixed_format_dtype_ok =
         (!gemm_info.fixed_format() ||
          (a->data_type() == DataType::F32 && b->data_type() == DataType::F32 && d->data_type() == DataType::F32) ||
