@@ -54,10 +54,10 @@ void sve_softmax_bf16(const ITensor *in,
     Iterator in_it(in, window);
     Iterator out_it(out, window);
 
-    const auto all_true_pg     = wrapper::svptrue<bfloat16_t>();
+    const auto all_true_pg     = wrapper::svptrue<arm_compute::bfloat16>();
     const auto all_true_pg_f32 = wrapper::svptrue<float32_t>();
     const auto all_true_pg_u32 = wrapper::svptrue<uint32_t>();
-    const int  vec_count       = wrapper::svcnt<bfloat16_t>();
+    const int  vec_count       = wrapper::svcnt<arm_compute::bfloat16>();
 
     execute_window_loop(
         window,
@@ -73,7 +73,7 @@ void sve_softmax_bf16(const ITensor *in,
                 auto vec_max = wrapper::svdup_n(support::cpp11::lowest<float32_t>());
 
                 int            x         = 0;
-                svbool_t       pg        = wrapper::svwhilelt<bfloat16_t>(x, input_width);
+                svbool_t       pg        = wrapper::svwhilelt<arm_compute::bfloat16>(x, input_width);
                 const svbool_t p_32_true = svptrue_b32();
 
                 svbool_t pg_u16      = wrapper::svwhilelt<uint16_t>(x, input_width);
@@ -96,7 +96,7 @@ void sve_softmax_bf16(const ITensor *in,
                     vec_max = svmax_m(pg_f32_high, vec_max, current_value_fp32_high);
 
                     x += vec_count;
-                    pg          = wrapper::svwhilelt<bfloat16_t>(x, input_width);
+                    pg          = wrapper::svwhilelt<arm_compute::bfloat16>(x, input_width);
                     pg_u16      = wrapper::svwhilelt<uint16_t>(x, input_width);
                     pg_f32_low  = svunpklo(pg_u16);
                     pg_f32_high = svunpkhi(pg_u16);
@@ -114,7 +114,7 @@ void sve_softmax_bf16(const ITensor *in,
                 /* Loop over row and compute exponentials and sum */
                 int x = 0;
 
-                svbool_t pg     = wrapper::svwhilelt<bfloat16_t>(x, input_width);
+                svbool_t pg     = wrapper::svwhilelt<arm_compute::bfloat16>(x, input_width);
                 svbool_t pg_u16 = wrapper::svwhilelt<uint16_t>(x, input_width);
 
                 svbool_t pg_f32_low  = svunpklo(pg_u16);
@@ -169,7 +169,7 @@ void sve_softmax_bf16(const ITensor *in,
                     vec_sum = svadd_m(pg_f32_high, vec_sum, exp_fp32_high);
 
                     x += vec_count;
-                    pg     = wrapper::svwhilelt<bfloat16_t>(x, input_width);
+                    pg     = wrapper::svwhilelt<arm_compute::bfloat16>(x, input_width);
                     pg_u16 = wrapper::svwhilelt<uint16_t>(x, input_width);
 
                     pg_f32_low  = svunpklo(pg_u16);
@@ -185,7 +185,7 @@ void sve_softmax_bf16(const ITensor *in,
             {
                 /* Loop over row and compute softmax */
                 int      x           = 0;
-                svbool_t pg          = wrapper::svwhilelt<bfloat16_t>(x, input_width);
+                svbool_t pg          = wrapper::svwhilelt<arm_compute::bfloat16>(x, input_width);
                 svbool_t pg_u16      = wrapper::svwhilelt<uint16_t>(x, input_width);
                 svbool_t pg_f32_low  = svunpklo(pg_u16);
                 svbool_t pg_f32_high = svunpkhi(pg_u16);
@@ -219,7 +219,7 @@ void sve_softmax_bf16(const ITensor *in,
                     svst1(pg, out_ptr + x, normalized_value_bf16);
 
                     x += vec_count;
-                    pg          = wrapper::svwhilelt<bfloat16>(x, input_width);
+                    pg          = wrapper::svwhilelt<arm_compute::bfloat16>(x, input_width);
                     pg_u16      = wrapper::svwhilelt<uint16_t>(x, input_width);
                     pg_f32_low  = svunpklo(pg_u16);
                     pg_f32_high = svunpkhi(pg_u16);
