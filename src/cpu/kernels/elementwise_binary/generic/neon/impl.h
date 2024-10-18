@@ -24,6 +24,8 @@
 #ifndef ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_NEON_IMPL_H
 #define ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_NEON_IMPL_H
 
+#include "arm_compute/core/Helpers.h"
+
 #include "src/core/NEON/NEAsymm.h"
 
 namespace arm_compute
@@ -567,7 +569,7 @@ inline float32x4x4_t load_quantized(const uint8_t *input1_ptr, const int32x4_t &
     return out;
 }
 
-inline float32x4x4_t load_quantized_signed(const int8_t *input1_ptr, const int32x4_t &offset, const float32x4_t &scale)
+inline float32x4x4_t load_quantized(const int8_t *input1_ptr, const int32x4_t &offset, const float32x4_t &scale)
 {
     qasymm8x16_signed_t x   = vld1q_s8(input1_ptr);
     const float32x4x4_t out = {{
@@ -596,11 +598,14 @@ inline void store_quantized(uint8_t *output_ptr, const int32x4x4_t &out)
 inline void
 store_quantized(uint8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4_t &invscale)
 {
-    int32x4x4_t out = {{
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[0], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[1], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[2], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[3], invscale)),
+    // Adjust offset with 0.5 to round to nearest.
+    const float32x4_t adj_offset = vaddq_f32(offset, vdupq_n_f32(0.5f));
+
+    const int32x4x4_t out = {{
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[0], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[1], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[2], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset, rf.val[3], invscale)),
     }};
     store_quantized(output_ptr, out);
 }
@@ -612,31 +617,48 @@ inline void store_quantized_signed(int8_t *output_ptr, const int32x4x4_t &out)
     vst1q_s8(output_ptr, vcombine_s8(pa, pb));
 }
 
-inline void store_quantized_signed(int8_t              *output_ptr,
-                                   const float32x4x4_t &rf,
-                                   const float32x4_t   &offset,
-                                   const float32x4_t   &invscale)
+inline void
+store_quantized(int8_t *output_ptr, const float32x4x4_t &rf, const float32x4_t &offset, const float32x4_t &invscale)
 {
-    int32x4x4_t out = {{
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[0], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[1], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[2], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[3], invscale)),
+    // Adjust offset to round to nearest.
+    const uint32x4x4_t cmp = {{
+#ifdef __aarch64__
+        vcltzq_f32(rf.val[0]),
+        vcltzq_f32(rf.val[1]),
+        vcltzq_f32(rf.val[2]),
+        vcltzq_f32(rf.val[3]),
+#else  // __aarch64__
+        vcltq_f32(rf.val[0], vdupq_n_f32(0.0f)),
+        vcltq_f32(rf.val[1], vdupq_n_f32(0.0f)),
+        vcltq_f32(rf.val[2], vdupq_n_f32(0.0f)),
+        vcltq_f32(rf.val[3], vdupq_n_f32(0.0f)),
+#endif // __aarch64__
+    }};
+    const float32x4_t   neg_point_5 = vdupq_n_f32(-0.5f);
+    const float32x4_t   pos_point_5 = vdupq_n_f32(0.5f);
+    const float32x4x4_t adj_offset  = {{
+         vaddq_f32(offset, vbslq_f32(cmp.val[0], neg_point_5, pos_point_5)),
+         vaddq_f32(offset, vbslq_f32(cmp.val[1], neg_point_5, pos_point_5)),
+         vaddq_f32(offset, vbslq_f32(cmp.val[2], neg_point_5, pos_point_5)),
+         vaddq_f32(offset, vbslq_f32(cmp.val[3], neg_point_5, pos_point_5)),
+    }};
+
+    const int32x4x4_t out = {{
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[0], rf.val[0], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[1], rf.val[1], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[2], rf.val[2], invscale)),
+        vcvtq_s32_f32(vmlaq_f32(adj_offset.val[3], rf.val[3], invscale)),
     }};
     store_quantized_signed(output_ptr, out);
 }
 
-template <ArithmeticOperation op>
-inline uint8_t elementwise_arithm_op_quantized_scalar(const float &a, const float &b, UniformQuantizationInfo qinfo)
+template <ArithmeticOperation op,
+          typename Output,
+          typename = std::enable_if_t<std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value>>
+inline Output elementwise_arithm_op_quantized_scalar(const float &a, const float &b, UniformQuantizationInfo qinfo)
 {
-    return quantize_qasymm8(elementwise_arithm_op_scalar<op>(a, b), qinfo);
-}
-
-template <ArithmeticOperation op>
-inline int8_t
-elementwise_arithm_op_quantized_signed_scalar(const float &a, const float &b, UniformQuantizationInfo qinfo)
-{
-    return quantize_qasymm8_signed(elementwise_arithm_op_scalar<op>(a, b), qinfo);
+    const float res = elementwise_arithm_op_scalar<op>(a, b);
+    return Qasymm8QuantizationHelper<Output>::quantize(res, qinfo);
 }
 
 template <ArithmeticOperation op>
@@ -669,19 +691,23 @@ inline uint32x4x4_t elementwise_comp_op(const float32x4x4_t &a, const float32x4x
     return out;
 }
 
-template <ArithmeticOperation op>
-inline int elementwise_arithm_op_quantized_loop(int            window_start_x,
-                                                int            window_end_x,
-                                                int            window_step_x,
-                                                const uint8_t *input1_ptr,
-                                                const uint8_t *input2_ptr,
-                                                uint8_t       *output_ptr,
-                                                int32x4_t      voffset1,
-                                                int32x4_t      voffset2,
-                                                float32x4_t    vscale1,
-                                                float32x4_t    vscale2,
-                                                float32x4_t    voffseto,
-                                                float32x4_t    invvscaleo)
+template <ArithmeticOperation op,
+          typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline int elementwise_arithm_op_quantized_loop(int          window_start_x,
+                                                int          window_end_x,
+                                                int          window_step_x,
+                                                const Input *input1_ptr,
+                                                const Input *input2_ptr,
+                                                Output      *output_ptr,
+                                                int32x4_t    voffset1,
+                                                int32x4_t    voffset2,
+                                                float32x4_t  vscale1,
+                                                float32x4_t  vscale2,
+                                                float32x4_t  voffseto,
+                                                float32x4_t  invvscaleo)
 {
     int x = window_start_x;
     for (; x <= (window_end_x - window_step_x); x += window_step_x)
@@ -695,44 +721,22 @@ inline int elementwise_arithm_op_quantized_loop(int            window_start_x,
     return x;
 }
 
-template <ArithmeticOperation op>
-inline int elementwise_arithm_op_quantized_singed_loop(int           window_start_x,
-                                                       int           window_end_x,
-                                                       int           window_step_x,
-                                                       const int8_t *input1_ptr,
-                                                       const int8_t *input2_ptr,
-                                                       int8_t       *output_ptr,
-                                                       int32x4_t     voffset1,
-                                                       int32x4_t     voffset2,
-                                                       float32x4_t   vscale1,
-                                                       float32x4_t   vscale2,
-                                                       float32x4_t   voffseto,
-                                                       float32x4_t   invvscaleo)
-{
-    int x = window_start_x;
-    for (; x <= (window_end_x - window_step_x); x += window_step_x)
-    {
-        // Get inputs and compute output
-        const float32x4x4_t af = load_quantized_signed(input1_ptr + x, voffset1, vscale1);
-        const float32x4x4_t bf = load_quantized_signed(input2_ptr + x, voffset2, vscale2);
-        const float32x4x4_t rf = elementwise_arithm_op<op>(af, bf);
-        store_quantized_signed(output_ptr + x, rf, voffseto, invvscaleo);
-    }
-    return x;
-}
-
-template <ArithmeticOperation op>
-inline int elementwise_arithm_op_quantized_broadcast_loop(int            window_start_x,
-                                                          int            window_end_x,
-                                                          int            window_step_x,
-                                                          const uint8_t *non_broadcast_input_ptr,
-                                                          float32x4x4_t  broadcast_vector,
-                                                          uint8_t       *output_ptr,
-                                                          int32x4_t      voffset_non_broadcast,
-                                                          float32x4_t    vscale_non_broadcast,
-                                                          float32x4_t    voffseto,
-                                                          float32x4_t    invvscaleo,
-                                                          bool           reorder)
+template <ArithmeticOperation op,
+          typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
+inline int elementwise_arithm_op_quantized_broadcast_loop(int           window_start_x,
+                                                          int           window_end_x,
+                                                          int           window_step_x,
+                                                          const Input  *non_broadcast_input_ptr,
+                                                          float32x4x4_t broadcast_vector,
+                                                          Output       *output_ptr,
+                                                          int32x4_t     voffset_non_broadcast,
+                                                          float32x4_t   vscale_non_broadcast,
+                                                          float32x4_t   voffseto,
+                                                          float32x4_t   invvscaleo,
+                                                          bool          reorder)
 {
     int x = window_start_x;
     for (; x <= (window_end_x - window_step_x); x += window_step_x)
@@ -745,44 +749,22 @@ inline int elementwise_arithm_op_quantized_broadcast_loop(int            window_
     }
     return x;
 }
-template <ArithmeticOperation op>
-inline int elementwise_arithm_op_quantized_signed_broadcast_loop(int           window_start_x,
-                                                                 int           window_end_x,
-                                                                 int           window_step_x,
-                                                                 const int8_t *non_broadcast_input_ptr,
-                                                                 float32x4x4_t broadcast_vector,
-                                                                 int8_t       *output_ptr,
-                                                                 int32x4_t     voffset_non_broadcast,
-                                                                 float32x4_t   vscale_non_broadcast,
-                                                                 float32x4_t   voffseto,
-                                                                 float32x4_t   invvscaleo,
-                                                                 bool          reorder)
-{
-    int x = window_start_x;
-    for (; x <= (window_end_x - window_step_x); x += window_step_x)
-    {
-        const float32x4x4_t af =
-            load_quantized_signed(non_broadcast_input_ptr + x, voffset_non_broadcast, vscale_non_broadcast);
-        const float32x4x4_t rf =
-            elementwise_arithm_op<op>(reorder ? broadcast_vector : af, reorder ? af : broadcast_vector);
-        store_quantized_signed(output_ptr + x, rf, voffseto, invvscaleo);
-    }
-    return x;
-}
 
-template <ComparisonOperation op>
-inline int elementwise_comp_op_quantized_loop(int            window_start_x,
-                                              int            window_end_x,
-                                              int            window_step_x,
-                                              const uint8_t *input1_ptr,
-                                              const uint8_t *input2_ptr,
-                                              uint8_t       *output_ptr,
-                                              int32x4_t      voffset1,
-                                              int32x4_t      voffset2,
-                                              float32x4_t    vscale1,
-                                              float32x4_t    vscale2,
-                                              float32x4_t    voffseto,
-                                              float32x4_t    invvscaleo)
+template <ComparisonOperation op,
+          typename Input,
+          typename = std::enable_if_t<std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value>>
+inline int elementwise_comp_op_quantized_loop(int          window_start_x,
+                                              int          window_end_x,
+                                              int          window_step_x,
+                                              const Input *input1_ptr,
+                                              const Input *input2_ptr,
+                                              uint8_t     *output_ptr,
+                                              int32x4_t    voffset1,
+                                              int32x4_t    voffset2,
+                                              float32x4_t  vscale1,
+                                              float32x4_t  vscale2,
+                                              float32x4_t  voffseto,
+                                              float32x4_t  invvscaleo)
 {
     ARM_COMPUTE_UNUSED(voffseto, invvscaleo);
     int x = window_start_x;
@@ -796,44 +778,20 @@ inline int elementwise_comp_op_quantized_loop(int            window_start_x,
     return x;
 }
 
-template <ComparisonOperation op>
-inline int elementwise_comp_op_quantized_signed_loop(int           window_start_x,
-                                                     int           window_end_x,
-                                                     int           window_step_x,
-                                                     const int8_t *input1_ptr,
-                                                     const int8_t *input2_ptr,
-                                                     uint8_t      *output_ptr,
-                                                     int32x4_t     voffset1,
-                                                     int32x4_t     voffset2,
-                                                     float32x4_t   vscale1,
-                                                     float32x4_t   vscale2,
-                                                     float32x4_t   voffseto,
-                                                     float32x4_t   invvscaleo)
-{
-    ARM_COMPUTE_UNUSED(voffseto, invvscaleo);
-    int x = window_start_x;
-    for (; x <= (window_end_x - window_step_x); x += window_step_x)
-    {
-        const float32x4x4_t af = load_quantized_signed(input1_ptr + x, voffset1, vscale1);
-        const float32x4x4_t bf = load_quantized_signed(input2_ptr + x, voffset2, vscale2);
-        const uint32x4x4_t  rf = elementwise_comp_op<op>(af, bf);
-        store_quantized(output_ptr + x, rf);
-    }
-    return x;
-}
-
-template <ComparisonOperation op>
-inline int elementwise_comp_op_quantized_broadcast_loop(int            window_start_x,
-                                                        int            window_end_x,
-                                                        int            window_step_x,
-                                                        const uint8_t *non_broadcast_input_ptr,
-                                                        float32x4x4_t  broadcast_vector,
-                                                        uint8_t       *output_ptr,
-                                                        int32x4_t      voffset_non_broadcast,
-                                                        float32x4_t    vscale_non_broadcast,
-                                                        float32x4_t    voffseto,
-                                                        float32x4_t    invvscaleo,
-                                                        bool           reorder)
+template <ComparisonOperation op,
+          typename Input,
+          typename = std::enable_if_t<std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value>>
+inline int elementwise_comp_op_quantized_broadcast_loop(int           window_start_x,
+                                                        int           window_end_x,
+                                                        int           window_step_x,
+                                                        const Input  *non_broadcast_input_ptr,
+                                                        float32x4x4_t broadcast_vector,
+                                                        uint8_t      *output_ptr,
+                                                        int32x4_t     voffset_non_broadcast,
+                                                        float32x4_t   vscale_non_broadcast,
+                                                        float32x4_t   voffseto,
+                                                        float32x4_t   invvscaleo,
+                                                        bool          reorder)
 {
     ARM_COMPUTE_UNUSED(voffseto, invvscaleo);
     int x = window_start_x;
@@ -848,43 +806,21 @@ inline int elementwise_comp_op_quantized_broadcast_loop(int            window_st
     return x;
 }
 
-template <ComparisonOperation op>
-inline int elementwise_comp_op_quantized_signed_broadcast_loop(int           window_start_x,
-                                                               int           window_end_x,
-                                                               int           window_step_x,
-                                                               const int8_t *non_broadcast_input_ptr,
-                                                               float32x4x4_t broadcast_vector,
-                                                               uint8_t      *output_ptr,
-                                                               int32x4_t     voffset_non_broadcast,
-                                                               float32x4_t   vscale_non_broadcast,
-                                                               float32x4_t   voffseto,
-                                                               float32x4_t   invvscaleo,
-                                                               bool          reorder)
-{
-    ARM_COMPUTE_UNUSED(voffseto, invvscaleo);
-    int x = window_start_x;
-    for (; x <= (window_end_x - window_step_x); x += window_step_x)
-    {
-        const float32x4x4_t af =
-            load_quantized_signed(non_broadcast_input_ptr + x, voffset_non_broadcast, vscale_non_broadcast);
-        const uint32x4x4_t rf =
-            elementwise_comp_op<op>(reorder ? broadcast_vector : af, reorder ? af : broadcast_vector);
-        store_quantized(output_ptr + x, rf);
-    }
-    return x;
-}
-
+template <typename Input,
+          typename Output,
+          typename = std::enable_if_t<(std::is_same<Input, int8_t>::value || std::is_same<Input, uint8_t>::value) &&
+                                      (std::is_same<Output, int8_t>::value || std::is_same<Output, uint8_t>::value)>>
 inline void elementwise_op_quantized(const ITensor *in1,
                                      const ITensor *in2,
                                      ITensor       *out,
                                      const Window  &window,
-                                     uint8_t (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
+                                     Output (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
                                      int (*broadcast_func)(int,
                                                            int,
                                                            int,
-                                                           const uint8_t *,
+                                                           const Input *,
                                                            float32x4x4_t,
-                                                           uint8_t *,
+                                                           Output *,
                                                            int32x4_t,
                                                            float32x4_t,
                                                            float32x4_t,
@@ -893,9 +829,9 @@ inline void elementwise_op_quantized(const ITensor *in1,
                                      int (*neon_func)(int,
                                                       int,
                                                       int,
-                                                      const uint8_t *,
-                                                      const uint8_t *,
-                                                      uint8_t *,
+                                                      const Input *,
+                                                      const Input *,
+                                                      Output *,
                                                       int32x4_t,
                                                       int32x4_t,
                                                       float32x4_t,
@@ -903,142 +839,8 @@ inline void elementwise_op_quantized(const ITensor *in1,
                                                       float32x4_t,
                                                       float32x4_t))
 {
-    // Create input windows
-    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
-    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+    using InputVector = wrapper::traits::neon_vector_t<Input, 16>;
 
-    // Clear X Dimension on execution window as we handle manually
-    Window win = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    const int  window_step_x         = 16;
-    const auto window_start_x        = static_cast<int>(window.x().start());
-    const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
-
-    const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
-
-    // Output quantization info (add 0.5 to round toward the nearest integer - 0.5 rounds away from zero)
-    const float32x4_t voffseto   = vdupq_n_f32(output_qinfo.offset + 0.5f);
-    const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_qinfo.scale);
-
-    if (is_broadcast_across_x)
-    {
-        // Select the broadcast input on the X axis
-        const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
-        Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
-        Window         non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
-        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
-        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
-
-        const UniformQuantizationInfo broadcast_qinfo     = broadcast_tensor->info()->quantization_info().uniform();
-        const UniformQuantizationInfo non_broadcast_qinfo = non_broadcast_tensor->info()->quantization_info().uniform();
-
-        const int32x4_t   voffset_non_broadcast = vdupq_n_s32(non_broadcast_qinfo.offset);
-        const float32x4_t vscale_non_broadcast  = vdupq_n_f32(non_broadcast_qinfo.scale);
-
-        // Clear X Dimension on execution window as we handle manually
-        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-        Iterator broadcast_input(broadcast_tensor, broadcast_win);
-        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
-        Iterator output(out, win);
-
-        execute_window_loop(
-            win,
-            [&](const Coordinates &)
-            {
-                const auto non_broadcast_input_ptr = reinterpret_cast<const uint8_t *>(non_broadcast_input.ptr());
-                const auto output_ptr              = reinterpret_cast<uint8_t *>(output.ptr());
-
-                const uint8_t       broadcast_value  = *reinterpret_cast<const uint8_t *>(broadcast_input.ptr());
-                const float32x4x4_t broadcast_vector = vdequantize(vdupq_n_u8(broadcast_value), broadcast_qinfo);
-
-                int x = (*broadcast_func)(window_start_x, window_end_x, window_step_x, non_broadcast_input_ptr,
-                                          broadcast_vector, output_ptr, voffset_non_broadcast, vscale_non_broadcast,
-                                          voffseto, invvscaleo, !is_broadcast_input_2);
-                for (; x < window_end_x; ++x)
-                {
-                    const float afs   = dequantize_qasymm8(*(non_broadcast_input_ptr + x), non_broadcast_qinfo);
-                    const float bfs   = dequantize_qasymm8(broadcast_value, broadcast_qinfo);
-                    *(output_ptr + x) = (*scalar_func)(!is_broadcast_input_2 ? bfs : afs,
-                                                       !is_broadcast_input_2 ? afs : bfs, output_qinfo);
-                }
-            },
-            broadcast_input, non_broadcast_input, output);
-    }
-    else
-    {
-        const UniformQuantizationInfo input1_qinfo = in1->info()->quantization_info().uniform();
-        const UniformQuantizationInfo input2_qinfo = in2->info()->quantization_info().uniform();
-
-        // Input1 quantization info
-        const int32x4_t   voffset1 = vdupq_n_s32(input1_qinfo.offset);
-        const float32x4_t vscale1  = vdupq_n_f32(input1_qinfo.scale);
-
-        // Input2 quantization info
-        const int32x4_t   voffset2 = vdupq_n_s32(input2_qinfo.offset);
-        const float32x4_t vscale2  = vdupq_n_f32(input2_qinfo.scale);
-
-        // Clear X Dimension on execution window as we handle manually
-        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-        Iterator input1(in1, input1_win);
-        Iterator input2(in2, input2_win);
-        Iterator output(out, win);
-
-        execute_window_loop(
-            win,
-            [&](const Coordinates &)
-            {
-                const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
-                const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
-                const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
-
-                int x = (*neon_func)(window_start_x, window_end_x, window_step_x, input1_ptr, input2_ptr, output_ptr,
-                                     voffset1, voffset2, vscale1, vscale2, voffseto, invvscaleo);
-                for (; x < window_end_x; ++x)
-                {
-                    const float afs   = dequantize_qasymm8(*(input1_ptr + x), input1_qinfo);
-                    const float bfs   = dequantize_qasymm8(*(input2_ptr + x), input2_qinfo);
-                    *(output_ptr + x) = (*scalar_func)(afs, bfs, output_qinfo);
-                }
-            },
-            input1, input2, output);
-    }
-}
-
-inline void
-elementwise_comp_quantized_signed(const ITensor *in1,
-                                  const ITensor *in2,
-                                  ITensor       *out,
-                                  const Window  &window,
-                                  uint8_t (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
-                                  int (*broadcast_func)(int,
-                                                        int,
-                                                        int,
-                                                        const int8_t *,
-                                                        float32x4x4_t,
-                                                        uint8_t *,
-                                                        int32x4_t,
-                                                        float32x4_t,
-                                                        float32x4_t,
-                                                        float32x4_t,
-                                                        const bool),
-                                  int (*neon_func)(int,
-                                                   int,
-                                                   int,
-                                                   const int8_t *,
-                                                   const int8_t *,
-                                                   uint8_t *,
-                                                   int32x4_t,
-                                                   int32x4_t,
-                                                   float32x4_t,
-                                                   float32x4_t,
-                                                   float32x4_t,
-                                                   float32x4_t))
-{
     // Create input windows
     Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
     Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
@@ -1083,19 +885,22 @@ elementwise_comp_quantized_signed(const ITensor *in1,
             win,
             [&](const Coordinates &)
             {
-                const auto non_broadcast_input_ptr = reinterpret_cast<const int8_t *>(non_broadcast_input.ptr());
-                const auto output_ptr              = reinterpret_cast<uint8_t *>(output.ptr());
+                const auto non_broadcast_input_ptr = reinterpret_cast<const Input *>(non_broadcast_input.ptr());
+                const auto output_ptr              = reinterpret_cast<Output *>(output.ptr());
 
-                const int8_t        broadcast_value  = *reinterpret_cast<const int8_t *>(broadcast_input.ptr());
-                const float32x4x4_t broadcast_vector = vdequantize(vdupq_n_s8(broadcast_value), broadcast_qinfo);
+                const Input       broadcast_value = *reinterpret_cast<const Input *>(broadcast_input.ptr());
+                const InputVector broadcast_value_v =
+                    wrapper::vdup_n(broadcast_value, wrapper::traits::vector_128_tag{});
+                const float32x4x4_t broadcast_vector = vdequantize(broadcast_value_v, broadcast_qinfo);
 
                 int x = (*broadcast_func)(window_start_x, window_end_x, window_step_x, non_broadcast_input_ptr,
                                           broadcast_vector, output_ptr, voffset_non_broadcast, vscale_non_broadcast,
                                           voffseto, invvscaleo, !is_broadcast_input_2);
                 for (; x < window_end_x; ++x)
                 {
-                    const float afs   = dequantize_qasymm8_signed(*(non_broadcast_input_ptr + x), non_broadcast_qinfo);
-                    const float bfs   = dequantize_qasymm8_signed(broadcast_value, broadcast_qinfo);
+                    const float afs   = Qasymm8QuantizationHelper<Input>::dequantize(*(non_broadcast_input_ptr + x),
+                                                                                     non_broadcast_qinfo);
+                    const float bfs   = Qasymm8QuantizationHelper<Input>::dequantize(broadcast_value, broadcast_qinfo);
                     *(output_ptr + x) = (*scalar_func)(!is_broadcast_input_2 ? bfs : afs,
                                                        !is_broadcast_input_2 ? afs : bfs, output_qinfo);
                 }
@@ -1127,151 +932,16 @@ elementwise_comp_quantized_signed(const ITensor *in1,
             win,
             [&](const Coordinates &)
             {
-                const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
-                const auto input2_ptr = reinterpret_cast<const int8_t *>(input2.ptr());
-                const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+                const auto input1_ptr = reinterpret_cast<const Input *>(input1.ptr());
+                const auto input2_ptr = reinterpret_cast<const Input *>(input2.ptr());
+                const auto output_ptr = reinterpret_cast<Output *>(output.ptr());
 
                 int x = (*neon_func)(window_start_x, window_end_x, window_step_x, input1_ptr, input2_ptr, output_ptr,
                                      voffset1, voffset2, vscale1, vscale2, voffseto, invvscaleo);
                 for (; x < window_end_x; ++x)
                 {
-                    const float afs   = dequantize_qasymm8_signed(*(input1_ptr + x), input1_qinfo);
-                    const float bfs   = dequantize_qasymm8_signed(*(input2_ptr + x), input2_qinfo);
-                    *(output_ptr + x) = (*scalar_func)(afs, bfs, output_qinfo);
-                }
-            },
-            input1, input2, output);
-    }
-}
-
-inline void
-elementwise_op_quantized_signed(const ITensor *in1,
-                                const ITensor *in2,
-                                ITensor       *out,
-                                const Window  &window,
-                                int8_t (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
-                                int (*broadcast_func)(int,
-                                                      int,
-                                                      int,
-                                                      const int8_t *,
-                                                      float32x4x4_t,
-                                                      int8_t *,
-                                                      int32x4_t,
-                                                      float32x4_t,
-                                                      float32x4_t,
-                                                      float32x4_t,
-                                                      const bool),
-                                int (*neon_func)(int,
-                                                 int,
-                                                 int,
-                                                 const int8_t *,
-                                                 const int8_t *,
-                                                 int8_t *,
-                                                 int32x4_t,
-                                                 int32x4_t,
-                                                 float32x4_t,
-                                                 float32x4_t,
-                                                 float32x4_t,
-                                                 float32x4_t))
-{
-    // Create input windows
-    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
-    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
-
-    // Clear X Dimension on execution window as we handle manually
-    Window win = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    const int  window_step_x         = 16;
-    const auto window_start_x        = static_cast<int>(window.x().start());
-    const auto window_end_x          = static_cast<int>(window.x().end());
-    const bool is_broadcast_across_x = in1->info()->tensor_shape().x() != in2->info()->tensor_shape().x();
-
-    const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
-
-    const float32x4_t voffseto   = vdupq_n_f32(output_qinfo.offset);
-    const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_qinfo.scale);
-
-    if (is_broadcast_across_x)
-    {
-        // Select the broadcast input on the X axis
-        const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
-        Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
-        Window         non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
-        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
-        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
-
-        const UniformQuantizationInfo broadcast_qinfo     = broadcast_tensor->info()->quantization_info().uniform();
-        const UniformQuantizationInfo non_broadcast_qinfo = non_broadcast_tensor->info()->quantization_info().uniform();
-
-        const int32x4_t   voffset_non_broadcast = vdupq_n_s32(non_broadcast_qinfo.offset);
-        const float32x4_t vscale_non_broadcast  = vdupq_n_f32(non_broadcast_qinfo.scale);
-
-        // Clear X Dimension on execution window as we handle manually
-        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-        Iterator broadcast_input(broadcast_tensor, broadcast_win);
-        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
-        Iterator output(out, win);
-
-        execute_window_loop(
-            win,
-            [&](const Coordinates &)
-            {
-                const auto non_broadcast_input_ptr = reinterpret_cast<const int8_t *>(non_broadcast_input.ptr());
-                const auto output_ptr              = reinterpret_cast<int8_t *>(output.ptr());
-
-                const int8_t        broadcast_value  = *reinterpret_cast<const int8_t *>(broadcast_input.ptr());
-                const float32x4x4_t broadcast_vector = vdequantize(vdupq_n_s8(broadcast_value), broadcast_qinfo);
-
-                int x = (*broadcast_func)(window_start_x, window_end_x, window_step_x, non_broadcast_input_ptr,
-                                          broadcast_vector, output_ptr, voffset_non_broadcast, vscale_non_broadcast,
-                                          voffseto, invvscaleo, !is_broadcast_input_2);
-                for (; x < window_end_x; ++x)
-                {
-                    const float afs   = dequantize_qasymm8_signed(*(non_broadcast_input_ptr + x), non_broadcast_qinfo);
-                    const float bfs   = dequantize_qasymm8_signed(broadcast_value, broadcast_qinfo);
-                    *(output_ptr + x) = (*scalar_func)(!is_broadcast_input_2 ? bfs : afs,
-                                                       !is_broadcast_input_2 ? afs : bfs, output_qinfo);
-                }
-            },
-            broadcast_input, non_broadcast_input, output);
-    }
-    else
-    {
-        const UniformQuantizationInfo input1_qinfo = in1->info()->quantization_info().uniform();
-        const UniformQuantizationInfo input2_qinfo = in2->info()->quantization_info().uniform();
-
-        // Input1 quantization info
-        const int32x4_t   voffset1 = vdupq_n_s32(input1_qinfo.offset);
-        const float32x4_t vscale1  = vdupq_n_f32(input1_qinfo.scale);
-
-        // Input2 quantization info
-        const int32x4_t   voffset2 = vdupq_n_s32(input2_qinfo.offset);
-        const float32x4_t vscale2  = vdupq_n_f32(input2_qinfo.scale);
-
-        // Clear X Dimension on execution window as we handle manually
-        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-        Iterator input1(in1, input1_win);
-        Iterator input2(in2, input2_win);
-        Iterator output(out, win);
-
-        execute_window_loop(
-            win,
-            [&](const Coordinates &)
-            {
-                const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
-                const auto input2_ptr = reinterpret_cast<const int8_t *>(input2.ptr());
-                const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
-
-                int x = (*neon_func)(window_start_x, window_end_x, window_step_x, input1_ptr, input2_ptr, output_ptr,
-                                     voffset1, voffset2, vscale1, vscale2, voffseto, invvscaleo);
-                for (; x < window_end_x; ++x)
-                {
-                    const float afs   = dequantize_qasymm8_signed(*(input1_ptr + x), input1_qinfo);
-                    const float bfs   = dequantize_qasymm8_signed(*(input2_ptr + x), input2_qinfo);
+                    const float afs   = Qasymm8QuantizationHelper<Input>::dequantize(*(input1_ptr + x), input1_qinfo);
+                    const float bfs   = Qasymm8QuantizationHelper<Input>::dequantize(*(input2_ptr + x), input2_qinfo);
                     *(output_ptr + x) = (*scalar_func)(afs, bfs, output_qinfo);
                 }
             },
@@ -1282,33 +952,34 @@ elementwise_op_quantized_signed(const ITensor *in1,
 template <ArithmeticOperation op>
 void elementwise_arithm_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    elementwise_op_quantized(in1, in2, out, window, &elementwise_arithm_op_quantized_scalar<op>,
-                             &elementwise_arithm_op_quantized_broadcast_loop<op>,
-                             &elementwise_arithm_op_quantized_loop<op>);
+    elementwise_op_quantized<uint8_t, uint8_t>(in1, in2, out, window,
+                                               &elementwise_arithm_op_quantized_scalar<op, uint8_t>,
+                                               &elementwise_arithm_op_quantized_broadcast_loop<op, uint8_t, uint8_t>,
+                                               &elementwise_arithm_op_quantized_loop<op, uint8_t, uint8_t>);
 }
 
 template <ArithmeticOperation op>
 void elementwise_arithm_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    elementwise_op_quantized_signed(in1, in2, out, window, &elementwise_arithm_op_quantized_signed_scalar<op>,
-                                    &elementwise_arithm_op_quantized_signed_broadcast_loop<op>,
-                                    &elementwise_arithm_op_quantized_singed_loop<op>);
+    elementwise_op_quantized<int8_t, int8_t>(in1, in2, out, window, &elementwise_arithm_op_quantized_scalar<op, int8_t>,
+                                             &elementwise_arithm_op_quantized_broadcast_loop<op, int8_t, int8_t>,
+                                             &elementwise_arithm_op_quantized_loop<op, int8_t, int8_t>);
 }
 
 template <ComparisonOperation op>
 void elementwise_comp_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    elementwise_op_quantized(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op>,
-                             &elementwise_comp_op_quantized_broadcast_loop<op>,
-                             &elementwise_comp_op_quantized_loop<op>);
+    elementwise_op_quantized<uint8_t, uint8_t>(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op>,
+                                               &elementwise_comp_op_quantized_broadcast_loop<op, uint8_t>,
+                                               &elementwise_comp_op_quantized_loop<op, uint8_t>);
 }
 
 template <ComparisonOperation op>
 void elementwise_comp_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    elementwise_comp_quantized_signed(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op>,
-                                      &elementwise_comp_op_quantized_signed_broadcast_loop<op>,
-                                      &elementwise_comp_op_quantized_signed_loop<op>);
+    elementwise_op_quantized<int8_t, uint8_t>(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op>,
+                                              &elementwise_comp_op_quantized_broadcast_loop<op, int8_t>,
+                                              &elementwise_comp_op_quantized_loop<op, int8_t>);
 }
 } // namespace cpu
 } // namespace arm_compute
