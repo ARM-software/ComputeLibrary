@@ -26,6 +26,7 @@
 #include "tests/validation/Validation.h"
 #include "src/core/helpers/LUTManager.h"
 #include "include/half/half.hpp"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
@@ -133,11 +134,19 @@ TEST_CASE(LUTValueTest, framework::DatasetMode::ALL)
 
 TEST_CASE(CheckLutReuse, framework::DatasetMode::ALL)
 {
-    LUTInfo info = {LUTType::Exponential, -1.0f, DataType::BFLOAT16, UniformQuantizationInfo()};
-    LUTManager lman = LUTManager::get_instance();
-    auto first = lman.get_lut_table<LookupTable65536>(info);
-    auto second = lman.get_lut_table<LookupTable65536>(info);
-    ARM_COMPUTE_EXPECT(first == second, framework::LogLevel::ERRORS);
+    if (cpu_supports_dtypes({DataType::BFLOAT16}))
+    {
+        LUTInfo info = {LUTType::Exponential, -1.0f, DataType::BFLOAT16, UniformQuantizationInfo()};
+        LUTManager lman = LUTManager::get_instance();
+        auto first = lman.get_lut_table<LookupTable65536>(info);
+        auto second = lman.get_lut_table<LookupTable65536>(info);
+        ARM_COMPUTE_EXPECT(first == second, framework::LogLevel::ERRORS);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support BFLOAT16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 
