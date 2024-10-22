@@ -417,9 +417,12 @@ CpuInfo CpuInfo::build()
 #elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
     CpuIsaInfo isainfo;
     isainfo.neon = true;
-    if (IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE))
+    isainfo.dot  = IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+    if (NTDDI_VERSION >= NTDDI_WIN11_GE)
     {
-        isainfo.dot = true;
+        isainfo.fp16 = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
+        isainfo.sve  = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
+        isainfo.i8mm = IsProcessorFeaturePresent(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE);
     }
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
