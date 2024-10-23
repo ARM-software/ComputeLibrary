@@ -139,6 +139,9 @@ if(ENABLE_NEON)
             NEON/ConvolutionLayer.cpp
             NEON/StridedSlice.cpp
             NEON/ReorderLayer.cpp
+            NEON/MatMul.cpp
+            NEON/AddMulAdd.cpp
+            NEON/Scatter.cpp
             NEON/UNIT/DynamicTensor.cpp
             NEON/UNIT/TensorAllocator.cpp
             NEON/UNIT/MemoryManager.cpp

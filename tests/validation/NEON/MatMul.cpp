@@ -55,6 +55,7 @@ constexpr AbsoluteTolerance<int32_t> tolerance_qasymm8_signed(1);
 // clang-format off
 // *INDENT-OFF*
 // Validation Tests
+#ifdef __aarch64__
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
     zip(
         make("InputAInfo", {
@@ -108,6 +109,61 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
                                         CpuMatMulSettings());
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
+#else // __aarch64__
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
+    zip(
+        make("InputAInfo", {
+            TensorInfo(TensorShape(9U, 6U), 1, DataType::F32),        // Mismatching datatype
+            TensorInfo(TensorShape(9U, 6U), 1, DataType::S32),        // Unsupported datatypes
+            TensorInfo(TensorShape(9U, 6U, 2U), 1, DataType::F32),    // Broadcasting in batch dimension not supported
+            TensorInfo(TensorShape(9U, 6U), 1, DataType::F32),        // Invalid shape for multiplication
+            TensorInfo(TensorShape(9U, 6U), 1, DataType::F32),
+            TensorInfo(TensorShape(9U, 6U , 12U) , 1 , DataType::F32),
+            TensorInfo(TensorShape(9U, 6U , 12U) , 1 , DataType::F32), // Tensors are not dynamic
+            TensorInfo(TensorShape(9U, 6U), 1, DataType::QASYMM8),
+            TensorInfo(TensorShape(9U, 6U), 1, DataType::QASYMM8_SIGNED),
+            TensorInfo(TensorShape(9U, 6U), 1, DataType::QASYMM8_SIGNED), // Mismatching data type
+        }),
+        make("InputBInfo", {
+            TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8),
+            TensorInfo(TensorShape(5U, 9U), 1, DataType::S32),
+            TensorInfo(TensorShape(5U, 9U, 1U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 12U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 9U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 9U, 12U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 9U, 12U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8), // MatMul of Qauntized Datatypes Not supported on armv7a
+            TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8_SIGNED),
+            TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8_SIGNED),
+        }),
+        make("OutputInfo", {
+            TensorInfo(TensorShape(5U, 6U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 6U), 1, DataType::S32),
+            TensorInfo(TensorShape(5U, 6U, 2U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 6U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 6U), 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 6U, 12U) , 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 6U, 12U) , 1, DataType::F32),
+            TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8),
+            TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8_SIGNED),
+            TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8),
+        }),
+        make("TensorIsConst", {false, false, false, false, false , false, true, false, false, false}),
+        make("Expected", { false, false, false, false, true, true, false, false, false, false })),
+    a_info, b_info, output_info, are_tensors_const, expected)
+{
+    TensorInfo a{a_info};
+    TensorInfo b{b_info};
+    a.set_are_values_constant(are_tensors_const);
+    b.set_are_values_constant(are_tensors_const);
+    Status status =  NEMatMul::validate(&a,
+                                        &b,
+                                        &output_info,
+                                        MatMulInfo(),
+                                        CpuMatMulSettings());
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+#endif // __aarch64__
 // *INDENT-ON*
 // clang-format on
 
