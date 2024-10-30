@@ -20,94 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+file(GLOB_RECURSE validation_reference "validation/reference/*.cpp")
+
 target_sources(
   arm_compute_validation_framework
   PRIVATE validation/Validation.cpp
           validation/Helpers.cpp
-          validation/reference/BoundingBoxTransform.cpp
-          validation/reference/GEMMReshapeRHSMatrix.cpp
-          validation/reference/ChannelShuffle.cpp
-          validation/reference/Logical.cpp
-          validation/reference/PoolingLayer.cpp
-          validation/reference/BitwiseNot.cpp
-          validation/reference/Conv3D.cpp
-          validation/reference/GEMMReshapeLHSMatrix.cpp
-          validation/reference/ComputeAllAnchors.cpp
-          validation/reference/DepthConcatenateLayer.cpp
-          validation/reference/TableLookup.cpp
-          validation/reference/ROIPoolingLayer.cpp
-          validation/reference/SliceOperations.cpp
-          validation/reference/GEMMLowp.cpp
-          validation/reference/Unstack.cpp
-          validation/reference/Pooling3dLayer.cpp
-          validation/reference/BitwiseOr.cpp
-          validation/reference/ReshapeLayer.cpp
-          validation/reference/SoftmaxLayer.cpp
-          validation/reference/Gather.cpp
-          validation/reference/Utils.cpp
-          validation/reference/Accumulate.cpp
-          validation/reference/CropResize.cpp
-          validation/reference/ReductionOperation.cpp
-          validation/reference/ConcatenateLayer.cpp
-          validation/reference/PixelWiseMultiplication.cpp
-          validation/reference/DepthConvertLayer.cpp
-          validation/reference/Erode.cpp
-          validation/reference/DepthToSpaceLayer.cpp
-          validation/reference/PadLayer.cpp
-          validation/reference/MeanStdDevNormalizationLayer.cpp
-          validation/reference/BitwiseXor.cpp
-          validation/reference/GEMM.cpp
-          validation/reference/NormalizePlanarYUVLayer.cpp
-          validation/reference/FuseBatchNormalization.cpp
-          validation/reference/BitwiseAnd.cpp
-          validation/reference/SpaceToDepth.cpp
-          validation/reference/NonMaximaSuppression.cpp
-          validation/reference/Reverse.cpp
-          validation/reference/DFT.cpp
-          validation/reference/L2NormalizeLayer.cpp
-          validation/reference/ActivationLayer.cpp
-          validation/reference/SpaceToBatch.cpp
-          validation/reference/Im2Col.cpp
-          validation/reference/DequantizationLayer.cpp
-          validation/reference/DeconvolutionLayer.cpp
-          validation/reference/MinMaxLocation.cpp
-          validation/reference/Select.cpp
-          validation/reference/BatchNormalizationLayer.cpp
-          validation/reference/InstanceNormalizationLayer.cpp
-          validation/reference/ROIAlignLayer.cpp
-          validation/reference/ElementwiseUnary.cpp
-          validation/reference/MeanStdDev.cpp
-          validation/reference/QLSTMLayerNormalization.cpp
-          validation/reference/Col2Im.cpp
-          validation/reference/FlattenLayer.cpp
-          validation/reference/AbsoluteDifference.cpp
-          validation/reference/Transpose.cpp
-          validation/reference/StackLayer.cpp
-          validation/reference/NormalizationLayer.cpp
-          validation/reference/Copy.cpp
-          validation/reference/MaxUnpoolingLayer.cpp
-          validation/reference/Winograd.cpp
-          validation/reference/Permute.cpp
-          validation/reference/Comparisons.cpp
-          validation/reference/Tile.cpp
-          validation/reference/BatchToSpaceLayer.cpp
-          validation/reference/ElementwiseOperations.cpp
-          validation/reference/QuantizationLayer.cpp
-          validation/reference/NonMaxSuppression.cpp
-          validation/reference/WeightsReshape.cpp
-          validation/reference/ArithmeticOperations.cpp
-          validation/reference/ConvertFullyConnectedWeights.cpp
-          validation/reference/Floor.cpp
-          validation/reference/PriorBoxLayer.cpp
-          validation/reference/Scale.cpp
-          validation/reference/ScatterLayer.cpp
-          validation/reference/ReorgLayer.cpp
-          validation/reference/Range.cpp
-          validation/reference/ArithmeticDivision.cpp
-          validation/reference/DepthwiseConvolutionLayer.cpp
-          validation/reference/FullyConnectedLayer.cpp
-          validation/reference/ConvolutionLayer.cpp
-          validation/reference/Reorder.cpp
+          ${validation_reference}
           framework/Framework.cpp
           framework/Utils.cpp
           framework/Exceptions.cpp
