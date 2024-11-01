@@ -45,6 +45,7 @@ GemmImplementation<bfloat16, bfloat16, bfloat16>::with_estimate(
     [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, bfloat16>::estimate_cycles<bfloat16>(args); },
     [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, bfloat16>(args); }
 ),
+#ifdef ARM_COMPUTE_ENABLE_SVE
 GemmImplementation<bfloat16, bfloat16, bfloat16>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "sve_ffinterleaved_bf16fp32_mmla_8x3VL",
@@ -53,6 +54,7 @@ GemmImplementation<bfloat16, bfloat16, bfloat16>::with_estimate(
     [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_sve_ffinterleaved_bf16fp32_mmla_8x3VL, bfloat16, bfloat16>::estimate_cycles<bfloat16>(args); },
     [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_sve_ffinterleaved_bf16fp32_mmla_8x3VL, bfloat16, bfloat16>(args); }
 ),
+#endif // ARM_COMPUTE_ENABLE_SVE
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #endif // ARM_COMPUTE_ENABLE_BF16
 #endif // __aarch64__
