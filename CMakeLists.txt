@@ -333,3 +333,16 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
   endforeach()
 
 endif() # ARM_COMPUTE_BUILD_EXAMPLES
+
+# Install libraries
+install(TARGETS arm_compute arm_compute_graph
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# Install test executables
+if(ARM_COMPUTE_BUILD_TESTING)
+  install(TARGETS arm_compute_validation_framework arm_compute_benchmark arm_compute_validation
+          RUNTIME DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests"
+          LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests"
+          ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests")
+endif()
