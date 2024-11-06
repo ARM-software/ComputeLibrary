@@ -54,6 +54,12 @@ const AbsoluteTolerance<float>      abs_tolerance_f16(
     0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
 constexpr float tolerance_num = 0.07f; /**< Tolerance number for FP16 data types */
 #endif                                 /* ARM_COMPUTE_ENABLE_FP16 */
+#ifdef ARM_COMPUTE_ENABLE_BF16
+const AbsoluteTolerance<float>      abs_tolerance_bf16(
+    0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for BF16 data types */
+const RelativeTolerance<float>      rel_tolerance_bf16(
+    0.02f); /**< Relative tolerance value for comparing reference's output against implementation's output for BF16 data types */
+#endif                                 /* ARM_COMPUTE_ENABLE_BF16 */
 /** CNN data types */
 const auto CNNDataTypes = make("DataType",
                                {
@@ -252,15 +258,15 @@ DATA_TEST_CASE(ValidateAllDataTypes,
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 
-template <typename T>
-using CpuGemmAssemblyDispatchFixture = CpuGemmAssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T>;
+template <typename T, typename WEI_T = T, typename DST_T = T, typename REF_T = T>
+using CpuGemmAssemblyDispatchFixture = CpuGemmAssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T, WEI_T, DST_T, REF_T>;
 
 template <typename T>
 using CpuGemmDstF32AssemblyDispatchFixture = CpuGemmDstF32AssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T>;
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
-template <typename T>
-using CpuGemmFixedFormatFixture = CpuGemmAssemblyDispatchFixedFormatFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T>;
+template <typename T, typename WEI_T = T, typename DST_T = T, typename REF_T = T>
+using CpuGemmFixedFormatFixture = CpuGemmAssemblyDispatchFixedFormatFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T, WEI_T, DST_T, REF_T>;
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 
 TEST_SUITE(Float)
@@ -296,15 +302,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CpuGemmAssemblyDispatchFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallGEMMDataset(),
-                            make("DataType", DataType::F16),
+                            make("SrcDataType", DataType::F16),
+                            make("WeiDataType", DataType::F16),
+                            make("DstDataType", DataType::F16),
                             make("Accumulate", false),
                             make("Pretranspose_B", {false, true}),
                             make("ActivationInfo", {
-                            ActivationLayerInfo(),
-                            ActivationLayerInfo(ActivationFunction::RELU),
-                            ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
-                            ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
-                        })))
+                                ActivationLayerInfo(),
+                                ActivationLayerInfo(ActivationFunction::RELU),
+                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                            }),
+                            make("FastMath", {false})
+                        ))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -321,15 +331,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        CpuGemmAssemblyDispatchFixture<half>,
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeGEMMDataset(),
-                            make("DataType", DataType::F16),
+                            make("SrcDataType", DataType::F16),
+                            make("WeiDataType", DataType::F16),
+                            make("DstDataType", DataType::F16),
                             make("Accumulate", false),
-                            make("Pretranspose_B", {false, true}),
-                            make("ActivationInfo", {
-                                ActivationLayerInfo(),
-                                ActivationLayerInfo(ActivationFunction::RELU),
-                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
-                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
-                            })))
+                            make("Pretranspose_B", false),
+                            make("ActivationInfo", ActivationLayerInfo()),
+                            make("FastMath", false)
+                            ))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -375,10 +384,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeGEMMDataset(),
                             make("data_type", DataType::F16),
-                            make("Pretranspose_B", {false, true}),
-                            make("ActivationInfo", {
-                            ActivationLayerInfo()
-                        })))
+                            make("Pretranspose_B", false),
+                            make("ActivationInfo", ActivationLayerInfo())))
 {
     if(CPUInfo::get().has_fp16() && CPUInfo::get().has_fhm())
     {
@@ -397,12 +404,103 @@ TEST_SUITE_END() // F32Dst
 TEST_SUITE_END() // FP16
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
+#ifdef ARM_COMPUTE_ENABLE_BF16
+using BF16Fixture = CpuGemmAssemblyDispatchFixture<bfloat16, bfloat16, float, float>;
+
+TEST_SUITE(BF16)
+FIXTURE_DATA_TEST_CASE(RunSmallFastMath,
+                       BF16Fixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMDataset(),
+                            make("SrcDataType", DataType::F32),
+                            make("WeiDataType", DataType::F32),
+                            make("DstDataType", DataType::F32),
+                            make("Accumulate", false),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                                ActivationLayerInfo(),
+                                ActivationLayerInfo(ActivationFunction::RELU),
+                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                            }),
+                            make("FastMath", {true})
+                        ))
+{
+    if(CPUInfo::get().has_bf16())
+    {
+        validate(Accessor(_target), _reference, rel_tolerance_bf16, tolerance_num, abs_tolerance_bf16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       BF16Fixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMDataset(),
+                            make("SrcDataType", DataType::BFLOAT16),
+                            make("WeiDataType", DataType::BFLOAT16),
+                            make("DstDataType", DataType::F32),
+                            make("Accumulate", false),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                                ActivationLayerInfo(),
+                                ActivationLayerInfo(ActivationFunction::RELU),
+                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                            }),
+                            make("FastMath", {true})
+                        ))
+{
+    if(CPUInfo::get().has_bf16())
+    {
+        validate(Accessor(_target), _reference, rel_tolerance_bf16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       BF16Fixture,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeGEMMDataset(),
+                            make("SrcDataType", DataType::BFLOAT16),
+                            make("WeiDataType", DataType::BFLOAT16),
+                            make("DstDataType", DataType::F32),
+                            make("Accumulate", false),
+                            make("Pretranspose_B", false),
+                            make("ActivationInfo", ActivationLayerInfo()),
+                            make("FastMath", true)
+                        ))
+{
+    if(CPUInfo::get().has_bf16())
+    {
+        validate(Accessor(_target), _reference, rel_tolerance_bf16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+TEST_SUITE_END() // BF16
+#endif /* ARM_COMPUTE_ENABLE_BF16 */
+
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CpuGemmAssemblyDispatchFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallGEMMDataset(),
-                            make("DataType", DataType::F32),
+                            make("SrcDataType", DataType::F32),
+                            make("WeiDataType", DataType::F32),
+                            make("DstDataType", DataType::F32),
                             make("Accumulate", {false, true}),
                             make("Pretranspose_B", {false, true}),
                             make("ActivationInfo", {
@@ -410,7 +508,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                 ActivationLayerInfo(ActivationFunction::RELU),
                                 ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
                                 ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
-                       })))
+                            }),
+                            make("FastMath", {false})
+                       ))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
@@ -419,15 +519,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        CpuGemmAssemblyDispatchFixture<float>,
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeGEMMDataset(),
-                            make("DataType", DataType::F32),
-                            make("Accumulate", {false, true}),
-                            make("Pretranspose_B", {false, true}),
-                            make("ActivationInfo", {
-                                ActivationLayerInfo(),
-                                ActivationLayerInfo(ActivationFunction::RELU),
-                                ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
-                                ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
-                       })))
+                            make("SrcDataType", DataType::F32),
+                            make("WeiDataType", DataType::F32),
+                            make("DstDataType", DataType::F32),
+                            make("Accumulate", false),
+                            make("Pretranspose_B", false),
+                            make("ActivationInfo", ActivationLayerInfo()),
+                            make("FastMath", false)
+                       ))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
@@ -442,7 +541,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        framework::DatasetMode::PRECOMMIT,
                        combine(
                             datasets::SmallGEMMDataset(),
-                            make("DataType", DataType::F32)
+                            make("SrcDataType", DataType::F32),
+                            make("WeiDataType", DataType::F32),
+                            make("DstDataType", DataType::F32)
                         ))
 {
     // Validate output
@@ -453,7 +554,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        framework::DatasetMode::NIGHTLY,
                        combine(
                             datasets::LargeGEMMDataset(),
-                            make("DataType", DataType::F32)
+                            make("SrcDataType", DataType::F32),
+                            make("WeiDataType", DataType::F32),
+                            make("DstDataType", DataType::F32)
                         ))
 {
     // Validate output

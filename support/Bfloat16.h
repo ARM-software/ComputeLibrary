@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022,2024 Arm Limited.
+ * Copyright (c) 2020-2022,2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,6 +73,20 @@ inline uint16_t float_to_bf16(const float v)
 #else  /* defined(ARM_COMPUTE_ENABLE_BF16) */
     return portable_float_to_bf16(v);
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
+}
+
+/** Truncate a float to bf16 precision.
+ *
+ * @param[in] v F32 value to truncate to bfloat16 precision
+ *
+ * @return Truncated float
+ */
+inline float to_bf_precision(float v)
+{
+    uint32_t resu32 = ((uint32_t)(float_to_bf16(v)) << 16);
+    float    resf32;
+    memcpy(&resf32, &resu32, sizeof resf32);
+    return resf32;
 }
 
 /** Convert bfloat16 to float
