@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_CAST_H
-#define ARM_COMPUTE_CL_CAST_H
+#ifndef ACL_SRC_GPU_CL_OPERATORS_CLCAST_H
+#define ACL_SRC_GPU_CL_OPERATORS_CLCAST_H
 
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
@@ -42,20 +42,11 @@ public:
      * Valid data layouts:
      * - All
      *
-     * Valid data type configurations:
-     * |src            |dst                                    |
-     * |:--------------|:--------------------------------------|
-     * |U8             | S8, U16, S16, U32, S32, F16, F32      |
-     * |U16            | U8, S8, S16, U32, S32, F16, F32       |
-     * |S16            | U8, S8, U16, U32, S32, F16, F32       |
-     * |U32            | U8, S8, U16, S16, S32, F16, F32       |
-     * |S32            | U8, S8, U16, S16, U32, F16, F32       |
-     * |F16            | U8, S8, U16, S16, U32, F32            |
-     * |F32            | U8, S8, U16, S16, U32, F16            |
+     * For data type configurations supported, please have a look at @ref CLCast
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src             The source tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
-     * @param[out] dst             The destinatio tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  src             The source tensor to convert.
+     * @param[out] dst             The destinatio tensor.
      * @param[in]  policy          Conversion policy.
      */
     void
@@ -70,4 +61,4 @@ public:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_CAST_H */
+#endif // ACL_SRC_GPU_CL_OPERATORS_CLCAST_H

@@ -455,16 +455,22 @@ where N = batches, C = channels, H = height, W = width, D = depth
   <td>
     <table>
     <tr><th>src<th>dst
-    <tr><td>U8<td>S8, U16, S16, U32, S32, F16, F32
-    <tr><td>S8<td>U8, U16, S16, U32, S32, F16, F32
-    <tr><td>U16<td>U8, S8, S16, U32, S32, F16, F32
-    <tr><td>S16<td>U8, S8, U16, U32, S32, F16, F32
-    <tr><td>U32<td>U8, S8, U16, S16, S32, F16, F32
-    <tr><td>S32<td>U8, S8, U16, S16, U32, F16, F32
-    <tr><td>U64<td>U8, S8, U16, S16, U32, S32, F16, F32
-    <tr><td>S64<td>U8, S8, U16, S16, U32, S32, F16, F32
-    <tr><td>F16<td>U8, S8, U16, S16, S32, U32, F32
-    <tr><td>F32<td>U8, S8, U16, S16, S32, U32, F16
+    <tr><td>U8<td>S8, U16, S16, U32, S32, F16, F32, QASYMM8_SIGNED, QSYMM8, QSYMM8_PER_CHANNEL, 16-bit Quantized
+    <tr><td>S8<td>U8, U16, S16, U32, S32, F16, F32, QASYMM8, 16-bit Quantized
+    <tr><td>U16<td>U8, S8, S16, U32, S32, F16, F32, 8-bit Quantized, QSYMM16
+    <tr><td>S16<td>U8, S8, U16, U32, S32, F16, F32, 8-bit Quantized, QASYMM16
+    <tr><td>U32<td>U8, S8, U16, S16, S32, F16, F32, All Quantized
+    <tr><td>S32<td>U8, S8, U16, S16, U32, F16, F32, All Quantized
+    <tr><td>U64<td>U8, S8, U16, S16, U32, S32, F16, F32, All Quantized
+    <tr><td>S64<td>U8, S8, U16, S16, U32, S32, F16, F32, All Quantized
+    <tr><td>F16<td>U8, S8, U16, S16, S32, U32, F32, All Quantized
+    <tr><td>F32<td>U8, S8, U16, S16, S32, U32, F16, All Quantized
+    <tr><td>QASYMM8<td>S8, U16, S16, U32, S32, F16, F32, QASYMM8_SIGNED, QSYMM8, QSYMM8_PER_CHANNEL, 16-bit Quantized
+    <tr><td>QASYMM8_SIGNED<td>U8, U16, S16, U32, S32, F16, F32, QASYMM8, 16-bit Quantized
+    <tr><td>QSYMM8<td>U8, U16, S16, U32, S32, F16, F32, QASYMM8, 16-bit Quantized
+    <tr><td>QSYMM8_PER_CHANNEL<td>U8, U16, S16, U32, S32, F16, F32, 16-bit Quantized
+    <tr><td>QASYMM16<td>U8, S8, U16, U32, S32, F16, F32, 8-bit Quantized, QSYMM16
+    <tr><td>QSYMM16<td>U8, S8, U16, U32, S32, F16, F32, 8-bit Quantized, QASYMM16
     </table>
 <tr>
   <td rowspan="2">ChannelShuffleLayer

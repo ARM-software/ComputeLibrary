@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 
@@ -43,7 +44,10 @@ class NEDepthwiseConvolutionLayer : public IFunction
 {
 public:
     /** Default constructor */
-    NEDepthwiseConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEDepthwiseConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEDepthwiseConvolutionLayer() : NEDepthwiseConvolutionLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDepthwiseConvolutionLayer(const NEDepthwiseConvolutionLayer &) = delete;
     /** Default move constructor */

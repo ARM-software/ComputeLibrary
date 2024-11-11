@@ -60,7 +60,8 @@ void NEGEMMConv2d::configure(
 
     _impl->weights     = weights;
     _impl->is_prepared = false;
-    _impl->op          = std::make_unique<OperatorType>();
+    _impl->memory_group.mappings().clear();
+    _impl->op = std::make_unique<OperatorType>();
 
     _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(),
                          info);

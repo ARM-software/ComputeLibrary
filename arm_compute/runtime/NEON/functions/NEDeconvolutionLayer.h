@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEDECONVOLUTIONLAYER_H
-#define ARM_COMPUTE_NEDECONVOLUTIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDECONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDECONVOLUTIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReverse.h"
@@ -74,7 +75,10 @@ class NEDeconvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEDeconvolutionLayer() : NEDeconvolutionLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDeconvolutionLayer(const NEDeconvolutionLayer &) = delete;
     /** Default move constructor */
@@ -166,4 +170,4 @@ private:
     bool               _do_upsampling;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEDECONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDECONVOLUTIONLAYER_H

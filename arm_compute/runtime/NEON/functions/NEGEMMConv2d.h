@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -50,7 +51,10 @@ class NEGEMMConv2d : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
+    NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager);
+    NEGEMMConv2d() : NEGEMMConv2d(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConv2d(const NEGEMMConv2d &) = delete;
     /** Default move constructor */

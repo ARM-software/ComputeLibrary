@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,8 +65,14 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     ARM_COMPUTE_ASSERT(t1.info()->is_resizable());
 
     // Negative case : Import misaligned pointer
-    Tensor       t2;
-    const size_t required_alignment = 339;
+    Tensor t2;
+    size_t required_alignment = 339;
+    ARM_COMPUTE_ASSERT(data.get() != nullptr);
+    // If the data ptr is aligned with 339, keep adding 1 until it is misaligned.
+    while (arm_compute::utility::check_aligned(data.get(), required_alignment))
+    {
+        required_alignment += 1;
+    }
     t2.allocator()->init(info, required_alignment);
     ARM_COMPUTE_ASSERT(!bool(t2.allocator()->import_memory(data.get())));
     ARM_COMPUTE_ASSERT(t2.info()->is_resizable());

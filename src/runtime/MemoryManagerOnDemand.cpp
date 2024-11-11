@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited.
+ * Copyright (c) 2016-2018, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,10 @@
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/ILifetimeManager.h"
 #include "arm_compute/runtime/IPoolManager.h"
+#include "arm_compute/runtime/PoolManager.h"
 
 #include <memory>
 
@@ -70,5 +72,14 @@ void MemoryManagerOnDemand::clear()
 {
     ARM_COMPUTE_ERROR_ON_MSG(!_pool_mgr, "Pool manager not specified correctly!");
     _pool_mgr->clear_pools();
+}
+
+std::shared_ptr<MemoryManagerOnDemand> MemoryManagerOnDemand::make_default()
+{
+    auto lifetime_mgr = std::make_shared<BlobLifetimeManager>();
+    auto pool_mgr     = std::make_shared<PoolManager>();
+    auto mm           = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
+
+    return mm;
 }
 } //namespace arm_compute

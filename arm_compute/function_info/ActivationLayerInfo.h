@@ -65,6 +65,7 @@ public:
 
     /** Lookup table  */
 #ifdef __aarch64__
+    // TODO (COMPMID-7511): delegate to LUTManager
     using LookupTable256   = std::array<qasymm8_t, 256>;
     using LookupTable65536 = std::array<float16_t, 65536>;
 #endif // __aarch64__

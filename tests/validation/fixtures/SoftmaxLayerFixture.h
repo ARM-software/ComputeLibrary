@@ -73,8 +73,9 @@ protected:
         {
             arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -10.0f, 10.0f };
             library->fill(tensor, distribution, 0);
-        }
-        else if(!is_data_type_quantized(tensor.data_type()))
+        }else if(tensor.data_type() == DataType::BFLOAT16){
+            library->fill_tensor_uniform(tensor, 0);
+        }else if(!is_data_type_quantized(tensor.data_type()))
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);

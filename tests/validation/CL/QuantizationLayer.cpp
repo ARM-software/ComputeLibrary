@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,13 +45,63 @@ namespace
 constexpr AbsoluteTolerance<float>    tolerance_f32(1.0f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
 constexpr AbsoluteTolerance<uint8_t>  tolerance_u8(1);     /**< Tolerance value for comparing reference's output against implementation's output for QASYMM8 data types */
 constexpr AbsoluteTolerance<int8_t>   tolerance_s8(1);     /**< Tolerance value for comparing reference's output against implementation's output for QASYMM8_SIGNED data types */
+constexpr AbsoluteTolerance<int8_t>   zero_tolerance_s8(0);
 constexpr AbsoluteTolerance<uint16_t> tolerance_u16(1);    /**< Tolerance value for comparing reference's output against implementation's output for QASYMM16 data types */
 const auto                            QuantizationSmallShapes = concat(datasets::Small3DShapes(), datasets::Small4DShapes());
 const auto                            QuantizationLargeShapes = concat(datasets::Large3DShapes(), datasets::Large4DShapes());
+
+void test_specific_case_int8(const std::vector<int8_t> &values, const std::vector<int8_t> &expected,
+    DataType dtype, const QuantizationInfo &in_qinfo, const QuantizationInfo &out_qinfo)
+{
+    // The test case here covers both Int8 and UInt8 because the underlying kernel is the same
+    const auto shape = TensorShape(values.size());
+
+    CLTensor input = create_tensor<CLTensor>(shape, dtype, 1, in_qinfo);
+    CLTensor output = create_tensor<CLTensor>(shape, dtype, 1, out_qinfo);
+
+    CLQuantizationLayer quant_layer;
+    quant_layer.configure(&input, &output);
+
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    SimpleTensor<int8_t> ref {shape, dtype, 1, out_qinfo};
+
+    library->fill_static_values(CLAccessor(input), values);
+    library->fill_static_values(ref, expected);
+
+    quant_layer.run();
+
+    validate(CLAccessor(output), ref, zero_tolerance_s8);
+}
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(QuantizationLayer)
+
+TEST_CASE(ProperlyRoundedRequantizationLt16Elements, framework::DatasetMode::ALL)
+{
+    std::vector<int8_t> values =   {1,3,5,7,9};
+    std::vector<int8_t> expected = {0,1,2,3,4}; // (x + 1)/2 - 1
+
+    const auto dtype = DataType::QASYMM8_SIGNED;
+    const auto in_qinfo = QuantizationInfo(0.5f, -1);
+    const auto out_qinfo = QuantizationInfo(1.f, -1);
+
+    test_specific_case_int8(values, expected, dtype, in_qinfo, out_qinfo);
+}
+
+TEST_CASE(ProperlyRoundedRequantizationGt16Elements, framework::DatasetMode::ALL)
+{
+    std::vector<int8_t> values =   {1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35};
+    std::vector<int8_t> expected = {0,1,2,3,4,5 ,6 ,7 ,8 ,9 ,10,11,12,13,14,15,16,17}; // (x + 1)/2 - 1
+
+    const auto dtype = DataType::QASYMM8_SIGNED;
+    const auto in_qinfo = QuantizationInfo(0.5f, -1);
+    const auto out_qinfo = QuantizationInfo(1.f, -1);
+
+    test_specific_case_int8(values, expected, dtype, in_qinfo, out_qinfo);
+}
 
 // *INDENT-OFF*
 // clang-format off

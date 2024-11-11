@@ -873,8 +873,7 @@ struct RedOpX_quantized
 
                         if (op == ReductionOperation::MEAN_SUM)
                         {
-                            const int32_t resFinal = A * (static_cast<float>(res)) + B;
-
+                            const float resFinal                 = A * (static_cast<float>(res)) + B;
                             *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(resFinal);
                         }
                         else
@@ -1427,10 +1426,10 @@ struct RedOpYZW_quantized
                             vec_res_value4_f = wrapper::vmla(vec_B, wrapper::vcvt<float>(vec_res_value4), vec_A);
 
 #ifdef __aarch64__
-                            vec_res_value1 = wrapper::vcvta<PromotedType>(vec_res_value1_f);
-                            vec_res_value2 = wrapper::vcvta<PromotedType>(vec_res_value2_f);
-                            vec_res_value3 = wrapper::vcvta<PromotedType>(vec_res_value3_f);
-                            vec_res_value4 = wrapper::vcvta<PromotedType>(vec_res_value4_f);
+                            vec_res_value1 = wrapper::vcvtn<PromotedType>(vec_res_value1_f);
+                            vec_res_value2 = wrapper::vcvtn<PromotedType>(vec_res_value2_f);
+                            vec_res_value3 = wrapper::vcvtn<PromotedType>(vec_res_value3_f);
+                            vec_res_value4 = wrapper::vcvtn<PromotedType>(vec_res_value4_f);
 #else  // defined(__aarch64__)
                             vec_res_value1    = wrapper::vcvt<PromotedType>(vec_res_value1_f);
                             vec_res_value2    = wrapper::vcvt<PromotedType>(vec_res_value2_f);
@@ -1584,8 +1583,8 @@ struct RedOpYZW_quantized
                         {
                         // Apply previously calculated coefficients (with rounding on aarch64)
 #ifdef __aarch64__
-                            const int32_t res =
-                                arm_compute::support::cpp11::round(A * (static_cast<float>(res_value_q)) + B);
+                            const int32_t res = arm_compute::round(A * (static_cast<float>(res_value_q)) + B,
+                                                                   RoundingPolicy::TO_NEAREST_EVEN);
 #else  // defined(__aarch64__)
                             const int32_t res = A * (static_cast<float>(res_value_q)) + B;
 #endif // __aarch64__

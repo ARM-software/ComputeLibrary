@@ -74,6 +74,18 @@ void sme2_qasymm8_signed_softmax_lut_512VL(const ITensor *in,
 
 #endif // ARM_COMPUTE_ENABLE_SME2
 
+#ifdef ARM_COMPUTE_ENABLE_BF16
+
+void sve_softmax_bf16(const ITensor *in,
+                      void *const    tmp,
+                      ITensor       *out,
+                      const float    beta,
+                      int            axis,
+                      const Window  &window,
+                      const void    *lut_ptr);
+
+#endif // ARM_COMPUTE_ENABLE_BF16
+
 #undef DECLARE_SOFTMAX_KERNEL
 } // namespace cpu
 } // namespace arm_compute

@@ -164,9 +164,13 @@ Status CpuMatMul::validate(const ITensorInfo         *lhs,
         arm_compute::WeightFormat expected_weight_format = WeightFormat::ANY;
         ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuGemmAssemblyDispatch::has_opt_impl(expected_weight_format, lhs_to_use,
                                                                                rhs_to_use, nullptr, dst, gemm_info));
+
+        // Set gemm weights info to the one returned by has_opt_impl because the user query the kernel for the format to be set.
+        gemm_info.weight_format = expected_weight_format;
     }
 
-    cpu::CpuGemmAssemblyDispatch::validate(lhs_to_use, rhs_to_use, nullptr, dst, gemm_info);
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        cpu::CpuGemmAssemblyDispatch::validate(lhs_to_use, rhs_to_use, nullptr, dst, gemm_info));
 
     return Status{};
 }
@@ -251,9 +255,11 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
     {
         _gemm_info.weight_format                         = WeightFormat::ANY;
         arm_compute::WeightFormat expected_weight_format = WeightFormat::ANY;
-        ARM_COMPUTE_ERROR_THROW_ON(cpu::CpuGemmAssemblyDispatch::has_opt_impl(expected_weight_format, &lhs_to_use,
-                                                                              &rhs_to_use, nullptr, dst, _gemm_info));
-        // Set gemm weights info to the one returned by has_opt_impl
+        Status ret = cpu::CpuGemmAssemblyDispatch::has_opt_impl(expected_weight_format, &lhs_to_use, &rhs_to_use,
+                                                                nullptr, dst, _gemm_info);
+        ARM_COMPUTE_ERROR_THROW_ON(ret);
+
+        // Set gemm weights info to the one returned by has_opt_impl because the user query the kernel for the format to be set.
         _gemm_info.weight_format = expected_weight_format;
         // has_opt_impl may return a non fast math kernel, even if we requested one
         _gemm_info.fast_mode = arm_compute::is_fixed_format_fast_math(expected_weight_format);
@@ -264,6 +270,7 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
     _asm_glue->configure(&lhs_to_use, &rhs_to_use, nullptr, &dst_to_use,
                          _gemm_info); // c is nullptr as bias not supported in MatMul
 
+    ARM_COMPUTE_EXIT_ON_MSG(!_asm_glue->is_configured(), "Error in CpuGemmAssemblyDispatch configuration");
     // Specify memory requirements for intermediate tensors
     auto asm_mem_req = _asm_glue->workspace();
     // Specify memory required by gemm kernel

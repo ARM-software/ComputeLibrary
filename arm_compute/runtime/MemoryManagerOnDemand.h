@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H
-#define ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_MEMORYMANAGERONDEMAND_H
+#define ACL_ARM_COMPUTE_RUNTIME_MEMORYMANAGERONDEMAND_H
 
 #include "arm_compute/runtime/ILifetimeManager.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
@@ -49,6 +49,8 @@ public:
     /** Allow instances of this class to be moved */
     MemoryManagerOnDemand &operator=(MemoryManagerOnDemand &&) = default;
 
+    static std::shared_ptr<MemoryManagerOnDemand> make_default();
+
     // Inherited methods overridden:
     ILifetimeManager *lifetime_manager() override;
     IPoolManager     *pool_manager() override;
@@ -60,4 +62,4 @@ private:
     std::shared_ptr<IPoolManager>     _pool_mgr;     /**< Memory pool manager */
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_MEMORYMANAGERONDEMAND_H

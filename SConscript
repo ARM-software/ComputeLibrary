@@ -33,8 +33,8 @@ import codecs
 import platform
 import SCons
 
-VERSION = "v24.09"
-LIBRARY_VERSION_MAJOR = 42
+VERSION = "v24.11"
+LIBRARY_VERSION_MAJOR = 43
 LIBRARY_VERSION_MINOR = 0
 LIBRARY_VERSION_PATCH = 0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -627,12 +627,8 @@ custom_operators = []
 custom_types = []
 custom_layouts = []
 
-use_custom_ops = env['high_priority'] or env['build_config']
+use_custom_ops = env['build_config']
 
-if env['high_priority']:
-    custom_operators = filelist['high_priority']
-    custom_types = ['all']
-    custom_layouts = ['all']
 
 if env['build_config']:
     custom_operators, custom_types, custom_layouts = read_build_config_json(env['build_config'])

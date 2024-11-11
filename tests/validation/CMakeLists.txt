@@ -20,141 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+file(GLOB_RECURSE files_validation_unit "UNIT/*.cpp")
+file(GLOB_RECURSE files_validation_cpp "CPP/*.cpp")
+
 target_sources(
   arm_compute_validation
-  PRIVATE UNIT/SafeIntegerOps.cpp
-          UNIT/Version.cpp
-          UNIT/TensorInfo.cpp
-          UNIT/TensorShape.cpp
-          UNIT/Utils.cpp
-          UNIT/SubTensorInfo.cpp
-          UNIT/WindowIterator.cpp
-          UNIT/LifetimeManager.cpp
-          UNIT/GPUTarget.cpp
-          CPP/DetectionPostProcessLayer.cpp
-          CPP/TopKV.cpp
-          CPP/DFT.cpp
-          CPP/Permute.cpp
-          CPP/NonMaximumSuppression.cpp)
+  PRIVATE ${files_validation_unit}
+          ${files_validation_cpp}
+  )
+
+file(GLOB_RECURSE files_validation_neon "NEON/*.cpp")
+file(GLOB_RECURSE files_validation_runtime "runtime/*.cpp")
 
 if(ENABLE_NEON)
   target_sources(
     arm_compute_validation
-    PRIVATE NEON/ElementwiseNegation.cpp
-            NEON/BoundingBoxTransform.cpp
-            NEON/ChannelShuffle.cpp
-            NEON/Logical.cpp
-            NEON/DilatedConvolutionLayer.cpp
-            NEON/PoolingLayer.cpp
-            NEON/BitwiseNot.cpp
-            NEON/FillBorder.cpp
-            NEON/ElementwiseRsqrtLayer.cpp
-            NEON/DepthConcatenateLayer.cpp
-            NEON/ElementwisePower.cpp
-            NEON/Fill.cpp
-            NEON/ROIPoolingLayer.cpp
-            NEON/LSTMLayer.cpp
-            NEON/ArithmeticSubtraction.cpp
-            NEON/GEMMLowp.cpp
-            NEON/Unstack.cpp
-            NEON/Slice.cpp
-            NEON/Pooling3dLayer.cpp
-            NEON/BitwiseOr.cpp
-            NEON/HeightConcatenateLayer.cpp
-            NEON/ReshapeLayer.cpp
-            NEON/SoftmaxLayer.cpp
-            NEON/Gather.cpp
-            NEON/CropResize.cpp
-            NEON/ReductionOperation.cpp
-            NEON/PixelWiseMultiplication.cpp
-            NEON/LogSoftmaxLayer.cpp
-            NEON/DepthConvertLayer.cpp
-            NEON/Flatten.cpp
-            NEON/ElementwiseKernelSelection.cpp
-            NEON/DepthToSpaceLayer.cpp
-            NEON/ElementwiseAbsoluteValue.cpp
-            NEON/PadLayer.cpp
-            NEON/MeanStdDevNormalizationLayer.cpp
-            NEON/GlobalPoolingLayer.cpp
-            NEON/RNNLayer.cpp
-            NEON/DetectionPostProcessLayer.cpp
-            NEON/ElementwiseRound.cpp
-            NEON/BitwiseXor.cpp
-            NEON/GEMM.cpp
-            NEON/FuseBatchNormalization.cpp
-            NEON/BitwiseAnd.cpp
-            NEON/ElementwiseMax.cpp
-            NEON/ReduceMean.cpp
-            NEON/Reverse.cpp
-            NEON/L2NormalizeLayer.cpp
-            NEON/Convolution3D.cpp
-            NEON/ArithmeticAddition.cpp
-            NEON/ActivationLayer.cpp
-            NEON/SpaceToBatchLayer.cpp
-            NEON/ElementwiseLog.cpp
-            NEON/LSTMLayerQuantized.cpp
-            NEON/Im2Col.cpp
-            NEON/DequantizationLayer.cpp
-            NEON/DeconvolutionLayer.cpp
-            NEON/Select.cpp
-            NEON/ElementwiseSin.cpp
-            NEON/PReluLayer.cpp
-            NEON/BatchNormalizationLayer.cpp
-            NEON/ElementwiseMin.cpp
-            NEON/InstanceNormalizationLayer.cpp
-            NEON/ROIAlignLayer.cpp
-            NEON/ElementwiseDivision.cpp
-            NEON/ElementwiseExpLayer.cpp
-            NEON/ArgMinMax.cpp
-            NEON/QLSTMLayerNormalization.cpp
-            NEON/Col2Im.cpp
-            NEON/Split.cpp
-            NEON/Transpose.cpp
-            NEON/GenerateProposalsLayer.cpp
-            NEON/StackLayer.cpp
-            NEON/WidthConcatenateLayer.cpp
-            NEON/NormalizationLayer.cpp
-            NEON/Copy.cpp
-            NEON/ElementwiseSquareDiff.cpp
-            NEON/MaxUnpoolingLayer.cpp
-            NEON/Permute.cpp
-            NEON/Comparisons.cpp
-            NEON/BatchConcatenateLayer.cpp
-            NEON/Tile.cpp
-            NEON/BatchToSpaceLayer.cpp
-            NEON/SpaceToDepthLayer.cpp
-            NEON/DepthwiseConvolutionLayerNative.cpp
-            NEON/QuantizationLayer.cpp
-            NEON/ConvertFullyConnectedWeights.cpp
-            NEON/Floor.cpp
-            NEON/FFT.cpp
-            NEON/Cast.cpp
-            NEON/PriorBoxLayer.cpp
-            NEON/Scale.cpp
-            NEON/ReorgLayer.cpp
-            NEON/Range.cpp
-            NEON/DirectConvolutionLayer.cpp
-            NEON/DepthwiseConvolutionLayer.cpp
-            NEON/FullyConnectedLayer.cpp
-            NEON/ConvolutionLayer.cpp
-            NEON/StridedSlice.cpp
-            NEON/ReorderLayer.cpp
-            NEON/UNIT/DynamicTensor.cpp
-            NEON/UNIT/TensorAllocator.cpp
-            NEON/UNIT/MemoryManager.cpp
-            NEON/UNIT/RuntimeContext.cpp
-            runtime/experimental/low_level/CpuGemmAssemblyDispatch.cpp
-            runtime/experimental/operators/CpuActivation.cpp
-            runtime/experimental/operators/CpuAdd.cpp
-            runtime/experimental/operators/CpuDepthwiseConv2d.cpp
-            runtime/experimental/operators/CpuElementwise.cpp
-            runtime/experimental/operators/CpuGemm.cpp
-            runtime/experimental/operators/CpuGemmConv2d.cpp
-            runtime/experimental/operators/CpuGemmDirectConv2d.cpp
-            runtime/experimental/operators/CpuMul.cpp
-            runtime/experimental/operators/CpuSoftmax.cpp
-            runtime/experimental/operators/CpuSub.cpp
-            runtime/experimental/operators/CpuTranspose.cpp
-            runtime/experimental/operators/CpuWinogradConv2d.cpp
-            )
+    PRIVATE ${files_validation_neon}
+            ${files_validation_runtime}
+  )
 endif()

@@ -35,14 +35,14 @@
 namespace arm_compute
 {
 #ifdef __aarch64__
-using LookupTable256   = std::array<qasymm8_t, 256>;
+using LookupTable256   = std::array<float, 256>;
 using LookupTable65536 = std::array<float16_t, 65536>;
 #endif // __aarch64__
 
 enum class LUTType
 {
     Activation,  // Determined by activation type
-    Exponential, // e^x
+    Exponential, // e^(beta * x)
 };
 
 struct LUTInfo
@@ -76,7 +76,7 @@ struct LUTInfo
     ActivationLayerInfo::ActivationFunction act;
     float                                   alpha;
     float                                   beta;
-    DataType                                dt;
+    DataType                                dt; // What datatype the table is indexed with.
     UniformQuantizationInfo                 qinfo;
     LUTType                                 type; // Default is Activation.
 };
@@ -89,9 +89,14 @@ public:
 
     static LUTManager &get_instance();
 #ifdef __aarch64__
-    std::shared_ptr<LookupTable65536> get_lut_table(LUTInfo info);
+    template <typename T>
+    std::shared_ptr<T> get_lut_table(LUTInfo info);
 
 private:
+    template <typename T>
+    inline std::map<LUTInfo, std::weak_ptr<T>> &get_map();
+
+    std::map<LUTInfo, std::weak_ptr<LookupTable256>>   map_fp32{};
     std::map<LUTInfo, std::weak_ptr<LookupTable65536>> map_fp16{};
 #endif // __aarch64__
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PERMUTE_FIXTURE
-#define ARM_COMPUTE_TEST_PERMUTE_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_PERMUTEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_PERMUTEFIXTURE_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
@@ -33,6 +33,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Permute.h"
 
 namespace arm_compute
@@ -47,6 +48,12 @@ class PermuteValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, PermutationVector perm, DataType data_type)
     {
+        if (std::is_same<TensorType, Tensor>::value && // CPU
+            !cpu_supports_dtypes({data_type}))
+        {
+            return;
+        }
+
         _target    = compute_target(input_shape, data_type, perm);
         _reference = compute_reference(input_shape, data_type, perm);
     }
@@ -108,4 +115,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PERMUTE_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_PERMUTEFIXTURE_H

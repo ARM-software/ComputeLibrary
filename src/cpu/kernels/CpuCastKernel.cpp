@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -893,7 +893,7 @@ void CpuCastKernel::run_op(ITensorPack &tensors, const Window &window, const Thr
                 case DataType::QASYMM8:
                 case DataType::U8:
                 {
-                    /* Down-conversion F32 -> U8 */
+                    /* Down-conversion F32 -> QASYMM8, U8 */
                     execute_window_loop(
                         win,
                         [&](const Coordinates &)
@@ -922,7 +922,7 @@ void CpuCastKernel::run_op(ITensorPack &tensors, const Window &window, const Thr
                             // Compute left-over elements
                             for (; x < window_end_x; ++x)
                             {
-                                *(dst_ptr + x) = utils::cast::saturate_cast<uint8_t>(*(src_ptr + x));
+                                *(dst_ptr + x) = utils::cast::saturate_static_cast<uint8_t>(*(src_ptr + x));
                             }
                         },
                         src, dst);
@@ -958,7 +958,7 @@ void CpuCastKernel::run_op(ITensorPack &tensors, const Window &window, const Thr
                             // Compute left-over elements
                             for (; x < window_end_x; ++x)
                             {
-                                *(dst_ptr + x) = utils::cast::saturate_cast<int8_t>(*(src_ptr + x));
+                                *(dst_ptr + x) = utils::cast::saturate_static_cast<int8_t>(*(src_ptr + x));
                             }
                         },
                         src, dst);

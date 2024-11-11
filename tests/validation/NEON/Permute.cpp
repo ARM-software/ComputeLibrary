@@ -31,6 +31,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/PermuteFixture.h"
 
@@ -179,14 +180,30 @@ TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<float16_t>, framework::DatasetMode::PRECOMMIT,
                        PermuteParametersSmall * framework::dataset::make("DataType", DataType::F16))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if (cpu_supports_dtypes({DataType::F16}))
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<float16_t>, framework::DatasetMode::NIGHTLY,
                        PermuteParametersLarge * framework::dataset::make("DataType", DataType::F16))
 {
-    // Validate output
-    validate(Accessor(_target), _reference);
+    if (cpu_supports_dtypes({DataType::F16}))
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */

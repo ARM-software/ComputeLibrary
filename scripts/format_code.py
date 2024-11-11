@@ -142,20 +142,20 @@ def check_license(filename):
     f.close()
 
     f = open(filename, "w")
-    f.write("".join(content[:2]))
+    f.write("".join(content[:3]))
 
     year = datetime.datetime.now().year
     # This only works until year 9999
-    m = re.match(r"(.*Copyright \(c\) )(.*\d{4})( [Arm|ARM].*)", content[2])
+    m = re.match(r"(.*FileCopyrightText: )(.*\d{4})( [arm|Arm|ARM].*)", content[3])
 
     if not m:
-        f.write("Copyright (c) {} Arm Limited\n".format(year))
+        f.write("# SPDX-FileCopyrightText: {} Arm Limited\n#\n".format(year))
     else:
         updated_year = adjust_copyright_year(m.group(2), year)
-        f.write("Copyright (c) {} Arm Limited\n".format(updated_year))
+        f.write("# SPDX-FileCopyrightText: {} Arm Limited\n".format(updated_year))
 
     # Copy the rest of the file's content:
-    f.write("".join(content[3:]))
+    f.write("".join(content[4:]))
     f.close()
 
 
@@ -276,7 +276,7 @@ class FormatCodeRun:
 
                 logger.info("Formatting %s" % f)
 
-            check_license("LICENSE")
+            check_license("LICENSES/MIT.txt")
 
         except subprocess.CalledProcessError as e:
             retval = -1

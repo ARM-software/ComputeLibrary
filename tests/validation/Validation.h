@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_VALIDATION_H
-#define ARM_COMPUTE_TEST_VALIDATION_H
+#ifndef ACL_TESTS_VALIDATION_VALIDATION_H
+#define ACL_TESTS_VALIDATION_VALIDATION_H
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
@@ -54,6 +54,14 @@ inline bool are_equal_infs(T val0, T val1)
     const auto same_sign = support::cpp11::signbit(val0) == support::cpp11::signbit(val1);
     return (!support::cpp11::isfinite(val0)) && (!support::cpp11::isfinite(val1)) && same_sign;
 }
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+template <>
+inline bool are_equal_infs(float16_t val0, float16_t val1)
+{
+    return are_equal_infs(static_cast<float>(val0), static_cast<float>(val1));
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
 /** Class reprensenting an absolute tolerance value. */
@@ -689,4 +697,4 @@ void validate_min_max_loc(const MinMaxLocationValues<T> &target, const MinMaxLoc
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_REFERENCE_VALIDATION_H */
+#endif // ACL_TESTS_VALIDATION_VALIDATION_H

@@ -109,15 +109,6 @@
       "src/c/operators/AclActivation.cpp"
     ]
   },
-  "high_priority": [
-    "Activation",
-    "DepthwiseConv2d",
-    "Conv2d",
-    "Permute",
-    "Pool2d",
-    "Reshape",
-    "MatMul"
-  ],
   "gpu": {
     "common": [
       "src/core/CL/CLCompileContext.cpp",
@@ -1612,11 +1603,14 @@
             "src/runtime/experimental/operators/CpuActivation.cpp",
             "src/runtime/experimental/operators/CpuAdd.cpp",
             "src/runtime/experimental/operators/CpuDepthwiseConv2d.cpp",
+            "src/runtime/experimental/operators/CpuDequantize.cpp",
             "src/runtime/experimental/operators/CpuElementwise.cpp",
+            "src/runtime/experimental/operators/CpuGEMMLowp.cpp",
             "src/runtime/experimental/operators/CpuGemm.cpp",
             "src/runtime/experimental/operators/CpuGemmConv2d.cpp",
             "src/runtime/experimental/operators/CpuGemmDirectConv2d.cpp",
             "src/runtime/experimental/operators/CpuMul.cpp",
+            "src/runtime/experimental/operators/CpuQuantize.cpp",
             "src/runtime/experimental/operators/CpuSoftmax.cpp",
             "src/runtime/experimental/operators/CpuSub.cpp",
             "src/runtime/experimental/operators/CpuTranspose.cpp",
@@ -2312,7 +2306,7 @@
             "qasymm8_signed":["src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp"]
           },
           "sve": {
-            "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ]
+            "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp", "src/cpu/kernels/softmax/generic/sve/impl_bf16.cpp" ]
           },
           "sve2":{
             "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],

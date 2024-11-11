@@ -651,6 +651,26 @@ inline int32x4x4_t vquantize_internal(const float32x4x4_t &qv, float scale, int3
     return rf;
 }
 
+inline int32x4x4_t vquantize_internal(const float32x4x4_t &qv, float scale, float offset)
+{
+    const float32x4_t voffset   = vdupq_n_f32(offset);
+    const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
+    const int32x4x4_t rf        = {{
+#ifdef __aarch64__
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[2], vinvscale)),
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[3], vinvscale)),
+#else  //__aarch64__
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[2], vinvscale)),
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[3], vinvscale)),
+#endif //__aarch64__
+    }};
+    return rf;
+}
+
 /** Quantize a neon vector holding 16 floating point values.
  *
  * @param[in] qv Input values to be quantized.
@@ -666,6 +686,14 @@ inline uint8x16_t vquantize(const float32x4x4_t &qv, const UniformQuantizationIn
     return vcombine_u8(pa, pb);
 }
 
+inline uint8x16_t vquantize(const float32x4x4_t &qv, const UniformRequantizationInfo &qi)
+{
+    auto            rf = vquantize_internal(qv, qi.scale, qi.offset);
+    const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+    const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+    return vcombine_u8(pa, pb);
+}
+
 /** Signed quantize a neon vector holding 16 floating point values.
  *
  * @param[in] qv Input values to be quantized.
@@ -674,6 +702,14 @@ inline uint8x16_t vquantize(const float32x4x4_t &qv, const UniformQuantizationIn
  * @return A neon vector holding the quantized values
  */
 inline int8x16_t vquantize_signed(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    auto           rf = vquantize_internal(qv, qi.scale, qi.offset);
+    const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+    const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+    return vcombine_s8(pa, pb);
+}
+
+inline int8x16_t vquantize_signed(const float32x4x4_t &qv, const UniformRequantizationInfo &qi)
 {
     auto           rf = vquantize_internal(qv, qi.scale, qi.offset);
     const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));

@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
@@ -62,7 +63,10 @@ public:
      *
      * @param[in] memory_manager (Optional) Memory manager.
      */
-    NEGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEGenerateProposalsLayer() : NEGenerateProposalsLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGenerateProposalsLayer(const NEGenerateProposalsLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

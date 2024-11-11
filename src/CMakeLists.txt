@@ -328,6 +328,7 @@ target_sources(
 	cpu/kernels/scale/sve/qasymm8.cpp
 	cpu/kernels/scale/sve/qasymm8_signed.cpp
 	cpu/kernels/softmax/generic/sve/impl.cpp
+	cpu/kernels/softmax/generic/sve/impl_bf16.cpp
 )
 
 target_sources(
@@ -1033,11 +1034,14 @@ target_sources(
 	runtime/experimental/operators/CpuActivation.cpp
 	runtime/experimental/operators/CpuAdd.cpp
 	runtime/experimental/operators/CpuDepthwiseConv2d.cpp
+	runtime/experimental/operators/CpuDequantize.cpp
 	runtime/experimental/operators/CpuElementwise.cpp
+	runtime/experimental/operators/CpuGEMMLowp.cpp
 	runtime/experimental/operators/CpuGemm.cpp
 	runtime/experimental/operators/CpuGemmConv2d.cpp
 	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
 	runtime/experimental/operators/CpuMul.cpp
+	runtime/experimental/operators/CpuQuantize.cpp
 	runtime/experimental/operators/CpuSoftmax.cpp
 	runtime/experimental/operators/CpuSub.cpp
 	runtime/experimental/operators/CpuTranspose.cpp

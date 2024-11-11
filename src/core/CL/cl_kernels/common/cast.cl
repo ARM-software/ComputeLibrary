@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,19 +70,14 @@ __kernel void cast_down(
     VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
     in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in_addr);
 
-#if defined(IS_DATA_TYPE_QUANTIZED)
-    in_data ^= (VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE))0x80;
-#endif // defined(IS_DATA_TYPE_QUANTIZED)
+#if defined(QSYMM8_PER_CHANNEL_TO_QASYMM8)
+    // This operation mode is used in Gemmlowp
+    in_data ^= (VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)) 0x80;
+#endif // defined(QSYMM8_PER_CHANNEL_TO_QASYMM8)
 
-#if defined(IS_DATA_TYPE_FLOAT)
     VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
     res0 = CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
     STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
-#else  /* defined(IS_DATA_TYPE_FLOAT) */
-    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
-    res0 = CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
-    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
-#endif /* defined(IS_DATA_TYPE_FLOAT) */
 }
 
 /** This function performs a up-casting
@@ -122,13 +117,7 @@ __kernel void cast_up(
     VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
     in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in_addr);
 
-#if defined(IS_DATA_TYPE_FLOAT)
     VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
     res0 = CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
     STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
-#else  /* defined(IS_DATA_TYPE_FLOAT) */
-    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
-    res0 = CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
-    STORE_VECTOR_SELECT(res, DATA_TYPE_OUT, out_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
-#endif /* defined(IS_DATA_TYPE_FLOAT) */
 }

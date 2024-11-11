@@ -25,6 +25,7 @@
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREDUCTIONOPERATION_H
 
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -45,7 +46,10 @@ class NEReductionOperation : public IFunction
 {
 public:
     /** Default constructor */
-    NEReductionOperation(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEReductionOperation(std::shared_ptr<IMemoryManager> memory_manager);
+    NEReductionOperation() : NEReductionOperation(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEReductionOperation(const NEReductionOperation &) = delete;
     /** Default move constructor */

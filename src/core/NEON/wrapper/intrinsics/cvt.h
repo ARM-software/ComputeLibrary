@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022-2023 Arm Limited.
+ * Copyright (c) 2020, 2022-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_WRAPPER_CVT_H
-#define ARM_COMPUTE_WRAPPER_CVT_H
+#ifndef ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_CVT_H
+#define ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_CVT_H
 
 #include <arm_neon.h>
 
@@ -82,6 +82,18 @@ inline typename std::enable_if<std::is_same<T, int32_t>::value, int32x4_t>::type
 {
     return vcvtaq_s32_f32(a);
 }
+
+template <typename T>
+inline typename std::enable_if<std::is_same<T, uint32_t>::value, uint32x4_t>::type vcvtn(const float32x4_t &a)
+{
+    return vcvtnq_u32_f32(a);
+}
+
+template <typename T>
+inline typename std::enable_if<std::is_same<T, int32_t>::value, int32x4_t>::type vcvtn(const float32x4_t &a)
+{
+    return vcvtnq_s32_f32(a);
+}
 #endif //__aarch64__
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
@@ -104,4 +116,4 @@ inline void vcvt_bf16_f32(const float *inptr, uint16_t *outptr)
 
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_WRAPPER_CVT_H */
+#endif // ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_CVT_H

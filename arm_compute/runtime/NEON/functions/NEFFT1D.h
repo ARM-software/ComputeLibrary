@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -49,7 +50,10 @@ class NEFFT1D : public IFunction
 {
 public:
     /** Default Constructor */
-    NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager);
+    NEFFT1D() : NEFFT1D(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFFT1D(const NEFFT1D &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -45,7 +46,10 @@ class NEPoolingLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEPoolingLayer() : NEPoolingLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEPoolingLayer(const NEPoolingLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

@@ -361,6 +361,8 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.pretranspose_A(), "Matrix A already pretransposed is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.pretranspose_B(), "Matrix B already pretransposed is not supported");
 
     // When using accumulation(in place summation), for now, the only supported DataType for output is S32.
     if (gemm_info.accumulate())

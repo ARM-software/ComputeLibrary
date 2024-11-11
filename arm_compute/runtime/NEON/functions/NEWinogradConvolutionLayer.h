@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -49,7 +50,10 @@ class NEWinogradConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
+    NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager);
+    NEWinogradConvolutionLayer() : NEWinogradConvolutionLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEWinogradConvolutionLayer(const NEWinogradConvolutionLayer &) = delete;
     /** Default move constructor */

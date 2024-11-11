@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
 namespace arm_compute
@@ -48,7 +49,10 @@ class NEArgMinMaxLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEArgMinMaxLayer() : NEArgMinMaxLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEArgMinMaxLayer(const NEArgMinMaxLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

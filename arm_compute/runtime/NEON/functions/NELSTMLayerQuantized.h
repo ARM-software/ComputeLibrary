@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NELSTMLAYERQUANTIZED_H
-#define ARM_COMPUTE_NELSTMLAYERQUANTIZED_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYERQUANTIZED_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYERQUANTIZED_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
@@ -63,7 +64,10 @@ class NELSTMLayerQuantized : public IFunction
 {
 public:
     /** Default constructor */
-    NELSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NELSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager);
+    NELSTMLayerQuantized() : NELSTMLayerQuantized(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NELSTMLayerQuantized(const NELSTMLayerQuantized &) = delete;
     /** Prevent instances of this class from being moved (As this class contains pointers) */
@@ -233,4 +237,4 @@ private:
     bool _is_prepared;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NELSTMLAYERQUANTIZED_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYERQUANTIZED_H

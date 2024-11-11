@@ -77,6 +77,21 @@ inline vector_type<int8_t> vquantize_qasymm8<int8_t>(const float32x4x4_t &qv, co
     return vquantize_signed(qv, qi);
 }
 
+template <typename quantized_type>
+inline vector_type<quantized_type> vquantize_qasymm8(const float32x4x4_t &qv, const UniformRequantizationInfo &qi);
+
+template <>
+inline vector_type<uint8_t> vquantize_qasymm8<uint8_t>(const float32x4x4_t &qv, const UniformRequantizationInfo &qi)
+{
+    return vquantize(qv, qi);
+}
+
+template <>
+inline vector_type<int8_t> vquantize_qasymm8<int8_t>(const float32x4x4_t &qv, const UniformRequantizationInfo &qi)
+{
+    return vquantize_signed(qv, qi);
+}
+
 template <typename TOut, typename = typename std::enable_if<std::is_signed<TOut>::value, bool>::type>
 inline int8x16_t recombine_8_16(int16x8_t lower, int16x8_t upper)
 {
@@ -239,12 +254,17 @@ void run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
+    constexpr bool is_8bit_int = std::is_same<TIn, int8_t>::value || std::is_same<TIn, uint8_t>::value;
+
     const UniformQuantizationInfo uqinfo_in = src->info()->quantization_info().uniform();
     UniformQuantizationInfo       uqinfo    = dst->info()->quantization_info().uniform();
-    if (is_data_type_quantized_asymmetric(src->info()->data_type()))
+    UniformRequantizationInfo     reqinfo(1.f, 0);
+
+    if (is_8bit_int)
     {
-        uqinfo = compute_requantization_scale_offset(uqinfo_in, uqinfo);
+        reqinfo = compute_requantization_scale_float_offset(uqinfo_in, uqinfo);
     }
+
 #ifdef __aarch64__
     constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_EVEN;
 #else  //__aarch64__
@@ -267,12 +287,26 @@ void run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window
             int x = window_start_x;
             for (; x <= (window_end_x - window_step); x += window_step)
             {
-                wrapper::vstore(&output_ptr[x], vquantize_qasymm8<TOut>(load_value(&input_ptr[x]), uqinfo));
+                if (is_8bit_int)
+                {
+                    wrapper::vstore(&output_ptr[x], vquantize_qasymm8<TOut>(load_value(&input_ptr[x]), reqinfo));
+                }
+                else
+                {
+                    wrapper::vstore(&output_ptr[x], vquantize_qasymm8<TOut>(load_value(&input_ptr[x]), uqinfo));
+                }
             }
             // Compute left-over elements
             for (; x < window_end_x; ++x)
             {
-                output_ptr[x] = Qasymm8QuantizationHelper<TOut>::quantize(input_ptr[x], uqinfo, rounding_policy);
+                if (is_8bit_int)
+                {
+                    output_ptr[x] = Qasymm8QuantizationHelper<TOut>::quantize(input_ptr[x], reqinfo, rounding_policy);
+                }
+                else
+                {
+                    output_ptr[x] = Qasymm8QuantizationHelper<TOut>::quantize(input_ptr[x], uqinfo, rounding_policy);
+                }
             }
         },
         input, output);

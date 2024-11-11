@@ -3690,6 +3690,17 @@ inline std::string to_string(const arm_compute::ScatterInfo &info)
     return str.str();
 }
 
+/** Formatted output of the bool data type.
+ *
+ * @param[in] info bool type to output.
+ *
+ * @return Formatted string
+ */
+inline std::string to_string(const bool &info)
+{
+    return info ? "true" : "false";
+}
+
 } // namespace arm_compute
 
 #endif // ACL_UTILS_TYPEPRINTER_H

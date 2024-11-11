@@ -26,6 +26,7 @@
 #include "tests/validation/Validation.h"
 #include "src/core/helpers/LUTManager.h"
 #include "include/half/half.hpp"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
@@ -85,7 +86,7 @@ TEST_SUITE(BF16)
 TEST_CASE(LUTValueTest, framework::DatasetMode::ALL)
 {
     // Define values for test
-    constexpr float beta = 1.0f;
+    constexpr float beta = -1.0f;
     constexpr float rel_tolerance = 0.01f;
     constexpr int num_elements = 65536;
     unsigned int num_mismatches = 0;
@@ -97,14 +98,14 @@ TEST_CASE(LUTValueTest, framework::DatasetMode::ALL)
     if(CPUInfo::get().has_fp16())
     {
         // Retrieve lut, Assert lut exists and is retrieved successfully.
-        std::shared_ptr<LookupTable65536> lut = lman.get_lut_table(info);
+        std::shared_ptr<LookupTable65536> lut = lman.get_lut_table<LookupTable65536>(info);
         ARM_COMPUTE_EXPECT(lut != nullptr, framework::LogLevel::ALL);
 
         // Check each value in lut
         for(int i=0; i < num_elements; i++)
         {
             // Calculate reference in fp32. Convert lut value to fp32.
-            const float fref = std::exp(bf16_to_float(i) * beta * -1);
+            const float fref = std::exp(bf16_to_float(i) * beta);
             const uint16_t target_bf16 = read_as_bf16((*lut)[i]);
             const float target = bf16_to_float(target_bf16);
 
@@ -133,11 +134,19 @@ TEST_CASE(LUTValueTest, framework::DatasetMode::ALL)
 
 TEST_CASE(CheckLutReuse, framework::DatasetMode::ALL)
 {
-    LUTInfo info = {LUTType::Exponential, 1.0f, DataType::BFLOAT16, UniformQuantizationInfo()};
-    LUTManager lman = LUTManager::get_instance();
-    auto first = lman.get_lut_table(info);
-    auto second = lman.get_lut_table(info);
-    ARM_COMPUTE_EXPECT(first == second, framework::LogLevel::ERRORS);
+    if (cpu_supports_dtypes({DataType::BFLOAT16}))
+    {
+        LUTInfo info = {LUTType::Exponential, -1.0f, DataType::BFLOAT16, UniformQuantizationInfo()};
+        LUTManager lman = LUTManager::get_instance();
+        auto first = lman.get_lut_table<LookupTable65536>(info);
+        auto second = lman.get_lut_table<LookupTable65536>(info);
+        ARM_COMPUTE_EXPECT(first == second, framework::LogLevel::ERRORS);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support BFLOAT16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 
 

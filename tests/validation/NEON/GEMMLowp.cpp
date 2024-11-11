@@ -56,6 +56,13 @@ namespace
 } // namespace
 
 
+const auto QuantizedActivationFunctionsDataset = make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
+});
+
 TEST_SUITE(NEON)
 TEST_SUITE(GEMMLowp)
 TEST_SUITE(MatrixMultiplyCore)
@@ -65,8 +72,6 @@ using NEGEMMLowpMatrixMultiplyCoreAccumulateFixture = GEMMLowpMatrixMultiplyAccu
 using NEGEMMLowpBatchedMatMulFixture      = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, true>;
 using NEGEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture = GEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
 using NEGEMMLowpDequantizedMatrixMultiplyValidationFixture = GEMMLowpDequantizedMatrixMultiplyValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
-
-using framework::dataset::make;
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
                shape_a, shape_b, shape_c, a_offset, b_offset)
@@ -368,7 +373,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQua
     combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
         make("DataType", { DataType::QASYMM8_SIGNED }),
         make("reshape_b_only_on_first_run", { false }),
-        make("updated_sq_info_after_config", { true })))
+        make("updated_sq_info_after_config", { true }),
+        QuantizedActivationFunctionsDataset
+        ))
 {
     validate(Accessor(_target), _reference, tolerance_batched);
 }
@@ -376,7 +383,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQua
     combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
         make("DataType", { DataType::QASYMM8_SIGNED }),
         make("reshape_b_only_on_first_run", { false }),
-        make("updated_sq_info_after_config", { true })))
+        make("updated_sq_info_after_config", { true }),
+        QuantizedActivationFunctionsDataset
+        ))
 {
     validate(Accessor(_target), _reference, tolerance_batched);
 }
@@ -389,7 +398,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQua
     combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
         make("DataType", { DataType::QASYMM8 }),
         make("reshape_b_only_on_first_run", { false }),
-        make("updated_sq_info_after_config", { true })))
+        make("updated_sq_info_after_config", { true }),
+        QuantizedActivationFunctionsDataset
+        ))
 {
     validate(Accessor(_target), _reference, tolerance_batched);
 }
@@ -397,7 +408,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQua
     combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
         make("DataType", { DataType::QASYMM8 }),
         make("reshape_b_only_on_first_run", { false }),
-        make("updated_sq_info_after_config", { true })))
+        make("updated_sq_info_after_config", { true }),
+        QuantizedActivationFunctionsDataset
+        ))
 {
     validate(Accessor(_target), _reference, tolerance_batched);
 }

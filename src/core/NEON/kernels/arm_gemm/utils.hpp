@@ -172,10 +172,12 @@ namespace utils {
 // get_vector_length(): Returns SVE vector length for type "T".
 //
 // It is required that this can be compiled by a compiler in non-SVE mode, but it must be prevented from running (at
-// runtime) if SVE is not enabled.  Typically this is used by switchyard/driver code which is built in normal mode
+// runtime) if SVE is not enabled. Typically this is used by switchyard/driver code which is built in normal mode
 // which then calls SVE kernels (compiled accordingly) iff SVE is detected at runtime.
 template <typename T>
 inline unsigned long get_vector_length() {
+// x0 register is not available in 32-bit builds
+#if defined(__aarch64__)
     uint64_t vl;
 
     __asm __volatile (
@@ -185,10 +187,13 @@ inline unsigned long get_vector_length() {
         :
         : "x0"
     );
-
     return vl / sizeof(T);
+#else // !defined(__aarch64__)
+    return 16 / sizeof(T);
+#endif // defined(__aarch64__)
 }
 
+#ifdef __aarch64__
 namespace sme {
 
 template <typename T>
@@ -207,6 +212,7 @@ inline uint64_t get_vector_length() {
 }
 
 } // namespace sme
+#endif // __aarch64__
 
 // get_vector_length(VLType): Returns vector length for type "T".
 //

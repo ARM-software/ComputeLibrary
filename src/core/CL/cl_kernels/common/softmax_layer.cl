@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -169,7 +169,7 @@ __kernel void softmax_x(
     // Normalize the data.
 #ifdef IS_QUANTIZED
 # if IS_LOG
-    TMP_DATA_TYPE norm_offset = -log(sum_value) + DST_OFFSET;
+    TMP_DATA_TYPE norm_offset = -log(sum_value) / DST_SCALE + DST_OFFSET;
 #  define NORMALIZE(SIZE, x) CONVERT_SAT_ROUND((x) / DST_SCALE + norm_offset, VEC_DATA_TYPE(DATA_TYPE, SIZE), rte)
 # else // IS_LOG
     TMP_DATA_TYPE norm_div = sum_value * DST_SCALE;
@@ -333,7 +333,7 @@ __kernel void softmax_non_x(
     // Normalize the data.
 #ifdef IS_QUANTIZED
 # if IS_LOG
-    VEC_DATA_TYPE(TMP_DATA_TYPE, VEC_SIZE) norm_offset = -log(sum_value) + DST_OFFSET;
+    VEC_DATA_TYPE(TMP_DATA_TYPE, VEC_SIZE) norm_offset = -log(sum_value) / DST_SCALE + DST_OFFSET;
 #  define NORMALIZE(x) CONVERT_SAT_ROUND((x) / DST_SCALE + norm_offset, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE), rte)
 # else // IS_LOG
     VEC_DATA_TYPE(TMP_DATA_TYPE, VEC_SIZE) norm_div = sum_value * DST_SCALE;

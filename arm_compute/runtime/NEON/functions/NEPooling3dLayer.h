@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -43,7 +44,10 @@ class NEPooling3dLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEPooling3dLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEPooling3dLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEPooling3dLayer() : NEPooling3dLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEPooling3dLayer(const NEPooling3dLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

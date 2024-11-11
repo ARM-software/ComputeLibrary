@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 
+#include <cstdint>
 #include <memory>
 
 namespace arm_compute
@@ -180,7 +181,12 @@ public:
      *
      * @return Vector length if sme2 is enabled, otherwise returns 0.
      */
-    uint64_t get_sme2_vector_length() const;
+    uint64_t get_sme2_vector_length_in_bytes() const;
+    /** Return the vector length in bits for sme2
+     *
+     * @return Vector length if sme2 is enabled, otherwise returns 0.
+     */
+    uint64_t get_sme2_vector_length_in_bits() const;
 
 private:
     struct Impl;

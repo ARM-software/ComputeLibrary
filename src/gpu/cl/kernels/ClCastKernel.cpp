@@ -54,12 +54,18 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
     ARM_COMPUTE_RETURN_ERROR_ON(src == dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(
         src, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QSYMM8, DataType::QASYMM8_SIGNED,
-        DataType::QSYMM8_PER_CHANNEL, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16,
-        DataType::F32, DataType::S64, DataType::U64);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                         DataType::S16, DataType::U16, DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == dst->data_type(), "src and dst data types must be different");
+        DataType::QSYMM8_PER_CHANNEL, DataType::QASYMM16, DataType::QSYMM16, DataType::S16, DataType::U16,
+        DataType::U32, DataType::S32, DataType::F16, DataType::F32, DataType::S64, DataType::U64);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(
+        dst, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QSYMM8, DataType::QASYMM8_SIGNED,
+        DataType::QSYMM8_PER_CHANNEL, DataType::QASYMM16, DataType::QSYMM16, DataType::S16, DataType::U16,
+        DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+
+    const DataType src_dtype = get_underlying_data_type(src->data_type());
+    const DataType dst_dtype = get_underlying_data_type(dst->data_type());
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src_dtype == dst_dtype, "src and dst data types must be different");
 
     // Validate in case of configured dst
     if (dst->total_size() > 0)
@@ -83,6 +89,9 @@ void ClCastKernel::configure(const CLCompileContext &compile_context,
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
+    const DataType src_dtype = src->data_type();
+    const DataType dst_dtype = dst->data_type();
+
     // Auto initialize dst shape if not initialized (We can only auto-configure the shape, datatype must be given)
     set_shape_if_empty(*dst, src->tensor_shape());
 
@@ -91,24 +100,24 @@ void ClCastKernel::configure(const CLCompileContext &compile_context,
     auto padding_info = get_padding_info({src, dst});
 
     // Get data sizes
-    const size_t src_size = data_size_from_type(src->data_type());
-    const size_t dst_size = data_size_from_type(dst->data_type());
+    const size_t src_size = data_size_from_type(src_dtype);
+    const size_t dst_size = data_size_from_type(dst_dtype);
 
     // Get number of elements to process per iterations
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(16 / src->element_size(), src->dimension(0));
 
     // Set build options
+
     CLBuildOptions build_opts;
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
                           support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
-    build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(src->data_type()));
-    build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(dst->data_type()));
+    build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(src_dtype));
+    build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(dst_dtype));
     // Conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
-    build_opts.add_option_if(is_data_type_float(src->data_type()) || policy == ConvertPolicy::SATURATE, "-DSATURATE");
-    build_opts.add_option_if(is_data_type_float(src->data_type()) || is_data_type_float(dst->data_type()),
-                             "-DIS_DATA_TYPE_FLOAT");
-    build_opts.add_option_if(is_data_type_quantized(src->data_type()), "-DIS_DATA_TYPE_QUANTIZED");
+    build_opts.add_option_if(is_data_type_float(src_dtype) || policy == ConvertPolicy::SATURATE, "-DSATURATE");
+    build_opts.add_option_if(dst_dtype == DataType::QASYMM8 && is_data_type_quantized_per_channel(src_dtype),
+                             "-DQSYMM8_PER_CHANNEL_TO_QASYMM8");
 
     // Create kernel
     const std::string kernel_name = (src_size >= dst_size) ? "cast_down" : "cast_up";
@@ -128,7 +137,7 @@ void ClCastKernel::configure(const CLCompileContext &compile_context,
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
     _config_id += "_";
-    _config_id += lower_string(string_from_data_type(src->data_type()));
+    _config_id += lower_string(string_from_data_type(src_dtype));
     _config_id += "_";
     _config_id += support::cpp11::to_string(src->dimension(0));
     _config_id += "_";

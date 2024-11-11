@@ -63,6 +63,31 @@ struct UniformQuantizationInfo
     int32_t offset;
 };
 
+/** Quantization info when assuming per layer quantization */
+struct UniformRequantizationInfo
+{
+    /** Default constructor */
+    UniformRequantizationInfo() : scale(0.f), offset(0.f)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] scale  Quantization scale
+     * @param[in] offset Quantization offset
+     */
+    UniformRequantizationInfo(float scale, float offset) : scale(scale), offset(offset)
+    {
+    }
+    /** Checks if the scale and offset are both zero */
+    bool empty() const
+    {
+        return (scale == 0) && (offset == 0);
+    }
+
+    float scale;
+    float offset;
+};
+
 /** Quantization information */
 class QuantizationInfo
 {
@@ -232,6 +257,13 @@ struct Qasymm8QuantizationHelper
         return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
     }
 
+    static inline QUANTIZED_TYPE quantize(float value, const UniformRequantizationInfo &qinfo)
+    {
+        ARM_COMPUTE_ERROR_ON(qinfo.scale == 0);
+        const int quantized = support::cpp11::lround(value / qinfo.scale + qinfo.offset);
+        return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
+    }
+
     /** Quantize a value given a 8-bit asymmetric quantization scheme using a specific rounding policy
      *
      * @param[in] value           Value to quantize
@@ -250,6 +282,21 @@ struct Qasymm8QuantizationHelper
 
         ARM_COMPUTE_ERROR_ON(qinfo.scale == 0);
         const int quantized = arm_compute::round(value / qinfo.scale, rounding_policy) + qinfo.offset;
+        return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
+    }
+
+    static inline QUANTIZED_TYPE
+    quantize(float value, const UniformRequantizationInfo &qinfo, RoundingPolicy rounding_policy)
+    {
+        if (rounding_policy == RoundingPolicy::TO_NEAREST_UP)
+        {
+            return quantize(value, qinfo);
+        }
+
+        ARM_COMPUTE_ERROR_ON(qinfo.scale == 0);
+
+        // We round after adding the offset, because the offset is also float
+        const int quantized = arm_compute::round(value / qinfo.scale + qinfo.offset, rounding_policy);
         return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
     }
 
@@ -588,7 +635,11 @@ inline float dequantize_s32(int32_t value, const QuantizationInfo &qinfo)
     return dequantize_s32(value, qinfo.uniform());
 }
 
-/*
+/** Compute the requantization offset and scale
+ *
+ * @deprecated because reequantization using integer offsets creates rounding issues.
+ * Please use @ref arm_compute::compute_requantization_scale_float_offset() instead.
+ *
  * In case of requantization of a quantized input tensor to an output tensor with another quantization
  * instead of applying dequantization and then a quantization functions, we just compute new scale and
  * offset.
@@ -628,8 +679,31 @@ inline UniformQuantizationInfo compute_requantization_scale_offset(const Uniform
     // In order to minimize flooring we convert the offset to a float,
     // then compute the new offset in the float domain,
     // finally we convert it back as int32_t
-    offset_to_apply -= static_cast<int32_t>(static_cast<float>(uqinfo_in.offset) * uqinfo_in.scale / uqinfo_out.scale);
+
+#ifdef __aarch64__
+    constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_EVEN;
+#else  //__aarch64__
+    constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP;
+#endif //__aarch64__
+
+    offset_to_apply -=
+        arm_compute::round(static_cast<float>(uqinfo_in.offset) * uqinfo_in.scale / uqinfo_out.scale, rounding_policy);
     return UniformQuantizationInfo(scale_to_apply, offset_to_apply);
+}
+
+/** Similar to @ref arm_compute::compute_requantization_scale_offset()
+ *  but returning offset as float instead of integer
+ */
+inline UniformRequantizationInfo compute_requantization_scale_float_offset(const UniformQuantizationInfo &uqinfo_in,
+                                                                           const UniformQuantizationInfo &uqinfo_out)
+{
+    float scale_to_apply  = uqinfo_out.scale;
+    float offset_to_apply = static_cast<float>(uqinfo_out.offset);
+
+    scale_to_apply /= uqinfo_in.scale;
+    offset_to_apply -= static_cast<float>(uqinfo_in.offset) * uqinfo_in.scale / uqinfo_out.scale;
+
+    return UniformRequantizationInfo(scale_to_apply, offset_to_apply);
 }
 
 } // namespace arm_compute

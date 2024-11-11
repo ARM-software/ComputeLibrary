@@ -29,6 +29,7 @@
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -73,7 +74,10 @@ class NEConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager);
+    NEConvolutionLayer() : NEConvolutionLayer(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayer(const NEConvolutionLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

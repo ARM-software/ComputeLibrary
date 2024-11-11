@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NESOFTMAXLAYER_H
-#define ARM_COMPUTE_NESOFTMAXLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESOFTMAXLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESOFTMAXLAYER_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -41,7 +42,10 @@ class NESoftmaxLayerGeneric : public IFunction
 {
 public:
     /** Constructor */
-    NESoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NESoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager);
+    NESoftmaxLayerGeneric() : NESoftmaxLayerGeneric(MemoryManagerOnDemand::make_default())
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NESoftmaxLayerGeneric(const NESoftmaxLayerGeneric &) = delete;
     /** Default move constructor */
@@ -98,4 +102,4 @@ using NESoftmaxLayer    = NESoftmaxLayerGeneric<false>;
 using NELogSoftmaxLayer = NESoftmaxLayerGeneric<true>;
 
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NESOFTMAXLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESOFTMAXLAYER_H

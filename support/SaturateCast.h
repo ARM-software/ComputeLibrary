@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_CAST_SATURATE_CAST_H
-#define ARM_COMPUTE_UTILS_CAST_SATURATE_CAST_H
+#ifndef ACL_SUPPORT_SATURATECAST_H
+#define ACL_SUPPORT_SATURATECAST_H
 
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/core/utils/misc/Utility.h"
@@ -190,6 +190,18 @@ inline T saturate_cast(U v)
     return saturate_cast<T>(vi);
 }
 
+// float -> int
+template<typename T,
+         typename U,
+         typename std::enable_if<std::is_integral<T>::value &&
+                                 traits::is_floating_point<U>::value,
+                  int >::type = 0 >
+inline T saturate_static_cast(U v)
+{
+    int32_t vi = static_cast<int32_t>(v);
+    return saturate_cast<T>(vi);
+}
+
 // int -> float
 template<typename T,
          typename U,
@@ -216,4 +228,4 @@ inline T saturate_cast(U v)
 } // namespace cast
 } // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_UTILS_CAST_SATURATE_CAST_H */
+#endif // ACL_SUPPORT_SATURATECAST_H
