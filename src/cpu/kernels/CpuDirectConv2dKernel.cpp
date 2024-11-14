@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024 Arm Limited.
+ * Copyright (c) 2017-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,19 +44,10 @@ static const std::vector<CpuDirectConv2dKernel::DirectConv2dKernel> available_ke
      [](const DataTypeDataLayoutISASelectorData &data)
      { return data.dt == DataType::F32 && data.dl == DataLayout::NHWC; },
      REGISTER_FP32_NEON(arm_compute::cpu::kernels::neon_fp32_nhwc_directconv2d)},
-    {"neon_fp32_nchw_directconv2d",
-     [](const DataTypeDataLayoutISASelectorData &data)
-     { return data.dt == DataType::F32 && data.dl == DataLayout::NCHW; },
-     REGISTER_FP32_NEON(arm_compute::cpu::kernels::neon_fp32_nchw_directconv2d)},
-    {"neon_fp16_nchw_directconv2d",
-     [](const DataTypeDataLayoutISASelectorData &data)
-     { return data.dt == DataType::F16 && data.dl == DataLayout::NCHW && data.isa.fp16; },
-     REGISTER_FP16_NEON(arm_compute::cpu::kernels::neon_fp16_nchw_directconv2d)},
     {"neon_fp16_nhwc_directconv2d",
      [](const DataTypeDataLayoutISASelectorData &data)
      { return data.dt == DataType::F16 && data.dl == DataLayout::NHWC && data.isa.fp16; },
      REGISTER_FP16_NEON(arm_compute::cpu::kernels::neon_fp16_nhwc_directconv2d)},
-
 };
 
 Status validate_arguments(const ITensorInfo   *src,
@@ -65,15 +56,16 @@ Status validate_arguments(const ITensorInfo   *src,
                           const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() != DataLayout::NHWC);
+
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
 
     const DataLayout data_layout = src->data_layout();
-    const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    constexpr int    width_idx   = 1;
+    constexpr int    height_idx  = 2;
+    constexpr int    channel_idx = 0;
 
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(channel_idx) != src->dimension(channel_idx));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) != weights->dimension(height_idx));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,12 +47,12 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
+constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);                           /**< Tolerance for floating point tests */
 #ifdef ARM_COMPUTE_ENABLE_FP16
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
 constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
 #endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
-constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);                           /**< Tolerance for floating point tests */
 
 /** Direct convolution data set.for FP32 */
 const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX", { 0, 1 }),
@@ -182,41 +182,6 @@ TEST_CASE(NoBias, framework::DatasetMode::PRECOMMIT)
     auto ref_dst = reference::convolution_layer<float>(ref_src, ref_weights, ref_bias, dst_shape, conv_info);
 
     validate(Accessor(dst), ref_dst);
-}
-
-DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
-               concat(combine(combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                                      framework::dataset::make("DataType", { DataType::F32 })),
-                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                      combine(combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                                      framework::dataset::make("DataType", { DataType::F16 })),
-                              framework::dataset::make("DataLayout", { DataLayout::NCHW }))),
-               cpu_ext, data_type, data_layout)
-{
-    using namespace cpu::kernels;
-
-    cpuinfo::CpuIsaInfo cpu_isa{};
-    cpu_isa.neon = (cpu_ext == "NEON");
-    cpu_isa.fp16 = (data_type == DataType::F16);
-
-    const auto *selected_impl = CpuDirectConv2dKernel::get_implementation(DataTypeDataLayoutISASelectorData{ data_type, data_layout, cpu_isa }, cpu::KernelSelectionType::Preferred);
-
-    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
-
-    std::string data_layout_str;
-    if(data_layout == DataLayout::NCHW)
-    {
-        data_layout_str = "nchw";
-    }
-    else
-    {
-        data_layout_str = "nhwc";
-    }
-
-    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_" + data_layout_str + "_directconv2d";
-    std::string actual   = selected_impl->name;
-
-    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
 }
 
 // *INDENT-OFF*

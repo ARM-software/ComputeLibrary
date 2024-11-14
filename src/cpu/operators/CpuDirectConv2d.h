@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@
 #include "src/cpu/kernels/CpuDirectConv2dKernel.h"
 #include "src/cpu/kernels/CpuDirectConv2dOutputStageKernel.h"
 #include "src/cpu/operators/CpuActivation.h"
+#include "src/cpu/operators/CpuPermute.h"
 
 #include <memory>
 
@@ -100,19 +101,35 @@ public:
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    experimental::MemoryRequirements workspace() const override;
 
 private:
+    enum InternalTensorIdx
+    {
+        PermInput = 0,
+        PermWeights,
+        PermOutput,
+        Count
+    };
+
     MemoryGroup                                                _memory_group;
     std::unique_ptr<kernels::CpuDirectConv2dOutputStageKernel> _output_stage_kernel;
     std::unique_ptr<kernels::CpuDirectConv2dKernel>            _conv_kernel;
     std::unique_ptr<NEFillBorderKernel>                        _input_border_handler;
     std::unique_ptr<CpuActivation>                             _activationlayer_function;
     Tensor                                                     _accumulator;
+    std::unique_ptr<CpuPermute>                                _permute_input{nullptr};
+    std::unique_ptr<CpuPermute>                                _permute_weights{nullptr};
+    std::unique_ptr<CpuPermute>                                _permute_output{nullptr};
+    bool                                                       _is_nchw{true};
     bool                                                       _has_bias{false};
     bool                                                       _is_activationlayer_enabled{false};
-    unsigned int                                               _dim_split{0};
     bool                                                       _is_padding_required{false};
+    experimental::MemoryRequirements                           _aux_mem{Count};
+    TensorInfo                                                 _src_perm_info{};
+    TensorInfo                                                 _wei_perm_info{};
+    TensorInfo                                                 _dst_perm_info{};
 };
 } // namespace cpu
 } // namespace arm_compute

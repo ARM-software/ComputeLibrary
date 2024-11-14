@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/directconv2d/impl.h"
 #include "src/cpu/kernels/directconv2d/list.h"
-#include "src/cpu/kernels/directconv2d/nchw/impl.h"
 #include "src/cpu/kernels/directconv2d/nhwc/neon/impl.h"
 
 #include <algorithm>
@@ -45,12 +44,6 @@ namespace cpu
 {
 namespace kernels
 {
-void neon_fp32_nchw_directconv2d(
-    const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
-{
-    convolve_nchw<float>(window, src, weights, dst, conv_info);
-}
-
 void run_im2col_fp32_nchw_pad(const ITensor                        *src,
                               ITensor                              *dst,
                               const Window                         &window,

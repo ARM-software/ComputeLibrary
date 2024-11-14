@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,6 @@
  */
 
 #include "src/cpu/kernels/directconv2d/impl.h"
-#include "src/cpu/kernels/directconv2d/nchw/impl.h"
 
 namespace arm_compute
 {
@@ -31,14 +30,6 @@ namespace cpu
 {
 namespace kernels
 {
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-void neon_fp16_nchw_directconv2d(
-    const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
-{
-    convolve_nchw<float16_t>(window, src, weights, dst, conv_info);
-}
-#endif //defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-
 void run_im2col_fp16_nchw_pad(const ITensor                        *src,
                               ITensor                              *dst,
                               const Window                         &window,

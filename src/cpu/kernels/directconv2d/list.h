@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,7 @@ namespace kernels
                    const PadStrideInfo &conv_info)
 
 DECLARE_DIRECT_CONV2D_KERNEL(neon_fp32_nhwc_directconv2d);
-DECLARE_DIRECT_CONV2D_KERNEL(neon_fp16_nchw_directconv2d);
 DECLARE_DIRECT_CONV2D_KERNEL(neon_fp16_nhwc_directconv2d);
-DECLARE_DIRECT_CONV2D_KERNEL(neon_fp32_nchw_directconv2d);
 
 #define DECLARE_IM2COL_KERNEL(func_name)                                                                 \
     void func_name(const ITensor *src, ITensor *dst, const Window &window, DataLayout data_layout,       \
