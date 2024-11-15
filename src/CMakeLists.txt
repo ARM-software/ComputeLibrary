@@ -700,6 +700,8 @@ target_sources(
 	cpu/kernels/CpuDirectConv2dKernel.cpp
 	cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp
 	cpu/kernels/CpuDirectConv3dKernel.cpp
+	cpu/kernels/CpuDynamicGemmKernel.cpp
+	cpu/kernels/CpuDynamicGemmKernelHeuristics.cpp
 	cpu/kernels/CpuElementwiseKernel.cpp
 	cpu/kernels/CpuElementwiseUnaryKernel.cpp
 	cpu/kernels/CpuFillKernel.cpp
@@ -883,6 +885,7 @@ target_sources(
 	cpu/operators/CpuDequantize.cpp
 	cpu/operators/CpuDirectConv2d.cpp
 	cpu/operators/CpuDirectConv3d.cpp
+	cpu/operators/CpuDynamicGemm.cpp
 	cpu/operators/CpuElementwise.cpp
 	cpu/operators/CpuElementwiseUnary.cpp
 	cpu/operators/CpuFill.cpp
