@@ -44,15 +44,14 @@ RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for compari
 RelativeTolerance<float> tolerance_f16(0.02f); /**< Tolerance value for comparing reference's output against implementation's output for fp16 data type */
 RelativeTolerance<int32_t> tolerance_int(0); /**< Tolerance value for comparing reference's output against implementation's output for integer data types */
 } // namespace
-
 using framework::dataset::make;
 
 TEST_SUITE(NEON)
 TEST_SUITE(Scatter)
-DATA_TEST_CASE(Validate, framework::DatasetMode::DISABLED, zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     make("InputInfo", { TensorInfo(TensorShape(9U), 1, DataType::F32),    // Mismatching data types
                         TensorInfo(TensorShape(15U), 1, DataType::F32),   // Valid
-                        TensorInfo(TensorShape(15U), 1, DataType::U8),   // Valid
+                        TensorInfo(TensorShape(15U), 1, DataType::U8),   // Not valid, not implemented yet
                         TensorInfo(TensorShape(8U), 1, DataType::F32),
                         TensorInfo(TensorShape(217U), 1, DataType::F32),    // Mismatch input/output dims.
                         TensorInfo(TensorShape(217U), 1, DataType::F32),    // Updates dim higher than Input/Output dims.
@@ -105,7 +104,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::DISABLED, zip(
                          ScatterInfo(ScatterFunction::Update, false),
                          ScatterInfo(ScatterFunction::Update, false),
     }),
-    make("Expected", { false, true, true, true, false, false, false, false, false, false })),
+    make("Expected", { false, true, false, true, false, false, false, false, false, false })),
     input_info, updates_info, indices_info, output_info, scatter_info, expected)
 {
     const Status status = NEScatter::validate(&input_info, &updates_info, &indices_info, &output_info, scatter_info);
@@ -117,19 +116,19 @@ const auto allScatterFunctions = make("ScatterFunction",
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::Small1DScatterDataset(),
         make("DataType", {DataType::F32}),
         allScatterFunctions,
         make("ZeroInit", {false}),
         make("Inplace", {false}),
-        make("Padding", {true})))
+        make("Padding", {false, true})))
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
 // With this test, src should be passed as nullptr.
-FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, NEScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, NEScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::Small1DScatterDataset(),
         make("DataType", {DataType::F32}),
         make("ScatterFunction", {ScatterFunction::Add}),
@@ -141,43 +140,43 @@ FIXTURE_DATA_TEST_CASE(RunSmallZeroInit, NEScatterLayerFixture<float>, framework
 }
 
 // Updates/src/dst have same no. dims.
-FIXTURE_DATA_TEST_CASE(RunSmallMultiDim, NEScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMultiDim, NEScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMultiDimDataset(),
         make("DataType", {DataType::F32}),
         allScatterFunctions,
         make("ZeroInit", {false}),
         make("Inplace", {false}),
-        make("Padding", {true})))
+        make("Padding", {false, true})))
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
 // m+1-D to m+n-D cases
-FIXTURE_DATA_TEST_CASE(RunSmallMultiIndices, NEScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMultiIndices, NEScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMultiIndicesDataset(),
         make("DataType", {DataType::F32}),
         make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add }),
         make("ZeroInit", {false}),
         make("Inplace", {false, true}),
-        make("Padding", {true})))
+        make("Padding", {false, true})))
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
 // m+k, k-1-D m+n-D case
-FIXTURE_DATA_TEST_CASE(RunSmallBatchedMultiIndices, NEScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallBatchedMultiIndices, NEScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterBatchedDataset(),
         make("DataType", {DataType::F32}),
         make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add}),
         make("ZeroInit", {false}),
         make("Inplace", {false}),
-        make("Padding", {true})))
+        make("Padding", {false, true})))
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
 // m+k, k-1-D m+n-D case
-FIXTURE_DATA_TEST_CASE(RunSmallScatterScalar, NEScatterLayerFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallScatterScalar, NEScatterLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterScalarDataset(),
         make("DataType", {DataType::F32}),
         make("ScatterFunction", {ScatterFunction::Update, ScatterFunction::Add}),
@@ -193,7 +192,6 @@ TEST_SUITE_END() // FP32
 
 // NOTE: Padding is disabled for the SmallScatterMixedDataset due certain shapes not supporting padding.
 //       Padding is well tested in F32 Datatype test cases.
-
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<half>, framework::DatasetMode::DISABLED,
     combine(datasets::SmallScatterMixedDataset(),

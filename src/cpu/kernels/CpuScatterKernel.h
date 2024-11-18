@@ -40,43 +40,41 @@ class CpuScatterKernel : public ICpuKernel<CpuScatterKernel>
 {
 private:
     using ScatterKernelPtr = std::add_pointer<void(
-        const ITensor *, const ITensor *, const ITensor *, ITensor *, const ScatterInfo, const Window &)>::type;
+        const ITensor *, const ITensor *, ITensor *, const ScatterInfo &, const Window &, const int)>::type;
 
 public:
     CpuScatterKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuScatterKernel);
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  src     Input tensor info for the source matrix.
-     * @param[in]  updates Input tensor info for the Update matrix. Data type supported: same as @p src
-     * @param[in]  indices Input tensor info for the Indices matrix. Data type supported: U32.
-     * @param[out] dst     Output tensor info. Data type supported: same as @p src
-     * @param[in]  info    Attributes for Scatter Kernel
+     * @param[in]  updates      Input tensor info for the Update matrix. Data type supported: F32.
+     * @param[in]  indices      Input tensor info for the Indices matrix. Data type supported: U32.
+     * @param[out] dst          Output tensor info. Data type supported: same as @p updates
+     * @param[in]  scatter_info Attributes for Scatter Kernel
      */
-    void configure(const ITensorInfo *src,
-                   const ITensorInfo *updates,
+    void configure(const ITensorInfo *updates,
                    const ITensorInfo *indices,
                    ITensorInfo       *dst,
-                   const ScatterInfo &info);
+                   const ScatterInfo &scatter_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuScatterKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src,
-                           const ITensorInfo *updates,
+    static Status validate(const ITensorInfo *updates,
                            const ITensorInfo *indices,
                            const ITensorInfo *dst,
-                           const ScatterInfo &info);
+                           const ScatterInfo &scatter_info);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
     struct ScatterKernel
     {
-        const char      *name;
-        ScatterKernelPtr ukernel;
+        const char                  *name;
+        const DataTypeISASelectorPtr is_selected;
+        ScatterKernelPtr             ukernel;
     };
 
     static const std::vector<ScatterKernel> &get_available_kernels();
@@ -84,6 +82,8 @@ public:
 private:
     ScatterKernelPtr _run_method{nullptr};
     std::string      _name{};
+    ScatterInfo      _scatter_info{ScatterFunction::Update, false};
+    int              _data_block_length{};
 };
 } // namespace kernels
 } // namespace cpu

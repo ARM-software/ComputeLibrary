@@ -860,6 +860,7 @@ target_sources(
 	cpu/kernels/scale/neon/integer.cpp
 	cpu/kernels/scale/neon/qasymm8.cpp
 	cpu/kernels/scale/neon/qasymm8_signed.cpp
+	cpu/kernels/scatter/generic/neon/fp32.cpp
 	cpu/kernels/select/generic/neon/fp16.cpp
 	cpu/kernels/select/generic/neon/fp32.cpp
 	cpu/kernels/select/generic/neon/integer.cpp

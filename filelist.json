@@ -2269,7 +2269,10 @@
             "src/cpu/kernels/CpuScatterKernel.cpp",
             "src/cpu/operators/CpuScatter.cpp",
             "src/runtime/NEON/functions/NEScatter.cpp"
-          ]
+          ],
+          "neon": {
+            "fp32": [ "src/cpu/kernels/scatter/generic/neon/fp32.cpp" ]
+          }
         }
       },
       "Select": {
