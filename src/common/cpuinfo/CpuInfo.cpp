@@ -416,7 +416,7 @@ CpuInfo CpuInfo::build()
     return info;
 #elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
     CpuIsaInfo isainfo;
-    isainfo.neon = true;
+    isainfo.neon = IsProcessorFeaturePresent(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE);
     isainfo.dot  = IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
     if (NTDDI_VERSION >= NTDDI_WIN11_GE)
     {
