@@ -24,6 +24,8 @@
 
 #include "arm_compute/runtime/experimental/low_level/CpuGemmAssemblyDispatch.h"
 
+#include "arm_compute/core/Error.h"
+
 #include "src/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
 /*
@@ -114,6 +116,13 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &weight_f
                                              const GEMMInfo            &gemm_info)
 {
     return cpu::CpuGemmAssemblyDispatch::has_opt_impl(weight_format, a, b, c, d, init_assembly_metadata(gemm_info));
+}
+
+bool CpuGemmAssemblyDispatch::has_stateless_impl() const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!is_configured(), "calling has_stateless_impl() on unconfigured CpuGemmAssemblyDispatch");
+
+    return _impl->cpu_gemm_assembly_dispatch->has_stateless_impl();
 }
 
 bool CpuGemmAssemblyDispatch::is_activation_supported(const ActivationLayerInfo &activation)
