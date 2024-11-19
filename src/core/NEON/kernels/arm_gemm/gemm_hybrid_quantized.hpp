@@ -171,8 +171,12 @@ public:
         return true;
     }
 
-    // Execute
-    void execute(const ndcoord_t &work_range, const ndcoord_t &, int threadid) override {
+    // Stateless execute
+    // TODO: Make this actually stateless. This still uses the stateful
+    // execution data because it requires a workspace which would also need to
+    // be handled statelessly.
+    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int threadid, GemmArrays<To, To, Tr> &) override {
+        auto& g_array = this->_gemm_array;
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -218,7 +222,7 @@ public:
 #ifdef CYCLE_PROFILING
                     auto p = prof.ScopedProfiler(PROFILE_KERNEL, (m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
 #endif
-                    strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + k0, this->_lda,
+                    strat.kernel(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + (m_start * g_array._lda) + k0, g_array._lda,
                                  b_panel,
                                  result_buffer, (nmax-n0),
                                  (m_end - m_start), (nmax - n0), kern_k,
@@ -230,7 +234,7 @@ public:
                     auto p = prof.ScopedProfiler(PROFILE_ROWSUMS, (m_end - m_start) * _Ksize);
 #endif
                     compute_row_sums(_qp, _Ksize, (m_end - m_start),
-                                     this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda), this->_lda,
+                                     g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + (m_start * g_array._lda), g_array._lda,
                                      local_row_sums);
                 }
 
@@ -240,11 +244,16 @@ public:
 #endif
 
                     requantize_block_32(_qp, (nmax - n0), (m_end - m_start), result_buffer, (nmax - n0),
-                                        this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
+                                        g_array._Cptr + (multi * g_array._C_multi_stride) + (batch * g_array._C_batch_stride) + (m_start * g_array._ldc) + n0, g_array._ldc,
                                         local_row_sums, col_bias + (multi * _Nsize) + n0, n0);
                 }
             } while (p.next_dim0());
         }
+    }
+
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
+        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
     }
 
     // Working space needed for intermediate result buffers.

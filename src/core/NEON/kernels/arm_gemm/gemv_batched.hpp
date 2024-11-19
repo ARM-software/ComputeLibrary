@@ -64,8 +64,15 @@ public:
         _subgemm->set_nthreads(nthreads);
     }
 
-    void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
+    // TODO: Make this actually stateless. This still uses the stateful
+    // execution data because it requires a workspace which would also need to
+    // be handled statelessly.
+    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &) override {
         _subgemm->execute(work_range, thread_locator, threadid);
+    }
+
+    void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
+        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
     }
 
     size_t get_working_size() const override {
