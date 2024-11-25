@@ -832,12 +832,8 @@ public:
         _nthreads = std::min(nthreads, _maxthreads);
     }
 
-    // Stateless execute
-    // TODO: Make this actually stateless. This still uses the stateful
-    // execution data because it requires a workspace which would also need to
-    // be handled statelessly.
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int threadid, GemmArrays<Tlo, Tro, Tr> &) override {
-        auto& g_array = this->_gemm_array;
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int threadid) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -890,8 +886,8 @@ public:
                     unsigned int kern_k = roundup(kmax - k0, strategy::k_unroll());
 
                     const Troi *b_ptr = FixedFormat ?
-                        reinterpret_cast<const Troi *>(g_array._Bptr) + (multi * g_array._B_multi_stride) +
-                                                     ((start_x / get_stripe_width<strategy, FixedFormat>::get()) * g_array._ldb) +
+                        reinterpret_cast<const Troi *>(this->_Bptr) + (multi * this->_B_multi_stride) +
+                                                     ((start_x / get_stripe_width<strategy, FixedFormat>::get()) * this->_ldb) +
                                                      (k0 * get_stripe_width<strategy, FixedFormat>::get()) :
                         _B_transposed + (rounded_width * _Ktotal * multi) + (k0 * rounded_width) + (start_x * kern_k);
 
@@ -916,16 +912,16 @@ public:
                                                              _rounded_Ksize, start_row, end_row, k0, kmax, row_sum_multiplier());
                             } else if (_convolver) {
                                 transforms.PrepareA_convolution(a_panel,
-                                                                g_array._Aptr + (batch * g_array._A_batch_stride) + (multi * g_array._A_multi_stride),
-                                                                g_array._lda, *_convolver, _rounded_Ksize, start_row, end_row, k0, kmax, row_sum_multiplier());
+                                                                this->_Aptr + (batch * this->_A_batch_stride) + (multi * this->_A_multi_stride),
+                                                                this->_lda, *_convolver, _rounded_Ksize, start_row, end_row, k0, kmax, row_sum_multiplier());
                             } else {
                                 transforms.PrepareA(a_panel,
-                                                    g_array._Aptr + (batch * g_array._A_batch_stride) + (multi * g_array._A_multi_stride),
-                                                    g_array._lda, start_row, end_row, k0, std::min(kmax, _Ksize), row_sum_multiplier());
+                                                    this->_Aptr + (batch * this->_A_batch_stride) + (multi * this->_A_multi_stride),
+                                                    this->_lda, start_row, end_row, k0, std::min(kmax, _Ksize), row_sum_multiplier());
                             }
                         }
 
-                        Tr *result_ptr = g_array._Cptr + (batch * g_array._C_batch_stride) + (multi * g_array._C_multi_stride);
+                        Tr *result_ptr = this->_Cptr + (batch * this->_C_batch_stride) + (multi * this->_C_multi_stride);
 
                         // If we are using an accumulation buffer and this isn't the last pass, don't pass a result pointer.
                         if (_accumulation_buffer && !last_pass) {
@@ -938,13 +934,13 @@ public:
                             prof,
                         #endif
                             // Strategy and panel pointers
-                            strat, a_panel, b_ptr, g_array._ldb, c_panel,
+                            strat, a_panel, b_ptr, this->_ldb, c_panel,
                             // Result buffer pointers
-                            result_ptr, g_array._ldc,
+                            result_ptr, this->_ldc,
                             // K size, and M/N ranges
                             kern_k, start_row, end_row, start_x, end_x,
                             // Only do bias on the first pass
-                            ((bias_pass && g_array._bias) ? g_array._bias + (multi * g_array._bias_multi_stride) : nullptr),
+                            ((bias_pass && this->_bias) ? this->_bias + (multi * this->_bias_multi_stride) : nullptr),
                             // Only do activation on the last pass, and accumulation on any non-first pass.
                             (last_pass ? _act : Activation()), (!first_pass || _accumulate),
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
@@ -1013,12 +1009,12 @@ public:
                                                       _rounded_Ksize, first_m, last_m, current.k0(), current.kmax(), row_sum_multiplier());
                         } else if (_convolver) {
                             transforms.PrepareA_convolution(a_panel + ((batch * _Mround + first_m) * get_total_k_depth()),
-                                                      g_array._Aptr + (batch * g_array._A_batch_stride) + (current.multi() * g_array._A_multi_stride),
-                                                      g_array._lda, *_convolver, _rounded_Ksize, first_m, last_m, current.k0(), current.kmax(), row_sum_multiplier());
+                                                      this->_Aptr + (batch * this->_A_batch_stride) + (current.multi() * this->_A_multi_stride),
+                                                      this->_lda, *_convolver, _rounded_Ksize, first_m, last_m, current.k0(), current.kmax(), row_sum_multiplier());
                         } else {
                             transforms.PrepareA(a_panel + ((batch * _Mround + first_m) * get_total_k_depth()),
-                                                      g_array._Aptr + (batch * g_array._A_batch_stride) + (current.multi() * g_array._A_multi_stride),
-                                                      g_array._lda, first_m, last_m, current.k0(), std::min(_Ksize, current.kmax()), row_sum_multiplier());
+                                                      this->_Aptr + (batch * this->_A_batch_stride) + (current.multi() * this->_A_multi_stride),
+                                                      this->_lda, first_m, last_m, current.k0(), std::min(_Ksize, current.kmax()), row_sum_multiplier());
                         }
                     }
 
@@ -1038,8 +1034,8 @@ public:
 
                 // For FixedFormat cases, figure out the B pointer.  The loop below moves through batches and vertically through the output so this will be the same throughout.
                 if (FixedFormat) {
-                    b_panel = reinterpret_cast<const Troi *>(g_array._Bptr) + (current.multi() * g_array._B_multi_stride) +
-                                                                           ((current.x0() / get_stripe_width<strategy, FixedFormat>::get()) * g_array._ldb) +
+                    b_panel = reinterpret_cast<const Troi *>(this->_Bptr) + (current.multi() * this->_B_multi_stride) +
+                                                                           ((current.x0() / get_stripe_width<strategy, FixedFormat>::get()) * this->_ldb) +
                                                                            (current.k0() * get_stripe_width<strategy, FixedFormat>::get());
                 }
 
@@ -1075,7 +1071,7 @@ public:
                         const bool bias_pass = (std::is_same<OutputStage, DequantizeFloat>::value && !MergeStep) ? last_pass : first_pass;
 
                         // Pointer to appropriate part of result array.
-                        Tr *result_ptr = g_array._Cptr + (batch * g_array._C_batch_stride) + (current.multi() * g_array._C_multi_stride);
+                        Tr *result_ptr = this->_Cptr + (batch * this->_C_batch_stride) + (current.multi() * this->_C_multi_stride);
 
                         // If we are using an accumulation buffer, we don't pass the result buffer to ask the kernel
                         // to write things into the accumulation buffer instead, except on the last pass.
@@ -1089,13 +1085,13 @@ public:
                             prof,
                         #endif
                             // Strategy and panel pointers
-                            strat, a_ptr, b_panel, g_array._ldb, c_panel,
+                            strat, a_ptr, b_panel, this->_ldb, c_panel,
                             // Result buffer pointers
-                            result_ptr, g_array._ldc,
+                            result_ptr, this->_ldc,
                             // K size, and M/N ranges
                             kern_k, y, ymax, current.x0(), current.xmax(),
                             // Only do bias on the first pass
-                            ((bias_pass && g_array._bias) ? g_array._bias + (current.multi() * g_array._bias_multi_stride) : nullptr),
+                            ((bias_pass && this->_bias) ? this->_bias + (current.multi() * this->_bias_multi_stride) : nullptr),
                             // Only do activation on the last pass, and accumulation on any non-first pass.
                             (last_pass ? _act : Activation()), (!first_pass || _accumulate),
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
@@ -1112,11 +1108,6 @@ public:
                 }
             }
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
     }
 
     // Interface implementation - working space

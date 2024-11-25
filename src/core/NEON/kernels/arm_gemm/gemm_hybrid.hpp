@@ -145,8 +145,8 @@ public:
         return true;
     }
 
-    // Stateless execute
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, To, Tr>& g_array) override {
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -190,27 +190,22 @@ public:
                 auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)(m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
 #endif
 
-                strat.kernel(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + (m_start * g_array._lda) + k0, g_array._lda,
+                strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + k0, this->_lda,
                              b_panel,
-                             g_array._Cptr + (multi * g_array._C_multi_stride) + (batch * g_array._C_batch_stride) + (m_start * g_array._ldc) + n0, g_array._ldc,
+                             this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
                              (m_end - m_start), (nmax - n0), kmax-k0,
-                             (strategy::supports_bias() && first_pass && g_array._bias) ? g_array._bias + (multi * g_array._bias_multi_stride) + n0 : nullptr,
+                             (strategy::supports_bias() && first_pass && this->_bias) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
                              last_pass ? _act : Activation(), !first_pass);
 
                 // Add bias externally if needed
-                if (!strategy::supports_bias() && g_array._bias && first_pass) {
-                    bias_adder(g_array._Cptr + (multi * g_array._C_multi_stride) + (batch * g_array._C_batch_stride) + (m_start * g_array._ldc) + n0, g_array._ldc,
-                               g_array._bias + (multi * g_array._bias_multi_stride) + n0,
+                if (!strategy::supports_bias() && this->_bias && first_pass) {
+                    bias_adder(this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
+                               this->_bias + (multi * this->_bias_multi_stride) + n0,
                                (m_end - m_start), (nmax - n0));
                 }
 
             } while (p.next_dim1());
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
     }
 
     // Interface implementation - pretransposed

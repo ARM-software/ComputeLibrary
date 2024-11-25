@@ -28,7 +28,6 @@
 #pragma once
 
 #include "convolution_parameters.hpp"
-#include "gemm_arrays.hpp"
 #include "ndrange.hpp"
 #include <cstddef>
 
@@ -95,7 +94,7 @@ public:
         return false;
     }
 
-    /** Main execute member function
+    /** Main execute member fucntion
      * @param [in] work_range     specifies the range of work we want to be computed, total range defined by get_window_size()
      * @param [in] thread_locator where are we inside of the thread space
      * @param [in] threadid       a unique threadid
@@ -201,21 +200,23 @@ template <typename To, typename Tw, typename Tr>
 class GemmCommon : public IGemmCommon
 {
 protected:
-    GemmArrays<To, Tw, Tr> _gemm_array{};
+    const To *_Aptr              = nullptr;
+    int       _lda               = 0;
+    int       _A_batch_stride    = 0;
+    int       _A_multi_stride    = 0;
+    const Tw *_Bptr              = nullptr;
+    int       _ldb               = 0;
+    int       _B_multi_stride    = 0;
+    Tr       *_Cptr              = nullptr;
+    int       _ldc               = 0;
+    int       _C_batch_stride    = 0;
+    int       _C_multi_stride    = 0;
+    const Tr *_bias              = nullptr;
+    int       _bias_multi_stride = 0;
 
 public:
     /* Pass in the pointers to the arrays to be operated on and their
      * strides (templated version with appropriate types). */
-    void set_gemm_arrays(GemmArrays<To, Tw, Tr> &ga)
-    {
-        _gemm_array = ga;
-    }
-
-    const GemmArrays<To, Tw, Tr> &get_gemm_arrays() const
-    {
-        return _gemm_array;
-    }
-
     virtual void set_arrays(const To                                     *A,
                             const int                                     lda,
                             const int                                     A_batch_stride,
@@ -230,8 +231,19 @@ public:
                             const Tr                                     *bias,
                             /* no row or batch stride needed */ const int bias_multi_stride)
     {
-        _gemm_array.set_arrays(A, lda, A_batch_stride, A_multi_stride, B, ldb, B_multi_stride, C, ldc, C_batch_stride,
-                               C_multi_stride, bias, bias_multi_stride);
+        _Aptr              = A;
+        _lda               = lda;
+        _A_batch_stride    = A_batch_stride;
+        _A_multi_stride    = A_multi_stride;
+        _Bptr              = B;
+        _ldb               = ldb;
+        _B_multi_stride    = B_multi_stride;
+        _Cptr              = C;
+        _ldc               = ldc;
+        _C_batch_stride    = C_batch_stride;
+        _C_multi_stride    = C_multi_stride;
+        _bias              = bias;
+        _bias_multi_stride = bias_multi_stride;
     }
 
     /* Implementation of the void * overload which casts its arguments to the appropriate type. */
@@ -300,18 +312,8 @@ public:
     {
         set_indirect_parameters(sz, reinterpret_cast<const To *const *const *>(ptr));
     }
-
-    /** Stateless version of the main execute member function
-     * @param [in] work_range     specifies the range of work we want to be computed, total range defined by get_window_size()
-     * @param [in] thread_locator where are we inside of the thread space
-     * @param [in] threadid       a unique threadid
-     * @param [out] GemmArrays    structure containing the input/output addresses, and stride info
-     */
-    virtual void execute_stateless(const ndcoord_t        &work_range,
-                                   const ndcoord_t        &thread_locator,
-                                   int                     threadid,
-                                   GemmArrays<To, Tw, Tr> &gemm_array) = 0;
 };
+
 } // namespace arm_gemm
 
 #endif // ACL_SRC_CPU_KERNELS_ASSEMBLY_GEMM_COMMON_HPP

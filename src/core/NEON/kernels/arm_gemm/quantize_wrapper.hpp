@@ -70,10 +70,9 @@ private:
         if (working_space == nullptr || arrays_set == false)
             return;
 
-        auto& g_array = this->_gemm_array;
         /* Use the first part of our working space for the subgemm result, pass the operand details straight through. */
-        _subgemm->set_arrays(g_array._Aptr, g_array._lda, g_array._A_batch_stride, g_array._A_multi_stride,
-                             g_array._Bptr, g_array._ldb,                          g_array._B_multi_stride,
+        _subgemm->set_arrays(this->_Aptr, this->_lda, this->_A_batch_stride, this->_A_multi_stride,
+                             this->_Bptr, this->_ldb,                        this->_B_multi_stride,
                              reinterpret_cast<Tgemm *>(working_space), _args._Nsize, (_args._Nsize * _args._Msize), (_args._Nsize * _args._Msize * _args._nbatches),
                              nullptr, 0);
     }
@@ -87,22 +86,20 @@ private:
     void requantize_runtime(unsigned int threadid) {
         unsigned int first_row = (threadid * _args._Msize) / _args._maxthreads;
         unsigned int last_row = ((threadid+1) * _args._Msize) / _args._maxthreads;
-        auto& g_array = this->_gemm_array;
 
         for (unsigned int multi=0; multi<_args._nmulti; multi++) {
             for (unsigned int batch=0; batch<_args._nbatches; batch++) {
                 /* Compute row sums now */
-                compute_row_sums(_params, _args._Ksize, (last_row - first_row), g_array._Aptr + (multi * g_array._A_multi_stride) +
-                                    (batch * g_array._A_batch_stride) + (first_row * g_array._lda), g_array._lda, _row_sums +
-                                    (multi * _args._nbatches * _args._Msize) + (batch * _args._Msize) + first_row);
+                compute_row_sums(_params, _args._Ksize, (last_row - first_row), this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (first_row * this->_lda),
+                                           this->_lda, _row_sums + (multi * _args._nbatches * _args._Msize) + (batch * _args._Msize) + first_row);
                 // If we don't care about negative values, call the version of this function that doesn't correct before shifting.
                 // 'c_offset' represents zero, so if the lowest possible quantized output value is the same or more than that we will not output negative numbers.
-                requantize_block_32(_params, _args._Nsize, (last_row - first_row), reinterpret_cast<Tgemm *>(working_space) +
-                                        (multi * (_args._Msize * _args._Nsize * _args._nbatches)) + (batch * (_args._Msize * _args._Nsize)) +
-                                        (first_row * _args._Nsize), _args._Nsize, g_array._Cptr + (multi * g_array._C_multi_stride) +
-                                        (batch * g_array._C_batch_stride) + (first_row * g_array._ldc), g_array._ldc, _row_sums +
-                                        (multi * _args._nbatches * _args._Msize) + (batch * _args._Msize) + first_row, _col_sums +
-                                        (multi * _args._Nsize), 0);
+                requantize_block_32(_params, _args._Nsize, (last_row - first_row),
+                                    reinterpret_cast<Tgemm *>(working_space) + (multi * (_args._Msize * _args._Nsize * _args._nbatches)) + (batch * (_args._Msize * _args._Nsize)) + (first_row * _args._Nsize),
+                                    _args._Nsize,
+                                    this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (first_row * this->_ldc), this->_ldc,
+                                    _row_sums + (multi * _args._nbatches * _args._Msize) + (batch * _args._Msize) + first_row,
+                                    _col_sums + (multi * _args._Nsize), 0);
             }
         }
     }
@@ -141,19 +138,12 @@ public:
         _args._maxthreads = nthreads;
     }
 
-    // TODO: Make this actually stateless. This still uses the stateful
-    // execution data because it requires a workspace which would also need to
-    // be handled statelessly.
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &) override {
+    void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
         _subgemm->execute(work_range, thread_locator, threadid);
 
         _barrier.arrive_and_wait();
 
         requantize_runtime(threadid);
-    }
-
-    void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
     }
 
     size_t get_working_size() const override {

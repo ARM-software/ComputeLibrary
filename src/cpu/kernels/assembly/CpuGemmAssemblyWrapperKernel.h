@@ -24,15 +24,12 @@
 #ifndef ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H
 #define ACL_SRC_CPU_KERNELS_ASSEMBLY_CPUGEMMASSEMBLYWRAPPERKERNEL_H
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 
 #include "src/core/NEON/INEKernel.h"
 #include "src/cpu/kernels/assembly/arm_gemm_compute_iface.hpp"
 
-#include "gemm_arrays.hpp"
 #include "gemm_common.hpp"
 
 namespace arm_compute
@@ -97,34 +94,6 @@ public:
         auto ndc_tlc = arm_gemm::to_ndcoord(thread_locator);
 
         _kernel->execute(ndc_win, ndc_tlc, info.thread_id);
-    }
-
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override
-    {
-        ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(_kernel)));
-        ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-
-        const auto *Aptr = reinterpret_cast<const TypeInput *>(tensors.get_tensor(ACL_SRC_0)->buffer());
-        const auto *Bptr = reinterpret_cast<const TypeWeight *>(tensors.get_tensor(ACL_SRC_1)->buffer());
-        const auto *bias = reinterpret_cast<const TypeOutput *>(tensors.get_tensor(ACL_SRC_2)->buffer());
-        auto       *Cptr = reinterpret_cast<TypeOutput *>(tensors.get_tensor(ACL_DST)->buffer());
-
-        ARM_COMPUTE_ERROR_ON_NULLPTR(Aptr, Cptr);
-
-        // We make a copy of the original gemm arrays and then update the
-        // source, bias, and destination pointers with the packed values.
-        arm_gemm::GemmArrays<TypeInput, TypeWeight, TypeOutput> ga = _kernel->get_gemm_arrays();
-
-        ga._Aptr = Aptr;
-        ga._Bptr = Bptr;
-        ga._bias = bias;
-        ga._Cptr = Cptr;
-
-        auto win = arm_gemm::to_ndcoord(window);
-
-        arm_gemm::ndcoord_t thread_locator{};
-
-        _kernel->execute_stateless(win, thread_locator, info.thread_id, ga);
     }
 
     /** Configure window of the kernel

@@ -423,8 +423,8 @@ public:
         return true;
     }
 
-    // Stateless execute
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, Tw, Tr>& g_array) override {
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -504,9 +504,9 @@ public:
 
                 const Troi *b_panel;
                 if (FixedFormat) {
-                    b_panel = reinterpret_cast<const Troi *>(g_array._Bptr) +
-                               (multi * g_array._B_multi_stride) +
-                               ((n0 / stripe_width<strategy, FixedFormat>::get()) * g_array._ldb) +
+                    b_panel = reinterpret_cast<const Troi *>(this->_Bptr) +
+                               (multi * this->_B_multi_stride) +
+                               ((n0 / stripe_width<strategy, FixedFormat>::get()) * this->_ldb) +
                                (k0 * stripe_width<strategy, FixedFormat>::get());
                 } else {
                     b_panel = _B_transposed +
@@ -515,7 +515,7 @@ public:
                                (n0 * kern_k);
                 }
 
-                IndirectOutputArg<Tr> out_arg(g_array._Cptr + (multi * g_array._C_multi_stride) + (batch * g_array._C_batch_stride) + (m_start * g_array._ldc) + n0, g_array._ldc);
+                IndirectOutputArg<Tr> out_arg(this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc);
 
 #ifdef CYCLE_PROFILING
                 auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)(m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
@@ -527,14 +527,14 @@ public:
 #endif
                                  strat, sections, string_lengths.data(),
                                  IndirectInputArg<To>(_indirect_buf + (multi * _args._nbatches * _args._Ksections) + (batch * _args._Ksections) + first_section, m_start, first_offset),
-                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_array._ldb, out_arg,
-                                 (g_array._bias && first_pass) ? g_array._bias + (multi * g_array._bias_multi_stride) + n0 : nullptr,
+                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, this->_ldb, out_arg,
+                                 (this->_bias && first_pass) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
                                  _os, _col_bias+(multi * _args._Nsize), n0);
                 } else if (_convolver) {
-                    auto conv_cols = _convolver->process_columns(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride), g_array._lda, k0, kmax, _rounded_Ksize);
+                    auto conv_cols = _convolver->process_columns(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride), this->_lda, k0, kmax, _rounded_Ksize);
 
                     unsigned int pos=0;
                     auto conv_rows = conv_cols.process_rows(m_start, m_end - m_start);
@@ -560,8 +560,8 @@ public:
 #endif
                                  strat, sections, string_lengths.data(),
                                  IndirectInputArg<To>(in_row_strings.data(), 0, first_offset),
-                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_array._ldb, out_arg,
-                                 (g_array._bias && first_pass) ? g_array._bias + (multi * g_array._bias_multi_stride) + n0 : nullptr,
+                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, this->_ldb, out_arg,
+                                 (this->_bias && first_pass) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
@@ -575,9 +575,9 @@ public:
                                  prof,
 #endif
                                  strat, 1, &len,
-                                 IndirectInputArg<To>(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + m_start * g_array._lda + k0, g_array._lda),
-                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_array._ldb, out_arg,
-                                 (g_array._bias && first_pass) ? g_array._bias + (multi * g_array._bias_multi_stride) + n0 : nullptr,
+                                 IndirectInputArg<To>(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + m_start * this->_lda + k0, this->_lda),
+                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, this->_ldb, out_arg,
+                                 (this->_bias && first_pass) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
@@ -585,11 +585,6 @@ public:
                 }
             } while (process_all_rows ? p.next_dim1() : p.next_dim0());
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
     }
 
     // Interface implementation - pretransposed

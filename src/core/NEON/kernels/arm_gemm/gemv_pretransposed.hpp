@@ -139,8 +139,8 @@ public:
         return { iceildiv(_args._Nsize, strategy::out_width()) * _args._nmulti };
     }
 
-    // Use the stateless interface to execute the GEMV.
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, To, Tr>& g_array) override {
+    // Actually execute the GEMV.
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -175,21 +175,16 @@ public:
 #ifdef CYCLE_PROFILING
                     auto p = prof.ScopedProfiler(PROFILE_KERNEL, (kmax-k0) * (nmax-n));
 #endif
-                    run_gemv_kernel<OutputStage>::run(strat, g_array._Aptr + (multi * g_array._A_multi_stride) + k0,
+                    run_gemv_kernel<OutputStage>::run(strat, this->_Aptr + (multi * this->_A_multi_stride) + k0,
                                  _B_pretransposed + (multi * _buffer_per_multi) + (n * roundup(_args._Ksize, strategy::k_unroll())) + (k0 * strategy::out_width()),
-                                 g_array._Cptr + (multi * g_array._C_multi_stride) + n,
+                                 this->_Cptr + (multi * this->_C_multi_stride) + n,
                                  (nmax - n), (kmax-k0),
-                                 g_array._bias ? g_array._bias + (multi * g_array._bias_multi_stride) + n : nullptr,
+                                 this->_bias ? this->_bias + (multi * this->_bias_multi_stride) + n : nullptr,
                                  _args._act, (k0 != 0) || _args._accumulate,
                                  _os, col_bias, n + (_args._Nsize * multi));
                 }
             }
         }
-    }
-
-    // Actually execute the GEMV.
-    void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
     }
 
     /* Pretransposed interface implementation */
