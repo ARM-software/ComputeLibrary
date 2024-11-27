@@ -70,14 +70,25 @@ void run_parallel_pretranspose_B_array(arm_gemm::GemmCommon<TypeInput, TypeWeigh
     // The window size is also the total workload size
     const unsigned int wsize = gemm_asm->get_B_pretranspose_window_size();
 
-    std::vector<IScheduler::Workload> workloads(num_threads);
-    for (unsigned int t = 0; t < num_threads; ++t)
+    const int workload_size       = std::min(wsize, num_threads);
+    const int chunks_per_workload = std::floor(wsize / workload_size);
+
+    std::vector<IScheduler::Workload> workloads(workload_size);
+    for (int t = 0; t < workload_size; ++t)
     {
         workloads[t] = [=](const ThreadInfo &info)
         {
-            const unsigned int start = (info.thread_id * wsize) / num_threads;
-            const unsigned int end   = ((info.thread_id + 1) * wsize) / num_threads;
-
+            const unsigned int start = ((info.thread_id) * chunks_per_workload);
+            unsigned int       end;
+            if (info.thread_id < workload_size - 1)
+            {
+                end = ((info.thread_id + 1) * chunks_per_workload);
+            }
+            else
+            {
+                end = wsize;
+            }
+            ARM_COMPUTE_ERROR_ON(start > end);
             if (start < end)
             {
                 gemm_asm->pretranspose_B_array_part(dst->buffer(), src, src_ld, src_multi_stride, transpose, start,
