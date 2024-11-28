@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,7 @@ void CLFill::configure(const CLCompileContext &compile_context,
 
 Status CLFill::validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *dst_window)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(tensor);
     return opencl::ClFill::validate(tensor, constant_value, dst_window);
 }
 

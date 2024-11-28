@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,7 @@ Status CLStridedSlice::validate(const ITensorInfo *input,
                                 int32_t            end_mask,
                                 int32_t            shrink_axis_mask)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return CLStridedSliceKernel::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
 } // namespace experimental
@@ -121,6 +122,7 @@ Status CLStridedSlice::validate(const ITensorInfo *input,
                                 int32_t            end_mask,
                                 int32_t            shrink_axis_mask)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return experimental::CLStridedSlice::validate(input, output, starts, ends, strides, begin_mask, end_mask,
                                                   shrink_axis_mask);
 }

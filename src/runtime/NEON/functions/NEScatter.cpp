@@ -67,6 +67,7 @@ Status NEScatter::validate(const ITensorInfo *src,
                            const ScatterInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, updates, indices, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(src, updates, indices, output);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuScatter::validate(src, updates, indices, output, info));
 
     return Status{};

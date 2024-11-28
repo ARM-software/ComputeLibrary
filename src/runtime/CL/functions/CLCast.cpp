@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,6 +71,7 @@ void CLCast::configure(const CLCompileContext &compile_context,
 
 Status CLCast::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClCast::validate(input, output, policy);
 }
 

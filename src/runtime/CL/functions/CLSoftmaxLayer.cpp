@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,6 +85,7 @@ template <bool IS_LOG>
 Status
 CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     SoftmaxKernelInfo softmax_info{beta, IS_LOG, input->data_type(), axis};
     return OperatorType::validate(*input, *output, softmax_info);
 }

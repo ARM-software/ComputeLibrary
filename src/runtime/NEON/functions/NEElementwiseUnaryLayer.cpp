@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
+
+#include "arm_compute/core/Validate.h"
 
 #include "src/cpu/operators/CpuElementwiseUnary.h"
 
@@ -62,6 +64,7 @@ void NEElementwiseUnaryLayer<op>::configure(const ITensor *input, ITensor *outpu
 template <ElementWiseUnary op>
 Status NEElementwiseUnaryLayer<op>::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return OperatorType::validate(op, *input, *output);
 }
 

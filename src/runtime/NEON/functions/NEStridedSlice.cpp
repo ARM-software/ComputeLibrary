@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
@@ -58,6 +59,7 @@ Status NEStridedSlice::validate(const ITensorInfo *input,
                                 int32_t            end_mask,
                                 int32_t            shrink_axis_mask)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEStridedSliceKernel::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
 } // namespace experimental
@@ -108,6 +110,7 @@ Status NEStridedSlice::validate(const ITensorInfo *input,
                                 int32_t            end_mask,
                                 int32_t            shrink_axis_mask)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return experimental::NEStridedSlice::validate(input, output, starts, ends, strides, begin_mask, end_mask,
                                                   shrink_axis_mask);
 }

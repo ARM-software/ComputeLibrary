@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,7 @@ Status CLComparison::validate(const ITensorInfo  *input1,
                               const ITensorInfo  *output,
                               ComparisonOperation operation)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return CLComparisonKernel::validate(input1, input2, output, operation);
 }
 
@@ -100,6 +101,7 @@ template <ComparisonOperation COP>
 Status
 CLComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return CLComparisonKernel::validate(input1, input2, output, COP);
 }
 

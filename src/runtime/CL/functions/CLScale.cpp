@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,7 @@ void CLScale::configure(const CLCompileContext &compile_context,
 
 Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClScale::validate(input, output, info);
 }
 

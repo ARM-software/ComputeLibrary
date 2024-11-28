@@ -106,6 +106,7 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
                                               const ITensorInfo *output,
                                               const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(a, b, c, output);
     return OperatorType::validate(a, b, c, output, gemm_info);
 }
 

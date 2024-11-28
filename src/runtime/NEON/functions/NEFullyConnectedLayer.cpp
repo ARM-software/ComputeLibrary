@@ -117,6 +117,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo      *input,
                                        FullyConnectedLayerInfo fc_info,
                                        const WeightsInfo      &weights_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return cpu::CpuFullyConnected::validate(input, weights, biases, output, fc_info, weights_info);
 }
 

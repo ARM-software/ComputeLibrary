@@ -249,6 +249,8 @@ public:
      */
     bool is_dynamic() const
     {
+        if (_num_dimensions == 0)
+            return false;
         return std::any_of(cbegin(), cend(), [](const auto &s) { return s == 0; });
     }
 
@@ -264,6 +266,8 @@ public:
     bool is_dynamic(const size_t dim) const
     {
         ARM_COMPUTE_ERROR_ON(dim >= TensorShape::num_max_dimensions);
+        if (_num_dimensions == 0)
+            return false;
         return _id[dim] == 0;
     }
 

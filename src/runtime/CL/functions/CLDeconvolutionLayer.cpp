@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,6 +124,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo   *input,
                                       const WeightsInfo   &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, bias, output);
     switch (CLDeconvolutionLayer::get_deconvolution_method(input, weights, bias, output, deconv_info, weights_info))
     {
         case DeconvolutionMethod::DIRECT:

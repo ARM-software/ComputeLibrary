@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,7 @@ Status CLBatchNormalizationLayer::validate(const ITensorInfo  *input,
                                            float               epsilon,
                                            ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, mean, var, beta, gamma);
     return CLBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 

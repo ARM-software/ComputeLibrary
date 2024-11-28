@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,7 @@ Status CLSlice::validate(const ITensorInfo *input,
                          const Coordinates &ends)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
     // Check start dimensions for being non-negative
     ARM_COMPUTE_RETURN_ERROR_ON(
@@ -88,6 +89,7 @@ Status CLSlice::validate(const ITensorInfo *input,
                          const Coordinates &starts,
                          const Coordinates &ends)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return experimental::CLSlice::validate(input, output, starts, ends);
 }
 

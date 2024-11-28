@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,6 +89,7 @@ Status CLDirectConvolutionLayer::validate(const ITensorInfo         *input,
                                           const PadStrideInfo       &conv_info,
                                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return opencl::ClDirectConv2d::validate(input, weights, biases, output, conv_info, act_info);
 }
 

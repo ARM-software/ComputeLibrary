@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/cpu/operators/CpuSub.h"
 
@@ -52,6 +53,7 @@ Status NEArithmeticSubtraction::validate(const ITensorInfo         *input1,
                                          ConvertPolicy              policy,
                                          const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuSub::validate(input1, input2, output, policy, act_info);
 }
 

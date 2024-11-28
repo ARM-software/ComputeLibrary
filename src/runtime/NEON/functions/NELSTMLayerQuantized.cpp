@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -364,6 +364,13 @@ Status NELSTMLayerQuantized::validate(const ITensorInfo *input,
                                       const ITensorInfo *output_state_out)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(
+        input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
+        recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
+        input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out,
+        output_state_out);
+
+    // Check dynamic shapes
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(
         input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
         recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
         input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,6 +82,11 @@ Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
                                     const ITensorInfo                      *output,
                                     size_t                                  axis)
 {
+    for (const auto &input : inputs_vector)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input);
+    }
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(output);
     return opencl::ClConcatenate::validate(inputs_vector, output, axis);
 }
 

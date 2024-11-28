@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,6 +78,28 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
     const Status status = CPPTopKV::validate(&prediction_info.clone()->set_is_resizable(false),&targets_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), k);
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
+DATA_TEST_CASE(ValidateDynamicTensorShapes, framework::DatasetMode::ALL, zip(zip(zip(zip(
+        framework::dataset::make("PredictionsInfo", { TensorInfo(TensorShape(0, 10), 1, DataType::F32),
+                                                TensorInfo(TensorShape(20, 10), 1, DataType::F32),
+                                                TensorInfo(TensorShape(0, 0), 1, DataType::F32),
+                                                TensorInfo(TensorShape(20, 10), 1, DataType::F32)}), // Wrong output dimension
+        framework::dataset::make("TargetsInfo",{ TensorInfo(TensorShape(10), 1, DataType::U32),
+                                                TensorInfo(TensorShape(0), 1, DataType::U32),
+                                                TensorInfo(TensorShape(0), 1, DataType::U32),
+                                                TensorInfo(TensorShape(10), 1, DataType::U32)})),
+        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(10), 1, DataType::U8),
+                                                TensorInfo(TensorShape(10), 1, DataType::U8),
+                                                TensorInfo(TensorShape(10), 1, DataType::U8),
+                                                TensorInfo(TensorShape(0), 1, DataType::U8)})),
+
+        framework::dataset::make("k",{ 0, 1, 2, 3 })),
+        framework::dataset::make("Expected", {false, false, false, false })),
+        prediction_info, targets_info, output_info, k, expected)
+{
+    const Status status = CPPTopKV::validate(&prediction_info.clone()->set_is_resizable(false),&targets_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), k);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+
 // clang-format on
 // *INDENT-ON*
 

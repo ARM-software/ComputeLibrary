@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,6 +61,7 @@ void NELogicalAnd::configure(const ITensor *input1, const ITensor *input2, ITens
 
 Status NELogicalAnd::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return kernels::NELogicalKernel::validate(input1, input2, output, LogicalOperation::And);
 }
 
@@ -93,6 +94,7 @@ void NELogicalOr::configure(const ITensor *input1, const ITensor *input2, ITenso
 
 Status NELogicalOr::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return kernels::NELogicalKernel::validate(input1, input2, output, LogicalOperation::Or);
 }
 
@@ -124,6 +126,7 @@ void NELogicalNot::configure(const ITensor *input, ITensor *output)
 
 Status NELogicalNot::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return kernels::NELogicalKernel::validate(input, nullptr, output, LogicalOperation::Not);
 }
 

@@ -124,6 +124,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo         *input,
                                         const ActivationLayerInfo &act_info,
                                         unsigned int               num_groups)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, false, num_groups);
     return opencl::ClGemmConv2d::validate(input, weights, biases, output, conv2d_info, weights_info);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,25 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                             TensorInfo(TensorShape(16U, 20U), 1, DataType::U32),
                                            })),
     framework::dataset::make("Expected", { false, false, true, true })),
+    a_info, output_info, expected)
+{
+    // Lock tensors
+    Status status =  NETranspose::validate(&a_info.clone()->set_is_resizable(false),
+                                           &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+DATA_TEST_CASE(ValidateDynamicTensorShapes, framework::DatasetMode::ALL, zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(0U, 13U), 1, DataType::U16), // Invalid shape
+                                            TensorInfo(TensorShape(20U, 31U), 1, DataType::U32),  // Wrong data type
+                                            TensorInfo(TensorShape(0U, 0U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(20U, 0U), 1, DataType::U32),
+                                          }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(13U, 21U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(31U, 0U), 1, DataType::U32),
+                                            TensorInfo(TensorShape(16U, 20U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(0U, 20U), 1, DataType::U32),
+                                           })),
+    framework::dataset::make("Expected", { false, false, false, false })),
     a_info, output_info, expected)
 {
     // Lock tensors

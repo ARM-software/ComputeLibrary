@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGather.h"
 
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEGatherKernel.h"
 
@@ -40,6 +42,7 @@ void NEGather::configure(const ITensor *input, const ITensor *indices, ITensor *
 
 Status NEGather::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, indices, output);
     return NEGatherKernel::validate(input, indices, output, axis);
 }
 } // namespace arm_compute

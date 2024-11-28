@@ -100,6 +100,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
                                               const ITensorInfo *output,
                                               const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(a, b, c, output);
     // Make the B matrix dynamic values.
     auto b_info_to_use = b->clone();
     if (!gemm_info.reshape_b_only_on_first_run())

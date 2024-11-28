@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,6 +60,7 @@ void CLLogicalNot::configure(const CLCompileContext &compile_context, const ICLT
 
 Status CLLogicalNot::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClLogicalNot::validate(input, output);
 }
 

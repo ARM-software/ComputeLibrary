@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,7 @@ void CLMeanStdDevNormalizationLayer::configure(const CLCompileContext &compile_c
 
 Status CLMeanStdDevNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return CLMeanStdDevNormalizationKernel::validate(input, output, epsilon);
 }
 } // namespace arm_compute

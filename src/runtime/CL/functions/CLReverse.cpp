@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,7 @@ Status CLReverse::validate(const ITensorInfo *input,
                            const ITensorInfo *axis,
                            bool               use_inverted_axis)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, axis);
     return CLReverseKernel::validate(input, output, axis, use_inverted_axis);
 }
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,8 @@ Status validate_arguments(const ITensorInfo            *input_box_encoding,
                           const unsigned int            kNumCoordBox)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_box_encoding, input_class_score, input_anchors);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input_box_encoding, input_class_score, input_anchors, output_boxes,
+                                              output_classes, output_scores, num_detection);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_box_encoding, 1, DataType::F32, DataType::QASYMM8,
                                                          DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_box_encoding, input_anchors);

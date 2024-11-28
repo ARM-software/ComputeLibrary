@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,7 @@ void CLChannelShuffleLayer::configure(const CLCompileContext &compile_context,
 
 Status CLChannelShuffleLayer::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_groups)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return CLChannelShuffleLayerKernel::validate(input, output, num_groups);
 }
 } // namespace arm_compute

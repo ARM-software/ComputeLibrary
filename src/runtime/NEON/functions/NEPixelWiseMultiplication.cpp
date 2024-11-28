@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/cpu/operators/CpuMul.h"
 
@@ -52,6 +53,7 @@ Status NEPixelWiseMultiplication::validate(const ITensorInfo         *input1,
                                            RoundingPolicy             rounding_policy,
                                            const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuMul::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
 
@@ -98,6 +100,7 @@ Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo         *inp
                                                   const ITensorInfo         *output,
                                                   const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuComplexMul::validate(input1, input2, output, act_info);
 }
 

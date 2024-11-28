@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,8 @@ void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, int axis, fl
 
 Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
+
     TensorShape shape(input->tensor_shape());
 
     // Create intermediate tensor info

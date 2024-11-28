@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/cpu/operators/CpuPRelu.h"
 
@@ -66,6 +67,7 @@ void NEPReluLayer::run()
 
 Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, alpha, output);
     return OperatorType::validate(input, alpha, output);
 }
 } // namespace arm_compute

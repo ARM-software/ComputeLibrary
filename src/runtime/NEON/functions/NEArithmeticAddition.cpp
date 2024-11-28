@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,7 @@ Status NEArithmeticAddition::validate(const ITensorInfo         *input1,
                                       ConvertPolicy              policy,
                                       const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuAdd::validate(input1, input2, output, policy, act_info);
 }
 

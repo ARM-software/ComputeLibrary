@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,5 +53,6 @@ void CLRange::configure(
 
 Status CLRange::validate(const ITensorInfo *output, const float start, const float end, const float step)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(output);
     return CLRangeKernel::validate(output, start, end, step);
 }

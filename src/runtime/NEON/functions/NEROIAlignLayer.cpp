@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"
 
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEROIAlignLayerKernel.h"
@@ -34,6 +36,7 @@ Status NEROIAlignLayer::validate(const ITensorInfo         *input,
                                  ITensorInfo               *output,
                                  const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, rois, output);
     ARM_COMPUTE_RETURN_ON_ERROR(NEROIAlignLayerKernel::validate(input, rois, output, pool_info));
 
     return Status{};

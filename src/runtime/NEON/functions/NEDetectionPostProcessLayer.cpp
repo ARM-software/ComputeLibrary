@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,6 +96,8 @@ Status NEDetectionPostProcessLayer::validate(const ITensorInfo            *input
                                              ITensorInfo                  *num_detection,
                                              DetectionPostProcessLayerInfo info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input_box_encoding, input_scores, input_anchors, output_boxes,
+                                              output_classes, output_scores, num_detection);
     bool run_dequantize = is_data_type_quantized(input_box_encoding->data_type());
     if (run_dequantize)
     {

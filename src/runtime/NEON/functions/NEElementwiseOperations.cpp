@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,7 @@ Status NEElementwiseMax::validate(const ITensorInfo         *input1,
                                   const ITensorInfo         *output,
                                   const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseMax::validate(input1, input2, output);
 }
@@ -105,6 +106,7 @@ Status NEElementwiseMin::validate(const ITensorInfo         *input1,
                                   const ITensorInfo         *output,
                                   const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseMin::validate(input1, input2, output);
 }
@@ -151,6 +153,7 @@ Status NEElementwiseSquaredDiff::validate(const ITensorInfo         *input1,
                                           const ITensorInfo         *output,
                                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseSquaredDiff::validate(input1, input2, output);
 }
@@ -197,6 +200,7 @@ Status NEElementwiseDivision::validate(const ITensorInfo         *input1,
                                        const ITensorInfo         *output,
                                        const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseDivision::validate(input1, input2, output);
 }
@@ -243,6 +247,7 @@ Status NEElementwisePower::validate(const ITensorInfo         *input1,
                                     const ITensorInfo         *output,
                                     const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwisePower::validate(input1, input2, output);
 }
@@ -292,6 +297,7 @@ Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1,
                                                     const ITensorInfo *input2,
                                                     const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuElementwiseComparisonStatic<COP>::validate(input1, input2, output);
 }
 
@@ -334,6 +340,7 @@ Status NEElementwiseComparison::validate(const ITensorInfo  *input1,
                                          const ITensorInfo  *output,
                                          ComparisonOperation op)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuElementwiseComparison::validate(input1, input2, output, op);
 }
 

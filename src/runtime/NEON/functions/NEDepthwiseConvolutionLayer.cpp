@@ -370,6 +370,7 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo         *input,
                                              const ActivationLayerInfo &act_info,
                                              const Size2D              &dilation)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     ConvolutionInfo info{conv_info, depth_multiplier, act_info, dilation};
     return cpu::CpuDepthwiseConv2d::validate(input, weights, biases, output, info);
 }

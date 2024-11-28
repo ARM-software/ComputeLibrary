@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,6 +84,7 @@ Status NESpaceToBatchLayer::validate(const ITensorInfo *input,
                                      const ITensorInfo *paddings,
                                      const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, block_shape, paddings, output);
     ARM_COMPUTE_RETURN_ON_ERROR(NESpaceToBatchLayerKernel::validate(input, block_shape, paddings, output));
 
     return Status{};
@@ -96,6 +97,7 @@ Status NESpaceToBatchLayer::validate(const ITensorInfo *input,
                                      const Size2D      &padding_right,
                                      const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(
         NESpaceToBatchLayerKernel::validate(input, block_shape_x, block_shape_y, padding_left, padding_right, output));
 

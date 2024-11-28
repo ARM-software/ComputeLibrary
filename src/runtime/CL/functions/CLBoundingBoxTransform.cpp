@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,7 @@ Status CLBoundingBoxTransform::validate(const ITensorInfo              *boxes,
                                         const ITensorInfo              *deltas,
                                         const BoundingBoxTransformInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(boxes, pred_boxes, deltas);
     return CLBoundingBoxTransformKernel::validate(boxes, pred_boxes, deltas, info);
 }
 } // namespace arm_compute

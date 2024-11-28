@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,7 @@ Status validate_arguments(const ITensorInfo       *input_loc,
                           DetectionOutputLayerInfo info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_loc, input_conf, input_priorbox, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input_loc, input_conf, input_priorbox, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_loc, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_loc, input_conf, input_priorbox);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_loc->num_dimensions() > 2, "The location input tensor should be [C1, N].");

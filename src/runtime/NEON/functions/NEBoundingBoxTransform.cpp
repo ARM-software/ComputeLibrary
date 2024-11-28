@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
 
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 
@@ -45,6 +47,7 @@ Status NEBoundingBoxTransform::validate(const ITensorInfo              *boxes,
                                         const ITensorInfo              *deltas,
                                         const BoundingBoxTransformInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(boxes, pred_boxes, deltas);
     return NEBoundingBoxTransformKernel::validate(boxes, pred_boxes, deltas, info);
 }
 } // namespace arm_compute

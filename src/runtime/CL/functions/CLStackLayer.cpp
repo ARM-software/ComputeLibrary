@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,6 +73,7 @@ Status CLStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis,
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(input.empty());
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(output);
 
     // Wrap around negative values
     const size_t       rank   = input[0]->num_dimensions();
@@ -82,6 +83,7 @@ Status CLStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis,
 
     for (unsigned int i = 0; i < num_inputs; i++)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input[i]);
         // All the tensors must have the same rank
         ARM_COMPUTE_RETURN_ERROR_ON(input[i]->num_dimensions() != rank);
         // Validate Kernel

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,7 @@ Status CLNormalizePlanarYUVLayer::validate(const ITensorInfo *input,
                                            const ITensorInfo *mean,
                                            const ITensorInfo *std)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, mean, std);
     return CLNormalizePlanarYUVLayerKernel::validate(input, output, mean, std);
 }
 } // namespace arm_compute

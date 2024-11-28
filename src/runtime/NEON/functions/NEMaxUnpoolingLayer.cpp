@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,6 +73,7 @@ Status NEMaxUnpoolingLayer::validate(const ITensorInfo      *input,
                                      const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, indices);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, indices, output);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuMaxUnpooling::validate(input, indices, output, pool_info));
     return Status{};
 }

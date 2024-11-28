@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,7 @@ void CLLogicalOr::configure(const CLCompileContext &compile_context,
 
 Status CLLogicalOr::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return arm_compute::opencl::kernels::ClLogicalBinaryKernel::validate(LogicalOperation::Or, input1, input2, output);
 }
 
@@ -90,6 +91,7 @@ void CLLogicalOr::configure(const CLCompileContext &compile_context,
 
 Status CLLogicalOr::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return experimental::CLLogicalOr::validate(input1, input2, output);
 }
 

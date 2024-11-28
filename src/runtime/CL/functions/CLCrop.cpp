@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,6 +90,7 @@ Status CLCrop::validate(const ITensorInfo *input,
                         float              extrapolation_value,
                         Window            *dst_window)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClCrop::validate(input, output, start, end, batch_index, extrapolation_value, dst_window);
 }
 

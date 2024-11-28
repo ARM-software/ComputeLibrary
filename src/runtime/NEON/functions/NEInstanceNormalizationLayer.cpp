@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,6 +82,7 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
 Status NEInstanceNormalizationLayer::validate(
     const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEInstanceNormalizationLayerKernel::validate(
         &input->clone()->set_data_layout(DataLayout::NCHW), &output->clone()->set_data_layout(DataLayout::NCHW),
         InstanceNormalizationLayerKernelInfo{gamma, beta, epsilon, true});

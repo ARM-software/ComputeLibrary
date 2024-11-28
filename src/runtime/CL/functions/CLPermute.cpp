@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,7 @@ void CLPermute::configure(const CLCompileContext  &compile_context,
 
 Status CLPermute::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClPermute::validate(input, output, perm);
 }
 

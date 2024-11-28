@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -128,6 +128,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
 
 Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return cpu::CpuScale::validate(input, output, info);
 }
 

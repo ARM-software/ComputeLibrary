@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,7 @@ Status CLSpaceToBatchLayer::validate(const ITensorInfo *input,
                                      const ITensorInfo *paddings,
                                      const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, block_shape, paddings, output);
     ARM_COMPUTE_RETURN_ON_ERROR(
         CLFill::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
     ARM_COMPUTE_RETURN_ON_ERROR(CLSpaceToBatchLayerKernel::validate(input, block_shape, paddings, output));
@@ -119,6 +120,7 @@ Status CLSpaceToBatchLayer::validate(const ITensorInfo *input,
                                      const Size2D      &padding_right,
                                      const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(
         CLFill::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
     ARM_COMPUTE_RETURN_ON_ERROR(

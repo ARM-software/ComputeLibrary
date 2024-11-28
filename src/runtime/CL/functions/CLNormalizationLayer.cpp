@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,6 +73,7 @@ Status CLNormalizationLayer::validate(const ITensorInfo            *input,
                                       const ITensorInfo            *output,
                                       const NormalizationLayerInfo &norm_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return CLNormalizationLayerKernel::validate(input, output, norm_info);
 }
 

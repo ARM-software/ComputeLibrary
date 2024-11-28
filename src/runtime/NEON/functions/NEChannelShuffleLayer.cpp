@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEChannelShuffleLayer.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEChannelShuffleLayerKernel.h"
@@ -40,6 +41,7 @@ void NEChannelShuffleLayer::configure(const ITensor *input, ITensor *output, uns
 
 Status NEChannelShuffleLayer::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_groups)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEChannelShuffleLayerKernel::validate(input, output, num_groups);
 }
 } // namespace arm_compute

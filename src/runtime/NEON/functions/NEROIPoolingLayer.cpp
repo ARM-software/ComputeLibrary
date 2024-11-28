@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ Status NEROIPoolingLayer::validate(const ITensorInfo         *input,
                                    const ITensorInfo         *output,
                                    const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, rois, output);
     return NEROIPoolingLayerKernel::validate(input, rois, output, pool_info);
 }
 
