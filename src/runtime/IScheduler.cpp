@@ -69,12 +69,9 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
         const std::size_t m = max_window.num_iterations(Window::DimX);
         const std::size_t n = max_window.num_iterations(Window::DimY);
 
-        const unsigned int num_iterations = max_window.num_iterations_total();
-        const unsigned int num_threads    = std::min(num_iterations, this->num_threads());
-
         //in c++17 this can be swapped for   auto [ m_threads, n_threads ] = split_2d(...
         unsigned m_threads, n_threads;
-        std::tie(m_threads, n_threads) = scheduler_utils::split_2d(num_threads, m, n);
+        std::tie(m_threads, n_threads) = scheduler_utils::split_2d(this->num_threads(), m, n);
 
         std::vector<IScheduler::Workload> workloads;
         for (unsigned int ni = 0; ni != n_threads; ++ni)
