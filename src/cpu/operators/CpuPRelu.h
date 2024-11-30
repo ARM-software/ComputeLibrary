@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_PRELU_H
-#define ARM_COMPUTE_CPU_PRELU_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUPRELU_H
+#define ACL_SRC_CPU_OPERATORS_CPUPRELU_H
 
 #include "src/cpu/operators/CpuElementwise.h"
 
@@ -30,9 +30,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-/** Class to run @ref cpu::kernels::CpuArithmeticKernel except for PRelu operation */
+/** Class to run @ref cpu::kernels::CpuArithmeticKernel for PRelu operation */
 using CpuPRelu = CpuElementwiseArithmetic<ArithmeticOperation::PRELU>;
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_CPU_PRELU_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUPRELU_H

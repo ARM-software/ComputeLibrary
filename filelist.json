@@ -1581,6 +1581,8 @@
           "files": {
           "common": [
             "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp",
+            "src/cpu/kernels/CpuDynamicGemmKernel.cpp",
+            "src/cpu/kernels/CpuDynamicGemmKernelHeuristics.cpp",
             "src/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
             "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp",
             "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp",
@@ -1593,6 +1595,7 @@
             "src/cpu/kernels/CpuGemmLowpMatrixReductionKernel.cpp",
             "src/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.cpp",
             "src/cpu/kernels/CpuGemmLowpOffsetContributionKernel.cpp",
+            "src/cpu/operators/CpuDynamicGemm.cpp",
             "src/cpu/operators/CpuGemm.cpp",
             "src/cpu/operators/CpuGemmLowpOutputStage.cpp",
             "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.cpp",

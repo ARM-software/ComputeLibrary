@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 list(APPEND CMAKE_MESSAGE_CONTEXT ArmCompute)
 project(
   ArmCompute
-  VERSION 43.0.0
+  VERSION 44.0.0
   DESCRIPTION
     "The Arm Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A CPU and Arm® Mali™ GPU architectures"
   LANGUAGES C CXX ASM)
@@ -333,3 +333,16 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
   endforeach()
 
 endif() # ARM_COMPUTE_BUILD_EXAMPLES
+
+# Install libraries
+install(TARGETS arm_compute arm_compute_graph
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# Install test executables
+if(ARM_COMPUTE_BUILD_TESTING)
+  install(TARGETS arm_compute_validation_framework arm_compute_benchmark arm_compute_validation
+          RUNTIME DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests"
+          LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests"
+          ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests")
+endif()

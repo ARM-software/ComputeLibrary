@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_HELPERS_ASYMM_H
-#define ARM_COMPUTE_HELPERS_ASYMM_H
+#ifndef ACL_SRC_CORE_CL_CL_KERNELS_HELPERS_ASYMM_H
+#define ACL_SRC_CORE_CL_CL_KERNELS_HELPERS_ASYMM_H
 
 #include "helpers.h"
 
@@ -115,17 +115,16 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
  *
  * @return Correctly-rounded-to-nearest division by a power-of-two.
  */
-#define ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(size)                                                               \
-    inline VEC_DATA_TYPE(int, size)                                                                            \
-        asymm_rounding_divide_by_POW2_##size(VEC_DATA_TYPE(int, size) x, VEC_DATA_TYPE(int, size) exponent)    \
-    {                                                                                                          \
-        const VEC_DATA_TYPE(int, size) zero = (VEC_DATA_TYPE(int, size))0;                                     \
-        const VEC_DATA_TYPE(int, size) one  = (VEC_DATA_TYPE(int, size))1;                                     \
-        VEC_DATA_TYPE(int, size)                                                                               \
-        mask = (one << exponent) - one;                                                                        \
-        VEC_DATA_TYPE(int, size)                                                                               \
-        threshold = (mask >> 1) + select(zero, one, (SELECT_VEC_DATA_TYPE(int, size))(x < 0));                 \
-        return (x >> exponent) + select(zero, one, (SELECT_VEC_DATA_TYPE(int, size))((x & mask) > threshold)); \
+#define ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(size)                                                            \
+    inline VEC_DATA_TYPE(int, size)                                                                         \
+        asymm_rounding_divide_by_POW2_##size(VEC_DATA_TYPE(int, size) x, VEC_DATA_TYPE(int, size) exponent) \
+    {                                                                                                       \
+        const VEC_DATA_TYPE(int, size) one = (VEC_DATA_TYPE(int, size))1;                                   \
+        VEC_DATA_TYPE(int, size)                                                                            \
+        rounding = one << (exponent - one);                                                                 \
+        VEC_DATA_TYPE(int, size)                                                                            \
+        _tmp = (x + rounding) >> exponent;                                                                  \
+        return select(x, _tmp, (SELECT_VEC_DATA_TYPE(int, size))(exponent > 0));                            \
     }
 
 /** Product of two numbers, interpreting them as fixed-point values in the interval [-1, 1),
@@ -146,19 +145,8 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
         b_64 = convert_long##size(b);                                                                        \
         VEC_DATA_TYPE(long, size)                                                                            \
         ab_64 = a_64 * b_64;                                                                                 \
-        /* Revert COMPMID-907 */                                                                             \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        mask1 = 1 << 30;                                                                                     \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        mask2 = 1 - (1 << 30);                                                                               \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        is_positive_or_zero = ab_64 >= 0;                                                                    \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        nudge = select(mask2, mask1, (SELECT_VEC_DATA_TYPE(long, size))(is_positive_or_zero));               \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        mask = 1ll << 31;                                                                                    \
         VEC_DATA_TYPE(int, size)                                                                             \
-        ab_x2_high32 = convert_int##size((ab_64 + nudge) / mask);                                            \
+        ab_x2_high32 = convert_int##size(ab_64 >> 31);                                                       \
         return select(ab_x2_high32, INT_MAX, (SELECT_VEC_DATA_TYPE(int, size))(overflow));                   \
     }
 
@@ -583,4 +571,4 @@ MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(4)
 MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(8)
 MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(16)
 
-#endif // ARM_COMPUTE_HELPERS_ASYMM_H
+#endif // ACL_SRC_CORE_CL_CL_KERNELS_HELPERS_ASYMM_H

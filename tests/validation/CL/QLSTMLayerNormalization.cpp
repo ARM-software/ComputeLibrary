@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -165,7 +165,7 @@ constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
                             QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape")),             \
                         QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),                   \
                     framework::dataset::make("DataType", DataType::QSYMM16)),                                        \
-            framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(8192) }))
+            framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(2) }))
 
 #define QSYMM16_DATASET_1D \
     concat(concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1)), QSYMM16_DATASET_ITER(1, 2))

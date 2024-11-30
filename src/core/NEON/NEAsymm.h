@@ -24,6 +24,9 @@
 #ifndef ACL_SRC_CORE_NEON_NEASYMM_H
 #define ACL_SRC_CORE_NEON_NEASYMM_H
 
+#include "arm_compute/core/QuantizationInfo.h"
+#include "arm_compute/core/Rounding.h"
+
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 
@@ -98,18 +101,18 @@ inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
         in_s32.val[2] = vmulq_n_s32(in_s32.val[2], (1 << (-result_shift)));
         in_s32.val[3] = vmulq_n_s32(in_s32.val[3], (1 << (-result_shift)));
 
-        in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
-        in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
-        in_s32.val[2] = vqrdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
-        in_s32.val[3] = vqrdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
+        in_s32.val[0] = vqdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+        in_s32.val[1] = vqdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+        in_s32.val[2] = vqdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
+        in_s32.val[3] = vqdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
     }
     else
     {
         // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-        in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
-        in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
-        in_s32.val[2] = vqrdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
-        in_s32.val[3] = vqrdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
+        in_s32.val[0] = vqdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+        in_s32.val[1] = vqdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+        in_s32.val[2] = vqdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
+        in_s32.val[3] = vqdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
 
         // Round to the nearest division by a power-of-two using result_shift_s32
         in_s32.val[0] = rounding_divide_by_pow2(in_s32.val[0], result_shift);
@@ -173,18 +176,18 @@ inline int8x16_t finalize_quantization(int32x4x4_t &in_s32,
         in_s32.val[2] = vmulq_n_s32(in_s32.val[2], (1 << (-result_shift)));
         in_s32.val[3] = vmulq_n_s32(in_s32.val[3], (1 << (-result_shift)));
 
-        in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
-        in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
-        in_s32.val[2] = vqrdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
-        in_s32.val[3] = vqrdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
+        in_s32.val[0] = vqdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+        in_s32.val[1] = vqdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+        in_s32.val[2] = vqdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
+        in_s32.val[3] = vqdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
     }
     else
     {
         // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-        in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
-        in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
-        in_s32.val[2] = vqrdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
-        in_s32.val[3] = vqrdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
+        in_s32.val[0] = vqdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+        in_s32.val[1] = vqdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+        in_s32.val[2] = vqdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
+        in_s32.val[3] = vqdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
 
         // Round to the nearest division by a power-of-two using result_shift_s32
         in_s32.val[0] = rounding_divide_by_pow2(in_s32.val[0], result_shift);
@@ -239,10 +242,10 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
 
     // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
     int32x4x4_t res_shift_gt0 = {
-        vqrdmulhq_s32(in_s32.val[0], result_fixedpoint_multiplier.val[0]),
-        vqrdmulhq_s32(in_s32.val[1], result_fixedpoint_multiplier.val[1]),
-        vqrdmulhq_s32(in_s32.val[2], result_fixedpoint_multiplier.val[2]),
-        vqrdmulhq_s32(in_s32.val[3], result_fixedpoint_multiplier.val[3]),
+        vqdmulhq_s32(in_s32.val[0], result_fixedpoint_multiplier.val[0]),
+        vqdmulhq_s32(in_s32.val[1], result_fixedpoint_multiplier.val[1]),
+        vqdmulhq_s32(in_s32.val[2], result_fixedpoint_multiplier.val[2]),
+        vqdmulhq_s32(in_s32.val[3], result_fixedpoint_multiplier.val[3]),
     };
     // Round to the nearest division by a power-of-two using result_shift_s32
     res_shift_gt0.val[0] = rounding_divide_by_pow2(res_shift_gt0.val[0], result_shift.val[0]);
@@ -256,10 +259,10 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
         vmulq_s32(in_s32.val[2], vshlq_s32(one_s32, vnegq_s32(result_shift.val[2]))),
         vmulq_s32(in_s32.val[3], vshlq_s32(one_s32, vnegq_s32(result_shift.val[3]))),
     };
-    res_shift_lt0.val[0] = vqrdmulhq_s32(res_shift_lt0.val[0], result_fixedpoint_multiplier.val[0]);
-    res_shift_lt0.val[1] = vqrdmulhq_s32(res_shift_lt0.val[1], result_fixedpoint_multiplier.val[1]);
-    res_shift_lt0.val[2] = vqrdmulhq_s32(res_shift_lt0.val[2], result_fixedpoint_multiplier.val[2]);
-    res_shift_lt0.val[3] = vqrdmulhq_s32(res_shift_lt0.val[3], result_fixedpoint_multiplier.val[3]);
+    res_shift_lt0.val[0] = vqdmulhq_s32(res_shift_lt0.val[0], result_fixedpoint_multiplier.val[0]);
+    res_shift_lt0.val[1] = vqdmulhq_s32(res_shift_lt0.val[1], result_fixedpoint_multiplier.val[1]);
+    res_shift_lt0.val[2] = vqdmulhq_s32(res_shift_lt0.val[2], result_fixedpoint_multiplier.val[2]);
+    res_shift_lt0.val[3] = vqdmulhq_s32(res_shift_lt0.val[3], result_fixedpoint_multiplier.val[3]);
 
     // Select result depending on shift value
     const uint32x4x4_t mask_lt0 = {
@@ -328,12 +331,12 @@ inline uint8_t finalize_quantization(int32_t in_value,
     if (result_shift < 0)
     {
         in_value = vgetq_lane_s32(
-            vqrdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
+            vqdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
     }
     else
     {
         // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-        in_value = vgetq_lane_s32(vqrdmulhq_n_s32(in_s32, result_fixedpoint_multiplier), 0);
+        in_value = vgetq_lane_s32(vqdmulhq_n_s32(in_s32, result_fixedpoint_multiplier), 0);
         // Shift value by result_shift_s32
         in_value = rounding_divide_by_pow2(in_value, result_shift);
     }
@@ -376,12 +379,12 @@ inline int8_t finalize_quantization(int32_t in_value,
     if (result_shift < 0)
     {
         in_value = vgetq_lane_s32(
-            vqrdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
+            vqdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
     }
     else
     {
         // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-        in_value = vgetq_lane_s32(vqrdmulhq_n_s32(in_s32, result_fixedpoint_multiplier), 0);
+        in_value = vgetq_lane_s32(vqdmulhq_n_s32(in_s32, result_fixedpoint_multiplier), 0);
 
         // Shift value by result_shift_s32
         in_value = rounding_divide_by_pow2(in_value, result_shift);
@@ -444,17 +447,14 @@ inline float32x4x2_t vdequantize(const int8x8_t &qv, const UniformQuantizationIn
 
 /** Dequantize a neon vector holding 16 quantized values.
  *
- * @param[in] qv Input values to be dequantized.
- * @param[in] qi Quantization information to be used in the computation.
+ * @param[in] qv      Input values to be dequantized.
+ * @param[in] voffset Vectorized dequantization offset.
+ * @param[in] vscale  Vectorized dequantization scale.
  *
  * @return Dequantized values in a neon vector
  */
-inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantizationInfo &qi)
+inline float32x4x4_t vdequantize(const uint8x16_t &qv, const int32x4_t &voffset, const float32x4_t &vscale)
 {
-    const float         scale              = qi.scale;
-    const int           offset             = qi.offset;
-    const int32x4_t     voffset            = vdupq_n_s32(offset);
-    const float32x4_t   vscale             = vdupq_n_f32(scale);
     const float32x4x4_t vdequantized_input = {{
         vmulq_f32(vcvtq_f32_s32(
                       vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(qv))))), voffset)),
@@ -472,6 +472,41 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantization
     return vdequantized_input;
 }
 
+/** Dequantize a neon vector holding 16 quantized values.
+ *
+ * @param[in] qv Input values to be dequantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float       scale   = qi.scale;
+    const int         offset  = qi.offset;
+    const int32x4_t   voffset = vdupq_n_s32(offset);
+    const float32x4_t vscale  = vdupq_n_f32(scale);
+    return vdequantize(qv, voffset, vscale);
+}
+
+/** Dequantize a neon vector holding 16 signed quantized values.
+ *
+ * @param[in] qv      Input values to be dequantized.
+ * @param[in] voffset Vectorized dequantization offset.
+ * @param[in] vscale  Vectorized dequantization scale.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const int8x16_t &qv, const int32x4_t &voffset, const float32x4_t &vscale)
+{
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+    }};
+    return vdequantized_input;
+}
+
 /** Dequantize a neon vector holding 16 signed quantized values.
  *
  * @param[in] qv Input values to be dequantized.
@@ -481,17 +516,11 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantization
  */
 inline float32x4x4_t vdequantize(const int8x16_t &qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale              = qi.scale;
-    const int           offset             = qi.offset;
-    const int32x4_t     voffset            = vdupq_n_s32(offset);
-    const float32x4_t   vscale             = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input = {{
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-    }};
-    return vdequantized_input;
+    const float       scale   = qi.scale;
+    const int         offset  = qi.offset;
+    const int32x4_t   voffset = vdupq_n_s32(offset);
+    const float32x4_t vscale  = vdupq_n_f32(scale);
+    return vdequantize(qv, voffset, vscale);
 }
 
 /** Dequantize following an asymmetric quantization scheme a neon vector holding 16 quantized values.

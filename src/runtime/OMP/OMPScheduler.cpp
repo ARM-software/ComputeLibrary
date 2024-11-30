@@ -75,6 +75,13 @@ void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 
 void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
 {
+    // The rest of the logic in this function does not handle the
+    // split_dimensions_all case so we defer to IScheduler::schedule_common()
+    if (hints.split_dimension() == IScheduler::split_dimensions_all)
+    {
+        return schedule_common(kernel, hints, window, tensors);
+    }
+
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
     ARM_COMPUTE_ERROR_ON_MSG(hints.strategy() == StrategyHint::DYNAMIC,
                              "Dynamic scheduling is not supported in OMPScheduler");

@@ -149,6 +149,11 @@ public:
                                const ITensorInfo         *d,
                                const GEMMInfo            &gemm_info = GEMMInfo());
 
+    /** Indicates whether or not there is a implementation for the configured GEMM
+     * @return a bool: true if the implementation is stateless; false if not.
+     */
+    bool has_stateless_impl() const;
+
     /** Checks if activation is supported by the gemm assembly dispatcher
      *
      * @param[in] activation Activation to check

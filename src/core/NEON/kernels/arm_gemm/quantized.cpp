@@ -55,7 +55,7 @@ namespace {
  * column is set up in any case (and it is hoped that the compiler can elide
  * the needless movs in the per-layer case).
  */
-template<bool do_shift_correction, bool per_channel, bool do_left_shift>
+template<bool per_channel, bool do_left_shift>
 void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigned int height,
                              const int32_t *input, unsigned int in_stride, int8_t *output, unsigned int out_stride,
                              const int32_t *row_bias, const int32_t *col_bias, const unsigned int start_col) {
@@ -203,48 +203,15 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
             }
 
             // Multiply
-            v_in00 = vqrdmulhq_s32(v_in00, v_mul0);
-            v_in01 = vqrdmulhq_s32(v_in01, v_mul1);
-            v_in02 = vqrdmulhq_s32(v_in02, v_mul2);
-            v_in03 = vqrdmulhq_s32(v_in03, v_mul3);
+            v_in00 = vqdmulhq_s32(v_in00, v_mul0);
+            v_in01 = vqdmulhq_s32(v_in01, v_mul1);
+            v_in02 = vqdmulhq_s32(v_in02, v_mul2);
+            v_in03 = vqdmulhq_s32(v_in03, v_mul3);
 
-            v_in10 = vqrdmulhq_s32(v_in10, v_mul0);
-            v_in11 = vqrdmulhq_s32(v_in11, v_mul1);
-            v_in12 = vqrdmulhq_s32(v_in12, v_mul2);
-            v_in13 = vqrdmulhq_s32(v_in13, v_mul3);
-
-            // Compute and add on corrective offset
-            if (do_shift_correction) {
-                int32x4_t v_temp00 = vandq_s32(v_in00, v_shf0);
-                int32x4_t v_temp01 = vandq_s32(v_in01, v_shf1);
-                int32x4_t v_temp02 = vandq_s32(v_in02, v_shf2);
-                int32x4_t v_temp03 = vandq_s32(v_in03, v_shf3);
-
-                int32x4_t v_temp10 = vandq_s32(v_in10, v_shf0);
-                int32x4_t v_temp11 = vandq_s32(v_in11, v_shf1);
-                int32x4_t v_temp12 = vandq_s32(v_in12, v_shf2);
-                int32x4_t v_temp13 = vandq_s32(v_in13, v_shf3);
-
-                v_temp00 = vshrq_n_s32(v_temp00, 31);
-                v_temp01 = vshrq_n_s32(v_temp01, 31);
-                v_temp02 = vshrq_n_s32(v_temp02, 31);
-                v_temp03 = vshrq_n_s32(v_temp03, 31);
-
-                v_temp10 = vshrq_n_s32(v_temp10, 31);
-                v_temp11 = vshrq_n_s32(v_temp11, 31);
-                v_temp12 = vshrq_n_s32(v_temp12, 31);
-                v_temp13 = vshrq_n_s32(v_temp13, 31);
-
-                v_in00 = vqaddq_s32(v_in00, v_temp00);
-                v_in01 = vqaddq_s32(v_in01, v_temp01);
-                v_in02 = vqaddq_s32(v_in02, v_temp02);
-                v_in03 = vqaddq_s32(v_in03, v_temp03);
-
-                v_in10 = vqaddq_s32(v_in10, v_temp10);
-                v_in11 = vqaddq_s32(v_in11, v_temp11);
-                v_in12 = vqaddq_s32(v_in12, v_temp12);
-                v_in13 = vqaddq_s32(v_in13, v_temp13);
-            }
+            v_in10 = vqdmulhq_s32(v_in10, v_mul0);
+            v_in11 = vqdmulhq_s32(v_in11, v_mul1);
+            v_in12 = vqdmulhq_s32(v_in12, v_mul2);
+            v_in13 = vqdmulhq_s32(v_in13, v_mul3);
 
             v_in00 = vrshlq_s32(v_in00, v_shf0);
             v_in01 = vrshlq_s32(v_in01, v_shf1);
@@ -390,40 +357,13 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
             }
 
             // Multiply
-            v_in00 = vqrdmulhq_s32(v_in00, v_mul0);
-            v_in01 = vqrdmulhq_s32(v_in01, v_mul1);
-            v_in02 = vqrdmulhq_s32(v_in02, v_mul2);
+            v_in00 = vqdmulhq_s32(v_in00, v_mul0);
+            v_in01 = vqdmulhq_s32(v_in01, v_mul1);
+            v_in02 = vqdmulhq_s32(v_in02, v_mul2);
 
-            v_in10 = vqrdmulhq_s32(v_in10, v_mul0);
-            v_in11 = vqrdmulhq_s32(v_in11, v_mul1);
-            v_in12 = vqrdmulhq_s32(v_in12, v_mul2);
-
-            // Compute and add on corrective offset
-            if (do_shift_correction) {
-                int32x4_t v_temp00 = vandq_s32(v_in00, v_shf0);
-                int32x4_t v_temp01 = vandq_s32(v_in01, v_shf1);
-                int32x4_t v_temp02 = vandq_s32(v_in02, v_shf2);
-
-                int32x4_t v_temp10 = vandq_s32(v_in10, v_shf0);
-                int32x4_t v_temp11 = vandq_s32(v_in11, v_shf1);
-                int32x4_t v_temp12 = vandq_s32(v_in12, v_shf2);
-
-                v_temp00 = vshrq_n_s32(v_temp00, 31);
-                v_temp01 = vshrq_n_s32(v_temp01, 31);
-                v_temp02 = vshrq_n_s32(v_temp02, 31);
-
-                v_temp10 = vshrq_n_s32(v_temp10, 31);
-                v_temp11 = vshrq_n_s32(v_temp11, 31);
-                v_temp12 = vshrq_n_s32(v_temp12, 31);
-
-                v_in00 = vqaddq_s32(v_in00, v_temp00);
-                v_in01 = vqaddq_s32(v_in01, v_temp01);
-                v_in02 = vqaddq_s32(v_in02, v_temp02);
-
-                v_in10 = vqaddq_s32(v_in10, v_temp10);
-                v_in11 = vqaddq_s32(v_in11, v_temp11);
-                v_in12 = vqaddq_s32(v_in12, v_temp12);
-            }
+            v_in10 = vqdmulhq_s32(v_in10, v_mul0);
+            v_in11 = vqdmulhq_s32(v_in11, v_mul1);
+            v_in12 = vqdmulhq_s32(v_in12, v_mul2);
 
             v_in00 = vrshlq_s32(v_in00, v_shf0);
             v_in01 = vrshlq_s32(v_in01, v_shf1);
@@ -525,24 +465,9 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
             }
 
             // Then multiply
-            v_in00 = vqrdmulhq_s32(v_in00, v_mul0);
+            v_in00 = vqdmulhq_s32(v_in00, v_mul0);
 
-            v_in10 = vqrdmulhq_s32(v_in10, v_mul0);
-
-            // Compute and add on corrective offset
-            if (do_shift_correction) {
-                int32x4_t v_temp00 = vandq_s32(v_in00, v_shf0);
-
-                int32x4_t v_temp10 = vandq_s32(v_in10, v_shf0);
-
-                v_temp00 = vshrq_n_s32(v_temp00, 31);
-
-                v_temp10 = vshrq_n_s32(v_temp10, 31);
-
-                v_in00 = vqaddq_s32(v_in00, v_temp00);
-
-                v_in10 = vqaddq_s32(v_in10, v_temp10);
-            }
+            v_in10 = vqdmulhq_s32(v_in10, v_mul0);
 
             v_in00 = vrshlq_s32(v_in00, v_shf0);
 
@@ -639,24 +564,9 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
             }
 
             // Then multiply
-            v_in00 = vqrdmulhq_s32(v_in00, v_mul0);
+            v_in00 = vqdmulhq_s32(v_in00, v_mul0);
 
-            v_in10 = vqrdmulhq_s32(v_in10, v_mul0);
-
-            // Compute and add on corrective offset
-            if (do_shift_correction) {
-                int32x4_t v_temp00 = vandq_s32(v_in00, v_shf0);
-
-                int32x4_t v_temp10 = vandq_s32(v_in10, v_shf0);
-
-                v_temp00 = vshrq_n_s32(v_temp00, 31);
-
-                v_temp10 = vshrq_n_s32(v_temp10, 31);
-
-                v_in00 = vqaddq_s32(v_in00, v_temp00);
-
-                v_in10 = vqaddq_s32(v_in10, v_temp10);
-            }
+            v_in10 = vqdmulhq_s32(v_in10, v_mul0);
 
             v_in00 = vrshlq_s32(v_in00, v_shf0);
 
@@ -699,40 +609,20 @@ void requantize_block_32(const Requantize32 &qp, unsigned int width, unsigned in
                          const Tin *input, unsigned int in_stride, Tout *output, unsigned int out_stride,
                          const int32_t *row_bias, const int32_t *col_bias, unsigned int start_col) {
     if (qp.per_channel_requant) {
-        if (qp.minval >= qp.c_offset) {
-            if (qp.per_channel_left_shifts) {
-                requantize_block_32_int<false, true, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            } else {
-                requantize_block_32_int<false, true, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            }
+        if (qp.per_channel_left_shifts) {
+            requantize_block_32_int<true, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         } else {
-            if (qp.per_channel_left_shifts) {
-                requantize_block_32_int<true, true, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            } else {
-                requantize_block_32_int<true, true, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            }
+            requantize_block_32_int<true, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         }
     } else {
-        if (qp.minval >= qp.c_offset) {
-            if (qp.per_layer_left_shift > 0) {
-                requantize_block_32_int<false, false, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            } else {
-                requantize_block_32_int<false, false, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            }
+        if (qp.per_layer_left_shift > 0) {
+            requantize_block_32_int<false, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         } else {
-            if (qp.per_layer_left_shift > 0) {
-                requantize_block_32_int<true, false, true>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            } else {
-                requantize_block_32_int<true, false, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
-                                 reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
-            }
+            requantize_block_32_int<false, false>(qp, width, height, reinterpret_cast<const int32_t *>(input), in_stride,
+                             reinterpret_cast<int8_t *>(output), out_stride, row_bias, col_bias, start_col);
         }
     }
 }

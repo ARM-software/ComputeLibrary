@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NESYMM_H
-#define ARM_COMPUTE_NESYMM_H
+#ifndef ACL_SRC_CORE_NEON_NESYMM_H
+#define ACL_SRC_CORE_NEON_NESYMM_H
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
@@ -229,11 +229,11 @@ inline int32x4x2_t multiply_by_quantized_multiplier_2row(int32x4x2_t input, int3
     const auto one_shifted = 1 << left_shift;
 
     int32x4x2_t result;
-    result.val[0] = rounding_divide_by_pow2(vqrdmulhq_n_s32(vmulq_n_s32(input.val[0], one_shifted), qmul), right_shift);
-    result.val[1] = rounding_divide_by_pow2(vqrdmulhq_n_s32(vmulq_n_s32(input.val[1], one_shifted), qmul), right_shift);
+    result.val[0] = rounding_divide_by_pow2(vqdmulhq_n_s32(vmulq_n_s32(input.val[0], one_shifted), qmul), right_shift);
+    result.val[1] = rounding_divide_by_pow2(vqdmulhq_n_s32(vmulq_n_s32(input.val[1], one_shifted), qmul), right_shift);
 
     return result;
 }
 
 } // namespace arm_compute
-#endif // ARM_COMPUTE_NESYMM_H
+#endif // ACL_SRC_CORE_NEON_NESYMM_H

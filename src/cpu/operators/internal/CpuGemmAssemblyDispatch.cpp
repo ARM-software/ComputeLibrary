@@ -23,6 +23,8 @@
  */
 #include "src/cpu/operators/internal/CpuGemmAssemblyDispatch.h"
 
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/core/CPP/Validate.h"
@@ -255,6 +257,11 @@ public:
         opt->configure_window(win);
 
         _is_prepared = is_prepared;
+    }
+
+    bool has_stateless_impl() const override
+    {
+        return _gemm_kernel_asm->get_working_size() == 0;
     }
 
 private:
@@ -794,11 +801,37 @@ void Fallback<TypeInput, TypeWeight, TypeOutput, OutputStage>::run(ITensorPack &
         multi_stride_a = 0;
     }
 
+    Tensor in0_tensor;
+    in0_tensor.allocator()->init(*(a->info()));
+    in0_tensor.allocator()->import_memory(const_cast<TypeInput *>(in0_ptr));
+
+    Tensor in1_tensor;
+    if (b)
+    {
+        in1_tensor.allocator()->init(*(b->info()));
+        in1_tensor.allocator()->import_memory(const_cast<TypeWeight *>(in1_ptr));
+    }
+
+    Tensor bias_tensor;
+    if (c)
+    {
+        bias_tensor.allocator()->init(*(c->info()));
+        bias_tensor.allocator()->import_memory(bias);
+    }
+
+    Tensor out_tensor;
+    out_tensor.allocator()->init(*(d->info()));
+    out_tensor.allocator()->import_memory(out_ptr);
+
+    ITensorPack gemm_pack{
+        {ACL_SRC_0, &in0_tensor}, {ACL_SRC_1, &in1_tensor}, {ACL_SRC_2, &bias_tensor}, {ACL_DST, &out_tensor}};
+
     // Set gemm parameters
     _gemm_kernel_asm->set_arrays(in0_ptr, lda, batch_stride_a, multi_stride_a, in1_ptr, ldb, multi_stride_b, out_ptr,
                                  ldd, batch_stride_d, multi_stride_d, bias, 0);
+
     // Schedule
-    NEScheduler::get().schedule(_optimised_kernel.get(), scheduling_hint);
+    NEScheduler::get().schedule_op(_optimised_kernel.get(), scheduling_hint, _optimised_kernel->window(), gemm_pack);
 }
 
 template <typename TypeInput, typename TypeWeight, typename TypeOutput>
@@ -1013,12 +1046,17 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
             break;
 #endif /* ENABLE_FP16_KERNELS */
         default:
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(true, "Usupported type. Could not find a kernel");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(true, "Unsupported type. Could not find a kernel");
             break;
     }
     expected_weight_format = assembly_utils::map_to_arm_compute_weight_format(arm_gemm_expected_wf);
 
     return Status{};
+}
+
+bool CpuGemmAssemblyDispatch::has_stateless_impl() const
+{
+    return _arm_gemm->has_stateless_impl();
 }
 
 Status CpuGemmAssemblyDispatch::validate(
