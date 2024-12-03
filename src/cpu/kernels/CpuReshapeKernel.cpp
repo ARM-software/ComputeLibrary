@@ -210,7 +210,7 @@ size_t CpuReshapeKernel::get_mws(const CPUInfo &platform, size_t thread_count) c
     ARM_COMPUTE_UNUSED(thread_count);
     ARM_COMPUTE_UNUSED(platform);
 
-    return ICPPKernel::default_mws;
+    return _reshape_mws;
 }
 
 void CpuReshapeKernel::prepare(ITensorPack &tensors)
@@ -233,9 +233,7 @@ void CpuReshapeKernel::prepare(ITensorPack &tensors)
 
     if (!src_has_holes && !dst_has_holes)
     {
-        size_t split_dimension;
-
-        std::tie(win, split_dimension) = calculate_squashed_or_max_window(*dst_info);
+        std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*dst_info);
         /*
             Copy the tensor per window. If the src and dst tensors
             are contiguous memory allocations without any holes or
@@ -243,15 +241,7 @@ void CpuReshapeKernel::prepare(ITensorPack &tensors)
             we can use use a single memcopy call to copy the whole
             window in reshape_tensor_per_window fn
         */
-        if (split_dimension != Window::DimY)
-        {
-            // Fall back when split dimension doesn't equal Window::DimY
-            _reshape_tensor_fn = reshape_tensor_per_row;
-        }
-        else
-        {
-            _reshape_tensor_fn = reshape_tensor_per_window;
-        }
+        _reshape_tensor_fn = reshape_tensor_per_window;
     }
     else
     {

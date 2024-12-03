@@ -74,7 +74,20 @@ public:
      */
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
+    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
+      *
+      * @return The split dimension.
+      */
+    size_t get_split_dimension() const
+    {
+        return _split_dimension;
+    }
+
 private:
+    size_t _split_dimension{Window::DimY};
+
+    static constexpr std::size_t _reshape_mws = 10'000;
+
     std::function<void(const Window &window, const ITensor *src, ITensor *dst)> _reshape_tensor_fn{};
 };
 } // namespace kernels
