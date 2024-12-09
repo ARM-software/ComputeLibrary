@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -156,18 +156,23 @@ bool is_mmul_kernel_preferred(const unsigned int m,
                               unsigned int      &best_m0,
                               unsigned int      &best_n0)
 {
-    ARM_COMPUTE_UNUSED(n, k, b, data_type);
+    if (data_type == DataType::F32)
+    {
+        ARM_COMPUTE_UNUSED(n, k, b);
 
-    const unsigned int mmul_k0 = 4;
-    best_m0                    = 4;
-    best_n0                    = 4;
+        const unsigned int mmul_k0 = 4;
+        best_m0                    = 4;
+        best_n0                    = 4;
 
-    const unsigned int ceil_to_multiple_m_m0             = ceil_to_multiple(m, best_m0);
-    const unsigned int m_div_m0                          = ceil_to_multiple_m_m0 / best_m0;
-    const unsigned int ceil_to_multiple_m_div_m0_mmul_k0 = ceil_to_multiple(m_div_m0, mmul_k0);
-    const unsigned int gws_y                             = ceil_to_multiple_m_div_m0_mmul_k0 / mmul_k0;
+        const unsigned int ceil_to_multiple_m_m0             = ceil_to_multiple(m, best_m0);
+        const unsigned int m_div_m0                          = ceil_to_multiple_m_m0 / best_m0;
+        const unsigned int ceil_to_multiple_m_div_m0_mmul_k0 = ceil_to_multiple(m_div_m0, mmul_k0);
+        const unsigned int gws_y                             = ceil_to_multiple_m_div_m0_mmul_k0 / mmul_k0;
 
-    return ((k % mmul_k0) == 0) && (gws_y > 4);
+        return ((k % mmul_k0) == 0) && (gws_y > 4);
+    }
+
+    return false;
 }
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
