@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PROFILER
-#define ARM_COMPUTE_TEST_PROFILER
+#ifndef ACL_TESTS_FRAMEWORK_PROFILER_H
+#define ACL_TESTS_FRAMEWORK_PROFILER_H
 
 #include "instruments/Instrument.h"
 #include "instruments/Measurement.h"
@@ -71,9 +71,11 @@ public:
 
     /** Call stop() on all the added instruments
      *
-     * Called just after the run of the test ends
-    */
-    void stop();
+     * @param[in] iteration The value of the current iteration. This is only used when the option --print_iterations_figures is enabled.
+     *
+     * Called just after the run of a test iteration ends
+     */
+    void stop(int32_t iteration = -1);
 
     /** Call test_stop() on all the added instruments
      *
@@ -101,4 +103,4 @@ private:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PROFILER */
+#endif // ACL_TESTS_FRAMEWORK_PROFILER_H
