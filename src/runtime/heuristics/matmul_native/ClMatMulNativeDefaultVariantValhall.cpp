@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultVariantValhall.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -76,7 +77,7 @@ MatMulKernelType ClMatMulNativeDefaultVariantValhall::select_kernel(const ITenso
 MatMulKernelType ClMatMulNativeDefaultVariantValhall::configure_G715_float(int k, bool act_enabled)
 {
     // MMUL kernel works only when K is a multiple of 4
-    if (!act_enabled && k % 4 == 0)
+    if (!act_enabled && k % 4 == 0 && arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
     {
         return MatMulKernelType::NATIVE_MMUL_FP;
     }
@@ -87,7 +88,7 @@ MatMulKernelType ClMatMulNativeDefaultVariantValhall::configure_G715_float(int k
 MatMulKernelType ClMatMulNativeDefaultVariantValhall::configure_G715_quantized(int k, bool act_enabled)
 {
     // MMUL kernel works only when K is a multiple of 16
-    if (!act_enabled && k % 16 == 0)
+    if (!act_enabled && k % 16 == 0 && arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
     {
         return MatMulKernelType::NATIVE_MMUL_QUANTIZED;
     }

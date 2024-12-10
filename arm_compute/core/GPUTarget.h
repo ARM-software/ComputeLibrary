@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ enum class GPUTarget
     MIDGARD             = 0x100,
     BIFROST             = 0x200,
     VALHALL             = 0x300,
-    FIFTHGEN            = 0X400,
+    FIFTHGEN            = 0x400,
     T600                = 0x110,
     T700                = 0x120,
     T800                = 0x130,
@@ -64,7 +64,14 @@ enum class GPUTarget
     G715                = 0x350,
     G615                = 0x351,
     G720                = 0x410,
-    G620                = 0X411
+    G620                = 0x411,
+
+    // When new models are added, watch out for heuristics.
+    // The default/unrecognized Gpu will be the latest one and
+    // heuristics are using LATEST in their logic. When a new
+    // model is added here, and in the relevant functions,
+    // heuristic behavior will change.
+    // Example heuristic: ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp
 };
 
 /** Enable bitwise operations on GPUTarget enumerations */

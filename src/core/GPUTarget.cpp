@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,159 +27,92 @@
 
 #include <map>
 #include <regex>
-
-namespace
-{
-
-arm_compute::GPUTarget get_fifth_gen_target(const std::string &version)
-{
-    if (version.find("G720") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G720;
-    }
-    else if (version.find("G620") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G620;
-    }
-    else
-    {
-        return arm_compute::GPUTarget::UNKNOWN;
-    }
-}
-
-arm_compute::GPUTarget get_valhall_target(const std::string &version)
-{
-    if (version.find("G77") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G77;
-    }
-    else if (version.find("G57") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G57;
-    }
-    if (version.find("G68") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G68;
-    }
-    if (version.find("G78AE") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G78AE;
-    }
-    if (version.find("G78") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G78;
-    }
-    else if (version.find("G710") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G710;
-    }
-    else if (version.find("G610") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G610;
-    }
-    else if (version.find("G510") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G510;
-    }
-    else if (version.find("G310") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G310;
-    }
-    else if (version.find("G715") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G715;
-    }
-    else if (version.find("G615") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G615;
-    }
-    else
-    {
-        return arm_compute::GPUTarget::UNKNOWN;
-    }
-}
-
-arm_compute::GPUTarget get_bifrost_target(const std::string &version)
-{
-    if (version.find("G71") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G71;
-    }
-    else if (version.find("G72") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G72;
-    }
-    else if (version.find("G51BIG") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G51BIG;
-    }
-    else if (version.find("G51LIT") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G51LIT;
-    }
-    else if (version.find("G51") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G51;
-    }
-    else if (version.find("G52LIT") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G52LIT;
-    }
-    else if (version.find("G52") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G52;
-    }
-    else if (version.find("G76") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G76;
-    }
-    else if (version.find("G31") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::G31;
-    }
-    else
-    {
-        return arm_compute::GPUTarget::UNKNOWN;
-    }
-}
-
-arm_compute::GPUTarget get_midgard_target(const std::string &version)
-{
-    if (version.find("T600") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::T600;
-    }
-    else if (version.find("T700") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::T700;
-    }
-    else if (version.find("T800") != std::string::npos)
-    {
-        return arm_compute::GPUTarget::T800;
-    }
-    else
-    {
-        return arm_compute::GPUTarget::MIDGARD;
-    }
-}
-} // namespace
+#include <string>
 
 namespace arm_compute
 {
+
+namespace
+{
+GPUTarget get_gpu_target(const std::string &full_name, const std::string &base_name)
+{
+    const static std::map<const std::string, GPUTarget> name_to_target_map = {
+        // Midgard
+        {"T600", GPUTarget::T600}, //
+        {"T700", GPUTarget::T700}, //
+        {"T800", GPUTarget::T800}, //
+        // Bifrost
+        {"G31", GPUTarget::G31},       //
+        {"G51", GPUTarget::G51},       //
+        {"G51LIT", GPUTarget::G51LIT}, //
+        {"G51BIG", GPUTarget::G51BIG}, //
+        {"G71", GPUTarget::G71},       //
+        {"G52", GPUTarget::G52},       //
+        {"G52LIT", GPUTarget::G52LIT}, //
+        {"G72", GPUTarget::G72},       //
+        {"G76", GPUTarget::G76},       //
+        // Vallhall
+        {"G57", GPUTarget::G57},     //
+        {"G77", GPUTarget::G77},     //
+        {"G68", GPUTarget::G68},     //
+        {"G78", GPUTarget::G78},     //
+        {"G78AE", GPUTarget::G78AE}, //
+        {"G310", GPUTarget::G310},   //
+        {"G510", GPUTarget::G510},   //
+        {"G610", GPUTarget::G610},   //
+        {"G710", GPUTarget::G710},   //
+        {"G615", GPUTarget::G615},   //
+        {"G715", GPUTarget::G715},   //
+        // 5th Gen
+        {"G620", GPUTarget::G620}, //
+        {"G720", GPUTarget::G720}, //
+
+    };
+    // Try full name with variant.
+    auto it = name_to_target_map.find(full_name);
+    if (it != name_to_target_map.end())
+    {
+        return it->second;
+    }
+    // Try name without variant.
+    it = name_to_target_map.find(base_name);
+    if (it != name_to_target_map.end())
+    {
+        return it->second;
+    }
+    // Try architecture name only.
+    if (!base_name.empty())
+    {
+        if (base_name[0] == 'G')
+        {
+            return GPUTarget::FIFTHGEN;
+        }
+        else if (base_name[0] == 'T')
+        {
+            return GPUTarget::MIDGARD;
+        }
+    }
+
+    // Othewise, assume it's bifrost.
+    ARM_COMPUTE_LOG_INFO_MSG_CORE("Arm® Mali™ Mali GPU unknown. Target is set to the default one. (FIFTHGEN)");
+    return GPUTarget::FIFTHGEN;
+}
+} // namespace
+
 const std::string &string_from_target(GPUTarget target)
 {
     static std::map<GPUTarget, const std::string> gpu_target_map = {
-        {GPUTarget::MIDGARD, "midgard"},   {GPUTarget::BIFROST, "bifrost"}, {GPUTarget::VALHALL, "valhall"},
-        {GPUTarget::FIFTHGEN, "fifthgen"},
+        {GPUTarget::MIDGARD, "midgard"},  {GPUTarget::BIFROST, "bifrost"}, {GPUTarget::VALHALL, "valhall"},
+        {GPUTarget::FIFTHGEN, "5th Gen"},
 
-        {GPUTarget::T600, "t600"},         {GPUTarget::T700, "t700"},       {GPUTarget::T800, "t800"},
-        {GPUTarget::G71, "g71"},           {GPUTarget::G72, "g72"},         {GPUTarget::G51, "g51"},
-        {GPUTarget::G51BIG, "g51big"},     {GPUTarget::G51LIT, "g51lit"},   {GPUTarget::G31, "g31"},
-        {GPUTarget::G76, "g76"},           {GPUTarget::G52, "g52"},         {GPUTarget::G52LIT, "g52lit"},
-        {GPUTarget::G77, "g77"},           {GPUTarget::G57, "g57"},         {GPUTarget::G78, "g78"},
-        {GPUTarget::G68, "g68"},           {GPUTarget::G78AE, "g78ae"},     {GPUTarget::G710, "g710"},
-        {GPUTarget::G610, "g610"},         {GPUTarget::G510, "g510"},       {GPUTarget::G310, "g310"},
-        {GPUTarget::G715, "g715"},         {GPUTarget::G615, "g615"},       {GPUTarget::G720, "g720"},
+        {GPUTarget::T600, "t600"},        {GPUTarget::T700, "t700"},       {GPUTarget::T800, "t800"},
+        {GPUTarget::G71, "g71"},          {GPUTarget::G72, "g72"},         {GPUTarget::G51, "g51"},
+        {GPUTarget::G51BIG, "g51big"},    {GPUTarget::G51LIT, "g51lit"},   {GPUTarget::G31, "g31"},
+        {GPUTarget::G76, "g76"},          {GPUTarget::G52, "g52"},         {GPUTarget::G52LIT, "g52lit"},
+        {GPUTarget::G77, "g77"},          {GPUTarget::G57, "g57"},         {GPUTarget::G78, "g78"},
+        {GPUTarget::G68, "g68"},          {GPUTarget::G78AE, "g78ae"},     {GPUTarget::G710, "g710"},
+        {GPUTarget::G610, "g610"},        {GPUTarget::G510, "g510"},       {GPUTarget::G310, "g310"},
+        {GPUTarget::G715, "g715"},        {GPUTarget::G615, "g615"},       {GPUTarget::G720, "g720"},
         {GPUTarget::G620, "g620"}};
 
     return gpu_target_map[target];
@@ -187,60 +120,21 @@ const std::string &string_from_target(GPUTarget target)
 
 GPUTarget get_target_from_name(const std::string &device_name)
 {
-    std::regex  mali_regex(R"(Mali-(.*))");
+    std::regex  mali_regex(R"(Mali-(([A-Za-z]+\d*)\w*))");
     std::smatch name_parts;
     const bool  found_mali = std::regex_search(device_name, name_parts, mali_regex);
-
     if (!found_mali)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Arm® Mali™ GPU. Target is set to default.");
-        return GPUTarget::MIDGARD;
+        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Can't find valid Arm® Mali™ GPU device name: %s. "
+                                                  "Target is set to default: %s",
+                                                  device_name.c_str(), string_from_target(GPUTarget::FIFTHGEN).c_str());
+        return GPUTarget::FIFTHGEN;
     }
-
-    const char         target  = name_parts.str(1)[0];
-    const std::string &version = name_parts.str(1);
-
-    std::regex future_regex(R"(.*X)");
-    const bool is_future_gpu = std::regex_search(version, future_regex);
-
-    // Work-out gpu target
-    GPUTarget gpu_target;
-    if (target == 'G' || is_future_gpu)
-    {
-        // Check for Valhall, Bifrost or 5-th Gen
-        gpu_target = get_fifth_gen_target(version);
-        if (gpu_target == GPUTarget::UNKNOWN)
-        {
-            gpu_target = get_valhall_target(version);
-        }
-
-        if (gpu_target == GPUTarget::UNKNOWN)
-        {
-            gpu_target = get_bifrost_target(version);
-        }
-
-        // Default GPUTarget
-        if (gpu_target == GPUTarget::UNKNOWN)
-        {
-            gpu_target = GPUTarget::VALHALL;
-        }
-    }
-    else if (target == 'T')
-    {
-        gpu_target = get_midgard_target(version);
-    }
-    else
-    {
-        gpu_target = GPUTarget::UNKNOWN;
-    }
-
-    // Report in case of unknown target
-    if (gpu_target == GPUTarget::UNKNOWN)
-    {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Arm® Mali™ Mali GPU unknown. Target is set to the default one. (BIFROST)");
-        return GPUTarget::BIFROST;
-    }
-
+    const auto &full_name  = name_parts.str(1);
+    const auto &base_name  = name_parts.str(2);
+    const auto  gpu_target = get_gpu_target(full_name, base_name);
+    ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Found Arm® Mali™ GPU device name %s. Target is set to %s.",
+                                              full_name.c_str(), string_from_target(gpu_target).c_str());
     return gpu_target;
 }
 
