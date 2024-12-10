@@ -163,9 +163,16 @@ TEST_CASE(OpCpuDepthwiseConv2dMemoryInjection, framework::DatasetMode::ALL)
     auto result_1 = run_conv();
     for (size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT((reinterpret_cast<float *>(result_0.buffer()))[i] ==
-                               (reinterpret_cast<float *>(result_1.buffer()))[i],
-                           framework::LogLevel::ERRORS);
+        const float val0 = reinterpret_cast<float *>(result_0.buffer())[i];
+        const float val1 = reinterpret_cast<float *>(result_1.buffer())[i];
+
+        if(val0 != val1)
+        {
+            ARM_COMPUTE_TEST_INFO("val0: " << val0 << ", val1: " << val1);
+            framework::ARM_COMPUTE_PRINT_INFO();
+        }
+
+        ARM_COMPUTE_EXPECT((val0 == val1), framework::LogLevel::ERRORS);
     }
 }
 
