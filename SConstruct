@@ -298,7 +298,7 @@ if env['estate'] == 'auto':
 if 'arm64' in env['arch']:
     env['estate'] = '64'
 
-if 'v7a' in env['estate'] and env['estate'] == '64':
+if 'v7a' in env['arch'] and env['estate'] == '64':
     print("ERROR: armv7a architecture has only 32-bit execution state")
     Exit(1)
 
