@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,14 +40,18 @@ using namespace arm_compute;
 #if !ARM_COMPUTE_CPP_SCHEDULER && ARM_COMPUTE_OPENMP_SCHEDULER
 Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::OMP;
 #elif ARM_COMPUTE_CPP_SCHEDULER && !ARM_COMPUTE_OPENMP_SCHEDULER
-Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::CPP;
+Scheduler::Type Scheduler::_scheduler_type                            = Scheduler::Type::CPP;
 #elif ARM_COMPUTE_CPP_SCHEDULER && ARM_COMPUTE_OPENMP_SCHEDULER
 Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::CPP;
 #else  /* ARM_COMPUTE_*_SCHEDULER */
 Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::ST;
 #endif /* ARM_COMPUTE_*_SCHEDULER */
 
+#ifndef ARM_COMPUTE_THREAD_LOCAL_SCHEDULER
 std::shared_ptr<IScheduler> Scheduler::_custom_scheduler = nullptr;
+#else  // ARM_COMPUTE_THREAD_LOCAL_SCHEDULER
+std::shared_ptr<IScheduler> thread_local Scheduler::_custom_scheduler = nullptr;
+#endif // ARM_COMPUTE_THREAD_LOCAL_SCHEDULER
 
 namespace
 {

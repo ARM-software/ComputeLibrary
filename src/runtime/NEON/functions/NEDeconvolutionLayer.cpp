@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,8 +68,8 @@ PadStrideInfo compute_upsample_info(const PadStrideInfo &info, uint32_t deconv_p
 } // namespace
 
 NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
-    : _memory_group(std::move(memory_manager)),
-      _conv_f(),
+    : _memory_group(memory_manager),
+      _conv_f(memory_manager),
       _upsample_f(),
       _flip_weights(),
       _scaled_output(),

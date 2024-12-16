@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2024 Arm Limited
+#
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+version = 1
+
+[[annotations]]
+path = [
+	"CL/cl.h",
+	"CL/cl_dx9_media_sharing_intel.h",
+	"CL/cl_ext_intel.h",
+	"CL/cl_platform.h"
+]
+SPDX-FileCopyrightText = "2008-2020 The Khronos Group Inc."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [
+	"CL/cl_d3d10.h",
+	"CL/cl_d3d11.h",
+	"CL/cl_dx9_media_sharing.h",
+	"CL/cl_egl.h",
+	"CL/cl_ext.h",
+	"CL/cl_gl.h",
+	"CL/cl_va_api_media_sharing_intel.h",
+	"CL/opencl.hpp"
+]
+SPDX-FileCopyrightText = "2008-2023 The Khronos Group Inc."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [
+	"CL/cl_gl_ext.h",
+	"CL/opencl.h"
+]
+SPDX-FileCopyrightText = "2008-2021 The Khronos Group Inc."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [
+	"CL/cl_half.h",
+	"CL/cl_icd.h"
+]
+SPDX-FileCopyrightText = "2019-2020 The Khronos Group Inc."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["CL/cl_version.h"]
+SPDX-FileCopyrightText = "2018-2020 The Khronos Group Inc."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [
+	"half/ChangeLog.txt",
+	"half/README.txt",
+	"half/half.hpp"
+]
+SPDX-FileCopyrightText = "2012-2017 Christian Rau <rauy@users.sourceforge.net>"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["libnpy/npy.hpp"]
+SPDX-FileCopyrightText = "2017 Leon Merten Lohse"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["stb/stb_image.h"]
+SPDX-FileCopyrightText = "2017 Sean Barrett"
+SPDX-License-Identifier = "MIT"
