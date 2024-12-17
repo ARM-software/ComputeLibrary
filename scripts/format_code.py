@@ -133,31 +133,6 @@ def check_copyright( filename ):
     f.write("".join(content[start:]))
     f.close()
 
-def check_license(filename):
-    """
-    Check that the license file is up-to-date
-    """
-    f = open(filename, "r")
-    content = f.readlines()
-    f.close()
-
-    f = open(filename, "w")
-    f.write("".join(content[:3]))
-
-    year = datetime.datetime.now().year
-    # This only works until year 9999
-    m = re.match(r"(.*FileCopyrightText: )(.*\d{4})( [arm|Arm|ARM].*)", content[3])
-
-    if not m:
-        f.write("# SPDX-FileCopyrightText: {} Arm Limited\n#\n".format(year))
-    else:
-        updated_year = adjust_copyright_year(m.group(2), year)
-        f.write("# SPDX-FileCopyrightText: {} Arm Limited\n".format(updated_year))
-
-    # Copy the rest of the file's content:
-    f.write("".join(content[4:]))
-    f.close()
-
 
 class OtherChecksRun:
     def __init__(self, folder, error_diff=False, strategy="all"):
@@ -275,8 +250,6 @@ class FormatCodeRun:
                     continue
 
                 logger.info("Formatting %s" % f)
-
-            check_license("LICENSES/MIT.txt")
 
         except subprocess.CalledProcessError as e:
             retval = -1
