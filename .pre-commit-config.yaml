@@ -98,3 +98,9 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=100']
         stages: [commit]
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v4.0.3
+    hooks:
+      - id: reuse
+        stages: [ pre-commit ]
+        name: "REUSE Compliant Copyright and License"
