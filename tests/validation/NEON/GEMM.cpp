@@ -367,6 +367,9 @@ template <typename T>
 using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;
 
 template <typename T>
+using NEDynamicGEMMFixture = GEMMDynamicValidationFixture<Tensor, Accessor, NEGEMM, T>;
+
+template <typename T>
 using NEBatchedMatMulFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true, false, false, false, false, true>;
 
 template <typename T>
@@ -490,6 +493,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::N
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
+
+TEST_SUITE(DynamicShape)
+// TODO: COMPMID-7681: Once NEGEMM supports tensors with dynamic shapes, enable this test for framework::DatasetMode::PRECOMMIT
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDynamicGEMMFixture<float>, framework::DatasetMode::DISABLED,
+        combine(
+            datasets::SmallGEMMDataset(),
+            make("ReshapeWeights", { true, false }),
+            make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f);
+}
+// TODO: COMPMID-7681: Once NEGEMM supports tensors with dynamic shapes, enable this test for framework::DatasetMode::NIGHTLY
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDynamicGEMMFixture<float>, framework::DatasetMode::DISABLED,
+        combine(
+            datasets::LargeGEMMDataset(),
+            make("ReshapeWeights", { true, false }),
+            make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f);
+}
+TEST_SUITE_END() // DynamicShape
 
 TEST_SUITE(BATCHED_MATMUL)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),

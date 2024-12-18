@@ -49,7 +49,7 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class GEMMGenericValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type, bool accumulate=false)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type, bool accumulate, bool dynamic)
     {
         if(std::is_same<TensorType, Tensor>::value &&  // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
@@ -58,7 +58,7 @@ public:
         }
 
         ARM_COMPUTE_UNUSED(pretranspose);
-        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, accumulate);
+        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, accumulate, dynamic);
         _reference = compute_reference(shape_a, shape_b, output_shape, alpha, beta, data_type, accumulate);
     }
 
@@ -85,14 +85,46 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &output_shape, float alpha, float beta,
-                              DataType data_type, bool accumulate=false)
+    TensorType compute_target(const TensorShape &input_shape_a, const TensorShape &input_shape_b, const TensorShape &input_shape_c, const TensorShape &output_shape, float alpha, float beta,
+                              DataType data_type, bool accumulate, bool dynamic)
     {
+        TensorShape tensor_shape_a = input_shape_a;
+        TensorShape tensor_shape_b = input_shape_b;
+        TensorShape tensor_shape_c = input_shape_c;
+        TensorShape tensor_shape_dst = output_shape;
+        if (dynamic)
+        {
+            // Dynamic tensor shapes allow to use partially defined (dynamic)
+            // shapes at configure() call time. Tensor shapes should be fully
+            // defined before run() method is called.
+            //
+            // To test this we create tensor shapes with the same number of
+            // dimensions, where all dimensions are dynamic (have zero values).
+            //
+            // The tensors passed to configure() call use these dynamic shapes.
+            //
+            // TODO: COMPMID-7681. When implemented:
+            // - adjust this comment block,
+            // - use non-initialized tensor shapes instead of the lambda.
+            auto dynamic_shape = [](TensorShape s) {
+                // TensorShapes dimensions are initialized to 0 by default.
+                TensorShape dynamic;
+
+                dynamic.set_num_dimensions(s.num_dimensions());
+
+                return dynamic;
+            };
+            tensor_shape_a = dynamic_shape(input_shape_a);
+            tensor_shape_b = dynamic_shape(input_shape_b);
+            tensor_shape_c = dynamic_shape(input_shape_c);
+            tensor_shape_dst = dynamic_shape(output_shape);
+        }
+
         // Create tensors
-        TensorType a   = create_tensor<TensorType>(shape_a, data_type, 1);
-        TensorType b   = create_tensor<TensorType>(shape_b, data_type, 1);
-        TensorType c   = create_tensor<TensorType>(shape_c, data_type, 1);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1);
+        TensorType a   = create_tensor<TensorType>(tensor_shape_a, data_type, 1);
+        TensorType b   = create_tensor<TensorType>(tensor_shape_b, data_type, 1);
+        TensorType c   = create_tensor<TensorType>(tensor_shape_c, data_type, 1);
+        TensorType dst = create_tensor<TensorType>(tensor_shape_dst, data_type, 1);
 
         // Create and configure function
         FunctionType gemm;
@@ -106,6 +138,20 @@ protected:
                        alpha, beta,
                        GEMMInfo(false, false, false, (reinterpret_output_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, false, (reinterpret_input_as_3d
                                 || reinterpret_output_as_3d), arm_compute::ActivationLayerInfo(), false /* fixed_format */, arm_compute::WeightFormat::UNSPECIFIED, false /* pretranspose_B */, accumulate));
+
+        if (dynamic)
+        {
+            // Tensors must be fully defined (non-dynamic) in order to be used
+            // by run() method. Here, we create new tensors using original fully
+            // defined shapes. We assign the tensors to the same variables that
+            // we used in configure() call. Because of this, the pointers passed
+            // to configure() are still valid.
+            a   = create_tensor<TensorType>(input_shape_a, data_type, 1);
+            b   = create_tensor<TensorType>(input_shape_b, data_type, 1);
+            c   = create_tensor<TensorType>(input_shape_c, data_type, 1);
+            dst = create_tensor<TensorType>(output_shape, data_type, 1);
+        }
+
         ARM_COMPUTE_ASSERT(a.info()->is_resizable());
         ARM_COMPUTE_ASSERT(b.info()->is_resizable());
         ARM_COMPUTE_ASSERT(c.info()->is_resizable());
@@ -154,7 +200,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &output_shape, float alpha, float beta,
-                                      DataType data_type, bool accumulate=false)
+                                      DataType data_type, bool accumulate)
     {
         TensorShape shape_a_to_use = shape_a;
         if(reinterpret_input_as_3d)
@@ -251,7 +297,20 @@ class GEMMValidationFixture : protected GEMMGenericValidationFixture<TensorType,
 public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
     {
-        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, false /*accumulate*/);
+        bool dynamic = false;
+        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, false /*accumulate*/, dynamic);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, bool pretranspose_a = false, bool pretranspose_b = false, bool run_twice = false>
+class GEMMDynamicValidationFixture : protected GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>
+{
+public:
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
+    {
+        bool accumulate = false;
+        bool dynamic = true;
+        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, accumulate, dynamic);
     }
 };
 
@@ -262,7 +321,8 @@ public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
     {
         bool accumulate = true;
-        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, accumulate);
+        bool dynamic = false;
+        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, accumulate, dynamic);
     }
 };
 

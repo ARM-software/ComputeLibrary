@@ -271,6 +271,18 @@ public:
         return _id[dim] == 0;
     }
 
+    /** Set number of dimensions.
+     *
+     * @param [in] num_dimensions Number of dimensions to set.
+     */
+    void set_num_dimensions(size_t num_dimensions)
+    {
+        Dimensions::set_num_dimensions(num_dimensions);
+
+        // Make sure all empty dimensions are filled with 1
+        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+    }
+
 private:
     /** Remove trailing dimensions of size 1 from the reported number of dimensions. */
     void apply_dimension_correction()
