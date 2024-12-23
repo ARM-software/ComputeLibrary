@@ -83,7 +83,13 @@ if 'macos' in test_env['os']:
     noload_whole_archive = ''
 
 if (env['multi_isa']):
-     test_env.Append(CPPDEFINES=['ARM_COMPUTE_ENABLE_BF16'])
+     test_env.Append(CPPDEFINES=['ARM_COMPUTE_ENABLE_BF16',
+                                 'ARM_COMPUTE_ENABLE_SME',
+                                 'ARM_COMPUTE_ENABLE_SME2',
+                                 'ARM_COMPUTE_ENABLE_SVE',
+                                 'ARM_COMPUTE_ENABLE_SVE2',
+                                 'ARM_COMPUTE_ENABLE_SVEF32MM',
+                                 'ARM_COMPUTE_ENABLE_I8MM',])
 
 if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")

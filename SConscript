@@ -98,9 +98,10 @@ def build_multiisa_lib_objects():
     # note that ARM_COMPUTE_ENABLE_FP16 is enabled in update_data_type_layout_flags() to make
     # sure the environment is progated to the validation suite
     arm_compute_env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON',
-                           'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE','ARM_COMPUTE_ENABLE_BF16',
-                           'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM',
-                           'ARM_COMPUTE_ENABLE_SME', 'ARM_COMPUTE_ENABLE_SME2', 'ENABLE_SME'])
+                           'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE','ARM_COMPUTE_ENABLE_SVE2',
+                           'ARM_COMPUTE_ENABLE_BF16', 'ARM_COMPUTE_ENABLE_I8MM',
+                           'ARM_COMPUTE_ENABLE_SVEF32MM', 'ARM_COMPUTE_ENABLE_SME',
+                           'ARM_COMPUTE_ENABLE_SME2', 'ENABLE_SME'])
 
     # Build all the common files for the base architecture
     if env['arch'] == 'armv8a' or env['arch'] == 'arm64-v8a':
@@ -122,7 +123,6 @@ def build_multiisa_lib_objects():
 
 
     # Build the SVE2 specific files
-    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
     lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2, static=False)
     lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2_fp16, static=True)
