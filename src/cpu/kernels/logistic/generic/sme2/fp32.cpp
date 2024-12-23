@@ -151,17 +151,17 @@ void sme2_f32_logistic_kernel(const float    *src,
             mov x28, %x[dst]  // starting point of pointers for dst.
             mov x26, %x[shape_1]
 
-outer_loop_start%=:
+1: // outer_loop_start
             // for index_1 in shape_1 downto 1
             cmp x26, #0
-            b.eq outer_loop_end%=
+            b.eq 6f // outer_loop_end
             sub x26, x26, #1
 
             mov x9, #0                                                         // x9: index
 
-inner_body_start%=:
+2: // inner_body_start
             cmp x9, x13
-            b.eq inner_body_end%=
+            b.eq 3f // inner_body_end
 
             // Loads the input data to 4 consecutive registers ---------------- z12-z15: input_data
             .inst 0xa009c76c  // ld1w {z12.s-z15.s}, pn9/z, [x27, x9, LSL #2]
@@ -327,13 +327,13 @@ inner_body_start%=:
             .inst 0xa029c790  // st1w {z16.s-z19.s}, pn9, [x28, x9, LSL #2]
 
             incw x9, ALL, MUL #4
-            b inner_body_start%=
-inner_body_end%=:
+            b 2b // inner_body_start
+3: // inner_body_end
 
-inner_leftover_start%=:
+4: // inner_leftover_start
             // Largely ordinary Sve code to handle taylor series 1/1+e^-x for leftover loop.
             whilelo p1.s, x9, %x[length]                                       // While x9<length
-            b.none inner_leftover_end%=
+            b.none 5f // inner_leftover_end
 
             ld1w z12.s, p1/z, [x27, x9, LSL #2]                                // x12: input_data (LOADS POINTERS)
             fneg  z12.s, p1/m, z12.s
@@ -370,8 +370,8 @@ inner_leftover_start%=:
             st1w z16.s, p1, [x28, x9, LSL #2]
 
             incw x9 // each word + 1
-            b inner_leftover_start%=
-inner_leftover_end%=:
+            b 4b // inner_leftover_start
+5: // inner_leftover_end
 
             // ==================================================
             // Outer loop closing
@@ -379,8 +379,8 @@ inner_leftover_end%=:
 
             add x27, x27, %x[src_stride_1]
             add x28, x28, %x[dst_stride_1]
-            b outer_loop_start%=
-outer_loop_end%=:
+            b 1b // outer_loop_start
+6: // outer_loop_end
 
             .inst 0xd503467f  // smstop
         )"

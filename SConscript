@@ -99,7 +99,8 @@ def build_multiisa_lib_objects():
     # sure the environment is progated to the validation suite
     arm_compute_env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON',
                            'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE','ARM_COMPUTE_ENABLE_BF16',
-                           'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
+                           'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM',
+                           'ARM_COMPUTE_ENABLE_SME', 'ARM_COMPUTE_ENABLE_SME2', 'ENABLE_SME'])
 
     # Build all the common files for the base architecture
     if env['arch'] == 'armv8a' or env['arch'] == 'arm64-v8a':

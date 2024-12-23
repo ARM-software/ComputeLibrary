@@ -108,10 +108,10 @@ void sme2_q8_signed_mul_kernel( //
             ld1rh {z2.h}, p0/z, [%[args_ptr], %[offset_B_offset]]
             ld1rw {z3.s}, p0/z, [%[args_ptr], %[multiplier_offset]]
 
-loop_3_start%=:
+1: // loop_3_start%=:
             // for index_3 in shape_3 downto 1
             cmp x10, #0
-            b.eq loop_3_end%=
+            b.eq 10f // loop_3_end%=
             sub x10, x10, #1
 
             ldr x14, [%[args_ptr], %[offset_shape_2]]
@@ -119,10 +119,10 @@ loop_3_start%=:
             mov x16, x12
             mov x17, x13
 
-loop_2_start%=:
+2: // loop_2_start%=:
             // for index_2 in shape_2 downto 1
             cmp x14, #0
-            b.eq loop_2_end%=
+            b.eq 9f // loop_2_end%=
             sub x14, x14, #1
 
             ldr x7, [%[args_ptr], %[offset_shape_1]]
@@ -130,17 +130,17 @@ loop_2_start%=:
             mov x21, x16
             mov x22, x17
 
-loop_1_start%=:
+3: // loop_1_start%=:
             // for index_1 in shape_2 downto 1
             cmp x7, #0
-            b.eq loop_1_end%=
+            b.eq 8f // loop_1_end%=
             sub x7, x7, #1
 
             mov x9, #0                                                         // x9: index/count
 
-inner_loop_body_start%=:
+4: // inner_loop_body_start%=:
             cmp x9, x8
-            b.eq inner_loop_body_end%=
+            b.eq 5f // inner_loop_body_end%=
 
             // WIDEN LOAD. LOAD 4 Z-REGS FOR BOTH A/B
 
@@ -202,12 +202,12 @@ inner_loop_body_start%=:
             .inst 0xa02906c4 	// st1b	{z4.b-z5.b}, pn9, [x22, x9]
 
             incb x9, ALL, MUL #2
-            b inner_loop_body_start%=
-inner_loop_body_end%=:
+            b 4b // inner_loop_body_start%=
+5: // inner_loop_body_end%=:
 
-inner_loop_leftover_start%=:
+6: // inner_loop_leftover_start%=:
             whilelo p1.b, x9, %x[length]    // While x9<length
-            b.none inner_loop_leftover_end%=
+            b.none 7f // inner_loop_leftover_end%=
 
             // HANDLE MULTIPLICATION HERE
             ld1b z4.b, p1/z, [x20, x9]                                // z4: a input_data
@@ -288,8 +288,8 @@ inner_loop_leftover_start%=:
             st1b z27.b, p1, [x22, x9]
 
             incb x9 // x9 : x9 += sizeof(element) * predicate_count
-            b inner_loop_leftover_start%=
-inner_loop_leftover_end%=:
+            b 6b // inner_loop_leftover_start%=
+7: // inner_loop_leftover_end%=:
 
             // ==================================================
             // 3D loop closing
@@ -298,20 +298,20 @@ inner_loop_leftover_end%=:
             add x20, x20, %[src_stride_1]
             add x21, x21, %[wei_stride_1]
             add x22, x22, %[dst_stride_1]
-            b loop_1_start%=
-loop_1_end%=:
+            b 3b // loop_1_start%=
+8: // loop_1_end%=:
 
             add x15, x15, %[src_stride_2]
             add x16, x16, %[wei_stride_2]
             add x17, x17, %[dst_stride_2]
-            b loop_2_start%=
-loop_2_end%=:
+            b 2b // loop_2_start%=
+9: // loop_2_end%=:
 
             add x11, x11, %[src_stride_3]
             add x12, x12, %[wei_stride_3]
             add x13, x13, %[dst_stride_3]
-            b loop_3_start%=
-loop_3_end%=:
+            b 1b // loop_3_start%=
+10: // loop_3_end%=:
 
             .inst 0xd503467f  // smstop
         )"

@@ -634,6 +634,19 @@ env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
 env.Append(LINKFLAGS = env['extra_link_flags'])
 
+if env['multi_isa'] and env['os'] == 'macos':
+    # We add this flag to prevent additional vectorization done
+    # by the compiler as those vectorizations could be SVE related
+    # and be done outside of sve/sve2 specific files. This is only
+    # a workaround needed for macOS but can be needed for other
+    # OSes in the future. Part of the problem likely stems from hpp
+    # files containing implementations instead of just declarations.
+    # Those implementations are optimized by the compiler whereever
+    # they are included (probably first) and depending on the file
+    # they might get sve/sve2 architectural feature flags during the
+    # compilation.
+    env.Append(CXXFLAGS = ['-fno-vectorize'])
+
 Default( install_include("arm_compute"))
 Default( install_include("support"))
 Default( install_include("utils"))

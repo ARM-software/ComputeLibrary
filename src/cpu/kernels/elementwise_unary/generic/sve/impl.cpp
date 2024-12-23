@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,7 +96,28 @@ void elementwise_sve_op(const ITensor *in, ITensor *out, const Window &window, E
             do
             {
                 const auto vin = svld1(pg, input_ptr + x);
+
+#if defined(__llvm__) && defined(__APPLE__) && defined(__clang__)
+                // Because of compiler bug(s), we workaround calling elementwise_op_sve_imp()
+                // and put the inside of this function here.
+                // More info: https://github.com/google/highway/issues/2356
+
+                auto vout = vin;
+                switch (op)
+                {
+                    case ElementWiseUnary::NEG:
+                        vout = svneg_z(pg, vin);
+                        break;
+                    case ElementWiseUnary::ABS:
+                        vout = svabs_z(pg, vin);
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("NOT_SUPPORTED");
+                }
+                svst1(pg, output_ptr + x, vout);
+#else  // defined(__llvm__) && defined(__APPLE__) && defined(__clang__)
                 svst1(pg, output_ptr + x, elementwise_op_sve_imp<ScalarType, decltype(vin)>(pg, op, vin));
+#endif // defined(__llvm__) && defined(__APPLE__) && defined(__clang__)
                 x += wrapper::svcnt<ScalarType>();
                 pg = wrapper::svwhilelt<ScalarType>(x, window_end_x);
             } while (svptest_any(all_true_pg, pg));

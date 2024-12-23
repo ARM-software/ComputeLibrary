@@ -275,13 +275,13 @@ template void elementwise_comparison_op<int32_t>(
     const ITensor *in1, const ITensor *in2, ITensor *out, const ComparisonOperation op, const Window &window);
 
 template <>
-svint32_t elementwise_pow<svint32_t>(svbool_t &pg, const svint32_t &a, const svint32_t &b)
+inline svint32_t elementwise_pow<svint32_t>(svbool_t &pg, const svint32_t &a, const svint32_t &b)
 {
     return svcvt_s32_z(pg, svpow_z(pg, svcvt_f32_z(pg, a), svcvt_f32_z(pg, b)));
 }
 
 template <>
-svint16_t elementwise_div<svint16_t>(svbool_t &pg, const svint16_t &a, const svint16_t &b)
+inline svint16_t elementwise_div<svint16_t>(svbool_t &pg, const svint16_t &a, const svint16_t &b)
 {
     ARM_COMPUTE_UNUSED(pg, a, b);
     ARM_COMPUTE_ERROR("Not supported");

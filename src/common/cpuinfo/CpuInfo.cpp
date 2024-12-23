@@ -412,6 +412,8 @@ CpuInfo CpuInfo::build()
     isainfo.dot  = get_hw_capability("hw.optional.arm.FEAT_DotProd");
     isainfo.bf16 = get_hw_capability("hw.optional.arm.FEAT_BF16");
     isainfo.i8mm = get_hw_capability("hw.optional.arm.FEAT_I8MM");
+    isainfo.sme  = get_hw_capability("hw.optional.arm.FEAT_SME");
+    isainfo.sme2 = get_hw_capability("hw.optional.arm.FEAT_SME2");
     CpuInfo info(isainfo, cpus_model);
     return info;
 #elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */

@@ -91,30 +91,30 @@ void sme2_qasymm8_signed_softmax_kernel_512VL( //
             .inst 0xa040c44c  //ld1w    { z12.s - z15.s }, pn9/z, [x2]
 
 
-loop_3_start%=:
+1: // loop_3_start
             // for index_3 in shape_3 downto 1
             cmp x20, #0
-            b.eq loop_3_end%=
+            b.eq 16f // loop_3_end
             sub x20, x20, #1
 
             mov x23, %x[shape_2]
             mov x24, x21
             mov x25, x22
 
-loop_2_start%=:
+2: // loop_2_start
             // for index_2 in shape_2 downto 1
             cmp x23, #0
-            b.eq loop_2_end%=
+            b.eq 15f // loop_2_end
             sub x23, x23, #1
 
             mov x26, %x[shape_1]
             mov x27, x24
             mov x28, x25
 
-loop_1_start%=:
+3: // loop_1_start
             // for index_1 in shape_2 downto 1
             cmp x26, #0
-            b.eq loop_1_end%=
+            b.eq 14f // loop_1_end
             sub x26, x26, #1
 
             // ==================================================
@@ -127,27 +127,28 @@ loop_1_start%=:
             dup z19.b, #0x80
 
             mov x1, #0                                                  // x1: index
-find_max_body_start%=:
+4: // find_max_body_start
             cmp x1, x13
-            b.eq find_max_body_end%=
+            b.eq 5f // find_max_body_end
             .inst 0xa0018374 // ld1b    { z20.b - z23.b }, pn8/z, [x27, x1]  z16-z19: x
             .inst 0xc134b810 // smax    { z16.b - z19.b }, { z16.b - z19.b }, { z20.b - z23.b } z16-z19: max_value = max(max_value, x)
             add x1, x1, #256 // Advance index by 256 bytes/integers: Z registers = 2048-bit data = 256 8-bit integers.
- b find_max_body_start%=
-find_max_body_end%=:
+            b 4b // find_max_body_start
+5: // find_max_body_end
 
             // Loop for processing the leftover part.
-find_max_leftover_start%=:
+6: // find_max_leftover_start
             whilelo p1.b, x1, %x[length]
-            b.none find_max_leftover_end%=
+            b.none 7f // find_max_leftover_end
 
             ld1b z30.b, p1/z, [x27, x1]                                // z30: x
             smax z16.b, p1/m, z16.b, z30.b                             // z16: max_value = max(max_value, x)
 
             add x1, x1, #64
 
-            b find_max_leftover_start%=
-find_max_leftover_end%=:
+            b 6b // find_max_leftover_start
+
+7: // find_max_leftover_end
             .inst 0xc132b010 // smax    { z16.b, z17.b }, { z16.b, z17.b }, { z18.b, z19.b }
             smax z16.b, p0/m, z16.b, z17.b
             smaxv b16, p0, z16.b // Reduction signed max operation to get maximum_value
@@ -159,10 +160,9 @@ find_max_leftover_end%=:
             mov x1, #0 // reset index
             dup z25.s, #0
 
-
-regularize_start%=:
+8: // regularize_start:
             whilelo p1.b, x1, %x[length]
-            b.none regularize_end%=
+            b.none 9f // regularize_end
 
             mov w9, 0xFF80
             movk w9, 0xFFFF, LSL #16 // Moving -127.f into w9 to set the registers below to the minimum QASYMM8_SIGNED value
@@ -379,8 +379,8 @@ regularize_start%=:
             fadd z25.s, p5/m, z25.s, z24.s
             add x1, x1, #16
 
-            b regularize_start%=
-regularize_end%=:
+            b 8b // regularize_start
+9: // regularize_end
 
             mov w9, 0x0000
             movk w9, 0x4380, LSL #16 // Moving 256.f into w9 to scale - via multiplication (division by reciprocal) - the floating point [0,1] range of the results to the [-128, 127] integer range of QASYMM8_SIGNED
@@ -396,9 +396,9 @@ regularize_end%=:
             // Step 3: Normalize
             // ==================================================
             mov x1, #0
-normalize_body_start%=:
+10: // normalize_body_start
             cmp x1, x13
-            b.eq normalize_body_end%=
+            b.eq 11f // normalize_body_end
 
             mov x2, x1       // Preserve the index into x2 for the final store to dst.
             .inst 0xa001c7b0 // ld1w    { z16.s - z19.s }, pn9/z, [x29, x1, lsl #2]
@@ -488,11 +488,11 @@ normalize_body_start%=:
             // Juggling the values back to z25 (resp. z30) as z20 (resp. z21) will be overwritten by the next iteration or z25 (resp. z30) will be used below.
             dup z25.s, z20.s[0]
             dup z30.s, z21.s[0]
-b normalize_body_start%=
-normalize_body_end%=:
-normalize_leftover_start%=:
+            b 10b // normalize_body_start
+11: // normalize_body_end
+12: // normalize_leftover_start
             whilelo p1.b, x1, %x[length]
-            b.none normalize_leftover_end%=
+            b.none 13f // normalize_leftover_end
 
             // p2-p5 are - together - the 32-bit version of p1, the instructions below unpack p1 into those four predicate registers to allow for the 32-bit loads below to be correctly predicated
             punpklo  p2.h, p1.b
@@ -541,25 +541,25 @@ normalize_leftover_start%=:
 
             st1b z19.b, p1, [x28, x2]
 
-            b normalize_leftover_start%=
-normalize_leftover_end%=:
+            b 12b // normalize_leftover_start
+13: // normalize_leftover_end
             // ==================================================
             // 3D loop closing
             // ==================================================
             add x27, x27, %x[src_stride_1]
             add x28, x28, %x[dst_stride_1]
-            b loop_1_start%=
-loop_1_end%=:
+            b 3b // loop_1_start
+14: // loop_1_end
 
             add x24, x24, %x[src_stride_2]
             add x25, x25, %x[dst_stride_2]
-            b loop_2_start%=
-loop_2_end%=:
+            b 2b // loop_2_start
+15: // loop_2_end
 
             add x21, x21, %x[src_stride_3]
             add x22, x22, %x[dst_stride_3]
-            b loop_3_start%=
-loop_3_end%=:
+            b 1b // loop_3_start
+16: // loop_3_end
             .inst 0xd503467f  // smstop
         )"
         :
