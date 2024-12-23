@@ -242,14 +242,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<bfloat16>, framework::Dat
         make("Beta", { 1.0f, 2.0f }),
         make("Axis", { 0 })))
 {
-    if(CPUInfo::get().has_bf16())
+    // The LUT is implemented using SVE. Bf16 support is not required because
+    // we do not use any instructions from FEAT_BF16
+    if(CPUInfo::get().has_sve())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_bf16);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
+        ARM_COMPUTE_TEST_INFO("Device does not support SVE. Test SKIPPED.");
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
