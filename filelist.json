@@ -1626,6 +1626,7 @@
             "src/runtime/experimental/operators/CpuMul.cpp",
             "src/runtime/experimental/operators/CpuQuantize.cpp",
             "src/runtime/experimental/operators/CpuSoftmax.cpp",
+	    "src/runtime/experimental/operators/CpuPool2d.cpp",
             "src/runtime/experimental/operators/CpuSub.cpp",
             "src/runtime/experimental/operators/CpuTranspose.cpp",
             "src/runtime/experimental/operators/CpuWinogradConv2d.cpp"

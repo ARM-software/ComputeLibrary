@@ -1005,6 +1005,7 @@ cc_library_static {
         "src/runtime/experimental/operators/CpuGemmDirectConv2d.cpp",
         "src/runtime/experimental/operators/CpuMeanStdDevNormalization.cpp",
         "src/runtime/experimental/operators/CpuMul.cpp",
+        "src/runtime/experimental/operators/CpuPool2d.cpp",
         "src/runtime/experimental/operators/CpuQuantize.cpp",
         "src/runtime/experimental/operators/CpuSoftmax.cpp",
         "src/runtime/experimental/operators/CpuSub.cpp",
