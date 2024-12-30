@@ -44,6 +44,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
@@ -337,10 +338,12 @@ using NEDirectConvolutionLayerMixedDataLayoutFixture = DirectConvolutionValidati
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
-                                                                                                                   DataType::F16)),
-                                                                                                                   ActivationFunctionsDataset),
-                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
+        combine(
+            data_precommit,
+            make("DataType", DataType::F16),
+            ActivationFunctionsDataset,
+            make("DataLayout", {DataLayout::NCHW,DataLayout::NHWC})))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -353,9 +356,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<half>, framewor
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_f16_nightly, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                 ActivationFunctionsDataset),
-                                                                                                                 framework::dataset::make("DataLayout", DataLayout::NCHW)))
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
+        combine(
+            data_f16_nightly,
+            make("DataType", {DataType::F16}),
+            ActivationFunctionsDataset,
+            make("DataLayout", {DataLayout::NCHW,DataLayout::NHWC})))
 {
     if(CPUInfo::get().has_fp16())
     {

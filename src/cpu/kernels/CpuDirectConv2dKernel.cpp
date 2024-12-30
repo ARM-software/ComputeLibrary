@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,11 @@ static const std::vector<CpuDirectConv2dKernel::DirectConv2dKernel> available_ke
      [](const DataTypeDataLayoutISASelectorData &data)
      { return data.dt == DataType::F16 && data.dl == DataLayout::NCHW && data.isa.fp16; },
      REGISTER_FP16_NEON(arm_compute::cpu::kernels::neon_fp16_nchw_directconv2d)},
+    {"neon_fp16_nhwc_directconv2d",
+     [](const DataTypeDataLayoutISASelectorData &data)
+     { return data.dt == DataType::F16 && data.dl == DataLayout::NHWC && data.isa.fp16; },
+     REGISTER_FP16_NEON(arm_compute::cpu::kernels::neon_fp16_nhwc_directconv2d)},
+
 };
 
 Status validate_arguments(const ITensorInfo   *src,
@@ -73,7 +78,10 @@ Status validate_arguments(const ITensorInfo   *src,
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(channel_idx) != src->dimension(channel_idx));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) != weights->dimension(height_idx));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
-    ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::NHWC && src->data_type() != DataType::F32);
+    if (data_layout == DataLayout::NHWC)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
+    }
     ARM_COMPUTE_UNUSED(width_idx);
     // Checks performed when output is configured
     if (dst->total_size() != 0)
