@@ -80,6 +80,7 @@ namespace
     }
 } // namespace
 
+TEST_SUITE(CPP)
 TEST_SUITE(LUTManager)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(BF16)
@@ -95,7 +96,7 @@ TEST_CASE(LUTValueTest, framework::DatasetMode::ALL)
     LUTInfo info = {LUTType::Exponential, beta, DataType::BFLOAT16, UniformQuantizationInfo()};
     LUTManager lman = LUTManager::get_instance();
 
-    if(CPUInfo::get().has_fp16())
+    if(cpu_supports_dtypes({DataType::BFLOAT16}))
     {
         // Retrieve lut, Assert lut exists and is retrieved successfully.
         std::shared_ptr<LookupTable65536> lut = lman.get_lut_table<LookupTable65536>(info);
@@ -149,11 +150,11 @@ TEST_CASE(CheckLutReuse, framework::DatasetMode::ALL)
     }
 }
 
-
 TEST_SUITE_END() // BF16
 #endif // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // LUTManager
+TEST_SUITE_END() // CPP
 
 } // namespace validation
 } // namespace test
