@@ -188,6 +188,14 @@ class FormatCodeRun:
         shell = Shell()
         shell.cd(folder)
         skip_copyright = False
+
+        # Check if author e-mail is in arm.com domain
+        author_email_cmd = "git config --get user.email"
+        author_email = shell.run_single_to_str(author_email_cmd).strip()
+
+        if not author_email.endswith("@arm.com"):
+            skip_copyright = True
+
         if strategy == "git-head":
             cmd = "git diff-tree --no-commit-id --name-status -r HEAD | grep \"^[AMRT]\" | cut -f 2"
         elif strategy == "git-diff":
