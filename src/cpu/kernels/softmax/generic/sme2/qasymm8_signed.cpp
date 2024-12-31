@@ -599,12 +599,6 @@ void sme2_qasymm8_signed_softmax_lut_512VL(const ITensor *in,
     const auto &full_shape  = dst_info->tensor_shape();
     const auto &src_strides = src_info->strides_in_bytes();
     const auto &dst_strides = dst_info->strides_in_bytes();
-    Strides     tmp_strides;
-
-    tmp_strides[0] = src_strides[0] * 4;
-    tmp_strides[1] = src_strides[1] * 4;
-    tmp_strides[2] = src_strides[2] * 4;
-    tmp_strides[3] = src_strides[3] * 4;
 
     const uintptr_t k_shape[] = {
         full_shape[0],
@@ -637,14 +631,9 @@ void sme2_qasymm8_signed_softmax_lut_512VL(const ITensor *in,
                                    window[2].start() * dst_strides[2] + //
                                    window[3].start() * dst_strides[3];
 
-    const uintptr_t k_tmp_offset = window[0].start() * tmp_strides[0] + //
-                                   window[1].start() * tmp_strides[1] + //
-                                   window[2].start() * tmp_strides[2] + //
-                                   window[3].start() * tmp_strides[3];
-
     const auto *k_src         = reinterpret_cast<const int8_t *>(in->buffer() + k_src_offset);
     float      *tmp_float_ptr = reinterpret_cast<float *>(tmp);
-    auto       *k_tmp         = reinterpret_cast<float *>(tmp_float_ptr + k_tmp_offset);
+    auto       *k_tmp         = reinterpret_cast<float *>(tmp_float_ptr);
     auto       *k_dst         = reinterpret_cast<int8_t *>(out->buffer() + k_dst_offset);
 
     sme2_qasymm8_signed_softmax_kernel_512VL(k_src, k_dst, beta, k_shape, k_src_strides, k_dst_strides, lut_fp32_ptr,
