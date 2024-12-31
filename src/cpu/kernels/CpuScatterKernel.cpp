@@ -46,7 +46,21 @@ constexpr int max_index_length = 5;
 /* Scatter */
 static const std::vector<typename CpuScatterKernel::ScatterKernel> available_kernels = {
     {"neon_fp32_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
-     REGISTER_FP32_NEON(arm_compute::cpu::scatter_fp32_neon)}};
+     REGISTER_FP32_NEON(arm_compute::cpu::scatter_fp32_neon)},
+    {"neon_fp16_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F16); },
+     REGISTER_FP16_NEON(arm_compute::cpu::scatter_fp16_neon)},
+    {"neon_s32_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::S32); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::scatter_s32_neon)},
+    {"neon_s16_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::S16); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::scatter_s16_neon)},
+    {"neon_s8_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::S8); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::scatter_s8_neon)},
+    {"neon_u32_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::U32); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::scatter_u32_neon)},
+    {"neon_u16_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::U16); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::scatter_u16_neon)},
+    {"neon_u8_scatter", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::U8); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::scatter_u8_neon)}};
 
 const std::vector<typename CpuScatterKernel::ScatterKernel> &CpuScatterKernel::get_available_kernels()
 {
@@ -59,6 +73,7 @@ void CpuScatterKernel::configure(const ITensorInfo *updates,
                                  const ScatterInfo &scatter_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(updates, dst, indices);
+    ARM_COMPUTE_ERROR_THROW_ON(validate(updates, indices, dst, scatter_info));
     ARM_COMPUTE_LOG_PARAMS(updates, indices, dst, scatter_info);
 
     const auto uk = CpuScatterKernel::get_implementation<DataTypeISASelectorData>(
@@ -120,7 +135,8 @@ Status CpuScatterKernel::validate(const ITensorInfo *updates,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(unsupported_padding_config, "Padding is not supported with these shapes.");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(updates, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(indices, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32, DataType::F16, DataType::S32, DataType::S16,
+                                                 DataType::S8, DataType::U32, DataType::U16, DataType::U8);
 
     // Check data dims in update tensor and output tensor are equal
     for (int32_t i = 0; i < data_dim; i++)

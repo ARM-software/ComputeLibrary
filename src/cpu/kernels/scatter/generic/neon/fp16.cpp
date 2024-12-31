@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+
 #include "arm_compute/function_info/ScatterInfo.h"
 
 #include "src/cpu/kernels/scatter/generic/neon/impl.h"
@@ -29,7 +31,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-void scatter_fp32_neon(const ITensor     *src,
+void scatter_fp16_neon(const ITensor     *src,
                        const ITensor     *indices,
                        ITensor           *dst,
                        const ScatterInfo &scatter_info,
@@ -39,19 +41,19 @@ void scatter_fp32_neon(const ITensor     *src,
     switch (scatter_info.func)
     {
         case ScatterFunction::Update:
-            scatter_neon<ScatterFunction::Update, float32_t>(src, indices, dst, window, data_block_length);
+            scatter_neon<ScatterFunction::Update, float16_t>(src, indices, dst, window, data_block_length);
             break;
         case ScatterFunction::Add:
-            scatter_neon<ScatterFunction::Add, float32_t>(src, indices, dst, window, data_block_length);
+            scatter_neon<ScatterFunction::Add, float16_t>(src, indices, dst, window, data_block_length);
             break;
         case ScatterFunction::Sub:
-            scatter_neon<ScatterFunction::Sub, float32_t>(src, indices, dst, window, data_block_length);
+            scatter_neon<ScatterFunction::Sub, float16_t>(src, indices, dst, window, data_block_length);
             break;
         case ScatterFunction::Max:
-            scatter_neon<ScatterFunction::Max, float32_t>(src, indices, dst, window, data_block_length);
+            scatter_neon<ScatterFunction::Max, float16_t>(src, indices, dst, window, data_block_length);
             break;
         case ScatterFunction::Min:
-            scatter_neon<ScatterFunction::Min, float32_t>(src, indices, dst, window, data_block_length);
+            scatter_neon<ScatterFunction::Min, float16_t>(src, indices, dst, window, data_block_length);
             break;
         default:
             ARM_COMPUTE_ERROR("Invalid reduction function for scatter.");
@@ -60,3 +62,4 @@ void scatter_fp32_neon(const ITensor     *src,
 }
 } // namespace cpu
 } // namespace arm_compute
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

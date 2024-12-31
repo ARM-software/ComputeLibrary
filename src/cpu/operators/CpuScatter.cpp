@@ -72,15 +72,12 @@ Status CpuScatter::validate(const ITensorInfo *src,
                             const ScatterInfo &scatter_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(updates, indices, dst);
-
-    bool fill_zero = scatter_info.zero_initialization;
-    if (fill_zero)
+    if (src != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
-    }
-    else if (src != dst)
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuCopy::validate(src, dst));
+        // Check dst/src are same shape and datatype.
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(src->tensor_shape(), dst->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, updates, dst);
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuCopy::validate(src, dst)); // Validate copy kernel
     }
 
     return kernels::CpuScatterKernel::validate(updates, indices, dst, scatter_info);

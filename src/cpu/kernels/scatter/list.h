@@ -33,6 +33,13 @@ namespace cpu
                    const Window &window, const int data_block_length)
 
 DECLARE_SCATTER_KERNEL(scatter_fp32_neon);
+DECLARE_SCATTER_KERNEL(scatter_fp16_neon);
+DECLARE_SCATTER_KERNEL(scatter_s32_neon);
+DECLARE_SCATTER_KERNEL(scatter_s16_neon);
+DECLARE_SCATTER_KERNEL(scatter_s8_neon);
+DECLARE_SCATTER_KERNEL(scatter_u32_neon);
+DECLARE_SCATTER_KERNEL(scatter_u16_neon);
+DECLARE_SCATTER_KERNEL(scatter_u8_neon);
 
 #undef DECLARE_SCATTER_KERNEL
 

@@ -39,8 +39,8 @@ namespace arm_compute
 {
 namespace cpu
 {
-template <arm_compute::ScatterFunction sf>
-void scatter_neon_fp32(
+template <arm_compute::ScatterFunction sf, typename ScalarType>
+void scatter_neon(
     const ITensor *updates, const ITensor *indices, ITensor *dst, const Window &window, const int data_block_length)
 {
     const auto updates_info = updates->info();
@@ -71,9 +71,8 @@ void scatter_neon_fp32(
     Iterator updates_it(updates, window);
     Iterator dst_it(dst, window);
 
-    constexpr int vec_size = 16 / sizeof(float32_t); // 4
-
-    uint8_t *idx_ptr_raw_base = indices->ptr_to_element(arm_compute::Coordinates(0));
+    constexpr int vec_size         = 16 / sizeof(ScalarType);
+    uint8_t      *idx_ptr_raw_base = indices->ptr_to_element(arm_compute::Coordinates(0));
 
     execute_window_loop(
         window,
@@ -114,39 +113,41 @@ void scatter_neon_fp32(
                 int x = 0;
                 for (; x <= (data_block_length - vec_size); x += vec_size)
                 {
-                    const float32x4_t update_val_vec =
-                        wrapper::vloadq(reinterpret_cast<const float32_t *>(upt_from_index_ptr) + x);
-                    const float32x4_t dst_val_vec =
-                        wrapper::vloadq(reinterpret_cast<float32_t *>(dst_from_index_ptr) + x);
-                    float32x4_t output_val_vec;
+                    const auto update_val_vec =
+                        wrapper::vloadq(reinterpret_cast<const ScalarType *>(upt_from_index_ptr) + x);
+                    const auto dst_val_vec = wrapper::vloadq(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x);
+
                     switch (sf)
                     {
                         case ScatterFunction::Update:
-                            output_val_vec = update_val_vec;
+                            wrapper::vstore(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x, update_val_vec);
                             break;
                         case ScatterFunction::Add:
-                            output_val_vec = wrapper::vadd(dst_val_vec, update_val_vec);
+                            wrapper::vstore(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x,
+                                            wrapper::vadd(dst_val_vec, update_val_vec));
                             break;
                         case ScatterFunction::Sub:
-                            output_val_vec = wrapper::vsub(dst_val_vec, update_val_vec);
+                            wrapper::vstore(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x,
+                                            wrapper::vsub(dst_val_vec, update_val_vec));
                             break;
                         case ScatterFunction::Max:
-                            output_val_vec = wrapper::vmax(dst_val_vec, update_val_vec);
+                            wrapper::vstore(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x,
+                                            wrapper::vmax(dst_val_vec, update_val_vec));
                             break;
                         case ScatterFunction::Min:
-                            output_val_vec = wrapper::vmin(dst_val_vec, update_val_vec);
+                            wrapper::vstore(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x,
+                                            wrapper::vmin(dst_val_vec, update_val_vec));
                             break;
                         default:
                             ARM_COMPUTE_ERROR("Invalid reduction function for scatter.");
                     }
-                    wrapper::vstore(reinterpret_cast<float32_t *>(dst_from_index_ptr) + x, output_val_vec);
                 }
 
                 for (; x < data_block_length; ++x)
                 {
-                    const float32_t update_val = *(reinterpret_cast<const float32_t *>(upt_from_index_ptr) + x);
-                    const float32_t dst_val    = *(reinterpret_cast<float32_t *>(dst_from_index_ptr) + x);
-                    float32_t       output_val;
+                    const ScalarType update_val = *(reinterpret_cast<const ScalarType *>(upt_from_index_ptr) + x);
+                    const ScalarType dst_val    = *(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x);
+                    ScalarType       output_val;
                     switch (sf)
                     {
                         case ScatterFunction::Update:
@@ -167,7 +168,7 @@ void scatter_neon_fp32(
                         default:
                             ARM_COMPUTE_ERROR("Invalid reduction function for scatter.");
                     }
-                    *(reinterpret_cast<float32_t *>(dst_from_index_ptr) + x) = output_val;
+                    *(reinterpret_cast<ScalarType *>(dst_from_index_ptr) + x) = output_val;
                 }
             }
         },

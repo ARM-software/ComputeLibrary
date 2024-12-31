@@ -53,6 +53,16 @@ void NEScatter::configure(
     const ITensor *src, const ITensor *updates, const ITensor *indices, ITensor *dst, const ScatterInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(updates, indices, dst);
+
+    if (src == nullptr)
+    {
+        ARM_COMPUTE_ERROR_THROW_ON(validate(nullptr, updates->info(), indices->info(), dst->info(), info));
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR_THROW_ON(validate(src->info(), updates->info(), indices->info(), dst->info(), info));
+    }
+
     ARM_COMPUTE_LOG_PARAMS(src, updates, indices, dst, info);
 
     _impl->op = std::make_unique<cpu::CpuScatter>();

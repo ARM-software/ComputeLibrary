@@ -51,7 +51,7 @@ TEST_SUITE(Scatter)
 DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
     make("InputInfo", { TensorInfo(TensorShape(9U), 1, DataType::F32),    // Mismatching data types
                         TensorInfo(TensorShape(15U), 1, DataType::F32),   // Valid
-                        TensorInfo(TensorShape(15U), 1, DataType::U8),   // Not valid, not implemented yet
+                        TensorInfo(TensorShape(15U), 1, DataType::U8),    // Valid
                         TensorInfo(TensorShape(8U), 1, DataType::F32),
                         TensorInfo(TensorShape(217U), 1, DataType::F32),    // Mismatch input/output dims.
                         TensorInfo(TensorShape(217U), 1, DataType::F32),    // Updates dim higher than Input/Output dims.
@@ -104,7 +104,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
                          ScatterInfo(ScatterFunction::Update, false),
                          ScatterInfo(ScatterFunction::Update, false),
     }),
-    make("Expected", { false, true, false, true, false, false, false, false, false, false })),
+    make("Expected", { false, true, true, true, false, false, false, false, false, false })),
     input_info, updates_info, indices_info, output_info, scatter_info, expected)
 {
     const Status status = NEScatter::validate(&input_info, &updates_info, &indices_info, &output_info, scatter_info);
@@ -192,8 +192,9 @@ TEST_SUITE_END() // FP32
 
 // NOTE: Padding is disabled for the SmallScatterMixedDataset due certain shapes not supporting padding.
 //       Padding is well tested in F32 Datatype test cases.
+#ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<half>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMixedDataset(),
         make("DataType", {DataType::F16}),
         allScatterFunctions,
@@ -204,11 +205,12 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<half>, framework::Da
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END() // FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int32_t>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int32_t>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMixedDataset(),
         make("DataType", {DataType::S32}),
         allScatterFunctions,
@@ -221,7 +223,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int32_t>, framework:
 TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int16_t>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMixedDataset(),
         make("DataType", {DataType::S16}),
         allScatterFunctions,
@@ -234,7 +236,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int16_t>, framework:
 TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int8_t>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMixedDataset(),
         make("DataType", {DataType::S8}),
         allScatterFunctions,
@@ -247,7 +249,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<int8_t>, framework::
 TEST_SUITE_END() // S8
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint32_t>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint32_t>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMixedDataset(),
         make("DataType", {DataType::U32}),
         allScatterFunctions,
@@ -260,7 +262,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint32_t>, framework
 TEST_SUITE_END() // U32
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint16_t>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint16_t>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMixedDataset(),
         make("DataType", {DataType::U16}),
         allScatterFunctions,
@@ -273,7 +275,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint16_t>, framework
 TEST_SUITE_END() // U16
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint8_t>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallScatterMixedDataset(),
         make("DataType", {DataType::U8}),
         allScatterFunctions,

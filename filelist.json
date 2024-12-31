@@ -2271,7 +2271,9 @@
             "src/runtime/NEON/functions/NEScatter.cpp"
           ],
           "neon": {
-            "fp32": [ "src/cpu/kernels/scatter/generic/neon/fp32.cpp" ]
+            "fp32": [ "src/cpu/kernels/scatter/generic/neon/fp32.cpp" ],
+            "fp16": [ "src/cpu/kernels/scatter/generic/neon/fp16.cpp" ],
+            "integer": [ "src/cpu/kernels/scatter/generic/neon/integer.cpp"]
           }
         }
       },
