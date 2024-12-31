@@ -37,11 +37,25 @@ exclude: |
 repos:
   - repo: local
     hooks:
-      - id: format-code
-        name: ACL Format Code Script
+      - id: android-bp-checks
+        name: Android.bp Checks
         stages: [commit]
         language: python
-        entry: python ./scripts/format_code.py --files=git-diff
+        entry: python ./scripts/format_code.py --files=git-diff --check_android_bp
+        pass_filenames: false
+        additional_dependencies: ['psutil==5.8.0', 'Jinja2==3.0.1']
+      - id: format-code
+        name: ACL Basic Formatting Checks
+        stages: [commit]
+        language: python
+        entry: python ./scripts/format_code.py --files=git-diff --check_formatting
+        pass_filenames: false
+        additional_dependencies: ['psutil==5.8.0', 'Jinja2==3.0.1']
+      - id: copyright-checks
+        name: ACL Copyright Year Checks
+        stages: [commit]
+        language: python
+        entry: python ./scripts/format_code.py --files=git-diff --check_copyright
         pass_filenames: false
         additional_dependencies: ['psutil==5.8.0', 'Jinja2==3.0.1']
       - id: prepare-cmake-build-files

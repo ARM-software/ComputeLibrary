@@ -48,6 +48,8 @@ exceptions = [
     "SConstruct"
 ]
 
+skip_copyright_global = False
+
 def adjust_copyright_year(copyright_years, curr_year):
     ret_copyright_year = str()
     # Read last year in the Copyright
@@ -187,7 +189,7 @@ class FormatCodeRun:
     def get_files(folder, strategy="git-head"):
         shell = Shell()
         shell.cd(folder)
-        skip_copyright = False
+        skip_copyright = skip_copyright_global
 
         # Check if author e-mail is in arm.com domain
         author_email_cmd = "git config --get user.email"
@@ -348,17 +350,22 @@ class GenerateAndroidBP:
         if retval != 0:
             raise Exception("generate Android bp file failed with error code %d" % retval)
 
-def run_fix_code_formatting( files="git-head", folder=".", num_threads=1, error_on_diff=True):
+def run_fix_code_formatting( files="git-head", folder=".", num_threads=1, error_on_diff=True, \
+    check_copyright=True, check_android_bp=True, check_formatting=True):
     try:
         retval = 0
 
         # Genereate Android.bp file and test it
-        gen_android_bp = GenerateAndroidBP(folder)
-        gen_android_bp.run()
+        if check_android_bp:
+            gen_android_bp = GenerateAndroidBP(folder)
+            gen_android_bp.run()
 
+        # check_copyright is being incorporated via the global variable
         to_check, skip_copyright = FormatCodeRun.get_files(folder, files)
-        other_checks = OtherChecksRun(folder,error_on_diff, files)
-        other_checks.run()
+
+        if check_formatting:
+            other_checks = OtherChecksRun(folder,error_on_diff, files)
+            other_checks.run()
 
         logger.debug(to_check)
         num_files = len(to_check)
@@ -389,12 +396,17 @@ if __name__ == "__main__":
     )
 
     file_sources=["git-diff","git-head","all"]
-    parser.add_argument("-D", "--debug", action='store_true', help="Enable script debugging output")
-    parser.add_argument("--error_on_diff", action='store_true', help="Show diff on error and stop")
+    parser.add_argument("-D", "--debug", action="store_true", help="Enable script debugging output")
+    parser.add_argument("--error_on_diff", action="store_true", help="Show diff on error and stop")
     parser.add_argument("--files", nargs='?', metavar="source", choices=file_sources, help="Which files to run fix_code_formatting on, choices=%s" % file_sources, default="git-head")
     parser.add_argument("--folder", metavar="path", help="Folder in which to run fix_code_formatting", default=".")
+    parser.add_argument("--check_copyright", action="store_true", help="Check copyright year if enabled")
+    parser.add_argument("--check_android_bp", action="store_true", help="Check Android.bp if enabled")
+    parser.add_argument("--check_formatting", action="store_true", help="Check basic formatting if enabled")
 
     args = parser.parse_args()
+
+    skip_copyright_global = (not args.check_copyright)
 
     logging_level = logging.INFO
     if args.debug:
@@ -404,4 +416,6 @@ if __name__ == "__main__":
 
     logger.debug("Arguments passed: %s" % str(args.__dict__))
 
-    exit(run_fix_code_formatting(args.files, args.folder, 1, error_on_diff=args.error_on_diff))
+    exit(run_fix_code_formatting(args.files, args.folder, 1, error_on_diff=args.error_on_diff, \
+        check_copyright=args.check_copyright, check_android_bp=args.check_android_bp, \
+        check_formatting=args.check_formatting))
