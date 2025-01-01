@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,7 @@ TensorInfo::TensorInfo()
       _id(invalid_tensor_id),
       _lock_paddings(false)
 {
+    _dims_state.fill(ITensorInfo::get_static_state_value());
 }
 
 TensorInfo::TensorInfo(const ITensorInfo &info) : TensorInfo()
@@ -95,6 +96,7 @@ TensorInfo::TensorInfo(const TensorInfo &info) : TensorInfo()
 }
 TensorInfo::TensorInfo(Format format) : TensorInfo(TensorShape(), format)
 {
+    _dims_state.fill(ITensorInfo::get_static_state_value());
 }
 
 TensorInfo::TensorInfo(unsigned int width, unsigned int height, Format format)
@@ -177,6 +179,8 @@ void TensorInfo::init(const TensorShape &tensor_shape, size_t num_channels, Data
     _format       = Format::UNKNOWN;
 
     set_tensor_shape(tensor_shape);
+
+    _dims_state.fill(ITensorInfo::get_static_state_value());
 }
 
 void TensorInfo::init(const TensorShape &tensor_shape,
@@ -197,6 +201,7 @@ void TensorInfo::init(const TensorShape &tensor_shape,
     _total_size                    = total_size_in_bytes;
 
     _valid_region = ValidRegion{Coordinates(), _tensor_shape};
+    _dims_state.fill(ITensorInfo::get_static_state_value());
 }
 
 size_t TensorInfo::init_auto_padding(const TensorShape &tensor_shape, Format format)
@@ -391,6 +396,12 @@ ITensorInfo &TensorInfo::set_tensor_shape(const TensorShape &shape)
 
 ITensorInfo &TensorInfo::set_tensor_dims_state(const TensorDimsState &state)
 {
+    for (size_t i = 0; i < MAX_DIMS; ++i)
+    {
+        ARM_COMPUTE_ERROR_ON(state[i] != ITensorInfo::get_dynamic_state_value() &&
+                             state[i] != ITensorInfo::get_static_state_value());
+    }
+
     _dims_state = state;
     return *this;
 }

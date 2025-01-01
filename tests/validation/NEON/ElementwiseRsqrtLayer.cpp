@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
@@ -57,16 +58,26 @@ constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
 TEST_SUITE(NEON)
 TEST_SUITE(RsqrtLayer)
 
-// Test test cases will execute the function with dynamic-stated shapes
-// Since other elementwise unary operations share the same kernel, this tests are added only here.
-// Also, only FP32 is tested since data type doesn't/shouldn't matter with dynamic shapes.
+template <typename T>
+using CpuRsqrtDynamicShapeFloatFixture = RsqrtDynamicShapeFloatValidationFixture<Tensor, Accessor, NERsqrtLayer, T>;
+
+template <typename T>
+using CpuRsqrtDynamicShapeQuantizedFixture = RsqrtDynamicShapeQuantizedValidationFixture<Tensor, Accessor, NERsqrtLayer, T>;
+
+/// Test test cases will execute the function with dynamic-stated shapes
+/// Since other elementwise unary operations share the same kernel, this tests are added only here.
+///
+/// @note Only FP32 is tested for float since data type doesn't/shouldn't matter with dynamic shapes.
+/// @note Only QASYMM8 is tested for quantized types since data type shouldn't matter with dynamic shapes.
+/// Quantized types require separate testing because they sometimes use LUTs (look up table) under the hood.
+/// If they hadn't been using LUTs, testing only the FP32 data type was enough because the kernel choice
+/// does not matter when testing the dynamic shapes. It's only necessary to cover the different scenarios in the
+/// configuration and run paths.
+
 TEST_SUITE(DynamicShape)
 TEST_SUITE(FP32)
 
-template <typename T>
-using CpuRsqrtDynamicShapeFixture = RsqrtDynamicShapeValidationFixture<Tensor, Accessor, NERsqrtLayer, T>;
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuRsqrtDynamicShapeFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuRsqrtDynamicShapeFloatFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                           DataType::F32)))
 {
     // Validate output
@@ -74,6 +85,20 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CpuRsqrtDynamicShapeFixture<float>, framework::
 }
 
 TEST_SUITE_END() // FP32
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuRsqrtDynamicShapeQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapes(),
+        make("DataType", DataType::QASYMM8),
+        make("InputQInfo", { QuantizationInfo(20, 0) }),
+        make("OutputQInfo", { QuantizationInfo(0.5, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
+TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // DynamicShape
 
 template <typename T>

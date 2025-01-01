@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -193,6 +193,50 @@ TEST_CASE(SubTensorPaddingExpansion, framework::DatasetMode::ALL)
     // Now lock padding is set to true, therefore the extend padding would fail
     ARM_COMPUTE_EXPECT_THROW(tensor_info.extend_padding(PaddingSize(2, 1)), framework::LogLevel::ERRORS);
 }
+
+TEST_CASE(DynamicShapes, framework::DatasetMode::ALL)
+{
+    // Static shape at init time
+    TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+    ARM_COMPUTE_ASSERT(!tensor_info.is_dynamic());  // Static initialized
+
+    // Make dynamic shape explicitly
+    tensor_info.set_tensor_dims_state(construct_dynamic_dims_state());
+    ARM_COMPUTE_ASSERT(tensor_info.is_dynamic());
+
+    // Make static shape explicitly
+    tensor_info.set_tensor_dims_state(construct_static_dims_state());
+    ARM_COMPUTE_ASSERT(!tensor_info.is_dynamic());
+
+    // Make only some dimensions dynamic
+    constexpr int32_t dynamic_dim = ITensorInfo::get_dynamic_state_value();
+    constexpr int32_t static_dim = ITensorInfo::get_static_state_value();
+
+    constexpr ITensorInfo::TensorDimsState state {static_dim, dynamic_dim, dynamic_dim, static_dim, static_dim, static_dim};
+    tensor_info.set_tensor_dims_state(state);
+    ARM_COMPUTE_ASSERT(tensor_info.is_dynamic());
+
+    tensor_info.set_dynamic(false);
+    ARM_COMPUTE_ASSERT(!tensor_info.is_dynamic());
+
+    tensor_info.set_dynamic(true);
+    ARM_COMPUTE_ASSERT(tensor_info.is_dynamic());
+}
+
+TEST_CASE(InvalidStateForDynamicShapes, framework::DatasetMode::ALL)
+{
+    TensorInfo tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+
+    // Make only some dimensions dynamic
+    constexpr int32_t dynamic_dim = ITensorInfo::get_dynamic_state_value();
+    constexpr int32_t static_dim = ITensorInfo::get_static_state_value();
+    constexpr int32_t invalid_dim = 10000;
+
+    constexpr ITensorInfo::TensorDimsState state {static_dim, invalid_dim, dynamic_dim, static_dim, static_dim, static_dim};
+    ARM_COMPUTE_UNUSED(state);
+    ARM_COMPUTE_EXPECT_THROW(tensor_info.set_tensor_dims_state(state), framework::LogLevel::ERRORS);
+}
+
 TEST_SUITE_END() // TensorInfo
 TEST_SUITE_END() // UNIT
 } // namespace validation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,7 @@ SubTensorInfo::SubTensorInfo()
       _extend_parent(false),
       _lock_paddings(false)
 {
+    _dims_state.fill(ITensorInfo::get_static_state_value());
 }
 
 SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords, bool extend_parent)
@@ -76,6 +77,7 @@ SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coor
       _lock_paddings(false)
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
+    ARM_COMPUTE_ERROR_ON_MSG(parent->is_dynamic(), "SubTensors for dynamically shaped parent tensor is not supported!");
 
     // Check if subtensor is valid if parent is configured
     if (parent->tensor_shape().total_size() != 0 && !_extend_parent)
@@ -122,7 +124,22 @@ ITensorInfo &SubTensorInfo::set_tensor_shape(const TensorShape &shape)
 ITensorInfo &SubTensorInfo::set_tensor_dims_state(const TensorDimsState &state)
 {
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+
+    const auto index = std::find(state.begin(), state.end(), ITensorInfo::get_dynamic_state_value());
+    ARM_COMPUTE_UNUSED(index);
+    ARM_COMPUTE_ERROR_ON(index != state.end());
+
     _dims_state = state;
+    return *this;
+}
+
+ITensorInfo &SubTensorInfo::set_dynamic(bool dynamic)
+{
+    if (dynamic)
+    {
+        ARM_COMPUTE_ERROR("Not Implemented.");
+    }
+
     return *this;
 }
 

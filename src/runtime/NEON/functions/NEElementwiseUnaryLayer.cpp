@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,8 @@ NEElementwiseUnaryLayer<op> &NEElementwiseUnaryLayer<op>::operator=(NEElementwis
 template <ElementWiseUnary op>
 void NEElementwiseUnaryLayer<op>::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseUnaryLayer<op>::validate(input->info(), output->info()));
+
     _impl->src    = input;
     _impl->dst    = output;
     _impl->cpu_op = std::make_unique<OperatorType>();
@@ -64,7 +66,6 @@ void NEElementwiseUnaryLayer<op>::configure(const ITensor *input, ITensor *outpu
 template <ElementWiseUnary op>
 Status NEElementwiseUnaryLayer<op>::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return OperatorType::validate(op, *input, *output);
 }
 

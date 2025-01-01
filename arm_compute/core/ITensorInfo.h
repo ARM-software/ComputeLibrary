@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,9 @@
 
 #include "support/ICloneable.h"
 
+#include <array>
 #include <cstddef>
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -44,7 +46,7 @@ class QuantizationInfo;
 class ITensorInfo : public misc::ICloneable<ITensorInfo>
 {
 public:
-    using TensorDimsState = std::vector<int>;
+    using TensorDimsState = std::array<int, arm_compute::MAX_DIMS>;
     /** An id that uniquely identifies an ITensorInfo within some domain (e.g. a workload)
      */
     using Id = int32_t;
@@ -255,6 +257,13 @@ public:
      * @return True if the tensor size can be changed.
      */
     virtual bool is_resizable() const = 0;
+    /** Set the tensor as dynamic/static
+     *
+     * @param[in] dynamic True if tensor is dynamic
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_dynamic(bool dynamic) = 0;
     /** Flag indicating whether the shape of the tensor is dynamic, meaning that it can change on kernel/function execution.
      *
      * @return True if its dynamic else false

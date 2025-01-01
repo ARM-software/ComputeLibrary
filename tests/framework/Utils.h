@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UTILS
-#define ARM_COMPUTE_TEST_UTILS
+#ifndef ACL_TESTS_FRAMEWORK_UTILS_H
+#define ACL_TESTS_FRAMEWORK_UTILS_H
 
 #include "support/StringSupport.h"
 
@@ -73,10 +73,22 @@ void apply_impl(O *obj, F &&func, const std::tuple<As...> &args, detail::sequenc
 {
     (obj->*func)(std::get<S>(args)...);
 }
+
+template <typename O, typename F, typename... As, int... S>
+void apply_impl(O *obj, F &&func, std::tuple<As...> &args, detail::sequence<S...>)
+{
+    (obj->*func)(std::get<S>(args)...);
+}
 } // namespace
 
 template <typename O, typename F, typename... As>
 void apply(O *obj, F &&func, const std::tuple<As...> &args)
+{
+    detail::apply_impl(obj, std::forward<F>(func), args, detail::sequence_t<sizeof...(As)>());
+}
+
+template <typename O, typename F, typename... As>
+void apply(O *obj, F &&func, std::tuple<As...> &args)
 {
     detail::apply_impl(obj, std::forward<F>(func), args, detail::sequence_t<sizeof...(As)>());
 }
@@ -178,4 +190,4 @@ void sleep_in_seconds(float seconds);
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UTILS */
+#endif // ACL_TESTS_FRAMEWORK_UTILS_H

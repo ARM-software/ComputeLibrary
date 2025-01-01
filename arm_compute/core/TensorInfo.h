@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -273,6 +273,13 @@ public:
     bool is_resizable() const override
     {
         return _is_resizable;
+    }
+    ITensorInfo &set_dynamic(bool dynamic) override
+    {
+        std::fill(std::begin(_dims_state), std::end(_dims_state),
+                  (dynamic ? get_dynamic_state_value() : get_static_state_value()));
+
+        return *this;
     }
     bool is_dynamic() const override
     {

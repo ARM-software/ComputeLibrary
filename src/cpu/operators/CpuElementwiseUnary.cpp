@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,8 @@ void CpuElementwiseUnary::run(ITensorPack &tensors)
         return;
     }
 
+    // In case the operator is configured with dynamic shapes, kernel is not configured.
+    // The window is prepared on the fly.
     auto src_info = tensors.get_const_tensor(TensorType::ACL_SRC)->info();
     ICpuOperator::run(tensors, compute_output_shape_and_window(src_info->tensor_shape()).second);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,8 +106,61 @@ TEST_CASE(SubTensorPaddingExpansion, framework::DatasetMode::ALL)
     }
 }
 
+TEST_CASE(DynamicShapesNotSupported, framework::DatasetMode::ALL)
+{
+    // Static shape at init time
+    TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+    SubTensorInfo sub_tensor_info(&tensor_info, TensorShape(4U, 3U, 3U), Coordinates(5, 2, 0));
+    ARM_COMPUTE_ASSERT(!sub_tensor_info.is_dynamic());
+
+    // Make dynamic shape explicitly (will throw)
+    ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.set_tensor_dims_state(construct_dynamic_dims_state()),
+        framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!sub_tensor_info.is_dynamic());
+
+    // Make static shape explicitly
+    sub_tensor_info.set_tensor_dims_state(construct_static_dims_state());
+    ARM_COMPUTE_ASSERT(!sub_tensor_info.is_dynamic());
+
+    // Make only some dimensions dynamic (will throw)
+    constexpr int32_t dynamic_dim = ITensorInfo::get_dynamic_state_value();
+    constexpr int32_t static_dim = ITensorInfo::get_static_state_value();
+
+    constexpr ITensorInfo::TensorDimsState state {static_dim, dynamic_dim, dynamic_dim, static_dim, static_dim, static_dim};
+    ARM_COMPUTE_UNUSED(state);
+    ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.set_tensor_dims_state(state), framework::LogLevel::ERRORS);
+
+    ARM_COMPUTE_EXPECT_NO_THROW(sub_tensor_info.set_dynamic(false), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!sub_tensor_info.is_dynamic());
+
+    ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.set_dynamic(true), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(!sub_tensor_info.is_dynamic());
+}
+
+TEST_CASE(ParentWithDynamicShapesNotSupported, framework::DatasetMode::ALL)
+{
+    TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+    tensor_info.set_tensor_dims_state(construct_dynamic_dims_state());
+
+    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&tensor_info, TensorShape(4U, 3U, 3U), Coordinates(5, 2, 0)),
+        framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(DynamicShapeNotSupportedDueToNullParent, framework::DatasetMode::ALL)
+{
+    SubTensorInfo sub_tensor_info = SubTensorInfo();
+    ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.set_tensor_dims_state(construct_dynamic_dims_state()),
+        framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(ExplicitNullParentNotSupported, framework::DatasetMode::ALL)
+{
+    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(nullptr, TensorShape(4U, 3U, 3U), Coordinates(5, 2, 0)),
+        framework::LogLevel::ERRORS);
+}
+
 TEST_SUITE_END() // SubTensorInfo
-TEST_SUITE_END()
+TEST_SUITE_END() // UNIT
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

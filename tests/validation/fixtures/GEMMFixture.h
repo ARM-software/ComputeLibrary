@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,43 +88,19 @@ protected:
     TensorType compute_target(const TensorShape &input_shape_a, const TensorShape &input_shape_b, const TensorShape &input_shape_c, const TensorShape &output_shape, float alpha, float beta,
                               DataType data_type, bool accumulate, bool dynamic)
     {
-        TensorShape tensor_shape_a = input_shape_a;
-        TensorShape tensor_shape_b = input_shape_b;
-        TensorShape tensor_shape_c = input_shape_c;
-        TensorShape tensor_shape_dst = output_shape;
-        if (dynamic)
-        {
-            // Dynamic tensor shapes allow to use partially defined (dynamic)
-            // shapes at configure() call time. Tensor shapes should be fully
-            // defined before run() method is called.
-            //
-            // To test this we create tensor shapes with the same number of
-            // dimensions, where all dimensions are dynamic (have zero values).
-            //
-            // The tensors passed to configure() call use these dynamic shapes.
-            //
-            // TODO: COMPMID-7681. When implemented:
-            // - adjust this comment block,
-            // - use non-initialized tensor shapes instead of the lambda.
-            auto dynamic_shape = [](TensorShape s) {
-                // TensorShapes dimensions are initialized to 0 by default.
-                TensorShape dynamic;
-
-                dynamic.set_num_dimensions(s.num_dimensions());
-
-                return dynamic;
-            };
-            tensor_shape_a = dynamic_shape(input_shape_a);
-            tensor_shape_b = dynamic_shape(input_shape_b);
-            tensor_shape_c = dynamic_shape(input_shape_c);
-            tensor_shape_dst = dynamic_shape(output_shape);
-        }
-
         // Create tensors
-        TensorType a   = create_tensor<TensorType>(tensor_shape_a, data_type, 1);
-        TensorType b   = create_tensor<TensorType>(tensor_shape_b, data_type, 1);
-        TensorType c   = create_tensor<TensorType>(tensor_shape_c, data_type, 1);
-        TensorType dst = create_tensor<TensorType>(tensor_shape_dst, data_type, 1);
+        TensorType a   = create_tensor<TensorType>(input_shape_a, data_type, 1);
+        TensorType b   = create_tensor<TensorType>(input_shape_b, data_type, 1);
+        TensorType c   = create_tensor<TensorType>(input_shape_c, data_type, 1);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1);
+
+        if(dynamic)
+        {
+            a.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            b.info()->set_tensor_shape(TensorShape()).set_dynamic(true);;
+            c.info()->set_tensor_shape(TensorShape()).set_dynamic(true);;
+            dst.info()->set_tensor_shape(TensorShape()).set_dynamic(true);;
+        }
 
         // Create and configure function
         FunctionType gemm;
@@ -141,15 +117,10 @@ protected:
 
         if (dynamic)
         {
-            // Tensors must be fully defined (non-dynamic) in order to be used
-            // by run() method. Here, we create new tensors using original fully
-            // defined shapes. We assign the tensors to the same variables that
-            // we used in configure() call. Because of this, the pointers passed
-            // to configure() are still valid.
-            a   = create_tensor<TensorType>(input_shape_a, data_type, 1);
-            b   = create_tensor<TensorType>(input_shape_b, data_type, 1);
-            c   = create_tensor<TensorType>(input_shape_c, data_type, 1);
-            dst = create_tensor<TensorType>(output_shape, data_type, 1);
+            a.info()->set_tensor_shape(input_shape_a);
+            b.info()->set_tensor_shape(input_shape_b);
+            c.info()->set_tensor_shape(input_shape_c);
+            dst.info()->set_tensor_shape(output_shape);
         }
 
         ARM_COMPUTE_ASSERT(a.info()->is_resizable());

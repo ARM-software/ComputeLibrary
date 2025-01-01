@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -224,27 +224,28 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     bool is_valid = bool(NEGEMM::validate(&lhs_info.clone()->set_is_resizable(true), &rhs_info.clone()->set_is_resizable(true), nullptr, &output_info.clone()->set_is_resizable(true), alpha, beta, gemm_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
-DATA_TEST_CASE(ValidateDynamicTensorShapes, framework::DatasetMode::ALL, zip(zip(zip(
-               make("LhsInfo", { TensorInfo(TensorShape(0U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),
-                                                     }),
-               make("RhsInfo",{ TensorInfo(TensorShape(8U, 27U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(0U, 27U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(8U, 27U), 1, DataType::F32),
-                                                     })),
-               make("OutputInfo",{ TensorInfo(TensorShape(8U, 13U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(8U, 13U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(0U, 0U), 1, DataType::F32),
-                                                     })),
-               make("Expected", { false, false, false })),
-               lhs_info, rhs_info, output_info, expected)
+
+NON_CONST_DATA_TEST_CASE(DynamicTensorShapesNotSupported, framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("LhsInfo", TensorInfo(TensorShape(27U, 13U), 1, DataType::F32)),
+            make("RhsInfo", TensorInfo(TensorShape(8U, 27U), 1, DataType::F32)),
+            make("OutputInfo", TensorInfo(TensorShape(8U, 13U), 1, DataType::F32))
+        ),
+    make("DynamicShape", { false, true })),
+    lhs_info, rhs_info, out_info, dynamic_shape)
 {
+    lhs_info.set_dynamic(dynamic_shape);
+    rhs_info.set_dynamic(dynamic_shape);
+    out_info.set_dynamic(dynamic_shape);
+
     constexpr float alpha = 1.0;
     constexpr float beta = 0.0;
     const auto gemm_info = GEMMInfo();
-    bool is_valid = bool(NEGEMM::validate(&lhs_info.clone()->set_is_resizable(true), &rhs_info.clone()->set_is_resizable(true), nullptr, &output_info.clone()->set_is_resizable(true), alpha, beta, gemm_info));
-    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+    bool is_valid = bool(NEGEMM::validate(&lhs_info, &rhs_info, nullptr, &out_info,
+        alpha, beta, gemm_info));
+
+    ARM_COMPUTE_EXPECT(is_valid == !dynamic_shape, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

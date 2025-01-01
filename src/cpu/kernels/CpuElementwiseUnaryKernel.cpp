@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -193,15 +193,15 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
     _run_method = uk->ukernel;
     _name       = std::string("CpuElementwiseUnaryKernel").append("/").append(uk->name);
 
+    if (uk->prepare_func != nullptr)
+    {
+        _lut = uk->prepare_func(op, &src, &dst);
+    }
+
     // If input shape is dynamic, expect a configured window and dst at run-time.
     if (src.is_dynamic())
     {
         return;
-    }
-
-    if (uk->prepare_func != nullptr)
-    {
-        _lut = uk->prepare_func(op, &src, &dst);
     }
 
     auto shape_and_window = compute_output_shape_and_window(src.tensor_shape());

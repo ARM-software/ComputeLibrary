@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1139,9 +1139,8 @@ inline arm_compute::Status
 error_on_dynamic_shape(const char *function, const char *file, const int line, Ts &&...tensor_infos)
 {
     const std::array<const ITensorInfo *, sizeof...(Ts)> infos_array{{std::forward<Ts>(tensor_infos)...}};
-    bool                                                 has_dynamic =
-        std::any_of(infos_array.begin(), infos_array.end(),
-                    [&](const ITensorInfo *ti) { return ti != nullptr && ti->tensor_shape().is_dynamic(); });
+    bool has_dynamic = std::any_of(infos_array.begin(), infos_array.end(),
+                                   [&](const ITensorInfo *ti) { return ti != nullptr && ti->is_dynamic(); });
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(has_dynamic, function, file, line, "Dynamic tensor shape is not supported");
 
     return arm_compute::Status{};

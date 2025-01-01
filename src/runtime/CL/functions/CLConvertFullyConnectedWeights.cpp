@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,8 +73,6 @@ Status CLConvertFullyConnectedWeights::validate(const ITensorInfo *input,
                                                 DataLayout         data_layout)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(original_input_shape.is_dynamic(),
-                                    "Dynamic shape for 'original_input_shape' is not supported.");
     return opencl::ClConvertFullyConnectedWeights::validate(input, output, original_input_shape, data_layout);
 }
 

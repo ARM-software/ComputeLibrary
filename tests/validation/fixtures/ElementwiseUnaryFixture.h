@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,9 +60,10 @@ public:
         }
 
         _op                = op;
+        _use_dynamic_shape = use_dynamic_shape;
+
         _target            = compute_target(input_shape, input_data_type, in_place, qinfo, qinfo_out);
         _reference         = compute_reference(input_shape, input_data_type, qinfo, qinfo_out);
-        _use_dynamic_shape = use_dynamic_shape;
     }
 
 protected:
@@ -216,12 +217,13 @@ protected:
         TensorType *actual_dst = in_place ? &src : &dst;
 
         // if _use_dynamic_shape is true, this fixture will test scenario for dynamic shapes.
-        // - At configure time, all input tensors are marked as dynamic using set_tensor_dynamic()
-        // - After configure, tensors are marked as static for run using set_tensor_static()
-        // - The tensors with static shape are given to run()
+        // - At configure time, all input tensors are marked as dynamic.
+        // - After configure and before run time, shapes are set.
+        // - The tensors with known shapes are given to run()
         if(_use_dynamic_shape)
         {
-            set_tensor_dynamic(src);
+            src.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            dst.info()->set_tensor_shape(TensorShape()).set_dynamic(true);;
         }
 
         // Create and configure function
@@ -230,7 +232,8 @@ protected:
 
         if(_use_dynamic_shape)
         {
-            set_tensor_static(src);
+            src.info()->set_tensor_shape(shape);
+            dst.info()->set_tensor_shape(shape);
         }
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
@@ -299,12 +302,23 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class RsqrtDynamicShapeValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+class RsqrtDynamicShapeQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(const TensorShape &shape, DataType data_type, QuantizationInfo in_qinfo, QuantizationInfo out_qinfo)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT, true /* use_dynamic_shape */,
+            in_qinfo, out_qinfo);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class RsqrtDynamicShapeFloatValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT, true);
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT, true /* use_dynamic_shape */);
     }
 };
 

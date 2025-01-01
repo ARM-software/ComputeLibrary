@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,8 @@ NEElementwiseMax::~NEElementwiseMax()                              = default;
 void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseMax::validate(input1->info(), input2->info(), output->info(), act_info));
+
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -94,6 +96,8 @@ NEElementwiseMin::~NEElementwiseMin()                              = default;
 void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseMin::validate(input1->info(), input2->info(), output->info(), act_info));
+
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -141,6 +145,9 @@ void NEElementwiseSquaredDiff::configure(ITensor                   *input1,
                                          const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_ERROR_THROW_ON(
+        NEElementwiseSquaredDiff::validate(input1->info(), input2->info(), output->info(), act_info));
+
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -188,6 +195,9 @@ void NEElementwiseDivision::configure(ITensor                   *input1,
                                       const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_ERROR_THROW_ON(
+        NEElementwiseDivision::validate(input1->info(), input2->info(), output->info(), act_info));
+
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -200,7 +210,6 @@ Status NEElementwiseDivision::validate(const ITensorInfo         *input1,
                                        const ITensorInfo         *output,
                                        const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseDivision::validate(input1, input2, output);
 }
@@ -235,6 +244,8 @@ void NEElementwisePower::configure(ITensor                   *input1,
                                    const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_ERROR_THROW_ON(NEElementwisePower::validate(input1->info(), input2->info(), output->info(), act_info));
+
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -285,6 +296,9 @@ NEElementwiseComparisonStatic<COP>::~NEElementwiseComparisonStatic() = default;
 template <ComparisonOperation COP>
 void NEElementwiseComparisonStatic<COP>::configure(ITensor *input1, ITensor *input2, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_THROW_ON(
+        NEElementwiseComparisonStatic<COP>::validate(input1->info(), input2->info(), output->info()));
+
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -328,6 +342,8 @@ NEElementwiseComparison::~NEElementwiseComparison()                             
 
 void NEElementwiseComparison::configure(ITensor *input1, ITensor *input2, ITensor *output, ComparisonOperation op)
 {
+    ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseComparison::validate(input1->info(), input2->info(), output->info(), op));
+
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;

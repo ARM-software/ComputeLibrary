@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,13 +118,18 @@ protected:
         }
 
         // if _use_dynamic_shape is true, this fixture will test scenario for dynamic shapes.
-        // - At configure time, all input tensors are marked as dynamic using set_tensor_dynamic()
-        // - After configure, tensors are marked as static for run using set_tensor_static()
-        // - The tensors with static shape are given to run()
+        // - At configure time, all input tensors are marked as dynamic.
+        // - After configure and before run time, shapes are set.
+        // - The tensors with known shapes are given to run()
         if(_use_dynamic_shape)
         {
-            set_tensor_dynamic(ref_src1);
-            set_tensor_dynamic(ref_src2);
+            ref_src1.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            ref_src2.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+
+            if(!_is_inplace)
+            {
+                dst.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            }
         }
 
         // Create and configure function
@@ -133,8 +138,13 @@ protected:
 
         if(_use_dynamic_shape)
         {
-            set_tensor_static(ref_src1);
-            set_tensor_static(ref_src2);
+            ref_src1.info()->set_tensor_shape(shape0);
+            ref_src2.info()->set_tensor_shape(shape1);
+
+            if(!_is_inplace)
+            {
+                dst.info()->set_tensor_shape(out_shape);
+            }
         }
 
         ARM_COMPUTE_ASSERT(ref_src1.info()->is_resizable());
