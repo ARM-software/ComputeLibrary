@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,9 @@ using NEScatterLayerFixture = ScatterValidationFixture<Tensor, Accessor, NEScatt
 namespace
 {
 RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for fp32 data type */
+#ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<float> tolerance_f16(0.02f); /**< Tolerance value for comparing reference's output against implementation's output for fp16 data type */
+#endif           // ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<int32_t> tolerance_int(0); /**< Tolerance value for comparing reference's output against implementation's output for integer data types */
 } // namespace
 using framework::dataset::make;
