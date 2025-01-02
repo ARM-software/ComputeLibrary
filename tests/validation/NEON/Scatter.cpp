@@ -25,6 +25,7 @@
 #include "arm_compute/runtime/NEON/functions/NEScatter.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/datasets/ScatterDataset.h"
+#include "tests/datasets/DatatypeDataset.h"
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ScatterLayerFixture.h"
@@ -47,6 +48,38 @@ RelativeTolerance<float> tolerance_f16(0.02f); /**< Tolerance value for comparin
 RelativeTolerance<int32_t> tolerance_int(0); /**< Tolerance value for comparing reference's output against implementation's output for integer data types */
 } // namespace
 using framework::dataset::make;
+
+void validate_data_types(DataType input_dtype, DataType updates_dtype, DataType indices_dtype, DataType output_dtype)
+{
+    const auto input = TensorInfo(TensorShape(6U, 5U, 2U), 1, input_dtype);
+    const auto updates = TensorInfo(TensorShape(6U, 4U), 1, updates_dtype);
+    const auto indices = TensorInfo(TensorShape(2U, 4U), 1, indices_dtype);
+    auto output = TensorInfo(TensorShape(6U, 5U, 2U), 1, output_dtype);
+
+    ScatterInfo scatter_info = ScatterInfo(ScatterFunction::Update, false);
+
+    const bool is_valid = static_cast<bool>(NEScatter::validate(&input, &updates, &indices, &output, scatter_info));
+
+    const auto supports = {
+        std::make_tuple(DataType::F32,DataType::F32,DataType::S32, DataType::F32),
+        std::make_tuple(DataType::F16,DataType::F16,DataType::S32, DataType::F16),
+        std::make_tuple(DataType::S32,DataType::S32,DataType::S32, DataType::S32),
+        std::make_tuple(DataType::S16,DataType::S16,DataType::S32, DataType::S16),
+        std::make_tuple(DataType::S8,DataType::S8,DataType::S32, DataType::S8),
+        std::make_tuple(DataType::U32,DataType::U32,DataType::S32, DataType::U32),
+        std::make_tuple(DataType::U16,DataType::U16,DataType::S32, DataType::U16),
+        std::make_tuple(DataType::U8,DataType::U8,DataType::S32, DataType::U8)
+    };
+    const auto config = std::make_tuple(input_dtype, updates_dtype, indices_dtype, output_dtype);
+    const std::initializer_list<DataType> dtypes_list = {input_dtype, updates_dtype, indices_dtype, output_dtype};
+
+    bool expected = false;
+    if(cpu_supports_dtypes(dtypes_list))
+    {
+        expected = (std::find(supports.begin(), supports.end(), config) != supports.end());
+    }
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
 
 TEST_SUITE(NEON)
 TEST_SUITE(Scatter)
@@ -111,6 +144,28 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
 {
     const Status status = NEScatter::validate(&input_info, &updates_info, &indices_info, &output_info, scatter_info);
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+
+DATA_TEST_CASE(ValidateAllDataTypes, framework::DatasetMode::NIGHTLY,
+    combine(
+        datasets::AllDataTypes("InputDataType"),
+        datasets::AllDataTypes("UpdatesDataType"),
+        datasets::AllDataTypes("IndicesDataType"),
+        datasets::AllDataTypes("OutputDataType")),
+        input_dtype, updates_dtype, indices_dtype, output_dtype)
+{
+    validate_data_types(input_dtype, updates_dtype, indices_dtype, output_dtype);
+}
+
+DATA_TEST_CASE(ValidateCommonDataTypes, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::CommonDataTypes("InputDataType"),
+        datasets::CommonDataTypes("UpdatesDataType"),
+        datasets::CommonDataTypes("IndicesDataType"),
+        datasets::CommonDataTypes("OutputDataType")),
+        input_dtype, updates_dtype, indices_dtype, output_dtype)
+{
+    validate_data_types(input_dtype, updates_dtype, indices_dtype, output_dtype);
 }
 
 const auto allScatterFunctions = make("ScatterFunction",
@@ -204,7 +259,15 @@ FIXTURE_DATA_TEST_CASE(RunSmallMixed, NEScatterLayerFixture<half>, framework::Da
         make("Inplace", {false}),
         make("Padding", {false})))
 {
-    validate(Accessor(_target), _reference, tolerance_f16);
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
 }
 TEST_SUITE_END() // FP16
 #endif           // ARM_COMPUTE_ENABLE_FP16

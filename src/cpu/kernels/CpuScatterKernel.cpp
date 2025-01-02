@@ -28,6 +28,7 @@
 
 #include "src/common/utils/Log.h"
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/scatter/list.h"
 
@@ -137,6 +138,7 @@ Status CpuScatterKernel::validate(const ITensorInfo *updates,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(indices, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32, DataType::F16, DataType::S32, DataType::S16,
                                                  DataType::S8, DataType::U32, DataType::U16, DataType::U8);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(updates);
 
     // Check data dims in update tensor and output tensor are equal
     for (int32_t i = 0; i < data_dim; i++)
