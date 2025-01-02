@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,14 +29,14 @@ namespace arm_compute
 {
 namespace cpu
 {
-void scatter_fp32_neon(const ITensor     *src,
-                       const ITensor     *indices,
-                       ITensor           *dst,
-                       const ScatterInfo &scatter_info,
-                       const Window      &window,
-                       const int          data_block_length)
+void scatter_fp32_neon(const ITensor         *src,
+                       const ITensor         *indices,
+                       ITensor               *dst,
+                       const ScatterFunction &scatter_func,
+                       const Window          &window,
+                       const int              data_block_length)
 {
-    switch (scatter_info.func)
+    switch (scatter_func)
     {
         case ScatterFunction::Update:
             scatter_neon<ScatterFunction::Update, float32_t>(src, indices, dst, window, data_block_length);

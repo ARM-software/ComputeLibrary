@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,15 +40,15 @@ class CpuScatterKernel : public ICpuKernel<CpuScatterKernel>
 {
 private:
     using ScatterKernelPtr = std::add_pointer<void(
-        const ITensor *, const ITensor *, ITensor *, const ScatterInfo &, const Window &, const int)>::type;
+        const ITensor *, const ITensor *, ITensor *, const ScatterFunction &, const Window &, const int)>::type;
 
 public:
     CpuScatterKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuScatterKernel);
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  updates      Input tensor info for the Update matrix. Data type supported: F32.
-     * @param[in]  indices      Input tensor info for the Indices matrix. Data type supported: U32.
+     * @param[in]  updates      Input tensor info for the Update matrix. Data type supported: F32/F16/S32/S16/S8/U32/U16/U8.
+     * @param[in]  indices      Input tensor info for the Indices matrix. Data type supported: S32.
      * @param[out] dst          Output tensor info. Data type supported: same as @p updates
      * @param[in]  scatter_info Attributes for Scatter Kernel
      */
@@ -82,7 +82,7 @@ public:
 private:
     ScatterKernelPtr _run_method{nullptr};
     std::string      _name{};
-    ScatterInfo      _scatter_info{ScatterFunction::Update, false};
+    ScatterFunction  _scatter_func{};
     int              _data_block_length{};
 };
 } // namespace kernels

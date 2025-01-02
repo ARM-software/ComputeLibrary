@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,7 @@ void CpuScatterKernel::configure(const ITensorInfo *updates,
         DataTypeISASelectorData{updates->data_type(), CPUInfo::get().get_isa()});
 
     _run_method   = uk->ukernel;
-    _scatter_info = scatter_info;
+    _scatter_func = scatter_info.func;
     _name         = std::string("CpuScatterKernel").append("/").append(uk->name);
 
     const int index_len = indices->dimension(0);
@@ -193,7 +193,7 @@ void CpuScatterKernel::run_op(ITensorPack &tensors, const Window &window, const 
         ARM_COMPUTE_ERROR("Unsupported Configuration! Padding not supported with these shapes.");
     }
 
-    _run_method(updates, indices, dst, _scatter_info, window, _data_block_length);
+    _run_method(updates, indices, dst, _scatter_func, window, _data_block_length);
 }
 
 const char *CpuScatterKernel::name() const

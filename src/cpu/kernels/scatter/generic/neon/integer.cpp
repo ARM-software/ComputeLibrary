@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,14 +30,14 @@ namespace arm_compute
 namespace cpu
 {
 template <typename ScalarType>
-void scatter_integer_generic(const ITensor     *src,
-                             const ITensor     *indices,
-                             ITensor           *dst,
-                             const ScatterInfo &scatter_info,
-                             const Window      &window,
-                             const int          data_block_length)
+void scatter_integer_generic(const ITensor         *src,
+                             const ITensor         *indices,
+                             ITensor               *dst,
+                             const ScatterFunction &scatter_func,
+                             const Window          &window,
+                             const int              data_block_length)
 {
-    switch (scatter_info.func)
+    switch (scatter_func)
     {
         case ScatterFunction::Update:
             scatter_neon<ScatterFunction::Update, ScalarType>(src, indices, dst, window, data_block_length);
@@ -60,69 +60,69 @@ void scatter_integer_generic(const ITensor     *src,
     return;
 }
 
-void scatter_s32_neon(const ITensor     *src,
-                      const ITensor     *indices,
-                      ITensor           *dst,
-                      const ScatterInfo &scatter_info,
-                      const Window      &window,
-                      const int          data_block_length)
+void scatter_s32_neon(const ITensor         *src,
+                      const ITensor         *indices,
+                      ITensor               *dst,
+                      const ScatterFunction &scatter_func,
+                      const Window          &window,
+                      const int              data_block_length)
 {
-    scatter_integer_generic<int32_t>(src, indices, dst, scatter_info, window, data_block_length);
+    scatter_integer_generic<int32_t>(src, indices, dst, scatter_func, window, data_block_length);
     return;
 }
 
-void scatter_s16_neon(const ITensor     *src,
-                      const ITensor     *indices,
-                      ITensor           *dst,
-                      const ScatterInfo &scatter_info,
-                      const Window      &window,
-                      const int          data_block_length)
+void scatter_s16_neon(const ITensor         *src,
+                      const ITensor         *indices,
+                      ITensor               *dst,
+                      const ScatterFunction &scatter_func,
+                      const Window          &window,
+                      const int              data_block_length)
 {
-    scatter_integer_generic<int16_t>(src, indices, dst, scatter_info, window, data_block_length);
+    scatter_integer_generic<int16_t>(src, indices, dst, scatter_func, window, data_block_length);
     return;
 }
 
-void scatter_s8_neon(const ITensor     *src,
-                     const ITensor     *indices,
-                     ITensor           *dst,
-                     const ScatterInfo &scatter_info,
-                     const Window      &window,
-                     const int          data_block_length)
+void scatter_s8_neon(const ITensor         *src,
+                     const ITensor         *indices,
+                     ITensor               *dst,
+                     const ScatterFunction &scatter_func,
+                     const Window          &window,
+                     const int              data_block_length)
 {
-    scatter_integer_generic<int8_t>(src, indices, dst, scatter_info, window, data_block_length);
+    scatter_integer_generic<int8_t>(src, indices, dst, scatter_func, window, data_block_length);
     return;
 }
 
-void scatter_u32_neon(const ITensor     *src,
-                      const ITensor     *indices,
-                      ITensor           *dst,
-                      const ScatterInfo &scatter_info,
-                      const Window      &window,
-                      const int          data_block_length)
+void scatter_u32_neon(const ITensor         *src,
+                      const ITensor         *indices,
+                      ITensor               *dst,
+                      const ScatterFunction &scatter_func,
+                      const Window          &window,
+                      const int              data_block_length)
 {
-    scatter_integer_generic<uint32_t>(src, indices, dst, scatter_info, window, data_block_length);
+    scatter_integer_generic<uint32_t>(src, indices, dst, scatter_func, window, data_block_length);
     return;
 }
 
-void scatter_u16_neon(const ITensor     *src,
-                      const ITensor     *indices,
-                      ITensor           *dst,
-                      const ScatterInfo &scatter_info,
-                      const Window      &window,
-                      const int          data_block_length)
+void scatter_u16_neon(const ITensor         *src,
+                      const ITensor         *indices,
+                      ITensor               *dst,
+                      const ScatterFunction &scatter_func,
+                      const Window          &window,
+                      const int              data_block_length)
 {
-    scatter_integer_generic<uint16_t>(src, indices, dst, scatter_info, window, data_block_length);
+    scatter_integer_generic<uint16_t>(src, indices, dst, scatter_func, window, data_block_length);
     return;
 }
 
-void scatter_u8_neon(const ITensor     *src,
-                     const ITensor     *indices,
-                     ITensor           *dst,
-                     const ScatterInfo &scatter_info,
-                     const Window      &window,
-                     const int          data_block_length)
+void scatter_u8_neon(const ITensor         *src,
+                     const ITensor         *indices,
+                     ITensor               *dst,
+                     const ScatterFunction &scatter_func,
+                     const Window          &window,
+                     const int              data_block_length)
 {
-    scatter_integer_generic<uint8_t>(src, indices, dst, scatter_info, window, data_block_length);
+    scatter_integer_generic<uint8_t>(src, indices, dst, scatter_func, window, data_block_length);
     return;
 }
 } // namespace cpu

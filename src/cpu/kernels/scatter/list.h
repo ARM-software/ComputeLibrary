@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,8 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_SCATTER_KERNEL(func_name)                                                                     \
-    void func_name(const ITensor *src, const ITensor *indices, ITensor *dst, const ScatterInfo &scatter_info, \
+#define DECLARE_SCATTER_KERNEL(func_name)                                                                         \
+    void func_name(const ITensor *src, const ITensor *indices, ITensor *dst, const ScatterFunction &scatter_func, \
                    const Window &window, const int data_block_length)
 
 DECLARE_SCATTER_KERNEL(scatter_fp32_neon);
