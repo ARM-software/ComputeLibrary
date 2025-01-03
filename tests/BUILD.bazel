@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -26,11 +26,13 @@
 cc_library(
     name = "validation_framework",
     srcs = glob([
+        "validation/helpers/*.cpp",
         "validation/reference/*.cpp",
         "validation/*.cpp",
         "*.h",
     ]),
     hdrs = glob([
+        "validation/helpers/*.h",
         "validation/reference/*.h",
         "validation/**/*.h",
     ]),

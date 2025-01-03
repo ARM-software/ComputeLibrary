@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023,2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,6 +70,15 @@ struct QuantizationHint
     QuantizationInfo q_info;
     int32_t          bias_min;
     int32_t          bias_max;
+};
+
+/** Helper enum to store the test type */
+enum class TestType
+{
+    ConfigureOnceRunOnce,           /**< Default tests, i.e. configure an operator once
+                                         and run that operator once */
+    ConfigureOnceRunMultiThreaded   /**< Thread-safety tests, Configure an operator, and use
+                                         the operator from different threads using different data */
 };
 
 /** Helper function to get the testing range for each activation layer.

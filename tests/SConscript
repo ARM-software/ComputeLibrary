@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2023, 2024 Arm Limited.
+# Copyright (c) 2017-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -219,7 +219,9 @@ if test_env['validation_tests']:
         #Set up directory for temp files. To prevent permission issue, the temp files are in the same directory with output files
         test_env['TEMPFILEDIR'] = test_env['build_dir']
 
-    arm_compute_validation_framework = test_env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework ])
+    arm_compute_validation_framework = test_env.StaticLibrary('arm_compute_validation_framework',
+        Glob('validation/reference/*.cpp') + Glob('validation/*.cpp') + Glob('validation/helpers/*.cpp'),
+        LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework ])
     Depends(arm_compute_validation_framework , arm_compute_test_framework)
 
     program_objects = files_validation + common_objects

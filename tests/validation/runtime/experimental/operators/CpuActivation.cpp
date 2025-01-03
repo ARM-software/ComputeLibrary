@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/CpuActivationFixture.h"
+#include "tests/validation/helpers/ActivationHelpers.h"
 
 /*
  * Tests for arm_compute::experimental::op::CpuActivation which is a shallow wrapper for
@@ -42,61 +43,55 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
-/** Define relative tolerance of the activation layer.
- *
- * @param[in] activation The activation function used.
- *
- * @return Relative tolerance depending on the activation function.
- */
-RelativeTolerance<float> relative_tolerance(ActivationLayerInfo::ActivationFunction activation)
-{
-    switch(activation)
-    {
-        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::ELU:
-        case ActivationLayerInfo::ActivationFunction::SQRT:
-        case ActivationLayerInfo::ActivationFunction::TANH:
-        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-        case ActivationLayerInfo::ActivationFunction::SWISH:
-        case ActivationLayerInfo::ActivationFunction::GELU:
-            return RelativeTolerance<float>(0.05f);
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            return RelativeTolerance<float>(0.00001f);
-        default:
-            return RelativeTolerance<float>(0.f);
-    }
-}
 
-/** Define absolute tolerance of the activation layer.
- *
- * @param[in] activation The activation function used.
- *
- * @return Absolute tolerance depending on the activation function.
- */
-AbsoluteTolerance<float> absolute_tolerance(ActivationLayerInfo::ActivationFunction activation)
-{
-    switch(activation)
-    {
-        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::SQRT:
-        case ActivationLayerInfo::ActivationFunction::TANH:
-        case ActivationLayerInfo::ActivationFunction::SWISH:
-        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            return AbsoluteTolerance<float>(0.00001f);
-        default:
-            return AbsoluteTolerance<float>(0.f);
-    }
-}
-
-const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions(),
-                                                   framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::HARD_SWISH, ActivationLayerInfo::ActivationFunction::SWISH }));
+const auto NeonActivationFunctionsDataset =
+    concat(
+        datasets::ActivationFunctions(),
+        make("ActivationFunction",
+            { ActivationLayerInfo::ActivationFunction::HARD_SWISH,
+            ActivationLayerInfo::ActivationFunction::SWISH })
+    );
 
 /** Input data sets. */
-const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+const auto ActivationDataset =
+    combine(
+        make("InPlace", { false, true }),
+        NeonActivationFunctionsDataset,
+        make("AlphaBeta", { 0.5f, 1.f })
+    );
 
+// Inplace calculation is irrelevant to thread safety because different threads
+// will use different tensors. AlphaBeta value is also irrelevant as it's just
+// a change in the computation value.
+const auto FloatActivationDatasetForThreadSafetyTests =
+    combine(
+        make("InPlace", { false }),
+        NeonActivationFunctionsDataset,
+        make("AlphaBeta", { 0.5f })
+    );
+
+const auto QuantizedActivationFunctionsDataset = make("ActivationFunction",
+{
+    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+    ActivationLayerInfo::ActivationFunction::RELU,
+    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+    ActivationLayerInfo::ActivationFunction::LOGISTIC,
+    ActivationLayerInfo::ActivationFunction::TANH,
+    ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
+});
+
+const auto QuantizedActivationDatasetForThreadSafetyTests =
+    combine(
+        make("InPlace", { false }),
+        concat(
+            QuantizedActivationFunctionsDataset,
+            make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH)
+        ),
+        make("AlphaBeta", { 1.f })
+    );
 } // namespace
 
 TEST_SUITE(NEON)
@@ -106,15 +101,110 @@ TEST_SUITE(CpuActivation)
 template <typename T>
 using CpuActivationFixture = CpuActivationValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
 
-TEST_SUITE(SmokeTest)
-FIXTURE_DATA_TEST_CASE(SmokeTest, CpuActivationFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
-                                                                                                       DataType::F32)))
+template <typename T>
+using CpuActivationFloatThreadSafeFixture = CpuActivationFloatThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
 
+template <typename T>
+using CpuActivationQuantizedThreadSafeFixture = CpuActivationQuantizedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
+
+TEST_SUITE(SmokeTest)
+FIXTURE_DATA_TEST_CASE(SmokeTest, CpuActivationFixture<float>, framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapes(),
+        ActivationDataset,
+        make("DataType", DataType::F32)
+    ))
 {
     // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_function), 0.f, absolute_tolerance(_function));
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i],
+            helper::relative_tolerance(_data_type, _function),
+            helper::tolerance_num(_data_type, _function),
+            helper::absolute_tolerance(_data_type, _function));
+    }
 }
 TEST_SUITE_END() // SmokeTest
+
+#ifndef BARE_METAL
+TEST_SUITE(ThreadSafety)
+TEST_SUITE(Float)
+TEST_SUITE(F32)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationFloatThreadSafeFixture<float>,
+    framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapes(),
+        FloatActivationDatasetForThreadSafetyTests,
+        make("DataType", DataType::F32)
+    ))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i],
+            helper::relative_tolerance(_data_type, _function),
+            helper::tolerance_num(_data_type, _function),
+            helper::absolute_tolerance(_data_type, _function));
+    }
+}
+TEST_SUITE_END() // F32
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(F16)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationFloatThreadSafeFixture<half>,
+    framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapes(),
+        FloatActivationDatasetForThreadSafetyTests,
+        make("DataType", DataType::F16)
+    ))
+{
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        for(int i = 0; i < _num_parallel_runs; ++i)
+        {
+            validate(Accessor(_target[i]), _reference[i],
+                helper::relative_tolerance(_data_type, _function),
+                helper::tolerance_num(_data_type, _function),
+                helper::absolute_tolerance(_data_type, _function));
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+TEST_SUITE_END() // F16
+#endif // ARM_COMPUTE_ENABLE_FP16
+
+TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+
+// Int8 and UInt8 are very similar, therefore no need to test both from thread-safety perspective
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationQuantizedThreadSafeFixture<int8_t>,
+    framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapes(),
+        QuantizedActivationDatasetForThreadSafetyTests,
+        make("DataType", DataType::QASYMM8_SIGNED),
+        make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })
+    ))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i], helper::tolerance_qasymm8(_function));
+    }
+}
+
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
+TEST_SUITE_END() // ThreadSafety
+#endif // #ifndef BARE_METAL
 
 TEST_SUITE_END() // CpuActivation
 TEST_SUITE_END() // OPERATORS
