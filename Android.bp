@@ -1,5 +1,5 @@
 //
-// Copyright © 2020-2024 Arm Ltd. All rights reserved.
+// Copyright © 2020-2025 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 
@@ -180,7 +180,8 @@ cc_library_static {
                          "src/core/NEON/kernels/assembly",
                          "src/core/NEON/kernels/convolution/common",
                          "src/core/NEON/kernels/convolution/winograd",
-                         "src/cpu/kernels/assembly"],
+                         "src/cpu/kernels/assembly",
+                         "third_party/kleidiai"],
     export_include_dirs: [".", "./include"],
     srcs: [
         "src/c/AclContext.cpp",
@@ -1055,6 +1056,7 @@ cc_library_static {
         "utils/GraphUtils.cpp",
         "utils/Utils.cpp",
         
+        "third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c",
     ],
     arch: {
         arm: {

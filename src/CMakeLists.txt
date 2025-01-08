@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -359,7 +359,8 @@ target_sources(
 target_sources(
     arm_compute
     PRIVATE
-    c/AclContext.cpp
+    ../third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c
+	c/AclContext.cpp
 	c/AclOperator.cpp
 	c/AclQueue.cpp
 	c/AclTensor.cpp

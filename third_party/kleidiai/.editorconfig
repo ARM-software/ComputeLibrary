@@ -1,0 +1,33 @@
+#
+# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Indicates this is the top-level EditorConfig.
+root = true
+
+# Apply these settings to all files.
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Avoid conflict with formatters.
+[*.{c,h,cpp,hpp,md}]
+indent_size = unset
+
+# Override settings.
+[*.{json,yml,yaml}]
+indent_size = 2
+
+# YAML files as well.
+[.clang-{tidy,format}]
+indent_size = 2
+
+# Override settings.
+[LICENSES/*]
+indent_size = unset

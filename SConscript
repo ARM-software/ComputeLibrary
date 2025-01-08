@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2024 Arm Limited.
+# Copyright (c) 2016-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -669,7 +669,8 @@ if env['neon']:
                                       "src/core/NEON/kernels/arm_conv/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
-                                      "src/cpu/kernels/assembly/"])
+                                      "src/cpu/kernels/assembly/",
+                                      "third_party/kleidiai/"])
 
     # Setup SIMD file list to include
     simd = ['neon']

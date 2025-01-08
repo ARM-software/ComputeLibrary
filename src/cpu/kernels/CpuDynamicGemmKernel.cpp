@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,11 @@
  * SOFTWARE.
  */
 #include "src/cpu/kernels/CpuDynamicGemmKernel.h"
+#if defined(__aarch64__)
+/* To verify that external headers are visible. */
+#include "kai/kai_common.h"
+#include "kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.h"
+#endif /* __aarch64__ */
 
 namespace arm_compute
 {
@@ -29,6 +34,11 @@ namespace cpu
 {
 namespace kernels
 {
+
+#if defined(__aarch64__)
+/* To verify that external symbol is visible. */
+const static size_t m_step = kai_get_m_step_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla();
+#endif /* __aarch64__ */
 
 void CpuDynamicGemmKernel::configure(const ITensorInfo *a,
                                      const ITensorInfo *b,

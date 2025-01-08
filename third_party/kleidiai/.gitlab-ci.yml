@@ -1,0 +1,439 @@
+#
+# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+stages:
+  - build
+  - test
+  - analyze
+  - deploy
+
+default:
+  image: registry.gitlab.arm.com/kleidi/kleidiai/image:latest
+  tags:
+    - arm64
+  interruptible: true
+  retry:
+    max: 2
+    when:
+      - job_execution_timeout
+      - stuck_or_timeout_failure
+
+.standard-rules:
+  timeout: 10m
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"
+
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+
+build-clang:
+  extends:
+    - .standard-rules
+  stage: build
+  script:
+    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -S . -B ${CI_JOB_NAME_SLUG}
+    - cmake --build ${CI_JOB_NAME_SLUG} -j$(nproc)
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ${CI_JOB_NAME_SLUG}/kleidiai_test
+
+build-clang-cov:
+  extends:
+    - .standard-rules
+  stage: build
+  script:
+    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -DCMAKE_C_FLAGS="--coverage" -DCMAKE_CXX_FLAGS="--coverage" -S . -B build
+    - cmake --build ./build -j$(nproc)
+    # save coverage build job path for later use since coverage processing requires files in exactly same location
+    - echo "COVERAGE_PROJECT_PATH=${PWD}" > build/coverage_path.env
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - build
+    reports:
+      dotenv: build/coverage_path.env
+
+build-gcc:
+  extends:
+    - .standard-rules
+  stage: build
+  script:
+    - cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -S . -B ${CI_JOB_NAME_SLUG}
+    - cmake --build ${CI_JOB_NAME_SLUG} -j$(nproc)
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ${CI_JOB_NAME_SLUG}/kleidiai_test
+
+build-gcc-bazel:
+  extends:
+    - .standard-rules
+  stage: build
+  cache:
+    - key: cache-bazelisk
+      paths:
+      - /cache/bazelisk
+  script:
+    - bazelisk clean --expunge
+    - bazelisk build -c opt --jobs=HOST_CPUS -k --verbose_failures --curses=no //...
+    - mkdir -p ${CI_JOB_NAME_SLUG} && cp bazel-bin/test/kleidiai_test ${CI_JOB_NAME_SLUG}/
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ${CI_JOB_NAME_SLUG}/kleidiai_test
+
+build-clang-bazel:
+  extends:
+    - .standard-rules
+  stage: build
+  cache:
+    - key: cache-bazelisk
+      paths:
+      - /cache/bazelisk
+  script:
+    - bazelisk clean --expunge
+    # explicitly disable layering_check feature
+    - CC=clang bazelisk build -c opt --jobs=HOST_CPUS -k --verbose_failures --compiler=clang --features=no-layering_check --curses=no //...
+    - mkdir -p ${CI_JOB_NAME_SLUG} && cp bazel-bin/test/kleidiai_test ${CI_JOB_NAME_SLUG}/
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ${CI_JOB_NAME_SLUG}/kleidiai_test
+
+build-examples:
+  stage: build
+  extends:
+    - .standard-rules
+  parallel:
+    matrix:
+      - EXAMPLE:
+          - matmul_clamp_f16_f16_f16p
+          - matmul_clamp_f32_bf16p_bf16p
+          - matmul_clamp_f32_qai8dxp_qsi4cxp
+          - matmul_clamp_f32_qsi8d32p_qsi4c32p
+          - matmul_clamp_f32_qai8dxp_qsi4c32p
+  script:
+    - mkdir -p build/$EXAMPLE
+    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -S examples/$EXAMPLE -B build/$EXAMPLE
+    - cmake --build build/$EXAMPLE -j$(nproc)
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - build/$EXAMPLE/$EXAMPLE
+
+test-examples:
+  stage: test
+  extends:
+    - .standard-rules
+  needs:
+  - build-examples
+  parallel:
+    matrix:
+      - EXAMPLE:
+          - matmul_clamp_f16_f16_f16p
+          - matmul_clamp_f32_bf16p_bf16p
+          - matmul_clamp_f32_qai8dxp_qsi4cxp
+          - matmul_clamp_f32_qsi8d32p_qsi4c32p
+          - matmul_clamp_f32_qai8dxp_qsi4c32p
+  script:
+    - build/${EXAMPLE}/${EXAMPLE} | tee -a ${EXAMPLE}.log
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - ${EXAMPLE}.log
+
+test-clang-tidy:
+  extends:
+    - .standard-rules
+  stage: test
+  needs: []
+  script:
+    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -DKLEIDIAI_BUILD_BENCHMARK=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build/${CI_JOB_NAME_SLUG}
+    # Only test the main library.
+    - run-clang-tidy -header-filter ".*" -warnings-as-errors "*" -p build/${CI_JOB_NAME_SLUG} kai
+
+pre-commit-hooks:
+  variables:
+    PRE_COMMIT_HOME: '/cache/pre-commit'
+  extends:
+    - .standard-rules
+  stage: build
+  cache:
+    - key: cache-pre-commit
+      paths:
+      - $PRE_COMMIT_HOME
+  script:
+    - PRE_COMMIT_HOME=$PRE_COMMIT_HOME pre-commit run --all-files
+
+test-remote:
+  # Part of the pipeline is executed in a separate system.
+  #
+  # When the remote pipeline has been completed, this job is manually triggered
+  # with the information about the remote pipeline including whether it's passed or failed.
+  # Run the job only for a public pipeline
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_SERVER_HOST == 'gitlab.arm.com'
+  # Longer timeout than rest of jobs to account for remote
+  timeout: 1h
+  stage: test
+  needs: []
+  when: manual
+  allow_failure: false
+  variables:
+    REMOTE_PIPELINE_ID: 0
+    REMOTE_PIPELINE_PASSED: ""
+    REMOTE_PIPELINE_MESSAGE: ""
+  script:
+    - echo "REMOTE_PIPELINE_ID=${REMOTE_PIPELINE_ID}" |& tee remote_result.txt
+    - echo "REMOTE_PIPELINE_PASSED=${REMOTE_PIPELINE_PASSED}" |& tee -a remote_result.txt
+    - echo "REMOTE_PIPELINE_MESSAGE=${REMOTE_PIPELINE_MESSAGE}" |& tee -a remote_result.txt
+    - echo "${REMOTE_PIPELINE_PASSED}" | grep -q "true"
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - remote_result.txt
+
+test-linux-aarch64:
+  extends:
+    - .standard-rules
+  stage: test
+  parallel:
+    matrix:
+      - BUILD_JOB_PROVIDER: [ clang, gcc, clang-bazel, gcc-bazel ]
+  needs:
+    - build-gcc
+    - build-gcc-bazel
+    - build-clang
+    - build-clang-bazel
+  script:
+    - ./build-${BUILD_JOB_PROVIDER}/kleidiai_test --gtest_output=xml:kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+    reports:
+      junit: kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+
+# This job template is used to mimic same location of source files used to build binary with coverage.
+# It is required because coverage post-processing tooling used expects source files to be in exactly
+# same location as during build. But it's not always possible in case of CI runner change or version
+# update.
+.coverage-post-processing:
+  before_script:
+    - >
+      if [ "${CI_PROJECT_DIR}" != "${COVERAGE_PROJECT_PATH}" ]; then
+        echo "Workaround for build location active"
+        echo "Cleanup old artifacts"
+        rm -rf ${COVERAGE_PROJECT_PATH}
+        echo "Copy current job files into path used to build coverage binary"
+        mkdir -vp ${COVERAGE_PROJECT_PATH}
+        cp -a -t ${COVERAGE_PROJECT_PATH}/ *
+      fi
+    - |
+      echo -e "
+      root=${COVERAGE_PROJECT_PATH}
+      exclude=${COVERAGE_PROJECT_PATH}/build
+      exclude=${COVERAGE_PROJECT_PATH}/test
+      gcov-executable=llvm-cov gcov
+      exclude-unreachable-branches=yes
+      exclude-lines-by-pattern=.*KAI_(?:ASSERT|ASSUME|ERROR).*
+      exclude-branches-by-pattern=.*KAI_(?:ASSERT|ASSUME).*" > gcovr.cfg
+  after_script:
+    - >
+      if [ "${CI_PROJECT_DIR}" != "${COVERAGE_PROJECT_PATH}" ]; then
+        echo "Cleanup workaround for build location"
+        rm -rf ${COVERAGE_PROJECT_PATH}
+        rm -f gcovr.cfg
+      fi
+
+# Script to run binary provided in FVP environment
+# * FVP_TEST_EXECUTABLE - mandatory path in CI for file and parameters to execute
+# * FVP_MODEL_EXTRA - optional additional FVP parameters, default is nothing
+# * FVP_HOST_PATH - optional path to share via P9 FS, default is $PWD
+.test-linux-fvp: &test-linux-fvp
+  - if [ ! -f /opt/devtools/linux-rootfs.img ]; then tar xJf /opt/devtools/linux-rootfs.img.xz; fi
+  - >
+    echo "#!/bin/bash
+      set -x
+      echo '=================================================='
+      echo '== START                                        =='
+      echo '=================================================='
+      echo '== CPU INFO                                     =='
+      if [ ! -f /proc/cpuinfo ]; then mount -vt proc -o rw,nosuid,nodev,noexec proc /proc; fi
+      cat /proc/cpuinfo
+      echo '=================================================='
+
+      mkdir -vp '$PWD'
+      mount -vt 9p -o trans=virtio,version=9p2000.L FM '$PWD'
+
+      cd '$PWD'
+      ${FVP_TEST_EXECUTABLE} && echo 'FINISHED WITHOUT ERROR'
+      sync
+
+      echo '=================================================='
+      echo '== END                                          =='
+      echo '=================================================='
+      " > startup
+  - e2cp -O 0 -G 0 -P 755 startup linux-rootfs.img:/root/startup
+  - >
+    /opt/devtools/fvp_base_aemva/models/Linux64*GCC-9.3/FVP_Base_RevC-2xAEMvA \
+      -C cache_state_modelled=0 \
+      -C bp.refcounter.non_arch_start_at_default=1 \
+      -C bp.secure_memory=0 \
+      -C bp.pl011_uart0.out_file=- \
+      -C bp.pl011_uart0.shutdown_tag="System halted" \
+      -C bp.terminal_0.mode=telnet \
+      -C bp.terminal_0.start_telnet=0 \
+      -C bp.terminal_1.mode=raw \
+      -C bp.terminal_1.start_telnet=0 \
+      -C bp.terminal_2.mode=raw \
+      -C bp.terminal_2.start_telnet=0 \
+      -C bp.terminal_3.mode=raw \
+      -C bp.terminal_3.start_telnet=0 \
+      -C cluster0.NUM_CORES=1 \
+      -C cluster0.has_arm_v8-1=1 \
+      -C cluster0.has_arm_v8-2=1 \
+      -C cluster0.has_arm_v8-3=1 \
+      -C cluster0.has_arm_v8-4=1 \
+      -C cluster0.has_arm_v8-5=1 \
+      -C cluster0.has_arm_v8-6=1 \
+      -C cluster0.has_arm_v8-7=1 \
+      -C cluster0.has_arm_v8-8=1 \
+      -C cluster0.has_arm_v9-0=1 \
+      -C cluster0.has_arm_v9-1=1 \
+      -C cluster0.has_arm_v9-2=1 \
+      -C cluster0.has_arm_v9-3=1 \
+      -C cluster0.has_arm_v9-4=1 \
+      -C cluster0.has_arm_v9-5=1 \
+      -C cluster0.has_sve=1 \
+      -C cluster0.sve.has_b16b16=1 \
+      -C cluster0.sve.has_sve2=1 \
+      -C cluster0.sve.has_sme=1 \
+      -C cluster0.sve.has_sme2=1 \
+      -C cluster0.sve.has_sme_f16f16=1 \
+      -C cluster0.sve.has_sme_fa64=1 \
+      -C cluster0.sve.has_sme_lutv2=1 \
+      -C cluster0.sve.sme2_version=1 \
+      -C cluster0.sve.veclen=2 \
+      -C cluster0.sve.sme_veclens_implemented=4 \
+      -C bp.virtio_rng.enabled=1 \
+      -C bp.virtioblockdevice.image_path=linux-rootfs.img \
+      -C bp.vis.disable_visualisation=1 \
+      -C bp.virtiop9device.root_path=${FVP_HOST_PATH:-$PWD} \
+      -a cluster*.cpu*=/opt/devtools/linux-system.axf \
+      ${FVP_MODEL_EXTRA:-} \
+      |& tee output.txt
+  - grep -q "FINISHED WITHOUT ERROR" output.txt
+
+test-linux-aarch64-cov:
+  extends:
+    - .standard-rules
+    - .coverage-post-processing
+  stage: test
+  needs:
+    - build-clang-cov
+  script:
+    - ./build/kleidiai_test --gtest_output=xml:kleidiai_test_results.xml
+    - mkdir -p build/coverage
+    - gcovr --json=build/coverage/linux-aarch64.json -j --config gcovr.cfg
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - kleidiai_test_results.xml
+      - build/coverage/linux-aarch64.json
+      - build/coverage_path.env
+    reports:
+      junit: kleidiai_test_results.xml
+      # Reexport coverage information for final 'coverage' job
+      dotenv: build/coverage_path.env
+
+.test-linux-aarch64-cov-fvp:
+  extends:
+    - .standard-rules
+    - .coverage-post-processing
+  stage: test
+  needs:
+    - build-clang-cov
+  variables:
+    FVP_TEST_EXECUTABLE: "./build/kleidiai_test --gtest_output=xml:kleidiai_test_results.xml"
+  script:
+    - *test-linux-fvp
+    - mkdir -p build/coverage
+    - gcovr --json=build/coverage/linux-aarch64-fvp.json -j --config gcovr.cfg
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - build/coverage/linux-aarch64-fvp.json
+      - kleidiai_test_results.xml
+    reports:
+      junit: kleidiai_test_results.xml
+
+.test-linux-aarch64-fvp-nosve:
+  extends:
+    - .standard-rules
+  stage: test
+  parallel:
+    matrix:
+      - BUILD_JOB_PROVIDER: [ clang, gcc, clang-bazel, gcc-bazel ]
+  needs:
+    - build-gcc
+    - build-gcc-bazel
+    - build-clang
+    - build-clang-bazel
+  variables:
+    FVP_MODEL_EXTRA: "-C cluster0.sve.has_sve2=0 -C cluster0.sve.sme_only=1"
+    FVP_TEST_EXECUTABLE: "./build-${BUILD_JOB_PROVIDER}/kleidiai_test --gtest_output=xml:kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml"
+  script:
+    - *test-linux-fvp
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+    reports:
+      junit: kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+
+coverage:
+  extends:
+    - .standard-rules
+    - .coverage-post-processing
+  stage: analyze
+  needs:
+    - test-linux-aarch64-cov
+    # - test-linux-aarch64-cov-fvp  # disabled job
+  script:
+    - mkdir -p build/html/coverage
+    - gcovr --json-add-tracefile "build/coverage/*.json" --print-summary --cobertura=build/coverage.xml --html-details=build/html/coverage/coverage_report.html --html-title="KleidiAI Coverage Report" -j
+  artifacts:
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    expire_in: 1 day
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: build/coverage.xml
+    paths:
+      - build/coverage.xml
+      - build/html/coverage
+
+pages:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  timeout: 10m
+  stage: deploy
+  needs:
+    - coverage
+  script:
+    - pwd > /dev/null
+  artifacts:
+    paths:
+      - build/html
+  publish: build/html

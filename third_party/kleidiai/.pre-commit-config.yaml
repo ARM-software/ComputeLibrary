@@ -1,0 +1,90 @@
+#
+# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+default_install_hook_types: [ pre-commit, pre-push ]
+fail_fast: false
+repos:
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v3.0.1
+    hooks:
+      - id: reuse
+        stages: [ pre-commit ]
+        name: "REUSE Compliant Copyright and License"
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        args: [ '--maxkb=200' ]
+        stages: [ pre-commit ]
+        name: "File size limit not exceeded"
+      - id: check-yaml
+        stages: [ pre-commit ]
+        name: "YAML Syntax"
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 2.7.3
+    hooks:
+      - id: editorconfig-checker
+        alias: ec
+        stages: [ pre-commit ]
+        name: "EditorConfig Rules"
+        exclude: ^LICENSES/
+  - repo: https://github.com/cmake-lint/cmake-lint
+    rev: 251239e56ab8b88889fec16a47376c44dfa16a99
+    hooks:
+      - id: cmakelint
+        stages: [ pre-commit ]
+        name: CMake Linter
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        stages: [ pre-commit ]
+        name: Markdown Formatter
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v17.0.6
+    hooks:
+      - id: clang-format
+        stages: [ pre-commit ]
+        name: "C/C++: clang-format Formatter"
+  - repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.12.0
+    hooks:
+      - id: reorder-python-imports
+        stages: [ pre-commit ]
+        name: "Python: Reorder Imports"
+  - repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+      - id: black
+        stages: [ pre-commit ]
+        name: "Python: Black Formatter"
+  - repo: https://github.com/keith/pre-commit-buildifier
+    rev: 5595ecae0b38f9450b7dddf00591c8591a9939bc
+    hooks:
+      - id: buildifier
+        name: "Bazel: Buildifier (fix)"
+        stages: [ pre-commit ]
+      - id: buildifier-lint
+        name: "Bazel: Buildifier (lint)"
+        stages: [ pre-commit ]
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        stages: [ pre-commit ]
+        args: [ "--severity=warning" ]
+  - repo: local
+    hooks:
+      - id: signed-off-checker
+        alias: signed-off-checker
+        name: "Signed-off Checker (DCO)"
+        entry: python tools/pre-commit/signedoff_checker.py
+        always_run: true
+        language: python
+        language_version: python3
+        description: Ensures that latest commit has been signed-off with `--signoff`.
+        pass_filenames: false
+        stages: [ pre-commit, pre-push ]

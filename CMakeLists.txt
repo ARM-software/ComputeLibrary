@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -203,7 +203,8 @@ target_include_directories(
           src/core/NEON/kernels/assembly
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise
-          src/core/NEON/kernels/convolution/winograd)
+          src/core/NEON/kernels/convolution/winograd
+          third_party/kleidiai)
 target_compile_options(arm_compute PUBLIC ${COMMON_CXX_FLAGS})
 
 add_library(ArmCompute::Core ALIAS arm_compute)

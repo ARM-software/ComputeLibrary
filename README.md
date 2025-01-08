@@ -146,6 +146,12 @@ This project contains code from other projects as listed below. The original lic
 
 * The stb image library is either licensed under MIT license or is in Public Domain. It is used by this project under the terms of MIT license.
 
+* The KleidiAI library is licensed under Apache License, Version 2.0.
+
+* The GoogleTest library is used by KleidiAI and is licensed under BSD-3-Clause license.
+
+* The Benchmark library is used by KleidiAI and is licensed under Apache License, Version 2.0.
+
 <br>
 
 ## Trademarks and Copyrights

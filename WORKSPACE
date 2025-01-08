@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023,2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -36,3 +36,5 @@ http_archive(
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
+
+local_repository(name = "kleidiai", path = "third_party/kleidiai")
