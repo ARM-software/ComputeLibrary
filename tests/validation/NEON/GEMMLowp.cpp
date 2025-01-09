@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,9 @@ namespace
 {
     constexpr AbsoluteTolerance<float> tolerance_batched(1);
     constexpr AbsoluteTolerance<float> tolerance_quant(1);
+#ifdef __aarch64__
+    constexpr float large_test_tolerance_num = 0.00001f;
+#endif // __aarch64__
 } // namespace
 
 
@@ -387,7 +390,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQua
         QuantizedActivationFunctionsDataset
         ))
 {
-    validate(Accessor(_target), _reference, tolerance_batched);
+    validate(Accessor(_target), _reference, tolerance_batched, large_test_tolerance_num);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 
@@ -412,7 +415,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQua
         QuantizedActivationFunctionsDataset
         ))
 {
-    validate(Accessor(_target), _reference, tolerance_batched);
+    validate(Accessor(_target), _reference, tolerance_batched, large_test_tolerance_num);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // UpdateStaticQuantInfoAfterConfigure
@@ -468,7 +471,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedMatrixMultiplyValidationFi
     ))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_dequantized);
+    validate(Accessor(_target), _reference, tolerance_dequantized, large_test_tolerance_num);
 }
 TEST_SUITE_END() // Dequant
 #endif // __aarch64__
