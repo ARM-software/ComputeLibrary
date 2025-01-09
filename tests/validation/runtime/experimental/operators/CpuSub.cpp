@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,30 +46,109 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
-const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", {false});
+const auto OutOfPlaceDataSet = make("InPlace", {false});
+
+const auto ArithmeticSubtractionQuantizationInfoSignedDataset = combine(make("QuantizationInfoIn1", { QuantizationInfo(0.5f, 10) }),
+                                                                                make("QuantizationInfoIn2", { QuantizationInfo(0.5f, 20) }),
+                                                                        make("QuantizationInfoOut", { QuantizationInfo(0.5f, 50) }));
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuSub)
 
-using CpuSubFixture = CpuArithmeticSubtractionValidationFixture<Tensor, Accessor, experimental::op::CpuSub>;
+template <typename T>
+using CpuSubFixture = CpuArithmeticSubtractionValidationFixture<Tensor, Accessor, experimental::op::CpuSub, T>;
+
+template <typename T>
+using CpuArithmeticSubtractionThreadSafeFixture = CpuArithmeticSubtractionThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuSub, T>;
+
+template <typename T>
+using CpuArithmeticSubtractionQuantizedThreadSafeFixture = CpuArithmeticSubtractionQuantizedThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuSub, T>;
+
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(
-    SmokeTest,
-    CpuSubFixture,
-    framework::DatasetMode::PRECOMMIT,
-    combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
-                    framework::dataset::make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP})),
-            OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(SmokeTest, CpuSubFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SmallShapes(),
+        make("DataType", DataType::U8),
+        make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+        OutOfPlaceDataSet
+    ))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
 }
 TEST_SUITE_END() // U8
+
+#ifndef BARE_METAL
+TEST_SUITE(ThreadSafety)
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuArithmeticSubtractionQuantizedThreadSafeFixture<int8_t>, framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallShapes(),
+        make("DataType", DataType::QASYMM8_SIGNED),
+        make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+        ArithmeticSubtractionQuantizationInfoSignedDataset,
+        OutOfPlaceDataSet
+    ))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
+
+TEST_SUITE(Integer)
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuArithmeticSubtractionThreadSafeFixture<int32_t>, framework::DatasetMode::ALL,
+    combine(
+        datasets::TinyShapes(),
+        make("DataType", DataType::S32),
+        make("ConvertPolicy", {ConvertPolicy::WRAP}),
+        OutOfPlaceDataSet
+    ))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+TEST_SUITE_END() // S32
+TEST_SUITE_END() // Integer
+
+TEST_SUITE(Float)
+TEST_SUITE(F32)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuArithmeticSubtractionThreadSafeFixture<float>, framework::DatasetMode::ALL,
+    combine(
+        datasets::TinyShapes(),
+        make("DataType", DataType::F32),
+        make("ConvertPolicy", {ConvertPolicy::SATURATE}),
+        OutOfPlaceDataSet
+    ))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+TEST_SUITE_END() // F32
+TEST_SUITE_END() // Float
+
+TEST_SUITE_END() // ThreadSafety
+#endif // #ifndef BARE_METAL
 
 TEST_SUITE_END() // CpuSub
 TEST_SUITE_END() // OPERATORS
