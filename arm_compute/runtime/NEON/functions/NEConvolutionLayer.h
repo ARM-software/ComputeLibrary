@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,10 +74,7 @@ class NEConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager);
-    NEConvolutionLayer() : NEConvolutionLayer(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayer(const NEConvolutionLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
