@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -119,6 +119,7 @@ Status validate_mm(const ITensorInfo         *src,
         gemm_info.set_weight_format(weight_format);
         gemm_info.set_fixed_format(weight_format != WeightFormat::UNSPECIFIED);
         gemm_info.set_fast_math(enable_fast_math);
+        gemm_info.set_activation_info(act);
         ARM_COMPUTE_RETURN_ON_ERROR(CpuGemm::validate(src, weights, biases, dst, 1.f, 1.0f, gemm_info));
     }
 
@@ -382,8 +383,17 @@ Status CpuFullyConnected::validate(const ITensorInfo      *src,
 {
     ARM_COMPUTE_UNUSED(fc_info.retain_internal_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::F16, DataType::F32);
+
+    if (is_fixed_format(weights_info.weight_format()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                             DataType::F16, DataType::F32, DataType::BFLOAT16);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                             DataType::F16, DataType::F32);
+    }
 
     if (is_fixed_format_fast_math(weights_info.weight_format()))
     {
