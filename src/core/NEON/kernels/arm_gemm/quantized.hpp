@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2023-2024 Arm Limited.
+ * Copyright (c) 2019, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,5 +48,13 @@ void row_sums_indirect(size_t num_strings, const unsigned int *string_lengths, I
 void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned int height,
                          const int32_t* input, unsigned int in_stride, float *output, unsigned int out_stride,
                          const float *row_bias, bool not_first_pass, const Activation &act);
+
+#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
+void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned int height,
+                         const int32_t* input, unsigned int in_stride, __fp16 *output, unsigned int out_stride,
+                         const __fp16 *row_bias, bool not_first_pass, const Activation &act);
+#endif // defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
+
+
 
 } // namespace arm_gemm

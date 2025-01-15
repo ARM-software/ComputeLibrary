@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,6 +115,7 @@ SimpleTensor<TOut> dequantization_layer(const SimpleTensor<TIn> &src)
     return dst;
 }
 
+template SimpleTensor<half> dequantization_layer(const SimpleTensor<int32_t> &src);
 template SimpleTensor<half> dequantization_layer(const SimpleTensor<uint8_t> &src);
 template SimpleTensor<float> dequantization_layer(const SimpleTensor<uint8_t> &src);
 template SimpleTensor<half> dequantization_layer(const SimpleTensor<int8_t> &src);

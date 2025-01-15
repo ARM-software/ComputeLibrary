@@ -1061,6 +1061,7 @@ Status CpuGemmAssemblyDispatch::validate(
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(
         b, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::S8,
         DataType::BFLOAT16, DataType::F16, DataType::F32);
+
     if (is_data_type_quantized_per_channel(b->data_type()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8_SIGNED, DataType::S8);
@@ -1159,6 +1160,12 @@ void CpuGemmAssemblyDispatch::configure(
             {
                 create_arm_gemm_dequant<int8_t, int8_t, float>(_arm_gemm, a, b, c, d, act, info);
             }
+#if defined(ENABLE_FP16_KERNELS)
+            else if (d->data_type() == DataType::F16)
+            {
+                create_arm_gemm_dequant<int8_t, int8_t, float16_t>(_arm_gemm, a, b, c, d, act, info);
+            }
+#endif /* defined(ENABLE_FP16_KERNELS) */
             else
             {
                 create_arm_gemm_quant<int8_t, int8_t, int8_t>(_arm_gemm, a, b, c, d, act, info);

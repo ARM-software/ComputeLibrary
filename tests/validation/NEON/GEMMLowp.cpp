@@ -56,6 +56,13 @@ namespace
 #ifdef __aarch64__
     constexpr float large_test_tolerance_num = 0.00001f;
 #endif // __aarch64__
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+RelativeTolerance<half_float::half> rel_tolerance_f16(half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for FP16 data types */
+const AbsoluteTolerance<float>      abs_tolerance_f16(0.2f);      /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
+constexpr float                     tolerance_num = 0.07f;        /**< Tolerance number for FP16 data types */
+#endif                                                            /* ARM_COMPUTE_ENABLE_FP16 */
+
 } // namespace
 
 
@@ -74,7 +81,10 @@ using NEGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidation
 using NEGEMMLowpMatrixMultiplyCoreAccumulateFixture = GEMMLowpMatrixMultiplyAccumulateValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
 using NEGEMMLowpBatchedMatMulFixture      = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, true>;
 using NEGEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture = GEMMLowpMatrixMultiplyCoreDynamicQuantizationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
-using NEGEMMLowpDequantizedMatrixMultiplyValidationFixture = GEMMLowpDequantizedMatrixMultiplyValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
+using NEGEMMLowpDequantizedF32MatrixMultiplyValidationFixture = GEMMLowpDequantizedMatrixMultiplyValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore,float>;
+using NEGEMMLowpDequantizedF16MatrixMultiplyValidationFixture = GEMMLowpDequantizedMatrixMultiplyValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore,half>;
+
+
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
                shape_a, shape_b, shape_c, a_offset, b_offset)
@@ -134,8 +144,7 @@ DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
         gemm_info.set_gemmlowp_output_stage(gemmLowpOutputStageInfo);
     }
 
-    cpu::CpuGemmLowpMatrixMultiplyCore gemmlowp_mm;
-    Status status = gemmlowp_mm.validate(&a, &b, nullptr, &dst, gemm_info);
+    Status status = cpu::CpuGemmLowpMatrixMultiplyCore::validate(&a, &b, nullptr, &dst, gemm_info);
 
     ARM_COMPUTE_EXPECT((expected ==  bool(status)), framework::LogLevel::ERRORS);
 }
@@ -420,8 +429,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreForUpdatedStaticQua
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // UpdateStaticQuantInfoAfterConfigure
 
-// Deqaunt tests involve returning F32 from the MatrixMultiplyCore kernels and is only implemented in aarch64
+// Deqaunt tests involve returning FP32 from the MatrixMultiplyCore kernels and is only implemented in aarch64
 TEST_SUITE(Dequant)
+TEST_SUITE(FP32)
+
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     make("InputAInfo", {
         TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),
@@ -450,11 +461,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 }
 
 constexpr AbsoluteTolerance<float> tolerance_dequantized(0.01f);
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedF32MatrixMultiplyValidationFixture, framework::DatasetMode::ALL,
     combine(
         datasets::SmallGEMMLowpDataset(),
         make("DataTypeA", {DataType::QASYMM8_SIGNED, DataType::QASYMM8}),
         make("DataTypeB", DataType::QASYMM8_SIGNED),
+        make("DataTypeB", DataType::F32),
         make("accumulate", {true, false})
     ))
 {
@@ -462,17 +474,47 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedMatrixMultiplyValidationFi
     validate(Accessor(_target), _reference, tolerance_dequantized);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedMatrixMultiplyValidationFixture, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpDequantizedF32MatrixMultiplyValidationFixture, framework::DatasetMode::NIGHTLY,
     combine(
         datasets::LargeGEMMLowpDataset(),
         make("DataTypeA", {DataType::QASYMM8_SIGNED, DataType::QASYMM8}),
         make("DataTypeB", DataType::QASYMM8_SIGNED),
+        make("DataTypeB", DataType::F32),
         make("accumulate", {false})
     ))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_dequantized, large_test_tolerance_num);
 }
+TEST_SUITE_END() // FP32
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedF16MatrixMultiplyValidationFixture, framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallGEMMLowpDataset(),
+        make("DataTypeA", DataType::QASYMM8_SIGNED),
+        make("DataTypeB", DataType::QASYMM8_SIGNED),
+        make("DataTypeB", DataType::F16),
+        make("accumulate", {true, false})
+    ))
+{
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+
+}
+TEST_SUITE_END() // FP16
+#endif  // ARM_COMPUTE_ENABLE_FP16
+
+
 TEST_SUITE_END() // Dequant
 #endif // __aarch64__
 

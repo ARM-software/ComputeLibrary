@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -286,9 +286,9 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
         }
         else
         {
-            // This scale is needed for the s8_f32 kernel where the multiplication output is dequantized to F32.
+            // This scale is needed for the s8_f32 kernel where the multiplication output is dequantized to F32/F16.
             const float dequantize_scale =
-                (dst->data_type() == DataType::F32)
+                dst->data_type() == DataType::F32 || dst->data_type() == DataType::F16
                     ? a->quantization_info().uniform().scale * b->quantization_info().uniform().scale
                     : 1.0f;
             // Configure matrix multiply kernel
@@ -352,7 +352,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32, DataType::QASYMM8,
-                                                         DataType::QASYMM8_SIGNED, DataType::F32);
+                                                         DataType::QASYMM8_SIGNED, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(c != nullptr && output->data_type() != DataType::F32 &&
                                         gemm_info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::NONE,
                                     "Bias addition not supported in NEGEMMLowpMatrixMultiplyCore for output S32");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022,2024 Arm Limited.
+ * Copyright (c) 2017-2022,2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -114,11 +114,23 @@ public:
     const char *name() const override;
 
 private:
-    int32_t _a_offset{0};
-    int32_t _b_offset{0};
-    int32_t _k{0}; // Number of columns of A or rows of B, used in last offset term
-    float   _scale{1.0};
-    bool    _slide_vector_sum_col{true};
+    using OffsetContributionFunction = void (*)(const Window  &window,
+                                                ITensor       *mm_result,
+                                                const ITensor *vector_sum_col,
+                                                const ITensor *vector_sum_row,
+                                                int32_t        a_offset,
+                                                int32_t        b_offset,
+                                                int32_t        k_offset,
+                                                float          scale,
+                                                bool           slide_vector_sum_col,
+                                                bool           is_gemm3d);
+
+    OffsetContributionFunction _func{nullptr};
+    int32_t                    _a_offset{0};
+    int32_t                    _b_offset{0};
+    int32_t                    _k{0}; // Number of columns of A or rows of B, used in last offset term
+    float                      _scale{1.0};
+    bool                       _slide_vector_sum_col{true};
 };
 } // namespace kernels
 } // namespace cpu
