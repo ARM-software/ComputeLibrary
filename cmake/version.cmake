@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -20,8 +20,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR aarch64)
+find_package(Git)
 
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_CXX_COMPILER g++)
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    RESULT_VARIABLE RESULT
+    OUTPUT_VARIABLE ACL_VERSION_SHA
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
+if(NOT GIT_FOUND OR RESULT)
+  set(ACL_VERSION_HASH "Unknown")
+endif()
+
+set(ARM_COMPUTE_SHA_FILE "${PROJECT_SOURCE_DIR}/arm_compute_version.embed")
+file(WRITE "${ARM_COMPUTE_SHA_FILE}.tmp" "\"${ACL_VERSION_SHA}\"")
+
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  ${ARM_COMPUTE_SHA_FILE}.tmp
+  ${ARM_COMPUTE_SHA_FILE}
+)
+file(REMOVE ${ARM_COMPUTE_SHA_FILE}.tmp)

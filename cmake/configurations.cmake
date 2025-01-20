@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -20,32 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-find_package(Git)
+# * For multiconfig generators, we only do debug and release builds.
+if(CMAKE_CONFIGURATION_TYPES)
+  set(
+    CMAKE_CONFIGURATION_TYPES "Release;Debug"
+    CACHE STRING "Allowed project configurations" FORCE
+  )
 
-if(GIT_FOUND)
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    RESULT_VARIABLE RESULT
-    OUTPUT_VARIABLE ACL_VERSION_SHA
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
+# * Default for single config build system is release.
+elseif(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+  message("CMAKE_BUILD_TYPE not specified. Assuming Release.")
 
-if(NOT GIT_FOUND OR RESULT)
-  set(ACL_VERSION_HASH "Unknown")
-endif()
-
-file(WRITE "${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp" "\"${ACL_VERSION_SHA}\"")
-
-execute_process(
-  COMMAND ${CMAKE_COMMAND} -E compare_files
-  ${PROJECT_SOURCE_DIR}/arm_compute_version.embed
-  ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp
-  RESULT_VARIABLE is_same
-)
-
-if(is_same EQUAL 0)
-    file(REMOVE ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp)
-else()
-    file(RENAME ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp ${PROJECT_SOURCE_DIR}/arm_compute_version.embed)
+# * Single config generators are restricted to debug and release builds.
+elseif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+  message(FATAL_ERROR "Only Debug and Release build configurations are supported.")
 endif()

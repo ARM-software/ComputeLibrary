@@ -188,7 +188,7 @@ target_sources(
 )
 
 target_sources(
-    arm_compute
+    arm_compute_core
     PRIVATE
     {line_separator.join(srcs_core)}
 )"""
