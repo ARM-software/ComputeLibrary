@@ -1962,7 +1962,8 @@
       "MeanStdDevNormalize": {
         "files": {
           "common": [
-            "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.cpp",
+            "src/cpu/operators/CpuMeanStdDevNormalization.cpp",
+            "src/cpu/kernels/CpuMeanStdDevNormalizationKernel.cpp",
             "src/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.cpp"
           ],
         "neon":{

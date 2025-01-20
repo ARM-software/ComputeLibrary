@@ -411,7 +411,6 @@ target_sources(
 	core/NEON/kernels/NEInstanceNormalizationLayerKernel.cpp
 	core/NEON/kernels/NEL2NormalizeLayerKernel.cpp
 	core/NEON/kernels/NELogicalKernel.cpp
-	core/NEON/kernels/NEMeanStdDevNormalizationKernel.cpp
 	core/NEON/kernels/NENormalizationLayerKernel.cpp
 	core/NEON/kernels/NEPadLayerKernel.cpp
 	core/NEON/kernels/NEPriorBoxLayerKernel.cpp
@@ -721,6 +720,7 @@ target_sources(
 	cpu/kernels/CpuGemmTranspose1xWKernel.cpp
 	cpu/kernels/CpuIm2ColKernel.cpp
 	cpu/kernels/CpuMaxUnpoolingLayerKernel.cpp
+	cpu/kernels/CpuMeanStdDevNormalizationKernel.cpp
 	cpu/kernels/CpuMulKernel.cpp
 	cpu/kernels/CpuPermuteKernel.cpp
 	cpu/kernels/CpuPool2dKernel.cpp
@@ -902,6 +902,7 @@ target_sources(
 	cpu/operators/CpuGemmLowpOutputStage.cpp
 	cpu/operators/CpuMatMul.cpp
 	cpu/operators/CpuMaxUnpooling.cpp
+	cpu/operators/CpuMeanStdDevNormalization.cpp
 	cpu/operators/CpuMul.cpp
 	cpu/operators/CpuPermute.cpp
 	cpu/operators/CpuPool2d.cpp

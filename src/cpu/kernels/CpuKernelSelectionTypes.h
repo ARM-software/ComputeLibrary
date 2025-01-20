@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,12 @@ namespace cpu
 namespace kernels
 {
 // Selector data types
+
+struct DataTypeSelectorData
+{
+    DataType dt;
+};
+
 struct DataTypeISASelectorData
 {
     DataType            dt;
@@ -110,6 +116,7 @@ struct SoftmaxKernelDataTypeISASelectorData
 };
 
 // Selector pointer types
+using DataTypeSelectorPtr               = std::add_pointer<bool(const DataTypeSelectorData &data)>::type;
 using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
 using DataTypeDataLayoutSelectorPtr     = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
 using PoolDataTypeISASelectorPtr        = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NELogicalKernel.h"
-#include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"
