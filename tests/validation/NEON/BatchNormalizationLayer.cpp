@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,9 @@ namespace validation
 {
 namespace
 {
+#ifndef ARM_COMPUTE_ADDRESS_SANITIZER_BUILD
 RelativeTolerance<float>           rel_tolerance_f32(0.05f);   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+#endif // ARM_COMPUTE_ADDRESS_SANITIZER_BUILD
 constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef ARM_COMPUTE_ENABLE_FP16
 constexpr AbsoluteTolerance<float> abs_tolerance_f16(0.015f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
@@ -184,6 +186,7 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE_END() // BatchNormalizationLayer
 
+#ifndef ARM_COMPUTE_ADDRESS_SANITIZER_BUILD
 TEST_SUITE(BatchNormalizationLayerFusion)
 template <typename T>
 using NEBatchNormalizationLayerFusionFixture = BatchNormalizationLayerFusionValidationFixture<Tensor, Accessor, NEConvolutionLayer, NEFuseBatchNormalization, T>;
@@ -236,6 +239,7 @@ TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
 TEST_SUITE_END() // BatchNormalizationLayerFusion
+#endif // ARM_COMPUTE_ADDRESS_SANITIZER_BUILD
 TEST_SUITE_END() // Neon
 } // namespace validation
 } // namespace test
