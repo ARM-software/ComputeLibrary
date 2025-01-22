@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -233,6 +233,7 @@ Status NEGenerateProposalsLayer::validate(const ITensorInfo           *scores,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(scores, DataLayout::NCHW, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(scores, deltas);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(scores, deltas);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
 
     const int num_anchors =
         scores->dimension(get_data_layout_dimension_index(scores->data_layout(), DataLayoutDimension::CHANNEL));

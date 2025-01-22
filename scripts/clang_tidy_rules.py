@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2024 Arm Limited.
+# Copyright (c) 2017-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -32,6 +32,7 @@ def get_list_includes():
            "src/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
+           "third_party/kleidiai " \
            "include/linux include " \
            ". ".split()
 
@@ -57,6 +58,8 @@ def filter_files( list_files ):
             ("NETracePoint.cpp" in f) or
             ("TracePoint.cpp" in f)):
             continue
+        if "third_party/" in f:
+            continue
         to_check.append(f)
     return to_check
 
@@ -79,6 +82,9 @@ def filter_clang_tidy_lines( lines ):
             continue
 
         if "/validate_examples/" in line:
+            continue
+
+        if "third_party/" in line:
             continue
 
         if "error:" in line:

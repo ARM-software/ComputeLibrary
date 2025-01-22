@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
@@ -45,6 +46,7 @@ void NERange::configure(ITensor *output, const float start, const float end, con
 
 Status NERange::validate(const ITensorInfo *output, const float start, const float end, const float step)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(output);
     return NERangeKernel::validate(output, start, end, step);
 }
 

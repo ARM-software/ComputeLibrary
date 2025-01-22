@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,6 +61,7 @@ void CLRsqrtLayer::configure(const CLCompileContext &compile_context, const ICLT
 
 Status CLRsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClRsqrt::validate(input, output);
 }
 
@@ -102,6 +103,7 @@ void CLExpLayer::configure(const CLCompileContext &compile_context, const ICLTen
 
 Status CLExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClExp::validate(input, output);
 }
 
@@ -142,6 +144,7 @@ void CLNegLayer::configure(const CLCompileContext &compile_context, const ICLTen
 }
 Status CLNegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClNeg::validate(input, output);
 }
 
@@ -182,6 +185,7 @@ void CLSinLayer::configure(const CLCompileContext &compile_context, const ICLTen
 }
 Status CLSinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClSin::validate(input, output);
 }
 
@@ -222,6 +226,7 @@ void CLAbsLayer::configure(const CLCompileContext &compile_context, const ICLTen
 }
 Status CLAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClAbs::validate(input, output);
 }
 
@@ -262,6 +267,7 @@ void CLLogLayer::configure(const CLCompileContext &compile_context, const ICLTen
 }
 Status CLLogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClLog::validate(input, output);
 }
 
@@ -302,6 +308,7 @@ void CLRoundLayer::configure(const CLCompileContext &compile_context, const ICLT
 }
 Status CLRoundLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClRound::validate(input, output);
 }
 

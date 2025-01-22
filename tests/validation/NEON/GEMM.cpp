@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -224,6 +224,29 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     bool is_valid = bool(NEGEMM::validate(&lhs_info.clone()->set_is_resizable(true), &rhs_info.clone()->set_is_resizable(true), nullptr, &output_info.clone()->set_is_resizable(true), alpha, beta, gemm_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
+
+NON_CONST_DATA_TEST_CASE(DynamicTensorShapesNotSupported, framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("LhsInfo", TensorInfo(TensorShape(27U, 13U), 1, DataType::F32)),
+            make("RhsInfo", TensorInfo(TensorShape(8U, 27U), 1, DataType::F32)),
+            make("OutputInfo", TensorInfo(TensorShape(8U, 13U), 1, DataType::F32))
+        ),
+    make("DynamicShape", { false, true })),
+    lhs_info, rhs_info, out_info, dynamic_shape)
+{
+    lhs_info.set_dynamic(dynamic_shape);
+    rhs_info.set_dynamic(dynamic_shape);
+    out_info.set_dynamic(dynamic_shape);
+
+    constexpr float alpha = 1.0;
+    constexpr float beta = 0.0;
+    const auto gemm_info = GEMMInfo();
+    bool is_valid = bool(NEGEMM::validate(&lhs_info, &rhs_info, nullptr, &out_info,
+        alpha, beta, gemm_info));
+
+    ARM_COMPUTE_EXPECT(is_valid == !dynamic_shape, framework::LogLevel::ERRORS);
+}
 // clang-format on
 // *INDENT-ON*
 TEST_SUITE(KERNEL_SELECTION)
@@ -343,6 +366,9 @@ TEST_SUITE_END() // INTERLEAVE_4X4
 
 template <typename T>
 using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;
+
+template <typename T>
+using NEDynamicGEMMFixture = GEMMDynamicValidationFixture<Tensor, Accessor, NEGEMM, T>;
 
 template <typename T>
 using NEBatchedMatMulFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true, false, false, false, false, true>;
@@ -468,6 +494,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::N
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
+
+TEST_SUITE(DynamicShape)
+// TODO: COMPMID-7681: Once NEGEMM supports tensors with dynamic shapes, enable this test for framework::DatasetMode::PRECOMMIT
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDynamicGEMMFixture<float>, framework::DatasetMode::DISABLED,
+        combine(
+            datasets::SmallGEMMDataset(),
+            make("ReshapeWeights", { true, false }),
+            make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f);
+}
+// TODO: COMPMID-7681: Once NEGEMM supports tensors with dynamic shapes, enable this test for framework::DatasetMode::NIGHTLY
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDynamicGEMMFixture<float>, framework::DatasetMode::DISABLED,
+        combine(
+            datasets::LargeGEMMDataset(),
+            make("ReshapeWeights", { true, false }),
+            make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f);
+}
+TEST_SUITE_END() // DynamicShape
 
 TEST_SUITE(BATCHED_MATMUL)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),

@@ -136,7 +136,7 @@ void Framework::init(const FrameworkConfig &config)
     _configure_only  = config.configure_only;
     _print_rerun_cmd = config.print_rerun_cmd;
     _seed            = config.seed;
-
+    _print_iterations = config.print_iterations;
     _instruments = std::set<framework::InstrumentsDescription>(std::begin(config.instruments), std::end(config.instruments));
 }
 
@@ -351,7 +351,7 @@ TestResult::Status Framework::run_test(const TestInfo &info, TestCaseFactory &te
                 test_case->do_sync();
                 if(_num_iterations == 1 || i != 0)
                 {
-                    profiler.stop();
+                    profiler.stop(_print_iterations?i:-1);
                 }
             }
 

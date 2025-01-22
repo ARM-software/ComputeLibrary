@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,6 +122,7 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
 Status NEFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, const FFT1DInfo &config)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(std::set<unsigned int>({0, 1}).count(config.axis) == 0);

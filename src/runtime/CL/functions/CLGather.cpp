@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,7 @@ void CLGather::configure(const CLCompileContext &compile_context,
 
 Status CLGather::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, indices, output);
     return CLGatherKernel::validate(input, indices, output, axis);
 }
 } // namespace arm_compute

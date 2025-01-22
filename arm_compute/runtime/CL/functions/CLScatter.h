@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,18 @@ public:
      *
      * Valid data layouts:
      * - All
+     *
+     * Valid data type configurations:
+     * |src0           |src1           |src2   |dst            |
+     * |:--------------|:--------------|:------|:--------------|
+     * |F32            |F32            |S32    |F32            |
+     * |F16            |F16            |S32    |F16            |
+     * |S32            |S32            |S32    |S32            |
+     * |S16            |S16            |S32    |S16            |
+     * |S8             |S8             |S32    |S8             |
+     * |U32            |U32            |S32    |U32            |
+     * |U16            |U16            |S32    |U16            |
+     * |U8             |U8             |S32    |U8             |
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  src             Source tensor. Values used to fill output. Can be nullptr when zero initialization is true.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,7 @@ void NEPooling3dLayer::configure(const ITensor *input, ITensor *output, const Po
 Status
 NEPooling3dLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const Pooling3dLayerInfo &pool_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return cpu::CpuPool3d::validate(input, output, pool_info);
 }
 

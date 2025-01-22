@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
 
 #include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
 
@@ -43,6 +44,7 @@ Status CPPTopKV::validate(const ITensorInfo *predictions,
                           ITensorInfo       *output,
                           const unsigned int k)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(predictions, targets, output);
     return CPPTopKVKernel::validate(predictions, targets, output, k);
 }
 } // namespace arm_compute

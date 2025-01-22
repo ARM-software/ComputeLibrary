@@ -116,6 +116,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo      *input,
                                        const ITensorInfo      *output,
                                        FullyConnectedLayerInfo fc_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return opencl::ClFullyConnected::validate(input, weights, biases, output, fc_info);
 }
 

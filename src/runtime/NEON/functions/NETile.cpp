@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NETileKernel.h"
 
@@ -39,6 +41,7 @@ void NETile::configure(const ITensor *input, ITensor *output, const Multiples &m
 
 Status NETile::validate(const ITensorInfo *input, const ITensorInfo *output, const Multiples &multiples)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NETileKernel::validate(input, output, multiples);
 }
 } // namespace arm_compute

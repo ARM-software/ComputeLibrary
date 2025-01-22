@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -235,6 +235,7 @@ Status NEPadLayer::validate(const ITensorInfo *input,
                             const PaddingMode  mode)
 {
     ARM_COMPUTE_UNUSED(constant_value);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
     const TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(input->tensor_shape(), padding);
 

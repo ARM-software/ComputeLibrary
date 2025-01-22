@@ -79,6 +79,7 @@ Status NEGEMMConv2d::validate(const ITensorInfo *input,
                               const ITensorInfo *output,
                               const Conv2dInfo  &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return OperatorType::validate(input, weights, biases, output, info);
 }
 

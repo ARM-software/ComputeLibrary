@@ -122,30 +122,30 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             dup z26.b, #0
             dup z27.b, #0
 
-loop_3_start%=:
+1: // loop_3_start
             // for index_3 in shape_3 downto 1
             cmp x20, #0
-            b.eq loop_3_end%=
+            b.eq 16f
             sub x20, x20, #1
 
             mov x23, %x[shape_2]
             mov x24, x21
             mov x25, x22
 
-loop_2_start%=:
+2: // loop_2_start
             // for index_2 in shape_2 downto 1
             cmp x23, #0
-            b.eq loop_2_end%=
+            b.eq 15f
             sub x23, x23, #1
 
             mov x26, %x[shape_1]
             mov x27, x24
             mov x28, x25
 
-loop_1_start%=:
+3: // loop_1_start
             // for index_1 in shape_2 downto 1
             cmp x26, #0
-            b.eq loop_1_end%=
+            b.eq 14f
             sub x26, x26, #1
 
             // ==================================================
@@ -157,27 +157,27 @@ loop_1_start%=:
             dup z18.b, #0
             dup z19.b, #0
             mov x1, #0                                                  // x1: index
-find_max_body_start%=:
+4: // find_max_body_start
             cmp x1, x13
-            b.eq find_max_body_end%=
+            b.eq 5f
             .inst 0xa001836c // ld1b    { z12.b - z15.b }, pn8/z, [x27, x1]  z12-z15: x
             .inst 0xc12cb811 // umax    { z16.b - z19.b }, { z16.b - z19.b }, { z12.b - z15.b } z16-z19: max_value = max(max_value, x)
             add x1, x1, #256 // Advance index by 256 bytes/integers: Z registers = 2048-bit data = 256 8-bit integers.
-            b find_max_body_start%=
-find_max_body_end%=:
+            b 4b // find_max_body_start
+5: // find_max_body_end
 
             // Loop for processing the leftover part.
-find_max_leftover_start%=:
+6: // find_max_leftover_start:
             whilelo p1.b, x1, %x[length]
-            b.none find_max_leftover_end%=
+            b.none 7f // find_max_leftover_end
 
             ld1b z30.b, p1/z, [x27, x1]                                // z30: x
             umax z16.b, p1/m, z16.b, z30.b                             // z16: max_value = max(max_value, x)
 
             add x1, x1, #64
 
-            b find_max_leftover_start%=
-find_max_leftover_end%=:
+            b 6b // find_max_leftover_start
+7: // find_max_leftover_end:
 
             .inst 0xc132b011 // umax    { z16.b, z17.b }, { z16.b, z17.b }, { z18.b, z19.b }
             umax z16.b, p0/m, z16.b, z17.b
@@ -196,9 +196,9 @@ find_max_leftover_end%=:
             // ==================================================
             // Step 2: Exponentiation and Summation
             // ==================================================
-regularize_start%=:
+8: // regularize_start
             whilelo p1.b, x1, %x[length]
-            b.none regularize_end%=
+            b.none 9f // regularize_end
 
             // p2-p5 are - together - the 32-bit version of p1, the instructions below unpack p1 into those four predicate registers to allow for the 32-bit loads below to be correctly predicated
             punpklo  p2.h, p1.b
@@ -353,8 +353,8 @@ regularize_start%=:
             fadd z28.s, p5/m, z28.s, z27.s
             add x1, x1, #16
 
-            b regularize_start%=
-regularize_end%=:
+            b 8b // regularize_start
+9: // regularize_end
 
             mov w9, 0x0000
             movk w9, 0x4380, LSL #16 // Moving 256.f into w9 to scale - via multiplication (division by reciprocal) - the floating point [0,1] range of the results to the [0,255] integer range of QASYMM8
@@ -367,9 +367,9 @@ regularize_end%=:
             // Step 3: Normalize
             // ==================================================
             mov x1, #0
-normalize_body_start%=:
+10: // normalize_body_start
             cmp x1, x13
-            b.eq normalize_body_end%=
+            b.eq 11f // normalize_body_end
 
             mov x2, x1       // Preserve the index into x2 for the final store to dst.
             .inst 0xa001c7ac // ld1w    { z12.s - z15.s }, pn9/z, [x29, x1, lsl #2]
@@ -436,12 +436,12 @@ normalize_body_start%=:
 
             dup z28.s, z16.s[0] // Juggling the value back to z28 as z16 will be overwritten by the next iteration
 
-b normalize_body_start%=
-normalize_body_end%=:
+            b 10b // normalize_body_start
+11: // normalize_body_end
 
-normalize_leftover_start%=:
+12: // normalize_leftover_start:
             whilelo p1.b, x1, %x[length]
-            b.none normalize_leftover_end%=
+            b.none 13f // normalize_leftover_end
 
             // p2-p5 are - together - the 32-bit version of p1, the instructions below unpack p1 into those four predicate registers to allow for the 32-bit loads below to be correctly predicated
             punpklo  p2.h, p1.b
@@ -484,25 +484,25 @@ normalize_leftover_start%=:
 
             st1b z19.b, p1, [x28, x2]
 
-            b normalize_leftover_start%=
-normalize_leftover_end%=:
+            b 12b // normalize_leftover_start
+13: // normalize_leftover_end
             // ==================================================
             // 3D loop closing
             // ==================================================
             add x27, x27, %x[src_stride_1]
             add x28, x28, %x[dst_stride_1]
-            b loop_1_start%=
-loop_1_end%=:
+            b 3b
+14: // loop_1_end
 
             add x24, x24, %x[src_stride_2]
             add x25, x25, %x[dst_stride_2]
-            b loop_2_start%=
-loop_2_end%=:
+            b 2b
+15: // loop_2_end
 
             add x21, x21, %x[src_stride_3]
             add x22, x22, %x[dst_stride_3]
-            b loop_3_start%=
-loop_3_end%=:
+            b 1b
+16: // loop_3_end
             .inst 0xd503467f // smstop
         )"
         :
@@ -542,12 +542,6 @@ void sme2_qasymm8_softmax_lut_512VL(const ITensor *in,
     const auto &full_shape  = dst_info->tensor_shape();
     const auto &src_strides = src_info->strides_in_bytes();
     const auto &dst_strides = dst_info->strides_in_bytes();
-    Strides     tmp_strides;
-
-    tmp_strides[0] = src_strides[0] * 4;
-    tmp_strides[1] = src_strides[1] * 4;
-    tmp_strides[2] = src_strides[2] * 4;
-    tmp_strides[3] = src_strides[3] * 4;
 
     const uintptr_t k_shape[] = {
         full_shape[0],
@@ -580,14 +574,9 @@ void sme2_qasymm8_softmax_lut_512VL(const ITensor *in,
                                    window[2].start() * dst_strides[2] + //
                                    window[3].start() * dst_strides[3];
 
-    const uintptr_t k_tmp_offset = window[0].start() * tmp_strides[0] + //
-                                   window[1].start() * tmp_strides[1] + //
-                                   window[2].start() * tmp_strides[2] + //
-                                   window[3].start() * tmp_strides[3];
-
     const auto *k_src         = reinterpret_cast<const uint8_t *>(in->buffer() + k_src_offset);
     float      *tmp_float_ptr = reinterpret_cast<float *>(tmp);
-    auto       *k_tmp         = reinterpret_cast<float *>(tmp_float_ptr + k_tmp_offset);
+    auto       *k_tmp         = reinterpret_cast<float *>(tmp_float_ptr);
     auto       *k_dst         = reinterpret_cast<uint8_t *>(out->buffer() + k_dst_offset);
 
     sme2_qasymm8_softmax_kernel_512VL(k_src, k_dst, beta, k_shape, k_src_strides, k_dst_strides, lut_fp32_ptr, k_tmp);

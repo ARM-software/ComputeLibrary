@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
 
 #include "arm_compute/core/CPP/kernels/CPPNonMaximumSuppressionKernel.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
 
@@ -50,6 +51,7 @@ Status CPPNonMaximumSuppression::validate(const ITensorInfo *bboxes,
                                           const float        score_threshold,
                                           const float        nms_threshold)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(bboxes, scores, indices);
     return CPPNonMaximumSuppressionKernel::validate(bboxes, scores, indices, max_output_size, score_threshold,
                                                     nms_threshold);
 }

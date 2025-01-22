@@ -41,6 +41,8 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+@warning After v24.08 release, changelog associated with each release can be found in https://github.com/ARM-software/ComputeLibrary/releases. They won't be included in this file.
+
 v24.08 Public major release
  - Expose CpuAdd functionality using the experimental operators api
  - Expose CpuDepthwiseConv2d functionality using the experimental operators api

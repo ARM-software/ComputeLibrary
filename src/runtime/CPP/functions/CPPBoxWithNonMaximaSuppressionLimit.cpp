@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -253,6 +253,7 @@ Status validate(const ITensorInfo    *scores_in,
 {
     ARM_COMPUTE_UNUSED(batch_splits_in, batch_splits_out, keeps, keeps_size, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(scores_in, boxes_in, scores_out, boxes_out, classes);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32);
 

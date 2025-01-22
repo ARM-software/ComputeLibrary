@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,7 @@ Status CLConvertFullyConnectedWeights::validate(const ITensorInfo *input,
                                                 const TensorShape &original_input_shape,
                                                 DataLayout         data_layout)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return opencl::ClConvertFullyConnectedWeights::validate(input, output, original_input_shape, data_layout);
 }
 

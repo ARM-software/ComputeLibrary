@@ -534,6 +534,12 @@ Status NELSTMLayer::validate(const ITensorInfo             *input,
     ARM_COMPUTE_RETURN_ERROR_ON(cell_bias->dimension(0) * 4 != scratch_buffer->dimension(0) &&
                                 cell_bias->dimension(0) * 3 != scratch_buffer->dimension(0));
 
+    // Dynamic shapes are not supported
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(
+        input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_forget_weights,
+        recurrent_to_cell_weights, recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
+        output_state_in, cell_state_in, scratch_buffer, output_state_out, cell_state_out, output);
+
     const unsigned int num_batches = input->dimension(1);
     const unsigned int num_cells   = input_to_output_weights->dimension(1);
 

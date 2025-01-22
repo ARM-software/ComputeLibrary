@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,7 @@ void NESpaceToDepthLayer::configure(const ITensor *input, ITensor *output, int32
 
 Status NESpaceToDepthLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(NESpaceToDepthLayerKernel::validate(input, output, block_shape));
     return Status{};
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NESelectKernel.h"
@@ -41,6 +42,7 @@ void NESelect::configure(const ITensor *c, const ITensor *x, const ITensor *y, I
 
 Status NESelect::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(c, x, y, output);
     return NESelectKernel::validate(c, x, y, output);
 }
 } // namespace arm_compute

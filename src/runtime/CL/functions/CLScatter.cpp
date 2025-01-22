@@ -82,6 +82,7 @@ Status CLScatter::validate(const ITensorInfo *src,
                            const ITensorInfo *output,
                            const ScatterInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(src, updates, indices, output);
     return OperatorType::validate(src, updates, indices, output, info);
 }
 

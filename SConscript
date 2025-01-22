@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2024 Arm Limited.
+# Copyright (c) 2016-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -33,8 +33,8 @@ import codecs
 import platform
 import SCons
 
-VERSION = "v24.12"
-LIBRARY_VERSION_MAJOR = 45
+VERSION = "v25.01"
+LIBRARY_VERSION_MAJOR = 46
 LIBRARY_VERSION_MINOR = 0
 LIBRARY_VERSION_PATCH = 0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -98,8 +98,10 @@ def build_multiisa_lib_objects():
     # note that ARM_COMPUTE_ENABLE_FP16 is enabled in update_data_type_layout_flags() to make
     # sure the environment is progated to the validation suite
     arm_compute_env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON',
-                           'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE','ARM_COMPUTE_ENABLE_BF16',
-                           'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
+                           'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE','ARM_COMPUTE_ENABLE_SVE2',
+                           'ARM_COMPUTE_ENABLE_BF16', 'ARM_COMPUTE_ENABLE_I8MM',
+                           'ARM_COMPUTE_ENABLE_SVEF32MM', 'ARM_COMPUTE_ENABLE_SME',
+                           'ARM_COMPUTE_ENABLE_SME2', 'ENABLE_SME'])
 
     # Build all the common files for the base architecture
     if env['arch'] == 'armv8a' or env['arch'] == 'arm64-v8a':
@@ -121,7 +123,6 @@ def build_multiisa_lib_objects():
 
 
     # Build the SVE2 specific files
-    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
     lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2, static=False)
     lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2_fp16, static=True)
@@ -668,7 +669,8 @@ if env['neon']:
                                       "src/core/NEON/kernels/arm_conv/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
-                                      "src/cpu/kernels/assembly/"])
+                                      "src/cpu/kernels/assembly/",
+                                      "third_party/kleidiai/"])
 
     # Setup SIMD file list to include
     simd = ['neon']

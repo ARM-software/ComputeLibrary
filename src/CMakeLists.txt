@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -359,7 +359,8 @@ target_sources(
 target_sources(
     arm_compute
     PRIVATE
-    c/AclContext.cpp
+    ../third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c
+	c/AclContext.cpp
 	c/AclOperator.cpp
 	c/AclQueue.cpp
 	c/AclTensor.cpp
@@ -776,7 +777,6 @@ target_sources(
 	cpu/kernels/directconv2d/nchw/fp16.cpp
 	cpu/kernels/directconv2d/nhwc/neon/fp16.cpp
 	cpu/kernels/directconv2d/nhwc/neon/fp32.cpp
-	cpu/kernels/directconv2d/nhwc/neon/impl.cpp
 	cpu/kernels/directconv2d/nhwc/neon/qasymm8.cpp
 	cpu/kernels/directconv2d_output_stage/generic/neon/fp16.cpp
 	cpu/kernels/directconv2d_output_stage/generic/neon/fp32.cpp
@@ -860,6 +860,9 @@ target_sources(
 	cpu/kernels/scale/neon/integer.cpp
 	cpu/kernels/scale/neon/qasymm8.cpp
 	cpu/kernels/scale/neon/qasymm8_signed.cpp
+	cpu/kernels/scatter/generic/neon/fp16.cpp
+	cpu/kernels/scatter/generic/neon/fp32.cpp
+	cpu/kernels/scatter/generic/neon/integer.cpp
 	cpu/kernels/select/generic/neon/fp16.cpp
 	cpu/kernels/select/generic/neon/fp32.cpp
 	cpu/kernels/select/generic/neon/integer.cpp

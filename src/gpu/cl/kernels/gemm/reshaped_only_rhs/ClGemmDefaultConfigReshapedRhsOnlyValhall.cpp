@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,6 +87,9 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
         case GPUTarget::G610:
             func = configs_G710.get_function(data_type);
             break;
+        case GPUTarget::FIFTHGEN:
+        case GPUTarget::G720:
+        case GPUTarget::G620:
         case GPUTarget::G715:
         case GPUTarget::G615:
             func = configs_G715.get_function(data_type);

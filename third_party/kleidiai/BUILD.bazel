@@ -1,0 +1,41 @@
+#
+# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+load(
+    "//:kai_defs.bzl",
+    "kai_c_library",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files([
+    "LICENSES/**",
+])
+
+config_setting(
+    name = "linux",
+    constraint_values = ["@platforms//os:linux"],
+)
+
+config_setting(
+    name = "windows",
+    constraint_values = ["@platforms//os:windows"],
+)
+
+cc_library(
+    name = "common",
+    hdrs = ["kai/kai_common.h"],
+)
+
+kai_c_library(
+    name = "kleidiai",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//kai/ukernels/matmul",
+    ],
+)

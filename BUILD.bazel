@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -423,6 +423,8 @@ cc_library(
         "//include",
         "//support",
         "//utils",
+        "@@kleidiai//:common",
+        "@@kleidiai//kai/ukernels/matmul:clamp_f32_f32_f32p",
         "//:arm_compute_sve",
         "//:arm_compute_sve2"
     ],

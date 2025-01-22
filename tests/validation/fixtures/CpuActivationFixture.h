@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,16 +25,18 @@
 #define ACL_TESTS_VALIDATION_FIXTURES_CPUACTIVATIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/helpers/ActivationHelpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
 
-#include <random>
+#ifndef BARE_METAL
+#include <thread>
+#include <vector>
+#endif // ifndef BARE_METAL
 
 namespace arm_compute
 {
@@ -42,142 +44,176 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+constexpr int NUM_THREADS =  3;
+} // namespace
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class CpuActivationValidationGenericFixture : public framework::Fixture
 {
 public:
 
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta,
+        DataType data_type, QuantizationInfo quantization_info, TestType test_type)
     {
+        if(data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         ActivationLayerInfo info(function, alpha_beta, alpha_beta);
 
         _in_place                 = in_place;
         _data_type                = data_type;
-	// We are only testing fp32 datatype for CpuActivation wrapper. Hence,
-	// we can ignore quantization_info here and just use the default one.
-        _output_quantization_info = quantization_info;
-        _input_quantization_info  = quantization_info;
+        _function                 = function;
+        _test_type                = test_type;
+        _num_parallel_runs        = (_test_type == TestType::ConfigureOnceRunMultiThreaded ? NUM_THREADS : 1);
 
-        _function  = function;
-        _target    = compute_target(shape, info);
-        _reference = compute_reference(shape, info);
+	    _output_quantization_info = helper::calculate_output_quantization_info(_data_type, info, quantization_info);
+        _input_quantization_info  = in_place ? _output_quantization_info : quantization_info;
+
+        compute_target(shape, info);
+        compute_reference(shape, info);
     }
 
 protected:
-    std::vector<T> get_boundary_values(T min, T max)
-    {
-        // This function will return a vector filled with the following values that can
-        // represent two partitions derived from equivalent partitioning.
-        // * Lower parition: min, min + delta, lower quarter (nominal), center - delta
-        // * Upper partition: center, center + delta, upper quarter (nominal), max - delta, max
-        const auto delta         = is_data_type_float(_data_type) ? T(0.1f) : T(1);
-        const auto center_value  = (min + max) / 2;
-        const auto lower_quarter = (min + center_value) / 2;
-        const auto upper_quarter = (center_value + max) / 2;
-
-        std::vector<T> boundary_values{};
-
-        // To ensure all the inserted values are within the given range after subtracing/adding delta
-        auto insert_values = [&boundary_values, &min, &max](const std::initializer_list<T> &new_values)
-        {
-            for(auto &v : new_values)
-            {
-                if(v >= min && v <= max)
-                {
-                    boundary_values.emplace_back(v);
-                }
-            }
-        };
-
-        insert_values({ min, static_cast<T>(min + delta), static_cast<T>(lower_quarter), static_cast<T>(center_value - delta) });                               // lower partition
-        insert_values({ static_cast<T>(center_value), static_cast<T>(center_value + delta), static_cast<T>(upper_quarter), static_cast<T>(max - delta), max }); // upper partition
-
-        return boundary_values;
-    }
-
     template <typename U>
-    void fill(U &&tensor)
+    void fill(U &&tensor, int seed_offset)
     {
         if(is_data_type_float(_data_type))
         {
             float min_bound = 0;
             float max_bound = 0;
             std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type);
-            library->fill_static_values(tensor, get_boundary_values(static_cast<T>(min_bound), static_cast<T>(max_bound)));
+
+            if(_test_type == TestType::ConfigureOnceRunMultiThreaded)
+            {
+                // Different threads should use different values for better testing, therefore we cannot use fill_static_values()
+                library->fill_tensor_uniform(tensor, seed_offset, static_cast<T>(min_bound), static_cast<T>(max_bound));
+            }
+            else
+            {
+                library->fill_static_values(tensor, helper::get_boundary_values(_data_type, static_cast<T>(min_bound), static_cast<T>(max_bound)));
+            }
         }
         else
         {
             PixelValue min{};
             PixelValue max{};
             std::tie(min, max) = get_min_max(tensor.data_type());
-            library->fill_static_values(tensor, get_boundary_values(min.get<T>(), max.get<T>()));
+            library->fill_static_values(tensor, helper::get_boundary_values(_data_type, min.get<T>(), max.get<T>()));
         }
     }
 
-    TensorType compute_target(const TensorShape &shape, ActivationLayerInfo info)
+    void allocate_and_fill_tensors(TensorType *src, TensorType *dst)
+    {
+        for(int i = 0; i < _num_parallel_runs; ++i)
+        {
+            ARM_COMPUTE_ASSERT(src[i].info()->is_resizable());
+            ARM_COMPUTE_ASSERT(dst[i].info()->is_resizable());
+
+            // Allocate tensors
+            src[i].allocator()->allocate();
+            ARM_COMPUTE_ASSERT(!src[i].info()->is_resizable());
+
+            if(!_in_place)
+            {
+                dst[i].allocator()->allocate();
+                ARM_COMPUTE_ASSERT(!dst[i].info()->is_resizable());
+            }
+
+            // Fill tensors
+            fill(AccessorType(src[i]), i);
+        }
+    }
+
+    void compute_target(const TensorShape &shape, ActivationLayerInfo info)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, _input_quantization_info, DataLayout::NCHW);
-        TensorType dst = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info, DataLayout::NCHW);
+        TensorType src[NUM_THREADS];
+        TensorType dst[NUM_THREADS];
+        ITensorPack run_pack[NUM_THREADS];
+
+        for(int i = 0; i < _num_parallel_runs; ++i)
+        {
+            src[i] = create_tensor<TensorType>(shape, _data_type, 1, _input_quantization_info, DataLayout::NCHW);
+            dst[i] = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info, DataLayout::NCHW);
+        }
 
         // Create and configure function
         FunctionType act_layer;
 
-        TensorType *dst_ptr = _in_place ? &src : &dst;
-
         if(!_in_place)
         {
-            act_layer.configure(src.info(), dst.info(), info);
+            act_layer.configure(src[0].info(), dst[0].info(), info);
         }
         else {
-            act_layer.configure(src.info(), nullptr, info);
+            act_layer.configure(src[0].info(), nullptr, info);
         }
 
-        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
+        allocate_and_fill_tensors(src, dst);
 
-        // Allocate tensors
-        src.allocator()->allocate();
-        ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
-
-        if(!_in_place)
+        if(_test_type == TestType::ConfigureOnceRunMultiThreaded)
         {
-            dst.allocator()->allocate();
-            ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
-        }
+#ifndef BARE_METAL
+            std::vector<std::thread> threads;
+            threads.reserve(_num_parallel_runs);
 
-        // Fill tensors
-        fill(AccessorType(src));
+            for(int i = 0; i < _num_parallel_runs; ++i)
+            {
+                // Compute function
+                TensorType *dst_ptr = _in_place ? &src[i] : &dst[i];
+                run_pack[i] = {
+                    { arm_compute::TensorType::ACL_SRC, &src[i] },
+                    { arm_compute::TensorType::ACL_DST, dst_ptr }
+                };
 
-        // Compute function
-        ITensorPack run_pack{ { arm_compute::TensorType::ACL_SRC, &src }, { arm_compute::TensorType::ACL_DST, dst_ptr } };
-        act_layer.run(run_pack);
+                threads.emplace_back([&,i]
+                {
+                    act_layer.run(run_pack[i]);
+                    _target[i] = _in_place ? std::move(src[i]) : std::move(dst[i]);
+                });
+            }
 
-        if(_in_place)
-        {
-            return src;
+            for(int i = 0; i < _num_parallel_runs; ++i)
+            {
+                threads[i].join();
+            }
+#endif // ifndef BARE_METAL
         }
         else
         {
-            return dst;
+            TensorType *dst_ptr = _in_place ? &src[0] : &dst[0];
+            ITensorPack run_pack {
+                { arm_compute::TensorType::ACL_SRC, &src[0] },
+                { arm_compute::TensorType::ACL_DST, dst_ptr }
+            };
+            act_layer.run(run_pack);
+
+            _target[0] = _in_place ? std::move(src[0]) : std::move(dst[0]);
         }
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info)
+    void compute_reference(const TensorShape &shape, ActivationLayerInfo &info)
     {
         // Create reference
         SimpleTensor<T> src{ shape, _data_type, 1, _input_quantization_info };
 
-        // Fill reference
-        fill(src);
+        for(int i = 0; i < _num_parallel_runs; ++i)
+        {
+            // Fill reference
+            fill(src, i);
 
-        return reference::activation_layer<T>(src, info, _output_quantization_info);
+            _reference[i] = reference::activation_layer<T>(src, info, _output_quantization_info);
+        }
     }
 
 protected:
-    TensorType                              _target{};
-    SimpleTensor<T>                         _reference{};
+    TensorType                              _target[NUM_THREADS];
+    SimpleTensor<T>                         _reference[NUM_THREADS];
     bool                                    _in_place{};
+    TestType                                _test_type{};
+    int                                     _num_parallel_runs{};
     QuantizationInfo                        _input_quantization_info{};
     QuantizationInfo                        _output_quantization_info{};
     DataType                                _data_type{};
@@ -190,7 +226,31 @@ class CpuActivationValidationFixture : public CpuActivationValidationGenericFixt
 public:
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type)
     {
-        CpuActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, QuantizationInfo());
+        CpuActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place,
+            function, alpha_beta, data_type, QuantizationInfo(), TestType::ConfigureOnceRunOnce);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class CpuActivationFloatThreadSafeValidationFixture : public CpuActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type)
+    {
+        CpuActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place,
+            function, alpha_beta, data_type, QuantizationInfo(), TestType::ConfigureOnceRunMultiThreaded);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class CpuActivationQuantizedThreadSafeValidationFixture : public CpuActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function,
+        float alpha_beta, DataType data_type, QuantizationInfo qinfo)
+    {
+        CpuActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place,
+            function, alpha_beta, data_type, qinfo, TestType::ConfigureOnceRunMultiThreaded);
     }
 };
 

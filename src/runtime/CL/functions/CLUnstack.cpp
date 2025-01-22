@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,11 @@ Status CLUnstack::validate(const ITensorInfo *input, const std::vector<ITensorIn
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON(output_vector.empty());
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input);
+    for (const auto &output : output_vector)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(output);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON(axis < (-static_cast<int>(input->tensor_shape().num_dimensions())));
     ARM_COMPUTE_RETURN_ERROR_ON(axis >= static_cast<int>(input->tensor_shape().num_dimensions()));
     const unsigned int num_slices = std::min(output_vector.size(), input->dimension(wrap_axis(axis, input)));

@@ -156,7 +156,7 @@ bool is_mmul_kernel_preferred(const unsigned int m,
                               unsigned int      &best_m0,
                               unsigned int      &best_n0)
 {
-    if (data_type == DataType::F32)
+    if (data_type == DataType::F32 && arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
     {
         ARM_COMPUTE_UNUSED(n, k, b);
 

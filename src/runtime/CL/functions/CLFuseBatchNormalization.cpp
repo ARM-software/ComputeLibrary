@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,6 +85,8 @@ Status CLFuseBatchNormalization::validate(const ITensorInfo         *input_weigh
                                           float                      epsilon,
                                           FuseBatchNormalizationType fbn_type)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias,
+                                              bn_beta, bn_gamma);
     return CLFuseBatchNormalizationKernel::validate(input_weights, bn_mean, bn_var, fused_weights, fused_bias,
                                                     input_bias, bn_beta, bn_gamma, epsilon, fbn_type);
 }

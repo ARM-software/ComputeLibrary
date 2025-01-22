@@ -1,0 +1,68 @@
+#
+# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+load(
+    "//:kai_defs.bzl",
+    "kai_cpu_bf16",
+    "kai_cpu_fp16",
+    "kai_cpu_sme",
+    "kai_cxx_library",
+    "kai_cxxopts",
+)
+
+package(default_testonly = 1)
+
+kai_cxx_library(
+    name = "common",
+    srcs = glob(
+        ["common/*.cpp"],
+        exclude = ["common/sme.cpp"],
+    ),
+    hdrs = glob(
+        ["common/*.hpp"],
+        exclude = ["common/sme.hpp"],
+    ),
+    # compare.cpp requires fp16 and bf16 support
+    cpu_uarch = kai_cpu_bf16() + kai_cpu_fp16(),
+)
+
+kai_cxx_library(
+    name = "common_sme",
+    srcs = ["common/sme.cpp"],
+    hdrs = ["common/sme.hpp"],
+    # compare.cpp requires fp16 and bf16 support
+    cpu_uarch = kai_cpu_sme(),
+    deps = [
+        ":common",
+    ],
+)
+
+kai_cxx_library(
+    name = "reference",
+    srcs = glob(["reference/*.cpp"]),
+    hdrs = glob(["reference/*.hpp"]),
+    cpu_uarch = kai_cpu_bf16() + kai_cpu_fp16(),
+    deps = [
+        ":common",
+    ],
+)
+
+cc_test(
+    name = "kleidiai_test",
+    srcs = glob(["tests/*.cpp"]),
+    copts = kai_cxxopts(kai_cpu_bf16() + kai_cpu_fp16()),
+    includes = [],
+    linkstatic = True,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common",
+        ":common_sme",
+        ":reference",
+        "//:common",
+        "//:kleidiai",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

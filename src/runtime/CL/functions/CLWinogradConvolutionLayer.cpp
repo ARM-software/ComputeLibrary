@@ -102,6 +102,7 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo         *input,
                                             const ActivationLayerInfo &act_info,
                                             bool                       enable_fast_math)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return opencl::ClWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math);
 }
 

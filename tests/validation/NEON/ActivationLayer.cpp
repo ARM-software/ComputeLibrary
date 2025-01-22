@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ActivationLayerFixture.h"
+#include "tests/validation/helpers/ActivationHelpers.h"
 #include "arm_compute/Acl.hpp"
 #include "support/AclRequires.h"
 
@@ -50,119 +51,8 @@ namespace validation
 {
 namespace
 {
+
 RelativeTolerance<float> tolerance_float_sqrt(0.0001f);
-
-/** Define relative tolerance of the activation layer.
- *
- * @param[in] data_type  The data type used.
- * @param[in] activation The activation function used.
- *
- * @return Relative tolerance depending on the activation function.
- */
-RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
-{
-    switch(activation)
-    {
-        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::ELU:
-        case ActivationLayerInfo::ActivationFunction::SQRT:
-        case ActivationLayerInfo::ActivationFunction::TANH:
-        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-        case ActivationLayerInfo::ActivationFunction::SWISH:
-        case ActivationLayerInfo::ActivationFunction::GELU:
-            switch(data_type)
-            {
-                case DataType::F16:
-#if defined(ENABLE_SVE)
-                    return RelativeTolerance<float>(0.25f);
-#else  // !defined(ENABLE_SVE)
-                    return RelativeTolerance<float>(0.1f);
-#endif // defined(ENABLE_SVE)
-                default:
-                    return RelativeTolerance<float>(0.05f);
-            }
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            switch(data_type)
-            {
-                case DataType::F16:
-#if defined(ENABLE_SVE)
-                    return RelativeTolerance<float>(0.9f);
-#else  // !defined(ENABLE_SVE)
-                    return RelativeTolerance<float>(0.01f);
-#endif // defined(ENABLE_SVE)
-                default:
-                    return RelativeTolerance<float>(0.00001f);
-            }
-        default:
-            return RelativeTolerance<float>(0.f);
-    }
-}
-
-/** Define absolute tolerance of the activation layer.
- *
- * @param[in] data_type  The data type used.
- * @param[in] activation The activation function used.
- *
- * @return Absolute tolerance depending on the activation function.
- */
-AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
-{
-    switch(activation)
-    {
-        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::SQRT:
-        case ActivationLayerInfo::ActivationFunction::TANH:
-        case ActivationLayerInfo::ActivationFunction::SWISH:
-        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-            switch(data_type)
-            {
-                case DataType::F16:
-#if defined(ENABLE_SVE)
-                    return AbsoluteTolerance<float>(0.25f);
-#else  // !defined(ENABLE_SVE)
-                    return AbsoluteTolerance<float>(0.01f);
-#endif // defined(ENABLE_SVE)
-                default:
-                    return AbsoluteTolerance<float>(0.00001f);
-            }
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            switch(data_type)
-            {
-                case DataType::F16:
-#if defined(ENABLE_SVE)
-                    return AbsoluteTolerance<float>(0.9f);
-#else  // !defined(ENABLE_SVE)
-                    return AbsoluteTolerance<float>(0.01f);
-#endif // defined(ENABLE_SVE)
-                default:
-                    return AbsoluteTolerance<float>(0.00001f);
-            }
-        default:
-            return AbsoluteTolerance<float>(0.f);
-    }
-}
-
-/** Define absolute tolerance of the activation layer for qasymm8.
- *
- * @param[in] activation The activation function used.
- *
- * @return Absolute tolerance depending on the activation function.
- */
-AbsoluteTolerance<uint8_t> tolerance_qasymm8(ActivationLayerInfo::ActivationFunction activation)
-{
-    switch(activation)
-    {
-        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-        case ActivationLayerInfo::ActivationFunction::SQRT:
-        case ActivationLayerInfo::ActivationFunction::TANH:
-        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-        case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
-            return AbsoluteTolerance<uint8_t>(1);
-        default:
-            return AbsoluteTolerance<uint8_t>(0);
-    }
-}
 
 constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);
 
@@ -305,7 +195,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::Data
     if(CPUInfo::get().has_fp16())
     {
         // Validate output
-        validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+        validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
     }
     else
     {
@@ -326,7 +216,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::Dat
 
 {
     // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
 }
 // Run only on SME Devices to stress Logistic SME kernel
 #ifdef ARM_COMPUTE_ENABLE_SME2
@@ -337,7 +227,7 @@ FIXTURE_DATA_TEST_CASE(RunLogistic5D, NEActivationLayerFixture<float>, framework
 
 {
     // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
 }
 
 FIXTURE_DATA_TEST_CASE(RunLogisticSME, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::LogisticSMEStressShapesFp32(), LogsisticDataset, framework::dataset::make("DataType",
@@ -345,7 +235,7 @@ FIXTURE_DATA_TEST_CASE(RunLogisticSME, NEActivationLayerFixture<float>, framewor
 
 {
     // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
 }
 TEST_SUITE_END() // SME
 #endif // ARM_COMPUTE_ENABLE_SME2
@@ -378,7 +268,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, fra
                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8(_function));
+    validate(Accessor(_target), _reference, helper::tolerance_qasymm8(_function));
 }
 TEST_SUITE_END() // QASYMM8
 
@@ -389,7 +279,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, fram
                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8(_function));
+    validate(Accessor(_target), _reference, helper::tolerance_qasymm8(_function));
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -732,6 +732,10 @@ Status CLQLSTMLayer::validate(const ITensorInfo             *input,
                                         recurrent_to_forget_weights, recurrent_to_cell_weights,
                                         recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
                                         cell_state_in, output_state_in, cell_state_out, output_state_out, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(
+        input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_forget_weights,
+        recurrent_to_cell_weights, recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
+        cell_state_in, output_state_in, cell_state_out, output_state_out, output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() != 2, "Input must have exactly 2 dimensions");

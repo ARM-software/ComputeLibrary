@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,7 @@ void CLDepthToSpaceLayer::configure(const CLCompileContext &compile_context,
 
 Status CLDepthToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return CLDepthToSpaceLayerKernel::validate(input, output, block_shape);
 }
 } // namespace arm_compute

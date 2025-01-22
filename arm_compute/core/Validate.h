@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_VALIDATE_H
-#define ARM_COMPUTE_VALIDATE_H
+#ifndef ACL_ARM_COMPUTE_CORE_VALIDATE_H
+#define ACL_ARM_COMPUTE_CORE_VALIDATE_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IKernel.h"
@@ -1124,5 +1124,30 @@ arm_compute::Status error_on_invalid_subtensor_valid_region(const char        *f
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) \
     ARM_COMPUTE_RETURN_ON_ERROR(                                           \
         ::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
+
+/** Create an error if at least one of tensor shapes is dynamic
+ *
+ * @param[in] function     Function in which the error occurred.
+ * @param[in] file         Name of the file where the error occurred.
+ * @param[in] line         Line on which the error occurred.
+ * @param[in] tensor_infos Tensor shapes to check.
+ *
+ * @return Status
+ */
+template <typename... Ts>
+inline arm_compute::Status
+error_on_dynamic_shape(const char *function, const char *file, const int line, Ts &&...tensor_infos)
+{
+    const std::array<const ITensorInfo *, sizeof...(Ts)> infos_array{{std::forward<Ts>(tensor_infos)...}};
+    bool has_dynamic = std::any_of(infos_array.begin(), infos_array.end(),
+                                   [&](const ITensorInfo *ti) { return ti != nullptr && ti->is_dynamic(); });
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(has_dynamic, function, file, line, "Dynamic tensor shape is not supported");
+
+    return arm_compute::Status{};
+}
+#define ARM_COMPUTE_ERROR_ON_DYNAMIC_SHAPE(...) \
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_dynamic_shape(__func__, __FILE__, __LINE__, __VA_ARGS__))
+#define ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(...) \
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_dynamic_shape(__func__, __FILE__, __LINE__, __VA_ARGS__))
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_VALIDATE_H*/
+#endif // ACL_ARM_COMPUTE_CORE_VALIDATE_H

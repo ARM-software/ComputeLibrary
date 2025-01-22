@@ -558,6 +558,10 @@ Status CLLSTMLayer::validate(const ITensorInfo             *input,
         input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_forget_weights,
         recurrent_to_cell_weights, recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
         output_state_in, cell_state_in, scratch_buffer, output_state_out, cell_state_out, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(
+        input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_forget_weights,
+        recurrent_to_cell_weights, recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
+        output_state_in, cell_state_in, scratch_buffer, output_state_out, cell_state_out, output);
 
     // Check data types
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);

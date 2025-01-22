@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 list(APPEND CMAKE_MESSAGE_CONTEXT ArmCompute)
 project(
   ArmCompute
-  VERSION 45.0.0
+  VERSION 46.0.0
   DESCRIPTION
     "The Arm Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A CPU and Arm® Mali™ GPU architectures"
   LANGUAGES C CXX ASM)
@@ -88,7 +88,7 @@ message(VERBOSE "-----------------------------------------------------")
 # ---------------------------------------------------------------------
 # Compile options and features
 
-set(COMMON_CXX_FLAGS
+set(COMMON_FLAGS
     -Wall
     -DARCH_ARM
     -Wextra
@@ -97,17 +97,19 @@ set(COMMON_CXX_FLAGS
     -Winit-self
     -Wstrict-overflow=2
     -Wswitch-default
-    -Woverloaded-virtual
     -Wformat-security
-    -Wctor-dtor-privacy
-    -Wsign-promo
-    -Weffc++
     -Wno-overlength-strings
     -Wno-ignored-attributes
     -Wlogical-op
-    -Wnoexcept
-    -Wstrict-null-sentinel
     -Wno-misleading-indentation)
+
+set(CXX_FLAGS
+    -Woverloaded-virtual
+    -Wctor-dtor-privacy
+    -Wsign-promo
+    -Weffc++
+    -Wnoexcept
+    -Wstrict-null-sentinel)
 
 # Disable note popups on compiler ABI changes
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -203,8 +205,11 @@ target_include_directories(
           src/core/NEON/kernels/assembly
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise
-          src/core/NEON/kernels/convolution/winograd)
-target_compile_options(arm_compute PUBLIC ${COMMON_CXX_FLAGS})
+          src/core/NEON/kernels/convolution/winograd
+          third_party/kleidiai)
+target_compile_options(arm_compute
+    PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
+           $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
 
 add_library(ArmCompute::Core ALIAS arm_compute)
 
@@ -234,7 +239,9 @@ target_include_directories(
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise
           src/core/NEON/kernels/convolution/winograd)
-target_compile_options(arm_compute_graph PUBLIC ${COMMON_CXX_FLAGS})
+target_compile_options(arm_compute_graph
+    PUBLIC  $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
+           $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
 
 add_library(ArmCompute::Graph ALIAS arm_compute_graph)
 
@@ -258,9 +265,9 @@ if(ARM_COMPUTE_BUILD_TESTING)
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
           ${CMAKE_CURRENT_SOURCE_DIR})
   target_compile_options(arm_compute_validation_framework
-                        PUBLIC ${COMMON_CXX_FLAGS})
-                        target_link_libraries(
-                          arm_compute_validation_framework
+      PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
+             $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
+  target_link_libraries(arm_compute_validation_framework
       PUBLIC arm_compute arm_compute_graph)
 
   # ---------------------------------------------------------------------
@@ -276,7 +283,9 @@ if(ARM_COMPUTE_BUILD_TESTING)
     target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_SVE)
   endif()
   add_subdirectory(tests/validation)
-  target_compile_options(arm_compute_validation PUBLIC ${COMMON_CXX_FLAGS})
+  target_compile_options(arm_compute_validation
+      PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
+             $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
   set_target_properties(
     arm_compute_validation PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                       "${CMAKE_BINARY_DIR}/validation")
@@ -293,7 +302,9 @@ if(ARM_COMPUTE_BUILD_TESTING)
   target_compile_options(arm_compute_benchmark PRIVATE "-march=${ARM_COMPUTE_ARCH}")
 
   add_subdirectory(tests/benchmark)
-  target_compile_options(arm_compute_benchmark PUBLIC ${COMMON_CXX_FLAGS})
+  target_compile_options(arm_compute_benchmark
+      PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
+             $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
   set_target_properties(
     arm_compute_benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                      "${CMAKE_BINARY_DIR}/validation")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -925,6 +925,16 @@
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_RESIZE_BILINEAR
  * ANEURALNETWORKS_RESIZE_NEAREST_NEIGHBOR
+ *
+ */
+
+/** Scatter
+ *
+ * Description:
+ * Function to perform the Scatter operation.
+ *
+ * Equivalent Android NNAPI Op:
+ * n/a
  *
  */
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,6 +82,7 @@ Status CLConv3D::validate(const ITensorInfo *src,
                           const ITensorInfo *dst,
                           const Conv3dInfo  &conv3d_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(src, weights, biases, dst);
     return opencl::ClDirectConv3d::validate(src, weights, biases, dst, conv3d_info);
 }
 

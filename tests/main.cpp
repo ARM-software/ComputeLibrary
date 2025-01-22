@@ -155,6 +155,9 @@ int main(int argc, char **argv)
     cooldown_sec->set_help("Delay to add between test executions in seconds");
     auto configure_only = parser.add_option<utils::ToggleOption>("configure-only", false);
     configure_only->set_help("Only configures kernels, without allocating, running or validating. Needed in order to validate OpenCL kernel run-time compilation, without necessarily running or validating the kernels' execution");
+    auto print_iterations_figures = parser.add_option<utils::ToggleOption>("print_iterations_figures", false);
+    print_iterations_figures->set_help("When using instruments, this option prints the time taken by each iteration of the test");
+
 
     try
     {
@@ -287,6 +290,7 @@ int main(int argc, char **argv)
         fconfig.configure_only  = configure_only->value();
         fconfig.print_rerun_cmd = print_rerun_command->value();
         fconfig.seed            = seed_value;
+        fconfig.print_iterations= print_iterations_figures->value();
         framework.init(fconfig);
 
         for(auto &p : printers)

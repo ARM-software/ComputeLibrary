@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,7 @@ Status NECropResize::validate(const ITensorInfo  *input,
                               InterpolationPolicy method,
                               float               extrapolation_value)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, boxes, box_ind, output);
     ARM_COMPUTE_RETURN_ERROR_ON(crop_size.x <= 0 || crop_size.y <= 0);
     ARM_COMPUTE_RETURN_ERROR_ON(method == InterpolationPolicy::AREA);
     TensorInfo temp_info;

@@ -1148,7 +1148,6 @@
               "src/core/NEON/kernels/convolution/winograd/weight_transforms/cpp_fp32_1x2_1x7.cpp",
               "src/core/NEON/kernels/convolution/winograd/weight_transforms/cpp_fp32_1x4_1x5.cpp",
               "src/core/NEON/kernels/convolution/winograd/weight_transforms/cpp_fp32_1x6_1x3.cpp",
-              "src/cpu/kernels/directconv2d/nhwc/neon/impl.cpp",
               "src/cpu/kernels/directconv2d/nhwc/neon/qasymm8.cpp",
               "src/cpu/kernels/directconv2d/nchw/all.cpp"
 
@@ -1576,8 +1575,18 @@
           ]
         }
       },
+      "KleidiAI": {
+          "files": {
+              "common": [],
+              "neon": {
+                  "estate64": [
+                      "src/../third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c"
+                  ]
+              }
+          }
+      },
       "Gemm": {
-        "deps": [ "Quantize", "Add", "Sub", "Softmax"],
+        "deps": [ "Quantize", "Add", "Sub", "Softmax", "KleidiAI"],
           "files": {
           "common": [
             "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp",
@@ -2269,7 +2278,12 @@
             "src/cpu/kernels/CpuScatterKernel.cpp",
             "src/cpu/operators/CpuScatter.cpp",
             "src/runtime/NEON/functions/NEScatter.cpp"
-          ]
+          ],
+          "neon": {
+            "fp32": [ "src/cpu/kernels/scatter/generic/neon/fp32.cpp" ],
+            "fp16": [ "src/cpu/kernels/scatter/generic/neon/fp16.cpp" ],
+            "integer": [ "src/cpu/kernels/scatter/generic/neon/integer.cpp"]
+          }
         }
       },
       "Select": {

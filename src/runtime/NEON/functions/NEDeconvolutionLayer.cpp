@@ -94,6 +94,7 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo   *input,
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8,
                                                          DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, bias, output);
     const unsigned int width_idx = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
     const unsigned int height_idx =
         get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::HEIGHT);

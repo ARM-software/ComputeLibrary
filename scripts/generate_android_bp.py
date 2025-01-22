@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -48,6 +48,7 @@ excluded_paths = ["build",
                   "/SVE2/",
                   "/sme/",
                   "/sme2/",
+                  "third_party",
                   ]
 
 excluded_files = ["TracePoint.cpp"]
@@ -117,12 +118,14 @@ cc_library_static {
                          "src/core/NEON/kernels/assembly",
                          "src/core/NEON/kernels/convolution/common",
                          "src/core/NEON/kernels/convolution/winograd",
-                         "src/cpu/kernels/assembly"],
+                         "src/cpu/kernels/assembly",
+                         "third_party/kleidiai"],
     export_include_dirs: [".", "./include"],
     srcs: [
         {% for src in srcs -%}
             "{{ src }}",
         {% endfor %}
+        "third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c",
     ],
     arch: {
         arm: {

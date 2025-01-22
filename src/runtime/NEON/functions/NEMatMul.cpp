@@ -81,6 +81,7 @@ Status NEMatMul::validate(const ITensorInfo         *lhs,
                           const CpuMatMulSettings   &settings,
                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(lhs, rhs, output);
     return cpu::CpuMatMul::validate(lhs, rhs, output, info, settings, act_info);
 }
 

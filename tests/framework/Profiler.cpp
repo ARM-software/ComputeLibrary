@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ void Profiler::start()
     }
 }
 
-void Profiler::stop()
+void Profiler::stop(int32_t iteration)
 {
     for(auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
     {
@@ -63,7 +63,14 @@ void Profiler::stop()
     {
         for(const auto &measurement : instrument->measurements())
         {
-            _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
+            if(iteration < 0) // do not append "Iteration-X" prefix, we do not wish to print the figures for the invidivual iterations
+            {
+                _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
+            }
+            else
+            {
+                _measurements["Iteration-" +  std::to_string(iteration) + "     " +  instrument->id() + "/" + measurement.first].push_back(measurement.second);
+            }
         }
     }
 }
@@ -81,7 +88,6 @@ void Profiler::test_stop()
         {
             _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
         }
-
         _header_data = instrument->instrument_header();
     }
 }

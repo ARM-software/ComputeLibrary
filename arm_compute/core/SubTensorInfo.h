@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -196,7 +196,8 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->is_resizable();
     }
-    bool is_dynamic() const override
+    ITensorInfo &set_dynamic(bool dynamic) override;
+    bool         is_dynamic() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->is_dynamic();

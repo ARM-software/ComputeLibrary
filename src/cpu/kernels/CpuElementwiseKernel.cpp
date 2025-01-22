@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -227,15 +227,18 @@ Status CpuElementwiseKernel<Derived>::validate_arguments_common(const ITensorInf
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src0);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &src1);
 
-    const TensorShape out_shape = TensorShape::broadcast_shape(src0.tensor_shape(), src1.tensor_shape());
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
-
-    // Validate in case of configured dst
-    if (dst.total_size() > 0)
+    if (!src0.is_dynamic() && !src1.is_dynamic() && !dst.is_dynamic())
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
-                                        "Wrong shape for output");
+        const TensorShape out_shape = TensorShape::broadcast_shape(src0.tensor_shape(), src1.tensor_shape());
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
+
+        // Validate in case of configured dst
+        if (dst.total_size() > 0)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
+                                            "Wrong shape for output");
+        }
     }
 
     return Status{};

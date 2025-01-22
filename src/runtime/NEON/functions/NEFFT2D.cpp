@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,7 @@ void NEFFT2D::configure(const ITensor *input, ITensor *output, const FFT2DInfo &
 Status NEFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, const FFT2DInfo &config)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
     // Create intermediate tensor info
     TensorInfo first_pass_tensor(input->clone()->set_is_resizable(true).reset_padding().set_num_channels(2));

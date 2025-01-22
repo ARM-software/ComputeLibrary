@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
+
+#include "arm_compute/core/Validate.h"
 
 #include "src/cpu/operators/CpuElementwiseUnary.h"
 
@@ -53,6 +55,8 @@ NEElementwiseUnaryLayer<op> &NEElementwiseUnaryLayer<op>::operator=(NEElementwis
 template <ElementWiseUnary op>
 void NEElementwiseUnaryLayer<op>::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseUnaryLayer<op>::validate(input->info(), output->info()));
+
     _impl->src    = input;
     _impl->dst    = output;
     _impl->cpu_op = std::make_unique<OperatorType>();

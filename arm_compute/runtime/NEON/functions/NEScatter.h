@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,21 +56,32 @@ public:
      * Valid data layouts:
      * - All
      *
+     * Valid data type configurations:
+     * |src0           |src1           |src2   |dst            |
+     * |:--------------|:--------------|:------|:--------------|
+     * |F32            |F32            |S32    |F32            |
+     * |F16            |F16            |S32    |F16            |
+     * |S32            |S32            |S32    |S32            |
+     * |S16            |S16            |S32    |S16            |
+     * |S8             |S8             |S32    |S8             |
+     * |U32            |U32            |S32    |U32            |
+     * |U16            |U16            |S32    |U16            |
+     * |U8             |U8             |S32    |U8             |
      *
-     * @param[in]  src     Source tensor. Values used to fill output. Can be nullptr when zero initialization is true.
+     * @param[in]  src     Source tensor. Values used to fill output. Can be nullptr when zero initialization is true. Data types supported : F32/F16/S32/S16/S8/U32/U16/U8.
      * @param[in]  updates Tensor containing values used to update output tensor. Data types supported: same as @p src
-     * @param[in]  indices Tensor containing Indices to change in the output Tensor. Data types supported : U32
-     * @param[out] output  Destination tensor. Data types supported: same as @p src.
+     * @param[in]  indices Tensor containing Indices to change in the output Tensor. Data types supported : S32
+     * @param[out] dst     Destination tensor. Data types supported: same as @p src.
      * @param[in]  info    Scatter info object.
      */
     void configure(
-        const ITensor *src, const ITensor *updates, const ITensor *indices, ITensor *output, const ScatterInfo &info);
+        const ITensor *src, const ITensor *updates, const ITensor *indices, ITensor *dst, const ScatterInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLScatter
      *
-     * @param[in] src     Source tensor.
+     * @param[in] src     Source tensor. Data types supported : F32/F16/S32/S16/S8/U32/U16/U8.
      * @param[in] updates Tensor containing values used for updating the output Tensor. Data types supported : same as @p src
-     * @param[in] indices Tensor containing Indices to change in the output Tensor. Data types supported : U32
-     * @param[in] output  Destination tensor. Data types supported: same as @p src.
+     * @param[in] indices Tensor containing Indices to change in the output Tensor. Data types supported : S32
+     * @param[in] dst     Destination tensor. Data types supported: same as @p src.
      * @param[in] info    Scatter info containing type of scatter.
      *
      * @return a status
@@ -78,7 +89,7 @@ public:
     static Status validate(const ITensorInfo *src,
                            const ITensorInfo *updates,
                            const ITensorInfo *indices,
-                           const ITensorInfo *output,
+                           const ITensorInfo *dst,
                            const ScatterInfo &info);
 
     // Inherited methods overridden:

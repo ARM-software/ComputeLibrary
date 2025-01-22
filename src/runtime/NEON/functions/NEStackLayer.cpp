@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,12 @@ Status NEStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis,
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(input.empty());
+
+    for (const auto &t : input)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(t);
+    }
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(output);
 
     // Wrap around negative values
     const size_t       rank   = input[0]->num_dimensions();

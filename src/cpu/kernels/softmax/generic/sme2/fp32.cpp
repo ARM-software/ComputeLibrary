@@ -161,30 +161,30 @@ void sme2_f32_softmax_kernel( //
             mov x21, %x[src]
             mov x22, %x[dst]
 
-loop_3_start%=:
+1: // loop_3_start
             // for index_3 in shape_3 downto 1
             cmp x20, #0
-            b.eq loop_3_end%=
+            b.eq 18f
             sub x20, x20, #1
 
             mov x23, %x[shape_2]
             mov x24, x21
             mov x25, x22
 
-loop_2_start%=:
+2: // loop_2_start
             // for index_2 in shape_2 downto 1
             cmp x23, #0
-            b.eq loop_2_end%=
+            b.eq 17f
             sub x23, x23, #1
 
             mov x26, %x[shape_1]
             mov x27, x24
             mov x28, x25
 
-loop_1_start%=:
+3: // loop_1_start
             // for index_1 in shape_2 downto 1
             cmp x26, #0
-            b.eq loop_1_end%=
+            b.eq 16f
             sub x26, x26, #1
 
             // ==================================================
@@ -201,28 +201,28 @@ loop_1_start%=:
             mov z18.d, z11.d
             mov z19.d, z11.d
 
-find_max_body_start%=:
+4: // find_max_body_start
             cmp x9, x13
-            b.eq find_max_body_end%=
+            b.eq 5f
 
             .inst 0xa009c76c  // ld1w {z12.s-z15.s}, pn9/z, [x27, x9, LSL #2]      // z12-z15: x
             .inst 0xc1acb910  // fmax {z16.s-z19.s}, {z16.s-z19.s}, {z12.s-z15.s}  // z16-z19: max_value = max(max_value, x)
 
             incw x9, ALL, MUL #4
-            b find_max_body_start%=
-find_max_body_end%=:
+            b 4b
+5: // find_max_body_end
 
             // Loop for processing the leftover part.
-find_max_leftover_start%=:
+6: // find_max_leftover_start
             whilelo p1.s, x9, %x[length]
-            b.none find_max_leftover_end%=
+            b.none 7f
 
             ld1w z12.s, p1/z, [x27, x9, LSL #2]                                // z12: x
             fmax z16.s, p1/m, z16.s, z12.s                                     // z16: max_value = max(max_value, x)
 
             incw x9
-            b find_max_leftover_start%=
-find_max_leftover_end%=:
+            b 6b
+7: // find_max_leftover_end
 
             // ---------------------------------------------------------------- z16: max_value
             .inst 0xc1b2b110  // fmax {z16.s-z17.s}, {z16.s-z17.s}, {z18.s-z19.s}
@@ -241,9 +241,9 @@ find_max_leftover_end%=:
             // Loop for processing 4 vectors per iteration.
             mov x9, #0  // ---------------------------------------------------- x9: index
 
-regularize_body_start%=:
+8: // regularize_body_start
             cmp x9, x13
-            b.eq regularize_body_end%=
+            b.eq 9f
 
             // Loads the input data to 4 consecutive registers ---------------- z12-z15: input_data
             .inst 0xa009c76c  // ld1w {z12.s-z15.s}, pn9/z, [x27, x9, LSL #2]
@@ -392,8 +392,8 @@ regularize_body_start%=:
             .inst 0xc1a17e00  // fadd za.s[w11, #0, VGx4], {z16.s-z19.s}        za0-za3: sum_value = sum_value + poly
 
             incw x9, ALL, MUL #4
-            b regularize_body_start%=
-regularize_body_end%=:
+            b 8b
+9: // regularize_body_end
 
             // ---------------------------------------------------------------- z28: sum_value
             .inst 0xc0066c1c  // mova {z28.s-z31.s}, za.s[w11, #0, VGx4]
@@ -402,9 +402,9 @@ regularize_body_end%=:
             fadd z28.s, z28.s, z30.s
 
             // Loop for processing the leftover part.
-regularize_leftover_start%=:
+10: // regularize_leftover_start
             whilelo p1.s, x9, %x[length]
-            b.none regularize_leftover_end%=
+            b.none 11f
 
             ld1w z12.s, p1/z, [x27, x9, LSL #2]                                // x12: input_data
 
@@ -436,8 +436,8 @@ regularize_leftover_start%=:
             fadd z28.s, p1/m, z28.s, z16.s                                     // z28: sum_value = sum_value + poly
 
             incw x9
-            b regularize_leftover_start%=
-regularize_leftover_end%=:
+            b 10b
+11: // regularize_leftover_end
 
             // ==================================================
             // Step 3: Normalize
@@ -452,9 +452,9 @@ regularize_leftover_end%=:
             // Loop for processing 4 vectors per iteration.
             mov x9, #0                                                         // x9: index
 
-normalize_body_start%=:
+12: // normalize_body_start
             cmp x9, x13
-            b.eq normalize_body_end%=
+            b.eq 13f
 
             .inst 0xa009c78c  // ld1w {z12.s-z15.s}, pn9/z, [x28, x9, LSL #2]  // z12-z15: x
 
@@ -467,13 +467,13 @@ normalize_body_start%=:
             .inst 0xa029c78c  // st1w {z12.s-z15.s}, pn9, [x28, x9, LSL #2]
 
             incw x9, ALL, MUL #4
-            b normalize_body_start%=
-normalize_body_end%=:
+            b 12b
+13: // normalize_body_end
 
             // Loop for processing the leftover part.
-normalize_leftover_start%=:
+14: // normalize_leftover_start
             whilelo p1.s, x9, %x[length]
-            b.none normalize_leftover_end%=
+            b.none 15f
 
             ld1w z12.s, p1/z, [x28, x9, LSL #2]                                // z12: x
             fmul z12.s, z12.s, z28.s                                           // z12: result = x * inv_sum_value
@@ -481,8 +481,8 @@ normalize_leftover_start%=:
             st1w z12.s, p1, [x28, x9, LSL #2]
 
             incw x9
-            b normalize_leftover_start%=
-normalize_leftover_end%=:
+            b 14b
+15: // normalize_leftover_end
 
             // ==================================================
             // 3D loop closing
@@ -490,18 +490,18 @@ normalize_leftover_end%=:
 
             add x27, x27, %x[src_stride_1]
             add x28, x28, %x[dst_stride_1]
-            b loop_1_start%=
-loop_1_end%=:
+            b 3b
+16: // loop_1_end
 
             add x24, x24, %x[src_stride_2]
             add x25, x25, %x[dst_stride_2]
-            b loop_2_start%=
-loop_2_end%=:
+            b 2b
+17: // loop_2_end
 
             add x21, x21, %x[src_stride_3]
             add x22, x22, %x[dst_stride_3]
-            b loop_3_start%=
-loop_3_end%=:
+            b 1b
+18: // loop_3_end
 
             .inst 0xd503467f  // smstop
         )"

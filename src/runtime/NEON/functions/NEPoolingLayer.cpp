@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,7 @@ Status NEPoolingLayer::validate(const ITensorInfo      *input,
                                 const PoolingLayerInfo &pool_info,
                                 const ITensorInfo      *indices)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, indices);
     return cpu::CpuPool2d::validate(input, output, pool_info, indices);
 }
 

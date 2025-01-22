@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,7 @@ Status CLPadLayer::validate(const ITensorInfo *input,
                             PixelValue         constant_value,
                             PaddingMode        mode)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     bool perform_pad =
         std::any_of(padding.begin(), padding.end(), [](PaddingInfo info) { return info.first > 0 || info.second > 0; });
 

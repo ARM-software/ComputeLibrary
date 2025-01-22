@@ -100,10 +100,10 @@ void sme2_q8_signed_add_kernel( //
             ld1rw {z2.s}, p0/z, [%[args_ptr], %[scale_1_offset]]
             ld1rw {z3.s}, p0/z, [%[args_ptr], %[offset_offset]]
 
-loop_3_start%=:
+6: // loop_3_start
             // for index_3 in shape_3 downto 1
             cmp x10, #0
-            b.eq loop_3_end%=
+            b.eq 1f // loop_3_end
             sub x10, x10, #1
 
             ldr x14, [%[args_ptr], %[offset_shape_2]]
@@ -111,10 +111,10 @@ loop_3_start%=:
             mov x16, x12
             mov x17, x13
 
-loop_2_start%=:
+5: // loop_2_start
             // for index_2 in shape_2 downto 1
             cmp x14, #0
-            b.eq loop_2_end%=
+            b.eq 7f // loop_2_end
             sub x14, x14, #1
 
             ldr x7, [%[args_ptr], %[offset_shape_1]]
@@ -122,17 +122,17 @@ loop_2_start%=:
             mov x21, x16
             mov x22, x17
 
-loop_1_start%=:
+4: // loop_1_start
             // for index_1 in shape_2 downto 1
             cmp x7, #0
-            b.eq loop_1_end%=
+            b.eq 3f // loop_1_end
             sub x7, x7, #1
 
             mov x9, #0                                                         // x9: index/count
 
 inner_loop_body_start%=:
             cmp x9, x8
-            b.eq inner_loop_body_end%=
+            b.eq 8f // inner_loop_body_end
 
             /*
             Two - instead of the maximal four - registers of each input are processed per loop iteration
@@ -204,11 +204,11 @@ inner_loop_body_start%=:
 
             incb x9, ALL, MUL #2
             b inner_loop_body_start%=
-inner_loop_body_end%=:
+8: // inner_loop_body_end
 
 inner_loop_leftover_start%=:
             whilelo p1.b, x9, %x[length]    // While x9<length
-            b.none inner_loop_leftover_end%=
+            b.none 2f // inner_loop_leftover_end
 
             // Load src0
             ld1b z4.b, p1/z, [x20, x9]
@@ -278,7 +278,7 @@ inner_loop_leftover_start%=:
 
             incb x9 // x9 : x9 += sizeof(element) * predicate_count
             b inner_loop_leftover_start%=
-inner_loop_leftover_end%=:
+2: // inner_loop_leftover_end
 
             // ==================================================
             // 3D loop closing
@@ -287,20 +287,20 @@ inner_loop_leftover_end%=:
             add x20, x20, %[src_stride_1]
             add x21, x21, %[wei_stride_1]
             add x22, x22, %[dst_stride_1]
-            b loop_1_start%=
-loop_1_end%=:
+            b 4b // loop_1_start
+3: // loop_1_end
 
             add x15, x15, %[src_stride_2]
             add x16, x16, %[wei_stride_2]
             add x17, x17, %[dst_stride_2]
-            b loop_2_start%=
-loop_2_end%=:
+            b 5b // loop_2_start
+7: // loop_2_end
 
             add x11, x11, %[src_stride_3]
             add x12, x12, %[wei_stride_3]
             add x13, x13, %[dst_stride_3]
-            b loop_3_start%=
-loop_3_end%=:
+            b 6b // loop_3_start
+1: // loop_3_end
 
             .inst 0xd503467f  // smstop
         )"

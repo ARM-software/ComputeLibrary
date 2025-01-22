@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,6 +104,9 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::select_kernel(const CLGEMMKernelSelec
                                                              params.is_rhs_constant);
             }
             ARM_COMPUTE_ERROR("Not supported data type");
+        case GPUTarget::FIFTHGEN:
+        case GPUTarget::G720:
+        case GPUTarget::G620:
         case GPUTarget::G715:
         case GPUTarget::G615:
             if (gemm_g715_configs.find(data_type) != gemm_g715_configs.end())

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
 
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/core/NEON/kernels/NEReorderKernel.h"
@@ -58,6 +59,7 @@ Status NEReorderLayer::validate(const ITensorInfo        *input,
                                 arm_compute::WeightFormat input_wf,
                                 arm_compute::WeightFormat output_wf)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEReorderKernel::validate(input, output, input_wf, output_wf);
 }
 

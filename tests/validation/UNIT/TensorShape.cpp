@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2024 Arm Limited.
+ * Copyright (c) 2017, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,49 +64,6 @@ DATA_TEST_CASE(SetEmpty, framework::DatasetMode::ALL, framework::dataset::make("
 
     ARM_COMPUTE_EXPECT(shape.num_dimensions() == dimension + 1, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(shape.total_size() == 10, framework::LogLevel::ERRORS);
-}
-
-DATA_TEST_CASE(DynamicDimentions, framework::DatasetMode::ALL, zip(
-            framework::dataset::make("TensorShape", {
-                TensorShape{ 0U },
-                TensorShape{ 1U, 0U, 3U },
-                TensorShape{ 1U, 2U, 0U },
-                TensorShape{ 1U, 2U, 0U, 1U },
-                TensorShape{ 0U, 2U, 0U, 1U },
-                TensorShape{ 0U, 2U, 0U, 1U },
-                TensorShape{ 0U, 0U },
-                TensorShape{ 0U, 0U }}),
-            framework::dataset::make("dim", {0U, 1U, 2U, 2U, 0U, 2U, 0U, 1U} )),
-            shape, dim)
-{
-    ARM_COMPUTE_ERROR_ON(dim >= TensorShape::num_max_dimensions);
-    ARM_COMPUTE_EXPECT(shape.is_dynamic(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(shape.is_dynamic(dim), framework::LogLevel::ERRORS);
-}
-
-DATA_TEST_CASE(StaticShapes, framework::DatasetMode::ALL,
-            framework::dataset::make("TensorShape", {
-                TensorShape{ 1U },
-                TensorShape{ 1U, 5U },
-                TensorShape{ 1U, 2U, 3U }}),
-            shape)
-{
-    ARM_COMPUTE_EXPECT(!shape.is_dynamic(), framework::LogLevel::ERRORS);
-}
-
-DATA_TEST_CASE(StaticDimentions, framework::DatasetMode::ALL, zip(
-            framework::dataset::make("TensorShape", {
-                TensorShape{ 1U },
-                TensorShape{ 1U, 0U },
-                TensorShape{ 0U, 2U },
-                TensorShape{ 1U, 0U, 3U },
-                TensorShape{ 1U, 2U, 0U },
-                TensorShape{ 1U, 2U, 3U }}),
-            framework::dataset::make("dim", {0U, 0U, 1U, 0U, 1U, 2U})),
-            shape, dim)
-{
-    ARM_COMPUTE_ERROR_ON(dim >= TensorShape::num_max_dimensions);
-    ARM_COMPUTE_EXPECT(!shape.is_dynamic(dim), framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END() // TensorShapeValidation

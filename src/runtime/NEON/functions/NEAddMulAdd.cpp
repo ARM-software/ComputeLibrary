@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,6 +79,7 @@ Status NEAddMulAdd::validate(const ITensorInfo         *input1,
                              ConvertPolicy              policy,
                              const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, bn_mul, bn_add, add_output, final_output);
     return cpu::CpuAddMulAdd::validate(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info);
 }
 

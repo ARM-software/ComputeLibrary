@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 
@@ -41,6 +43,7 @@ void NEMeanStdDevNormalizationLayer::configure(ITensor *input, ITensor *output, 
 
 Status NEMeanStdDevNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEMeanStdDevNormalizationKernel::validate(input, output, epsilon);
 }
 } // namespace arm_compute

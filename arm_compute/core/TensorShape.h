@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,12 +35,7 @@
 
 namespace arm_compute
 {
-/** Shape of a tensor.
- *
- * It is allowed to set one or several dimensions of a tensor shape to size 0.
- * In this case the dimensions of size 0 and the whole tensor shape are
- * considered dynamic.
- */
+/** Shape of a tensor */
 class TensorShape : public Dimensions<size_t>
 {
 public:
@@ -82,17 +77,24 @@ public:
      */
     TensorShape &set(size_t dimension, size_t value, bool apply_dim_correction = true, bool increase_dim_unit = true)
     {
-        // Make sure all empty dimensions are filled with 1
-        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
-
-        // Set the specified dimension and increase the number of dimensions if
-        // necessary
-        Dimensions::set(dimension, value, increase_dim_unit);
-
-        // Correct number dimensions to ignore trailing dimensions of size 1
-        if (apply_dim_correction)
+        // Clear entire shape if one dimension is zero
+        if (value == 0)
         {
-            apply_dimension_correction();
+            _num_dimensions = 0;
+            std::fill(_id.begin(), _id.end(), 0);
+        }
+        else
+        {
+            // Make sure all empty dimensions are filled with 1
+            std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+            // Set the specified dimension and increase the number of dimensions if
+            // necessary
+            Dimensions::set(dimension, value, increase_dim_unit);
+            // Correct number dimensions to ignore trailing dimensions of size 1
+            if (apply_dim_correction)
+            {
+                apply_dimension_correction();
+            }
         }
         return *this;
     }
@@ -240,31 +242,16 @@ public:
         return bc_shape;
     }
 
-    /** Check if the tensor shape is dynamic.
+    /** Set number of dimensions.
      *
-     * If any dimension of the tensor shape has size 0, then this dimension
-     * and the whole shape are considered dynamic.
-     *
-     * @return True if the tensor shape is dynamic, else false.
+     * @param [in] num_dimensions Number of dimensions to set.
      */
-    bool is_dynamic() const
+    void set_num_dimensions(size_t num_dimensions)
     {
-        return std::any_of(cbegin(), cend(), [](const auto &s) { return s == 0; });
-    }
+        Dimensions::set_num_dimensions(num_dimensions);
 
-    /** Check if a given dimension of the tensor shape is dynamic.
-     *
-     * If a dimension of the tensor shape has size 0, then this dimension
-     * and the whole shape are considered dynamic.
-     *
-     * @param[in] dim Dimension index.
-     *
-     * @return True if dimension dim is dynamic, else false.
-     */
-    bool is_dynamic(const size_t dim) const
-    {
-        ARM_COMPUTE_ERROR_ON(dim >= TensorShape::num_max_dimensions);
-        return _id[dim] == 0;
+        // Make sure all empty dimensions are filled with 1
+        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
     }
 
 private:

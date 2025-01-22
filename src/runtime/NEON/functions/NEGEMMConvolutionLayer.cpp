@@ -96,6 +96,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo         *input,
                                         bool                       enable_fast_math,
                                         unsigned int               num_groups)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return cpu::CpuGemmConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info,
                                         enable_fast_math, num_groups);
 }

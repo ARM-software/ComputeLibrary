@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,22 +23,26 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 
-#include "arm_compute/core/PixelValue.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/Tensor.h"
 
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuDirectConv2d.h"
 
 namespace arm_compute
 {
 struct NEDirectConvolutionLayer::Impl
 {
+    MemoryGroup                           memory_group{};
     ITensor                              *src{nullptr};
     const ITensor                        *weights{nullptr};
     const ITensor                        *bias{nullptr};
     ITensor                              *dst{nullptr};
     std::unique_ptr<cpu::CpuDirectConv2d> op{nullptr};
+    ITensorPack                           run_pack{};
+    WorkspaceData<Tensor>                 workspace_tensors{};
 };
 
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
@@ -54,6 +58,8 @@ void NEDirectConvolutionLayer::configure(ITensor                   *input,
                                          const PadStrideInfo       &conv_info,
                                          const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    _impl->memory_group.mappings().clear();
     _impl->src     = input;
     _impl->weights = weights;
     _impl->bias    = bias;
@@ -61,6 +67,10 @@ void NEDirectConvolutionLayer::configure(ITensor                   *input,
     _impl->op      = std::make_unique<cpu::CpuDirectConv2d>(_memory_manager);
     _impl->op->configure(input->info(), weights->info(), (bias != nullptr ? bias->info() : nullptr), output->info(),
                          conv_info, act_info);
+
+    _impl->run_pack = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, bias}, {ACL_DST, output}};
+
+    _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
 Status NEDirectConvolutionLayer::validate(const ITensorInfo         *input,
@@ -70,16 +80,12 @@ Status NEDirectConvolutionLayer::validate(const ITensorInfo         *input,
                                           const PadStrideInfo       &conv_info,
                                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, bias, output);
     return cpu::CpuDirectConv2d::validate(input, weights, bias, output, conv_info, act_info);
 }
 
 void NEDirectConvolutionLayer::run()
 {
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
-    pack.add_tensor(TensorType::ACL_SRC_1, _impl->weights);
-    pack.add_tensor(TensorType::ACL_SRC_2, _impl->bias);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-    _impl->op->run(pack);
+    _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,9 +33,8 @@
 #include "tests/framework/Fixture.h"
 #include "tests/framework/ParametersLibrary.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/helpers/ActivationHelpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
-
-#include <random>
 
 namespace arm_compute
 {
@@ -60,7 +59,7 @@ public:
 
         _in_place                 = in_place;
         _data_type                = data_type;
-        _output_quantization_info = calculate_output_quantization_info(_data_type, info, quantization_info);
+        _output_quantization_info = helper::calculate_output_quantization_info(_data_type, info, quantization_info);
         _input_quantization_info  = in_place ? _output_quantization_info : quantization_info;
 
         _function  = function;
@@ -69,37 +68,6 @@ public:
     }
 
 protected:
-    std::vector<T> get_boundary_values(T min, T max)
-    {
-        // This function will return a vector filled with the following values that can
-        // represent two partitions derived from equivalent partitioning.
-        // * Lower parition: min, min + delta, lower quarter (nominal), center - delta
-        // * Upper partition: center, center + delta, upper quarter (nominal), max - delta, max
-        const auto delta         = is_data_type_float(_data_type) ? T(0.1f) : T(1);
-        const auto center_value  = (min + max) / 2;
-        const auto lower_quarter = (min + center_value) / 2;
-        const auto upper_quarter = (center_value + max) / 2;
-
-        std::vector<T> boundary_values{};
-
-        // To ensure all the inserted values are within the given range after subtracing/adding delta
-        auto insert_values = [&boundary_values, &min, &max](const std::initializer_list<T> &new_values)
-        {
-            for(auto &v : new_values)
-            {
-                if(v >= min && v <= max)
-                {
-                    boundary_values.emplace_back(v);
-                }
-            }
-        };
-
-        insert_values({ min, static_cast<T>(min + delta), static_cast<T>(lower_quarter), static_cast<T>(center_value - delta) });                               // lower partition
-        insert_values({ static_cast<T>(center_value), static_cast<T>(center_value + delta), static_cast<T>(upper_quarter), static_cast<T>(max - delta), max }); // upper partition
-
-        return boundary_values;
-    }
-
     template <typename U>
     void fill(U &&tensor)
     {
@@ -108,14 +76,14 @@ protected:
             float min_bound = 0;
             float max_bound = 0;
             std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type);
-            library->fill_static_values(tensor, get_boundary_values(static_cast<T>(min_bound), static_cast<T>(max_bound)));
+            library->fill_static_values(tensor, helper::get_boundary_values(_data_type, static_cast<T>(min_bound), static_cast<T>(max_bound)));
         }
         else
         {
             PixelValue min{};
             PixelValue max{};
             std::tie(min, max) = get_min_max(tensor.data_type());
-            library->fill_static_values(tensor, get_boundary_values(min.get<T>(), max.get<T>()));
+            library->fill_static_values(tensor, helper::get_boundary_values(_data_type, min.get<T>(), max.get<T>()));
         }
     }
 
@@ -170,54 +138,6 @@ protected:
         fill(src);
 
         return reference::activation_layer<T>(src, info, _output_quantization_info);
-    }
-
-private:
-    QuantizationInfo calculate_output_quantization_info(DataType dt, const ActivationLayerInfo &act_info, const QuantizationInfo &default_qinfo)
-    {
-        auto qasymm8_max        = float(std::numeric_limits<uint8_t>::max()) + 1.f;
-        auto qasymm8_signed_max = float(std::numeric_limits<int8_t>::max()) + 1.f;
-        auto qsymm16_max        = float(std::numeric_limits<int16_t>::max()) + 1.f;
-
-        switch(act_info.activation())
-        {
-            case ActivationLayerInfo::ActivationFunction::TANH:
-                if(dt == DataType::QSYMM16)
-                {
-                    return QuantizationInfo(1.f / qsymm16_max, 0);
-                }
-                else if(dt == DataType::QASYMM8)
-                {
-                    return QuantizationInfo(1.f / (0.5 * qasymm8_max), int(0.5 * qasymm8_max));
-                }
-                else if(dt == DataType::QASYMM8_SIGNED)
-                {
-                    return QuantizationInfo(1.f / qasymm8_signed_max, 0);
-                }
-                else
-                {
-                    return default_qinfo;
-                }
-            case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-                if(dt == DataType::QSYMM16)
-                {
-                    return QuantizationInfo(1.f / qsymm16_max, 0);
-                }
-                else if(dt == DataType::QASYMM8)
-                {
-                    return QuantizationInfo(1.f / qasymm8_max, 0);
-                }
-                else if(dt == DataType::QASYMM8_SIGNED)
-                {
-                    return QuantizationInfo(1.f / (2.f * qasymm8_signed_max), -int(qasymm8_signed_max));
-                }
-                else
-                {
-                    return default_qinfo;
-                }
-            default:
-                return default_qinfo;
-        }
     }
 
 protected:

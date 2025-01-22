@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(Transpose)
 
@@ -63,6 +65,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
     Status status =  NETranspose::validate(&a_info.clone()->set_is_resizable(false),
                                            &output_info.clone()->set_is_resizable(false));
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+NON_CONST_DATA_TEST_CASE(DynamicTensorShapesNotSupported, framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputInfo", TensorInfo(TensorShape(20U, 16U), 1, DataType::U16)),
+            make("OutputInfo", TensorInfo(TensorShape(16U, 20U), 1, DataType::U16))
+        ),
+        make("DynamicShape", { false, true })),
+    src_info, dst_info, dynamic_shape)
+{
+    src_info.set_dynamic(dynamic_shape);
+    dst_info.set_dynamic(dynamic_shape);
+
+    Status status =  NETranspose::validate(&src_info, &dst_info);
+
+    ARM_COMPUTE_EXPECT(bool(status) == !dynamic_shape, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2021-2024 Arm Limited.
+/// Copyright (c) 2021-2025 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -2909,6 +2909,48 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>F32<td>F32
     <tr><td>U8<td>U8
     <tr><td>S16<td>S16
+    </table>
+<tr>
+  <td rowspan="2">Scatter
+  <td rowspan="2" style="width:200px;"> Function to perform the Scatter operation.
+  <td rowspan="2">
+      <ul>
+       <li>n/a
+      </ul>
+  <td>NEScatter
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F32<td>F32<td>S32<td>F32
+    <tr><td>F16<td>F16<td>S32<td>F16
+    <tr><td>S32<td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S32<td>S16
+    <tr><td>S8<td>S8<td>S32<td>S8
+    <tr><td>U32<td>U32<td>S32<td>U32
+    <tr><td>U16<td>U16<td>S32<td>U16
+    <tr><td>U8<td>U8<td>S32<td>U8
+    </table>
+<tr>
+  <td>CLScatter
+  <td>
+      <ul>
+       <li>All
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F32<td>F32<td>S32<td>F32
+    <tr><td>F16<td>F16<td>S32<td>F16
+    <tr><td>S32<td>S32<td>S32<td>S32
+    <tr><td>S16<td>S16<td>S32<td>S16
+    <tr><td>S8<td>S8<td>S32<td>S8
+    <tr><td>U32<td>U32<td>S32<td>U32
+    <tr><td>U16<td>U16<td>S32<td>U16
+    <tr><td>U8<td>U8<td>S32<td>U8
     </table>
 <tr>
   <td rowspan="2">Select

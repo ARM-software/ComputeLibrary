@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Arm Limited.
+# Copyright (c) 2023-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -26,6 +26,7 @@ target_sources(
   arm_compute_validation_framework
   PRIVATE validation/Validation.cpp
           validation/Helpers.cpp
+          validation/helpers/ActivationHelpers.cpp
           ${validation_reference}
           framework/Framework.cpp
           framework/Utils.cpp

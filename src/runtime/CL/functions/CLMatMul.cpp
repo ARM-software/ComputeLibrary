@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,7 @@ Status CLMatMul::validate(const ITensorInfo         *lhs,
                           const MatMulInfo          &matmul_info,
                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(lhs, rhs, output);
     return OperatorType::validate(lhs, rhs, output, matmul_info, act_info);
 }
 

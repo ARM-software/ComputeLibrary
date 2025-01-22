@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,7 @@ Status NENormalizationLayer::validate(const ITensorInfo            *input,
 {
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
     ARM_COMPUTE_RETURN_ON_ERROR(NENormalizationLayerKernel::validate(input, input, output, norm_info));
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(input, input, output, 1.0f, ConvertPolicy::SATURATE,

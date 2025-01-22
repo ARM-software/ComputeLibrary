@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEReverse.h"
 
+#include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEReverseKernel.h"
 
@@ -42,6 +44,7 @@ Status NEReverse::validate(const ITensorInfo *input,
                            const ITensorInfo *axis,
                            bool               use_inverted_axis)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, axis);
     return NEReverseKernel::validate(input, output, axis, use_inverted_axis);
 }
 } // namespace arm_compute

@@ -1,0 +1,91 @@
+///
+/// Copyright (c) 2025 Arm Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/**
+@page dynamic_shape_support Dynamic Shape Support
+
+@section dynamic_shape_support_in_compute_library Dynamic Shape Support in Compute Library
+
+It is possible to delay the initialization of the tensor shape of input and output tensors in certain functions/operators in Compute Library.
+In those cases, @ref TensorInfo of the tensor object is modified accordingly, and the shape information is not used at the time of configuration.
+The calculation of the execution window of the underlying kernels are delayed until the shapes are known (usually at runtime). Not all functions/operators support
+dynamic shapes. The ones that does not support it have the following macros to guard for it in their input validation.
+
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(...)
+    ARM_COMPUTE_ERROR_ON_DYNAMIC_SHAPE(...)
+
+@subsection how_is_it_described How is it described?
+
+The dynamic-ness of the tensor shape is described through the @ref TensorInfo object. All or some of the dimensions can be made dynamic.
+@ref TensorInfo object holds an array of values (0 or -1) to indicate the dynamic-ness of the corresponding dimension. (-1) means the dimension
+is dynamic, (0) means the dimension is not dynamic (i.e. static). All tensor objects are assumed static by default.
+
+A tensor can be made dynamic by calling the set_dynamic() public interface function:
+
+    tensor_info.set_dynamic(true); // Make dynamic
+    tensor_info.set_dynamic(false); // Make static
+
+This will signal the function/operator that the shape information inside this tensor info can be different at runtime. At runtime, i.e. when the
+shape is known, it's not necessary to make the tensor static. Knowing the shape does not mean the shape won't change at a later time.
+
+@subsection example Example
+
+The following is an example usage.
+
+@code{.cpp}
+    Tensor tensor;
+    Tensor output;
+    TensorShape shape = TensorShape(10U, 5U, 2U);
+
+    ...
+    // Not necessary to make the tensor shape empty, but it'll work as the shape information will be disregarded.
+    tensor.info()->set_tensor_shape(TensorShape());
+    tensor.info()->set_dynamic(true);
+
+    // Configure the layer
+    NEElementwiseUnaryLayer layer;
+    layer.configure(&tensor, &output);
+
+    // Now, set the shape. No need to make the tensor static.
+    tensor.info()->set_tensor_shape(shape);
+
+    // Run the layer
+    layer.run();
+@endcode
+
+@subsection controlling_individual_dimensions Controlling individual dimensions
+
+It's possible to make only some of the dimensions dynamic.
+
+@code{.cpp}
+    // This will make dimensions 1 and 2 dynamic, others static.
+    constexpr int32_t dynamic_dim = ITensorInfo::get_dynamic_state_value();
+    constexpr int32_t static_dim = ITensorInfo::get_static_state_value();
+
+    ITensorInfo::TensorDimsState state {static_dim, dynamic_dim, dynamic_dim, static_dim, static_dim, static_dim};
+    tensor_info.set_tensor_dims_state(state);
+@endcode
+*/
+} // namespace

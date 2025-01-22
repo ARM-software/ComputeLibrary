@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,8 +104,10 @@
 
 #define MAKE_TYPE_PARAM(i, name) typename T##i
 #define MAKE_ARG_PARAM(i, name) const T##i &name
+#define MAKE_NON_CONST_ARG_PARAM(i, name) T##i &name
 #define MAKE_TYPE_PARAMS(...) JOIN_PARAM(MAKE_TYPE_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
 #define MAKE_ARG_PARAMS(...) JOIN_PARAM(MAKE_ARG_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
+#define MAKE_NON_CONST_ARG_PARAMS(...) JOIN_PARAM(MAKE_NON_CONST_ARG_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
 
 //
 // TEST CASE MACROS
@@ -207,6 +209,29 @@
     template <typename... As>                                                                                       \
     template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                        \
     void TEST_NAME<std::tuple<As...>>::run(MAKE_ARG_PARAMS(__VA_ARGS__))
+
+#define NON_CONST_DATA_TEST_CASE_IMPL(TEST_NAME, MODE, STATUS, DATASET, ...)                                                  \
+    template <typename T>                                                                                           \
+    class TEST_NAME;                                                                                                \
+    template <typename... As>                                                                                       \
+    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type> \
+    {                                                                                                               \
+    public:                                                                                                     \
+        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                              \
+        void do_run() override                                                                                      \
+        {                                                                                                           \
+            arm_compute::test::framework::apply(this, &TEST_NAME::run<As...>, _data);                               \
+        }                                                                                                           \
+        template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                    \
+        void run(MAKE_NON_CONST_ARG_PARAMS(__VA_ARGS__));                                                                     \
+    };                                                                                                              \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                          \
+    template <typename... As>                                                                                       \
+    template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                        \
+    void TEST_NAME<std::tuple<As...>>::run(MAKE_NON_CONST_ARG_PARAMS(__VA_ARGS__))
+
+#define NON_CONST_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
+    NON_CONST_DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET, __VA_ARGS__)
 
 #define DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
     DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET, __VA_ARGS__)

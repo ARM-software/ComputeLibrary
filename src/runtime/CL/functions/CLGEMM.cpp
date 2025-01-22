@@ -115,6 +115,7 @@ Status CLGEMM::validate(const ITensorInfo *a,
                         float              beta,
                         const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(a, b, c, output);
     return OperatorType::validate(a, b, c, output, alpha, beta, gemm_info);
 }
 

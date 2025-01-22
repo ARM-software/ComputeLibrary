@@ -54,6 +54,13 @@ public:
             return;
         }
 
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::BFLOAT16 && !CPUInfo::get().has_sve())
+        {
+            // See tests/validation/NEON/SoftmaxLayer.cpp for explanation
+            return;
+        }
+
         _quantization_info = quantization_info;
 
         _reference = compute_reference(shape, data_type, quantization_info, beta, axis);

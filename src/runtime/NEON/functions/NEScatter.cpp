@@ -26,6 +26,7 @@
 #include "arm_compute/function_info/ScatterInfo.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuScatter.h"
 
@@ -36,7 +37,7 @@ struct NEScatter::Impl
     const ITensor                   *src{nullptr};
     const ITensor                   *updates{nullptr};
     const ITensor                   *indices{nullptr};
-    ITensor                         *output{nullptr};
+    ITensor                         *dst{nullptr};
     std::unique_ptr<cpu::CpuScatter> op{nullptr};
     MemoryGroup                      memory_group{};
     ITensorPack                      run_pack{};
@@ -49,34 +50,54 @@ NEScatter::NEScatter() : _impl(std::make_unique<Impl>())
 NEScatter::~NEScatter() = default;
 
 void NEScatter::configure(
-    const ITensor *src, const ITensor *updates, const ITensor *indices, ITensor *output, const ScatterInfo &info)
+    const ITensor *src, const ITensor *updates, const ITensor *indices, ITensor *dst, const ScatterInfo &info)
 {
-    ARM_COMPUTE_UNUSED(src);
-    ARM_COMPUTE_UNUSED(updates);
-    ARM_COMPUTE_UNUSED(indices);
-    ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(updates, indices, dst);
 
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, updates, indices, output);
+    if (src == nullptr)
+    {
+        ARM_COMPUTE_ERROR_THROW_ON(validate(nullptr, updates->info(), indices->info(), dst->info(), info));
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR_THROW_ON(validate(src->info(), updates->info(), indices->info(), dst->info(), info));
+    }
+
+    ARM_COMPUTE_LOG_PARAMS(src, updates, indices, dst, info);
+
+    _impl->op = std::make_unique<cpu::CpuScatter>();
+    if (src)
+    {
+        _impl->op->configure(src->info(), updates->info(), indices->info(), dst->info(), info);
+    }
+    else
+    {
+        _impl->op->configure(nullptr, updates->info(), indices->info(), dst->info(), info);
+    }
+
+    _impl->run_pack = {
+        {TensorType::ACL_SRC_0, src},
+        {TensorType::ACL_SRC_1, updates},
+        {TensorType::ACL_SRC_2, indices},
+        {TensorType::ACL_DST_0, dst},
+    };
+
+    _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
 Status NEScatter::validate(const ITensorInfo *src,
                            const ITensorInfo *updates,
                            const ITensorInfo *indices,
-                           const ITensorInfo *output,
+                           const ITensorInfo *dst,
                            const ScatterInfo &info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, updates, indices, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuScatter::validate(src, updates, indices, output, info));
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(src, updates, indices, dst);
 
-    return Status{};
+    return cpu::CpuScatter::validate(src, updates, indices, dst, info);
 }
 
 void NEScatter::run()
 {
-    // Acquire all the temporaries
-    MemoryGroupResourceScope scope_mg(_impl->memory_group);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->updates, _impl->indices, _impl->output);
     _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H
-#define SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H
+#ifndef ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_SVE_IMPL_H
+#define ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_SVE_IMPL_H
 
 #include "arm_compute/core/Helpers.h"
 
@@ -36,13 +36,13 @@ namespace cpu
 using namespace arm_compute::wrapper;
 
 template <typename VectorType>
-VectorType elementwise_pow(svbool_t &pg, const VectorType &a, const VectorType &b)
+inline VectorType elementwise_pow(svbool_t &pg, const VectorType &a, const VectorType &b)
 {
     return svpow_z(pg, a, b);
 }
 
 template <typename VectorType>
-VectorType elementwise_div(svbool_t &pg, const VectorType &a, const VectorType &b)
+inline VectorType elementwise_div(svbool_t &pg, const VectorType &a, const VectorType &b)
 {
     return svdiv_z(pg, a, b);
 }
@@ -164,4 +164,4 @@ void elementwise_comparison_op(
     const ITensor *in1, const ITensor *in2, ITensor *out, ComparisonOperation op, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
-#endif /* SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H */
+#endif // ACL_SRC_CPU_KERNELS_ELEMENTWISE_BINARY_GENERIC_SVE_IMPL_H

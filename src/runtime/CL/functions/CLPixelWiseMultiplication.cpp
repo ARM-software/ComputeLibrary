@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,6 +85,7 @@ Status CLPixelWiseMultiplication::validate(const ITensorInfo         *input1,
                                            RoundingPolicy             rounding_policy,
                                            const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return opencl::ClMul::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
 
@@ -140,6 +141,7 @@ Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo         *inp
                                                   const ITensorInfo         *output,
                                                   const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return opencl::ClComplexMul::validate(input1, input2, output, act_info);
 }
 

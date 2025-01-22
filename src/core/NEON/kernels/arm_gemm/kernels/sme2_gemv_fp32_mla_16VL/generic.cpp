@@ -61,8 +61,8 @@ void sme2_gemv_fp32_mla_16VL (
             break;
     }
     __asm__ __volatile__(
-      "ptrue p8.b\n"
       ".inst 0xd503477f  // SMSTART ZA\n"
+      "ptrue p8.b\n"
       "mov x9, #0x0\n"
       "cntw x28, ALL, MUL #4\n"
       "mov x27, %x[B_ptr]\n"
@@ -540,7 +540,6 @@ void sme2_gemv_fp32_mla_16VL (
       "bgt 4b\n"
       "36:"  // Exit
       ".inst 0xd503467f  // SMSTOP\n"
-      "ptrue p8.b\n"
       : [N] "+&r" (N)
       : [A_ptr] "r" (A_ptr), [B_ptr] "r" (B_ptr), [K] "r" (K), [args_ptr] "r" (&ka), [bias] "r" (bias), [flags] "r" (flags), [offset_max] "I" (offsetof(KernelArgs, maxval)), [offset_min] "I" (offsetof(KernelArgs, minval)), [output_ptr] "r" (output_ptr)
       : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x9", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"

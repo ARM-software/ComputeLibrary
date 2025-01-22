@@ -29,6 +29,8 @@
 
 #include "src/cpu/ICpuKernel.h"
 #include "src/cpu/ICpuOperator.h"
+#include "src/cpu/operators/CpuCopy.h"
+#include "src/cpu/operators/CpuFill.h"
 
 namespace arm_compute
 {
@@ -50,13 +52,13 @@ public:
      * @param[in]  updates      Tensor info for tensor storing update values to use for scatter function. Data types supported: same as @p src.
      * @param[in]  indices      Tensor info for tensor storing indices to use for scatter function. Data types supported: U32 only.
      * @param[out] dst          Output tensor to store the result of the Scatter Function. Data types supported: same as @p src and @p updates.
-     * @param[in]  Scatter_info Contains Scatter operation information described in @ref ScatterInfo.
+     * @param[in]  scatter_info Contains Scatter operation information described in @ref ScatterInfo.
      */
     void configure(const ITensorInfo *src,
                    const ITensorInfo *updates,
                    const ITensorInfo *indices,
                    ITensorInfo       *dst,
-                   const ScatterInfo &Scatter_info);
+                   const ScatterInfo &scatter_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuScatter::configure()
@@ -67,14 +69,17 @@ public:
                            const ITensorInfo *updates,
                            const ITensorInfo *indices,
                            const ITensorInfo *dst,
-                           const ScatterInfo &Scatter_info);
+                           const ScatterInfo &scatter_info);
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<ICPPKernel> _scatter_kernel{nullptr};
-    std::unique_ptr<ICPPKernel> _fill_kernel{nullptr};
+    std::unique_ptr<ICPPKernel>   _scatter_kernel{nullptr};
+    std::unique_ptr<cpu::CpuCopy> _copy_operator{nullptr};
+    std::unique_ptr<cpu::CpuFill> _fill_operator{nullptr};
+    bool                          _fill_zero{false};
+    bool                          _run_copy{false};
 };
 } // namespace cpu
 } // namespace arm_compute
