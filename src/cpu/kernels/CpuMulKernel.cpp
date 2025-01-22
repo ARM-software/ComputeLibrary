@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -330,6 +330,8 @@ void mul_saturate_quantized_8(const ITensor *src1, const ITensor *src2, ITensor 
 
 bool mul_q8_sme_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, float scale)
 {
+    ARM_COMPUTE_UNUSED(src0, src1, dst, scale);
+#ifdef ARM_COMPUTE_ENABLE_SME2
     const auto        &in0_shape = src0->tensor_shape();
     const auto        &in1_shape = src1->tensor_shape();
     const unsigned int dst_dims  = dst->num_dimensions();
@@ -360,6 +362,7 @@ bool mul_q8_sme_possible(const ITensorInfo *src0, const ITensorInfo *src1, const
         // Passed all checks
         return true;
     }
+#endif // ARM_COMPUTE_ENABLE_SME2
     return false;
 }
 
