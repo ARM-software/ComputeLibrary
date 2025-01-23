@@ -35,12 +35,17 @@ if(NOT GIT_FOUND OR RESULT)
   set(ACL_VERSION_HASH "Unknown")
 endif()
 
-set(ARM_COMPUTE_SHA_FILE "${PROJECT_SOURCE_DIR}/arm_compute_version.embed")
-file(WRITE "${ARM_COMPUTE_SHA_FILE}.tmp" "\"${ACL_VERSION_SHA}\"")
+file(WRITE "${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp" "\"${ACL_VERSION_SHA}\"")
 
 execute_process(
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  ${ARM_COMPUTE_SHA_FILE}.tmp
-  ${ARM_COMPUTE_SHA_FILE}
+  COMMAND ${CMAKE_COMMAND} -E compare_files
+  ${PROJECT_SOURCE_DIR}/arm_compute_version.embed
+  ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp
+  RESULT_VARIABLE is_same
 )
-file(REMOVE ${ARM_COMPUTE_SHA_FILE}.tmp)
+
+if(is_same EQUAL 0)
+    file(REMOVE ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp)
+else()
+    file(RENAME ${PROJECT_SOURCE_DIR}/arm_compute_version.embed.tmp ${PROJECT_SOURCE_DIR}/arm_compute_version.embed)
+endif()

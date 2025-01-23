@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Arm Limited.
+# Copyright (c) 2023, 2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -20,19 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# * For multiconfig generators, we only do debug and release builds.
-if(CMAKE_CONFIGURATION_TYPES)
-  set(
-    CMAKE_CONFIGURATION_TYPES "Release;Debug"
-    CACHE STRING "Allowed project configurations" FORCE
-  )
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
 
-# * Default for single config build system is release.
-elseif(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-  message("CMAKE_BUILD_TYPE not specified. Assuming Release.")
-
-# * Single config generators are restricted to debug and release builds.
-elseif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
-  message(FATAL_ERROR "Only Debug and Release build configurations are supported.")
-endif()
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)

@@ -357,7 +357,7 @@ target_sources(
 )
 
 target_sources(
-    arm_compute_core
+    arm_compute
     PRIVATE
     ../third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c
 	c/AclContext.cpp
