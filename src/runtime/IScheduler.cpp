@@ -90,7 +90,7 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
             for (unsigned int mi = 0; mi != m_threads; ++mi)
             {
                 workloads.push_back(
-                    [ni, mi, m_threads, n_threads, &max_window, &kernel](const ThreadInfo &info)
+                    [ni, mi, m_threads, n_threads, &max_window, &kernel, &tensors](const ThreadInfo &info)
                     {
                         //narrow the window to our mi-ni workload
                         Window win = max_window.split_window(Window::DimX, mi, m_threads)
@@ -104,7 +104,14 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
 
                         thread_locator.validate();
 
-                        kernel->run_nd(win, info, thread_locator);
+                        if (tensors.empty())
+                        {
+                            kernel->run_nd(win, info, thread_locator);
+                        }
+                        else
+                        {
+                            kernel->run_op(tensors, win, info);
+                        }
                     });
             }
         }

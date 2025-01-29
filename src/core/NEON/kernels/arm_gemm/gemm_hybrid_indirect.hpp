@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,12 +31,10 @@
 #include <cassert>
 
 #include "arm_gemm.hpp"
-#include "bias_adder.hpp"
 #include "convolver.hpp"
 #include "kernel_weight_format.hpp"
 #include "ndrange.hpp"
 #include "performance_parameters.hpp"
-#include "transform.hpp"
 #include "utils.hpp"
 
 #ifdef CYCLE_PROFILING
@@ -423,8 +421,8 @@ public:
         return true;
     }
 
-    // Stateless execute
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, Tw, Tr>& g_array) override {
+    // Common execution logic.
+    void execute_common(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, Tw, Tr>& g_arrays) {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -452,7 +450,6 @@ public:
         /* Make sure we've been set up correctly. */
         assert(FixedFormat || _B_transposed);
         static_assert(std::is_same<To, Tloi>::value, "gemm_native: Operand types must be the same.");
-//        static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
 
         /* For now, each work item implies all the K for a given output
          * pixel (so we don't need to synchronize access to the output
@@ -504,9 +501,9 @@ public:
 
                 const Troi *b_panel;
                 if (FixedFormat) {
-                    b_panel = reinterpret_cast<const Troi *>(g_array._Bptr) +
-                               (multi * g_array._B_multi_stride) +
-                               ((n0 / stripe_width<strategy, FixedFormat>::get()) * g_array._ldb) +
+                    b_panel = reinterpret_cast<const Troi *>(g_arrays._Bptr) +
+                               (multi * g_arrays._B_multi_stride) +
+                               ((n0 / stripe_width<strategy, FixedFormat>::get()) * g_arrays._ldb) +
                                (k0 * stripe_width<strategy, FixedFormat>::get());
                 } else {
                     b_panel = _B_transposed +
@@ -515,7 +512,7 @@ public:
                                (n0 * kern_k);
                 }
 
-                IndirectOutputArg<Tr> out_arg(g_array._Cptr + (multi * g_array._C_multi_stride) + (batch * g_array._C_batch_stride) + (m_start * g_array._ldc) + n0, g_array._ldc);
+                IndirectOutputArg<Tr> out_arg(g_arrays._Cptr + (multi * g_arrays._C_multi_stride) + (batch * g_arrays._C_batch_stride) + (m_start * g_arrays._ldc) + n0, g_arrays._ldc);
 
 #ifdef CYCLE_PROFILING
                 auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)(m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
@@ -527,14 +524,14 @@ public:
 #endif
                                  strat, sections, string_lengths.data(),
                                  IndirectInputArg<To>(_indirect_buf + (multi * _args._nbatches * _args._Ksections) + (batch * _args._Ksections) + first_section, m_start, first_offset),
-                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_array._ldb, out_arg,
-                                 (g_array._bias && first_pass) ? g_array._bias + (multi * g_array._bias_multi_stride) + n0 : nullptr,
+                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_arrays._ldb, out_arg,
+                                 (g_arrays._bias && first_pass) ? g_arrays._bias + (multi * g_arrays._bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
                                  _os, _col_bias+(multi * _args._Nsize), n0);
                 } else if (_convolver) {
-                    auto conv_cols = _convolver->process_columns(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride), g_array._lda, k0, kmax, _rounded_Ksize);
+                    auto conv_cols = _convolver->process_columns(g_arrays._Aptr + (multi * g_arrays._A_multi_stride) + (batch * g_arrays._A_batch_stride), g_arrays._lda, k0, kmax, _rounded_Ksize);
 
                     unsigned int pos=0;
                     auto conv_rows = conv_cols.process_rows(m_start, m_end - m_start);
@@ -560,8 +557,8 @@ public:
 #endif
                                  strat, sections, string_lengths.data(),
                                  IndirectInputArg<To>(in_row_strings.data(), 0, first_offset),
-                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_array._ldb, out_arg,
-                                 (g_array._bias && first_pass) ? g_array._bias + (multi * g_array._bias_multi_stride) + n0 : nullptr,
+                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_arrays._ldb, out_arg,
+                                 (g_arrays._bias && first_pass) ? g_arrays._bias + (multi * g_arrays._bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
@@ -575,9 +572,9 @@ public:
                                  prof,
 #endif
                                  strat, 1, &len,
-                                 IndirectInputArg<To>(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + m_start * g_array._lda + k0, g_array._lda),
-                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_array._ldb, out_arg,
-                                 (g_array._bias && first_pass) ? g_array._bias + (multi * g_array._bias_multi_stride) + n0 : nullptr,
+                                 IndirectInputArg<To>(g_arrays._Aptr + (multi * g_arrays._A_multi_stride) + (batch * g_arrays._A_batch_stride) + m_start * g_arrays._lda + k0, g_arrays._lda),
+                                 (m_end - m_start), (nmax - n0), kern_k, b_panel, g_arrays._ldb, out_arg,
+                                 (g_arrays._bias && first_pass) ? g_arrays._bias + (multi * g_arrays._bias_multi_stride) + n0 : nullptr,
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
@@ -587,9 +584,14 @@ public:
         }
     }
 
+    // Stateless execute
+    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, Tw, Tr>& g_arrays) override {
+        return execute_common(work_range, thread_locator, threadid, g_arrays);
+    }
+
     // Execute
     void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
+        execute_common(work_range, thread_locator, threadid, this->_gemm_arrays);
     }
 
     // Interface implementation - pretransposed

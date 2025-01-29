@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
-#include "src/cpu/kernels/assembly/arm_gemm.hpp"
 
 namespace arm_compute
 {
@@ -93,7 +92,6 @@ public:
                                                                                 const bool,
                                                                                 const bool) = 0;
         virtual ~IFallback()                                                                = default;
-        virtual bool has_stateless_impl() const                                             = 0;
     };
 
 public:
@@ -171,17 +169,6 @@ public:
                                const ITensorInfo         *c,
                                const ITensorInfo         *d,
                                const AsmGemmInfo         &info);
-
-    /** Checks if a stateless implementation is supported
-     *
-     * The arm_gemm kernels that have been made stateless so far are those that
-     * do not require any working space. Once all kernels have been made
-     * stateless we can deprecate it by always returning true, and eventually
-     * removing it completely
-     *
-     * @return True if stateless execution is supported else false
-     */
-    bool has_stateless_impl() const;
 
     /** Checks if activation is supported by the gemm assembly dispatcher
      *

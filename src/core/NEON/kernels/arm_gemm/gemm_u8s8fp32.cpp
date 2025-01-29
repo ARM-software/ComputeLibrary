@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,9 +40,9 @@
 
 #include "gemm_hybrid_indirect.hpp"
 #include "gemm_hybrid_quantized.hpp"
+#include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 #include "gemv_pretransposed.hpp"
-#include "quantize_wrapper.hpp"
 #include "utils.hpp"
 
 namespace arm_gemm {

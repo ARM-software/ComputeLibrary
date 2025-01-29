@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2019-2020, 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,9 +58,9 @@
 
 #include "gemm_hybrid_indirect.hpp"
 #include "gemm_hybrid_quantized.hpp"
+#include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 #include "gemv_pretransposed.hpp"
-#include "quantize_wrapper.hpp"
 #include "utils.hpp"
 
 namespace arm_gemm {
@@ -241,13 +241,6 @@ GemmImplementation<int8_t, int8_t, int8_t, Requantize32>::with_estimate(
     [](const GemmArgs &args, const Requantize32 &) { return GemmInterleavedQuantized<cls_a64_gemm_s8_4x4, int8_t, int8_t, int8_t>::estimate_cycles<int8_t>(args); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedQuantized<cls_a64_gemm_s8_4x4, int8_t, int8_t, int8_t>(args, qp); }
 ),
-{
-    GemmMethod::QUANTIZE_WRAPPER,
-    "quantized_wrapper",
-    [](const GemmArgs &args, const Requantize32 &) { return !args._indirect_input; },
-    [](const GemmArgs &, const Requantize32 &) { return false; },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new QuantizeWrapper<int8_t, int8_t, int32_t>(args, qp); }
-},
 {
     GemmMethod::DEFAULT,
     "",

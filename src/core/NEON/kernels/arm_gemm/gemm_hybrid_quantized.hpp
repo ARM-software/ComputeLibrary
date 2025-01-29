@@ -31,9 +31,6 @@
 #include "ndrange.hpp"
 #include "utils.hpp"
 
-#include "mergeresults.hpp"
-#include "transform.hpp"
-
 #ifdef CYCLE_PROFILING
 #include "profiler.hpp"
 #endif
@@ -69,8 +66,6 @@ class GemmHybridQuantized : public GemmCommon<To, To, Tr> {
     Requantize32  _qp;
     int32_t *row_bias = nullptr;
     int32_t *col_bias = nullptr;
-
-    void *working_space = nullptr;
 
     unsigned int _nthreads;
 
@@ -171,20 +166,17 @@ public:
         return true;
     }
 
-    // Stateless execute
-    // TODO: Make this actually stateless. This still uses the stateful
-    // execution data because it requires a workspace which would also need to
-    // be handled statelessly.
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int threadid, GemmArrays<To, To, Tr> &) override {
-        auto& g_array = this->_gemm_array;
+    // Common execution logic.
+    void execute_common(const ndcoord_t &work_range, const ndcoord_t &, int threadid, GemmArrays<To, To, Tr> &g_arrays) {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
         strategy strat(_ci);
 
-        uintptr_t working_int = reinterpret_cast<uintptr_t>(working_space);
+        void *working_space = g_arrays._workspace;
+        auto working_int = reinterpret_cast<uintptr_t>(working_space);
 
-        Tri *result_buffer = reinterpret_cast<Tri *>(working_int + (threadid * strategy::out_height() * _Nsize * sizeof(Tri)));
+        auto *result_buffer = reinterpret_cast<Tri *>(working_int + (threadid * strategy::out_height() * _Nsize * sizeof(Tri)));
 
         /* Make sure we've been set up correctly. */
         assert(_B_transposed);
@@ -222,7 +214,7 @@ public:
 #ifdef CYCLE_PROFILING
                     auto p = prof.ScopedProfiler(PROFILE_KERNEL, (m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
 #endif
-                    strat.kernel(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + (m_start * g_array._lda) + k0, g_array._lda,
+                    strat.kernel(g_arrays._Aptr + (multi * g_arrays._A_multi_stride) + (batch * g_arrays._A_batch_stride) + (m_start * g_arrays._lda) + k0, g_arrays._lda,
                                  b_panel,
                                  result_buffer, (nmax-n0),
                                  (m_end - m_start), (nmax - n0), (kmax-k0),
@@ -234,7 +226,7 @@ public:
                     auto p = prof.ScopedProfiler(PROFILE_ROWSUMS, (m_end - m_start) * _Ksize);
 #endif
                     compute_row_sums(_qp, _Ksize, (m_end - m_start),
-                                     g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + (m_start * g_array._lda), g_array._lda,
+                                     g_arrays._Aptr + (multi * g_arrays._A_multi_stride) + (batch * g_arrays._A_batch_stride) + (m_start * g_arrays._lda), g_arrays._lda,
                                      local_row_sums);
                 }
 
@@ -244,16 +236,21 @@ public:
 #endif
 
                     requantize_block_32(_qp, (nmax - n0), (m_end - m_start), result_buffer, (nmax - n0),
-                                        g_array._Cptr + (multi * g_array._C_multi_stride) + (batch * g_array._C_batch_stride) + (m_start * g_array._ldc) + n0, g_array._ldc,
+                                        g_arrays._Cptr + (multi * g_arrays._C_multi_stride) + (batch * g_arrays._C_batch_stride) + (m_start * g_arrays._ldc) + n0, g_arrays._ldc,
                                         local_row_sums, col_bias + (multi * _Nsize) + n0, n0);
                 }
             } while (p.next_dim0());
         }
     }
 
+    // Stateless execute
+    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &g_arrays) override {
+        return execute_common(work_range, thread_locator, threadid, g_arrays);
+    }
+
     // Execute
     void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
+        execute_common(work_range, thread_locator, threadid, this->_gemm_arrays);
     }
 
     // Working space needed for intermediate result buffers.
@@ -262,7 +259,7 @@ public:
     }
 
     void set_working_space(void *buffer) override {
-        working_space = buffer;
+        this->_gemm_arrays._workspace = buffer;
     }
 
     // Interface implementation - pretransposed
