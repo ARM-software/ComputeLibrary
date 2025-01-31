@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -311,7 +311,7 @@ protected:
         // Total size needs to include padded dimensions
         const size_t total_size_in_bytes = Op * H * W * Ip * tensor_info.element_size();
 
-        const TensorShape TS({tensor_shape[0], arm_compute::ceil_to_multiple<int32_t, int32_t>(tensor_shape[1], 4)});
+        const TensorShape TS({tensor_shape[0], arm_compute::ceil_to_multiple<int32_t, int32_t>(tensor_shape[1], interleave_by)});
 
         TensorInfo new_tensor_info = tensor_info;
         new_tensor_info.set_data_layout(DataLayout::UNKNOWN);
