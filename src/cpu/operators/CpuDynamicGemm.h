@@ -91,7 +91,9 @@ private:
     };
 
     std::unique_ptr<kernels::CpuDynamicGemmKernel> _kernel{nullptr};
-    mutable experimental::MemoryRequirements       _dynamic_workspace{};
+    mutable experimental::MemoryRequirements       _aux_mem{};
+    bool                                           _reshape_b_and_c_only_on_first_run{false};
+    bool                                           _reuse_b{false};
 };
 } // namespace cpu
 } // namespace arm_compute

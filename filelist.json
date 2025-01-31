@@ -1592,7 +1592,6 @@
           "common": [
             "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp",
             "src/cpu/kernels/CpuDynamicGemmKernel.cpp",
-            "src/cpu/kernels/CpuDynamicGemmKernelHeuristics.cpp",
             "src/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
             "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp",
             "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp",
@@ -1605,6 +1604,7 @@
             "src/cpu/kernels/CpuGemmLowpMatrixReductionKernel.cpp",
             "src/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.cpp",
             "src/cpu/kernels/CpuGemmLowpOffsetContributionKernel.cpp",
+            "src/cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.cpp",
             "src/cpu/operators/CpuDynamicGemm.cpp",
             "src/cpu/operators/CpuGemm.cpp",
             "src/cpu/operators/CpuGemmLowpOutputStage.cpp",
@@ -1722,7 +1722,8 @@
               "src/cpu/kernels/gemmlowp/generic/neon/int32.cpp",
               "src/cpu/kernels/gemm_matrix_add/generic/neon/impl.cpp"
             ],
-            "fp32":["src/cpu/kernels/gemm_matrix_mul/generic/neon/fp32.cpp",
+            "fp32":["src/cpu/kernels/dynamic_gemm/generic/neon/fp32.cpp",
+                    "src/cpu/kernels/gemm_matrix_mul/generic/neon/fp32.cpp",
                     "src/cpu/kernels/gemmlowp/generic/neon/fp32.cpp",
                     "src/cpu/kernels/gemm_matrix_add/generic/neon/fp32.cpp"],
             "fp16":["src/cpu/kernels/gemm_matrix_mul/generic/neon/fp16.cpp",

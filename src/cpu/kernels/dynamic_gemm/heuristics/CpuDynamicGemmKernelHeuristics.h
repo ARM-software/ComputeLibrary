@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ACL_SRC_CPU_KERNELS_CPUDYNAMICGEMMKERNELHEURISTICS_H
-#define ACL_SRC_CPU_KERNELS_CPUDYNAMICGEMMKERNELHEURISTICS_H
+#ifndef ACL_SRC_CPU_KERNELS_DYNAMIC_GEMM_HEURISTICS_CPUDYNAMICGEMMKERNELHEURISTICS_H
+#define ACL_SRC_CPU_KERNELS_DYNAMIC_GEMM_HEURISTICS_CPUDYNAMICGEMMKERNELHEURISTICS_H
 
 #include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/ITensor.h"
@@ -49,8 +49,42 @@ namespace heuristics
 class CpuDynamicGemmKernelHeuristics
 {
 public:
+    /** Run the micro-kernel
+     *
+     * @param[in] a      Tensor a
+     * @param[in] b      Tensor b
+     * @param[in] c      Tensor c
+     * @param[in] d      Tensor d
+     * @param[in] pack_b Packed tensor b
+     * @param[in] window Window to run the kernel on
+     */
     using KernelPtr = std::add_pointer<void(
         const ITensor *, const ITensor *, const ITensor *, ITensor *, ITensor *, const Window &)>::type;
+
+    /** Pack RHS tensor
+     *
+     * @param[in]  rhs        Tensor b
+     * @param[in]  bias       Bias data
+     * @param[out] packed_rhs Destination buffer for packed RHS data
+     */
+    using PackRhsPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *)>::type;
+
+    /** Size of packed RHS for data of given size
+     *
+     * @param[in] rows    Number of rows
+     * @param[in] columns Number of columns
+     *
+     * @return Size of packed RHS data
+     */
+    using SizeOfPackedRhsPtr = std::add_pointer<size_t(const size_t, const size_t)>::type;
+
+    /** Calculate window size
+     *
+     * @param[in] dst Destination tensor
+     *
+     * @return Window size for the micro-kernel
+     */
+    using GetWindowPtr = std::add_pointer<Window(const ITensorInfo *dst)>::type;
 
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDynamicGemmKernelHeuristics);
 
@@ -73,17 +107,39 @@ public:
      */
     size_t mws() const;
 
-    /** Return kernel's execution window
+    /** Prepare the micro-kernel for the run
      *
-     * @return a reference to the kernel execution window of type @ref Window
+     * An example of an action that can be done here is b-tensor packing.
+     *
+     * @param[in] tensors              Tensors that will be used in the run
+     * @param[in] run_packing          Whether b tensor should be packed
+     * @param[in] pack_b_tensor_offset An offset of pack_rhs tensor in the tensors parameter
      */
-    const Window &window() const;
+    void prepare(ITensorPack &tensors, bool run_packing, const int pack_b_tensor_offset);
 
     /** Return the kernel to run
      *
      * @return The function pointer to the chosen kernel
      */
     KernelPtr kernel() const;
+
+    /** Return the pack_rhs() function for the kernel
+     *
+     * @return The pointer to the pack_rhs() function
+     */
+    PackRhsPtr pack_rhs() const;
+
+    /** Return the size_of_packed_rhs() function for the kernel
+     *
+     * @return The pointer to the size_of_packed_rhs() function
+     */
+    SizeOfPackedRhsPtr size_of_packed_rhs() const;
+
+    /** Return the get_window() function for the kernel
+     *
+     * @return The pointer to the get_window() function
+     */
+    GetWindowPtr get_window() const;
 
     /** Return the name of the selected kernel
      *
@@ -102,7 +158,11 @@ private:
     {
         const char                  *name{nullptr};
         const DataTypeISASelectorPtr is_selected{nullptr};
-        KernelPtr                    ukernel{nullptr};
+
+        KernelPtr          ukernel{nullptr};
+        PackRhsPtr         pack_rhs{nullptr};
+        SizeOfPackedRhsPtr size_of_packed_rhs{nullptr};
+        GetWindowPtr       get_window{nullptr};
     };
 
     using KernelList = std::vector<DynamicGemmKernel>;
@@ -120,7 +180,6 @@ private:
     const static KernelMap  kernels;
 
     size_t                   _mws{ICPPKernel::default_mws};
-    Window                   _window{};
     const DynamicGemmKernel *_kernel{nullptr};
     IScheduler::Hints        _hint{Window::DimY};
 };
@@ -129,4 +188,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif // ACL_SRC_CPU_KERNELS_CPUDYNAMICGEMMKERNELHEURISTICS_H
+#endif // ACL_SRC_CPU_KERNELS_DYNAMIC_GEMM_HEURISTICS_CPUDYNAMICGEMMKERNELHEURISTICS_H

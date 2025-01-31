@@ -704,7 +704,6 @@ target_sources(
 	cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp
 	cpu/kernels/CpuDirectConv3dKernel.cpp
 	cpu/kernels/CpuDynamicGemmKernel.cpp
-	cpu/kernels/CpuDynamicGemmKernelHeuristics.cpp
 	cpu/kernels/CpuElementwiseKernel.cpp
 	cpu/kernels/CpuElementwiseUnaryKernel.cpp
 	cpu/kernels/CpuFillKernel.cpp
@@ -785,6 +784,8 @@ target_sources(
 	cpu/kernels/directconv2d_output_stage/generic/neon/fp32.cpp
 	cpu/kernels/directconv2d_output_stage/generic/neon/qasymm8.cpp
 	cpu/kernels/directconv2d_output_stage/generic/neon/qasymm8_signed.cpp
+	cpu/kernels/dynamic_gemm/generic/neon/fp32.cpp
+	cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp16.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp32.cpp
 	cpu/kernels/elementwise_binary/generic/neon/integer.cpp

@@ -27,8 +27,9 @@
 #include "arm_compute/core/TensorInfo.h"
 
 #include "src/core/common/Macros.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/ICpuKernel.h"
-#include "src/cpu/kernels/CpuDynamicGemmKernelHeuristics.h"
+#include "src/cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.h"
 
 namespace arm_compute
 {
@@ -93,6 +94,28 @@ public:
      */
     static constexpr size_t max_workspace_count();
 
+    /** Prepare the kernel for the run.
+     *
+     * Any actions the kernel needs to perform before the run should be
+     * done here. An example of such an action could be packing RHS.
+     *
+     * @param[in] tensors Tensors to operate on.
+     * @param[in] reuse_b Whether b-tensor from the last run should
+     *                    be reused. This for instance allows to skip
+     *                    unnecessary packing of b-tensor if it was not
+     *                    changed.
+     */
+    void prepare(ITensorPack &tensors, const bool reuse_b);
+
+    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
+     *
+     * @return The split dimension hint.
+     */
+    size_t get_split_dimension_hint() const
+    {
+        return _heuristics.scheduler_hint().split_dimension();
+    }
+
 private:
     // Intermediate tensor types that may have to be allocated for the
     // selected kernel.
@@ -115,8 +138,6 @@ private:
     // `mutable` to be able to cache and return memory requirements from the
     // `workspace` method.
     mutable experimental::MemoryRequirements _aux_mem{Count};
-    bool                                     _reshape_b_and_c_only_on_first_run{false};
-    bool                                     _has_packed_b_and_c{false};
 };
 
 constexpr size_t CpuDynamicGemmKernel::max_workspace_count()
