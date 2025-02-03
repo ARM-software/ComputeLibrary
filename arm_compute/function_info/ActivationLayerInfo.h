@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,6 +134,10 @@ public:
     bool operator==(const ActivationLayerInfo &l) const
     {
         return this->_act == l._act && this->_a == l._a && this->_b == l._b && this->_enabled == l._enabled;
+    }
+    bool operator!=(const ActivationLayerInfo &l) const
+    {
+        return !(*this == l);
     }
 
 private:

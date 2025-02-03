@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_IOPERATOR_H
-#define ARM_COMPUTE_IOPERATOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_IOPERATOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_IOPERATOR_H
 
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
@@ -55,10 +55,21 @@ public:
      */
     virtual void prepare(ITensorPack &constants) = 0;
 
-    /** Return the memory requirements required by the workspace
+    /** Return the memory requirements for the static workspace
      */
     virtual MemoryRequirements workspace() const = 0;
+
+    /** Return the memory requirements for the dynamic workspace
+     *
+     * @param[in] tensors Set of tensors that this operator will later operate on.
+     */
+    virtual const MemoryRequirements &workspace_dynamic(const ITensorPack &tensors) const
+    {
+        ARM_COMPUTE_UNUSED(tensors);
+        static MemoryRequirements empty{};
+        return empty;
+    }
 };
 } // namespace experimental
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_IOPERATOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_IOPERATOR_H

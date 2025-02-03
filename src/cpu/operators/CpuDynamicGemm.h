@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,10 +81,17 @@ public:
                            const GEMMInfo    &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void                                    run(ITensorPack &tensors) override;
+    const experimental::MemoryRequirements &workspace_dynamic(const ITensorPack &tensors) const override;
 
 private:
+    enum AuxTensorIdx
+    {
+        Count
+    };
+
     std::unique_ptr<kernels::CpuDynamicGemmKernel> _kernel{nullptr};
+    mutable experimental::MemoryRequirements       _dynamic_workspace{};
 };
 } // namespace cpu
 } // namespace arm_compute

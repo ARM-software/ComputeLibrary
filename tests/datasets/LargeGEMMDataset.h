@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, 2024 Arm Limited.
+ * Copyright (c) 2017-2019, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,6 +89,16 @@ public:
         add_config(TensorShape(1021U, 1U), TensorShape(783U, 1021U), TensorShape(783U, 1U), TensorShape(783U, 1U), 1.0f, 0.0f);
         add_config(TensorShape(1021U, 1U), TensorShape(783U, 1021U), TensorShape(783U, 1U), TensorShape(783U, 1U), 1.0f, 0.0f);
         add_config(TensorShape(941U, 1U), TensorShape(623U, 941U), TensorShape(623U, 1U), TensorShape(623U, 1U), 1.0f, 0.0f);
+    }
+};
+
+class LargeGEMMVectorBiasDataset final : public GEMMDataset
+{
+public:
+    LargeGEMMVectorBiasDataset()
+    {
+        add_config(TensorShape(1021U, 1U), TensorShape(783U, 1021U), TensorShape(783U, 1U), TensorShape(783U, 1U), 1.0f, 1.0f);
+        add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 1U), TensorShape(871U, 429U), 1.0f, 1.0f);
     }
 };
 

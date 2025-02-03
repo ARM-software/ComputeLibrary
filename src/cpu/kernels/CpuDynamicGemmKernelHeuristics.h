@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,16 @@
 #define ACL_SRC_CPU_KERNELS_CPUDYNAMICGEMMKERNELHEURISTICS_H
 
 #include "arm_compute/core/CPP/ICPPKernel.h"
+#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/IScheduler.h"
 
 #include "src/core/common/Macros.h"
+#include "src/cpu/kernels/CpuKernelSelectionTypes.h"
+
+#include <map>
+#include <vector>
 
 namespace arm_compute
 {
@@ -45,13 +50,7 @@ class CpuDynamicGemmKernelHeuristics
 {
 public:
     using KernelPtr = std::add_pointer<void(
-        const ITensor *, const ITensor *, const ITensor *, ITensor *, const Window &, float, float)>::type;
-
-    struct DynamicGemmKernel
-    {
-        const char *name{nullptr};
-        KernelPtr   ukernel{nullptr};
-    };
+        const ITensor *, const ITensor *, const ITensor *, ITensor *, ITensor *, const Window &)>::type;
 
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDynamicGemmKernelHeuristics);
 
@@ -84,7 +83,13 @@ public:
      *
      * @return The function pointer to the chosen kernel
      */
-    const DynamicGemmKernel *kernel();
+    KernelPtr kernel() const;
+
+    /** Return the name of the selected kernel
+     *
+     * @return Name of the selected kernel
+     */
+    const char *name() const;
 
     /** Return the scheduling hint e.g. dimension(s) to split
      *
@@ -93,6 +98,27 @@ public:
     const IScheduler::Hints &scheduler_hint() const;
 
 private:
+    struct DynamicGemmKernel
+    {
+        const char                  *name{nullptr};
+        const DataTypeISASelectorPtr is_selected{nullptr};
+        KernelPtr                    ukernel{nullptr};
+    };
+
+    using KernelList = std::vector<DynamicGemmKernel>;
+    using KernelMap  = std::map<DataType, KernelList>;
+
+private:
+    /** Chooses a kernel to run and saves it into _kernel data member
+     *
+     * @param[in] selector Selector object based on input and device configuration
+     */
+    void choose_kernel(const DataTypeISASelectorData &selector);
+
+private:
+    const static KernelList fp32_kernels;
+    const static KernelMap  kernels;
+
     size_t                   _mws{ICPPKernel::default_mws};
     Window                   _window{};
     const DynamicGemmKernel *_kernel{nullptr};

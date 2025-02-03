@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,20 @@ public:
         add_config(TensorShape(8U, 2U), TensorShape(16U, 8U), TensorShape(16U, 2U), TensorShape(16U, 2U), 1.0f, 0.0f);
         add_config(TensorShape(31U, 1U), TensorShape(23U, 31U), TensorShape(23U, 1U), TensorShape(23U, 1U), 1.0f, 0.0f);
         add_config(TensorShape(21U, 13U), TensorShape(33U, 21U), TensorShape(33U, 13U), TensorShape(33U, 13U), 1.0f, 0.0f);
+    }
+};
+
+class SmallGEMMVectorBiasDataset final : public GEMMDataset
+{
+public:
+    SmallGEMMVectorBiasDataset()
+    {
+        add_config(TensorShape(1U), TensorShape(1U), TensorShape(1U), TensorShape(1U), 1.0f, 1.0f); // scalar * scalar
+        add_config(TensorShape(7U), TensorShape(1U, 7U), TensorShape(1U), TensorShape(1U), 1.0f, 1.0f); // row * column
+        add_config(TensorShape(1U, 7U), TensorShape(5U), TensorShape(5U), TensorShape(5U, 7U), 1.0f, 1.0f); // column * row
+        add_config(TensorShape(31U), TensorShape(23U, 31U), TensorShape(23U), TensorShape(23U), 1.0f, 1.0f); // row * matrix
+        add_config(TensorShape(23U, 31U), TensorShape(1U, 23U), TensorShape(1U), TensorShape(1U, 31U), 1.0f, 1.0f); // matrix * column
+        add_config(TensorShape(21U, 13U), TensorShape(33U, 21U), TensorShape(33U), TensorShape(33U, 13U), 1.0f, 1.0f); // matrix * matrix
     }
 };
 

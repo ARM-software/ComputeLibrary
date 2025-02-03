@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,14 @@
 #include "src/cpu/operators/CpuDynamicGemm.h"
 
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
+#include "src/common/utils/Log.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/CpuDynamicGemmKernel.h"
+
+using namespace arm_compute::experimental;
 
 namespace arm_compute
 {
@@ -38,14 +46,11 @@ void CpuDynamicGemm::configure(const ITensorInfo *a,
                                float              beta,
                                const GEMMInfo    &gemm_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(c);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(gemm_info);
+    ARM_COMPUTE_ERROR_THROW_ON(CpuDynamicGemm::validate(a, b, c, d, alpha, beta, gemm_info));
+    ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, gemm_info);
+
+    _kernel = std::make_unique<kernels::CpuDynamicGemmKernel>();
+    _kernel->configure(a, b, c, d, alpha, beta, Count, gemm_info);
 }
 
 Status CpuDynamicGemm::validate(const ITensorInfo *a,
@@ -56,20 +61,28 @@ Status CpuDynamicGemm::validate(const ITensorInfo *a,
                                 float              beta,
                                 const GEMMInfo    &gemm_info)
 {
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(c);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(gemm_info);
-
-    return Status{ErrorCode::RUNTIME_ERROR, "Operator not implemented yet."};
+    return kernels::CpuDynamicGemmKernel::validate(a, b, c, d, alpha, beta, gemm_info);
 }
 
 void CpuDynamicGemm::run(ITensorPack &tensors)
 {
-    ARM_COMPUTE_UNUSED(tensors);
+    ARM_COMPUTE_EXIT_ON_MSG(tensors.empty(), "No inputs provided");
+
+    Window window = calculate_max_window(*tensors.get_const_tensor(ACL_DST)->info(), Steps());
+    NEScheduler::get().schedule_op(_kernel.get(), Window::DimX, window, tensors);
+}
+
+const experimental::MemoryRequirements &CpuDynamicGemm::workspace_dynamic(const ITensorPack &tensors) const
+{
+    // Update memory requirements with those from the kernel.
+    _dynamic_workspace.reserve(Count + kernels::CpuDynamicGemmKernel::max_workspace_count());
+    _dynamic_workspace.resize(Count);
+    for (MemoryInfo mi : _kernel->workspace(tensors))
+    {
+        _dynamic_workspace.push_back(mi);
+    }
+
+    return _dynamic_workspace;
 }
 
 } // namespace cpu
