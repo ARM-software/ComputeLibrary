@@ -169,7 +169,7 @@ if env['neon']:
 extra_link_flags = []
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
-elif env['os'] not in ['windows','bare_metal', 'macos']:
+elif env['os'] not in ['windows','bare_metal','openbsd','macos']:
     test_env.Append(LIBS = ["rt"])
     extra_link_flags += ['-fstack-protector-strong']
 
@@ -185,7 +185,7 @@ bm_link_flags = []
 if test_env['linker_script']:
     bm_link_flags += ['-Wl,--build-id=none', '-T', env['linker_script']]
 
-if test_env['reference_openmp'] and env['os'] not in ['bare_metal', 'macos','windows']:
+if test_env['reference_openmp'] and env['os'] not in ['bare_metal','openbsd','macos','windows']:
     test_env['CXXFLAGS'].append('-fopenmp')
     test_env['LINKFLAGS'].append('-fopenmp')
 

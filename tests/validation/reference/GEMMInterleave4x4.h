@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVE4X4_H
+#define ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVE4X4_H
+
 #include "GEMM.h"
 
 #include "arm_compute/core/Types.h"
@@ -69,10 +73,14 @@ SimpleTensor<T> gemm_interleave_4x4(const SimpleTensor<T> &in, SimpleTensor<T> &
         for(int32_t x = 0; x < in_cols; x++)
         {
             T tmp[4] = { 0, 0, 0, 0 };
-
             for(int32_t k = 0; k < leftover_y; k++)
             {
-                tmp[k] = in_ptr[k * in_cols + x];
+#if defined(__OpenBSD__)
+              // Workaround for compiler error stringop-overflow
+              tmp[k%4] = in_ptr[k * in_cols + x];
+#else  // defined(__OpenBSD__)
+              tmp[k] = in_ptr[k * in_cols + x];
+#endif // defined(__OpenBSD__)
             }
             T *dst = &mtx_ref[static_cast<size_t>(x * 4.f) + static_cast<size_t>(std::ceil(y / 4.f)) * out_stride];
             memcpy(dst, tmp, sizeof(T) * 4);
@@ -86,3 +94,5 @@ SimpleTensor<T> gemm_interleave_4x4(const SimpleTensor<T> &in, SimpleTensor<T> &
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVE4X4_H
