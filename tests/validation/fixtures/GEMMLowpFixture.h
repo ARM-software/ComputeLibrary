@@ -602,6 +602,12 @@ class GEMMLowpDequantizedMatrixMultiplyValidationFixture : public framework::Fix
 public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, DataType data_type_a, DataType data_type_b, DataType output_type, bool accumulate)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            output_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const bool dynamic_qinfo = false;
         const auto a_qinfo = QuantizationInfo(1.0f / 255, a_offset);
         const auto b_qinfo = QuantizationInfo(5.0f / 255, b_offset);

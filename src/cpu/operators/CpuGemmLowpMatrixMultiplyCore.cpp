@@ -34,6 +34,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.h"
@@ -351,6 +352,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32, DataType::QASYMM8,
                                                          DataType::QASYMM8_SIGNED, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(c != nullptr && output->data_type() != DataType::F32 &&

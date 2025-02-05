@@ -1048,6 +1048,7 @@ Status CpuGemmAssemblyDispatch::validate(
     ARM_COMPUTE_UNUSED(c, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(info.reshape_b_only_on_first_run),
                                     "Assembly kernel will not be executed when reshape_b_only_on_first_run is false");

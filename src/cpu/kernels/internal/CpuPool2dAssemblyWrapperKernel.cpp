@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,7 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
     ARM_COMPUTE_RETURN_ERROR_MSG("32-bit is not supported by assembly kernels");
 #endif /* __aarch64__ */
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((src->data_layout() != DataLayout::NHWC) || (info.data_layout != DataLayout::NHWC),

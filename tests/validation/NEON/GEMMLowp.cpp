@@ -495,7 +495,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpDequantizedF16MatrixMultiplyValidatio
         datasets::SmallGEMMLowpDataset(),
         make("DataTypeA", DataType::QASYMM8_SIGNED),
         make("DataTypeB", DataType::QASYMM8_SIGNED),
-        make("DataTypeB", DataType::F16),
+        make("DataTypeC", DataType::F16),
         make("accumulate", {true, false})
     ))
 {
