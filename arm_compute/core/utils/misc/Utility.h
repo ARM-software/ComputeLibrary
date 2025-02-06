@@ -68,12 +68,11 @@ struct generate_array<T, 0, val, vals...>
     static constexpr std::array<T, sizeof...(vals)> value{vals...};
 };
 
-// Below code triggers a redundant declaration warning of constexpr static data member in C++17,
-// but is still needed for __ANDROID__ builds
-#if defined(__ANDROID__)
+// Below code triggers a redundant declaration warning of constexpr static data member in C++17
+#if defined(__cplusplus) && __cplusplus < 201703L
 template <typename T, T val, T... vals>
 constexpr std::array<T, sizeof...(vals)> generate_array<T, 0, val, vals...>::value;
-#endif /* __ANDROID__ */
+#endif /* defined(__cplusplus) && __cplusplus < 201703L */
 
 /** @endcond */
 
