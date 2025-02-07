@@ -186,7 +186,7 @@ class OtherChecksRun:
 
 class FormatCodeRun:
     @staticmethod
-    def get_files(folder, strategy="git-head"):
+    def get_files(folder, strategy="git-head", file_list=None):
         shell = Shell()
         shell.cd(folder)
         skip_copyright = skip_copyright_global
@@ -198,26 +198,29 @@ class FormatCodeRun:
         if not author_email.endswith("@arm.com"):
             skip_copyright = True
 
-        if strategy == "git-head":
-            cmd = "git diff-tree --no-commit-id --name-status -r HEAD | grep \"^[AMRT]\" | cut -f 2"
-        elif strategy == "git-diff":
-            cmd = "git diff --name-status --cached -r HEAD | grep \"^[AMRT]\" | rev | cut -f 1 | rev"
-        else:
-            cmd = "git ls-tree -r HEAD --name-only"
-            # Skip copyright checks when running on all files because we don't know when they were last modified
-            # Therefore we can't tell if their copyright dates are correct
-            skip_copyright = True
+        if file_list == None:
+            if strategy == "git-head":
+                raw_file_list = shell.run_single_to_str("git diff-tree --no-commit-id --name-status -r head | grep \"^[AMRT]\" | cut -f 2")
+            elif strategy == "git-diff":
+                raw_file_list = shell.run_single_to_str("git diff --name-status --cached -r HEAD | grep \"^[AMRT]\" | rev | cut -f 1 | rev")
+            else:
+                raw_file_list = shell.run_single_to_str("git ls-tree -r HEAD --name-only")
+                # Skip copyright checks when running on all files because we don't know when they were last modified
+                # Therefore we can't tell if their copyright dates are correct
+                skip_copyright = True
 
-        grep_folder = "grep -e \"^\\(arm_compute\\|src\\|examples\\|tests\\|utils\\|support\\)/\""
-        grep_extension = "grep -e \"\\.\\(cpp\\|h\\|hh\\|inl\\|cl\\|cs\\|hpp\\)$\""
-        list_files = shell.run_single_to_str(cmd+" | { "+ grep_folder+" | "+grep_extension + " || true; }")
-        to_check = [ f for f in list_files.split("\n") if len(f) > 0]
+            file_list = raw_file_list.split("\n")
+
+        folder_pattern = re.compile(r"^(arm_compute|src|examples|tests|utils|support)/")
+        extension_pattern = re.compile(r"\.(cpp|h|hh|inl|cl|cs|hpp)$")
+
+        list_files = [ f for f in file_list if folder_pattern.search(f) and extension_pattern.search(f)]
 
         # Check for scons files as they are excluded from the above list
-        list_files = shell.run_single_to_str(cmd+" | { grep -e \"SC\" || true; }")
-        to_check += [ f for f in list_files.split("\n") if len(f) > 0]
+        scons_pattern = re.compile(r"SC")
+        list_files += [ f for f in file_list if scons_pattern.search(f)]
 
-        return (to_check, skip_copyright)
+        return (list_files, skip_copyright)
 
     def __init__(self, files, folder, error_diff=False, skip_copyright=False):
         self.files = files
@@ -350,7 +353,7 @@ class GenerateAndroidBP:
         if retval != 0:
             raise Exception("generate Android bp file failed with error code %d" % retval)
 
-def run_fix_code_formatting( files="git-head", folder=".", num_threads=1, error_on_diff=True, \
+def run_fix_code_formatting( files="git-head", file_list=None, folder=".", num_threads=1, error_on_diff=True, \
     check_copyright=True, check_android_bp=True, check_formatting=True):
     try:
         retval = 0
@@ -361,7 +364,7 @@ def run_fix_code_formatting( files="git-head", folder=".", num_threads=1, error_
             gen_android_bp.run()
 
         # check_copyright is being incorporated via the global variable
-        to_check, skip_copyright = FormatCodeRun.get_files(folder, files)
+        to_check, skip_copyright = FormatCodeRun.get_files(folder, files, file_list)
 
         if check_formatting:
             other_checks = OtherChecksRun(folder,error_on_diff, files)
@@ -403,6 +406,7 @@ if __name__ == "__main__":
     parser.add_argument("--check_copyright", action="store_true", help="Check copyright year if enabled")
     parser.add_argument("--check_android_bp", action="store_true", help="Check Android.bp if enabled")
     parser.add_argument("--check_formatting", action="store_true", help="Check basic formatting if enabled")
+    parser.add_argument("--file_list", nargs='*', help="Optional list of files to check. Using this option ignores the --files option.")
 
     args = parser.parse_args()
 
@@ -416,6 +420,6 @@ if __name__ == "__main__":
 
     logger.debug("Arguments passed: %s" % str(args.__dict__))
 
-    exit(run_fix_code_formatting(args.files, args.folder, 1, error_on_diff=args.error_on_diff, \
+    exit(run_fix_code_formatting(args.files, args.file_list, args.folder, 1, error_on_diff=args.error_on_diff, \
         check_copyright=args.check_copyright, check_android_bp=args.check_android_bp, \
         check_formatting=args.check_formatting))
