@@ -37,7 +37,7 @@ import json
 import glob
 
 
-def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=[]):
+def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=[], include_common=True):
     files = {"common": []}
 
     # Early return if filelist is empty
@@ -47,7 +47,8 @@ def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=
     # Iterate over operators and create the file lists to compiler
     for operator in operators:
         if operator in filelist[backend]['operators']:
-            files['common'] += filelist[backend]['operators'][operator]["files"]["common"]
+            if include_common:
+                files['common'] += filelist[backend]['operators'][operator]["files"]["common"]
             for tech in techs:
                 if tech in filelist[backend]['operators'][operator]["files"]:
                     # Add tech as a key to dictionary if not there
@@ -56,7 +57,8 @@ def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=
 
                     # Add tech files to the tech file list
                     tech_files = filelist[backend]['operators'][operator]["files"][tech]
-                    files[tech] += tech_files.get('common', [])
+                    if include_common:
+                        files[tech] += tech_files.get('common', [])
                     for attr in attrs:
                         files[tech] += tech_files.get(attr, [])
 
@@ -163,7 +165,7 @@ filegroup(
     return template
 
 
-def build_from_template_cmake(srcs_graph, srcs_sve, srcs_sve2, srcs_core):
+def build_from_template_cmake(srcs_graph, srcs_sve, srcs_sve2, srcs_core, srcs_core_fp16):
 
     line_separator = '\n\t'
 
@@ -188,9 +190,15 @@ target_sources(
 )
 
 target_sources(
-    arm_compute
+    arm_compute_core
     PRIVATE
     {line_separator.join(srcs_core)}
+)
+
+target_sources(
+    arm_compute_core_fp16
+    PRIVATE
+    {line_separator.join(srcs_core_fp16)}
 )"""
     return template
 
@@ -230,19 +238,21 @@ def gather_sources():
     simd = ['neon', 'sve', 'sve2']
 
     # Get attributes
-    data_types = ["qasymm8", "qasymm8_signed", "qsymm16",
-                  "fp16", "fp32", "integer"]
+    data_types = ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]
     data_layouts = ["nhwc", "nchw"]
     fixed_format_kernels = ["fixed_format_kernels"]
-    attrs = data_types + data_layouts + \
-        fixed_format_kernels + ["estate64"]
+    attrs = data_types + data_layouts + fixed_format_kernels + ["estate64"]
 
     # Setup data-type and data-layout files to include
     cpu_operators = filelist['cpu']['operators'].keys()
-    cpu_ops_to_build = resolve_operator_dependencies(
-        filelist, cpu_operators, 'cpu')
-    cpu_files = get_operator_backend_files(
-        filelist, cpu_ops_to_build, 'cpu', simd, attrs)
+    cpu_ops_to_build = resolve_operator_dependencies(filelist, cpu_operators, 'cpu')
+
+    # We need to build fp16 files for armv8.2-a+fp16 so we filter them out of cpu_files removing the attribute fp16
+    attrs.remove('fp16')
+    cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
+
+    # Get all the fp16 files
+    fp16_cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, ['fp16'], False)
 
     # Shared among ALL CPU files
     lib_files += cpu_files.get('common', [])
@@ -250,22 +260,31 @@ def gather_sources():
     # Arm® Neon™ specific files
     lib_files += cpu_files.get('neon', [])
 
+    # FP16 Arm® Neon™ specific files
+    lib_files_neon_fp16 = fp16_cpu_files.get('neon',[])
+
     # SVE files only
     lib_files_sve = cpu_files.get('sve', [])
+    lib_files_sve += fp16_cpu_files.get('sve', [])
 
     # SVE2 files only
     lib_files_sve2 = cpu_files.get('sve2', [])
+    lib_files_sve2 += fp16_cpu_files.get('sve2', [])
 
     graph_files += glob.glob('src/graph/backends/NEON/*.cpp')
 
     # -------------------------------------
 
-    graph_files = sorted([path.replace("src/", "") for path in graph_files])
-    lib_files_sve = sorted([path.replace("src/", "") for path in lib_files_sve])
-    lib_files_sve2 = sorted([path.replace("src/", "") for path in lib_files_sve2])
-    lib_files = sorted([path.replace("src/", "") for path in lib_files])
+    def strip_prefix(filename, prefix = "src/"):
+        return filename[len(prefix):] if filename.startswith(prefix) else filename
 
-    return graph_files, lib_files_sve, lib_files_sve2, lib_files
+    graph_files = sorted([strip_prefix(path, "src/") for path in graph_files])
+    lib_files_sve = sorted([strip_prefix(path, "src/") for path in lib_files_sve])
+    lib_files_sve2 = sorted([strip_prefix(path, "src/") for path in lib_files_sve2])
+    lib_files = sorted([strip_prefix(path, "src/") for path in lib_files])
+    lib_files_neon_fp16 = sorted([strip_prefix(path, "src/") for path in lib_files_neon_fp16])
+
+    return (graph_files, lib_files_sve, lib_files_sve2, lib_files, lib_files_neon_fp16)
 
 
 if "__main__" in __name__:
@@ -275,20 +294,20 @@ if "__main__" in __name__:
     parser.add_argument("--cmake", action="store_true")
     args = parser.parse_args()
 
-    graph_files, lib_files_sve, lib_files_sve2, lib_files = gather_sources()
+    (graph_files, lib_files_sve, lib_files_sve2, lib_files, lib_files_neon_fp16) = gather_sources()
 
     if args.bazel:
         # 8562a4ec: Remove CommonGraphOptions from Utils target and warnings
         graph_files += ["//utils:CommonGraphOptions.cpp"]
 
         bazel_build_string = build_from_template_bazel(
-            graph_files, lib_files_sve, lib_files_sve2, lib_files)
+            graph_files, lib_files_sve, lib_files_sve2, lib_files + lib_files_neon_fp16)
         with open("src/BUILD.bazel", "w") as fp:
             fp.write(bazel_build_string)
 
     if args.cmake:
         cmake_build_string = build_from_template_cmake(
-            graph_files, lib_files_sve, lib_files_sve2, lib_files)
+            graph_files, lib_files_sve, lib_files_sve2, lib_files, lib_files_neon_fp16)
         with open("src/CMakeLists.txt", "w") as fp:
             fp.write(cmake_build_string)
 

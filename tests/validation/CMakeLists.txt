@@ -26,16 +26,14 @@ file(GLOB_RECURSE files_validation_cpp "CPP/*.cpp")
 target_sources(
   arm_compute_validation
   PRIVATE ${files_validation_unit}
-          ${files_validation_cpp}
-  )
+  ${files_validation_cpp}
+)
 
 file(GLOB_RECURSE files_validation_neon "NEON/*.cpp")
 file(GLOB_RECURSE files_validation_runtime "runtime/*.cpp")
 
-if(ENABLE_NEON)
-  target_sources(
-    arm_compute_validation
-    PRIVATE ${files_validation_neon}
-            ${files_validation_runtime}
-  )
-endif()
+target_sources(
+  arm_compute_validation
+  PRIVATE ${files_validation_neon}
+  ${files_validation_runtime}
+)

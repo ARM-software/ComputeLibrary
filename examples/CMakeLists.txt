@@ -48,7 +48,9 @@ set(EXAMPLE_GRAPH_NAMES
     PARENT_SCOPE)
 
 set(EXAMPLE_NEON_NAMES
-    neon_cnn neon_copy_objects
+    neon_cnn
+    neon_copy_objects
+    neon_gemm_qasymm8_signed
     neon_gemm_qasymm8
     neon_gemm_s8_f32
     neon_permute

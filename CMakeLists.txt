@@ -22,338 +22,252 @@
 
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-# ---------------------------------------------------------------------
-# Project ArmCompute
-
-list(APPEND CMAKE_MESSAGE_CONTEXT ArmCompute)
 project(
   ArmCompute
-  VERSION 38.0.0
+  VERSION 0.0.0
   DESCRIPTION
-    "The Arm Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A CPU and Arm® Mali™ GPU architectures"
-  LANGUAGES C CXX ASM)
+  "The Compute Library is a collection of low-level machine learning functions \
+   optimized for Arm® Cortex®-A, Arm® Neoverse™ CPU and Arm® Mali™ GPU \
+   architectures."
+  LANGUAGES C CXX ASM
+)
 
-include(GNUInstallDirs)
+# * Component build options.
+option(ARM_COMPUTE_BUILD_EXAMPLES "Build example programs." OFF)
+option(ARM_COMPUTE_BUILD_SHARED_LIB "Build a shared library." ON)
+option(ARM_COMPUTE_BUILD_TESTING "Build tests." OFF)
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+# * Feature build options.
+option(ARM_COMPUTE_ENABLE_ASSERTS "Enable asserts." OFF)
+option(ARM_COMPUTE_ENABLE_CPPTHREADS "Enable C++11 threads backend." OFF)
+option(ARM_COMPUTE_ENABLE_LOGGING "Enable logging." OFF)
+option(ARM_COMPUTE_ENABLE_OPENMP "Enable OpenMP backend." ON)
+option(ARM_COMPUTE_ENABLE_WERROR "Enable fatal warnings." OFF)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# * Debugging options.
+option(ARM_COMPUTE_ENABLE_CODE_COVERAGE "Enable code coverage." OFF)
+option(ARM_COMPUTE_ENABLE_SANITIZERS "Enable sanitizers." OFF)
+option(ARM_COMPUTE_USE_LIBCXX "Use libcxx instead of the default stdlib." OFF)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Options.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.cmake)
+# * Set architecture.
+set(ARM_COMPUTE_ARCH armv8-a CACHE STRING "Architecture (march) for core library.")
+set(ARM_COMPUTE_CORE_FP16_ARCH armv8.2-a+fp16 CACHE STRING "Architecture (march) for core library that require fp16 support.")
+set(ARM_COMPUTE_SVE_ARCH armv8.2-a+sve+fp16+dotprod CACHE STRING "Architecture (march) for sve library.")
+set(ARM_COMPUTE_SVE2_ARCH armv8.6-a+sve2+fp16+dotprod CACHE STRING "Architecture (march) for sve2 library.")
 
-# Require at least gcc/g++ 11) CMAKE_CXX_COMPILER_VERSION OR
-if(CMAKE_C_COMPILER_VERSION VERSION_LESS 10.2 OR CMAKE_CXX_COMPILER_VERSION
-                                                 VERSION_LESS 10.2)
-  message(
-    FATAL_ERROR "gcc and g++ version => 10.2 is required for building project!")
+# * Set variables.
+set(ARM_COMPUTE_C_STANDARD 99 CACHE STRING "C Standard to use for the library.")
+set(ARM_COMPUTE_CXX_STANDARD 14 CACHE STRING "CXX Standard to use for the library.")
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/configurations.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/compilers/setup.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
+
+if(ARM_COMPUTE_ENABLE_OPENMP)
+  find_package(OpenMP REQUIRED)
 endif()
 
-# ---------------------------------------------------------------------
-# Configuration
-
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -gdwarf-2 -DARM_COMPUTE_ASSERTS_ENABLED -DARM_COMPUTE_DEBUG_ENABLED")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-# Default to Release Build
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE
-      "Release"
-      CACHE
-        STRING
-        "Choose build type, available options are: Debug, Release, RelWithDebInfo"
-        FORCE)
+# Set lib build type accordingly
+if(ARM_COMPUTE_BUILD_SHARED_LIB)
+  message(STATUS "Will build the Arm Compute Library with shared libraries.")
+  set(ARM_COMPUTE_LIB_BUILD_TYPE SHARED)
+else()
+  message(STATUS "Will build the Arm Compute Library with static libraries.")
+  set(ARM_COMPUTE_LIB_BUILD_TYPE STATIC)
 endif()
 
-# ---------------------------------------------------------------------
-# Information
+set(
+  ARM_COMPUTE_PUBLIC_INCLUDE
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/include
+)
 
-message(STATUS "Arm Compute Library ${PROJECT_VERSION}")
+set(
+  ARM_COMPUTE_COMMON_INCLUDE
+  ${ARM_COMPUTE_PUBLIC_INCLUDE}
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/src/cpu/kernels/assembly
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/arm_gemm
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/assembly
+)
 
-message(VERBOSE "-----------------------------------------------------")
-message(VERBOSE "Build information:")
-list(APPEND CMAKE_MESSAGE_INDENT "  ")
-message(VERBOSE "Host system: ${CMAKE_SYSTEM_NAME}")
-message(VERBOSE "Host processor: ${CMAKE_SYSTEM_PROCESSOR}")
-message(VERBOSE "Build path: ${CMAKE_CURRENT_BINARY_DIR}")
-message(VERBOSE "Enable OpenCL acceleration: ${ENABLE_OPENCL}")
-message(VERBOSE "Enable CPU acceleration: ${ENABLE_NEON}")
-list(POP_BACK CMAKE_MESSAGE_INDENT)
-message(VERBOSE "-----------------------------------------------------")
+set(
+  ARM_COMPUTE_GRAPH_INCLUDE
+  ${ARM_COMPUTE_COMMON_INCLUDE}
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/convolution/common
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/arm_conv/depthwise
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/convolution/winograd
+)
 
-# ---------------------------------------------------------------------
-# Compile options and features
+set(
+  ARM_COMPUTE_INCLUDE
+  ${ARM_COMPUTE_GRAPH_INCLUDE}
+  ${CMAKE_CURRENT_LIST_DIR}/third_party/kleidiai
+)
 
-set(COMMON_FLAGS
-    -Wall
-    -DARCH_ARM
-    -Wextra
-    -Wdisabled-optimization
-    -Wformat=2
-    -Winit-self
-    -Wstrict-overflow=2
-    -Wswitch-default
-    -Wformat-security
-    -Wno-overlength-strings
-    -Wno-ignored-attributes
-    -Wlogical-op
-    -Wno-misleading-indentation)
+set(
+  ARM_COMPUTE_SVE_COMMON_INCLUDE
+  ${ARM_COMPUTE_COMMON_INCLUDE}
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/arm_conv
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/cpu/kernels/assembly
+  ${CMAKE_CURRENT_LIST_DIR}/src/cpu/kernels/assembly
+  ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/arm_gemm/merges
+)
 
-set(CXX_FLAGS
-    -Woverloaded-virtual
-    -Wctor-dtor-privacy
-    -Wsign-promo
-    -Weffc++
-    -Wnoexcept
-    -Wstrict-null-sentinel)
-
-# Disable note popups on compiler ABI changes
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options("-Wno-psabi")
-endif()
-
-# Compile with -Werror if ARM_COMPUTE_WERROR set
-if(ARM_COMPUTE_WERROR)
-  add_compile_options("-Werror")
-endif()
-
-# Compile with -fno-exceptions flag and define ARM_COMPUTE_EXCEPTIONS_DISABLED
-# if ARM_COMPUTE_EXCEPTIONS not set
-if(NOT ARM_COMPUTE_EXCEPTIONS)
-  add_compile_options("-fno-exceptions")
-  add_definitions(-DARM_COMPUTE_EXCEPTIONS_DISABLED)
-endif()
-
-# Link OpenMP libraries if ARM_COMPUTE_OPENMP set
-if(ARM_COMPUTE_OPENMP)
-  find_package(OpenMP)
-  if(OpenMP_CXX_FOUND)
-    link_libraries(OpenMP::OpenMP_CXX)
-    add_definitions(-DARM_COMPUTE_OPENMP_SCHEDULER)
-  else()
-    message(FATAL_ERROR "OPENMP was set but no OpenMP library was found!")
-  endif()
-endif()
-
-# ---------------------------------------------------------------------
-# SVE Object Library
-
-add_library(arm_compute_sve OBJECT "")
-target_compile_options(arm_compute_sve
-                       PRIVATE "-march=armv8.2-a+sve+fp16+dotprod"
-                       PRIVATE "-fPIC")
-target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_BF16)
-target_compile_definitions(arm_compute_sve PRIVATE ENABLE_SVE)
-target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_SVE)
-target_include_directories(
+add_library(arm_compute_sve OBJECT)
+set_target_properties(
   arm_compute_sve
-  PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         ${CMAKE_CURRENT_SOURCE_DIR}
-  PUBLIC src
-         src/core/NEON/kernels/arm_conv
-         src/core/NEON/kernels/arm_gemm
-         src/core/NEON/kernels/assembly
-         src/core/cpu/kernels/assembly
-         src/cpu/kernels/assembly
-         src/core/NEON/kernels/arm_gemm/merges)
+  PROPERTIES
+  COMPILE_OPTIONS "${ARM_COMPUTE_SVE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+  INCLUDE_DIRECTORIES "${ARM_COMPUTE_SVE_COMMON_INCLUDE}"
+  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+)
 
-# ---------------------------------------------------------------------
-# SVE2 Object Library
-
-add_library(arm_compute_sve2 OBJECT "")
-target_compile_options(arm_compute_sve2
-                       PRIVATE "-march=armv8.6-a+sve2+fp16+dotprod"
-                       PRIVATE "-fPIC")
-target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_SVE2)
-target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_BF16)
-target_compile_definitions(arm_compute_sve2 PRIVATE ENABLE_SVE)
-target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_SVE)
-target_include_directories(
+add_library(arm_compute_sve2 OBJECT)
+set_target_properties(
   arm_compute_sve2
-  PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         ${CMAKE_CURRENT_SOURCE_DIR}
-  PUBLIC src
-         src/core/NEON/kernels/arm_conv
-         src/core/NEON/kernels/arm_gemm
-         src/core/NEON/kernels/assembly
-         src/core/cpu/kernels/assembly
-         src/cpu/kernels/assembly
-         src/core/NEON/kernels/arm_gemm/merges)
+  PROPERTIES
+  COMPILE_OPTIONS "${ARM_COMPUTE_SVE2_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+  INCLUDE_DIRECTORIES "${ARM_COMPUTE_SVE_COMMON_INCLUDE}"
+  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+)
 
-# ---------------------------------------------------------------------
-# Core Library
+add_library(arm_compute_core OBJECT)
+set_target_properties(
+  arm_compute_core
+  PROPERTIES
+  COMPILE_OPTIONS "${ARM_COMPUTE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+  INCLUDE_DIRECTORIES "${ARM_COMPUTE_INCLUDE}"
+  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+)
 
-add_library(arm_compute "")
-target_compile_options(arm_compute PRIVATE "-march=${ARM_COMPUTE_ARCH}")
-target_compile_definitions(arm_compute PRIVATE ARM_COMPUTE_ENABLE_BF16)
-target_compile_definitions(arm_compute PRIVATE ENABLE_SVE)
-target_compile_definitions(arm_compute PRIVATE ARM_COMPUTE_ENABLE_SVE)
-target_include_directories(
-  arm_compute
-  PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         ${CMAKE_CURRENT_SOURCE_DIR}
-  PRIVATE src
-          src/cpu/kernels/assembly
-          src/core/NEON/kernels/arm_gemm
-          src/core/NEON/kernels/assembly
-          src/core/NEON/kernels/convolution/common
-          src/core/NEON/kernels/arm_conv/depthwise
-          src/core/NEON/kernels/convolution/winograd
-          third_party/kleidiai)
-target_compile_options(arm_compute
-    PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
-           $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
+add_library(arm_compute_core_fp16 OBJECT)
+set_target_properties(
+  arm_compute_core_fp16
+  PROPERTIES
+  COMPILE_OPTIONS "${ARM_COMPUTE_CORE_FP16_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+  INCLUDE_DIRECTORIES "${ARM_COMPUTE_INCLUDE}"
+  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+)
 
-add_library(ArmCompute::Core ALIAS arm_compute)
-
-# arm_compute_sve and arm_compute_sve2 obj files will not be public in the arm_compute.so
-target_link_libraries(
-  arm_compute PRIVATE $<TARGET_OBJECTS:arm_compute_sve>
-              PRIVATE $<TARGET_OBJECTS:arm_compute_sve2>)
-
-# ---------------------------------------------------------------------
-# Graph Library
-
-add_library(arm_compute_graph "")
-target_compile_options(arm_compute_graph PRIVATE "-march=${ARM_COMPUTE_ARCH}")
-target_compile_definitions(arm_compute_graph PRIVATE ENABLE_SVE)
-target_compile_definitions(arm_compute_graph PRIVATE ARM_COMPUTE_ENABLE_SVE)
-# add_subdirectory(src/graph)
-
-target_include_directories(
+add_library(arm_compute_graph OBJECT)
+set_target_properties(
   arm_compute_graph
-  PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         ${CMAKE_CURRENT_SOURCE_DIR}
-  PRIVATE src
-          src/cpu/kernels/assembly
-          src/core/NEON/kernels/arm_gemm
-          src/core/NEON/kernels/assembly
-          src/core/NEON/kernels/convolution/common
-          src/core/NEON/kernels/arm_conv/depthwise
-          src/core/NEON/kernels/convolution/winograd)
-target_compile_options(arm_compute_graph
-    PUBLIC  $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
-           $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
+  PROPERTIES
+  COMPILE_OPTIONS "${ARM_COMPUTE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+  INCLUDE_DIRECTORIES "${ARM_COMPUTE_GRAPH_INCLUDE}"
+  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+)
 
-add_library(ArmCompute::Graph ALIAS arm_compute_graph)
+add_library(
+  arm_compute
+  ${ARM_COMPUTE_LIB_BUILD_TYPE}
+  $<TARGET_OBJECTS:arm_compute_graph>
+  $<TARGET_OBJECTS:arm_compute_core>
+  $<TARGET_OBJECTS:arm_compute_core_fp16>
+  $<TARGET_OBJECTS:arm_compute_sve>
+  $<TARGET_OBJECTS:arm_compute_sve2>
+)
 
-# ---------------------------------------------------------------------
-# Library Target Sources
+set_target_properties(
+  arm_compute
+  PROPERTIES
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+)
+
+# Linking to this target should automatically bring includes and dependent libs with it.
+target_include_directories(arm_compute PUBLIC ${ARM_COMPUTE_PUBLIC_INCLUDE})
+target_link_libraries(arm_compute PUBLIC ${ARM_COMPUTE_LINK_LIBS})
+list(APPEND ARM_COMPUTE_TARGETS arm_compute arm_compute_graph arm_compute_core arm_compute_core_fp16 arm_compute_sve arm_compute_sve2)
+
+# Library target sources.
 add_subdirectory(src)
 
 if(ARM_COMPUTE_BUILD_TESTING)
-  # ---------------------------------------------------------------------
-  # Validation Framework Library
-  add_library(arm_compute_validation_framework "")
-  # target_compile_options(arm_compute_validation_framework PRIVATE
-  # "-march=armv8.2-a")
-  target_compile_options(arm_compute_validation_framework
-                        PRIVATE "-march=${ARM_COMPUTE_ARCH}")
-
+  add_library(arm_compute_validation_framework OBJECT)
   add_subdirectory(tests)
-  target_include_directories(
-    arm_compute_validation_framework
-    PUBLIC $<INSTALL_INTERFACE:include>
-          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-          ${CMAKE_CURRENT_SOURCE_DIR})
-  target_compile_options(arm_compute_validation_framework
-      PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
-             $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
-  target_link_libraries(arm_compute_validation_framework
-      PUBLIC arm_compute arm_compute_graph)
 
-  # ---------------------------------------------------------------------
-  # Validation Binary
-
-  add_executable(arm_compute_validation "")
-  target_compile_options(arm_compute_validation PRIVATE "-march=${ARM_COMPUTE_ARCH}")
-  if(ARM_COMPUTE_ENABLE_BF16_VALIDATION)
-    target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_BF16)
-  endif()
-  if(ARM_COMPUTE_ENABLE_SVE_VALIDATION)
-    target_compile_definitions(arm_compute_validation PRIVATE ENABLE_SVE)
-    target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_SVE)
-  endif()
+  add_executable(arm_compute_validation $<TARGET_OBJECTS:arm_compute_validation_framework>)
   add_subdirectory(tests/validation)
-  target_compile_options(arm_compute_validation
-      PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
-             $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
-  set_target_properties(
-    arm_compute_validation PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                      "${CMAKE_BINARY_DIR}/validation")
-  target_link_libraries(
-    arm_compute_validation
-    PUBLIC arm_compute arm_compute_graph arm_compute_validation_framework
-           arm_compute_sve)
-  target_link_directories(arm_compute_validation PUBLIC tests)
 
-  # ---------------------------------------------------------------------
-  # Benchmark Binary
-
-  add_executable(arm_compute_benchmark)
-  target_compile_options(arm_compute_benchmark PRIVATE "-march=${ARM_COMPUTE_ARCH}")
-
+  add_executable(arm_compute_benchmark $<TARGET_OBJECTS:arm_compute_validation_framework>)
   add_subdirectory(tests/benchmark)
-  target_compile_options(arm_compute_benchmark
-      PUBLIC $<$<COMPILE_LANGUAGE:C>:${COMMON_FLAGS}>
-             $<$<COMPILE_LANGUAGE:CXX>:${COMMON_FLAGS} ${CXX_FLAGS}>)
+
   set_target_properties(
-    arm_compute_benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                     "${CMAKE_BINARY_DIR}/validation")
-  target_link_libraries(
-    arm_compute_benchmark PUBLIC arm_compute arm_compute_graph
-                                 arm_compute_validation_framework)
+    arm_compute_benchmark arm_compute_validation_framework arm_compute_validation
+    PROPERTIES
+    COMPILE_OPTIONS "${ARM_COMPUTE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+    INCLUDE_DIRECTORIES "${ARM_COMPUTE_PUBLIC_INCLUDE};${ARM_COMPUTE_COMMON_INCLUDE}"
+    COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+    LINK_LIBRARIES arm_compute
+  )
+  list(APPEND ARM_COMPUTE_TARGETS arm_compute_validation arm_compute_benchmark)
+endif(ARM_COMPUTE_BUILD_TESTING)
 
-endif() # ARM_COMPUTE_BUILD_TESTING
-# ---------------------------------------------------------------------
 # Examples Binaries
-
 if(ARM_COMPUTE_BUILD_EXAMPLES)
-
   add_subdirectory(examples)
 
   # Graph Examples
   foreach(test_name ${EXAMPLE_GRAPH_NAMES})
     add_executable(
-      ${test_name} "examples/${test_name}.cpp" utils/Utils.cpp
-                   utils/GraphUtils.cpp utils/CommonGraphOptions.cpp)
-    target_compile_options(${test_name} PRIVATE "-march=${ARM_COMPUTE_ARCH}")
-    set_target_properties(
-      ${test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                              "${CMAKE_BINARY_DIR}/examples")
-    target_link_libraries(${test_name} PUBLIC arm_compute
-                                              arm_compute_graph arm_compute_sve)
+      ${test_name}
+      "examples/${test_name}.cpp"
+      utils/Utils.cpp
+      utils/GraphUtils.cpp
+      utils/CommonGraphOptions.cpp
+    )
   endforeach()
 
   # NEON Examples
   foreach(test_name ${EXAMPLE_NEON_NAMES})
-    add_executable(${test_name} "examples/${test_name}.cpp" utils/Utils.cpp)
-    target_compile_options(${test_name} PRIVATE "-march=${ARM_COMPUTE_ARCH}")
-    set_target_properties(
-      ${test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                              "${CMAKE_BINARY_DIR}/examples")
-    target_link_libraries(${test_name} PUBLIC arm_compute)
+    add_executable(
+      ${test_name}
+      "examples/${test_name}.cpp"
+      utils/Utils.cpp
+    )
   endforeach()
 
-endif() # ARM_COMPUTE_BUILD_EXAMPLES
+  set_target_properties(
+    ${EXAMPLE_NEON_NAMES} ${EXAMPLE_GRAPH_NAMES}
+    PROPERTIES
+    COMPILE_OPTIONS "${ARM_COMPUTE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+    LINK_LIBRARIES arm_compute
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/examples"
+  )
+endif(ARM_COMPUTE_BUILD_EXAMPLES)
+
+set_target_properties(
+  ${ARM_COMPUTE_TARGETS} ${EXAMPLE_NEON_NAMES} ${EXAMPLE_GRAPH_NAMES}
+  PROPERTIES
+  COMPILE_WARNING_AS_ERROR ${ARM_COMPUTE_ENABLE_WERROR}
+  C_STANDARD ${ARM_COMPUTE_C_STANDARD}
+  C_STANDARD_REQUIRED ON
+  C_CLANG_TIDY "${ARM_COMPUTE_CLANG_TIDY}"
+  C_EXTENSIONS OFF
+  C_VISIBILITY_PRESET hidden
+  CXX_CLANG_TIDY "${ARM_COMPUTE_CLANG_TIDY}"
+  CXX_EXTENSIONS OFF
+  CXX_SCAN_FOR_MODULES OFF
+  CXX_STANDARD ${ARM_COMPUTE_CXX_STANDARD}
+  CXX_STANDARD_REQUIRED ON
+  CXX_VISIBILITY_PRESET default
+  LINK_OPTIONS "${ARM_COMPUTE_LINKER_FLAGS}"
+  POSITION_INDEPENDENT_CODE ON
+  VISIBILITY_INLINES_HIDDEN ON
+)
 
 # Install libraries
-install(TARGETS arm_compute arm_compute_graph
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-# Install test executables
-if(ARM_COMPUTE_BUILD_TESTING)
-  install(TARGETS arm_compute_validation_framework arm_compute_benchmark arm_compute_validation
-          RUNTIME DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests"
-          LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests"
-          ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/tests")
-endif()
+include(GNUInstallDirs)
+install(
+  TARGETS
+  ${ARM_COMPUTE_TARGETS}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
