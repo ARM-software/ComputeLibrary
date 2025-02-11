@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@
 #if !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__))
 #include <asm/hwcap.h> /* Get HWCAP bits from asm/hwcap.h */
 #include <sys/auxv.h>
-#elif defined(__APPLE__) && defined(__aarch64__)
+#elif (defined(__OpenBSD__) || defined(__APPLE__)) && defined(__aarch64__)
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #endif /* defined(__APPLE__) && defined(__aarch64__)) */
@@ -382,7 +382,22 @@ CpuInfo CpuInfo::build()
 
     CpuInfo info(isa, cpus_model);
     return info;
-
+#elif defined(__OpenBSD__)
+    int    mib[2] = {0, 0};
+    int    ncpu   = {1};
+    size_t len    = sizeof(ncpu);
+    mib[0]        = CTL_HW;
+    mib[1]        = HW_NCPU;
+    if (sysctl(mib, 2, &ncpu, &len, NULL, 0) == -1)
+    {
+        // if the system call fails we set number of cpus to 1
+        ncpu = 1;
+    }
+    CpuIsaInfo            isainfo;
+    std::vector<CpuModel> cpus_model(ncpu);
+    isainfo.neon = true;
+    CpuInfo info(isainfo, cpus_model);
+    return info;
 #elif (BARE_METAL) && \
     defined(          \
         __aarch64__) /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
@@ -403,7 +418,8 @@ CpuInfo CpuInfo::build()
     std::vector<CpuModel> cpus_model(1, midr_to_model(midr));
     CpuInfo               info(isa, cpus_model);
     return info;
-#elif defined(__aarch64__) && defined(__APPLE__) /* #elif(BARE_METAL) && defined(__aarch64__) */
+#elif defined(__aarch64__) && \
+    (defined(__OpenBSD__) || defined(__APPLE__)) /* #elif(BARE_METAL) && defined(__aarch64__) */
     int                   ncpus = get_hw_capability("hw.perflevel0.logicalcpu");
     CpuIsaInfo            isainfo;
     std::vector<CpuModel> cpus_model(ncpus);
