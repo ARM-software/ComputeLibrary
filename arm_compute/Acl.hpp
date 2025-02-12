@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_HPP_
-#define ARM_COMPUTE_ACL_HPP_
+#ifndef ACL_ARM_COMPUTE_ACL_HPP
+#define ACL_ARM_COMPUTE_ACL_HPP
 
 #include "arm_compute/Acl.h"
 
@@ -92,14 +92,14 @@ OBJECT_DELETER(AclOperator, AclDestroyOperator)
 #undef OBJECT_DELETER
 
 /** Convert a strongly typed enum to an old plain c enum
-  *
-  * @tparam E  Plain old C enum
-  * @tparam SE Strongly typed resulting enum
-  *
-  * @param[in] v Value to convert
-  *
-  * @return A corresponding plain old C enumeration
-  */
+ *
+ * @tparam E  Plain old C enum
+ * @tparam SE Strongly typed resulting enum
+ *
+ * @param[in] v Value to convert
+ *
+ * @return A corresponding plain old C enumeration
+ */
 template <typename E, typename SE>
 constexpr E as_cenum(SE v) noexcept
 {
@@ -107,14 +107,14 @@ constexpr E as_cenum(SE v) noexcept
 }
 
 /** Convert plain old enumeration to a strongly typed enum
-  *
-  * @tparam SE Strongly typed resulting enum
-  * @tparam E  Plain old C enum
-  *
-  * @param[in] val Value to convert
-  *
-  * @return A corresponding strongly typed enumeration
-  */
+ *
+ * @tparam SE Strongly typed resulting enum
+ * @tparam E  Plain old C enum
+ *
+ * @param[in] val Value to convert
+ *
+ * @return A corresponding strongly typed enumeration
+ */
 template <typename SE, typename E>
 constexpr SE as_enum(E val) noexcept
 {
@@ -502,7 +502,7 @@ class TensorDescriptor
 public:
     /** Constructor
      *
-     * @param[in] shape Shape of the tensor
+     * @param[in] shape     Shape of the tensor
      * @param[in] data_type Data type of the tensor
      */
     TensorDescriptor(const std::vector<int32_t> &shape, DataType data_type) : _shape(shape), _data_type(data_type)
@@ -593,10 +593,10 @@ public:
     }
     /** Constructor
      *
-     * @param[in]  ctx    Context from where the tensor will be created from
-     * @param[in]  desc   Tensor descriptor to be used
+     * @param[in]  ctx      Context from where the tensor will be created from
+     * @param[in]  desc     Tensor descriptor to be used
      * @param[in]  allocate Flag to indicate if the tensor needs to be allocated
-     * @param[out] status Status information if requested
+     * @param[out] status   Status information if requested
      */
     Tensor(Context &ctx, const TensorDescriptor &desc, bool allocate, StatusCode *status)
     {
@@ -685,7 +685,7 @@ public:
     {
         /** Constructor
          *
-         * @param[in] tensor_ Tensor to pack
+         * @param[in] tensor_  Tensor to pack
          * @param[in] slot_id_ Slot identification of the tensor in respect with the operator
          */
         PackPair(Tensor *tensor_, int32_t slot_id_) : tensor(tensor_), slot_id(slot_id_)
@@ -756,6 +756,7 @@ public:
     /** Run an operator on a given input list
      *
      * @param[in,out] queue Queue to scheduler the operator on
+     *
      * @param pack  Tensor list to be used as input
      *
      * @return Status Code
@@ -793,4 +794,4 @@ public:
 };
 } // namespace acl
 #undef ARM_COMPUTE_IGNORE_UNUSED
-#endif /* ARM_COMPUTE_ACL_HPP_ */
+#endif // ACL_ARM_COMPUTE_ACL_HPP

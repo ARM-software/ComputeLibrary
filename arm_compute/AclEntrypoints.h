@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,17 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_ENTRYPOINTS_H_
-#define ARM_COMPUTE_ACL_ENTRYPOINTS_H_
+#ifndef ACL_ARM_COMPUTE_ACLENTRYPOINTS_H
+#define ACL_ARM_COMPUTE_ACLENTRYPOINTS_H
 
 #include "arm_compute/AclTypes.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /** __cplusplus */
 
-    /** Create a context object
+/** Create a context object
  *
  * Context is responsible for retaining internal information and work as an aggregate service mechanism
  *
@@ -47,9 +46,9 @@ extern "C"
  *  - @ref AclUnsupportedTarget if the requested target is unsupported
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclCreateContext(AclContext *ctx, AclTarget target, const AclContextOptions *options);
+AclStatus AclCreateContext(AclContext *ctx, AclTarget target, const AclContextOptions *options);
 
-    /** Destroy a given context object
+/** Destroy a given context object
  *
  * @param[in] ctx A valid context object to destroy
  *
@@ -59,9 +58,9 @@ extern "C"
  *  - @ref AclSuccess if functions was completed successfully
  *  - @ref AclInvalidArgument if the provided context is invalid
  */
-    AclStatus AclDestroyContext(AclContext ctx);
+AclStatus AclDestroyContext(AclContext ctx);
 
-    /** Create an operator queue
+/** Create an operator queue
  *
  * Queue is responsible for any scheduling related activities
  *
@@ -77,9 +76,9 @@ extern "C"
  *  - @ref AclUnsupportedTarget if the requested target is unsupported
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclCreateQueue(AclQueue *queue, AclContext ctx, const AclQueueOptions *options);
+AclStatus AclCreateQueue(AclQueue *queue, AclContext ctx, const AclQueueOptions *options);
 
-    /** Wait until all elements on the queue have been completed
+/** Wait until all elements on the queue have been completed
  *
  * @param[in] queue Queue to wait on completion
  *
@@ -90,9 +89,9 @@ extern "C"
  *  - @ref AclInvalidArgument if the provided queue is invalid
  *  - @ref AclRuntimeError on any other runtime related error
  */
-    AclStatus AclQueueFinish(AclQueue queue);
+AclStatus AclQueueFinish(AclQueue queue);
 
-    /** Destroy a given queue object
+/** Destroy a given queue object
  *
  * @param[in] queue A valid context object to destroy
  *
@@ -102,9 +101,9 @@ extern "C"
  *  - @ref AclSuccess if functions was completed successfully
  *  - @ref AclInvalidArgument if the provided context is invalid
  */
-    AclStatus AclDestroyQueue(AclQueue queue);
+AclStatus AclDestroyQueue(AclQueue queue);
 
-    /** Create a Tensor object
+/** Create a Tensor object
  *
  * Tensor is a generalized matrix construct that can represent up to ND dimensionality (where N = 6 for Compute Library)
  * The object holds a backing memory along-side to operate on
@@ -120,9 +119,9 @@ extern "C"
  *  - @ref AclUnsupportedTarget if the requested target is unsupported
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclCreateTensor(AclTensor *tensor, AclContext ctx, const AclTensorDescriptor *desc, bool allocate);
+AclStatus AclCreateTensor(AclTensor *tensor, AclContext ctx, const AclTensorDescriptor *desc, bool allocate);
 
-    /** Map a tensor's backing memory to the host
+/** Map a tensor's backing memory to the host
  *
  * @param[in]      tensor Tensor to be mapped
  * @param[in, out] handle A handle to the underlying backing memory
@@ -133,9 +132,9 @@ extern "C"
  *  - @ref AclSuccess if function was completed successfully
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclMapTensor(AclTensor tensor, void **handle);
+AclStatus AclMapTensor(AclTensor tensor, void **handle);
 
-    /** Unmap the tensor's backing memory
+/** Unmap the tensor's backing memory
  *
  * @param[in] tensor tensor to unmap memory from
  * @param[in] handle Backing memory to be unmapped
@@ -146,9 +145,9 @@ extern "C"
  *  - @ref AclSuccess if function was completed successfully
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclUnmapTensor(AclTensor tensor, void *handle);
+AclStatus AclUnmapTensor(AclTensor tensor, void *handle);
 
-    /** Import external memory to a given tensor object
+/** Import external memory to a given tensor object
  *
  * @param[in, out] tensor Tensor to import memory to
  * @param[in]      handle Backing memory to be imported
@@ -158,9 +157,9 @@ extern "C"
  *  - @ref AclSuccess if function was completed successfully
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclTensorImport(AclTensor tensor, void *handle, AclImportMemoryType type);
+AclStatus AclTensorImport(AclTensor tensor, void *handle, AclImportMemoryType type);
 
-    /** Destroy a given tensor object
+/** Destroy a given tensor object
  *
  * @param[in,out] tensor A valid tensor object to be destroyed
  *
@@ -170,9 +169,9 @@ extern "C"
  *  - @ref AclSuccess if function was completed successfully
  *  - @ref AclInvalidArgument if the provided tensor is invalid
  */
-    AclStatus AclDestroyTensor(AclTensor tensor);
+AclStatus AclDestroyTensor(AclTensor tensor);
 
-    /** Creates a tensor pack
+/** Creates a tensor pack
  *
  * Tensor packs are used to create a collection of tensors that can be passed around for operator execution
  *
@@ -186,9 +185,9 @@ extern "C"
  *  - @ref AclOutOfMemory if there was a failure allocating memory resources
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclCreateTensorPack(AclTensorPack *pack, AclContext ctx);
+AclStatus AclCreateTensorPack(AclTensorPack *pack, AclContext ctx);
 
-    /** Add a tensor to a tensor pack
+/** Add a tensor to a tensor pack
  *
  * @param[in,out] pack    Pack to append a tensor to
  * @param[in]     tensor  Tensor to pack
@@ -201,9 +200,9 @@ extern "C"
  *  - @ref AclOutOfMemory if there was a failure allocating memory resources
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclPackTensor(AclTensorPack pack, AclTensor tensor, int32_t slot_id);
+AclStatus AclPackTensor(AclTensorPack pack, AclTensor tensor, int32_t slot_id);
 
-    /** A list of tensors to a tensor pack
+/** A list of tensors to a tensor pack
  *
  * @param[in,out] pack        Pack to append the tensors to
  * @param[in]     tensors     Tensors to append to the pack
@@ -217,9 +216,9 @@ extern "C"
  *  - @ref AclOutOfMemory if there was a failure allocating memory resources
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclPackTensors(AclTensorPack pack, AclTensor *tensors, int32_t *slot_ids, size_t num_tensors);
+AclStatus AclPackTensors(AclTensorPack pack, AclTensor *tensors, int32_t *slot_ids, size_t num_tensors);
 
-    /** Destroy a given tensor pack object
+/** Destroy a given tensor pack object
  *
  * @param[in,out] pack A valid tensor pack object to destroy
  *
@@ -229,9 +228,9 @@ extern "C"
  *  - @ref AclSuccess if functions was completed successfully
  *  - @ref AclInvalidArgument if the provided context is invalid
  */
-    AclStatus AclDestroyTensorPack(AclTensorPack pack);
+AclStatus AclDestroyTensorPack(AclTensorPack pack);
 
-    /** Eager execution of a given operator on a list of inputs and outputs
+/** Eager execution of a given operator on a list of inputs and outputs
  *
  * @param[in]     op      Operator to execute
  * @param[in]     queue   Queue to schedule the operator on
@@ -246,9 +245,9 @@ extern "C"
  *  - @ref AclInvalidArgument if a given argument is invalid
  *  - @ref AclRuntimeError on any other runtime related error
  */
-    AclStatus AclRunOperator(AclOperator op, AclQueue queue, AclTensorPack tensors);
+AclStatus AclRunOperator(AclOperator op, AclQueue queue, AclTensorPack tensors);
 
-    /** Destroy a given operator object
+/** Destroy a given operator object
  *
  * @param[in,out] op A valid operator object to destroy
  *
@@ -258,8 +257,8 @@ extern "C"
  *  - @ref AclSuccess if functions was completed successfully
  *  - @ref AclInvalidArgument if the provided context is invalid
  */
-    AclStatus AclDestroyOperator(AclOperator op);
+AclStatus AclDestroyOperator(AclOperator op);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACL_ENTRYPOINTS_H_ */
+#endif // ACL_ARM_COMPUTE_ACLENTRYPOINTS_H

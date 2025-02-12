@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2018, 2020-2021, 2023 Arm Limited.
+# Copyright (c) 2017-2018, 2020-2021, 2023, 2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -92,10 +92,12 @@ def include_components(target, path, header_prefix, folder, subfolders=None):
             lines = add_updated_includes(lines, first_pos, include_list)
             write_file(components_file, lines)
 
-
-if __name__ == "__main__":
+def main():
     # Include kernels
     include_components(core_targets, core_path, "Kernels.h", "kernels", ["arm32", "arm64"])
 
     # Include functions
     include_components(runtime_targets, runtime_path, "Functions.h", "functions")
+
+if __name__ == "__main__":
+    main()

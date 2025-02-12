@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_OPENCL_EXT_H_
-#define ARM_COMPUTE_ACL_OPENCL_EXT_H_
+#ifndef ACL_ARM_COMPUTE_ACLOPENCLEXT_H
+#define ACL_ARM_COMPUTE_ACLOPENCLEXT_H
 
 #include "arm_compute/AclTypes.h"
 
@@ -37,11 +37,10 @@
 #pragma GCC diagnostic pop
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /* __cplusplus */
 
-    /** Extract the underlying OpenCL context used by a given Compute Library context object
+/** Extract the underlying OpenCL context used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
  *
@@ -50,9 +49,9 @@ extern "C"
  *
  * @return Status code
  */
-    AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
+AclStatus AclGetClContext(AclContext ctx, cl_context *opencl_context);
 
-    /** Extract the underlying OpenCL device id used by a given Compute Library context object
+/** Extract the underlying OpenCL device id used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
  *
@@ -61,9 +60,9 @@ extern "C"
  *
  * @return Status code
  */
-    AclStatus AclGetClDevice(AclContext ctx, cl_device_id *opencl_device);
+AclStatus AclGetClDevice(AclContext ctx, cl_device_id *opencl_device);
 
-    /** Set the underlying OpenCL context to be used by a given Compute Library context object
+/** Set the underlying OpenCL context to be used by a given Compute Library context object
  *
  * @note @ref AclContext should be of an OpenCL backend target
  *
@@ -72,9 +71,9 @@ extern "C"
  *
  * @return Status code
  */
-    AclStatus AclSetClContext(AclContext ctx, cl_context opencl_context);
+AclStatus AclSetClContext(AclContext ctx, cl_context opencl_context);
 
-    /** Extract the underlying OpenCL queue used by a given Compute Library queue object
+/** Extract the underlying OpenCL queue used by a given Compute Library queue object
  *
  * @note @ref AclQueue should be of an OpenCL backend target
  * @note @ref AclQueue refcount should be 0, meaning not used by other objects
@@ -84,9 +83,9 @@ extern "C"
  *
  * @return Status code
  */
-    AclStatus AclGetClQueue(AclQueue queue, cl_command_queue *opencl_queue);
+AclStatus AclGetClQueue(AclQueue queue, cl_command_queue *opencl_queue);
 
-    /** Set the underlying OpenCL queue to be used by a given Compute Library queue object
+/** Set the underlying OpenCL queue to be used by a given Compute Library queue object
  *
  * @note @ref AclQueue should be of an OpenCL backend target
  * @note opecl_queue needs to be created from the same context that the AclContext that the queue will use
@@ -96,18 +95,18 @@ extern "C"
  *
  * @return Status code
  */
-    AclStatus AclSetClQueue(AclQueue queue, cl_command_queue opencl_queue);
+AclStatus AclSetClQueue(AclQueue queue, cl_command_queue opencl_queue);
 
-    /** Extract the underlying OpenCL memory object by a given Compute Library tensor object
+/** Extract the underlying OpenCL memory object by a given Compute Library tensor object
  *
  * @param[in]  tensor     A valid non-zero tensor
  * @param[out] opencl_mem Underlyig OpenCL memory object
  *
  * @return Status code
  */
-    AclStatus AclGetClMem(AclTensor tensor, cl_mem *opencl_mem);
+AclStatus AclGetClMem(AclTensor tensor, cl_mem *opencl_mem);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACL_OPENCL_EXT_H_ */
+#endif // ACL_ARM_COMPUTE_ACLOPENCLEXT_H

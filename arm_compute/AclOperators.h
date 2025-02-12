@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_OPERATORS_H_
-#define ARM_COMPUTE_ACL_OPERATORS_H_
+#ifndef ACL_ARM_COMPUTE_ACLOPERATORS_H
+#define ACL_ARM_COMPUTE_ACLOPERATORS_H
 
 #include "arm_compute/AclDescriptors.h"
 #include "arm_compute/AclTypes.h"
@@ -31,11 +31,10 @@
 #define ARM_COMPUTE_VALIDATE_OPERATOR_SUPPORT ((AclOperator *)(size_t)-1)
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /** __cplusplus */
 
-    /** Create an activation operator
+/** Create an activation operator
  *
  * Applies an activation function to a given tensor .
  * Compute Library supports a wide list of activation functions @ref AclActivationType.
@@ -76,12 +75,12 @@ extern "C"
  *  - @ref AclUnsupportedTarget if operator for the requested target is unsupported
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclActivation(AclOperator                  *op,
-                            AclContext                    ctx,
-                            const AclTensorDescriptor    *src,
-                            const AclTensorDescriptor    *dst,
-                            const AclActivationDescriptor info);
+AclStatus AclActivation(AclOperator                  *op,
+                        AclContext                    ctx,
+                        const AclTensorDescriptor    *src,
+                        const AclTensorDescriptor    *dst,
+                        const AclActivationDescriptor info);
 #ifdef __cplusplus
 }
 #endif /** __cplusplus */
-#endif /* ARM_COMPUTE_ACL_OPERATORS_H_ */
+#endif // ACL_ARM_COMPUTE_ACLOPERATORS_H

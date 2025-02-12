@@ -41,46 +41,58 @@ repos:
     hooks:
       - id: android-bp-checks
         name: Android.bp Checks
-        stages: [commit]
+        stages: [pre-commit]
         language: python
-        entry: python ./scripts/format_code.py --files=git-diff --check_android_bp
+        entry: python ./scripts/format_code.py --check_android_bp
         pass_filenames: false
         additional_dependencies: ['psutil==5.8.0', 'Jinja2==3.0.1']
       - id: format-code
         name: ACL Basic Formatting Checks
-        stages: [commit]
+        stages: [pre-commit]
         language: python
-        entry: python ./scripts/format_code.py --files=git-diff --check_formatting
-        pass_filenames: false
+        entry: python ./scripts/format_code.py --check_formatting --file_list
+        pass_filenames: true
         additional_dependencies: ['psutil==5.8.0', 'Jinja2==3.0.1']
       - id: copyright-checks
         name: ACL Copyright Year Checks
-        stages: [commit]
+        stages: [pre-commit]
         language: python
-        entry: python ./scripts/format_code.py --files=git-diff --check_copyright
-        pass_filenames: false
+        entry: python ./scripts/format_code.py --check_copyright --file_list
+        pass_filenames: true
         additional_dependencies: ['psutil==5.8.0', 'Jinja2==3.0.1']
+      - id: include-functions-kernels
+        name: Include new functions and kernels in headers
+        stages: [pre-commit]
+        language: python
+        entry: python ./scripts/include_functions_kernels.py
+        additional_dependencies: ['psutil==5.8.0', 'Jinja2==3.0.1']
+        pass_filenames: false
+      - id: check-bad-style
+        name: Check bad style on all files
+        stages: [pre-commit]
+        language: script
+        entry: ./scripts/check_bad_style.sh
       - id: prepare-cmake-build-files
         name: Prepare CMake build files
-        stages: [commit]
+        stages: [pre-commit]
         language: python
         entry: python ./scripts/generate_build_files.py --cmake
         pass_filenames: false
       - id: prepare-bazel-build-files
         name: Prepare Bazel build files
-        stages: [commit]
+        stages: [pre-commit]
         language: python
         entry: python ./scripts/generate_build_files.py --bazel
         pass_filenames: false
       - id: fix-header-guards-ckw
         name: Fix header guards in CKW
-        stages: [commit]
+        stages: [pre-commit]
         language: python
         entry: python ./scripts/check_header_guards.py --extensions=h,hh,hpp,inl --comment_style=double_slash --prefix=CKW --include=compute_kernel_writer/ --add_extension --drop_outermost_subdir
         pass_filenames: true
       - id: fix-header-guards-acl
         name: Fix header guards in ACL
-        stages: [commit]
+        stages: [pre-commit]
         language: python
         entry: python ./scripts/check_header_guards.py --extensions=h,hh,hpp,inl --comment_style=double_slash --prefix=ACL --exclude=compute_kernel_writer/,src/core/NEON/kernels/convolution/,src/core/NEON/kernels/arm_gemm/,src/core/NEON/kernels/arm_conv/,include/,third_party/ --add_extension
         pass_filenames: true
@@ -99,21 +111,21 @@ repos:
             (?x)^(
               tests/.*
             )$
-        stages: [commit]
+        stages: [pre-commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: end-of-file-fixer
-        stages: [commit]
+        stages: [pre-commit]
       - id: trailing-whitespace
-        stages: [commit]
+        stages: [pre-commit]
       - id: mixed-line-ending
         args: ['--fix=lf']
         description: Forces to replace line ending by the UNIX 'lf' character.
-        stages: [commit]
+        stages: [pre-commit]
       - id: check-added-large-files
         args: ['--maxkb=100']
-        stages: [commit]
+        stages: [pre-commit]
   - repo: https://github.com/fsfe/reuse-tool
     rev: v4.0.3
     hooks:

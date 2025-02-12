@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# SPDX-FileCopyrightText: 2017-2018, 2023-2024 Arm Limited
+# SPDX-FileCopyrightText: 2017-2018, 2023-2025 Arm Limited
 #
 # SPDX-License-Identifier: MIT
 #
@@ -101,23 +101,22 @@ def process_comment(fd, comment, first_param, last_param):
                 raise Exception("{}:{}: Not a comment line ? ".format(path, n_line - len(comment) + comment_line + 1))
             fd.write(line_prefix+ m.group(1)+"\n")
 
-if __name__ == "__main__":
+def main(*args):
     n_file=0
 
-    if len(sys.argv) == 2 and sys.argv[1] == '--all':
+    if len(args) == 1 and args[0] == '--all':
         paths = []
 
         for top_level in ["./arm_compute", "./src", "./examples", "./tests", "./utils", "./framework", "./support"]:
             for root, _, files in os.walk(top_level):
                 paths.extend([os.path.join(root, f) for f in files])
     else:
-        paths = sys.argv[1:]
-
+        paths = args
     for path in paths:
-        if (path[-3:] not in ("cpp", "inl") and
-            path[-2:] not in ("cl") and
-            path[-2:] not in ("cs") and
-            path[-1] not in ("h")):
+        if (path[-3:] not in ("cpp", "inl", "hpp") and
+            path[-2:] not in ("cl",) and
+            path[-2:] not in ("cs",) and
+            path[-1] not in ("h",)):
             continue
 
         print("[{}] {}".format(n_file, path))
@@ -187,3 +186,7 @@ if __name__ == "__main__":
                         comment = list()
                         first_param = -1
                         last_param = -1
+
+if __name__ == "__main__":
+    _, *args = sys.argv
+    main(*args)
