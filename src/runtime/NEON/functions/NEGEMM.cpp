@@ -134,8 +134,8 @@ void NEGEMM::configure(const ITensor  *a,
 
     // Check if we need to reshape the matrix B only on the first run
     _impl->is_prepared = false;
-    _impl->memory_group.mappings().clear();
-    _impl->original_b = b;
+    _impl->original_b  = b;
+    _impl->op          = std::make_unique<cpu::CpuGemm>();
 
     _impl->op = make_and_config_op(a->info(), b->info(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta,
                                    gemm_info);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -55,10 +54,7 @@ namespace cpu
 class CpuDirectConv3d : public ICpuOperator
 {
 public:
-    CpuDirectConv3d(std::shared_ptr<IMemoryManager> memory_manager);
-    CpuDirectConv3d() : CpuDirectConv3d(MemoryManagerOnDemand::make_default())
-    {
-    }
+    CpuDirectConv3d(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     ~CpuDirectConv3d();
     /** Set the input, weights, biases and output tensor info.
      *

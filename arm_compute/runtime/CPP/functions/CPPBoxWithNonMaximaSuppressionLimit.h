@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2024 Arm Limited.
+ * Copyright (c) 2018-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -41,10 +40,7 @@ class CPPBoxWithNonMaximaSuppressionLimit : public IFunction
 {
 public:
     /** Constructor */
-    CPPBoxWithNonMaximaSuppressionLimit(std::shared_ptr<IMemoryManager> memory_manager);
-    CPPBoxWithNonMaximaSuppressionLimit() : CPPBoxWithNonMaximaSuppressionLimit(MemoryManagerOnDemand::make_default())
-    {
-    }
+    CPPBoxWithNonMaximaSuppressionLimit(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CPPBoxWithNonMaximaSuppressionLimit(const CPPBoxWithNonMaximaSuppressionLimit &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

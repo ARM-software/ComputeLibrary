@@ -29,7 +29,6 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -48,11 +47,8 @@ class NEGEMMLowpMatrixMultiplyCore : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager,
+    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager  = nullptr,
                                  IWeightsManager                *weights_manager = nullptr);
-    NEGEMMLowpMatrixMultiplyCore() : NEGEMMLowpMatrixMultiplyCore(MemoryManagerOnDemand::make_default())
-    {
-    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMLowpMatrixMultiplyCore(const NEGEMMLowpMatrixMultiplyCore &) = delete;
     /** Default move constructor */

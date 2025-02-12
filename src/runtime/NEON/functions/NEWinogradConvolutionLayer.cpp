@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024 Arm Limited.
+ * Copyright (c) 2017-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,8 +69,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor             *input,
                                            const ActivationLayerInfo &act_info,
                                            bool                       enable_fast_math)
 {
-    _impl->is_prepared = false;
-    _impl->memory_group.mappings().clear();
+    _impl->is_prepared      = false;
     _impl->original_weights = weights;
     _impl->op               = std::make_unique<cpu::CpuWinogradConv2d>();
     _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(),

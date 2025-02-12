@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,9 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Macros.h"
-#include "arm_compute/runtime/Allocator.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IMemoryPool.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <cstddef>
 #include <memory>
@@ -68,11 +66,10 @@ private:
     std::shared_ptr<IMemoryManager> _memory_manager; /**< Memory manager to be used by the group */
     IMemoryPool                    *_pool;           /**< Memory pool that the group is scheduled with */
     MemoryMappings                  _mappings;       /**< Memory mappings of the group */
-    bool                            _auto_clear;     /**< Whether the memory manager will be auto-cleared on release */
 };
 
 inline MemoryGroup::MemoryGroup(std::shared_ptr<IMemoryManager> memory_manager) noexcept
-    : _memory_manager(memory_manager), _pool(nullptr), _mappings(), _auto_clear(false)
+    : _memory_manager(memory_manager), _pool(nullptr), _mappings()
 {
 }
 
@@ -107,17 +104,6 @@ inline void MemoryGroup::acquire()
     if (!_mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->pool_manager());
-        // If the caller has not populated the underlying memory manager,
-        // do it here. Also set flag to auto-clear the memory manager on release.
-        // This is needed when using default memory managers that were not set up
-        // by the user.
-        if (_memory_manager->pool_manager()->num_pools() == 0)
-        {
-            Allocator alloc{};
-            _memory_manager->populate(alloc, 1);
-            _auto_clear = true;
-        }
-
         _pool = _memory_manager->pool_manager()->lock_pool();
         _pool->acquire(_mappings);
     }
@@ -132,12 +118,6 @@ inline void MemoryGroup::release()
         _pool->release(_mappings);
         _memory_manager->pool_manager()->unlock_pool(_pool);
         _pool = nullptr;
-
-        if (_auto_clear)
-        {
-            _memory_manager->clear();
-            _auto_clear = false;
-        }
     }
 }
 

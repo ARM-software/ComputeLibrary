@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, 2024 Arm Limited.
+ * Copyright (c) 2017-2019, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,8 +48,6 @@ public:
     MemoryManagerOnDemand(MemoryManagerOnDemand &&) = default;
     /** Allow instances of this class to be moved */
     MemoryManagerOnDemand &operator=(MemoryManagerOnDemand &&) = default;
-
-    static std::shared_ptr<MemoryManagerOnDemand> make_default();
 
     // Inherited methods overridden:
     ILifetimeManager *lifetime_manager() override;

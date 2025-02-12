@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -42,10 +41,7 @@ class NEGEMM : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager = nullptr);
-    NEGEMM() : NEGEMM(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMM(const NEGEMM &) = delete;
     /** Default move constructor */
