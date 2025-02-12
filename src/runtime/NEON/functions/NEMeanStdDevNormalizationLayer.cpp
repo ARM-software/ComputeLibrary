@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,24 +26,41 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
-#include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
+#include "src/cpu/operators/CpuMeanStdDevNormalization.h"
 
 namespace arm_compute
 {
+struct arm_compute::NEMeanStdDevNormalizationLayer::Impl
+{
+    ITensor                                         *input{nullptr};
+    ITensor                                         *output{nullptr};
+    std::unique_ptr<cpu::CpuMeanStdDevNormalization> op{nullptr};
+};
+
+NEMeanStdDevNormalizationLayer::NEMeanStdDevNormalizationLayer() : _impl(std::make_unique<Impl>())
+{
+}
+
 NEMeanStdDevNormalizationLayer::~NEMeanStdDevNormalizationLayer() = default;
 
 void NEMeanStdDevNormalizationLayer::configure(ITensor *input, ITensor *output, float epsilon)
 {
-    ARM_COMPUTE_LOG_PARAMS(input, output, epsilon);
-
-    auto k = std::make_unique<NEMeanStdDevNormalizationKernel>();
-    k->configure(input, output, epsilon);
-    _kernel = std::move(k);
+    _impl->input  = input;
+    _impl->output = (output == nullptr) ? input : output;
+    _impl->op     = std::make_unique<cpu::CpuMeanStdDevNormalization>();
+    _impl->op->configure(_impl->input->info(), _impl->output->info(), epsilon);
 }
 
 Status NEMeanStdDevNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
-    return NEMeanStdDevNormalizationKernel::validate(input, output, epsilon);
+    return cpu::CpuMeanStdDevNormalization::validate(input, output, epsilon);
+}
+
+void NEMeanStdDevNormalizationLayer::run()
+{
+    ITensorPack pack;
+    pack.add_tensor(TensorType::ACL_SRC, _impl->input);
+    pack.add_tensor(TensorType::ACL_DST, _impl->output);
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

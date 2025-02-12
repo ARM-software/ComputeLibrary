@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,12 @@
 #ifndef ACL_SRC_CPU_KERNELS_CPUDYNAMICGEMMKERNEL_H
 #define ACL_SRC_CPU_KERNELS_CPUDYNAMICGEMMKERNEL_H
 
+#include "arm_compute/core/TensorInfo.h"
+
 #include "src/core/common/Macros.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/ICpuKernel.h"
+#include "src/cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.h"
 
 namespace arm_compute
 {
@@ -34,30 +38,22 @@ namespace cpu
 namespace kernels
 {
 /** Arm(R) Neon (TM) kernel to perform dynamic GEMM */
-class CpuDynamicGemmKernel : public ICpuKernel<CpuDynamicGemmKernel>
+class CpuDynamicGemmKernel final : public ICpuKernel<CpuDynamicGemmKernel>
 {
-private:
-    using DynamicGemmKernelPtr = std::add_pointer<void(
-        const ITensor *, const ITensor *, const ITensor *, ITensor *, const Window &, float, float)>::type;
-
 public:
-    struct DynamicGemmKernel
-    {
-        const char          *name;
-        DynamicGemmKernelPtr ukernel;
-    };
     CpuDynamicGemmKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDynamicGemmKernel);
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  a         First input tensor info (Matrix A or Vector A). Data type supported: F32
-     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a
-     * @param[in]  c         Third input tensor info (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a
-     * @param[out] d         Output tensor info. Data type supported: same as @p a
-     * @param[in]  alpha     Weight of the matrix product
-     * @param[in]  beta      Weight of matrix C
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                       if the reshape of matrix B should happen only for the first run
+     * @param[in]  a             First input tensor info (Matrix A or Vector A). Data type supported: F32
+     * @param[in]  b             Second input tensor info (Matrix B). Data type supported: same as @p a
+     * @param[in]  c             Third input tensor info (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a
+     * @param[out] d             Output tensor info. Data type supported: same as @p a
+     * @param[in]  alpha         Weight of the matrix product
+     * @param[in]  beta          Weight of matrix C
+     * @param[in]  base_aux_slot First slot to use for intermediate tensor allocations
+     * @param[in]  gemm_info     (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                           if the reshape of matrix B should happen only for the first run
      */
     void configure(const ITensorInfo *a,
                    const ITensorInfo *b,
@@ -65,6 +61,7 @@ public:
                    ITensorInfo       *d,
                    float              alpha,
                    float              beta,
+                   size_t             base_aux_slot,
                    const GEMMInfo    &gemm_info = GEMMInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CpuDynamicGemmMatKernel.
@@ -78,7 +75,7 @@ public:
     static Status validate(const ITensorInfo *a,
                            const ITensorInfo *b,
                            const ITensorInfo *c,
-                           ITensorInfo       *d,
+                           const ITensorInfo *d,
                            float              alpha,
                            float              beta,
                            const GEMMInfo    &gemm_info = GEMMInfo());
@@ -87,9 +84,66 @@ public:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
+    /** Return updated extra memory requirements for the selected ukernel,
+     * based on the tensors that will be used when running it.
+     */
+    const experimental::MemoryRequirements &workspace(const ITensorPack &tensors) const;
+
+    /** Return the maximum number of allocations that may be required by the
+     * selected ukernel.
+     */
+    static constexpr size_t max_workspace_count();
+
+    /** Prepare the kernel for the run.
+     *
+     * Any actions the kernel needs to perform before the run should be
+     * done here. An example of such an action could be packing RHS.
+     *
+     * @param[in] tensors Tensors to operate on.
+     * @param[in] reuse_b Whether b-tensor from the last run should
+     *                    be reused. This for instance allows to skip
+     *                    unnecessary packing of b-tensor if it was not
+     *                    changed.
+     */
+    void prepare(ITensorPack &tensors, const bool reuse_b);
+
+    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
+     *
+     * @return The split dimension hint.
+     */
+    size_t get_split_dimension_hint() const
+    {
+        return _heuristics.scheduler_hint().split_dimension();
+    }
+
 private:
-    DynamicGemmKernelPtr _func{nullptr};
+    // Intermediate tensor types that may have to be allocated for the
+    // selected kernel.
+    enum AuxTensorIdx
+    {
+        PackedRHS = 0,
+        Count
+    };
+
+private:
+    /** Calculate the size of the packed RHS, if that's something that the
+     * selected ukernel needs.
+     */
+    size_t size_of_packed_rhs(size_t rows, size_t columns) const;
+
+private:
+    heuristics::CpuDynamicGemmKernelHeuristics _heuristics{};
+    std::string                                _name{};
+    size_t                                     _base_aux_slot{};
+    // `mutable` to be able to cache and return memory requirements from the
+    // `workspace` method.
+    mutable experimental::MemoryRequirements _aux_mem{Count};
 };
+
+constexpr size_t CpuDynamicGemmKernel::max_workspace_count()
+{
+    return Count;
+}
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

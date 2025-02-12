@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -48,11 +47,8 @@ class NEGEMMLowpMatrixMultiplyCore : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager,
+    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager  = nullptr,
                                  IWeightsManager                *weights_manager = nullptr);
-    NEGEMMLowpMatrixMultiplyCore() : NEGEMMLowpMatrixMultiplyCore(MemoryManagerOnDemand::make_default())
-    {
-    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMLowpMatrixMultiplyCore(const NEGEMMLowpMatrixMultiplyCore &) = delete;
     /** Default move constructor */
@@ -87,6 +83,7 @@ public:
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32      |S32            |
      * |QASYMM8_SIGNED |QSYMM8             |S32      |S32            |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |F32      |F32            |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |F32      |F16            |
      *
      * @note GEMM_LOWP:  low precision GEMM kernel
      *  This kernel performs the following computations:

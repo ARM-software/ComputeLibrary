@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -88,10 +87,8 @@ class NEFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager = nullptr);
-    NEFullyConnectedLayer() : NEFullyConnectedLayer(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager  = nullptr,
+                          IWeightsManager                *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFullyConnectedLayer(const NEFullyConnectedLayer &) = delete;
     /** Prevent instances of this class from being moved (As this class contains pointers) */

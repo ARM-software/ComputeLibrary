@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/runtime/CPP/functions/CPPDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -48,10 +47,7 @@ class NEDetectionPostProcessLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEDetectionPostProcessLayer(std::shared_ptr<IMemoryManager> memory_manager);
-    NEDetectionPostProcessLayer() : NEDetectionPostProcessLayer(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEDetectionPostProcessLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDetectionPostProcessLayer(const NEDetectionPostProcessLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

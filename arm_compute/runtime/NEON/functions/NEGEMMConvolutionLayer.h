@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -48,11 +47,8 @@ class NEGEMMConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager,
+    NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager  = nullptr,
                            IWeightsManager                       *weights_manager = nullptr);
-    NEGEMMConvolutionLayer() : NEGEMMConvolutionLayer(MemoryManagerOnDemand::make_default())
-    {
-    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConvolutionLayer(const NEGEMMConvolutionLayer &) = delete;
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */

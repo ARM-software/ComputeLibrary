@@ -30,6 +30,7 @@
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
+#include "src/cpu/operators/CpuDynamicGemm.h"
 #include "src/cpu/operators/CpuGemm.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
@@ -224,29 +225,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     bool is_valid = bool(NEGEMM::validate(&lhs_info.clone()->set_is_resizable(true), &rhs_info.clone()->set_is_resizable(true), nullptr, &output_info.clone()->set_is_resizable(true), alpha, beta, gemm_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
-
-NON_CONST_DATA_TEST_CASE(DynamicTensorShapesNotSupported, framework::DatasetMode::ALL,
-    combine(
-        zip(
-            make("LhsInfo", TensorInfo(TensorShape(27U, 13U), 1, DataType::F32)),
-            make("RhsInfo", TensorInfo(TensorShape(8U, 27U), 1, DataType::F32)),
-            make("OutputInfo", TensorInfo(TensorShape(8U, 13U), 1, DataType::F32))
-        ),
-    make("DynamicShape", { false, true })),
-    lhs_info, rhs_info, out_info, dynamic_shape)
-{
-    lhs_info.set_dynamic(dynamic_shape);
-    rhs_info.set_dynamic(dynamic_shape);
-    out_info.set_dynamic(dynamic_shape);
-
-    constexpr float alpha = 1.0;
-    constexpr float beta = 0.0;
-    const auto gemm_info = GEMMInfo();
-    bool is_valid = bool(NEGEMM::validate(&lhs_info, &rhs_info, nullptr, &out_info,
-        alpha, beta, gemm_info));
-
-    ARM_COMPUTE_EXPECT(is_valid == !dynamic_shape, framework::LogLevel::ERRORS);
-}
 // clang-format on
 // *INDENT-ON*
 TEST_SUITE(KERNEL_SELECTION)
@@ -367,8 +345,14 @@ TEST_SUITE_END() // INTERLEAVE_4X4
 template <typename T>
 using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;
 
+#if defined(__aarch64__)
 template <typename T>
 using NEDynamicGEMMFixture = GEMMDynamicValidationFixture<Tensor, Accessor, NEGEMM, T>;
+
+// Runs twice to exercise code paths with buffer reuse.
+template <typename T>
+using NEDynamicGEMMFixtureRunTwice = GEMMDynamicValidationFixture<Tensor, Accessor, NEGEMM, T, false, false, false, false, false, true>;
+#endif // __aarch64__
 
 template <typename T>
 using NEBatchedMatMulFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true, false, false, false, false, true>;
@@ -495,28 +479,85 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::N
     validate(Accessor(_target), _reference, tolerance_f);
 }
 
+#if defined(__aarch64__)
 TEST_SUITE(DynamicShape)
-// TODO: COMPMID-7681: Once NEGEMM supports tensors with dynamic shapes, enable this test for framework::DatasetMode::PRECOMMIT
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDynamicGEMMFixture<float>, framework::DatasetMode::DISABLED,
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, combine(
+    zip(
+        make("A", TensorShape{13U, 1U}),
+        make("B", TensorShape{21U, 13U}),
+        make("C", TensorShape{21U, 1U}),
+        make("D", TensorShape{21U, 1U})
+    ),
+    make("DataType", {DataType::U32, DataType::F32}),
+    make("Null_C", {true, false}),
+    make("Alpha", {0.0f, 0.5f, 1.0f}),
+    make("Beta", {0.0f, 0.5f, 1.0f}),
+    make("Dynamic_A", {true, false}),
+    make("Dynamic_B", {true, false}),
+    make("Dynamic_C", {true, false}),
+    make("Dynamic_D", {true, false}),
+    make("ReshapeFirstRun", {true, false})
+), shape_a, shape_b, shape_c, shape_d, data_type, null_c, alpha, beta, dynamic_a, dynamic_b, dynamic_c, dynamic_d, reshape_first_run)
+{
+    TensorInfo a{shape_a, 1, data_type};
+    a.set_dynamic(dynamic_a);
+    a.set_are_values_constant(!dynamic_a);
+    TensorInfo b{shape_b, 1, DataType::F32};
+    b.set_dynamic(dynamic_b);
+    b.set_are_values_constant(!dynamic_b);
+    TensorInfo c{shape_c, 1, DataType::F32};
+    c.set_dynamic(dynamic_c);
+    c.set_are_values_constant(!dynamic_c);
+    TensorInfo d{shape_d, 1, DataType::F32};
+    d.set_dynamic(dynamic_d);
+    d.set_are_values_constant(!dynamic_d);
+
+    GEMMInfo gemm_info{false, false, reshape_first_run};
+    cpu::CpuDynamicGemm gemm;
+    Status status = gemm.validate(&a, &b, null_c ? nullptr : &c, &d, alpha, beta, gemm_info);
+
+    bool valid_data_type = data_type == DataType::F32;
+    bool valid_null_c = !null_c;
+    bool valid_alpha = (alpha == 1.0f);
+    bool valid_beta = (beta == 1.0f);
+    bool valid_dynamic_ab = (dynamic_a || dynamic_b);
+    bool valid_dynamic_d = dynamic_d;
+    bool valid_reshape_first_run = (!reshape_first_run || (!dynamic_b && !dynamic_c));
+    bool validity = valid_data_type && valid_null_c && valid_alpha && valid_beta && valid_dynamic_ab && valid_dynamic_d && valid_reshape_first_run;
+    ARM_COMPUTE_EXPECT((validity == bool(status)), framework::LogLevel::ERRORS);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDynamicGEMMFixture<float>, framework::DatasetMode::PRECOMMIT,
         combine(
-            datasets::SmallGEMMDataset(),
+            datasets::SmallGEMMVectorBiasDataset(),
             make("ReshapeWeights", { true, false }),
-            make("DataType", DataType::F32)))
+            make("DataType", DataType::F32),
+            make("ConstantRHS", false)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-// TODO: COMPMID-7681: Once NEGEMM supports tensors with dynamic shapes, enable this test for framework::DatasetMode::NIGHTLY
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDynamicGEMMFixture<float>, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunSmallConstantRHS, NEDynamicGEMMFixtureRunTwice<float>, framework::DatasetMode::PRECOMMIT,
         combine(
-            datasets::LargeGEMMDataset(),
+            datasets::SmallGEMMVectorBiasDataset(),
+            make("ReshapeWeights", false),
+            make("DataType", DataType::F32),
+            make("ConstantRHS", true)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDynamicGEMMFixture<float>, framework::DatasetMode::NIGHTLY,
+        combine(
+            datasets::LargeGEMMVectorBiasDataset(),
             make("ReshapeWeights", { true, false }),
-            make("DataType", DataType::F32)))
+            make("DataType", DataType::F32),
+            make("ConstantRHS", false)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
 TEST_SUITE_END() // DynamicShape
+#endif // __aarch64__
 
 TEST_SUITE(BATCHED_MATMUL)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),

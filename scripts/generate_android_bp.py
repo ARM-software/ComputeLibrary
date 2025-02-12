@@ -126,6 +126,7 @@ cc_library_static {
             "{{ src }}",
         {% endfor %}
         "third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c",
+        "third_party/kleidiai/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p8x1biasf32_f32_f32_neon.c",
     ],
     arch: {
         arm: {

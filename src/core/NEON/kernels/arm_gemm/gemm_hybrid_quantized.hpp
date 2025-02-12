@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -225,7 +225,7 @@ public:
                     strat.kernel(g_array._Aptr + (multi * g_array._A_multi_stride) + (batch * g_array._A_batch_stride) + (m_start * g_array._lda) + k0, g_array._lda,
                                  b_panel,
                                  result_buffer, (nmax-n0),
-                                 (m_end - m_start), (nmax - n0), kern_k,
+                                 (m_end - m_start), (nmax - n0), (kmax-k0),
                                  nullptr, Activation(), false);
                 }
 

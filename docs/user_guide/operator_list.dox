@@ -1782,6 +1782,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>S32
     <tr><td>QASYMM8_SIGNED<td>QSYMM8<td>S32<td>S32
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>F32<td>F32
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>F32<td>F16
     </table>
 <tr>
   <td>CLGEMMLowpMatrixMultiplyCore

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,18 +61,30 @@ void fill_quantized(U &&tensor, int i)
 template <typename U>
 void fill(U &&tensor, int i, int32_t min, int32_t max)
 {
-    if (tensor.data_type() == DataType::S32) {
-        std::uniform_int_distribution<int32_t> distribution(min, max);
-        library->fill(tensor, distribution, i);
-    }
-    else if(tensor.data_type() == DataType::F32)
+    switch(tensor.data_type())
     {
-        std::uniform_real_distribution<float> distribution((float)min, (float)max);
-        library->fill(tensor, distribution, i);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+        case DataType::S32:
+        {
+            std::uniform_int_distribution<int32_t> distribution(min, max);
+            library->fill(tensor, distribution, i);
+            break;
+        }
+        case DataType::F32:
+        {
+            std::uniform_real_distribution<float> distribution(static_cast<float>(min), static_cast<float>(max));
+            library->fill(tensor, distribution, i);
+            break;
+        }
+        case DataType::F16:
+        {
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{static_cast<half>(min), static_cast<half>(max)};
+            library->fill(tensor, distribution, i);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+        }
     }
 }
 
@@ -584,30 +596,38 @@ protected:
     SimpleTensor<TI> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, bool run_twice = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, bool run_twice = false>
 class GEMMLowpDequantizedMatrixMultiplyValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, DataType data_type_a, DataType data_type_b, bool accumulate)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, DataType data_type_a, DataType data_type_b, DataType output_type, bool accumulate)
     {
+        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+            output_type == DataType::F16 && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
         const bool dynamic_qinfo = false;
         const auto a_qinfo = QuantizationInfo(1.0f / 255, a_offset);
         const auto b_qinfo = QuantizationInfo(5.0f / 255, b_offset);
         TensorFillInfo finfo;
-        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, finfo,
+        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, finfo, output_type,
                                     accumulate, dynamic_qinfo);
         _reference = compute_reference(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b,
-                                       finfo, accumulate, dynamic_qinfo);
+                                       finfo, output_type,accumulate, dynamic_qinfo);
     }
 
 protected:
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, DataType data_type_a, DataType data_type_b, const TensorFillInfo& finfo, const bool accumulate, const bool dynamic_qinfo)
+    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, DataType data_type_a, DataType data_type_b, const TensorFillInfo& finfo, DataType output_type, const bool accumulate, const bool dynamic_qinfo)
     {
         const auto output_qinfo = QuantizationInfo();
-        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, int32_t, false, run_twice>(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, output_qinfo, data_type_a, data_type_b, GEMMLowpOutputStageInfo(), false, finfo, accumulate, dynamic_qinfo, DataType::F32);
+        return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, int32_t, false, run_twice>(
+                    shape_a, shape_b, shape_output, a_qinfo, b_qinfo,
+                    output_qinfo, data_type_a, data_type_b, GEMMLowpOutputStageInfo(), false, finfo, accumulate, dynamic_qinfo, output_type);
     }
 
-    SimpleTensor<float> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, DataType data_type_a, DataType data_type_b, const TensorFillInfo& finfo, bool accumulate, const bool dynamic_qinfo)
+    SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, const QuantizationInfo& a_qinfo, const QuantizationInfo& b_qinfo, DataType data_type_a, DataType data_type_b, const TensorFillInfo& finfo, DataType output_type, bool accumulate, const bool dynamic_qinfo)
     {
         QuantizationInfo s32_ref_output_quant_info = QuantizationInfo(a_qinfo.uniform().scale * b_qinfo.uniform().scale, 0, dynamic_qinfo);
 
@@ -643,22 +663,21 @@ protected:
 
         s32_ref_output.quantization_info(s32_ref_output_quant_info);
 
-        SimpleTensor<float> f32_ref_output(s32_ref_output.shape(), DataType::F32);
-        f32_ref_output = reference::dequantization_layer<float, int32_t>(s32_ref_output);
+        SimpleTensor<T> ref_output(s32_ref_output.shape(), output_type);
+        ref_output = reference::dequantization_layer<T, int32_t>(s32_ref_output);
 
         if (accumulate)
         {
-            SimpleTensor<float> output{ shape_output, DataType::F32, 1 };
+            SimpleTensor<T> output{ shape_output, output_type, 1 };
             fill(output, 6 + finfo.hash, finfo.min_output, finfo.max_output);
-            reference::arithmetic_operation<float>(reference::ArithmeticOperation::ADD, output, f32_ref_output, output, ConvertPolicy::SATURATE);
+            reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, output, ref_output, output, ConvertPolicy::SATURATE);
             return output;
         }
-
-        return f32_ref_output;
+        return ref_output;
     }
 
     TensorType            _target{};
-    SimpleTensor<float> _reference{};
+    SimpleTensor<T> _reference{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, typename TI = uint8_t, typename TW = uint8_t, bool run_twice = false>

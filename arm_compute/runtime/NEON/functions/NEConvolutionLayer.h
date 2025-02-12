@@ -29,7 +29,6 @@
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 

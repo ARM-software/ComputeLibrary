@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -212,7 +212,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
         auto_init_if_empty(*dst, *src->clone());
     }
 
-    const auto *uk = heuristics.kernel();
+    const auto *uk = _heuristics.kernel();
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _name = std::string("CpuActivationKernel").append("/").append(uk->name);
@@ -242,7 +242,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 #endif // __aarch64__
     _act_info = activation_info;
 
-    ICPPKernel::configure(heuristics.window());
+    ICPPKernel::configure(_heuristics.window());
 }
 
 Status

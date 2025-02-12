@@ -49,7 +49,7 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class GEMMGenericValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type, bool accumulate, bool dynamic)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type, bool accumulate, bool dynamic, bool constant_b_and_c, bool vector_bias)
     {
         if(std::is_same<TensorType, Tensor>::value &&  // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
@@ -58,8 +58,8 @@ public:
         }
 
         ARM_COMPUTE_UNUSED(pretranspose);
-        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, accumulate, dynamic);
-        _reference = compute_reference(shape_a, shape_b, output_shape, alpha, beta, data_type, accumulate);
+        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, accumulate, dynamic, constant_b_and_c);
+        _reference = compute_reference(shape_a, shape_b, output_shape, alpha, beta, data_type, accumulate, constant_b_and_c, vector_bias);
     }
 
 protected:
@@ -86,7 +86,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &input_shape_a, const TensorShape &input_shape_b, const TensorShape &input_shape_c, const TensorShape &output_shape, float alpha, float beta,
-                              DataType data_type, bool accumulate, bool dynamic)
+                              DataType data_type, bool accumulate, bool dynamic, bool constant_b_and_c)
     {
         // Create tensors
         TensorType a   = create_tensor<TensorType>(input_shape_a, data_type, 1);
@@ -94,12 +94,21 @@ protected:
         TensorType c   = create_tensor<TensorType>(input_shape_c, data_type, 1);
         TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1);
 
+        b.info()->set_are_values_constant(constant_b_and_c);
+        c.info()->set_are_values_constant(constant_b_and_c);
+
         if(dynamic)
         {
             a.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
-            b.info()->set_tensor_shape(TensorShape()).set_dynamic(true);;
-            c.info()->set_tensor_shape(TensorShape()).set_dynamic(true);;
-            dst.info()->set_tensor_shape(TensorShape()).set_dynamic(true);;
+            if (!b.info()->are_values_constant())
+            {
+                b.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            }
+            if (!c.info()->are_values_constant())
+            {
+                c.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            }
+            dst.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
         }
 
         // Create and configure function
@@ -112,14 +121,20 @@ protected:
                        (disable_c) ? nullptr : &c,
                        &dst,
                        alpha, beta,
-                       GEMMInfo(false, false, false, (reinterpret_output_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, false, (reinterpret_input_as_3d
+                       GEMMInfo(false, false, constant_b_and_c, (reinterpret_output_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, false, (reinterpret_input_as_3d
                                 || reinterpret_output_as_3d), arm_compute::ActivationLayerInfo(), false /* fixed_format */, arm_compute::WeightFormat::UNSPECIFIED, false /* pretranspose_B */, accumulate));
 
         if (dynamic)
         {
             a.info()->set_tensor_shape(input_shape_a);
-            b.info()->set_tensor_shape(input_shape_b);
-            c.info()->set_tensor_shape(input_shape_c);
+            if (!b.info()->are_values_constant())
+            {
+                b.info()->set_tensor_shape(input_shape_b);
+            }
+            if (!c.info()->are_values_constant())
+            {
+                c.info()->set_tensor_shape(input_shape_c);
+            }
             dst.info()->set_tensor_shape(output_shape);
         }
 
@@ -157,8 +172,11 @@ protected:
         {
             gemm.run();
             fill(AccessorType(a), 3); // Fill tensors with new seed after run
-            fill(AccessorType(b), 4);
-            if(!disable_c)
+            if (!constant_b_and_c)
+            {
+                fill(AccessorType(b), 4);
+            }
+            if(!disable_c && !constant_b_and_c)
             {
                 fill(AccessorType(c), 5);
             }
@@ -171,7 +189,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &output_shape, float alpha, float beta,
-                                      DataType data_type, bool accumulate)
+                                      DataType data_type, bool accumulate, bool constant_b_and_c, bool vector_bias)
     {
         TensorShape shape_a_to_use = shape_a;
         if(reinterpret_input_as_3d)
@@ -191,7 +209,8 @@ protected:
         fill(b, 1);
         fill(c, 2);
 
-        if(reinterpret_input_as_3d || reinterpret_output_as_3d)
+        bool broadcast_bias = reinterpret_input_as_3d || reinterpret_output_as_3d || vector_bias;
+        if (broadcast_bias)
         {
             const int n          = shape_b[0];
             const int m          = reinterpret_output_as_3d ? output_shape[1] * output_shape[2] : output_shape[1];
@@ -234,8 +253,26 @@ protected:
         {
             reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
             fill((pretranspose_a) ? a_transposed : a, 3);
-            fill((pretranspose_b) ? b_transposed : b, 4);
-            fill(c, 5);
+            if (!constant_b_and_c)
+            {
+                fill((pretranspose_b) ? b_transposed : b, 4);
+            }
+            if (!constant_b_and_c)
+            {
+                fill(c, 5);
+            }
+            if (broadcast_bias)
+            {
+                const int n          = shape_b[0];
+                const int m          = reinterpret_output_as_3d ? output_shape[1] * output_shape[2] : output_shape[1];
+                const int batch_size = reinterpret_output_as_3d ? output_shape[3] : output_shape[2];
+
+                // In case of broadcast, we need to simply copy the first into the following "M" ones
+                for(int i = 1; i < m * batch_size; i++)
+                {
+                    memcpy(c.data() + i * n, c.data(), n * sizeof(T));
+                }
+            }
         }
 
         // Do in place summation
@@ -269,7 +306,9 @@ public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
     {
         bool dynamic = false;
-        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, false /*accumulate*/, dynamic);
+        bool constant_b_and_c = false;
+        bool vector_bias = false;
+        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, false /*accumulate*/, dynamic, constant_b_and_c, vector_bias);
     }
 };
 
@@ -277,11 +316,12 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class GEMMDynamicValidationFixture : protected GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>
 {
 public:
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type, bool constant_b_and_c)
     {
         bool accumulate = false;
         bool dynamic = true;
-        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, accumulate, dynamic);
+        bool vector_bias = true;
+        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, accumulate, dynamic, constant_b_and_c, vector_bias);
     }
 };
 
@@ -293,7 +333,9 @@ public:
     {
         bool accumulate = true;
         bool dynamic = false;
-        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, accumulate, dynamic);
+        bool constant_b_and_c = false;
+        bool vector_bias = false;
+        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, disable_c, reinterpret_input_as_3d, reinterpret_output_as_3d, pretranspose_a, pretranspose_b, run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type, accumulate, dynamic, constant_b_and_c, vector_bias);
     }
 };
 

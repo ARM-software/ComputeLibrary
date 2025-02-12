@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, 2024 Arm Limited.
+ * Copyright (c) 2019-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
+#include "src/cpu/kernels/CpuMeanStdDevNormalizationKernel.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -39,52 +39,23 @@
 
 namespace arm_compute
 {
+namespace cpu
+{
+namespace kernels
+{
 namespace
 {
-struct MeanStdDevNormSelectorData
-{
-    DataType dt;
-};
 
-using MeanStdDevNormSelctorPtr = std::add_pointer<bool(const MeanStdDevNormSelectorData &data)>::type;
-using MeanStdDevNormUKernelPtr =
-    std::add_pointer<void(ITensor *input, ITensor *output, float epsilon, const Window &window)>::type;
-
-struct MeanStdDevNormKernel
-{
-    const char                    *name;
-    const MeanStdDevNormSelctorPtr is_selected;
-    MeanStdDevNormUKernelPtr       ukernel;
-};
-
-static const std::vector<MeanStdDevNormKernel> available_kernels = {
-    {"fp32_neon_meanstddevnorm", [](const MeanStdDevNormSelectorData &data) { return data.dt == DataType::F32; },
+static const std::vector<CpuMeanStdDevNormalizationKernel::MeanStdDevNormKernel> available_kernels = {
+    {"fp32_neon_meanstddevnorm", [](const DataTypeSelectorData &data) { return data.dt == DataType::F32; },
      REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_meanstddevnorm)},
 #ifdef ARM_COMPUTE_ENABLE_FP16
-    {"fp16_neon_meanstddevnorm", [](const MeanStdDevNormSelectorData &data) { return data.dt == DataType::F16; },
+    {"fp16_neon_meanstddevnorm", [](const DataTypeSelectorData &data) { return data.dt == DataType::F16; },
      REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_meanstddevnorm)},
 #endif // ARM_COMPUTE_ENABLE_FP16
-    {"qasymm8_neon_meanstddevnorm", [](const MeanStdDevNormSelectorData &data) { return data.dt == DataType::QASYMM8; },
+    {"qasymm8_neon_meanstddevnorm", [](const DataTypeSelectorData &data) { return data.dt == DataType::QASYMM8; },
      REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_meanstddevnorm)},
 };
-
-/** Micro-kernel selector
- *
- * @param[in] data Selection data passed to help pick the appropriate micro-kernel
- *
- * @return A matching micro-kernel else nullptr
- */
-const MeanStdDevNormKernel *get_implementation(const MeanStdDevNormSelectorData &data)
-{
-    for (const auto &uk : available_kernels)
-    {
-        if (uk.is_selected(data))
-        {
-            return &uk;
-        }
-    }
-    return nullptr;
-}
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
@@ -120,28 +91,28 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-NEMeanStdDevNormalizationKernel::NEMeanStdDevNormalizationKernel() : _input(nullptr), _output(nullptr), _epsilon(1e-8f)
+const std::vector<CpuMeanStdDevNormalizationKernel::MeanStdDevNormKernel> &
+CpuMeanStdDevNormalizationKernel::get_available_kernels()
 {
+    return available_kernels;
 }
 
-void NEMeanStdDevNormalizationKernel::configure(ITensor *input, ITensor *output, float epsilon)
+void CpuMeanStdDevNormalizationKernel::configure(ITensorInfo *input, ITensorInfo *output, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
-    ARM_COMPUTE_ERROR_THROW_ON(NEMeanStdDevNormalizationKernel::validate(
-        input->info(), (output != nullptr) ? output->info() : nullptr, epsilon));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        CpuMeanStdDevNormalizationKernel::validate(input, (output != nullptr) ? output : nullptr, epsilon));
 
-    _input   = input;
-    _output  = (output == nullptr) ? input : output;
     _epsilon = epsilon;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (output == nullptr) ? nullptr : output->info());
+    auto win_config = validate_and_configure_window(input, (output == nullptr) ? nullptr : output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICPPKernel::configure(win_config.second);
 }
 
-Status NEMeanStdDevNormalizationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
+Status CpuMeanStdDevNormalizationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, epsilon));
     ARM_COMPUTE_RETURN_ON_ERROR(
@@ -150,15 +121,17 @@ Status NEMeanStdDevNormalizationKernel::validate(const ITensorInfo *input, const
     return Status{};
 }
 
-void NEMeanStdDevNormalizationKernel::run(const Window &window, const ThreadInfo &info)
+void CpuMeanStdDevNormalizationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
-
-    const auto *uk = get_implementation(MeanStdDevNormSelectorData{_output->info()->data_type()});
+    ITensor    *input  = tensors.get_tensor(TensorType::ACL_SRC);
+    ITensor    *output = tensors.get_tensor(TensorType::ACL_DST);
+    const auto *uk     = get_implementation<DataTypeSelectorData>(DataTypeSelectorData{output->info()->data_type()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
-
-    uk->ukernel(_input, _output, _epsilon, window);
+    uk->ukernel(input, output, _epsilon, window);
 }
+} // namespace kernels
+} // namespace cpu
 } // namespace arm_compute

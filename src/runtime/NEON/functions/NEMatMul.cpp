@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,23 +34,16 @@ namespace arm_compute
 {
 struct NEMatMul::Impl
 {
-    Impl(std::shared_ptr<IMemoryManager> memory_manager) : memory_group(memory_manager)
-    {
-    }
-
-    Impl(const Impl &)            = delete;
-    Impl &operator=(const Impl &) = delete;
-
     const ITensor                  *lhs{nullptr};
     const ITensor                  *rhs{nullptr};
     ITensor                        *output{nullptr};
     std::unique_ptr<cpu::CpuMatMul> op{nullptr};
-    MemoryGroup                     memory_group;
+    MemoryGroup                     memory_group{};
     WorkspaceData<Tensor>           workspace_tensors{};
     ITensorPack                     run_pack{};
 };
 
-NEMatMul::NEMatMul(std::shared_ptr<IMemoryManager> memory_manager) : _impl(std::make_unique<Impl>(memory_manager))
+NEMatMul::NEMatMul() : _impl(std::make_unique<Impl>())
 {
 }
 

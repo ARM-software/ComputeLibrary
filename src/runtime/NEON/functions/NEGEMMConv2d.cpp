@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2024 Arm Limited.
+ * Copyright (c) 2020-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,8 +60,7 @@ void NEGEMMConv2d::configure(
 
     _impl->weights     = weights;
     _impl->is_prepared = false;
-    _impl->memory_group.mappings().clear();
-    _impl->op = std::make_unique<OperatorType>();
+    _impl->op          = std::make_unique<OperatorType>();
 
     _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(),
                          info);

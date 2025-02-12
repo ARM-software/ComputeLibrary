@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -79,10 +78,7 @@ class NEMatMul : public IFunction
 {
 public:
     /** Constructor */
-    NEMatMul(std::shared_ptr<IMemoryManager> memory_manager);
-    NEMatMul() : NEMatMul(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEMatMul();
     /** Destructor */
     ~NEMatMul();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

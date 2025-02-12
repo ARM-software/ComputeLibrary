@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_MISC_UTILITY_H
-#define ARM_COMPUTE_MISC_UTILITY_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_UTILITY_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_MISC_UTILITY_H
 
 #include "arm_compute/core/Error.h"
 
@@ -68,8 +68,12 @@ struct generate_array<T, 0, val, vals...>
     static constexpr std::array<T, sizeof...(vals)> value{vals...};
 };
 
+// Below code triggers a redundant declaration warning of constexpr static data member in C++17
+#if defined(__cplusplus) && __cplusplus < 201703L
 template <typename T, T val, T... vals>
 constexpr std::array<T, sizeof...(vals)> generate_array<T, 0, val, vals...>::value;
+#endif /* defined(__cplusplus) && __cplusplus < 201703L */
+
 /** @endcond */
 
 namespace detail
@@ -227,4 +231,4 @@ inline std::string getenv(const std::string &env_name)
 }
 } // namespace utility
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_MISC_UTILITY_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_MISC_UTILITY_H

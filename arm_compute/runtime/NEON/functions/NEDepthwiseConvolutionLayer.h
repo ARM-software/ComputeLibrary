@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 
@@ -44,10 +43,7 @@ class NEDepthwiseConvolutionLayer : public IFunction
 {
 public:
     /** Default constructor */
-    NEDepthwiseConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager);
-    NEDepthwiseConvolutionLayer() : NEDepthwiseConvolutionLayer(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEDepthwiseConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDepthwiseConvolutionLayer(const NEDepthwiseConvolutionLayer &) = delete;
     /** Default move constructor */

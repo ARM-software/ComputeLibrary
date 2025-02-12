@@ -360,6 +360,7 @@ target_sources(
     arm_compute
     PRIVATE
     ../third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c
+	../third_party/kleidiai/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p8x1biasf32_f32_f32_neon.c
 	c/AclContext.cpp
 	c/AclOperator.cpp
 	c/AclQueue.cpp
@@ -411,7 +412,6 @@ target_sources(
 	core/NEON/kernels/NEInstanceNormalizationLayerKernel.cpp
 	core/NEON/kernels/NEL2NormalizeLayerKernel.cpp
 	core/NEON/kernels/NELogicalKernel.cpp
-	core/NEON/kernels/NEMeanStdDevNormalizationKernel.cpp
 	core/NEON/kernels/NENormalizationLayerKernel.cpp
 	core/NEON/kernels/NEPadLayerKernel.cpp
 	core/NEON/kernels/NEPriorBoxLayerKernel.cpp
@@ -527,6 +527,7 @@ target_sources(
 	core/NEON/kernels/arm_gemm/gemm_q8_mixed.cpp
 	core/NEON/kernels/arm_gemm/gemm_qint8.cpp
 	core/NEON/kernels/arm_gemm/gemm_quint8.cpp
+	core/NEON/kernels/arm_gemm/gemm_s8fp16.cpp
 	core/NEON/kernels/arm_gemm/gemm_s8fp32.cpp
 	core/NEON/kernels/arm_gemm/gemm_u8s8fp32.cpp
 	core/NEON/kernels/arm_gemm/gemm_uint16.cpp
@@ -615,6 +616,7 @@ target_sources(
 	core/NEON/kernels/arm_gemm/mergeresults-fp16.cpp
 	core/NEON/kernels/arm_gemm/mergeresults.cpp
 	core/NEON/kernels/arm_gemm/misc.cpp
+	core/NEON/kernels/arm_gemm/quantized-fp16.cpp
 	core/NEON/kernels/arm_gemm/quantized.cpp
 	core/NEON/kernels/arm_gemm/rowsum_indirect_s8.cpp
 	core/NEON/kernels/arm_gemm/rowsum_indirect_u8.cpp
@@ -702,7 +704,6 @@ target_sources(
 	cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp
 	cpu/kernels/CpuDirectConv3dKernel.cpp
 	cpu/kernels/CpuDynamicGemmKernel.cpp
-	cpu/kernels/CpuDynamicGemmKernelHeuristics.cpp
 	cpu/kernels/CpuElementwiseKernel.cpp
 	cpu/kernels/CpuElementwiseUnaryKernel.cpp
 	cpu/kernels/CpuFillKernel.cpp
@@ -721,6 +722,7 @@ target_sources(
 	cpu/kernels/CpuGemmTranspose1xWKernel.cpp
 	cpu/kernels/CpuIm2ColKernel.cpp
 	cpu/kernels/CpuMaxUnpoolingLayerKernel.cpp
+	cpu/kernels/CpuMeanStdDevNormalizationKernel.cpp
 	cpu/kernels/CpuMulKernel.cpp
 	cpu/kernels/CpuPermuteKernel.cpp
 	cpu/kernels/CpuPool2dKernel.cpp
@@ -782,6 +784,8 @@ target_sources(
 	cpu/kernels/directconv2d_output_stage/generic/neon/fp32.cpp
 	cpu/kernels/directconv2d_output_stage/generic/neon/qasymm8.cpp
 	cpu/kernels/directconv2d_output_stage/generic/neon/qasymm8_signed.cpp
+	cpu/kernels/dynamic_gemm/generic/neon/fp32.cpp
+	cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp16.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp32.cpp
 	cpu/kernels/elementwise_binary/generic/neon/integer.cpp
@@ -808,6 +812,9 @@ target_sources(
 	cpu/kernels/gemm_matrix_mul/generic/neon/fp16.cpp
 	cpu/kernels/gemm_matrix_mul/generic/neon/fp32.cpp
 	cpu/kernels/gemm_matrix_mul/generic/neon/impl.cpp
+	cpu/kernels/gemmlowp/generic/neon/fp16.cpp
+	cpu/kernels/gemmlowp/generic/neon/fp32.cpp
+	cpu/kernels/gemmlowp/generic/neon/int32.cpp
 	cpu/kernels/genproposals/generic/neon/fp16.cpp
 	cpu/kernels/genproposals/generic/neon/fp32.cpp
 	cpu/kernels/genproposals/generic/neon/impl.cpp
@@ -902,6 +909,7 @@ target_sources(
 	cpu/operators/CpuGemmLowpOutputStage.cpp
 	cpu/operators/CpuMatMul.cpp
 	cpu/operators/CpuMaxUnpooling.cpp
+	cpu/operators/CpuMeanStdDevNormalization.cpp
 	cpu/operators/CpuMul.cpp
 	cpu/operators/CpuPermute.cpp
 	cpu/operators/CpuPool2d.cpp
@@ -1046,6 +1054,7 @@ target_sources(
 	runtime/experimental/operators/CpuGemm.cpp
 	runtime/experimental/operators/CpuGemmConv2d.cpp
 	runtime/experimental/operators/CpuGemmDirectConv2d.cpp
+	runtime/experimental/operators/CpuMeanStdDevNormalization.cpp
 	runtime/experimental/operators/CpuMul.cpp
 	runtime/experimental/operators/CpuQuantize.cpp
 	runtime/experimental/operators/CpuSoftmax.cpp

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MEAN_STDDEV_NORMALIZATION_LAYER_H
-#define ARM_COMPUTE_TEST_MEAN_STDDEV_NORMALIZATION_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_MEANSTDDEVNORMALIZATIONLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_MEANSTDDEVNORMALIZATIONLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,10 +36,12 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> mean_std_normalization_layer(const SimpleTensor<T> &src, float epsilon = 1e-8f);
+SimpleTensor<T> mean_std_normalization_layer(const SimpleTensor<T>  &src,
+                                             float                   epsilon = 1e-8,
+                                             const QuantizationInfo &oq_info = QuantizationInfo());
 
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MEAN_STDDEV_NORMALIZATION_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_MEANSTDDEVNORMALIZATIONLAYER_H

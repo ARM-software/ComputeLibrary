@@ -1580,7 +1580,8 @@
               "common": [],
               "neon": {
                   "estate64": [
-                      "src/../third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c"
+                      "src/../third_party/kleidiai/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.c",
+                      "src/../third_party/kleidiai/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p8x1biasf32_f32_f32_neon.c"
                   ]
               }
           }
@@ -1591,7 +1592,6 @@
           "common": [
             "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp",
             "src/cpu/kernels/CpuDynamicGemmKernel.cpp",
-            "src/cpu/kernels/CpuDynamicGemmKernelHeuristics.cpp",
             "src/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
             "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp",
             "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp",
@@ -1604,6 +1604,7 @@
             "src/cpu/kernels/CpuGemmLowpMatrixReductionKernel.cpp",
             "src/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.cpp",
             "src/cpu/kernels/CpuGemmLowpOffsetContributionKernel.cpp",
+            "src/cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.cpp",
             "src/cpu/operators/CpuDynamicGemm.cpp",
             "src/cpu/operators/CpuGemm.cpp",
             "src/cpu/operators/CpuGemmLowpOutputStage.cpp",
@@ -1621,6 +1622,7 @@
             "src/runtime/experimental/operators/CpuGemm.cpp",
             "src/runtime/experimental/operators/CpuGemmConv2d.cpp",
             "src/runtime/experimental/operators/CpuGemmDirectConv2d.cpp",
+            "src/runtime/experimental/operators/CpuMeanStdDevNormalization.cpp",
             "src/runtime/experimental/operators/CpuMul.cpp",
             "src/runtime/experimental/operators/CpuQuantize.cpp",
             "src/runtime/experimental/operators/CpuSoftmax.cpp",
@@ -1717,13 +1719,19 @@
               "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_8x4/a55.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_8x4/generic.cpp",
               "src/cpu/kernels/gemm_matrix_mul/generic/neon/impl.cpp",
+              "src/cpu/kernels/gemmlowp/generic/neon/int32.cpp",
               "src/cpu/kernels/gemm_matrix_add/generic/neon/impl.cpp"
             ],
-            "fp32":["src/cpu/kernels/gemm_matrix_mul/generic/neon/fp32.cpp",
+            "fp32":["src/cpu/kernels/dynamic_gemm/generic/neon/fp32.cpp",
+                    "src/cpu/kernels/gemm_matrix_mul/generic/neon/fp32.cpp",
+                    "src/cpu/kernels/gemmlowp/generic/neon/fp32.cpp",
                     "src/cpu/kernels/gemm_matrix_add/generic/neon/fp32.cpp"],
             "fp16":["src/cpu/kernels/gemm_matrix_mul/generic/neon/fp16.cpp",
+                    "src/cpu/kernels/gemmlowp/generic/neon/fp16.cpp",
                     "src/core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/a55r1.cpp",
                     "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
+                    "src/core/NEON/kernels/arm_gemm/gemm_s8fp16.cpp",
+                    "src/core/NEON/kernels/arm_gemm/quantized-fp16.cpp",
                     "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp16_mla_6x32/generic.cpp",
                     "src/core/NEON/kernels/arm_gemm/kernels/a64_ffinterleaved_fp16_mla_8x24/generic.cpp",
                     "src/core/NEON/kernels/arm_gemm/mergeresults-fp16.cpp",
@@ -1962,7 +1970,8 @@
       "MeanStdDevNormalize": {
         "files": {
           "common": [
-            "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.cpp",
+            "src/cpu/operators/CpuMeanStdDevNormalization.cpp",
+            "src/cpu/kernels/CpuMeanStdDevNormalizationKernel.cpp",
             "src/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.cpp"
           ],
         "neon":{

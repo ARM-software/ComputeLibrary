@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -137,7 +137,6 @@ void NEFullyConnectedLayer::prepare()
     if (!_impl->is_prepared)
     {
         allocate_tensors(_impl->aux_mem_req, _impl->workspace);
-        MemoryGroupResourceScope scope_mg(_impl->memory_group);
         _impl->op->prepare(_impl->run_pack);
 
         // Release temporary tensors that are only used in prepare stage

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2024 Arm Limited.
+ * Copyright (c) 2020-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 
 #include <memory>
 
@@ -51,10 +50,7 @@ class NEGEMMConv2d : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager);
-    NEGEMMConv2d() : NEGEMMConv2d(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConv2d(const NEGEMMConv2d &) = delete;
     /** Default move constructor */

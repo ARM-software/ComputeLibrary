@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,14 @@
  */
 #include "src/cpu/operators/CpuDynamicGemm.h"
 
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
+#include "src/common/utils/Log.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/CpuDynamicGemmKernel.h"
+
+using namespace arm_compute::experimental;
 
 namespace arm_compute
 {
@@ -38,14 +45,13 @@ void CpuDynamicGemm::configure(const ITensorInfo *a,
                                float              beta,
                                const GEMMInfo    &gemm_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(c);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(gemm_info);
+    ARM_COMPUTE_ERROR_THROW_ON(CpuDynamicGemm::validate(a, b, c, d, alpha, beta, gemm_info));
+    ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, gemm_info);
+
+    _kernel = std::make_unique<kernels::CpuDynamicGemmKernel>();
+    _kernel->configure(a, b, c, d, alpha, beta, Count, gemm_info);
+
+    _reshape_b_and_c_only_on_first_run = b->are_values_constant() && c->are_values_constant();
 }
 
 Status CpuDynamicGemm::validate(const ITensorInfo *a,
@@ -56,20 +62,40 @@ Status CpuDynamicGemm::validate(const ITensorInfo *a,
                                 float              beta,
                                 const GEMMInfo    &gemm_info)
 {
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(c);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(gemm_info);
-
-    return Status{ErrorCode::RUNTIME_ERROR, "Operator not implemented yet."};
+    return kernels::CpuDynamicGemmKernel::validate(a, b, c, d, alpha, beta, gemm_info);
 }
 
 void CpuDynamicGemm::run(ITensorPack &tensors)
 {
-    ARM_COMPUTE_UNUSED(tensors);
+    ARM_COMPUTE_EXIT_ON_MSG(tensors.empty(), "No inputs provided");
+
+    kernels::CpuDynamicGemmKernel *dynamic_gemm = _kernel.get();
+    dynamic_gemm->prepare(tensors, _reuse_b);
+
+    if (_reshape_b_and_c_only_on_first_run)
+    {
+        _reuse_b = true;
+    }
+
+    Window window           = dynamic_gemm->window();
+    auto   split_dimensions = dynamic_gemm->get_split_dimension_hint();
+
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimensions, window, tensors);
+}
+
+const experimental::MemoryRequirements &CpuDynamicGemm::workspace_dynamic(const ITensorPack &tensors) const
+{
+    ARM_COMPUTE_ERROR_ON(tensors.empty());
+    // Update memory requirements with those from the kernel.
+    _aux_mem.reserve(Count + kernels::CpuDynamicGemmKernel::max_workspace_count());
+    _aux_mem.resize(Count);
+
+    for (MemoryInfo mi : _kernel->workspace(tensors))
+    {
+        _aux_mem.push_back(mi);
+    }
+
+    return _aux_mem;
 }
 
 } // namespace cpu

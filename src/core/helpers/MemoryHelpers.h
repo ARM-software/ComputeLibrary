@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,6 +135,41 @@ void allocate_tensors(const experimental::MemoryRequirements &mem_reqs, Workspac
                 auto tensor = ws.tensor.get();
                 if (!tensor->allocator()->is_allocated())
                 {
+                    tensor->allocator()->allocate();
+                }
+                break;
+            }
+        }
+    }
+}
+
+/** Reallocate tensors of a managed workspace based on new memory requirements.
+ *
+ * @note Matching is based on the slot.
+ * @note The lifetime is expected to remain the same; only the size and alignment are affected.
+ */
+template <typename TensorType>
+void reallocate_tensors(const experimental::MemoryRequirements &mem_reqs, WorkspaceData<TensorType> &workspace)
+{
+    for (auto &ws : workspace)
+    {
+        auto      tensor = ws.tensor.get();
+        const int slot   = ws.slot;
+        for (auto &m : mem_reqs)
+        {
+            if (m.slot == slot)
+            {
+                ARM_COMPUTE_ERROR_ON(ws.lifetime != m.lifetime);
+                size_t current_size = tensor->info()->total_size();
+                if (!tensor->allocator()->is_allocated() || current_size < m.size ||
+                    tensor->allocator()->alignment() != m.alignment)
+                {
+                    if (tensor->allocator()->is_allocated())
+                    {
+                        tensor->allocator()->free();
+                    }
+                    const ITensorInfo &info = tensor->info()->set_tensor_shape(TensorShape{m.size});
+                    tensor->allocator()->init(info, m.alignment);
                     tensor->allocator()->allocate();
                 }
                 break;

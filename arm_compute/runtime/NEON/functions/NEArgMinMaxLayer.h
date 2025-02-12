@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
 namespace arm_compute
@@ -49,10 +48,7 @@ class NEArgMinMaxLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager);
-    NEArgMinMaxLayer() : NEArgMinMaxLayer(MemoryManagerOnDemand::make_default())
-    {
-    }
+    NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEArgMinMaxLayer(const NEArgMinMaxLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

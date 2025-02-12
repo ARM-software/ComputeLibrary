@@ -29,7 +29,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -58,10 +57,7 @@ namespace cpu
 class CpuDirectConv2d : public ICpuOperator
 {
 public:
-    CpuDirectConv2d(std::shared_ptr<IMemoryManager> memory_manager);
-    CpuDirectConv2d() : CpuDirectConv2d(MemoryManagerOnDemand::make_default())
-    {
-    }
+    CpuDirectConv2d(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     ~CpuDirectConv2d();
     /** Set the input, weights, biases and output tensors.
      *

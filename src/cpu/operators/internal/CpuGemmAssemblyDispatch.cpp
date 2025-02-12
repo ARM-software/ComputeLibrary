@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -137,34 +137,6 @@ Params extract_parameters(const ITensorInfo *a, const ITensorInfo *b, const ITen
     return p;
 }
 
-IScheduler::Hints scheduling_hint_heuristic(arm_gemm::GemmMethod method, DataType data_type)
-{
-    // Schedule assembly kernel
-    const int         granule_threshold = 200;
-    IScheduler::Hints scheduling_hint   = IScheduler::Hints(Window::DimX);
-    if (method == arm_gemm::GemmMethod::GEMM_INTERLEAVED && data_type == DataType::F32)
-    {
-        scheduling_hint = IScheduler::Hints(Window::DimX, IScheduler::StrategyHint::DYNAMIC, granule_threshold);
-    }
-    else if (method == arm_gemm::GemmMethod::GEMM_INTERLEAVED_2D &&
-             (data_type == DataType::F32 || data_type == DataType::F16 || data_type == DataType::U8 ||
-              data_type == DataType::S8))
-    {
-        //GEMM_INTERLEAVED supports 2D parallelism, IScheduler::split_dimensions_all signals to parallelise over all window dimensions
-        scheduling_hint =
-            IScheduler::Hints(IScheduler::split_dimensions_all, IScheduler::StrategyHint::STATIC, granule_threshold);
-    }
-    else if (method == arm_gemm::GemmMethod::QUANTIZE_WRAPPER_2D &&
-             (data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED))
-    {
-        //special case for QASYMM8 to support 2D parallelism, scheduler here may be tweaked differently compared to FP32 case
-        scheduling_hint =
-            IScheduler::Hints(IScheduler::split_dimensions_all, IScheduler::StrategyHint::STATIC, granule_threshold);
-    }
-
-    return scheduling_hint;
-}
-
 /** Fallback in case ACL doesn't have a function */
 template <typename TypeInput, typename TypeWeight, typename TypeOutput, class OutputStage = arm_gemm::Nothing>
 class Fallback : public CpuGemmAssemblyDispatch::IFallback
@@ -300,8 +272,6 @@ private:
     bool _is_prepared{false};
     /** GEMM meta-data */
     AsmGemmInfo _gemm_info{};
-    /** GEMM kernel description */
-    arm_gemm::KernelDescription _kernel_info{};
     /** Per channel quantization shifts */
     std::vector<int32_t> _shifts{};
     std::vector<int32_t> right_shifts{};
@@ -760,7 +730,20 @@ void Fallback<TypeInput, TypeWeight, TypeOutput, OutputStage>::run(ITensorPack &
         }
     }
 
-    const auto scheduling_hint = scheduling_hint_heuristic(_kernel_info.method, d->info()->data_type());
+    // The scheduling_hint needs to be compatible with the window exposed by arm_gemm
+    // The default case is when we split among the X dimension
+    IScheduler::Hints scheduling_hint = IScheduler::Hints(Window::DimX);
+    // If arm_gemm exposes a 2D window, perform 2D scheduling
+    if (_optimised_kernel->window().num_iterations(Window::DimY) > 1 &&
+        _optimised_kernel->window().num_iterations(Window::DimX) > 1)
+    {
+        scheduling_hint = IScheduler::Hints(IScheduler::split_dimensions_all);
+    }
+    // Split among Y
+    else if (_optimised_kernel->window().num_iterations(Window::DimY) > 1)
+    {
+        scheduling_hint = IScheduler::Hints(Window::DimY);
+    }
 
     // Set workspace if needed and reset number of threads as buffer manager gets re-created with max_threads
     CpuAuxTensorHandler workspace(offset_int_vec(AsmGemmWorkspace), _workspace_info, tensors, false);
@@ -1065,6 +1048,7 @@ Status CpuGemmAssemblyDispatch::validate(
     ARM_COMPUTE_UNUSED(c, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(info.reshape_b_only_on_first_run),
                                     "Assembly kernel will not be executed when reshape_b_only_on_first_run is false");
@@ -1078,6 +1062,7 @@ Status CpuGemmAssemblyDispatch::validate(
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(
         b, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::S8,
         DataType::BFLOAT16, DataType::F16, DataType::F32);
+
     if (is_data_type_quantized_per_channel(b->data_type()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8_SIGNED, DataType::S8);
@@ -1176,6 +1161,12 @@ void CpuGemmAssemblyDispatch::configure(
             {
                 create_arm_gemm_dequant<int8_t, int8_t, float>(_arm_gemm, a, b, c, d, act, info);
             }
+#if defined(ENABLE_FP16_KERNELS)
+            else if (d->data_type() == DataType::F16)
+            {
+                create_arm_gemm_dequant<int8_t, int8_t, float16_t>(_arm_gemm, a, b, c, d, act, info);
+            }
+#endif /* defined(ENABLE_FP16_KERNELS) */
             else
             {
                 create_arm_gemm_quant<int8_t, int8_t, int8_t>(_arm_gemm, a, b, c, d, act, info);
