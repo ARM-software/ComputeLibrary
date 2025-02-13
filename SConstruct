@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2024 Arm Limited.
+# Copyright (c) 2016-2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -142,6 +142,7 @@ vars.AddVariables(
     BoolVariable("undefined_sanitizer", "Enable UndefinedBehaviorSanitizer", False),
     BoolVariable("thread_sanitizer", "Enable ThreadSanitizer", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
+    ("extra_cc_flags", "Extra CC flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
     ("specs_file", "Specs file to use (e.g. rdimon.specs)", ""),
@@ -632,6 +633,7 @@ if env['thread_sanitizer']:
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
+env.Append(CCFLAGS = env['extra_cc_flags'])
 env.Append(LINKFLAGS = env['extra_link_flags'])
 
 if env['multi_isa'] and env['os'] == 'macos':
