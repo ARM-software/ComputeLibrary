@@ -130,7 +130,6 @@ vars.AddVariables(
             ├── datasets
             ├── fixtures
             └── Neon\n""", "", PathVariable.PathAccept),
-    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files. This option also enables opencl=1 on which it has a direct dependency.", False),
     BoolVariable("fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     BoolVariable("mapfile", "Generate a map file", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
@@ -222,10 +221,6 @@ if env['os'] == 'bare_metal':
     if env['cppthreads'] or env['openmp']:
          print("ERROR: OpenMP and C++11 threads not supported in bare_metal. Use cppthreads=0 openmp=0")
          Exit(1)
-
-if env['experimental_dynamic_fusion']:
-    # Dynamic Fusion on GPU has a direct dependency on OpenCL and Compute Kernel Writer
-    env['opencl'] = 1
 
 if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
     print("Compressed kernels are supported only for android builds")
@@ -429,50 +424,6 @@ env['RANLIB'] = toolchain_prefix + "ranlib"
 print("Using compilers:")
 print("CC", env['CC'])
 print("CXX", env['CXX'])
-
-"""Build the Compute Kernel Writer subproject"""
-if env['experimental_dynamic_fusion']:
-    # Strip ccache prefix from CC and CXX to obtain only the target triple
-    CKW_CC = env['CC'].replace(env['compiler_cache'] + " ", "")
-    CKW_CXX = env['CXX'].replace(env['compiler_cache'] + " ", "")
-    CKW_CCACHE = 1 if env['compiler_cache'] else 0
-
-    CKW_BUILD_TYPE = "Debug" if env['debug'] else "Release"
-
-    CKW_ENABLE_OPENCL = env['opencl']
-    CKW_ENABLE_ASSERTS = env['debug'] or env['asserts']
-
-    CKW_PROJECT_DIR = Dir('.').path + "/compute_kernel_writer"
-    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/include"
-    CKW_BUILD_DIR = build_path.replace("#", "")
-
-    CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" " \
-                    "-S {CKW_PROJECT_DIR} -B {CKW_BUILD_DIR} " \
-                    "-DCMAKE_BUILD_TYPE={CKW_BUILD_TYPE} " \
-                    "-DCKW_ENABLE_OPENCL=ON " \
-                    "-DCKW_ENABLE_ASSERTS={CKW_ENABLE_ASSERTS} " \
-                    "-DCKW_CCACHE={CKW_CCACHE} ".format(CKW_CC=CKW_CC,
-                                                        CKW_CXX=CKW_CXX,
-                                                        CKW_PROJECT_DIR=CKW_PROJECT_DIR,
-                                                        CKW_BUILD_DIR=CKW_BUILD_DIR,
-                                                        CKW_BUILD_TYPE=CKW_BUILD_TYPE,
-                                                        CKW_ENABLE_OPENCL=CKW_ENABLE_OPENCL,
-                                                        CKW_ENABLE_ASSERTS=CKW_ENABLE_ASSERTS,
-                                                        CKW_CCACHE=CKW_CCACHE
-                                                        )
-
-    # Configure CKW static objects with -fPIC (CMAKE_POSITION_INDEPENDENT_CODE) option to enable linking statically to ACL
-    CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} --target ckw -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
-                                                                                                 NUM_JOBS=GetOption('num_jobs')
-                                                                                                 )
-
-    # Build Compute Kernel Writer Static Library
-    subprocess.check_call(CKW_CMAKE_CONFIGURE_STATIC, stderr=subprocess.STDOUT, shell=True)
-    subprocess.check_call(CKW_CMAKE_BUILD, stderr=subprocess.STDOUT, shell=True)
-
-    # Let ACL know where to find CKW headers
-    env.Append(CPPPATH = CKW_INCLUDE_DIR)
 
 if not GetOption("help"):
     try:
