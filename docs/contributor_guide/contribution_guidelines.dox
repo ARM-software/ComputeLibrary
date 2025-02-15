@@ -523,5 +523,15 @@ At the moment, the Jenkins server is not publicly accessible and for security re
 
 If the pre-commit test fails, the Jenkins job will post a comment on Gerrit with the details about the failure so that the committer will be able to reproduce the error and fix the issue, if any (sometimes there can be infrastructure issues, a test platform disconnecting for example, where the job needs to be retriggered).
 
+@section S5_4_patch_reversion Patch reversion policy
+
+If the contributed patch breaks our regression suite, we either
+- require a fix within the next business day, or
+- revert the offending patch
+
+to keep our main branch healthy.
+
+Please remember that this is done to keep the tip of the main healthy, and such reverts are normal. Our regression suite is comprehensive and might find out issues that might not have been detected before merging. It doesn't mean you did anything wrong, and we welcome your fix.
+
 */
 } // namespace arm_compute
