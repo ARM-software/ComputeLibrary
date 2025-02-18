@@ -1,0 +1,77 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "ci",
+            "generator": "Ninja Multi-Config",
+            "displayName": "CI Build Configuration",
+            "description": "Configuration used in CI to enable examples and testing.",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "ARM_COMPUTE_BUILD_SHARED_LIB": "ON",
+                "ARM_COMPUTE_ENABLE_ASSERTS": "ON",
+                "ARM_COMPUTE_ENABLE_CPPTHREADS": "OFF",
+                "ARM_COMPUTE_ENABLE_OPENMP": "ON",
+                "ARM_COMPUTE_ENABLE_WERROR": "ON",
+                "ARM_COMPUTE_BUILD_EXAMPLES": "ON",
+                "ARM_COMPUTE_BUILD_TESTING": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "generator": "Ninja Multi-Config",
+            "displayName": "Release Build Configuration",
+            "description": "Configuration used for a fully-optimized release build.",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ci",
+            "displayName": "CI Build",
+            "configurePreset": "ci",
+            "configuration": "Release",
+            "description": "Builds the CI configuration."
+        },
+        {
+            "name": "release",
+            "displayName": "Release Build",
+            "configurePreset": "release",
+            "configuration": "Release",
+            "description": "Builds the Release configuration."
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "ci",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ci"
+                },
+                {
+                    "type": "build",
+                    "name": "ci"
+                }
+            ]
+        },
+        {
+            "name": "release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "release"
+                },
+                {
+                    "type": "build",
+                    "name": "release"
+                }
+            ]
+        }
+    ]
+}
