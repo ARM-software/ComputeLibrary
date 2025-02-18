@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021-2025 Arm Limited
+# Copyright (c) 2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -20,61 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Library builds
-/build/
-bazel-*
+@PACKAGE_INIT@
 
-# CMake files
-CMakeUserPresets.json
+include("${CMAKE_CURRENT_LIST_DIR}/@ARM_COMPUTE_TARGETS_NAME@.cmake")
 
-# Cscope/Ctags files
-*cscope*
+# Manually re-create the alias for installed projects
+if(NOT TARGET @PROJECT_NAME@::Core)
+    add_library(@PROJECT_NAME@::Core ALIAS @PROJECT_NAME@::arm_compute)
+endif()
 
-# Text files
-*.txt
-!CMakeLists.txt
-*.xml
-*.embed
-*.diff
-
-# Generated Android bp file
-Generated_Android.bp
-
-# Vim swap files
-*.swp
-
-# Logs
-*.log
-
-### C++ ###
-# Object files
-*.o
-
-# Dynamic libraries
-*.so
-
-# Static libraries
-*.a
-
-# Executable binaries
-*.out
-
-### Python ###
-# Byte-compiled files
-*.py[cod]
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-
-# IDE folders
-.idea/
-.vscode/
-.cache/
+# Manually re-create the alias for installed projects
+if(NOT TARGET @PROJECT_NAME@::Graph)
+    add_library(@PROJECT_NAME@::Graph ALIAS @PROJECT_NAME@::arm_compute_graph)
+endif()

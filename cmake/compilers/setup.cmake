@@ -23,6 +23,14 @@
 include(${CMAKE_CURRENT_LIST_DIR}/gcc.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/clang.cmake)
 
+# Handle unique library artifacts when using a multi-config generator
+if(CMAKE_GENERATOR MATCHES "Multi-Config")
+  message(STATUS "Using multi-config generator. Will append '_d' to debug libraries")
+  set(CMAKE_DEBUG_POSTFIX "_d")
+else()
+  message(STATUS "Using single-config generator.")
+endif()
+
 # Common definitions for all projects.
 set(
   ARM_COMPUTE_DEFINES
@@ -126,9 +134,3 @@ string(PREPEND ARM_COMPUTE_ARCH -march=)
 string(PREPEND ARM_COMPUTE_CORE_FP16_ARCH -march=)
 string(PREPEND ARM_COMPUTE_SVE_ARCH -march=)
 string(PREPEND ARM_COMPUTE_SVE2_ARCH -march=)
-
-# Remove any CMake additions so we have clean build line.
-set(CMAKE_CXX_FLAGS "" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS_INIT "" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS_DEBUG "" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS_RELEASE "" CACHE STRING "" FORCE)

@@ -59,6 +59,15 @@ set(ARM_COMPUTE_SVE2_ARCH armv8.6-a+sve2+fp16+dotprod CACHE STRING "Architecture
 set(ARM_COMPUTE_C_STANDARD 99 CACHE STRING "C Standard to use for the library.")
 set(ARM_COMPUTE_CXX_STANDARD 14 CACHE STRING "CXX Standard to use for the library.")
 
+# If this is the top-level project and the installation directory hasn't been set, set it
+# to be <project-root>/install/
+if(PROJECT_IS_TOP_LEVEL)
+  if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Install path" FORCE)
+    message(STATUS "CMAKE_INSTALL_PREFIX was not set, using default: ${CMAKE_INSTALL_PREFIX}")
+  endif()
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/configurations.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/compilers/setup.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
@@ -67,12 +76,15 @@ if(ARM_COMPUTE_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
 endif()
 
+# Introduce CMAKE_INSTALL_BINDIR, CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_INCLUDEDIR variables
+include(GNUInstallDirs)
+
 # Set lib build type accordingly
 if(ARM_COMPUTE_BUILD_SHARED_LIB)
-  message(STATUS "Will build the Arm Compute Library with shared libraries.")
+  message(STATUS "Building Arm Compute Library with shared libraries.")
   set(ARM_COMPUTE_LIB_BUILD_TYPE SHARED)
 else()
-  message(STATUS "Will build the Arm Compute Library with static libraries.")
+  message(STATUS "Building Arm Compute Library with static libraries.")
   set(ARM_COMPUTE_LIB_BUILD_TYPE STATIC)
 endif()
 
@@ -176,11 +188,22 @@ add_library(
 # Linking to arm_compute[_graph] should automatically bring includes and dependent libs with it
 foreach(TARGET IN ITEMS arm_compute arm_compute_graph)
   target_link_libraries(${TARGET} PUBLIC ${ARM_COMPUTE_LINK_LIBS})
-  target_include_directories(${TARGET} PUBLIC ${ARM_COMPUTE_PUBLIC_INCLUDE})
+  target_include_directories(${TARGET} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
   set_target_properties(${TARGET} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 endforeach()
 
+# Linking to this target should automatically bring includes and dependent libs with it.
 list(APPEND ARM_COMPUTE_TARGETS arm_compute arm_compute_graph arm_compute_core arm_compute_core_fp16 arm_compute_sve arm_compute_sve2)
+
+# Create an alias targets so that a user can download ArmCompute via FetchContent and
+# still link to ArmCompute::Core and ArmCompute::Graph. Otherwise these targets would not
+# be available at configure-time (as required by FetchContent)
+add_library(${PROJECT_NAME}::Core ALIAS arm_compute)
+add_library(${PROJECT_NAME}::Graph ALIAS arm_compute_graph)
 
 # Library target sources.
 add_subdirectory(src)
@@ -200,6 +223,11 @@ if(ARM_COMPUTE_BUILD_TESTING)
     INCLUDE_DIRECTORIES "${ARM_COMPUTE_PUBLIC_INCLUDE};${ARM_COMPUTE_COMMON_INCLUDE}"
     COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
     LINK_LIBRARIES "arm_compute;arm_compute_graph"
+
+    # Adjusted for relative location of installed arm_compute lib
+    INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"
+    BUILD_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"
+    INSTALL_RPATH_USE_LINK_PATH TRUE
   )
   list(APPEND ARM_COMPUTE_TARGETS arm_compute_validation arm_compute_benchmark)
 endif(ARM_COMPUTE_BUILD_TESTING)
@@ -217,6 +245,10 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
       utils/GraphUtils.cpp
       utils/CommonGraphOptions.cpp
     )
+    target_include_directories(${test_name} PRIVATE
+      $<BUILD_INTERFACE:${ARM_COMPUTE_PUBLIC_INCLUDE}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
   endforeach()
 
   # NEON Examples
@@ -225,6 +257,10 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
       ${test_name}
       "examples/${test_name}.cpp"
       utils/Utils.cpp
+    )
+    target_include_directories(${test_name} PRIVATE
+      $<BUILD_INTERFACE:${ARM_COMPUTE_PUBLIC_INCLUDE}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
   endforeach()
 
@@ -262,11 +298,79 @@ set_target_properties(
 )
 
 # Install libraries
-include(GNUInstallDirs)
 install(
   TARGETS
   ${ARM_COMPUTE_TARGETS}
+  EXPORT ${PROJECT_NAME}Targets
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+# Introduce the functions write_basic_package_version_file(...) and
+# configure_package_config_file(...) into the current workspace
+include(CMakePackageConfigHelpers)
+
+# Set filenames and installation destinations
+set(ARM_COMPUTE_CONFIG_FILE ${PROJECT_NAME}Config.cmake)
+set(ARM_COMPUTE_CONFIG_VERSION_FILE ${PROJECT_NAME}ConfigVersion.cmake)
+set(ARM_COMPUTE_TARGETS_NAME ${PROJECT_NAME}Targets)
+set(ARM_COMPUTE_TARGETS_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARM_COMPUTE_TARGETS_NAME}.cmake")
+set(ARM_COMPUTE_CONFIG_TEMPLATE_FILE "cmake/${ARM_COMPUTE_CONFIG_FILE}.in")
+set(ARM_COMPUTE_CONFIG_OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARM_COMPUTE_CONFIG_FILE}")
+set(ARM_COMPUTE_CONFIG_VERSION_OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARM_COMPUTE_CONFIG_VERSION_FILE}")
+set(ARM_COMPUTE_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+
+# Add all targets to the build-tree export set
+export(
+  EXPORT ${PROJECT_NAME}Targets
+  NAMESPACE ${PROJECT_NAME}::
+  FILE "${ARM_COMPUTE_TARGETS_FILE}"
+)
+
+# Install the exported targets to allow other projects to find this project with find_package()
+install(
+  EXPORT ${PROJECT_NAME}Targets
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION "${ARM_COMPUTE_CONFIG_INSTALL_DIR}"
+)
+
+# Install header files
+# N.B. The absence of a trailing slash is *important*. Do not add one.
+install(
+  DIRECTORY
+  "${CMAKE_CURRENT_LIST_DIR}/include/"
+  "${CMAKE_CURRENT_LIST_DIR}/arm_compute"
+  "${CMAKE_CURRENT_LIST_DIR}/utils"
+  "${CMAKE_CURRENT_LIST_DIR}/support"
+  "${CMAKE_CURRENT_LIST_DIR}/third_party/kleidiai"
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Install the header files from the src/ directory (only) preserving the folder structure
+install(
+  DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/src/"
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/src"
+  FILES_MATCHING
+  PATTERN "*.h" PATTERN "*.hpp"
+)
+
+# Generate the *Config.cmake file for find_package()
+configure_package_config_file(
+  "${ARM_COMPUTE_CONFIG_TEMPLATE_FILE}"
+  "${ARM_COMPUTE_CONFIG_OUTPUT_FILE}"
+  INSTALL_DESTINATION ${ARM_COMPUTE_CONFIG_INSTALL_DIR}
+)
+
+# Configure *ConfigVersion.cmake which exports the version info
+write_basic_package_version_file(
+  "${ARM_COMPUTE_CONFIG_VERSION_OUTPUT_FILE}"
+  VERSION ${${PROJECT_NAME}_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+# Install the generated *Config.cmake for find_package()
+install(
+  FILES "${ARM_COMPUTE_CONFIG_OUTPUT_FILE}" "${ARM_COMPUTE_CONFIG_VERSION_OUTPUT_FILE}"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
