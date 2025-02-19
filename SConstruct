@@ -80,7 +80,6 @@ def update_data_type_layout_flags(env, data_types, data_layouts):
         env.Append(CXXFLAGS = ['-DENABLE_QSYMM16_KERNELS'])
     if any(i in data_types for i in ['all', 'integer']):
         env.Append(CXXFLAGS = ['-DENABLE_INTEGER_KERNELS'])
-
     # Manage data-layouts
     if any(i in data_layouts for i in ['all', 'nhwc']):
         env.Append(CXXFLAGS = ['-DENABLE_NHWC_KERNELS'])
@@ -104,7 +103,7 @@ vars.AddVariables(
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
-    BoolVariable("multi_isa", "Build Multi ISA binary version of library. Works for armv8a without the support for FP16 vector arithmetic. Use armv8.2-a or beyond to enable FP16 vector arithmetic support", False),
+    BoolVariable("multi_isa", "Build Multi ISA binary version of library.", False),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
@@ -325,7 +324,7 @@ if env['multi_isa']:
             if "disable_mmla_fp" not in env['custom_options']:
                 env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
 
-        env.Append(CCFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
 
 else: # NONE "multi_isa" builds
 
@@ -341,7 +340,7 @@ else: # NONE "multi_isa" builds
         elif 'armv8.6-a-sve' == env['arch']:
             env.Append(CCFLAGS = ['-march=armv8.6-a+sve'])
         elif 'armv8.6-a' == env['arch']:
-            env.Append(CCFLAGS = ['-march=armv8.6-a+fp16'])
+            env.Append(CXXFLAGS = ['-march=armv8.6-a+fp16'])
 
         env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16','ARM_COMPUTE_ENABLE_FP16'])
         if "disable_mmla_fp" not in env['custom_options']:
@@ -349,13 +348,13 @@ else: # NONE "multi_isa" builds
     elif 'v8' in env['arch']:
         # Preserve the V8 archs for non-multi-ISA variants
         if 'sve2' in env['arch']:
-            env.Append(CCFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
         elif 'sve' in env['arch']:
-            env.Append(CCFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
         elif 'armv8r64' in env['arch']:
             env.Append(CCFLAGS = ['-march=armv8.4-a'])
         elif 'v8.' in env['arch']:
-            env.Append(CCFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
         else:
             env.Append(CCFLAGS = ['-march=armv8-a'])
 

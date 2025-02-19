@@ -93,14 +93,17 @@ Status CpuGemmAssemblyDispatch::validate(
     bool bf16_ok        = ((a->data_type() == DataType::BFLOAT16 && b->data_type() == DataType::BFLOAT16) ||
                     b->data_type() == DataType::BFLOAT16) &&
                    (d->data_type() == DataType::BFLOAT16 || d->data_type() == DataType::F32);
+    bool f16_ok =
+        ((a->data_type() == DataType::F16 && b->data_type() == DataType::F16) || b->data_type() == DataType::F16) &&
+        (d->data_type() == DataType::F16 || d->data_type() == DataType::F32);
 
     bool fixed_format_dtype_ok =
         (!gemm_info.fixed_format() ||
          (a->data_type() == DataType::F32 && b->data_type() == DataType::F32 && d->data_type() == DataType::F32) ||
-         (a->data_type() == DataType::F16 && b->data_type() == DataType::F16 && d->data_type() == DataType::F16) ||
-         bf16_ok);
+         bf16_ok || f16_ok);
 
-    if (!((a_data_type_ok && b_data_type_ok && c_data_type_ok && d_data_type_ok && fixed_format_dtype_ok) || bf16_ok))
+    if (!((a_data_type_ok && b_data_type_ok && c_data_type_ok && d_data_type_ok && fixed_format_dtype_ok) || bf16_ok ||
+          f16_ok))
     {
         return Status(ErrorCode::RUNTIME_ERROR, "datatype is not supported");
     }

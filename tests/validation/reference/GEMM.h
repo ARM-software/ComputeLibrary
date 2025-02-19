@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, 2024 Arm Limited.
+ * Copyright (c) 2017-2019, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,8 +38,8 @@ namespace reference
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
 SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta);
 
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> gemm_mixed_precision(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta);
+template <typename T, typename Tout = T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
+SimpleTensor<Tout> gemm_mixed_precision(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta);
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
 void gemm_accumulate(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta, SimpleTensor<T> &dst);

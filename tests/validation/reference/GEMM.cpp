@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,13 +107,13 @@ gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &
     return dst;
 }
 
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> gemm_mixed_precision(
+template <typename T, typename Tout, typename std::enable_if<is_floating_point<T>::value, int>::type>
+SimpleTensor<Tout> gemm_mixed_precision(
     const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta)
 {
     // GEMM mixed-precision combines F32 accumulators with F16 multiplications
     // Create reference
-    SimpleTensor<T> dst{c.shape(), c.data_type(), 1};
+    SimpleTensor<Tout> dst{c.shape(), std::is_same<Tout, float>::value ? DataType::F32 : c.data_type(), 1};
 
     // Compute reference
     const int M = a.shape().y();
@@ -172,7 +172,7 @@ SimpleTensor<T> gemm_mixed_precision(
 
                     // Finalize the result: alpha * A * B + beta * C
                     dst[base_addr_c + col + row * N] =
-                        static_cast<T>(alpha * acc + beta * c[base_addr_c + col + row * N]);
+                        static_cast<Tout>(alpha * acc + beta * c[base_addr_c + col + row * N]);
                 }
             }
         }
@@ -192,11 +192,12 @@ void gemm_accumulate(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
 template SimpleTensor<bfloat16> gemm(const SimpleTensor<bfloat16> &a, const SimpleTensor<bfloat16> &b, const SimpleTensor<bfloat16> &c, float alpha, float beta);
 template SimpleTensor<float> gemm(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta);
 template SimpleTensor<half> gemm(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
-
 template void gemm_accumulate(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta, SimpleTensor<float> &dst);
 template void gemm_accumulate(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta, SimpleTensor<half> &dst);
 
+template SimpleTensor<float> gemm_mixed_precision<half>(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
 template SimpleTensor<half> gemm_mixed_precision(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
+
 } // namespace reference
 } // namespace validation
 } // namespace test

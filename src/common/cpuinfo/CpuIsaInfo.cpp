@@ -37,6 +37,7 @@
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP   (1 << 10)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDDP   (1 << 20)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP_SVE       (1 << 22)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDFHM  (1 << 23)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVE2     (1 << 1)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEI8MM  (1 << 9)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEF32MM (1 << 10)
@@ -69,6 +70,7 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
     // High-level SIMD support
     isa.neon = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMD);
     isa.sve  = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_SVE);
+    isa.fhm  = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDFHM);
     isa.sve2 = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVE2);
 
     // Detection of SME from type HWCAP2 in the auxillary vector
@@ -106,6 +108,7 @@ void decode_regs(CpuIsaInfo    &isa,
     // High-level SIMD support
     isa.neon = (((pfr0 >> 20) & 0xf) <= 1);
     isa.sve  = is_supported(pfr0, 32);
+    isa.fhm  = is_supported(isar0, 48);
     isa.sve2 = is_supported(svefr0, 0);
     isa.sme  = is_supported(pfr1, 24);
     isa.sme2 = (((pfr1 >> 24) & 0xf) > 1);

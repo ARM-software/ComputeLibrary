@@ -1019,10 +1019,20 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
 
 #if defined(ENABLE_FP16_KERNELS)
         case DataType::F16:
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-                !(arm_gemm::has_opt_gemm<float16_t, float16_t, float16_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args,
+            if (d->data_type() == DataType::F16)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                    !(arm_gemm::has_opt_gemm<float16_t, float16_t, float16_t, arm_gemm::Nothing>(arm_gemm_expected_wf,
+                                                                                                 args, {})),
+                    "We could not find an optimized kernel for F16 input and F16 output");
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                    !(arm_gemm::has_opt_gemm<float16_t, float16_t, float, arm_gemm::Nothing>(arm_gemm_expected_wf, args,
                                                                                              {})),
-                "We could not find an optimized kernel for F16 input and F16 output");
+                    "We could not find an optimized kernel for F16 input and F32 output");
+            }
             break;
 #endif /* ENABLE_FP16_KERNELS */
         default:
@@ -1070,8 +1080,9 @@ Status CpuGemmAssemblyDispatch::validate(
     }
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::F32 && d->data_type() != DataType::F32,
                                     "Only F32 output supported for F32 input");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::F16 && d->data_type() != DataType::F16,
-                                    "Only F16 output supported for F16 input");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::F16 &&
+                                        (d->data_type() != DataType::F32 && d->data_type() != DataType::F16),
+                                    "Only F32/F16 output supported for F16 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::BFLOAT16 &&
                                         (d->data_type() != DataType::F32 && d->data_type() != DataType::BFLOAT16),
                                     "Only F32/BFLOAT16 output supported for BFLOAT16 input");
@@ -1179,7 +1190,14 @@ void CpuGemmAssemblyDispatch::configure(
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 #ifdef ENABLE_FP16_KERNELS
         case DataType::F16:
-            create_arm_gemm<float16_t, float16_t, float16_t>(_arm_gemm, a, b, c, d, act, info);
+            if (d->data_type() == DataType::F16)
+            {
+                create_arm_gemm<float16_t, float16_t, float16_t>(_arm_gemm, a, b, c, d, act, info);
+            }
+            else
+            {
+                create_arm_gemm<float16_t, float16_t, float>(_arm_gemm, a, b, c, d, act, info);
+            }
             break;
 #endif /* ENABLE_FP16_KERNELS */
         default:

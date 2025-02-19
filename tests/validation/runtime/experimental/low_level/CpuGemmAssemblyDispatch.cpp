@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -237,6 +237,7 @@ DATA_TEST_CASE(ValidateAllDataTypes,
 
     const auto supports = {
         std::make_tuple(DataType::F32, DataType::F32, DataType::F32),
+        std::make_tuple(DataType::F16, DataType::F16, DataType::F32),
         std::make_tuple(DataType::F16, DataType::F16, DataType::F16),
         std::make_tuple(DataType::BFLOAT16, DataType::BFLOAT16, DataType::BFLOAT16),
         std::make_tuple(DataType::BFLOAT16, DataType::BFLOAT16, DataType::F32),
@@ -253,6 +254,9 @@ DATA_TEST_CASE(ValidateAllDataTypes,
 
 template <typename T>
 using CpuGemmAssemblyDispatchFixture = CpuGemmAssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T>;
+
+template <typename T>
+using CpuGemmDstF32AssemblyDispatchFixture = CpuGemmDstF32AssemblyDispatchValidationFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T>;
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 template <typename T>
@@ -285,7 +289,9 @@ DATA_TEST_CASE(ValidateAccumulate,
 }
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
+
 TEST_SUITE(FP16)
+
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CpuGemmAssemblyDispatchFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
@@ -336,6 +342,57 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
+
+TEST_SUITE(F32Dst)
+
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmDstF32AssemblyDispatchFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMDataset(),
+                            make("data_type", DataType::F16),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                            ActivationLayerInfo(),
+                            ActivationLayerInfo(ActivationFunction::RELU),
+                            ActivationLayerInfo(ActivationFunction::BOUNDED_RELU, 1.f),
+                            ActivationLayerInfo(ActivationFunction::LU_BOUNDED_RELU, 1.f)
+                        })))
+{
+    if(CPUInfo::get().has_fp16() && CPUInfo::get().has_fhm())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 or FHM vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CpuGemmDstF32AssemblyDispatchFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeGEMMDataset(),
+                            make("data_type", DataType::F16),
+                            make("Pretranspose_B", {false, true}),
+                            make("ActivationInfo", {
+                            ActivationLayerInfo()
+                        })))
+{
+    if(CPUInfo::get().has_fp16() && CPUInfo::get().has_fhm())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 or FHM vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+TEST_SUITE_END() // F32Dst
 
 TEST_SUITE_END() // FP16
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
