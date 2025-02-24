@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARGMINMAXLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEARGMINMAXLAYER_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"

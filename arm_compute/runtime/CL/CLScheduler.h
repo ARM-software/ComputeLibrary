@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022, 2024 Arm Limited.
+ * Copyright (c) 2016-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_RUNTIME_CL_CLSCHEDULER_H
 #define ACL_ARM_COMPUTE_RUNTIME_CL_CLSCHEDULER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLTypes.h"

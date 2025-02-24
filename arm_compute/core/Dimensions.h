@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DIMENSIONS_H
-#define ARM_COMPUTE_DIMENSIONS_H
+#ifndef ACL_ARM_COMPUTE_CORE_DIMENSIONS_H
+#define ACL_ARM_COMPUTE_CORE_DIMENSIONS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 
@@ -289,4 +293,4 @@ inline bool operator!=(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
     return !(lhs == rhs);
 }
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_DIMENSIONS_H*/
+#endif // ACL_ARM_COMPUTE_CORE_DIMENSIONS_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_NEDEVICEBACKEND_H
-#define ARM_COMPUTE_GRAPH_NEDEVICEBACKEND_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NEDEVICEBACKEND_H
+#define ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NEDEVICEBACKEND_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/IDeviceBackend.h"
 #include "arm_compute/runtime/Allocator.h"
@@ -60,4 +64,4 @@ private:
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute
-#endif //ARM_COMPUTE_GRAPH_NEDEVICEBACKEND_H
+#endif // ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NEDEVICEBACKEND_H

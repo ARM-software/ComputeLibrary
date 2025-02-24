@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H
-#define ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPDETECTIONPOSTPROCESSLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPDETECTIONPOSTPROCESSLAYER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
@@ -122,4 +126,4 @@ private:
     const ITensor *_input_scores_to_use;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPDETECTIONPOSTPROCESSLAYER_H

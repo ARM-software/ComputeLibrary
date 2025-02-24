@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NE_SLICE_H
-#define ARM_COMPUTE_NE_SLICE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESLICE_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESLICE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/INEOperator.h"
@@ -135,4 +139,4 @@ public:
 };
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NE_SLICE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESLICE_H

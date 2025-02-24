@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLSPLIT_H
-#define ARM_COMPUTE_CLSPLIT_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSPLIT_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSPLIT_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
@@ -55,4 +59,4 @@ public:
     void run() override;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLSPLIT_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSPLIT_H

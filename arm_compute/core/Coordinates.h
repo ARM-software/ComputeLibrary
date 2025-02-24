@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_COORDINATES_H
-#define ARM_COMPUTE_COORDINATES_H
+#ifndef ACL_ARM_COMPUTE_CORE_COORDINATES_H
+#define ACL_ARM_COMPUTE_CORE_COORDINATES_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
@@ -57,4 +61,4 @@ public:
     ~Coordinates() = default;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_COORDINATES_H*/
+#endif // ACL_ARM_COMPUTE_CORE_COORDINATES_H

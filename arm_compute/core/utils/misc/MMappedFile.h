@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_MISC_MMAPPED_FILE_H
-#define ARM_COMPUTE_MISC_MMAPPED_FILE_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_MMAPPEDFILE_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_MISC_MMAPPEDFILE_H
+
+/** @file
+ * @publicapi
+ */
 
 #if !defined(_WIN64) && !defined(BARE_METAL)
 
@@ -107,4 +111,4 @@ private:
 } // namespace arm_compute
 #endif // !defined(_WIN64) &&!defined(BARE_METAL)
 
-#endif /* ARM_COMPUTE_MISC_MMAPPED_FILE_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_MISC_MMAPPEDFILE_H

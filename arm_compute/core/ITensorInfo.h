@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_CORE_ITENSORINFO_H
 #define ACL_ARM_COMPUTE_CORE_ITENSORINFO_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_CORE_CORETYPES
-#define ACL_ARM_COMPUTE_CORE_CORETYPES
+#ifndef ACL_ARM_COMPUTE_CORE_CORETYPES_H
+#define ACL_ARM_COMPUTE_CORE_CORETYPES_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Strides.h"
 
@@ -349,4 +353,4 @@ enum class WeightFormat
 };
 
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_CORE_CORETYPES */
+#endif // ACL_ARM_COMPUTE_CORE_CORETYPES_H

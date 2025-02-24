@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_CORE_GPUTARGET_H
 #define ACL_ARM_COMPUTE_CORE_GPUTARGET_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "support/Traits.h"
 

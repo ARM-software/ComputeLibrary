@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H
-#define ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFUSEBATCHNORMALIZATION_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFUSEBATCHNORMALIZATION_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -150,4 +154,4 @@ private:
     std::unique_ptr<CLFuseBatchNormalizationKernel> _fuse_bn_kernel;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFUSEBATCHNORMALIZATION_H

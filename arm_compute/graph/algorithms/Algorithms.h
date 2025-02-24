@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_ALGORITHMS_H
-#define ARM_COMPUTE_GRAPH_ALGORITHMS_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_ALGORITHMS_ALGORITHMS_H
+#define ACL_ARM_COMPUTE_GRAPH_ALGORITHMS_ALGORITHMS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/algorithms/TopologicalSort.h"
 
-#endif /* ARM_COMPUTE_GRAPH_ALGORITHMS_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_ALGORITHMS_ALGORITHMS_H

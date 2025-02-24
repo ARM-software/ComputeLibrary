@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_VALIDATEHELPERS_H
 #define ACL_ARM_COMPUTE_GRAPH_BACKENDS_VALIDATEHELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"

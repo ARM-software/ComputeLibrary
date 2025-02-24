@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLTUNER_TYPES_H
-#define ARM_COMPUTE_CLTUNER_TYPES_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_CLTUNERTYPES_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_CLTUNERTYPES_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Utility.h"
@@ -92,4 +96,4 @@ inline ::std::istream &operator>>(::std::istream &stream, CLTunerMode &tuner_mod
     return stream;
 }
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLTUNER_TYPES_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_CLTUNERTYPES_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_CORE_TYPES_H
 #define ACL_ARM_COMPUTE_CORE_TYPES_H
+
+/** @file
+ * @publicapi
+ */
 
 /** The following symbols have been moved to:
  * half

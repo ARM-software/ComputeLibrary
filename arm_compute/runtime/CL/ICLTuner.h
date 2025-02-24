@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022 Arm Limited.
+ * Copyright (c) 2017-2020, 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ICLTUNER_H
-#define ARM_COMPUTE_ICLTUNER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_ICLTUNER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_ICLTUNER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/experimental/Types.h"
 
@@ -59,4 +63,4 @@ public:
     virtual void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) = 0;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_ICLTUNER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_ICLTUNER_H

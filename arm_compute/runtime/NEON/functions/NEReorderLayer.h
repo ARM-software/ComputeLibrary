@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER_H
+
 #if defined(__aarch64__)
 
-#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER
-#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -89,6 +94,7 @@ private:
     std::unique_ptr<NEReorderKernel> _reorder_kernel; /**< Reorder layer kernel */
 };
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER */
 
 #endif // defined(__aarch64__)
+
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER_H

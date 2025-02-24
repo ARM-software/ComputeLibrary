@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_ADJUSTVECSIZE_H
-#define ARM_COMPUTE_UTILS_ADJUSTVECSIZE_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_HELPERS_ADJUSTVECSIZE_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_HELPERS_ADJUSTVECSIZE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 
@@ -52,4 +56,4 @@ inline unsigned int adjust_vec_size(unsigned int vec_size, size_t dim0)
     return vec_size;
 }
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_UTILS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_HELPERS_ADJUSTVECSIZE_H

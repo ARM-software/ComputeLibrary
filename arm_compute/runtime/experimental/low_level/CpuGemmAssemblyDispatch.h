@@ -25,6 +25,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_LOW_LEVEL_CPUGEMMASSEMBLYDISPATCH_H
 #define ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_LOW_LEVEL_CPUGEMMASSEMBLYDISPATCH_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/runtime/IOperator.h"

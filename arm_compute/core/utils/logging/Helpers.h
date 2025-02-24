@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_LOGGING_HELPERS_H
-#define ARM_COMPUTE_LOGGING_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_HELPERS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_HELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/utils/logging/Types.h"
 
@@ -75,4 +79,4 @@ inline std::string angle_wrap_value(const T &val)
 const std::string &string_from_log_level(LogLevel log_level);
 } // namespace logging
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_LOGGING_HELPERS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_HELPERS_H

@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_MEMORYMANAGERONDEMAND_H
 #define ACL_ARM_COMPUTE_RUNTIME_MEMORYMANAGERONDEMAND_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/runtime/ILifetimeManager.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
 #include "arm_compute/runtime/IMemoryManager.h"

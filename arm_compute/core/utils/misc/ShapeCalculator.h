@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR_H
 #define ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"

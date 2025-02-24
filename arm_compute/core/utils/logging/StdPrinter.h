@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_LOGGING_STD_PRINTER_H
-#define ARM_COMPUTE_LOGGING_STD_PRINTER_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_STDPRINTER_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_STDPRINTER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/utils/logging/IPrinter.h"
 
@@ -44,4 +48,4 @@ private:
 };
 } // namespace logging
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_LOGGING_STD_PRINTER_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_STDPRINTER_H

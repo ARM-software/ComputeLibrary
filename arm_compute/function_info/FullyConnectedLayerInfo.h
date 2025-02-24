@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO
-#define ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO_H
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -68,4 +72,4 @@ struct FullyConnectedLayerInfo
 };
 
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO */
+#endif // ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO_H

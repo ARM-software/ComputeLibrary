@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_CROP_RESIZE_H
-#define ARM_COMPUTE_CL_CROP_RESIZE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCROPRESIZE_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCROPRESIZE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -157,4 +161,4 @@ public:
     std::vector<std::unique_ptr<IFunction>> _internal_functions;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_CROP_RESIZE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLCROPRESIZE_H

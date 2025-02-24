@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLSELECT_H
-#define ARM_COMPUTE_CLSELECT_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSELECT_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSELECT_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -79,4 +83,4 @@ public:
     static Status validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLSELECT_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSELECT_H

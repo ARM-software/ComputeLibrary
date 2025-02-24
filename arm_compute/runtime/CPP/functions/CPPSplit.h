@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021,2023 Arm Limited.
+ * Copyright (c) 2020-2021,2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPP_SPLIT_H
-#define ARM_COMPUTE_CPP_SPLIT_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPSPLIT_H
+#define ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPSPLIT_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -196,4 +200,4 @@ protected:
 };
 
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPP_SPLIT_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPSPLIT_H

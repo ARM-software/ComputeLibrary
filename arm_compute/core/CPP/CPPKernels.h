@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPPKERNELS_H
-#define ARM_COMPUTE_CPPKERNELS_H
+#ifndef ACL_ARM_COMPUTE_CORE_CPP_CPPKERNELS_H
+#define ACL_ARM_COMPUTE_CORE_CPP_CPPKERNELS_H
+
+/** @file
+ * @publicapi
+ */
 
 /* Header regrouping all the CPP kernels */
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
@@ -31,4 +35,4 @@
 #include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
 
-#endif /* ARM_COMPUTE_CPPKERNELS_H */
+#endif // ACL_ARM_COMPUTE_CORE_CPP_CPPKERNELS_H

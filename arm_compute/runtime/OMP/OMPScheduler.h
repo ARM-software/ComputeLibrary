@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_RUNTIME_OMP_OMPSCHEDULER_H
 #define ACL_ARM_COMPUTE_RUNTIME_OMP_OMPSCHEDULER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/IScheduler.h"
 

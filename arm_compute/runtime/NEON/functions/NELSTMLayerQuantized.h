@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYERQUANTIZED_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NELSTMLAYERQUANTIZED_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"

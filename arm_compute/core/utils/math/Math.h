@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2023 Arm Limited.
+ * Copyright (c) 2017-2018, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_MATH_H
-#define ARM_COMPUTE_UTILS_MATH_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MATH_MATH_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_MATH_MATH_H
+
+/** @file
+ * @publicapi
+ */
 
 namespace arm_compute
 {
@@ -68,4 +72,4 @@ inline auto floor_to_multiple(S value, T divisor) -> decltype((value / divisor) 
 }
 
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_UTILS_MATH_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_MATH_MATH_H

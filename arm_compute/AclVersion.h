@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,22 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_VERSION_H_
-#define ARM_COMPUTE_ACL_VERSION_H_
+#ifndef ACL_ARM_COMPUTE_ACLVERSION_H
+#define ACL_ARM_COMPUTE_ACLVERSION_H
+
+/** @file
+ * @publicapi
+ */
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /* __cplusplus */
 
-    /** Semantic versioning information */
-    typedef struct AclVersion
-    {
-        int         major;      /**< Major version, is increased on API incompatible changes */
-        int         minor;      /**< Minor version, is increased on adding back-ward compatible functionality */
-        int         patch;      /**< Patch version, is increased when doing backward compatible fixes */
-        const char *build_info; /**< Build related information */
-    } AclVersion;
+/** Semantic versioning information */
+typedef struct AclVersion
+{
+    int         major;      /**< Major version, is increased on API incompatible changes */
+    int         minor;      /**< Minor version, is increased on adding back-ward compatible functionality */
+    int         patch;      /**< Patch version, is increased when doing backward compatible fixes */
+    const char *build_info; /**< Build related information */
+} AclVersion;
 
 /**< Major version, is increased on API incompatible changes */
 #define ARM_COMPUTE_LIBRARY_VERSION_MAJOR 0
@@ -45,13 +48,13 @@ extern "C"
 /**< Patch version, is increased when doing backward compatible fixes */
 #define ARM_COMPUTE_LIBRARY_VERSION_PATCH 0
 
-    /** Get library's version meta-data
+/** Get library's version meta-data
  *
  * @return Version information
  */
-    const AclVersion *AclVersionInfo();
+const AclVersion *AclVersionInfo();
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACL_VERSION_H_ */
+#endif // ACL_ARM_COMPUTE_ACLVERSION_H

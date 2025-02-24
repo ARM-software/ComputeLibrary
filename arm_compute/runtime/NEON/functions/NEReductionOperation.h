@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREDUCTIONOPERATION_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREDUCTIONOPERATION_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"

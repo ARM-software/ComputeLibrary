@@ -25,6 +25,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUMEANSTDDEVNORMALIZATION_H
 #define ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUMEANSTDDEVNORMALIZATION_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INEOperator.h"

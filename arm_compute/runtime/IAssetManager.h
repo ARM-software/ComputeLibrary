@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_IASSET_MANAGER_H
-#define ARM_COMPUTE_IASSET_MANAGER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_IASSETMANAGER_H
+#define ACL_ARM_COMPUTE_RUNTIME_IASSETMANAGER_H
+
+/** @file
+ * @publicapi
+ */
 
 namespace arm_compute
 {
@@ -37,4 +41,4 @@ public:
     virtual IMemoryManager *memory_manager() = 0;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_IASSET_MANAGER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_IASSETMANAGER_H

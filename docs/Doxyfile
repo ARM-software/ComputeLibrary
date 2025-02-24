@@ -260,7 +260,8 @@ TAB_SIZE               = 4
 # "Side Effects:". You can put \n's in the value part of an alias to insert
 # newlines.
 
-ALIASES                =
+ALIASES                = \
+    "publicapi=\xrefitem semver \"\" \"\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"
@@ -791,6 +792,7 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./docs/user_guide/introduction.dox \
+                         ./docs/user_guide/semantic_versioning.dox \
                          ./docs/user_guide/how_to_build_and_run_examples.dox \
                          ./docs/user_guide/library.dox \
                          ./docs/user_guide/data_type.dox \

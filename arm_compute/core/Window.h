@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, 2022-2023 Arm Limited.
+ * Copyright (c) 2016-2020, 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_CORE_WINDOW_H
 #define ACL_ARM_COMPUTE_CORE_WINDOW_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"

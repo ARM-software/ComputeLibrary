@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_ACLOPENCLEXT_H
 #define ACL_ARM_COMPUTE_ACLOPENCLEXT_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/AclTypes.h"
 
 #ifndef CL_TARGET_OPENCL_VERSION

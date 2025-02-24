@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_WINDOW_ITERATOR_H
-#define ARM_COMPUTE_WINDOW_ITERATOR_H
+#ifndef ACL_ARM_COMPUTE_CORE_WINDOWITERATOR_H
+#define ACL_ARM_COMPUTE_CORE_WINDOWITERATOR_H
+
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
@@ -315,4 +320,4 @@ create_window_iterator(const Window &w, const Coordinates &start, const Coordina
     return WindowIterator<L>(w, start, end, std::move(lambda_function));
 }
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_WINDOW_ITERATOR_H*/
+#endif // ACL_ARM_COMPUTE_CORE_WINDOWITERATOR_H

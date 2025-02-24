@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+/** @file
+ * @publicapi
+ */
+
+#ifndef ACL_ARM_COMPUTE_CORE_HELPERS_INL
+#define ACL_ARM_COMPUTE_CORE_HELPERS_INL
+
 #include "arm_compute/core/Error.h"
 
 #include <cmath>
@@ -218,3 +226,5 @@ inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout &dat
     return dims[index];
 }
 } // namespace arm_compute
+
+#endif // ACL_ARM_COMPUTE_CORE_HELPERS_INL

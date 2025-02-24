@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSOFTMAXLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSOFTMAXLAYER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_H
-#define ARM_COMPUTE_UTILS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
@@ -410,4 +414,4 @@ void print_consecutive_elements(std::ostream      &s,
 int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n);
 #endif /* ARM_COMPUTE_ASSERTS_ENABLED */
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_UTILS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_H

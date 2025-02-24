@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_LAYER_DESCRIPTORS_H
-#define ARM_COMPUTE_LAYER_DESCRIPTORS_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_LAYERDESCRIPTORS_H
+#define ACL_ARM_COMPUTE_GRAPH_LAYERDESCRIPTORS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/graph/Types.h"
@@ -144,4 +148,4 @@ struct DeconvolutionLayerDescriptor
 } // namespace descriptors
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_LAYER_DESCRIPTORS_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_LAYERDESCRIPTORS_H

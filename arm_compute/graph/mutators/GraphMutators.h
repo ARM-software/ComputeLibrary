@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H
-#define ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_MUTATORS_GRAPHMUTATORS_H
+#define ACL_ARM_COMPUTE_GRAPH_MUTATORS_GRAPHMUTATORS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/mutators/DepthConcatSubTensorMutator.h"
 #include "arm_compute/graph/mutators/GroupedConvolutionMutator.h"
@@ -32,4 +36,4 @@
 #include "arm_compute/graph/mutators/SplitLayerSubTensorMutator.h"
 #include "arm_compute/graph/mutators/SyntheticDataTypeMutator.h"
 
-#endif /* ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_MUTATORS_GRAPHMUTATORS_H

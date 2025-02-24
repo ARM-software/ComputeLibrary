@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_TRAITS_TRAITS_H
-#define ARM_COMPUTE_UTILS_TRAITS_TRAITS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_TRAITS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_MISC_TRAITS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 
@@ -53,4 +57,4 @@ struct is_floating_point<__fp16> : public std::true_type
 } // namespace traits
 } // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_UTILS_TRAITS_TRAITS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_MISC_TRAITS_H

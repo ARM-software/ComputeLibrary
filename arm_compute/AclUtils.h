@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_ACLUTILS_H
 #define ACL_ARM_COMPUTE_ACLUTILS_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/AclTypes.h"
 
 #ifdef __cplusplus

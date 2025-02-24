@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,10 @@
 
 #ifndef ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUELEMENTWISE_H
 #define ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUELEMENTWISE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Types.h"

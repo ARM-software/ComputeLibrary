@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2023 Arm Limited.
+ * Copyright (c) 2019, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,10 @@
 
 #ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUSEDCONVOLUTIONBATCHNORMALIZATIONFUNCTION_H
 #define ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUSEDCONVOLUTIONBATCHNORMALIZATIONFUNCTION_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"

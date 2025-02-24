@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPPTOPKVERNEL_H
-#define ARM_COMPUTE_CPPTOPKVERNEL_H
+#ifndef ACL_ARM_COMPUTE_CORE_CPP_KERNELS_CPPTOPKVKERNEL_H
+#define ACL_ARM_COMPUTE_CORE_CPP_KERNELS_CPPTOPKVKERNEL_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CPP/ICPPKernel.h"
 
@@ -90,4 +94,4 @@ private:
     unsigned int _num_classes;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPPTOPKVKERNEL_H */
+#endif // ACL_ARM_COMPUTE_CORE_CPP_KERNELS_CPPTOPKVKERNEL_H

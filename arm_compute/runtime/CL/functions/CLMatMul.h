@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL
-#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -131,4 +135,4 @@ private:
 };
 } // namespace arm_compute
 
-#endif /* ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL_H

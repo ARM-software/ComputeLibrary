@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_MEMORYGROUP_H
 #define ACL_ARM_COMPUTE_RUNTIME_MEMORYGROUP_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Macros.h"
 #include "arm_compute/runtime/IMemoryGroup.h"

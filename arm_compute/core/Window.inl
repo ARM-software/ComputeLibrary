@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, 2022-2023 Arm Limited.
+ * Copyright (c) 2016-2020, 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,10 @@
 
 #ifndef ACL_ARM_COMPUTE_CORE_WINDOW_INL
 #define ACL_ARM_COMPUTE_CORE_WINDOW_INL
+
+/** @file
+ * @publicapi
+ */
 
 namespace arm_compute
 {

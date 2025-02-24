@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_ACL_HPP
 #define ACL_ARM_COMPUTE_ACL_HPP
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/Acl.h"
 
 #include <cstdlib>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_BOUNDING_BOX_TRANSFORM_NODE_H
-#define ARM_COMPUTE_BOUNDING_BOX_TRANSFORM_NODE_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_NODES_BOUNDINGBOXTRANSFORMLAYERNODE_H
+#define ACL_ARM_COMPUTE_GRAPH_NODES_BOUNDINGBOXTRANSFORMLAYERNODE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/INode.h"
 
@@ -57,4 +61,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_BOUNDING_BOX_TRANSFORM_NODE_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_NODES_BOUNDINGBOXTRANSFORMLAYERNODE_H

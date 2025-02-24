@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_RUNTIME_CL_UTILS_H
-#define ARM_COMPUTE_RUNTIME_CL_UTILS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_UTILS_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_UTILS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <string>
 
@@ -40,4 +44,4 @@ void save_program_cache_to_file(const std::string &filename = "cache.bin");
  */
 void restore_program_cache_from_file(const std::string &filename = "cache.bin");
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_RUNTIME_CL_UTILS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_UTILS_H
