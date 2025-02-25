@@ -47,19 +47,20 @@ namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f(
     0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 data types */
+
 #ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half_float::half> rel_tolerance_f16(half(
     0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for FP16 data types */
 const AbsoluteTolerance<float>      abs_tolerance_f16(
-    0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
+         0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
 constexpr float tolerance_num = 0.07f; /**< Tolerance number for FP16 data types */
 #endif                                 /* ARM_COMPUTE_ENABLE_FP16 */
 #ifdef ARM_COMPUTE_ENABLE_BF16
-const AbsoluteTolerance<float>      abs_tolerance_bf16(
+const AbsoluteTolerance<float> abs_tolerance_bf16(
     0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for BF16 data types */
-const RelativeTolerance<float>      rel_tolerance_bf16(
+const RelativeTolerance<float> rel_tolerance_bf16(
     0.02f); /**< Relative tolerance value for comparing reference's output against implementation's output for BF16 data types */
-#endif                                 /* ARM_COMPUTE_ENABLE_BF16 */
+#endif /* ARM_COMPUTE_ENABLE_BF16 */
 /** CNN data types */
 const auto CNNDataTypes = make("DataType",
                                {
@@ -89,7 +90,6 @@ bool validate_zero_padding(unsigned int dim0_value, unsigned int dim1_value)
 
     return in.padding().empty();
 }
-
 } // namespace
 
 TEST_SUITE(NEON)
@@ -270,6 +270,16 @@ using CpuGemmDstF32AssemblyDispatchFixture = CpuGemmDstF32AssemblyDispatchValida
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 template <typename T, typename WEI_T = T, typename DST_T = T, typename REF_T = T>
 using CpuGemmFixedFormatFixture = CpuGemmAssemblyDispatchFixedFormatFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T, WEI_T, DST_T, REF_T>;
+#ifndef BARE_METAL
+
+namespace {
+// Used for setting number of parallel runs in thread-safety tests
+constexpr int num_parallel_runs = 3;
+} // namespace
+
+template <typename T, typename WEI_T = T, typename DST_T = T, typename REF_T = T>
+using CpuGemmFixedFormatThreadSafeFixture =  CpuGemmAssemblyDispatchFixedFormatThreadSafetyFixture<Tensor, Accessor, experimental::op::ll::CpuGemmAssemblyDispatch, T, WEI_T, DST_T, REF_T, num_parallel_runs>;
+#endif // BARE_METAL
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 
 TEST_SUITE(Float)
@@ -486,6 +496,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallFastMath,
 {
     if(CPUInfo::get().has_bf16())
     {
+        // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_bf16, tolerance_num, abs_tolerance_bf16);
     }
     else
@@ -515,6 +526,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 {
     if(CPUInfo::get().has_bf16())
     {
+    // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_bf16);
     }
     else
@@ -539,6 +551,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 {
     if(CPUInfo::get().has_bf16())
     {
+    // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_bf16);
     }
     else
@@ -573,6 +586,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
+
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CpuGemmAssemblyDispatchFixture<float>,
                        framework::DatasetMode::NIGHTLY,
@@ -592,7 +606,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
-
 TEST_SUITE(FIXED_FORMAT)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CpuGemmFixedFormatFixture<float>,
@@ -605,7 +618,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                         ))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    // Only check the zeroth elements when not running thread-safety tests
+    validate(Accessor(_target[0]), _reference[0], tolerance_f);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CpuGemmFixedFormatFixture<float>,
@@ -618,15 +632,38 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                         ))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    // Only check the zeroth elements when not running thread-safety tests
+    validate(Accessor(_target[0]), _reference[0], tolerance_f);
 }
+
+#ifndef BARE_METAL
+TEST_SUITE(ThreadSafety)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmFixedFormatThreadSafeFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(
+                            datasets::SmallFixedFormatGEMMDataset(),
+                            make("SrcDataType", DataType::F32),
+                            make("WeiDataType", DataType::F32),
+                            make("DstDataType", DataType::F32)
+                        ))
+{
+    // Validate output
+    for (int i = 0; i < num_parallel_runs; ++i) {
+        validate(Accessor(_target[i]), _reference[i], tolerance_f);
+    }
+}
+TEST_SUITE_END() // ThreadSafety
+#endif // BARE_METAL
+
+
 TEST_SUITE_END() // FIXED_FORMAT
 #endif // ARM_COMPUTE_FIXED_FORMAT_KERNELS
 
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
-TEST_SUITE_END() // CpuGemmAseemblyDispatch
+TEST_SUITE_END() // CpuGemmAssemblyDispatch
 TEST_SUITE_END() // LOW_LEVEL
 TEST_SUITE_END() // NEON
 } // namespace validation

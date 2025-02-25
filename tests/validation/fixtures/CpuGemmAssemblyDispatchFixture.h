@@ -21,18 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #ifndef ACL_TESTS_VALIDATION_FIXTURES_CPUGEMMASSEMBLYDISPATCHFIXTURE_H
 #define ACL_TESTS_VALIDATION_FIXTURES_CPUGEMMASSEMBLYDISPATCHFIXTURE_H
 
+#include "arm_compute/core/CoreTypes.h"
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/SimpleTensor.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/GEMM.h"
+
+#include <array>
+
+#ifndef BARE_METAL
+#include <thread>
+#endif
 
 namespace arm_compute
 {
@@ -40,7 +52,13 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename WEI_T = float, typename DST_T = float, typename REF_T = float>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename WEI_T = float,
+          typename DST_T = float,
+          typename REF_T = float>
 class CpuGemmAssemblyDispatchGenericValidationFixture : public framework::Fixture
 {
 public:
@@ -56,22 +74,24 @@ public:
                bool                accumulate,
                bool                pretranspose_b,
                ActivationLayerInfo act_info,
-               bool                fast_math=false,
+               bool                fast_math    = false,
                bool                use_fp32_acc = false)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             !cpu_supports_dtypes({a_data_type, b_data_type, dst_data_type}))
         {
             return;
         }
-        if (fast_math && !CPUInfo::get().has_bf16()) {
+        if (fast_math && !CPUInfo::get().has_bf16())
+        {
             return;
         }
         ARM_COMPUTE_UNUSED(alpha);
         ARM_COMPUTE_UNUSED(beta);
-        _target =
-            compute_target(shape_a, shape_b, shape_c, output_shape, a_data_type, b_data_type, dst_data_type, accumulate, pretranspose_b, act_info, fast_math, use_fp32_acc);
-        _reference = compute_reference(shape_a, shape_b, output_shape, dst_data_type, accumulate, act_info, fast_math);
+
+        compute_target(shape_a, shape_b, shape_c, output_shape, a_data_type, b_data_type, dst_data_type, accumulate,
+                       pretranspose_b, act_info, fast_math, use_fp32_acc);
+        compute_reference(shape_a, shape_b, output_shape, dst_data_type, accumulate, act_info, fast_math);
     }
 
 protected:
@@ -88,7 +108,8 @@ protected:
             }
             case DataType::BFLOAT16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution{float(lo), float(hi), true /* portable */};
+                arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution{float(lo), float(hi),
+                                                                                           true /* portable */};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -103,18 +124,18 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape  &shape_a,
-                              const TensorShape  &shape_b,
-                              const TensorShape  &shape_c,
-                              const TensorShape  &output_shape,
-                              DataType            a_data_type,
-                              DataType            b_data_type,
-                              DataType            dst_data_type,
-                              bool                accumulate,
-                              bool                pretranspose_b,
-                              ActivationLayerInfo act_info,
-                              bool                fast_math,
-                              bool                use_fp32_acc)
+    void compute_target(const TensorShape  &shape_a,
+                        const TensorShape  &shape_b,
+                        const TensorShape  &shape_c,
+                        const TensorShape  &output_shape,
+                        DataType            a_data_type,
+                        DataType            b_data_type,
+                        DataType            dst_data_type,
+                        bool                accumulate,
+                        bool                pretranspose_b,
+                        ActivationLayerInfo act_info,
+                        bool                fast_math,
+                        bool                use_fp32_acc)
     {
         ARM_COMPUTE_UNUSED(shape_c);
         // Create tensors
@@ -122,7 +143,7 @@ protected:
         TensorType  b            = create_tensor<TensorType>(shape_b, b_data_type, 1);
         TensorType  b_transposed = create_tensor<TensorType>({shape_b[1], shape_b[0]}, b_data_type, 1);
         TensorType  dst          = create_tensor<TensorType>(output_shape, dst_data_type, 1);
-        TensorType *c = nullptr;
+        TensorType *c            = nullptr;
         // Create and configure function
         FunctionType gemm;
         NETranspose  transpose;
@@ -215,16 +236,16 @@ protected:
         b.allocator()->free();
         b_transposed.allocator()->free();
 
-        return dst;
+        _target = std::move(dst);
     }
 
-    SimpleTensor<REF_T> compute_reference(const TensorShape  &shape_a,
-                                      const TensorShape  &shape_b,
-                                      const TensorShape  &output_shape,
-                                      DataType            data_type,
-                                      bool                accumulate,
-                                      ActivationLayerInfo act_info,
-                                      bool                fast_math=false)
+    void compute_reference(const TensorShape  &shape_a,
+                           const TensorShape  &shape_b,
+                           const TensorShape  &output_shape,
+                           DataType            data_type,
+                           bool                accumulate,
+                           ActivationLayerInfo act_info,
+                           bool                fast_math = false)
     {
         // Create reference
         SimpleTensor<REF_T> a{shape_a, data_type, 1};
@@ -254,18 +275,30 @@ protected:
 
         if (act_info.enabled())
         {
-            return reference::activation_layer<REF_T>(dst, act_info);
+            dst = reference::activation_layer<REF_T>(dst, act_info);
         }
-        return dst;
+
+        _reference = dst;
     }
 
-    TensorType      _target{};
+    TensorType          _target{};
     SimpleTensor<REF_T> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename WEI_T = T, typename DST_T = T, typename REF_T = T>
-class CpuGemmAssemblyDispatchValidationFixture
-    : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T, REF_T>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename WEI_T = T,
+          typename DST_T = T,
+          typename REF_T = T>
+class CpuGemmAssemblyDispatchValidationFixture : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType,
+                                                                                                           AccessorType,
+                                                                                                           FunctionType,
+                                                                                                           T,
+                                                                                                           WEI_T,
+                                                                                                           DST_T,
+                                                                                                           REF_T>
 {
 public:
     void setup(TensorShape         shape_a,
@@ -282,14 +315,29 @@ public:
                ActivationLayerInfo act_info,
                bool                fast_math)
     {
-        CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T, REF_T>::setup(
-            shape_a, shape_b, shape_c, output_shape, alpha, beta, a_data_type, b_data_type, dst_data_type, accumulate, pretranspose_b, act_info, fast_math, false);
+        CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T,
+                                                        REF_T>::setup(shape_a, shape_b, shape_c, output_shape, alpha,
+                                                                      beta, a_data_type, b_data_type, dst_data_type,
+                                                                      accumulate, pretranspose_b, act_info, fast_math,
+                                                                      false);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename WEI_T = T, typename DST_T = T, typename REF_T = T>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename WEI_T = T,
+          typename DST_T = T,
+          typename REF_T = T>
 class CpuGemmAccF32AssemblyDispatchValidationFixture
-    : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T, REF_T>
+    : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType,
+                                                                AccessorType,
+                                                                FunctionType,
+                                                                T,
+                                                                WEI_T,
+                                                                DST_T,
+                                                                REF_T>
 {
 public:
     void setup(TensorShape         shape_a,
@@ -304,14 +352,28 @@ public:
                bool                use_fp32_acc,
                ActivationLayerInfo act_info)
     {
-        CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T, REF_T>::setup(
-            shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, data_type, data_type, accumulate, pretranspose_b, act_info, false, use_fp32_acc);
+        CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T,
+                                                        REF_T>::setup(shape_a, shape_b, shape_c, output_shape, alpha,
+                                                                      beta, data_type, data_type, data_type, accumulate,
+                                                                      pretranspose_b, act_info, false, use_fp32_acc);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename WEI_T = T, typename DST_T = float, typename REF_T = float>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename WEI_T = T,
+          typename DST_T = float,
+          typename REF_T = float>
 class CpuGemmDstF32AssemblyDispatchValidationFixture
-    : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T, REF_T>
+    : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType,
+                                                                AccessorType,
+                                                                FunctionType,
+                                                                T,
+                                                                WEI_T,
+                                                                DST_T,
+                                                                REF_T>
 {
 public:
     void setup(TensorShape         shape_a,
@@ -324,52 +386,70 @@ public:
                bool                pretranspose_b,
                ActivationLayerInfo act_info)
     {
-        if((std::is_same<TensorType, Tensor>::value &&  // Cpu
-            data_type == DataType::F16 && !CPUInfo::get().has_fp16()) || !CPUInfo::get().has_fhm())
+        if ((std::is_same<TensorType, Tensor>::value && // Cpu
+             data_type == DataType::F16 && !CPUInfo::get().has_fp16()) ||
+            !CPUInfo::get().has_fhm())
         {
             return;
         }
         ARM_COMPUTE_UNUSED(alpha);
         ARM_COMPUTE_UNUSED(beta);
-        this->_target = this->compute_target(shape_a, shape_b, shape_c, output_shape, data_type, data_type, DataType::F32, false, pretranspose_b, act_info, false, false);
-        this->_reference = this->compute_reference(shape_a, shape_b, output_shape, data_type, act_info);
+        this->compute_target(shape_a, shape_b, shape_c, output_shape, data_type, data_type, DataType::F32, false,
+                             pretranspose_b, act_info, false, false);
+        compute_reference(shape_a, shape_b, output_shape, data_type, act_info);
     }
 
 protected:
+    void compute_reference(const TensorShape  &shape_a,
+                           const TensorShape  &shape_b,
+                           const TensorShape  &output_shape,
+                           DataType            data_type,
+                           ActivationLayerInfo act_info)
+    {
+        // Create reference
+        SimpleTensor<T>     a{shape_a, data_type, 1};
+        SimpleTensor<T>     b{shape_b, data_type, 1};
+        SimpleTensor<T>     c{output_shape, data_type, 1};
+        SimpleTensor<float> dst{output_shape, DataType::F32, 1};
 
-    SimpleTensor<float> compute_reference(const TensorShape  &shape_a,
-                                        const TensorShape  &shape_b,
-                                        const TensorShape  &output_shape,
-                                        DataType            data_type,
-                                        ActivationLayerInfo act_info)
+        // Fill reference
+        this->fill(a, 0, -1.f, 1.f);
+        this->fill(b, 1, -1.f, 1.f);
+        this->fill(c, 2);
+
+        dst = reference::gemm_mixed_precision<T, float>(a, b, c, 1.f, 0.f);
+
+        if (act_info.enabled())
         {
-            // Create reference
-            SimpleTensor<T> a{shape_a, data_type, 1};
-            SimpleTensor<T> b{shape_b, data_type, 1};
-            SimpleTensor<T> c{output_shape, data_type, 1};
-            SimpleTensor<float> dst{output_shape, DataType::F32, 1};
-
-            // Fill reference
-            this->fill(a, 0, -1.f, 1.f);
-            this->fill(b, 1, -1.f, 1.f);
-            this->fill(c, 2);
-
-            dst = reference::gemm_mixed_precision<T, float>(a, b, c, 1.f, 0.f);
-
-            if (act_info.enabled())
-            {
-                return reference::activation_layer<float>(dst, act_info);
-            }
-            return dst;
+            dst = reference::activation_layer<float>(dst, act_info);
         }
-
-    SimpleTensor<float> _reference{};
+        this->_reference = dst;
+    }
 };
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename WEI_T=T, typename DST_T=T, typename REF_T=T>
-class CpuGemmAssemblyDispatchFixedFormatFixture
-    : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T, DST_T, REF_T>
+// The NumRuns template parameter supports thread-safety tests by creating an
+// array at compile-time to store results from parallely runs.
+//
+// In general, we should avoid adding further parameters where possible as it
+// bloats the validation binary. Please consider if your use-case can be met
+// without expanding the template.
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename WEI_T = T,
+          typename DST_T = T,
+          typename REF_T = T,
+          int NumRuns    = 1>
+class CpuGemmAssemblyDispatchFixedFormatGenericValidationFixture
+    : public CpuGemmAssemblyDispatchGenericValidationFixture<TensorType,
+                                                             AccessorType,
+                                                             FunctionType,
+                                                             T,
+                                                             WEI_T,
+                                                             DST_T,
+                                                             REF_T>
 {
 public:
     void setup(TensorShape shape_a,
@@ -380,15 +460,18 @@ public:
                float       beta,
                DataType    a_data_type,
                DataType    b_data_type,
-               DataType    dst_data_type
-               )
+               DataType    dst_data_type,
+               TestType    test_type)
     {
         ARM_COMPUTE_UNUSED(alpha);
         ARM_COMPUTE_UNUSED(beta);
-        bool fast_math = a_data_type == DataType::BFLOAT16 || b_data_type == DataType::BFLOAT16 || dst_data_type == DataType::BFLOAT16;
-        this->_target = compute_target(shape_a, shape_b, shape_c, output_shape, a_data_type, b_data_type, dst_data_type);
-        this->_reference =
-            this->compute_reference(shape_a, shape_b, output_shape, fast_math ? DataType::F32 : dst_data_type, false, ActivationLayerInfo());
+        bool fast_math = a_data_type == DataType::BFLOAT16 || b_data_type == DataType::BFLOAT16 ||
+                         dst_data_type == DataType::BFLOAT16;
+        _test_type = test_type;
+        compute_target(shape_a, shape_b, shape_c, output_shape, a_data_type, b_data_type,
+                       fast_math ? DataType::F32 : dst_data_type);
+        compute_reference(shape_a, shape_b, output_shape, fast_math ? DataType::F32 : dst_data_type, false,
+                          ActivationLayerInfo());
     }
 
 protected:
@@ -416,7 +499,8 @@ protected:
         // Total size needs to include padded dimensions
         const size_t total_size_in_bytes = Op * H * W * Ip * tensor_info.element_size();
 
-        const TensorShape TS({tensor_shape[0], arm_compute::ceil_to_multiple<int32_t, int32_t>(tensor_shape[1], interleave_by)});
+        const TensorShape TS(
+            {tensor_shape[0], arm_compute::ceil_to_multiple<int32_t, int32_t>(tensor_shape[1], interleave_by)});
 
         TensorInfo new_tensor_info = tensor_info;
         new_tensor_info.set_data_layout(DataLayout::UNKNOWN);
@@ -425,16 +509,22 @@ protected:
         return new_tensor_info;
     }
 
-    TensorType compute_target(
-        TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, DataType a_data_type, DataType b_data_type, DataType dst_data_type)
+    void compute_target(TensorShape shape_a,
+                        TensorShape shape_b,
+                        TensorShape shape_c,
+                        TensorShape output_shape,
+                        DataType    a_data_type,
+                        DataType    b_data_type,
+                        DataType    dst_data_type)
     {
         ARM_COMPUTE_UNUSED(shape_c);
         permute(shape_b, PermutationVector(1U, 0U));
         // Create tensors
-        TensorType a   = create_tensor<TensorType>(shape_a, a_data_type, 1, QuantizationInfo(), DataLayout::NCHW);
-        TensorType b   = create_tensor<TensorType>(shape_b, b_data_type, 1, QuantizationInfo(), DataLayout::NCHW);
-        TensorType c   = nullptr;
-        TensorType dst = create_tensor<TensorType>(output_shape, dst_data_type, 1, QuantizationInfo(), DataLayout::NCHW);
+        std::array<TensorType, NumRuns> a{};
+        std::array<TensorType, NumRuns> b{};
+        std::array<TensorType, NumRuns> c{};
+        std::array<TensorType, NumRuns> dst{};
+        std::array<TensorType, NumRuns> b_transformed{};
 
         // Create and configure function
         FunctionType              gemm;
@@ -442,98 +532,261 @@ protected:
         arm_compute::WeightFormat computed_weight_format{arm_compute::WeightFormat::ANY};
         GEMMInfo                  gemm_info;
 
+        for (int i = 0; i < NumRuns; ++i)
+        {
+            a[i]   = create_tensor<TensorType>(shape_a, a_data_type, 1, QuantizationInfo(), DataLayout::NCHW);
+            b[i]   = create_tensor<TensorType>(shape_b, b_data_type, 1, QuantizationInfo(), DataLayout::NCHW);
+            dst[i] = create_tensor<TensorType>(output_shape, dst_data_type, 1, QuantizationInfo(), DataLayout::NCHW);
+            ARM_COMPUTE_ASSERT(a[i].info()->is_resizable());
+            ARM_COMPUTE_ASSERT(b[i].info()->is_resizable());
+            ARM_COMPUTE_ASSERT(dst[i].info()->is_resizable());
+        }
+
         gemm_info.set_fixed_format(true);
         gemm_info.set_accumulate(false);
         gemm_info.set_weight_format(computed_weight_format);
 
-        const bool kernel_found = bool(
-            FunctionType::has_opt_impl(computed_weight_format, a.info(), b.info(), nullptr, dst.info(), gemm_info));
+        const bool kernel_found = bool(FunctionType::has_opt_impl(computed_weight_format, a[0].info(), b[0].info(),
+                                                                  nullptr, dst[0].info(), gemm_info));
 
         ARM_COMPUTE_ASSERT(kernel_found);
         gemm_info.set_weight_format(computed_weight_format);
         gemm_info.set_fast_math(is_fixed_format_fast_math(computed_weight_format));
-        TensorType b_transformed = create_tensor<TensorType>(prepare_weights(*b.info(), computed_weight_format));
-
-        a.info()->set_are_values_constant(false);
-        b_transformed.info()->set_are_values_constant(false);
-
-        ARM_COMPUTE_ASSERT(a.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(b.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(b_transformed.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
         // Allocate tensors
-        a.allocator()->allocate();
-        b.allocator()->allocate();
-        b_transformed.allocator()->allocate();
-        dst.allocator()->allocate();
+        for (int i = 0; i < NumRuns; ++i)
+        {
+            b_transformed[i] = create_tensor<TensorType>(prepare_weights(*b[i].info(), computed_weight_format));
+            ARM_COMPUTE_ASSERT(b_transformed[i].info()->is_resizable());
 
-        ARM_COMPUTE_ASSERT(!a.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(!b.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(!b_transformed.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+            a[i].info()->set_are_values_constant(false);
+            b_transformed[i].info()->set_are_values_constant(false);
 
-        // Fill tensors
-        this->fill(AccessorType(a), 0, -1.f, 1.f);
-        this->fill(AccessorType(b), 1, -1.f, 1.f);
+            a[i].allocator()->allocate();
+            b[i].allocator()->allocate();
+            b_transformed[i].allocator()->allocate();
+            dst[i].allocator()->allocate();
 
-        // Reorder weight to the expected format
-        ARM_COMPUTE_ASSERT(reorder.validate(b.info(), b_transformed.info(), WeightFormat::OHWI, computed_weight_format, true));
-        reorder.configure(&b, &b_transformed, WeightFormat::OHWI, computed_weight_format, true);
-        reorder.run();
+            ARM_COMPUTE_ASSERT(!a[i].info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!b[i].info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!b_transformed[i].info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!dst[i].info()->is_resizable());
 
-        ARM_COMPUTE_ASSERT(gemm.validate(a.info(), b_transformed.info(), nullptr, dst.info(), gemm_info));
-        gemm.configure(a.info(), b_transformed.info(), nullptr, dst.info(), gemm_info);
+            // Fill tensors
+            this->fill(AccessorType(a[i]), 7 * i + 0, -1.f, 1.f);
+            this->fill(AccessorType(b[i]), 7 * i + 1, -1.f, 1.f);
+
+            // Reorder weight to the expected format
+            ARM_COMPUTE_ASSERT(reorder.validate(b[i].info(), b_transformed[i].info(), WeightFormat::OHWI,
+                                                computed_weight_format, true));
+            reorder.configure(&b[i], &b_transformed[i], WeightFormat::OHWI, computed_weight_format, true);
+            reorder.run();
+        }
+
+        ARM_COMPUTE_ASSERT(gemm.validate(a[0].info(), b_transformed[0].info(), nullptr, dst[0].info(), gemm_info));
+        gemm.configure(a[0].info(), b_transformed[0].info(), nullptr, dst[0].info(), gemm_info);
         ARM_COMPUTE_ASSERT(gemm.is_configured());
 
-        ITensorPack run_pack;
-        run_pack.add_const_tensor(arm_compute::TensorType::ACL_SRC_0, &a);
-        run_pack.add_const_tensor(arm_compute::TensorType::ACL_SRC_1, &b_transformed);
-        run_pack.add_tensor(arm_compute::TensorType::ACL_SRC_2, &c);
-        run_pack.add_tensor(arm_compute::TensorType::ACL_DST, &dst);
+        std::array<ITensorPack, NumRuns> run_pack;
+        std::array<ITensorPack, NumRuns> prep_pack;
 
-        // Prepare memory
-        ITensorPack prep_pack{{arm_compute::TensorType::ACL_SRC_1, &b_transformed},
-                              {arm_compute::TensorType::ACL_SRC_2, &c}};
-
-        experimental::MemoryRequirements aux_mem_req = gemm.workspace();
-        MemoryGroup                      memory_group{};
-
-        WorkspaceData<Tensor> workspace = manage_workspace<Tensor>(aux_mem_req, memory_group, run_pack, prep_pack);
-
-        gemm.prepare(prep_pack);
-        MemoryGroupResourceScope scope_mg(memory_group);
-
-        auto has_reshape = std::find_if(aux_mem_req.begin(), aux_mem_req.end(),
-                                        [](const arm_compute::experimental::MemoryInfo &m) -> bool {
-                                            return m.lifetime == arm_compute::experimental::MemoryLifetime::Persistent;
-                                        });
-
-        if (has_reshape != std::end(aux_mem_req))
+        // Define this as a lambda so we can call it in a thread or within the
+        // main process (if BARE_METAL)
+        auto gemm_runner = [&](int i)
         {
-            b_transformed.mark_as_unused();
-        }
-        else
+            experimental::MemoryRequirements aux_mem_req = gemm.workspace();
+            MemoryGroup                      memory_group{};
+
+            WorkspaceData<Tensor> workspace =
+                manage_workspace<Tensor>(aux_mem_req, memory_group, run_pack[i], prep_pack[i]);
+
+            gemm.prepare(prep_pack[i]);
+            MemoryGroupResourceScope scope_mg(memory_group);
+
+            auto has_reshape =
+                std::find_if(aux_mem_req.begin(), aux_mem_req.end(),
+                             [](const arm_compute::experimental::MemoryInfo &m) -> bool
+                             { return m.lifetime == arm_compute::experimental::MemoryLifetime::Persistent; });
+
+            if (has_reshape != std::end(aux_mem_req))
+            {
+                b_transformed[i].mark_as_unused();
+            }
+            else
+            {
+                run_pack[i].add_const_tensor(ACL_SRC_1, &b_transformed[i]);
+            }
+
+            // Release temporary tensors that are only used in prepare stage
+            release_temporaries<Tensor>(aux_mem_req, workspace);
+
+            // Run, and store result
+            gemm.run(run_pack[i]);
+            _target[i] = std::move(dst[i]);
+        };
+
+#ifndef BARE_METAL
+        std::array<std::thread, NumRuns> threads;
+#endif // BARE_METAL
+
+        for (int i = 0; i < NumRuns; ++i)
         {
-            run_pack.add_const_tensor(ACL_SRC_1, &b_transformed);
+            run_pack[i].add_const_tensor(arm_compute::TensorType::ACL_SRC_0, &a[i]);
+            run_pack[i].add_const_tensor(arm_compute::TensorType::ACL_SRC_1, &b_transformed[i]);
+            run_pack[i].add_tensor(arm_compute::TensorType::ACL_SRC_2, &c[i]);
+            run_pack[i].add_tensor(arm_compute::TensorType::ACL_DST, &dst[i]);
+
+            // Prepare memory
+            prep_pack[i] = {{arm_compute::TensorType::ACL_SRC_1, &b_transformed[i]},
+                            {arm_compute::TensorType::ACL_SRC_2, &c[i]}};
+
+            if (_test_type == TestType::ConfigureOnceRunMultiThreaded)
+            {
+#ifndef BARE_METAL
+                threads[i] = std::thread{gemm_runner, i};
+#endif // BARE_METAL
+            }
+            else
+            {
+                gemm_runner(i);
+            }
         }
 
-        // Release temporary tensors that are only used in prepare stage
-        release_temporaries<Tensor>(aux_mem_req, workspace);
-        // End of preparing
+        for (int i = 0; i < NumRuns; ++i)
+        {
+#ifndef BARE_METAL
+            if (_test_type == TestType::ConfigureOnceRunMultiThreaded)
+            {
+                threads[i].join();
+            }
+#endif // BARE_METAL
 
-        gemm.run(run_pack);
-
-        a.allocator()->free();
-        b.allocator()->free();
-        b_transformed.allocator()->free();
-
-        return dst;
+            a[i].allocator()->free();
+            b[i].allocator()->free();
+            b_transformed[i].allocator()->free();
+        }
     }
 
-    TensorType      _target{};
-    SimpleTensor<REF_T> _reference{};
-    bool            _kernel_found{false};
+    void compute_reference(const TensorShape  &shape_a,
+                           const TensorShape  &shape_b,
+                           const TensorShape  &output_shape,
+                           DataType            data_type,
+                           bool                accumulate,
+                           ActivationLayerInfo act_info,
+                           bool                fast_math = false)
+    {
+        // Create reference
+        SimpleTensor<REF_T> a{shape_a, data_type, 1};
+        SimpleTensor<REF_T> b{shape_b, data_type, 1};
+        SimpleTensor<REF_T> c{output_shape, data_type, 1};
+        SimpleTensor<REF_T> dst{output_shape, data_type, 1};
+
+        for (int i = 0; i < NumRuns; ++i)
+        {
+            // Fill reference
+            this->fill(a, 7 * i + 0, -1.f, 1.f);
+            this->fill(b, 7 * i + 1, -1.f, 1.f);
+            this->fill(c, 7 * i + 2);
+
+            // Do in place summation
+            if (accumulate)
+            {
+                this->fill(dst, 7 * i + 6);
+            }
+
+            if (accumulate)
+            {
+                reference::gemm_accumulate<REF_T>(a, b, c, 1.0f, 0.f, dst);
+            }
+            else
+            {
+                dst = reference::gemm<REF_T>(a, b, c, 1.f, 0.f, fast_math);
+            }
+
+            if (act_info.enabled())
+            {
+                dst = reference::activation_layer<REF_T>(dst, act_info);
+            }
+
+            _reference[i] = dst;
+        }
+    }
+
+    std::array<TensorType, NumRuns>          _target{};
+    std::array<SimpleTensor<REF_T>, NumRuns> _reference{};
+    TestType                                 _test_type{TestType::ConfigureOnceRunOnce};
+};
+
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename WEI_T = T,
+          typename DST_T = T,
+          typename REF_T = T>
+class CpuGemmAssemblyDispatchFixedFormatFixture
+    : public CpuGemmAssemblyDispatchFixedFormatGenericValidationFixture<TensorType,
+                                                                        AccessorType,
+                                                                        FunctionType,
+                                                                        T,
+                                                                        WEI_T,
+                                                                        DST_T,
+                                                                        REF_T>
+{
+public:
+    void setup(TensorShape shape_a,
+               TensorShape shape_b,
+               TensorShape shape_c,
+               TensorShape output_shape,
+               float       alpha,
+               float       beta,
+               DataType    src_data_type,
+               DataType    wei_data_type,
+               DataType    dst_data_type)
+    {
+        CpuGemmAssemblyDispatchFixedFormatGenericValidationFixture<TensorType, AccessorType, FunctionType, T, WEI_T,
+                                                                   DST_T, REF_T>::setup(shape_a, shape_b, shape_c,
+                                                                                        output_shape, alpha, beta,
+                                                                                        src_data_type, wei_data_type,
+                                                                                        dst_data_type,
+                                                                                        TestType::ConfigureOnceRunOnce);
+    }
+};
+
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename WEI_T = T,
+          typename DST_T = T,
+          typename REF_T = T,
+          int NumRuns    = 1>
+class CpuGemmAssemblyDispatchFixedFormatThreadSafetyFixture
+    : public CpuGemmAssemblyDispatchFixedFormatGenericValidationFixture<TensorType,
+                                                                        AccessorType,
+                                                                        FunctionType,
+                                                                        T,
+                                                                        WEI_T,
+                                                                        DST_T,
+                                                                        REF_T,
+                                                                        NumRuns>
+{
+public:
+    void setup(TensorShape shape_a,
+               TensorShape shape_b,
+               TensorShape shape_c,
+               TensorShape output_shape,
+               float       alpha,
+               float       beta,
+               DataType    a_data_type,
+               DataType    b_data_type,
+               DataType    dst_data_type)
+    {
+        CpuGemmAssemblyDispatchFixedFormatGenericValidationFixture<
+            TensorType, AccessorType, FunctionType, T, WEI_T, DST_T, REF_T,
+            NumRuns>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, a_data_type, b_data_type,
+                            dst_data_type, TestType::ConfigureOnceRunMultiThreaded);
+    }
 };
 
 #endif //ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
@@ -541,4 +794,5 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
 #endif // ACL_TESTS_VALIDATION_FIXTURES_CPUGEMMASSEMBLYDISPATCHFIXTURE_H

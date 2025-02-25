@@ -119,6 +119,27 @@ public:
     }
 };
 
+// These shapes have been experimentally determined to hit a combination of
+// fixed-format interleaved and fixed-format hybrid kernels when run with <=16
+// threads. May need to be update if the heuristics change.
+class SmallFixedFormatGEMMDataset final : public GEMMDataset
+{
+public:
+    SmallFixedFormatGEMMDataset()
+    {
+        add_config(144, 17, 256, 1.0f, 0.0f);
+        add_config(253, 21, 127, 1.0f, 0.0f);
+        add_config(570, 24, 80, 1.0f, 0.0f);
+        add_config(13, 33, 21, 1.0f, 0.0f);
+        add_config(1, 23, 31, 1.0f, 0.0f);
+        add_config(1, 23, 31, 1.0f, 1.0f);
+        add_config(2, 16, 8, 1.0f, 0.0f);
+        add_config(12, 21, 38, 0.2f, 1.2f);
+        add_config(1, 17, 32, 0.4f, 0.7f);
+    }
+};
+
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
