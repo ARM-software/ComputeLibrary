@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023, 2025 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -27,7 +27,6 @@ cc_library(
         "core/**/*.inl",
         "*.h",
         "*.hpp",
-        "dynamic_fusion/**/*.h",
         "function_info/**/*.h",
     ]),
     visibility = ["//visibility:public"],

@@ -896,7 +896,6 @@ EXCLUDE                = ./arm_compute/core/NEON/kernels/assembly/ \
                          ./src/core/NEON/kernels/NEL2NormalizeLayerKernel.cpp \
                          ./tests/datasets/ \
                          ./tests/benchmark/fixtures/ \
-                         ./tests/validation/CL/UNIT/dynamic_fusion/ClCompositeKernel.cpp \
                          ./tests/validation/fixtures/ \
                          ./tests/validation/NEON/GEMMLowp.cpp
 

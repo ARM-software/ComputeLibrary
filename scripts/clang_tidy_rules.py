@@ -28,8 +28,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "compute_kernel_writer/include " \
-           "src/cpu/kernels/assembly " \
+    return "src/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
            "third_party/kleidiai " \
@@ -73,9 +72,6 @@ def filter_clang_tidy_lines( lines ):
             continue
 
         if "/arm_gemm/" in line:
-            continue
-
-        if "compute_kernel_writer/" in line:
             continue
 
         if "/convolution/" in line:
