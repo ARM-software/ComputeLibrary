@@ -235,6 +235,13 @@ if test_env['validation_tests']:
     Default(arm_compute_validation)
     Export('arm_compute_validation')
 
+    if test_env['test_static_dynamic_linking']:
+        Import('arm_compute_a')
+        link_test = test_env.SharedLibrary('link_test', ['validation/NEON/GEMM.cpp'], LIBS=[arm_compute_a], LINKFLAGS=test_env['LINKFLAGS'] + bm_link_flags)
+        Depends(link_test, arm_compute_a)
+        Default(link_test)
+        Export('link_test')
+
     if test_env['validate_examples']:
         files_validate_examples = [ test_env.Object('validate_examples/RunExample.cpp') ] + [ x for x in common_objects if not "main.o" in str(x)]
         if test_env['os'] == 'bare_metal':

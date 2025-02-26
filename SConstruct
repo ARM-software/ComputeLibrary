@@ -140,12 +140,13 @@ vars.AddVariables(
     BoolVariable("address_sanitizer", "Enable AddressSanitizer", False),
     BoolVariable("undefined_sanitizer", "Enable UndefinedBehaviorSanitizer", False),
     BoolVariable("thread_sanitizer", "Enable ThreadSanitizer", False),
-    ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
-    ("extra_cc_flags", "Extra CC flags to be appended to the build command", ""),
+    ("extra_cxx_flags", "Extra build flags applied to C++ files", ""),
+    ("extra_cc_flags", "Extra build flags appliled to C and C++ files", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
     ("specs_file", "Specs file to use (e.g. rdimon.specs)", ""),
-    ("build_config", "Operator/Data-type/Data-layout configuration to use for tailored ComputeLibrary builds. Can be a JSON file or a JSON formatted string", "")
+    ("build_config", "Operator/Data-type/Data-layout configuration to use for tailored ComputeLibrary builds. Can be a JSON file or a JSON formatted string", ""),
+    BoolVariable("test_static_dynamic_linking", "Test that Compute Library built as a static library can be linked into another shared library", False)
 )
 
 if version_at_least(SCons.__version__, "4.0"):
@@ -366,7 +367,7 @@ else: # NONE "multi_isa" builds
             env.Append(CCFLAGS = ['-m32'])
             env.Append(LINKFLAGS = ['-m32'])
         else:
-            env.Append(CXXFLAGS = ['-fPIC'])
+            env.Append(CCFLAGS = ['-fPIC'])
             env.Append(CCFLAGS = ['-m64'])
             env.Append(LINKFLAGS = ['-m64'])
 
@@ -484,7 +485,7 @@ env = update_data_type_layout_flags(env, data_types, data_layouts)
 
 if env['standalone']:
     if not 'windows' in env['os']:
-        env.Append(CXXFLAGS = ['-fPIC'])
+        env.Append(CCFLAGS = ['-fPIC'])
         env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
 
 if env['Werror']:
@@ -495,7 +496,7 @@ if env['os'] == 'android':
     env.Append(LINKFLAGS = ['-pie', '-static-libstdc++', '-ldl'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
-    env.Append(CXXFLAGS = ['-fPIC'])
+    env.Append(CCFLAGS = ['-fPIC'])
     if env['specs_file'] == "":
         env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
     env.Append(CPPDEFINES = ['NO_MULTI_THREADING'])
@@ -531,7 +532,7 @@ if env["os"] not in ["windows","android", "bare_metal"] and (env['opencl'] or en
 
 if env['os'] == 'openbsd':
     env.Append(LIBS = ['c'])
-    env.Append(CXXFLAGS = ['-fPIC'])
+    env.Append(CCFLAGS = ['-fPIC'])
 
 if env['opencl']:
     if env['embed_kernels']:

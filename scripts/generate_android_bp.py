@@ -96,7 +96,10 @@ arm_compute_library_defaults {
             "-DARM_COMPUTE_ENABLE_NEON",
             "-Wno-unused-parameter",
             "-DNO_DOT_IN_TOOLCHAIN",
-            "-Wno-implicit-fallthrough",
+            "-Wno-implicit-fallthrough"
+    ],
+    // cflags are applied both to C and C++ code
+    cflags: [
             "-fPIC"
     ],
     rtti: true,
