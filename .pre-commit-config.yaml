@@ -71,6 +71,7 @@ repos:
         stages: [pre-commit]
         language: script
         entry: ./scripts/check_bad_style.sh
+        pass_filenames: false
       - id: prepare-cmake-build-files
         name: Prepare CMake build files
         stages: [pre-commit]
