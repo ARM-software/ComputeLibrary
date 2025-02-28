@@ -2684,6 +2684,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <table>
     <tr><th>src<th>dst
     <tr><td>F32<td>F32
+    <tr><td>F32<td>BFLOAT16
     </table>
 <tr>
   <td rowspan="2">ReorgLayer

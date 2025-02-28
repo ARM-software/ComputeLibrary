@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,78 +32,93 @@
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/arm_gemm/transform.hpp"
 
+#include <map>
+
 namespace arm_compute
 {
+
+namespace
+{
+struct TransformParams
+{
+    int              interleave_by;
+    int              block_by;
+    bool             transpose;
+    arm_gemm::VLType vltype;
+
+    bool operator<(const TransformParams &b) const
+    {
+        if (interleave_by != b.interleave_by)
+            return interleave_by < b.interleave_by;
+        if (block_by != b.block_by)
+            return block_by < b.block_by;
+        if (static_cast<int>(vltype) != static_cast<int>(b.vltype))
+            return static_cast<int>(vltype) < static_cast<int>(b.vltype);
+        return transpose < b.transpose;
+    }
+};
+
+std::map<TransformParams, void (*)(float *, const float *, int, int, int, int, int)> supported_float_transforms = {
+    {{4, 1, true, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 1, true, arm_gemm::VLType::None, float, float>},
+#ifdef ARM_COMPUTE_ENABLE_SVE
+    {{1, 1, true, arm_gemm::VLType::SVE}, &arm_gemm::Transform<1, 1, true, arm_gemm::VLType::SVE, float, float>},
+#endif // ARM_COMPUTE_ENABLE_SVE
+};
+
+std::map<TransformParams, void (*)(bfloat16 *, const float *, int, int, int, int, int)> supported_bf16_transforms = {
+    {{4, 4, true, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 4, true, arm_gemm::VLType::None, bfloat16, float>},
+#ifdef ARM_COMPUTE_ENABLE_SVE
+    {{2, 4, true, arm_gemm::VLType::SVE}, &arm_gemm::Transform<2, 4, true, arm_gemm::VLType::SVE, bfloat16, float>},
+#endif // ARM_COMPUTE_ENABLE_SVE
+};
+
+} // namespace
 
 void NEReorderKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    switch (_input->info()->data_type())
+    ARM_COMPUTE_ERROR_ON_MSG(_input->info()->data_type() != DataType::F32, "Unsupported input data type");
+    const int ksize_rows_elements = _xmax * _ksize;
+    const int jump_rows           = ksize_rows_elements * window.x().start();
+    const int k_start             = window.x().start() * _ksize;
+    const int k_end               = std::min(window.x().end() * _ksize, _kmax);
+    const int stride              = _kmax;
+    const int block_by            = arm_compute::block_by(_output_wf);
+    const int interleave_by       = arm_compute::interleave_by(_output_wf);
+    ARM_COMPUTE_ERROR_ON(interleave_by != 4 && interleave_by != 8);
+
+    if (k_start >= k_end)
+        return;
+
+    switch (_output->info()->data_type())
     {
         case DataType::F32:
         {
-            const int ksize_rows_elements = _xmax * _ksize;
-            const int jump_rows           = ksize_rows_elements * window.x().start();
-            const int k_start             = window.x().start() * _ksize;
-            const int k_end               = std::min(window.x().end() * _ksize, _kmax);
-            const int stride              = _kmax;
-            if (k_start < k_end)
-            {
-                switch (_output_wf)
-                {
-                    case WeightFormat::OHWIo4:
-                    {
-                        switch (_output->info()->data_type())
-                        {
-                            case DataType::F32:
-                                arm_gemm::Transform<4, 1, true, arm_gemm::VLType::None>(
-                                    reinterpret_cast<float *>(_output->buffer()) + jump_rows,
-                                    reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
-                                break;
-                            case DataType::BFLOAT16:
-                                arm_gemm::Transform<4, 4, true, arm_gemm::VLType::None>(
-                                    reinterpret_cast<bfloat16 *>(_output->buffer()) + jump_rows,
-                                    reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
-                                break;
-                            default:
-                                ARM_COMPUTE_ERROR("Unsupported data type!");
-                        }
-                        break;
-                    }
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-                    case WeightFormat::OHWIo8:
-                    {
-                        switch (_output->info()->data_type())
-                        {
-                            case DataType::F32:
-                                arm_gemm::Transform<1, 1, true, arm_gemm::VLType::SVE>(
-                                    reinterpret_cast<float *>(_output->buffer()) + jump_rows,
-                                    reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
-                                break;
-                            case DataType::BFLOAT16:
-                                arm_gemm::Transform<2, 4, true, arm_gemm::VLType::SVE>(
-                                    reinterpret_cast<bfloat16 *>(_output->buffer()) + jump_rows,
-                                    reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
-                                break;
-                            default:
-                                ARM_COMPUTE_ERROR("Unsupported data type!");
-                        }
-                        break;
-                    }
-#endif /* ARM_COMPUTE_ENABLE_SVE */
-                    default:
-                    {
-                        ARM_COMPUTE_ERROR("Unsupported data type!");
-                        break;
-                    }
-                }
-            }
+            // Interleave_by is different for SVE cases. Refer to src/core/NEON/kernels/arm_gemm/transform.cpp
+            const int interleave_by_ = interleave_by == 8 ? interleave_by / (8 / block_by) : 4;
+            supported_float_transforms[{interleave_by_, block_by, _transpose,
+                                        interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}](
+                reinterpret_cast<float *>(_output->buffer()) + jump_rows, reinterpret_cast<float *>(_input->buffer()),
+                stride, k_start, k_end, 0, _xmax);
+            break;
+        }
+        case DataType::BFLOAT16:
+        {
+            // Interleave_by is different for SVE cases. Refer to transform.cpp
+            const int interleave_by_ = interleave_by == 8 ? interleave_by / (16 / block_by) : 4;
+            supported_bf16_transforms[{interleave_by_, block_by, _transpose,
+                                       interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}](
+                reinterpret_cast<bfloat16 *>(_output->buffer()) + jump_rows,
+                reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
             break;
         }
         default:
+        {
             ARM_COMPUTE_ERROR("Unsupported data type!");
+            break;
+        }
     }
 }
 
@@ -121,17 +136,19 @@ NEReorderKernel::NEReorderKernel()
 void NEReorderKernel::configure(const ITensor            *input,
                                 ITensor                  *output,
                                 arm_compute::WeightFormat input_wf,
-                                arm_compute::WeightFormat output_wf)
+                                arm_compute::WeightFormat output_wf,
+                                bool                      transpose)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, input_wf, output_wf);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), input_wf, output_wf));
+    ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), input_wf, output_wf, transpose));
 
     // Set variables
     _input     = input;
     _output    = output;
     _input_wf  = input_wf;
     _output_wf = output_wf;
+    _transpose = transpose;
 
     // Setting parameters for transform
     auto dims = input->info()->num_dimensions();
@@ -159,28 +176,9 @@ void NEReorderKernel::configure(const ITensor            *input,
     // Window size is set by rows / _ksize
     Window win;
     int    window_size = 0;
-    switch (_output_wf)
-    {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-        case WeightFormat::OHWIo8:
-        {
-            _ksize      = 8;
-            window_size = _kmax / _ksize;
-            break;
-        }
-#endif /* ARM_COMPUTE_ENABLE_SVE */
-        case WeightFormat::OHWIo4:
-        {
-            _ksize      = 4;
-            window_size = _kmax / _ksize;
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Unsupported weight format.");
-            break;
-        }
-    }
+    ARM_COMPUTE_ERROR_ON(arm_compute::interleave_by(_output_wf) != 4 && arm_compute::interleave_by(_output_wf) != 8);
+    _ksize      = arm_compute::interleave_by(_output_wf);
+    window_size = _kmax / _ksize;
     if (_kmax % _ksize != 0)
     {
         window_size += 1;
@@ -194,8 +192,10 @@ void NEReorderKernel::configure(const ITensor            *input,
 Status NEReorderKernel::validate(const ITensorInfo        *input,
                                  const ITensorInfo        *output,
                                  arm_compute::WeightFormat input_wf,
-                                 arm_compute::WeightFormat output_wf)
+                                 arm_compute::WeightFormat output_wf,
+                                 bool                      transpose)
 {
+    ARM_COMPUTE_UNUSED(input_wf);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     if (output->tensor_shape().total_size() != 0)
@@ -203,8 +203,7 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
         ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON(output->data_type() != DataType::F32 && output->data_type() != DataType::BFLOAT16);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-        // Only input WeightFormat OHWI supported
-        ARM_COMPUTE_RETURN_ERROR_ON(input_wf != arm_compute::WeightFormat::OHWI);
+
         int  input_x_dim;
         int  input_k_dim;
         int  output_x_dim;
@@ -234,40 +233,64 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
             }
         }
 
-        int ksize = 0;
-        switch (output_wf)
+        int ksize         = 0;
+        int interleave_by = arm_compute::interleave_by(output_wf);
+        int block_by      = arm_compute::block_by(output_wf);
+        ARM_COMPUTE_RETURN_ERROR_ON(interleave_by != 4 && interleave_by != 8);
+        if (interleave_by == 8)
         {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-            case WeightFormat::OHWIo8:
+#ifdef ARM_COMPUTE_ENABLE_SVE
+            ARM_COMPUTE_RETURN_ERROR_ON(!Scheduler::get().cpu_info().has_sve() ||
+                                        arm_gemm::utils::get_vector_length<float>() != 8);
+#else  // ARM_COMPUTE_ENABLE_SVE
+            ARM_COMPUTE_RETURN_ERROR_MSG("SVE format requested on non-SVE machine");
+#endif // ARM_COMPUTE_ENABLE_SVE
+        }
+        ksize = interleave_by;
+
+        if (transpose)
+        {
+            // output k_dim needs to be same as input but multiple of ksize
+            int32_t rnd_up_input_kdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_k_dim, ksize);
+            ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_kdim != output_k_dim);
+            // output x_dim needs to be same as input
+            ARM_COMPUTE_RETURN_ERROR_ON(input_x_dim != output_x_dim);
+        }
+        else
+        {
+            // output x_dim needs to be same as input but multiple of ksize
+            int32_t rnd_up_input_xdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_x_dim, ksize);
+            ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_xdim != output_x_dim);
+            // output k_dim needs to be same as input
+            ARM_COMPUTE_RETURN_ERROR_ON(input_k_dim != output_k_dim);
+        }
+
+        switch (output->data_type())
+        {
+            case DataType::F32:
             {
-                if (Scheduler::get().cpu_info().has_sve() && arm_gemm::utils::get_vector_length<float>() == 8)
-                {
-                    ksize = 8;
-                }
-                else
-                {
-                    ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported weight format.");
-                }
+                // Interleave_by is different for SVE cases. Refer to transform.cpp
+                const int interleave_by_ = interleave_by == 8 ? interleave_by / (8 / block_by) : 4;
+                ARM_COMPUTE_RETURN_ERROR_ON(!supported_float_transforms.count(
+                    {interleave_by_, block_by, transpose,
+                     interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}));
                 break;
             }
-#endif /* ARM_COMPUTE_ENABLE_SVE */
-            case WeightFormat::OHWIo4:
+            case DataType::BFLOAT16:
             {
-                ksize = 4;
+                // Interleave_by is different for SVE cases. Refer to transform.cpp
+                const int interleave_by_ = interleave_by == 8 ? interleave_by / (16 / block_by) : 4;
+                ARM_COMPUTE_RETURN_ERROR_ON(!supported_bf16_transforms.count(
+                    {interleave_by_, block_by, transpose,
+                     interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}));
                 break;
             }
             default:
             {
-                ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported weight format.");
+                ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported output data type");
                 break;
             }
         }
-
-        // output k_dim needs to be same as input but multiple of ksize
-        int32_t rnd_up_input_kdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_k_dim, ksize);
-        ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_kdim != output_k_dim);
-        // output x_dim needs to be same as input
-        ARM_COMPUTE_RETURN_ERROR_ON(input_x_dim != output_x_dim);
     }
     return Status{};
 }

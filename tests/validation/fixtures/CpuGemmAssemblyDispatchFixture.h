@@ -431,7 +431,7 @@ protected:
         this->fill(AccessorType(b), 1, -1.f, 1.f);
 
         // Reorder weight to the expected format
-        reorder.configure(&b, &b_transformed, WeightFormat::OHWI, computed_weight_format);
+        reorder.configure(&b, &b_transformed, WeightFormat::OHWI, computed_weight_format, true);
         reorder.run();
 
         ARM_COMPUTE_ASSERT(gemm.validate(a.info(), b_transformed.info(), nullptr, dst.info(), gemm_info));

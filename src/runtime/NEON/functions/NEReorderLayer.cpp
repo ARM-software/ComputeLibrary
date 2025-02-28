@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,10 +41,11 @@ NEReorderLayer::NEReorderLayer() : _reorder_kernel(std::make_unique<NEReorderKer
 void NEReorderLayer::configure(const ITensor            *input,
                                ITensor                  *output,
                                arm_compute::WeightFormat input_wf,
-                               arm_compute::WeightFormat output_wf)
+                               arm_compute::WeightFormat output_wf,
+                               bool                      transpose)
 {
     auto k = std::make_unique<NEReorderKernel>();
-    k->configure(input, output, input_wf, output_wf);
+    k->configure(input, output, input_wf, output_wf, transpose);
     _reorder_kernel = std::move(k);
 }
 
@@ -57,10 +58,11 @@ void NEReorderLayer::run()
 Status NEReorderLayer::validate(const ITensorInfo        *input,
                                 const ITensorInfo        *output,
                                 arm_compute::WeightFormat input_wf,
-                                arm_compute::WeightFormat output_wf)
+                                arm_compute::WeightFormat output_wf,
+                                bool                      transpose)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
-    return NEReorderKernel::validate(input, output, input_wf, output_wf);
+    return NEReorderKernel::validate(input, output, input_wf, output_wf, transpose);
 }
 
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__aarch64__)
 
-#ifndef ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL
-#define ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL_H
+
+#if defined(__aarch64__)
 
 #include "arm_compute/core/Types.h"
 
@@ -61,11 +62,13 @@ public:
      * @param[out] output    Destination tensor. Data type supported: same as @p input. Shape same as @p input expect last dimension which needs to be multiple of blocking parameter _ksize.
      * @param[in]  input_wf  WeightFormat of input.
      * @param[in]  output_wf WeightFormat of output.
+     * @param[in]  transpose Whether to transpose or not.
      */
     void configure(const ITensor            *input,
                    ITensor                  *output,
                    arm_compute::WeightFormat input_wf,
-                   arm_compute::WeightFormat output_wf);
+                   arm_compute::WeightFormat output_wf,
+                   bool                      transpose);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReorderKernel
      *
@@ -73,13 +76,15 @@ public:
      * @param[in] output    Destination tensor. Data type supported: same as @p input. Shape same as @p input expect last dimension which needs to be multiple of blocking parameter _ksize.
      * @param[in] input_wf  WeightFormat of input.
      * @param[in] output_wf WeightFormat of output.
+     * @param[in] transpose Whether to transpose or not.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo        *input,
                            const ITensorInfo        *output,
                            arm_compute::WeightFormat input_wf,
-                           arm_compute::WeightFormat output_wf);
+                           arm_compute::WeightFormat output_wf,
+                           bool                      transpose);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -94,9 +99,11 @@ private:
     int32_t        _xmax{0};         // Columns in input tensor
     WeightFormat   _input_wf{WeightFormat::UNSPECIFIED};  // WeightFormat of input tensor
     WeightFormat   _output_wf{WeightFormat::UNSPECIFIED}; // WeightFormat of output tensor
+    bool           _transpose = false;                    // Whether to transpose or not
 };
 
 } // namespace arm_compute
-#endif /* ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL */
 
 #endif // defined(__aarch64__)
+
+#endif // ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL_H
