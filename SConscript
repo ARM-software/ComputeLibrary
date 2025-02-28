@@ -73,8 +73,8 @@ def build_obj_list(arch_info, sources, static=False):
     tmp_env = arm_compute_env.Clone()
 
     # Append architecture spec
-    if 'cxxflags' in arch_info and len(arch_info['cxxflags']) > 0:
-        tmp_env.Append(CXXFLAGS = arch_info['cxxflags'])
+    if 'ccflags' in arch_info and len(arch_info['ccflags']) > 0:
+        tmp_env.Append(CCFLAGS = arch_info['ccflags'])
 
     # Build and return objects
     if static:
@@ -164,6 +164,10 @@ def build_library(name, build_env, sources, static=False, libs=[]):
         cloned_build_env['CXXCOM'] = "${TEMPFILE('"+ cloned_build_env['CXXCOM'] + "')}"
         #The command line used to compile C++ source file to a shared-library object file
         cloned_build_env['SHCXXCOM'] = "${TEMPFILE('"+ cloned_build_env['SHCXXCOM'] + "')}"
+        #The command line used to compile C source file to an object file
+        cloned_build_env['CCCOM'] = "${TEMPFILE('"+ cloned_build_env['CCCOM'] + "')}"
+        #The command line used to compile C source file to a shared-library object file
+        cloned_build_env['SHCCCOM'] = "${TEMPFILE('"+ cloned_build_env['SHCCCOM'] + "')}"
         #The command line used to generate a static library from object files
         cloned_build_env['ARCOM'] = "${TEMPFILE('"+ cloned_build_env['ARCOM'] + "')}"
         #The command line used to link object files into an executable

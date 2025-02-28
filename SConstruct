@@ -319,29 +319,29 @@ if env['multi_isa']:
         Exit(1)
 
     if 'v8a' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8-a'])
+        env.Append(CCFLAGS = ['-march=armv8-a'])
     else:
         if 'v8.6-a' in env['arch']:
             if "disable_mmla_fp" not in env['custom_options']:
                 env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
 
-        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        env.Append(CCFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
 
 else: # NONE "multi_isa" builds
 
     if 'v7a' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
+        env.Append(CCFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
         if (env['os'] == 'android' or env['os'] == 'tizen') and not 'hf' in env['arch']:
-            env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
+            env.Append(CCFLAGS = ['-mfloat-abi=softfp'])
         else:
-            env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+            env.Append(CCFLAGS = ['-mfloat-abi=hard'])
     elif 'v8.6-a' in env['arch']:
         if 'armv8.6-a-sve2' in env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.6-a+sve2'])
+            env.Append(CCFLAGS = ['-march=armv8.6-a+sve2'])
         elif 'armv8.6-a-sve' == env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.6-a+sve'])
+            env.Append(CCFLAGS = ['-march=armv8.6-a+sve'])
         elif 'armv8.6-a' == env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.6-a+fp16'])
+            env.Append(CCFLAGS = ['-march=armv8.6-a+fp16'])
 
         env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16','ARM_COMPUTE_ENABLE_FP16'])
         if "disable_mmla_fp" not in env['custom_options']:
@@ -349,15 +349,15 @@ else: # NONE "multi_isa" builds
     elif 'v8' in env['arch']:
         # Preserve the V8 archs for non-multi-ISA variants
         if 'sve2' in env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
+            env.Append(CCFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
         elif 'sve' in env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
+            env.Append(CCFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
         elif 'armv8r64' in env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.4-a'])
+            env.Append(CCFLAGS = ['-march=armv8.4-a'])
         elif 'v8.' in env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+            env.Append(CCFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
         else:
-            env.Append(CXXFLAGS = ['-march=armv8-a'])
+            env.Append(CCFLAGS = ['-march=armv8-a'])
 
         if 'v8.' in env['arch']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
@@ -469,7 +469,7 @@ if not GetOption("help"):
             # System assembler is deprecated and integrated assembler is preferred since r23.
             # However integrated assembler has always been suppressed for NDK < r23.
             # Thus for backward compatibility, we include this flag only for NDK < r23
-            env.Append(CXXFLAGS = ['-no-integrated-as'])
+            env.Append(CCFLAGS = ['-no-integrated-as'])
 
 data_types = []
 data_layouts = []
@@ -544,43 +544,44 @@ if env['opencl']:
 if env['debug']:
     env['asserts'] = True
     if not 'windows' in env['os']:
-        env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
+        env.Append(CCFLAGS = ['-O0','-g','-gdwarf-2'])
     else:
-        env.Append(CXXFLAGS = ['-Z7','-MTd','-fms-compatibility','-fdelayed-template-parsing'])
+        env.Append(CCFLAGS = ['-Z7','-MTd','-fms-compatibility'])
+        env.Append(CXXFLAGS = ['-fdelayed-template-parsing'])
         env.Append(LINKFLAGS = ['-DEBUG'])
 
     env.Append(CPPDEFINES = ['ARM_COMPUTE_DEBUG_ENABLED'])
 else:
     if not 'windows' in env['os']:
-        env.Append(CXXFLAGS = ['-O3'])
+        env.Append(CCFLAGS = ['-O3'])
     else:
         # on windows we use clang-cl which does not support the option -O3
         if not version_at_least(compiler_ver, '17.0.0'):
             # Disable optimizations in clang 17 or later because the compiler crashes with -O2
-            env.Append(CXXFLAGS = ['-O2'])
+            env.Append(CCFLAGS = ['-O2'])
 
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
     if not 'windows' in env['os']:
-        env.Append(CXXFLAGS = ['-fstack-protector-strong'])
+        env.Append(CCFLAGS = ['-fstack-protector-strong'])
 
 if env['logging']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])
 
 if env['address_sanitizer']:
     if 'android' in env['os']:
-        env.Append(CXXFLAGS = ['-fsanitize=hwaddress'])
+        env.Append(CCFLAGS = ['-fsanitize=hwaddress'])
         env.Append(LINKFLAGS = ['-fsanitize=hwaddress'])
     else:
-        env.Append(CXXFLAGS = ['-fsanitize=address'])
+        env.Append(CCFLAGS = ['-fsanitize=address'])
         env.Append(LINKFLAGS = ['-fsanitize=address'])
 
 if env['undefined_sanitizer']:
-    env.Append(CXXFLAGS = ['-fsanitize=undefined'])
+    env.Append(CCFLAGS = ['-fsanitize=undefined'])
     env.Append(LINKFLAGS = ['-fsanitize=undefined'])
 
 if env['thread_sanitizer']:
-    env.Append(CXXFLAGS = ['-fsanitize=thread'])
+    env.Append(CCFLAGS = ['-fsanitize=thread'])
     env.Append(LINKFLAGS = ['-fsanitize=thread'])
 
 env.Append(CPPPATH = ['#/include', "#"])
@@ -599,7 +600,7 @@ if env['multi_isa'] and env['os'] == 'macos':
     # they are included (probably first) and depending on the file
     # they might get sve/sve2 architectural feature flags during the
     # compilation.
-    env.Append(CXXFLAGS = ['-fno-vectorize'])
+    env.Append(CCFLAGS = ['-fno-vectorize'])
 
 Default( install_include("arm_compute"))
 Default( install_include("support"))
