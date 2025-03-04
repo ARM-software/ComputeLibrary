@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "src/common/utils/Log.h"
 #include "src/cpu/operators/CpuElementwise.h"
+#include "src/cpu/operators/CpuPRelu.h"
 
 #include <memory>
 
@@ -117,6 +118,34 @@ Status CpuElementwiseMin::validate(const ITensorInfo *src0, const ITensorInfo *s
 void CpuElementwiseMin::run(ITensorPack &tensors)
 {
     _impl->minOp->run(tensors);
+}
+
+// CpuPRelu implementation:
+struct CpuPRelu::Impl
+{
+    std::unique_ptr<cpu::CpuPRelu> PReluOp{nullptr};
+};
+
+CpuPRelu::CpuPRelu() : _impl(std::make_unique<Impl>())
+{
+    _impl->PReluOp = std::make_unique<cpu::CpuPRelu>();
+}
+
+CpuPRelu::~CpuPRelu() = default;
+
+void CpuPRelu::configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output)
+{
+    _impl->PReluOp->configure(input, alpha, output);
+}
+
+Status CpuPRelu::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
+{
+    return cpu::CpuPRelu::validate(input, alpha, output);
+}
+
+void CpuPRelu::run(ITensorPack &tensors)
+{
+    _impl->PReluOp->run(tensors);
 }
 
 } // namespace op
