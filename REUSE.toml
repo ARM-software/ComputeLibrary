@@ -57,11 +57,6 @@ SPDX-FileCopyrightText = "2018-2025 Arm Limited"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["compute_kernel_writer/README.md"]
-SPDX-FileCopyrightText = "2023 Arm Limited"
-SPDX-License-Identifier = "MIT"
-
-[[annotations]]
 path = ["examples/gemm_tuner/README.md"]
 SPDX-FileCopyrightText = "2019-2021 Arm Limited"
 SPDX-License-Identifier = "MIT"

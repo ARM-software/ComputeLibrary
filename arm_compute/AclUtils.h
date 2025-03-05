@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,17 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_UTILS_H_
-#define ARM_COMPUTE_ACL_UTILS_H_
+#ifndef ACL_ARM_COMPUTE_ACLUTILS_H
+#define ACL_ARM_COMPUTE_ACLUTILS_H
 
 #include "arm_compute/AclTypes.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /** __cplusplus */
 
-    /** Get the size of the existing tensor in byte
+/** Get the size of the existing tensor in byte
  *
  * @note The size isn't based on allocated memory, but based on information in its descriptor (dimensions, data type, etc.).
  *
@@ -43,9 +42,9 @@ extern "C"
  *  - @ref AclSuccess if function was completed successfully
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclGetTensorSize(AclTensor tensor, uint64_t *size);
+AclStatus AclGetTensorSize(AclTensor tensor, uint64_t *size);
 
-    /** Get the descriptor of this tensor
+/** Get the descriptor of this tensor
  *
  * @param[in]  tensor A tensor in interest
  * @param[out] desc   The descriptor of the tensor
@@ -55,10 +54,10 @@ extern "C"
  *  - @ref AclSuccess if function was completed successfully
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-    AclStatus AclGetTensorDescriptor(AclTensor tensor, AclTensorDescriptor *desc);
+AclStatus AclGetTensorDescriptor(AclTensor tensor, AclTensorDescriptor *desc);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* ARM_COMPUTE_ACL_UTILS_H_ */
+#endif // ACL_ARM_COMPUTE_ACLUTILS_H

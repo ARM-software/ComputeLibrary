@@ -86,6 +86,10 @@ public:
      * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
+     *
+     * @warning For F16, this function may encounter unexpected behavior due to a known issue: for large enough input values, the intermediate results in the winograd
+     * domain will be too large for the type float16_t and this will cause the final result to be incorrect. To prevent this make sure the input values are not too large.
+     *
      */
     void configure(const ITensor             *input,
                    const ITensor             *weights,

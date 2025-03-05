@@ -29,9 +29,6 @@ import datetime
 
 # Paths to exclude
 excluded_paths = ["build",
-                  "compute_kernel_writer/",
-                  "src/dynamic_fusion/runtime/gpu/cl/ckw_driver/",
-                  "src/dynamic_fusion/sketch/gpu/ckw_driver/",
                   "docs/",
                   "documentation/",
                   "examples/",
@@ -111,7 +108,6 @@ cc_library_static {
     proprietary: true,
     local_include_dirs: ["build/android-arm64v8a/src/core",
                          "build/android-arm64v8a/src/core/CL",
-                         "compute_kernel_writer/include",
                          "src/core/common",
                          "src/core/helpers",
                          "src/core/NEON/kernels/arm_gemm",

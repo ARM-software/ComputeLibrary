@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,7 +122,7 @@ bool CpuGemmAssemblyDispatch::has_stateless_impl() const
 {
     ARM_COMPUTE_ERROR_ON_MSG(!is_configured(), "calling has_stateless_impl() on unconfigured CpuGemmAssemblyDispatch");
 
-    return _impl->cpu_gemm_assembly_dispatch->has_stateless_impl();
+    return true;
 }
 
 bool CpuGemmAssemblyDispatch::is_activation_supported(const ActivationLayerInfo &activation)

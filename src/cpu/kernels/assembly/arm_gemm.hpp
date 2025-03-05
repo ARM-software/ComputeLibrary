@@ -44,7 +44,6 @@ enum class GemmMethod
     GEMM_NATIVE,
     GEMM_HYBRID,
     GEMM_INTERLEAVED,
-    QUANTIZE_WRAPPER,
     GEMM_HYBRID_QUANTIZED
 };
 

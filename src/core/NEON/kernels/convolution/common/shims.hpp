@@ -33,8 +33,9 @@ namespace reorder {
  *
  * @note The stride parameters are optional and are provided to allow padding in either input or output tensors.
  *
- * @param[in] in Input tensor in NCHW format.
+ * @param[in]  in  Input tensor in NCHW format.
  * @param[out] out Output tensor, to be written in NHWC format.
+ *
  * @param n_batches Number of batches in the tensors.
  * @param n_channels Number of channels in the tensors
  * @param n_rows Height of the tensor
@@ -66,8 +67,9 @@ inline void nchw_to_nhwc(
  *
  * @note The stride parameters are optional and are provided to allow padding in either input or output tensors.
  *
- * @param[in] in Input tensor in NHWC format.
+ * @param[in]  in  Input tensor in NHWC format.
  * @param[out] out Output tensor, to be written in NCHW format.
+ *
  * @param n_batches Number of batches in the tensors.
  * @param n_rows Height of the tensor
  * @param n_cols Width of the tensor

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024 Arm Limited.
+ * Copyright (c) 2017-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,9 +26,6 @@
 #include <stdio.h>
 
 #include "arm_gemm.hpp"
-#include "bias_adder.hpp"
-#include "mergeresults.hpp"
-#include "transform.hpp"
 
 #ifdef CYCLE_PROFILING
 #include "profiler.hpp"
@@ -139,8 +136,8 @@ public:
         return { iceildiv(_args._Nsize, strategy::out_width()) * _args._nmulti };
     }
 
-    // Use the stateless interface to execute the GEMV.
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, To, Tr>& g_array) override {
+    // Common execution logic.
+    void execute_common(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, To, Tr>& g_arrays) {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -175,11 +172,11 @@ public:
 #ifdef CYCLE_PROFILING
                     auto p = prof.ScopedProfiler(PROFILE_KERNEL, (kmax-k0) * (nmax-n));
 #endif
-                    run_gemv_kernel<OutputStage>::run(strat, g_array._Aptr + (multi * g_array._A_multi_stride) + k0,
+                    run_gemv_kernel<OutputStage>::run(strat, g_arrays._Aptr + (multi * g_arrays._A_multi_stride) + k0,
                                  _B_pretransposed + (multi * _buffer_per_multi) + (n * roundup(_args._Ksize, strategy::k_unroll())) + (k0 * strategy::out_width()),
-                                 g_array._Cptr + (multi * g_array._C_multi_stride) + n,
+                                 g_arrays._Cptr + (multi * g_arrays._C_multi_stride) + n,
                                  (nmax - n), (kmax-k0),
-                                 g_array._bias ? g_array._bias + (multi * g_array._bias_multi_stride) + n : nullptr,
+                                 g_arrays._bias ? g_arrays._bias + (multi * g_arrays._bias_multi_stride) + n : nullptr,
                                  _args._act, (k0 != 0) || _args._accumulate,
                                  _os, col_bias, n + (_args._Nsize * multi));
                 }
@@ -187,9 +184,14 @@ public:
         }
     }
 
+    // Stateless execute
+    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &g_arrays) override {
+        return execute_common(work_range, thread_locator, threadid, g_arrays);
+    }
+
     // Actually execute the GEMV.
     void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
+        execute_common(work_range, thread_locator, threadid, this->_gemm_arrays);
     }
 
     /* Pretransposed interface implementation */

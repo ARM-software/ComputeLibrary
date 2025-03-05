@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, 2024 Arm Limited.
+ * Copyright (c) 2018-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,10 +104,11 @@ public:
         ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(_kernel)));
         ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
 
-        const auto *Aptr = reinterpret_cast<const TypeInput *>(tensors.get_tensor(ACL_SRC_0)->buffer());
-        const auto *Bptr = reinterpret_cast<const TypeWeight *>(tensors.get_tensor(ACL_SRC_1)->buffer());
-        const auto *bias = reinterpret_cast<const TypeOutput *>(tensors.get_tensor(ACL_SRC_2)->buffer());
-        auto       *Cptr = reinterpret_cast<TypeOutput *>(tensors.get_tensor(ACL_DST)->buffer());
+        const auto *Aptr      = reinterpret_cast<const TypeInput *>(tensors.get_tensor(ACL_SRC_0)->buffer());
+        const auto *Bptr      = reinterpret_cast<const TypeWeight *>(tensors.get_tensor(ACL_SRC_1)->buffer());
+        const auto *bias      = reinterpret_cast<const TypeOutput *>(tensors.get_tensor(ACL_SRC_2)->buffer());
+        void       *workspace = tensors.get_tensor(ACL_SRC_3)->buffer();
+        auto       *Cptr      = reinterpret_cast<TypeOutput *>(tensors.get_tensor(ACL_DST)->buffer());
 
         ARM_COMPUTE_ERROR_ON_NULLPTR(Aptr, Cptr);
 
@@ -119,6 +120,7 @@ public:
         ga._Bptr = Bptr;
         ga._bias = bias;
         ga._Cptr = Cptr;
+        ga.set_working_space(workspace);
 
         auto win = arm_gemm::to_ndcoord(window);
 

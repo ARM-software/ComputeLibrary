@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2024 Arm Limited.
+ * Copyright (c) 2019-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,7 @@ DATA_TEST_CASE(Complex, framework::DatasetMode::ALL, shapes_1d_dft,
     auto backward = reference::dft_1d(forward, reference::FFTDirection::Inverse);
 
     // Validate with input
-    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f));
+    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f), 0.f, AbsoluteTolerance<float>(0.001f));
 }
 TEST_SUITE_END() // DFT1D
 

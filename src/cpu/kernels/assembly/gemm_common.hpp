@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021,2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021,2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -201,21 +201,21 @@ template <typename To, typename Tw, typename Tr>
 class GemmCommon : public IGemmCommon
 {
 protected:
-    GemmArrays<To, Tw, Tr> _gemm_array{};
+    GemmArrays<To, Tw, Tr> _gemm_arrays{};
 
 public:
-    /* Pass in the pointers to the arrays to be operated on and their
-     * strides (templated version with appropriate types). */
     void set_gemm_arrays(GemmArrays<To, Tw, Tr> &ga)
     {
-        _gemm_array = ga;
+        _gemm_arrays = ga;
     }
 
     const GemmArrays<To, Tw, Tr> &get_gemm_arrays() const
     {
-        return _gemm_array;
+        return _gemm_arrays;
     }
 
+    /* Pass in the pointers to the arrays to be operated on and their
+     * strides (templated version with appropriate types). */
     virtual void set_arrays(const To                                     *A,
                             const int                                     lda,
                             const int                                     A_batch_stride,
@@ -230,8 +230,8 @@ public:
                             const Tr                                     *bias,
                             /* no row or batch stride needed */ const int bias_multi_stride)
     {
-        _gemm_array.set_arrays(A, lda, A_batch_stride, A_multi_stride, B, ldb, B_multi_stride, C, ldc, C_batch_stride,
-                               C_multi_stride, bias, bias_multi_stride);
+        _gemm_arrays.set_arrays(A, lda, A_batch_stride, A_multi_stride, B, ldb, B_multi_stride, C, ldc, C_batch_stride,
+                                C_multi_stride, bias, bias_multi_stride);
     }
 
     /* Implementation of the void * overload which casts its arguments to the appropriate type. */

@@ -124,10 +124,6 @@ filter_pattern = test_env['test_filter']
 files_validation += Glob('validation/CPP/' + filter_pattern)
 
 if env['opencl']:
-    if env['experimental_dynamic_fusion']:
-        files_validation += Glob('validation/dynamic_fusion/gpu/' + filter_pattern)
-        files_validation += Glob('validation/dynamic_fusion/gpu/cl/' + filter_pattern)
-
     filter_pattern = test_env['test_filter']
 
     test_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])

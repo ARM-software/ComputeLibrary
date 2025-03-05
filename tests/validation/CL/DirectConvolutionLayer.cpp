@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,9 +35,6 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DirectConvolutionLayerFixture.h"
 
-/** Synced with tests/validation/dynamic_fusion/gpu/cl/DirectConv2d.cpp
- *  Please check there for any differences in the coverage
- */
 namespace arm_compute
 {
 namespace test

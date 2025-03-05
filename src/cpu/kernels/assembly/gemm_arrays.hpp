@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,8 @@ struct IGemmArrays
                                     const void *bias,
                                     const int   bias_multi_stride) = 0; /* no row or batch stride needed */
 
+    virtual void set_working_space(void *workspace) = 0;
+
     virtual ~IGemmArrays() = default;
 };
 
@@ -71,6 +73,7 @@ struct GemmArrays : public IGemmArrays
     int       _C_multi_stride    = 0;
     const Tr *_bias              = nullptr;
     int       _bias_multi_stride = 0;
+    void     *_workspace         = nullptr;
 
     GemmArrays() = default;
 
@@ -158,6 +161,11 @@ struct GemmArrays : public IGemmArrays
         set_arrays(static_cast<const To *>(A), lda, A_batch_stride, A_multi_stride, static_cast<const Tw *>(B), ldb,
                    B_multi_stride, static_cast<Tr *>(C), ldc, C_batch_stride, C_multi_stride,
                    static_cast<const Tr *>(bias), bias_multi_stride);
+    }
+
+    void set_working_space(void *workspace) override
+    {
+        _workspace = workspace;
     }
 };
 } // namespace arm_gemm

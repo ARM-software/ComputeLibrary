@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 #define ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_LOW_LEVEL_CPUGEMMASSEMBLYDISPATCH_H
 
 #include "arm_compute/core/ITensorPack.h"
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/runtime/IOperator.h"
 
@@ -150,6 +149,11 @@ public:
                                const GEMMInfo            &gemm_info = GEMMInfo());
 
     /** Indicates whether or not there is a implementation for the configured GEMM
+     *
+     * @deprecated All fixed-format kernels are now stateless.
+     * For now this function will always return true, but it will be removed
+     * completely in a future release.
+     *
      * @return a bool: true if the implementation is stateless; false if not.
      */
     bool has_stateless_impl() const;

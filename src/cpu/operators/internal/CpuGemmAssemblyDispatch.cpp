@@ -29,7 +29,6 @@
 
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/core/utils/AssemblyUtils.h"
 #include "src/cpu/kernels/assembly/arm_gemm.hpp"
 #include "src/cpu/kernels/assembly/CpuGemmAssemblyWrapperKernel.h"
@@ -229,11 +228,6 @@ public:
         opt->configure_window(win);
 
         _is_prepared = is_prepared;
-    }
-
-    bool has_stateless_impl() const override
-    {
-        return _gemm_kernel_asm->get_working_size() == 0;
     }
 
 private:
@@ -806,8 +800,11 @@ void Fallback<TypeInput, TypeWeight, TypeOutput, OutputStage>::run(ITensorPack &
     out_tensor.allocator()->init(*(d->info()));
     out_tensor.allocator()->import_memory(out_ptr);
 
-    ITensorPack gemm_pack{
-        {ACL_SRC_0, &in0_tensor}, {ACL_SRC_1, &in1_tensor}, {ACL_SRC_2, &bias_tensor}, {ACL_DST, &out_tensor}};
+    ITensorPack gemm_pack{{ACL_SRC_0, &in0_tensor},
+                          {ACL_SRC_1, &in1_tensor},
+                          {ACL_SRC_2, &bias_tensor},
+                          {ACL_SRC_3, workspace.get()},
+                          {ACL_DST, &out_tensor}};
 
     // Set gemm parameters
     _gemm_kernel_asm->set_arrays(in0_ptr, lda, batch_stride_a, multi_stride_a, in1_ptr, ldb, multi_stride_b, out_ptr,
@@ -1035,11 +1032,6 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
     expected_weight_format = assembly_utils::map_to_arm_compute_weight_format(arm_gemm_expected_wf);
 
     return Status{};
-}
-
-bool CpuGemmAssemblyDispatch::has_stateless_impl() const
-{
-    return _arm_gemm->has_stateless_impl();
 }
 
 Status CpuGemmAssemblyDispatch::validate(

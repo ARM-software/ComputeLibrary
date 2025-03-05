@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,10 +31,8 @@
 #include "convolver.hpp"
 #include "kernel_traits.hpp"
 #include "kernel_weight_format.hpp"
-#include "mergeresults.hpp"
 #include "performance_parameters.hpp"
 #include "quantized.hpp"
-#include "transform.hpp"
 #include "utils.hpp"
 
 #ifdef CYCLE_PROFILING
@@ -418,6 +416,11 @@ struct get_kernel_weight_format<strategy, true, Tro> {
     }
 };
 
+// Calculate the offset needed if the address is not a multiple of cache-line length
+inline size_t get_cache_align_offset(uintptr_t addr) {
+    return (addr & 0x3F) ? 0x40 - (addr & 0x3F) : 0;
+}
+
 } // anonymous namespace
 
 template<typename strategy, typename Tlo, typename Tro, typename Tr, typename OutputStage=Nothing, bool MergeStep=true, bool FixedFormat=false, bool ForceThreadColumns=false, bool ForceFloatAccumulate=false>
@@ -455,9 +458,6 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
 
     /* Working space, pretransposed buffer, buffer manager */
     const Troi *_B_transposed=nullptr;
-    void *_working_space=nullptr;
-
-    Tab *_accumulation_buffer=nullptr;
 
     /* Output stage */
     OutputStage  _os;
@@ -600,10 +600,25 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
         return num_buffers * size_per_buffer;
     }
 
+    // Set up accumulation buffer
+    Tab *get_accumulation_buffer_offset(void *working_space) const {
+        Tab *accumulation_buffer = nullptr;
+
+        auto working_space_addr = reinterpret_cast<uintptr_t>(working_space);
+
+        if (get_accumulation_buffer_size() > 0) {
+            auto acc_buff_addr = working_space_addr + get_a_working_size() + (get_c_working_size() * _maxthreads);
+            acc_buff_addr += get_cache_align_offset(acc_buff_addr);
+            accumulation_buffer = reinterpret_cast<Tab *>(acc_buff_addr);
+        }
+
+        return accumulation_buffer;
+    }
+
     // Get pointer into accumulation buffer
-    Tab *get_accumulation_buffer(unsigned int M, unsigned int N, unsigned int batch, unsigned int multi) const {
+    Tab *get_accumulation_buffer(Tab *accumulation_buffer, unsigned int M, unsigned int N, unsigned int batch, unsigned int multi) const {
         // Don't do anything if there's no buffer.
-        if (_accumulation_buffer == nullptr) {
+        if (accumulation_buffer == nullptr) {
             return nullptr;
         }
 
@@ -623,7 +638,7 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
 
         size_t buffer_index = multi * buffers_per_multi + batch * buffers_per_batch + row * buffer_cols + col;
 
-        return _accumulation_buffer + (buffer_index * size_per_buffer);
+        return accumulation_buffer + (buffer_index * size_per_buffer);
     }
 
     int32_t row_sum_multiplier() const {
@@ -806,7 +821,7 @@ public:
                       _Ksections(args._Ksections), _Ktotal(get_ktotal(args)),
                       _rounded_Ksize(roundup(_Ksize, strategy::k_unroll())),
                       _nbatches(args._nbatches), _nmulti(args._nmulti), _thread_columns(is_thread_columns(args)),
-                      _act(args._act), _accumulate(args._accumulate),  _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
+                      _act(args._act), _accumulate(args._accumulate), _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
                       _k_block(get_k_block_size(args)), _x_block(get_x_block_size(args)), _Mround(roundup(args._Msize, strategy::out_height())),
                       _os() { }
 
@@ -832,27 +847,25 @@ public:
         _nthreads = std::min(nthreads, _maxthreads);
     }
 
-    // Stateless execute
-    // TODO: Make this actually stateless. This still uses the stateful
-    // execution data because it requires a workspace which would also need to
-    // be handled statelessly.
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &, int threadid, GemmArrays<Tlo, Tro, Tr> &) override {
-        auto& g_array = this->_gemm_array;
+    // Common execution logic.
+    void execute_common(const ndcoord_t &work_range, const ndcoord_t &, int threadid, GemmArrays<Tlo, Tro, Tr> &g_arrays) {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
 
-        /* Make sure we've been set up correctly. */
-        assert(FixedFormat || _B_transposed);
-        assert(_working_space);
-        int8_t *working_space_bytes = reinterpret_cast<int8_t *>(_working_space);
+        void *working_space = g_arrays._workspace;
 
-        /* Align if needed */
-        intptr_t working_space_v = reinterpret_cast<intptr_t>(_working_space);
-        if (working_space_v & 0x3f) {
-            intptr_t alignment_offset = 0x40 - (working_space_v & 0x3f);
-            working_space_bytes += alignment_offset;
-        }
+        // Make sure we've been set up correctly.
+        assert(FixedFormat || _B_transposed);
+        assert(working_space);
+
+        // Align if needed.
+        auto *working_space_bytes = reinterpret_cast<int8_t *>(working_space);
+        auto working_space_addr = reinterpret_cast<uintptr_t>(working_space);
+        working_space_bytes += get_cache_align_offset(working_space_addr);
+        working_space = reinterpret_cast<void *>(working_space_bytes);
+
+        auto *accumulation_buffer = get_accumulation_buffer_offset(working_space);
 
         strategy strat(_ci);
 
@@ -890,8 +903,8 @@ public:
                     unsigned int kern_k = roundup(kmax - k0, strategy::k_unroll());
 
                     const Troi *b_ptr = FixedFormat ?
-                        reinterpret_cast<const Troi *>(g_array._Bptr) + (multi * g_array._B_multi_stride) +
-                                                     ((start_x / get_stripe_width<strategy, FixedFormat>::get()) * g_array._ldb) +
+                        reinterpret_cast<const Troi *>(g_arrays._Bptr) + (multi * g_arrays._B_multi_stride) +
+                                                     ((start_x / get_stripe_width<strategy, FixedFormat>::get()) * g_arrays._ldb) +
                                                      (k0 * get_stripe_width<strategy, FixedFormat>::get()) :
                         _B_transposed + (rounded_width * _Ktotal * multi) + (k0 * rounded_width) + (start_x * kern_k);
 
@@ -916,19 +929,19 @@ public:
                                                              _rounded_Ksize, start_row, end_row, k0, kmax, row_sum_multiplier());
                             } else if (_convolver) {
                                 transforms.PrepareA_convolution(a_panel,
-                                                                g_array._Aptr + (batch * g_array._A_batch_stride) + (multi * g_array._A_multi_stride),
-                                                                g_array._lda, *_convolver, _rounded_Ksize, start_row, end_row, k0, kmax, row_sum_multiplier());
+                                                                g_arrays._Aptr + (batch * g_arrays._A_batch_stride) + (multi * g_arrays._A_multi_stride),
+                                                                g_arrays._lda, *_convolver, _rounded_Ksize, start_row, end_row, k0, kmax, row_sum_multiplier());
                             } else {
                                 transforms.PrepareA(a_panel,
-                                                    g_array._Aptr + (batch * g_array._A_batch_stride) + (multi * g_array._A_multi_stride),
-                                                    g_array._lda, start_row, end_row, k0, std::min(kmax, _Ksize), row_sum_multiplier());
+                                                    g_arrays._Aptr + (batch * g_arrays._A_batch_stride) + (multi * g_arrays._A_multi_stride),
+                                                    g_arrays._lda, start_row, end_row, k0, std::min(kmax, _Ksize), row_sum_multiplier());
                             }
                         }
 
-                        Tr *result_ptr = g_array._Cptr + (batch * g_array._C_batch_stride) + (multi * g_array._C_multi_stride);
+                        Tr *result_ptr = g_arrays._Cptr + (batch * g_arrays._C_batch_stride) + (multi * g_arrays._C_multi_stride);
 
                         // If we are using an accumulation buffer and this isn't the last pass, don't pass a result pointer.
-                        if (_accumulation_buffer && !last_pass) {
+                        if (accumulation_buffer && !last_pass) {
                             result_ptr = nullptr;
                         }
 
@@ -938,19 +951,19 @@ public:
                             prof,
                         #endif
                             // Strategy and panel pointers
-                            strat, a_panel, b_ptr, g_array._ldb, c_panel,
+                            strat, a_panel, b_ptr, g_arrays._ldb, c_panel,
                             // Result buffer pointers
-                            result_ptr, g_array._ldc,
+                            result_ptr, g_arrays._ldc,
                             // K size, and M/N ranges
                             kern_k, start_row, end_row, start_x, end_x,
                             // Only do bias on the first pass
-                            ((bias_pass && g_array._bias) ? g_array._bias + (multi * g_array._bias_multi_stride) : nullptr),
+                            ((bias_pass && g_arrays._bias) ? g_arrays._bias + (multi * g_arrays._bias_multi_stride) : nullptr),
                             // Only do activation on the last pass, and accumulation on any non-first pass.
                             (last_pass ? _act : Activation()), (!first_pass || _accumulate),
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
                             _os, col_bias + (multi * _Nsize),
                             // Accumulation buffer
-                            get_accumulation_buffer(start_row, start_x, batch, multi));
+                            get_accumulation_buffer(accumulation_buffer, start_row, start_x, batch, multi));
 
                         /* Increment to the next block */
                         start_row += strategy::out_height();
@@ -1013,12 +1026,12 @@ public:
                                                       _rounded_Ksize, first_m, last_m, current.k0(), current.kmax(), row_sum_multiplier());
                         } else if (_convolver) {
                             transforms.PrepareA_convolution(a_panel + ((batch * _Mround + first_m) * get_total_k_depth()),
-                                                      g_array._Aptr + (batch * g_array._A_batch_stride) + (current.multi() * g_array._A_multi_stride),
-                                                      g_array._lda, *_convolver, _rounded_Ksize, first_m, last_m, current.k0(), current.kmax(), row_sum_multiplier());
+                                                      g_arrays._Aptr + (batch * g_arrays._A_batch_stride) + (current.multi() * g_arrays._A_multi_stride),
+                                                      g_arrays._lda, *_convolver, _rounded_Ksize, first_m, last_m, current.k0(), current.kmax(), row_sum_multiplier());
                         } else {
                             transforms.PrepareA(a_panel + ((batch * _Mround + first_m) * get_total_k_depth()),
-                                                      g_array._Aptr + (batch * g_array._A_batch_stride) + (current.multi() * g_array._A_multi_stride),
-                                                      g_array._lda, first_m, last_m, current.k0(), std::min(_Ksize, current.kmax()), row_sum_multiplier());
+                                                      g_arrays._Aptr + (batch * g_arrays._A_batch_stride) + (current.multi() * g_arrays._A_multi_stride),
+                                                      g_arrays._lda, first_m, last_m, current.k0(), std::min(_Ksize, current.kmax()), row_sum_multiplier());
                         }
                     }
 
@@ -1038,8 +1051,8 @@ public:
 
                 // For FixedFormat cases, figure out the B pointer.  The loop below moves through batches and vertically through the output so this will be the same throughout.
                 if (FixedFormat) {
-                    b_panel = reinterpret_cast<const Troi *>(g_array._Bptr) + (current.multi() * g_array._B_multi_stride) +
-                                                                           ((current.x0() / get_stripe_width<strategy, FixedFormat>::get()) * g_array._ldb) +
+                    b_panel = reinterpret_cast<const Troi *>(g_arrays._Bptr) + (current.multi() * g_arrays._B_multi_stride) +
+                                                                           ((current.x0() / get_stripe_width<strategy, FixedFormat>::get()) * g_arrays._ldb) +
                                                                            (current.k0() * get_stripe_width<strategy, FixedFormat>::get());
                 }
 
@@ -1061,7 +1074,7 @@ public:
 
                     // But in the case where we have an accumulation buffer, we can't do that after all, unless
                     // there is no N blocking.
-                    if (_accumulation_buffer && ((current.x0() != 0) || (current.xmax() < _Nsize))) {
+                    if (accumulation_buffer && ((current.x0() != 0) || (current.xmax() < _Nsize))) {
                         m_step = strategy::out_height();
                     }
 
@@ -1075,11 +1088,11 @@ public:
                         const bool bias_pass = (std::is_same<OutputStage, DequantizeFloat>::value && !MergeStep) ? last_pass : first_pass;
 
                         // Pointer to appropriate part of result array.
-                        Tr *result_ptr = g_array._Cptr + (batch * g_array._C_batch_stride) + (current.multi() * g_array._C_multi_stride);
+                        Tr *result_ptr = g_arrays._Cptr + (batch * g_arrays._C_batch_stride) + (current.multi() * g_arrays._C_multi_stride);
 
                         // If we are using an accumulation buffer, we don't pass the result buffer to ask the kernel
                         // to write things into the accumulation buffer instead, except on the last pass.
-                        if (_accumulation_buffer && !last_pass) {
+                        if (accumulation_buffer && !last_pass) {
                             result_ptr = nullptr;
                         }
 
@@ -1089,19 +1102,19 @@ public:
                             prof,
                         #endif
                             // Strategy and panel pointers
-                            strat, a_ptr, b_panel, g_array._ldb, c_panel,
+                            strat, a_ptr, b_panel, g_arrays._ldb, c_panel,
                             // Result buffer pointers
-                            result_ptr, g_array._ldc,
+                            result_ptr, g_arrays._ldc,
                             // K size, and M/N ranges
                             kern_k, y, ymax, current.x0(), current.xmax(),
                             // Only do bias on the first pass
-                            ((bias_pass && g_array._bias) ? g_array._bias + (current.multi() * g_array._bias_multi_stride) : nullptr),
+                            ((bias_pass && g_arrays._bias) ? g_arrays._bias + (current.multi() * g_arrays._bias_multi_stride) : nullptr),
                             // Only do activation on the last pass, and accumulation on any non-first pass.
                             (last_pass ? _act : Activation()), (!first_pass || _accumulate),
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
                             _os, col_bias + (current.multi() * _Nsize),
                             // Accumulation buffer
-                            get_accumulation_buffer(y, current.x0(), batch, current.multi()) );
+                            get_accumulation_buffer(accumulation_buffer, y, current.x0(), batch, current.multi()) );
 
                         a_ptr += (strategy::out_height() * a_panel_stride);
                     }
@@ -1114,9 +1127,14 @@ public:
         }
     }
 
+    // Stateless execute
+    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<Tlo, Tro, Tr> &g_arrays) override {
+        return execute_common(work_range, thread_locator, threadid, g_arrays);
+    }
+
     // Execute
     void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_array);
+        execute_common(work_range, thread_locator, threadid, this->_gemm_arrays);
     }
 
     // Interface implementation - working space
@@ -1131,32 +1149,12 @@ public:
 
     void set_working_space(void *working_space) override {
         // Make sure everything ends up cache line aligned
-        int8_t *working_space_bytes = reinterpret_cast<int8_t *>(working_space);
-        intptr_t working_space_int = reinterpret_cast<intptr_t>(working_space);
-
-        size_t diff=0;
-
-        if (working_space_int & 0x3F) {
-            diff = 0x40 - (working_space_int & 0x3F);
-        }
-
-        working_space_bytes += diff;
-        working_space_int += diff;
+        auto *working_space_bytes = reinterpret_cast<int8_t *>(working_space);
+        auto  working_space_addr = reinterpret_cast<uintptr_t>(working_space);
+        working_space_bytes += get_cache_align_offset(working_space_addr);
 
         // Pretransposed case: just set internal pointer to parameter value.
-        _working_space = reinterpret_cast<void *>(working_space_bytes);
-
-        // Set up accumulation buffer
-        if (get_accumulation_buffer_size() > 0) {
-            intptr_t acc_buff_int = working_space_int + get_a_working_size() + (get_c_working_size() * _maxthreads);
-            // Make sure the accumulation buffer is aligned (needed if the other blocks are not a multiple of cache line length)
-            if (acc_buff_int & 0x3F) {
-                acc_buff_int += (0x40 - (acc_buff_int & 0x3F));
-            }
-            _accumulation_buffer = reinterpret_cast<Tab *>(acc_buff_int);
-        } else {
-            _accumulation_buffer = nullptr;
-        }
+        this->_gemm_arrays._workspace = reinterpret_cast<void *>(working_space_bytes);
     }
 
     // Interface implementation - pretransposed

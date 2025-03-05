@@ -333,27 +333,12 @@ void foo(const Goo &g);             // OK
 
 @subsection S5_1_2_how_to_check_the_rules How to check the rules
 
-astyle (http://astyle.sourceforge.net/) and clang-format (https://clang.llvm.org/docs/ClangFormat.html) can check and help you apply some of these rules.
-
-We have also provided the python scripts we use in our precommit pipeline inside scripts directory.
-    - format_code.py: checks Android.bp, bad style, end of file, formats doxygen, runs astyle and clang-format (assuming necessary binaries are in the path). Example invocations:
-@code{.sh}
-        python format_code.py
-        python format_code.py --error-on-diff
-        python format_code.py --files=git-diff (Default behavior in pre-commit configuration, where it checks the staged files)
-@endcode
-    - generate_build_files.py: generates build files required for CMake and Bazel builds. Example invocations:
-@code{.sh}
-        python generate_build_files.py --cmake
-        python generate_build_files.py --bazel
-@endcode
-
-Another way of running the checks is using `pre-commit` (https://pre-commit.com/) framework, which has also nice features like checking trailing spaces, and large committed files etc.
+We check the rules using `pre-commit` (https://pre-commit.com/) framework.
 `pre-commit` can be installed via `pip`. After installing, run the following command in the root directory of the repository:
 
 	pre-commit install
 
-This will create the hooks that perform the formatting checks mentioned above and will automatically run just before committing to flag issues.
+This will create the hooks that perform the required formatting checks and will automatically run just before committing to flag issues.
 
 Following conventional commits https://www.conventionalcommits.org/en/v1.0.0/#specification each commit must have a type from the following:
 build, ci, docs, feat, fix, perf, refactor, style, test, chore, revert, bump. In this format: `<type>[optional scope]: <description>`.
@@ -537,6 +522,16 @@ Once a patch is uploaded for review, there is a pre-commit test that runs on a J
 At the moment, the Jenkins server is not publicly accessible and for security reasons patches submitted by non-allowlisted committers do not trigger the pre-commit tests. For this reason, one of the maintainers has to manually trigger the job.
 
 If the pre-commit test fails, the Jenkins job will post a comment on Gerrit with the details about the failure so that the committer will be able to reproduce the error and fix the issue, if any (sometimes there can be infrastructure issues, a test platform disconnecting for example, where the job needs to be retriggered).
+
+@section S5_4_patch_reversion Patch reversion policy
+
+If the contributed patch breaks our regression suite, we either
+- require a fix within the next business day, or
+- revert the offending patch
+
+to keep our main branch healthy.
+
+Please remember that this is done to keep the tip of the main healthy, and such reverts are normal. Our regression suite is comprehensive and might find out issues that might not have been detected before merging. It doesn't mean you did anything wrong, and we welcome your fix.
 
 */
 } // namespace arm_compute

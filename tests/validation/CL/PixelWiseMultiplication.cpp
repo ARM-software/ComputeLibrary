@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,6 @@ namespace test
 {
 namespace validation
 {
-/** Synced with tests/validation/dynamic_fusion/gpu/cl/Mul.cpp from the dynamic fusion interface.
- * Please check there for any differences in the coverage
- */
 namespace
 {
 namespace

@@ -33,8 +33,8 @@ import codecs
 import platform
 import SCons
 
-VERSION = "v25.02"
-LIBRARY_VERSION_MAJOR = 47
+VERSION = "v25.02.1"
+LIBRARY_VERSION_MAJOR = 48
 LIBRARY_VERSION_MINOR = 0
 LIBRARY_VERSION_PATCH = 0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -146,11 +146,6 @@ def recursive_glob(root_dir, pattern):
     return files
 
 
-def get_ckw_obj_list():
-    cmake_obj_dir = os.path.abspath("CMakeFiles/ckw.dir/src")
-    return recursive_glob(root_dir=cmake_obj_dir, pattern=".*.o$")
-
-
 def build_library(name, build_env, sources, static=False, libs=[]):
     cloned_build_env = build_env.Clone()
 
@@ -188,20 +183,10 @@ def build_library(name, build_env, sources, static=False, libs=[]):
     if static:
         # Recreate the list to avoid mutating the original
         static_sources = list(sources)
-
-        # Dynamic Fusion has a direct dependency on the Compute Kernel Writer (CKW) subproject, therefore we collect the
-        # built CKW objects to pack into the Compute Library archive.
-        if env['experimental_dynamic_fusion'] and name == "arm_compute-static":
-            static_sources += get_ckw_obj_list()
-
         obj = cloned_build_env.StaticLibrary(name, source=static_sources, LIBS=arm_compute_env["LIBS"] + libs)
 
     # -- Shared Library --
     else:
-        # Always statically link Compute Library against CKW
-        if env['experimental_dynamic_fusion'] and name == "arm_compute":
-            libs.append('libckw.a')
-
         # Add shared library versioning
         if env['set_soname']:
             obj = cloned_build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
@@ -597,12 +582,6 @@ lib_files = filelist['common']
 # Fixed format GEMM kernels.
 if env['fixed_format_kernels']:
     arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
-
-# Experimental files
-# Dynamic fusion
-if env['experimental_dynamic_fusion']:
-    lib_files += filelist['experimental']['dynamic_fusion']['common']
-    lib_files += filelist['experimental']['dynamic_fusion']['ckw_driver']
 
 # Logging files
 if env["logging"]:
