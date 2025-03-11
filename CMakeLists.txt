@@ -154,7 +154,7 @@ set_target_properties(
   LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
 )
 
-add_library(arm_compute_graph OBJECT)
+add_library(arm_compute_graph ${ARM_COMPUTE_LIB_BUILD_TYPE})
 set_target_properties(
   arm_compute_graph
   PROPERTIES
@@ -167,22 +167,19 @@ set_target_properties(
 add_library(
   arm_compute
   ${ARM_COMPUTE_LIB_BUILD_TYPE}
-  $<TARGET_OBJECTS:arm_compute_graph>
   $<TARGET_OBJECTS:arm_compute_core>
   $<TARGET_OBJECTS:arm_compute_core_fp16>
   $<TARGET_OBJECTS:arm_compute_sve>
   $<TARGET_OBJECTS:arm_compute_sve2>
 )
 
-set_target_properties(
-  arm_compute
-  PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-)
+# Linking to arm_compute[_graph] should automatically bring includes and dependent libs with it
+foreach(TARGET IN ITEMS arm_compute arm_compute_graph)
+  target_link_libraries(${TARGET} PUBLIC ${ARM_COMPUTE_LINK_LIBS})
+  target_include_directories(${TARGET} PUBLIC ${ARM_COMPUTE_PUBLIC_INCLUDE})
+  set_target_properties(${TARGET} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+endforeach()
 
-# Linking to this target should automatically bring includes and dependent libs with it.
-target_include_directories(arm_compute PUBLIC ${ARM_COMPUTE_PUBLIC_INCLUDE})
-target_link_libraries(arm_compute PUBLIC ${ARM_COMPUTE_LINK_LIBS})
 list(APPEND ARM_COMPUTE_TARGETS arm_compute arm_compute_graph arm_compute_core arm_compute_core_fp16 arm_compute_sve arm_compute_sve2)
 
 # Library target sources.
@@ -204,7 +201,7 @@ if(ARM_COMPUTE_BUILD_TESTING)
     COMPILE_OPTIONS "${ARM_COMPUTE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
     INCLUDE_DIRECTORIES "${ARM_COMPUTE_PUBLIC_INCLUDE};${ARM_COMPUTE_COMMON_INCLUDE}"
     COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
-    LINK_LIBRARIES arm_compute
+    LINK_LIBRARIES "arm_compute;arm_compute_graph"
   )
   list(APPEND ARM_COMPUTE_TARGETS arm_compute_validation arm_compute_benchmark)
 endif(ARM_COMPUTE_BUILD_TESTING)
@@ -233,13 +230,17 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
     )
   endforeach()
 
+  # Set common properties
   set_target_properties(
-    ${EXAMPLE_NEON_NAMES} ${EXAMPLE_GRAPH_NAMES}
+    ${EXAMPLE_GRAPH_NAMES} ${EXAMPLE_NEON_NAMES}
     PROPERTIES
     COMPILE_OPTIONS "${ARM_COMPUTE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
-    LINK_LIBRARIES arm_compute
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/examples"
   )
+
+  # Now set the linking properties which differ between the NEON and Graph examples
+  set_target_properties(${EXAMPLE_GRAPH_NAMES} PROPERTIES LINK_LIBRARIES "arm_compute;arm_compute_graph")
+  set_target_properties(${EXAMPLE_NEON_NAMES} PROPERTIES LINK_LIBRARIES arm_compute)
 endif(ARM_COMPUTE_BUILD_EXAMPLES)
 
 set_target_properties(
