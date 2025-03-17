@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024 Arm Limited.
+ * Copyright (c) 2021-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,6 +104,7 @@ void decode_regs(CpuIsaInfo    &isa,
     { return ((feature_reg >> feature_pos) & 0xf); };
 
     // High-level SIMD support
+    isa.neon = (((pfr0 >> 20) & 0xf) <= 1);
     isa.sve  = is_supported(pfr0, 32);
     isa.sve2 = is_supported(svefr0, 0);
     isa.sme  = is_supported(pfr1, 24);
