@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, 2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2019, 2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ERROR_H
-#define ARM_COMPUTE_ERROR_H
+#ifndef ACL_ARM_COMPUTE_CORE_ERROR_H
+#define ACL_ARM_COMPUTE_CORE_ERROR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <array>
 #include <string>
@@ -481,4 +485,4 @@ Status create_error_msg(ErrorCode error_code, const char *func, const char *file
 #define ARM_COMPUTE_THROW(ex) (ex), std::abort()
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 
-#endif /* ARM_COMPUTE_ERROR_H */
+#endif // ACL_ARM_COMPUTE_CORE_ERROR_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_LIBRARY_VERSION_H
-#define ARM_COMPUTE_LIBRARY_VERSION_H
+#ifndef ACL_ARM_COMPUTE_CORE_VERSION_H
+#define ACL_ARM_COMPUTE_CORE_VERSION_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <string>
 
@@ -48,4 +52,4 @@ std::string build_information();
 #undef ARM_COMPUTE_STRINGIFY
 #undef ARM_COMPUTE_STRINGIFY2
 
-#endif /* ARM_COMPUTE_LIBRARY_VERSION_H */
+#endif // ACL_ARM_COMPUTE_CORE_VERSION_H

@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_CORE_VALIDATE_H
 #define ACL_ARM_COMPUTE_CORE_VALIDATE_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/ITensor.h"

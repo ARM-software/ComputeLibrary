@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS_H
 #define ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"

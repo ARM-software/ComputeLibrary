@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDETECTIONPOSTPROCESSLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDETECTIONPOSTPROCESSLAYER_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"

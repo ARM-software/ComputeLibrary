@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2021 Arm Limited.
+ * Copyright (c) 2019, 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_IRUNTIME_CONTEXT_H
-#define ARM_COMPUTE_IRUNTIME_CONTEXT_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_IRUNTIMECONTEXT_H
+#define ACL_ARM_COMPUTE_RUNTIME_IRUNTIMECONTEXT_H
+
+/** @file
+ * @publicapi
+ */
 
 namespace arm_compute
 {
@@ -52,4 +56,4 @@ public:
     virtual IAssetManager *asset_manager() = 0;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_IRUNTIME_CONTEXT_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_IRUNTIMECONTEXT_H

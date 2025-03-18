@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_NETENSORHANDLE_H
-#define ARM_COMPUTE_GRAPH_NETENSORHANDLE_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NETENSORHANDLE_H
+#define ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NETENSORHANDLE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/ITensorHandle.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -68,4 +72,4 @@ private:
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_NETENSORHANDLE_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NETENSORHANDLE_H

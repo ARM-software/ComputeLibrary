@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,7 +110,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint32_t>, framework::Dataset
 }
 TEST_SUITE_END()
 
-TEST_SUITE(QASYMM8_SINGED)
+TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
                        PermuteParametersSmall * framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))
 {
@@ -118,7 +118,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<int8_t>, framework::DatasetMo
     validate(Accessor(_target), _reference);
 }
 
-TEST_SUITE_END() // QASYMM8_SINGED
+TEST_SUITE_END() // QASYMM8_SIGNED
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)

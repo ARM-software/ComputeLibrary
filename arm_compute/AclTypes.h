@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_ACLTYPES_H
 #define ACL_ARM_COMPUTE_ACLTYPES_H
 
+/** @file
+ * @publicapi
+ */
+
 #include <stddef.h>
 #include <stdint.h>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLFFTCONVOLUTIONLAYER_H
-#define ARM_COMPUTE_CLFFTCONVOLUTIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFFTCONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFFTCONVOLUTIONLAYER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -198,4 +202,4 @@ private:
     bool             _is_prepared;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLFFTCONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLFFTCONVOLUTIONLAYER_H

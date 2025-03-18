@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_DEPTH_TO_SPACE_LAYER_NODE_H
-#define ARM_COMPUTE_GRAPH_DEPTH_TO_SPACE_LAYER_NODE_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_NODES_DEPTHTOSPACELAYERNODE_H
+#define ACL_ARM_COMPUTE_GRAPH_NODES_DEPTHTOSPACELAYERNODE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/INode.h"
 
@@ -63,4 +67,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_DEPTH_TO_SPACE_LAYER_NODE_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_NODES_DEPTHTOSPACELAYERNODE_H

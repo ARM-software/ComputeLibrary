@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_OPERATORLIST_H
 #define ACL_ARM_COMPUTE_RUNTIME_OPERATORLIST_H
 
+/** @file
+ * @publicapi
+ */
+
 /** ActivationLayer
  *
  * Description:

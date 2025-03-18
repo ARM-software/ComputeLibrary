@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_DETAIL_CROSS_LAYER_MEMORY_MANAGER_HELPERS_H
-#define ARM_COMPUTE_GRAPH_DETAIL_CROSS_LAYER_MEMORY_MANAGER_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_DETAIL_CROSSLAYERMEMORYMANAGERHELPERS_H
+#define ACL_ARM_COMPUTE_GRAPH_DETAIL_CROSSLAYERMEMORYMANAGERHELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <vector>
 
@@ -49,4 +53,4 @@ void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload
 } // namespace detail
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_DETAIL_CROSS_LAYER_MEMORY_MANAGER_HELPERS_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_DETAIL_CROSSLAYERMEMORYMANAGERHELPERS_H

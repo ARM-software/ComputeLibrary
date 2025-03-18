@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_REDUCE_MEAN_H
-#define ARM_COMPUTE_CL_REDUCE_MEAN_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLREDUCEMEAN_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLREDUCEMEAN_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
@@ -109,4 +113,4 @@ private:
     CLTensor                          _output_no_quant;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_REDUCE_MEAN_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLREDUCEMEAN_H

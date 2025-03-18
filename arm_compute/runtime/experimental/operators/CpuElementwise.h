@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,10 @@
 
 #ifndef ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUELEMENTWISE_H
 #define ACL_ARM_COMPUTE_RUNTIME_EXPERIMENTAL_OPERATORS_CPUELEMENTWISE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Types.h"
@@ -150,6 +154,46 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
+
+    void run(ITensorPack &tensors) override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
+};
+
+/** Wrapper class for CpuPRelu. For information on the functions,
+ * see "src/cpu/operators/CpuPRelu.h"
+*/
+class CpuPRelu : public INEOperator
+{
+public:
+    /** Constructor */
+    CpuPRelu();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CpuPRelu(CpuPRelu &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CpuPRelu &operator=(CpuPRelu &) = delete;
+    /** Default move constructor */
+    CpuPRelu(CpuPRelu &&) = default;
+    /** Default move assignment */
+    CpuPRelu &operator=(CpuPRelu &&) = default;
+    /** Defualt destructor */
+    ~CpuPRelu() override;
+    /** Configure the operator
+     *
+     * @param[in]  input  The source tensor information.
+     * @param[in]  alpha  The source alpha tensor information.
+     * @param[out] output The output tensor information.
+     */
+    void configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output);
+    /** Static function to check if given info will lead to a valid configuration
+     *
+     * Similar to @ref CpuPRelu::configure()
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
 
     void run(ITensorPack &tensors) override;
 

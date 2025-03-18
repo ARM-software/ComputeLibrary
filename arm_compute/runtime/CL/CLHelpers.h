@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_HELPERS_H
-#define ARM_COMPUTE_CL_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_CLHELPERS_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_CLHELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
@@ -61,4 +65,4 @@ void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush
  */
 cl::Platform select_preferable_platform(CLBackendType cl_backend_type);
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_HELPERS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_CLHELPERS_H

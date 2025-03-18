@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_ACLOPERATORS_H
 #define ACL_ARM_COMPUTE_ACLOPERATORS_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/AclDescriptors.h"
 #include "arm_compute/AclTypes.h"
 

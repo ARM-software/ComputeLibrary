@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2020, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLNORMALIZEPLANARYUVLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLNORMALIZEPLANARYUVLAYER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"

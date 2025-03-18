@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_CORE_CL_OPENCL_H
 #define ACL_ARM_COMPUTE_CORE_CL_OPENCL_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <string>
 #include <utility>

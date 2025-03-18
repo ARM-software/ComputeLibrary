@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2021 Arm Limited.
+ * Copyright (c) 2019, 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_IWEIGHTSMANAGER_H
-#define ARM_COMPUTE_IWEIGHTSMANAGER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_IWEIGHTSMANAGER_H
+#define ACL_ARM_COMPUTE_RUNTIME_IWEIGHTSMANAGER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/runtime/ITransformWeights.h"
@@ -100,4 +104,4 @@ private:
     std::map<const ITensor *, ITransformWeights *>              _managed_weights_parents;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_IWEIGHTSMANAGER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_IWEIGHTSMANAGER_H

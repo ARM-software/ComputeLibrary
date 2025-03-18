@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_HELPERS_TENSOR_TRANSFORM_H
-#define ARM_COMPUTE_UTILS_HELPERS_TENSOR_TRANSFORM_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_HELPERS_TENSOR_TRANSFORM_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_HELPERS_TENSOR_TRANSFORM_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 
@@ -140,4 +144,4 @@ int32_t construct_slice_end_mask(Coordinates ends);
 } // namespace tensor_transform
 } // namespace helpers
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_UTILS_HELPERS_TENSOR_TRANSFORM_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_HELPERS_TENSOR_TRANSFORM_H

@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESOFTMAXLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NESOFTMAXLAYER_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"

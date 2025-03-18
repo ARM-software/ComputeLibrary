@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHWISECONVOLUTIONLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEDEPTHWISECONVOLUTIONLAYER_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"

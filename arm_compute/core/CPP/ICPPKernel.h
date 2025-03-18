@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ICPPKERNEL_H
-#define ARM_COMPUTE_ICPPKERNEL_H
+#ifndef ACL_ARM_COMPUTE_CORE_CPP_ICPPKERNEL_H
+#define ACL_ARM_COMPUTE_CORE_CPP_ICPPKERNEL_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/experimental/Types.h"
@@ -111,4 +115,4 @@ public:
     virtual const char *name() const = 0;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_ICPPKERNEL_H */
+#endif // ACL_ARM_COMPUTE_CORE_CPP_ICPPKERNEL_H

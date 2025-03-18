@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, 2023 Arm Limited.
+ * Copyright (c) 2016-2019, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ICLTENSOR_H
-#define ARM_COMPUTE_ICLTENSOR_H
+#ifndef ACL_ARM_COMPUTE_CORE_CL_ICLTENSOR_H
+#define ACL_ARM_COMPUTE_CORE_CL_ICLTENSOR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/ITensor.h"
@@ -113,4 +117,4 @@ private:
 
 using ICLImage = ICLTensor;
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_ICLTENSOR_H */
+#endif // ACL_ARM_COMPUTE_CORE_CL_ICLTENSOR_H

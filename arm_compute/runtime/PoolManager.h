@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_POOLMANAGER_H
-#define ARM_COMPUTE_POOLMANAGER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_POOLMANAGER_H
+#define ACL_ARM_COMPUTE_RUNTIME_POOLMANAGER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IMemoryPool.h"
@@ -67,4 +71,4 @@ private:
     mutable arm_compute::Mutex              _mtx;            /**< Mutex to control access to the queues */
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_POOLMANAGER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_POOLMANAGER_H

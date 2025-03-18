@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_H
-#define ARM_COMPUTE_GRAPH_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_H
+#define ACL_ARM_COMPUTE_GRAPH_H
+
+/** @file
+ * @publicapi
+ */
 
 // IR
 #include "arm_compute/graph/Edge.h"
@@ -54,4 +58,4 @@
 #include "arm_compute/graph/frontend/SubStream.h"
 #include "arm_compute/graph/frontend/Types.h"
 
-#endif /* ARM_COMPUTE_GRAPH_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_H

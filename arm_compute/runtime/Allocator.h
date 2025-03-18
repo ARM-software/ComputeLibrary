@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ALLOCATOR_H
-#define ARM_COMPUTE_ALLOCATOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_ALLOCATOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_ALLOCATOR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/IMemoryRegion.h"
@@ -44,4 +48,4 @@ public:
     std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_ALLOCATOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_ALLOCATOR_H

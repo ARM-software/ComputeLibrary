@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_IMEMORYMANAGER_H
-#define ARM_COMPUTE_IMEMORYMANAGER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_IMEMORYMANAGER_H
+#define ACL_ARM_COMPUTE_RUNTIME_IMEMORYMANAGER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/ILifetimeManager.h"
 #include "arm_compute/runtime/IPoolManager.h"
@@ -66,4 +70,4 @@ public:
     virtual void clear() = 0;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_IMEMORYMANAGER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_IMEMORYMANAGER_H

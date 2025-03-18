@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, 2024 Arm Limited.
+ * Copyright (c) 2016-2019, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,11 @@
  */
 #ifndef ACL_ARM_COMPUTE_RUNTIME_TENSORALLOCATOR_H
 #define ACL_ARM_COMPUTE_RUNTIME_TENSORALLOCATOR_H
+
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/Memory.h"
 #include "arm_compute/runtime/MemoryGroup.h"

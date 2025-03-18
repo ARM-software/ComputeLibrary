@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_MATH_SAFE_OPS
-#define ARM_COMPUTE_UTILS_MATH_SAFE_OPS
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MATH_SAFEOPS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_MATH_SAFEOPS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 
@@ -180,4 +184,4 @@ T safe_integer_div(T val_a, T val_b)
 } // namespace math
 } // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_UTILS_MATH_SAFE_OPS */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_MATH_SAFEOPS_H

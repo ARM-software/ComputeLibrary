@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_CORE_TENSORSHAPE_H
 #define ACL_ARM_COMPUTE_CORE_TENSORSHAPE_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Utility.h"

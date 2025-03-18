@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_LOG_H
-#define ARM_COMPUTE_LOG_H
+#ifndef ACL_ARM_COMPUTE_CORE_LOG_H
+#define ACL_ARM_COMPUTE_CORE_LOG_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/utils/logging/Macros.h"
 
@@ -114,4 +118,4 @@
         ARM_COMPUTE_LOG_STREAM_CORE(arm_compute::logging::LogLevel::INFO, ss); \
     } while (false)
 
-#endif /* ARM_COMPUTE_LOGGING_MACROS_H */
+#endif // ACL_ARM_COMPUTE_CORE_LOG_H

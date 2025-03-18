@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_UTILITY_H
 #define ACL_ARM_COMPUTE_CORE_UTILS_MISC_UTILITY_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Error.h"
 
 #include <algorithm>

@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_ACLENTRYPOINTS_H
 #define ACL_ARM_COMPUTE_ACLENTRYPOINTS_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/AclTypes.h"
 
 #ifdef __cplusplus

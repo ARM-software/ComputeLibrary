@@ -25,6 +25,7 @@ SOFTWARE.
   <!-- Navigation index tabs for HTML output -->
   <navindex>
     <tab type="mainpage" url="@ref introduction" title="Introduction"/>
+    <tab type="user" url="@ref semver" title="Versioning"/>
     <tab type="usergroup" title="User Guide">
         <tab type="user" url="@ref how_to_build" title="How to Build and Run Examples"/>
         <tab type="user" url="@ref architecture" title="Library Architecture"/>

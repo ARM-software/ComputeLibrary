@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLHELPERS_H
-#define ARM_COMPUTE_CLHELPERS_H
+#ifndef ACL_ARM_COMPUTE_CORE_CL_CLHELPERS_H
+#define ACL_ARM_COMPUTE_CORE_CL_CLHELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -289,4 +293,4 @@ bool command_buffer_supported(const cl::Device &device);
 bool command_buffer_mutable_dispatch_supported(const cl::Device &device);
 
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLHELPERS_H */
+#endif // ACL_ARM_COMPUTE_CORE_CL_CLHELPERS_H

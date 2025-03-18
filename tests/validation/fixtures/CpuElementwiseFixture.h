@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -225,6 +225,19 @@ public:
     {
         CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
             ArithmeticOperation::MIN, shape, shape, data_type0, data_type1, output_data_type, is_inplace);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class CpuPReluValidationFixture
+    : public CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(
+        const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
+    {
+        CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            ArithmeticOperation::PRELU, shape, shape, data_type0, data_type1, output_data_type, is_inplace);
     }
 };
 } // namespace validation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLDEVICE_H
-#define ARM_COMPUTE_CLDEVICE_H
+#ifndef ACL_ARM_COMPUTE_CORE_CL_CLDEVICE_H
+#define ACL_ARM_COMPUTE_CORE_CL_CLDEVICE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLTypes.h"
@@ -174,4 +178,4 @@ private:
 
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_CLDEVICE_H */
+#endif // ACL_ARM_COMPUTE_CORE_CL_CLDEVICE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H
-#define ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_QUANTIZATION_ASYMMHELPERS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_QUANTIZATION_ASYMMHELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
@@ -161,4 +165,4 @@ void get_invsqrt_quantized_multiplier_exp(int32_t  input,
 
 } // namespace quantization
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_IO_FILE_HANDLER_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_QUANTIZATION_ASYMMHELPERS_H

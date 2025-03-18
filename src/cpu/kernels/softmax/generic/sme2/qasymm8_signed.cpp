@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,7 +78,7 @@ void sme2_qasymm8_signed_softmax_kernel_512VL( //
             mov x20, %x[shape_3]
             mov x21, %x[src]
             mov x22, %x[dst]
-            mov x29, %x[tmp]
+            mov x14, %x[tmp]
 
             // Load the LUT to the register file.
             mov x2, %x[lut]
@@ -363,19 +363,19 @@ void sme2_qasymm8_signed_softmax_kernel_512VL( //
             tbx z24.s, z15.s, z20.s
 
 
-            st1w z21.s, p2, [x29, x1, LSL #2]// z21 store exp(-scale*beta*x) into the tmp tensor
+            st1w z21.s, p2, [x14, x1, LSL #2]// z21 store exp(-scale*beta*x) into the tmp tensor
             fadd z25.s, p2/m, z25.s, z21.s
             add x1, x1, #16
 
-            st1w z22.s, p3, [x29, x1, LSL #2]// z22 store exp(-scale*beta*x) into the tmp tensor
+            st1w z22.s, p3, [x14, x1, LSL #2]// z22 store exp(-scale*beta*x) into the tmp tensor
             fadd z25.s, p3/m, z25.s, z22.s
             add x1, x1, #16
 
-            st1w z23.s, p4, [x29, x1, LSL #2]// z23 store exp(-scale*beta*x) into the tmp tensor
+            st1w z23.s, p4, [x14, x1, LSL #2]// z23 store exp(-scale*beta*x) into the tmp tensor
             fadd z25.s, p4/m, z25.s, z23.s
             add x1, x1, #16
 
-            st1w z24.s, p5, [x29, x1, LSL #2]// z24 store exp(-scale*beta*x) into the tmp tensor
+            st1w z24.s, p5, [x14, x1, LSL #2]// z24 store exp(-scale*beta*x) into the tmp tensor
             fadd z25.s, p5/m, z25.s, z24.s
             add x1, x1, #16
 
@@ -401,9 +401,9 @@ void sme2_qasymm8_signed_softmax_kernel_512VL( //
             b.eq 11f // normalize_body_end
 
             mov x2, x1       // Preserve the index into x2 for the final store to dst.
-            .inst 0xa001c7b0 // ld1w    { z16.s - z19.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5d0 // ld1w    { z16.s - z19.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
-            .inst 0xa001c7b4 // ld1w    { z20.s - z23.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5d4 // ld1w    { z20.s - z23.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
 
             // z16-z23: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
@@ -444,9 +444,9 @@ void sme2_qasymm8_signed_softmax_kernel_512VL( //
             dup z20.s, z25.s[0]
             dup z21.s, z30.s[0]
 
-            .inst 0xa001c7b8 // ld1w    { z24.s - z27.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5d8 // ld1w    { z24.s - z27.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
-            .inst 0xa001c7bc // ld1w    { z28.s - z31.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5dc // ld1w    { z28.s - z31.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
 
             // z24-z31: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
@@ -507,16 +507,16 @@ void sme2_qasymm8_signed_softmax_kernel_512VL( //
             mov x2, x1 // Preserve the index into x2 for the final store to dst.
 
             // z20-z23: load exp(-scale*beta*x) from the tmp tensor
-            ld1w z20.s, p2/z, [x29, x1, LSL #2]
+            ld1w z20.s, p2/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z21.s, p3/z, [x29, x1, LSL #2]
+            ld1w z21.s, p3/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z22.s, p4/z, [x29, x1, LSL #2]
+            ld1w z22.s, p4/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z23.s, p5/z, [x29, x1, LSL #2]
+            ld1w z23.s, p5/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
             // z20-z23: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
@@ -571,8 +571,8 @@ void sme2_qasymm8_signed_softmax_kernel_512VL( //
           [dst_stride_3] "r"(dst_strides[3]),                            //
           [length] "r"(shape[0])                                         //
         : "cc", "memory",                                                //
-          "p0", "p1", "p2", "p3", "p4",                                  //
-          "x2", "x9", "x13",                                             //
+          "p0", "p1", "p2", "p3", "p4", "p5",                            //
+          "x1", "x2", "x9", "x13", "x14",                                //
           "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", //
           "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7",                //
           "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15",          //

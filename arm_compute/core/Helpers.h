@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_HELPERS_H
-#define ARM_COMPUTE_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_CORE_HELPERS_H
+#define ACL_ARM_COMPUTE_CORE_HELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IAccessWindow.h"
@@ -295,4 +299,4 @@ inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"
-#endif /*ARM_COMPUTE_HELPERS_H */
+#endif // ACL_ARM_COMPUTE_CORE_HELPERS_H

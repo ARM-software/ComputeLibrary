@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO
-#define ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO_H
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/core/Size2D.h"
@@ -47,4 +51,4 @@ struct ConvolutionInfo
     Size2D              dilation{Size2D(1, 1)}; /**< Dilation, in elements, across x and y. Defaults to (1, 1). */
 };
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO */
+#endif // ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO_H

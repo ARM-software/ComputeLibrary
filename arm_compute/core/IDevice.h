@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_IDEVICE_H
-#define ARM_COMPUTE_IDEVICE_H
+#ifndef ACL_ARM_COMPUTE_CORE_IDEVICE_H
+#define ACL_ARM_COMPUTE_CORE_IDEVICE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <string>
 
@@ -56,4 +60,4 @@ public:
 };
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_IDEVICE_H */
+#endif // ACL_ARM_COMPUTE_CORE_IDEVICE_H

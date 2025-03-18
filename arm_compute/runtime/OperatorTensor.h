@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_OPERATORTENSOR_H
-#define ARM_COMPUTE_OPERATORTENSOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_OPERATORTENSOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_OPERATORTENSOR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -72,4 +76,4 @@ private:
 };
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_OPERATORTENSOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_OPERATORTENSOR_H

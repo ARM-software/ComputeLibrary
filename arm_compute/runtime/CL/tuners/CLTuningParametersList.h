@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_TUNINGPARAMETERS_LIST_H
-#define ARM_COMPUTE_CL_TUNINGPARAMETERS_LIST_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_TUNERS_CLTUNINGPARAMETERSLIST_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_TUNERS_CLTUNINGPARAMETERSLIST_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
@@ -87,4 +91,4 @@ std::unique_ptr<ICLTuningParametersList> get_tuning_parameters_list(CLTuningInfo
 
 } // namespace cl_tuner
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_TUNINGPARAMETERS_LIST_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_TUNERS_CLTUNINGPARAMETERSLIST_H

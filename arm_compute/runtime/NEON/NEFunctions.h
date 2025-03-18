@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_NEFUNCTIONS_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_NEFUNCTIONS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEAddMulAdd.h"

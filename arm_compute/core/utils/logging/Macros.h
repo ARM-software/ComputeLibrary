@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_LOGGING_MACROS_H
-#define ARM_COMPUTE_LOGGING_MACROS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_MACROS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_MACROS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/utils/logging/LoggerRegistry.h"
 
@@ -100,4 +104,4 @@ inline std::string signature_name(const std::string &pretty_func)
 
 #endif /* ARM_COMPUTE_LOGGING_ENABLED */
 
-#endif /* ARM_COMPUTE_LOGGING_MACROS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_LOGGING_MACROS_H

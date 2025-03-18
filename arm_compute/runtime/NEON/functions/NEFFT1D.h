@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFFT1D_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEFFT1D_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"

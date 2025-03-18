@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_TENSOR_DESCRIPTOR_H
-#define ARM_COMPUTE_GRAPH_TENSOR_DESCRIPTOR_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_TENSORDESCRIPTOR_H
+#define ACL_ARM_COMPUTE_GRAPH_TENSORDESCRIPTOR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/Types.h"
 
@@ -118,4 +122,4 @@ struct TensorDescriptor final : public misc::ICloneable<TensorDescriptor>
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_TENSOR_DESCRIPTOR_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_TENSORDESCRIPTOR_H

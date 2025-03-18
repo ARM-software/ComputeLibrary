@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_CORE_SUBTENSORINFO_H
 #define ACL_ARM_COMPUTE_CORE_SUBTENSORINFO_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"

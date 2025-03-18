@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSIONKERNEL_LAYER_H
-#define ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSIONKERNEL_LAYER_H
+#ifndef ACL_ARM_COMPUTE_CORE_CPP_KERNELS_CPPNONMAXIMUMSUPPRESSIONKERNEL_H
+#define ACL_ARM_COMPUTE_CORE_CPP_KERNELS_CPPNONMAXIMUMSUPPRESSIONKERNEL_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
@@ -102,4 +106,4 @@ private:
     unsigned int _num_boxes;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSIONKERNEL_LAYER_H */
+#endif // ACL_ARM_COMPUTE_CORE_CPP_KERNELS_CPPNONMAXIMUMSUPPRESSIONKERNEL_H

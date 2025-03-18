@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"

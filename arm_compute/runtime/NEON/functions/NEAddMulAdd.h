@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEADDMULADD
-#define ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEADDMULADD
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEADDMULADD_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEADDMULADD_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -112,4 +116,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEADDMULADD */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEADDMULADD_H

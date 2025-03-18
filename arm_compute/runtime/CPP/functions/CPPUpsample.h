@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPPUPSAMPLE_H
-#define ARM_COMPUTE_CPPUPSAMPLE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPUPSAMPLE_H
+#define ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPUPSAMPLE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
@@ -44,4 +48,4 @@ public:
     void configure(const ITensor *input, ITensor *output, const PadStrideInfo &info);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPPUPSAMPLE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPUPSAMPLE_H

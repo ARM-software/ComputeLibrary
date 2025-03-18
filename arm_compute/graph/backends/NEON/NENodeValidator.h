@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_NENODEVALIDATOR_H
-#define ARM_COMPUTE_GRAPH_NENODEVALIDATOR_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NENODEVALIDATOR_H
+#define ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NENODEVALIDATOR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 
@@ -49,4 +53,4 @@ public:
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute
-#endif //ARM_COMPUTE_GRAPH_NENODEVALIDATOR_H
+#endif // ACL_ARM_COMPUTE_GRAPH_BACKENDS_NEON_NENODEVALIDATOR_H

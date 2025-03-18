@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_RUNTIME_CL_CLFUNCTIONS_H
 #define ACL_ARM_COMPUTE_RUNTIME_CL_CLFUNCTIONS_H
+
+/** @file
+ * @publicapi
+ */
 
 /* Header regrouping all the CL functions */
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"

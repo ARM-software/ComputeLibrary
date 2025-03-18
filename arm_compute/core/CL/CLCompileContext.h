@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCOMPILECONTEXT_H
-#define ARM_COMPUTE_CLCOMPILECONTEXT_H
+#ifndef ACL_ARM_COMPUTE_CORE_CL_CLCOMPILECONTEXT_H
+#define ACL_ARM_COMPUTE_CORE_CL_CLCOMPILECONTEXT_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/CLDevice.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -355,4 +359,4 @@ private:
     bool _is_wbsm_supported; /**< Support of worksize batch size modifier support boolean*/
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLCOMPILECONTEXT_H */
+#endif // ACL_ARM_COMPUTE_CORE_CL_CLCOMPILECONTEXT_H

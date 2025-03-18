@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGEMM_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEGEMM_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"

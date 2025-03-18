@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,8 @@ namespace arm_compute
 {
 namespace
 {
-PadStrideInfo compute_upsample_info(const PadStrideInfo &info, uint32_t deconv_pad_x, uint32_t deconv_pad_y)
+std::pair<PadStrideInfo, bool>
+compute_upsample_info(const PadStrideInfo &info, uint32_t deconv_pad_x, uint32_t deconv_pad_y)
 {
     const unsigned int pad_left   = info.pad_left();
     const unsigned int pad_right  = info.pad_right();
@@ -50,6 +51,9 @@ PadStrideInfo compute_upsample_info(const PadStrideInfo &info, uint32_t deconv_p
     // Find the upsampled dimensions and the padding needed for the convolution with stride 1 in order to match output shape
     unsigned int deconv_pad_left  = pad_right > pad_left ? pad_right - pad_left : 0;
     unsigned int deconv_pad_right = pad_left > pad_right ? pad_left - pad_right : 0;
+
+    bool negative_padding = (deconv_pad_x < deconv_pad_left + deconv_pad_right);
+
     deconv_pad_x -= deconv_pad_left + deconv_pad_right;
     ARM_COMPUTE_ERROR_ON((deconv_pad_x % 2) != 0);
     deconv_pad_left += deconv_pad_x / 2;
@@ -57,13 +61,17 @@ PadStrideInfo compute_upsample_info(const PadStrideInfo &info, uint32_t deconv_p
 
     unsigned int deconv_pad_top    = pad_bottom > pad_top ? pad_bottom - pad_top : 0;
     unsigned int deconv_pad_bottom = pad_top > pad_bottom ? pad_top - pad_bottom : 0;
+
+    negative_padding = negative_padding || (deconv_pad_y < deconv_pad_top + deconv_pad_bottom);
+
     deconv_pad_y -= deconv_pad_top + deconv_pad_bottom;
     ARM_COMPUTE_ERROR_ON((deconv_pad_y % 2) != 0);
     deconv_pad_top += deconv_pad_y / 2;
     deconv_pad_bottom += deconv_pad_y / 2;
 
-    return PadStrideInfo(stride_x, stride_y, deconv_pad_left, deconv_pad_right, deconv_pad_top, deconv_pad_bottom,
-                         DimensionRoundingType::FLOOR);
+    return std::make_pair(PadStrideInfo(stride_x, stride_y, deconv_pad_left, deconv_pad_right, deconv_pad_top,
+                                        deconv_pad_bottom, DimensionRoundingType::FLOOR),
+                          negative_padding);
 }
 } // namespace
 
@@ -162,7 +170,12 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo   *input,
     const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y,
                                                                               out_dims, deconv_pad_x, deconv_pad_y);
     TensorInfo scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape));
-    const PadStrideInfo upsample_info = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
+
+    PadStrideInfo upsample_info;
+    bool          negative_padding;
+    std::tie(upsample_info, negative_padding) = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(negative_padding);
 
     // Do not perform upsampling when the operation uses unit stride in all dimensions
     const bool do_upsampling = stride_x != 1 || stride_y != 1;
@@ -240,8 +253,11 @@ void NEDeconvolutionLayer::configure(ITensor             *input,
     const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(
         *input->info(), *weights->info(), stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
 
-    const PadStrideInfo upsample_info = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
+    PadStrideInfo upsample_info;
+    bool          negative_padding;
+    std::tie(upsample_info, negative_padding) = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
 
+    ARM_COMPUTE_ERROR_ON(negative_padding);
     // Do not perform upsampling when the operation uses unit stride in all dimensions
     _do_upsampling = stride_x != 1 || stride_y != 1;
 

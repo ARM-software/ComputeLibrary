@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEUNSTACK_H
-#define ARM_COMPUTE_NEUNSTACK_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEUNSTACK_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEUNSTACK_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -89,4 +93,4 @@ private:
     std::vector<NEStridedSlice> _strided_slice_vector;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEUNSTACK_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEUNSTACK_H

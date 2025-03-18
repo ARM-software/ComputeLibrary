@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPBOXWITHNONMAXIMASUPPRESSIONLIMIT_H
 #define ACL_ARM_COMPUTE_RUNTIME_CPP_FUNCTIONS_CPPBOXWITHNONMAXIMASUPPRESSIONLIMIT_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"

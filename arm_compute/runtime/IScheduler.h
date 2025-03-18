@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ISCHEDULER_H
-#define ARM_COMPUTE_ISCHEDULER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_ISCHEDULER_H
+#define ACL_ARM_COMPUTE_RUNTIME_ISCHEDULER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/experimental/Types.h"
@@ -236,4 +240,4 @@ private:
     unsigned int _num_threads_hint = {};
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_ISCHEDULER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_ISCHEDULER_H

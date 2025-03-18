@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEON_CROP_RESIZE_H
-#define ARM_COMPUTE_NEON_CROP_RESIZE_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECROPRESIZE_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECROPRESIZE_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 
@@ -122,4 +126,4 @@ public:
     std::vector<std::unique_ptr<Tensor>>       _scaled_results;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NEON_CROP_RESIZE_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECROPRESIZE_H

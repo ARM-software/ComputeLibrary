@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACL_H_
-#define ARM_COMPUTE_ACL_H_
+#ifndef ACL_ARM_COMPUTE_ACL_H
+#define ACL_ARM_COMPUTE_ACL_H
+
+/** @file
+ * @publicapi
+ */
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /* __cplusplus */
 
 /* Core headers */
@@ -42,4 +45,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACL_H_ */
+#endif // ACL_ARM_COMPUTE_ACL_H

@@ -25,6 +25,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSCATTER_H
 #define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSCATTER_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
 

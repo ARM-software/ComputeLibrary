@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_INEOPERATOR_H
-#define ARM_COMPUTE_INEOPERATOR_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_INEOPERATOR_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_INEOPERATOR_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/runtime/IOperator.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
@@ -73,4 +77,4 @@ protected:
 };
 } // namespace experimental
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_INEOPERATOR_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_INEOPERATOR_H

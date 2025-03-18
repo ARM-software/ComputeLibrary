@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_SIZE2D_H
-#define ARM_COMPUTE_SIZE2D_H
+#ifndef ACL_ARM_COMPUTE_CORE_SIZE2D_H
+#define ACL_ARM_COMPUTE_CORE_SIZE2D_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <cstddef>
 #include <string>
@@ -89,4 +93,4 @@ public:
     size_t height = {}; /**< Height of the image region or rectangle */
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_SIZE2D_H */
+#endif // ACL_ARM_COMPUTE_CORE_SIZE2D_H

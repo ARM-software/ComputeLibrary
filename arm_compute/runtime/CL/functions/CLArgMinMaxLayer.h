@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLARGMINMAXLAYER_H
-#define ARM_COMPUTE_CLARGMINMAXLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLARGMINMAXLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLARGMINMAXLAYER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -118,4 +122,4 @@ private:
     unsigned int                            _reduction_axis;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLARGMINMAXLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLARGMINMAXLAYER_H

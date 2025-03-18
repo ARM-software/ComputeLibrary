@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H
 #define ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 

@@ -24,6 +24,10 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_IOPERATOR_H
 #define ACL_ARM_COMPUTE_RUNTIME_IOPERATOR_H
 
+/** @file
+ * @publicapi
+ */
+
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Types.h"

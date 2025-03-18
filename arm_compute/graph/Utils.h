@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_UTILS_H
-#define ARM_COMPUTE_GRAPH_UTILS_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_UTILS_H
+#define ACL_ARM_COMPUTE_GRAPH_UTILS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/PassManager.h"
@@ -146,4 +150,4 @@ std::vector<NodeIdxPair> get_driver_nodes(const INode &node);
 void configure_tensor(Tensor *tensor);
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_UTILS_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_UTILS_H

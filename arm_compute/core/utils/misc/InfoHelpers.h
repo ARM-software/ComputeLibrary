@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_MISC_INFO_HELPERS_H
-#define ARM_COMPUTE_MISC_INFO_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_INFOHELPERS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_MISC_INFOHELPERS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
@@ -122,4 +126,4 @@ inline void build_lstm_params_tensor_info(const LSTMParams<T> &lstm_params, LSTM
 } // namespace info_helpers
 } // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_MISC_INFO_HELPERS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_MISC_INFOHELPERS_H

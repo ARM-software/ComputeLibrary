@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_GRAPH_BUILDER_H
-#define ARM_COMPUTE_GRAPH_GRAPH_BUILDER_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_GRAPHBUILDER_H
+#define ACL_ARM_COMPUTE_GRAPH_GRAPHBUILDER_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/LayerDescriptors.h"
@@ -682,4 +686,4 @@ public:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_GRAPH_BUILDER_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_GRAPHBUILDER_H

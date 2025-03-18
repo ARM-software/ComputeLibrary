@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,6 +113,26 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
 TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // CpuElementwiseMin
+
+TEST_SUITE(CpuPRelu)
+
+template <typename T>
+using CpuPReluFixture =
+    CpuPReluValidationFixture<Tensor, Accessor, experimental::op::CpuPRelu, T>;
+
+TEST_SUITE(Float)
+TEST_SUITE(F32)
+FIXTURE_DATA_TEST_CASE(SmokeTest,
+                       CpuPReluFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallShapes(), ElementwiseFP32Dataset), InPlaceDataSet))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // F32
+TEST_SUITE_END() // Float
+TEST_SUITE_END() // CpuPRelu
 
 TEST_SUITE_END() // OPERATORS
 TEST_SUITE_END() // NEON

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H
-#define ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H
+
+/** @file
+ * @publicapi
+ */
 
 #include <string>
 #include <vector>
@@ -62,4 +66,4 @@ std::string float_to_string_with_full_precision(float val);
  */
 std::string join(const std::vector<std::string> strings, const std::string &sep);
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H

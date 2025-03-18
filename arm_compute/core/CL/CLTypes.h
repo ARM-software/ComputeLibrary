@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_TYPES_H
-#define ARM_COMPUTE_CL_TYPES_H
+#ifndef ACL_ARM_COMPUTE_CORE_CL_CLTYPES_H
+#define ACL_ARM_COMPUTE_CORE_CL_CLTYPES_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/GPUTarget.h"
@@ -86,4 +90,4 @@ enum CLKernelType
     WINOGRAD     /**< Winograd CL kernel type */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_TYPES_H */
+#endif // ACL_ARM_COMPUTE_CORE_CL_CLTYPES_H

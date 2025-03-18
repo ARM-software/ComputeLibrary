@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,7 +73,7 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             //   * x26: index_1
             //   * x27: src_1
             //   * x28: dst_1
-            //   * x29  tmp
+            //   * x14  tmp
             //
             //
             //   * p0: all-true
@@ -105,7 +105,7 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             mov x20, %x[shape_3]
             mov x21, %x[src]
             mov x22, %x[dst]
-            mov x29, %x[tmp]
+            mov x14, %x[tmp]
 
             // Load the LUT to the register file.
             mov x2, %x[lut]
@@ -337,19 +337,19 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             tbx z27.s, z23.s, z19.s
 
 
-            st1w z24.s, p2, [x29, x1, LSL #2]// z24 store exp(-scale*beta*x) into the tmp tensor
+            st1w z24.s, p2, [x14, x1, LSL #2]// z24 store exp(-scale*beta*x) into the tmp tensor
             fadd z28.s, p2/m, z28.s, z24.s
             add x1, x1, #16
 
-            st1w z25.s, p3, [x29, x1, LSL #2]// z25 store exp(-scale*beta*x) into the tmp tensor
+            st1w z25.s, p3, [x14, x1, LSL #2]// z25 store exp(-scale*beta*x) into the tmp tensor
             fadd z28.s, p3/m, z28.s, z25.s
             add x1, x1, #16
 
-            st1w z26.s, p4, [x29, x1, LSL #2]// z26 store exp(-scale*beta*x) into the tmp tensor
+            st1w z26.s, p4, [x14, x1, LSL #2]// z26 store exp(-scale*beta*x) into the tmp tensor
             fadd z28.s, p4/m, z28.s, z26.s
             add x1, x1, #16
 
-            st1w z27.s, p5, [x29, x1, LSL #2]// z27 store exp(-scale*beta*x) into the tmp tensor
+            st1w z27.s, p5, [x14, x1, LSL #2]// z27 store exp(-scale*beta*x) into the tmp tensor
             fadd z28.s, p5/m, z28.s, z27.s
             add x1, x1, #16
 
@@ -372,9 +372,9 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             b.eq 11f // normalize_body_end
 
             mov x2, x1       // Preserve the index into x2 for the final store to dst.
-            .inst 0xa001c7ac // ld1w    { z12.s - z15.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5cc // ld1w    { z12.s - z15.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
-            .inst 0xa001c7b0 // ld1w    { z16.s - z19.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5d0 // ld1w    { z16.s - z19.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
 
             // z12-z19: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
@@ -403,9 +403,9 @@ void sme2_qasymm8_softmax_kernel_512VL( //
 
             dup z16.s, z28.s[0] // Juggling the value to z16 as z28 will be overwritten by the load below
 
-            .inst 0xa001c7b8 // ld1w    { z24.s - z27.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5d8 // ld1w    { z24.s - z27.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
-            .inst 0xa001c7bc // ld1w    { z28.s - z31.s }, pn9/z, [x29, x1, lsl #2]
+            .inst 0xa001c5dc // ld1w    { z28.s - z31.s }, pn9/z, [x14, x1, lsl #2]
             add x1, x1, #64
 
             // z24-z31: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
@@ -456,16 +456,16 @@ void sme2_qasymm8_softmax_kernel_512VL( //
             mov x2, x1 // Preserve the index into x2 for the final store to dst.
 
             // z12-z15: load exp(-scale*beta*x) from the tmp tensor
-            ld1w z12.s, p2/z, [x29, x1, LSL #2]
+            ld1w z12.s, p2/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z13.s, p3/z, [x29, x1, LSL #2]
+            ld1w z13.s, p3/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z14.s, p4/z, [x29, x1, LSL #2]
+            ld1w z14.s, p4/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
-            ld1w z15.s, p5/z, [x29, x1, LSL #2]
+            ld1w z15.s, p5/z, [x14, x1, LSL #2]
             add x1, x1, #16
 
             // z12-z15: effectively divides exp(-scale*beta*x) by the sum of the exponentials for the current row and multiplies by 256.
@@ -515,7 +515,7 @@ void sme2_qasymm8_softmax_kernel_512VL( //
           [length] "r"(shape[0])                                         //
         : "cc", "memory",                                                //
           "p0", "p1", "p2", "p3", "p4", "p5",                            //
-          "x2", "x9", "x13",                                             //
+          "x1", "x2", "x9", "x13", "x14",                                //
           "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", //
           "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7",                //
           "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15",          //

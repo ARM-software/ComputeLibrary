@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,10 @@
  */
 #ifndef ACL_ARM_COMPUTE_CORE_QUANTIZATIONINFO_H
 #define ACL_ARM_COMPUTE_CORE_QUANTIZATIONINFO_H
+
+/** @file
+ * @publicapi
+ */
 
 #include "arm_compute/core/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H
-#define ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H
+#define ACL_ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H
+
+/** @file
+ * @publicapi
+ */
 
 namespace arm_compute
 {
@@ -63,4 +67,4 @@ public:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H

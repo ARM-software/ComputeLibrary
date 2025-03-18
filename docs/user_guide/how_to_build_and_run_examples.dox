@@ -192,10 +192,8 @@ Examples for different build tools look like below.
 
 (experimental) CMake:
 
-	mkdir build
-	cd build
-	CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_OPENMP=1 -DARM_COMPUTE_WERROR=0 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
-	CC=clang CXX=clang++ cmake --build . -j32
+	CC=clang CXX=clang++ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_ENABLE_OPENMP=1 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
+	CC=clang CXX=clang++ cmake --build build -j32
 
 (experimental) Bazel:
 
@@ -523,23 +521,23 @@ File structure for all files included in the CMake build:
 
 Available build options:
 
-	- CMAKE_BUILD_TYPE: "Release" (default) enables ['-O3', '-DNDEBUG'] compilation flags, "Debug" enables ['-O0','-g','-gdwarf-2', '-DARM_COMPUTE_ASSERTS_ENABLED']
-	- ARM_COMPUTE_WERROR: Enable -Werror compilation flag
+	- CMAKE_BUILD_TYPE: "Release" (default) enables ['-O3', '-DNDEBUG'] compilation flags, "Debug" enables ['-O0','-g',]
+	- ARM_COMPUTE_BUILD_SHARED_LIB: Build shared library
+	- ARM_COMPUTE_ENABLE_WERROR: Enable -Werror compilation flag
 	- ARM_COMPUTE_EXCEPTIONS: If disabled ARM_COMPUTE_EXCEPTIONS_DISABLED is enabled
-	- ARM_COMPUTE_LOGGING: Enable logging
+	- ARM_COMPUTE_ENABLE_LOGGING: Enable logging
 	- ARM_COMPUTE_BUILD_EXAMPLES: Build examples
 	- ARM_COMPUTE_BUILD_TESTING: Build tests
-	- ARM_COMPUTE_CPPTHREADS: Enable C++11 threads backend
-	- ARM_COMPUTE_OPENMP: Enable OpenMP backend
+	- ARM_COMPUTE_ENABLE_CPPTHREADS: Enable C++11 threads backend
+	- ARM_COMPUTE_ENABLE_OPENMP: Enable OpenMP backend
+	- ARM_COMPUTE_ENABLE_ASSERTS: Enable runtime asserts
 
 @subsubsection S1_8_2_3_example_builds Example builds
 
 To build libraries, examples and tests:
 
-	mkdir build
-	cd build
-	cmake .. -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_OPENMP=1 -DARM_COMPUTE_WERROR=0 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
-	cmake --build . -j32
+	cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_ENABLE_OPENMP=1 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1
+	cmake --build build -j32
 
 @section S1_9_fixed_format Building with support for fixed format kernels
 
