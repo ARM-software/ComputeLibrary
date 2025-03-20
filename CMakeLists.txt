@@ -188,10 +188,8 @@ add_subdirectory(src)
 if(ARM_COMPUTE_BUILD_TESTING)
   add_library(arm_compute_validation_framework OBJECT)
   add_subdirectory(tests)
-
   add_executable(arm_compute_validation $<TARGET_OBJECTS:arm_compute_validation_framework>)
   add_subdirectory(tests/validation)
-
   add_executable(arm_compute_benchmark $<TARGET_OBJECTS:arm_compute_validation_framework>)
   add_subdirectory(tests/benchmark)
 
