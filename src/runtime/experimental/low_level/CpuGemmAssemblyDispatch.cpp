@@ -53,6 +53,7 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
     asm_info.fixed_format    = info.fixed_format();
     asm_info.accumulate      = info.accumulate();
     asm_info.weight_format   = info.weight_format();
+    asm_info.use_fp32_acc    = info.use_fp32_acc();
     asm_info.transpose_b =
         info.pretranspose_B(); // The "pretranspose_B" flag here is not the same as the pretranspose_B_array method. The flag here signals to pretranspose_B_array method if we want to perform additional transpose on B before the pretranspose_B_array method
 

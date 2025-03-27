@@ -58,6 +58,7 @@ struct AsmGemmInfo
     arm_compute::WeightFormat weight_format{arm_compute::WeightFormat::UNSPECIFIED};
     bool                      reshape_b_only_on_first_run{true};
     bool                      accumulate{false};
+    bool                      use_fp32_acc{false};
     /** Whether we want to perform an additional transpose of b before passing it to gemm or pretranspose_B_array
      * @note This transpose b operation is also considered a form of "reshape" or "transform", so should be counted for
      *       by the reshape_b_only_on_first_run flag

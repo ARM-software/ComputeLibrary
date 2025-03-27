@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,10 +37,12 @@
 #include "kernels/a32_sgemm_8x6.hpp"
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/a64_ffhybrid_fp16_mla_6x32.hpp"
+#include "kernels/a64_ffhybrid_fp16fp32fp16_mla_6x16.hpp"
 #include "kernels/a64_ffinterleaved_fp16_mla_8x24.hpp"
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/a64_hgemm_8x24.hpp"
 #include "kernels/a64_hybrid_fp16_mla_6x32.hpp"
+#include "kernels/a64_hybrid_fp16fp32fp16_mla_6x16.hpp"
 #include "kernels/a64_sgemm_8x12.hpp"
 #include "kernels/sme2_gemv_fp16fp32fp16_dot_16VL.hpp"
 #include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL.hpp"
@@ -48,9 +50,11 @@
 #include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL.hpp"
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/sve_ffhybrid_fp16_mla_6x4VL.hpp"
+#include "kernels/sve_ffhybrid_fp16fp32fp16_mla_6x4VL.hpp"
 #include "kernels/sve_ffinterleaved_fp16_mla_8x3VL.hpp"
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/sve_hybrid_fp16_mla_6x4VL.hpp"
+#include "kernels/sve_hybrid_fp16fp32fp16_mla_6x4VL.hpp"
 #include "kernels/sve_interleaved_fp16_mla_8x3VL.hpp"
 
 namespace arm_gemm {
@@ -92,14 +96,21 @@ static const GemmImplementation<__fp16, __fp16, __fp16> gemm_fp16_methods[] = {
 GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp16_mla_6x4VL",
-    [](const GemmArgs &args) { return args._ci->has_sve(); },
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._fast_mode; },
     [](const GemmArgs &args) { return GemmHybridIndirect<cls_sve_hybrid_fp16_mla_6x4VL, __fp16, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp16_mla_6x4VL, __fp16, __fp16, __fp16>(args); }
 ),
+{
+    GemmMethod::GEMM_HYBRID,
+    "sve_hybrid_fp16fp32fp16_mla_6x4VL",
+    [](const GemmArgs &args) { return args._ci->has_sve2(); },
+    [](const GemmArgs &args) { return !args._fast_mode; },
+    [](const GemmArgs &args) { return new GemmHybridIndirect<cls_sve_hybrid_fp16fp32fp16_mla_6x4VL, __fp16, __fp16, __fp16>(args); }
+},
 GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "sve_interleaved_fp16_mla_8x3VL",
-    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize > 4); },
+    [](const GemmArgs &args) { return args._ci->has_sve() && (args._Ksize > 4) && args._fast_mode; },
     [](const GemmArgs &args) { return GemmInterleaved<cls_sve_interleaved_fp16_mla_8x3VL, __fp16, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_fp16_mla_8x3VL, __fp16, __fp16, __fp16>(args); }
 ),
@@ -108,7 +119,7 @@ GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "sve_ffinterleaved_fp16_mla_8x3VL",
     KernelWeightFormat::VL1VL_BL16,
-    [](const GemmArgs &args) { return args._ci->has_sve(); },
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._fast_mode; },
     [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_sve_ffinterleaved_fp16_mla_8x3VL, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_sve_ffinterleaved_fp16_mla_8x3VL, __fp16, __fp16>(args); }
 ),
@@ -116,24 +127,39 @@ GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_ffhybrid_fp16_mla_6x4VL",
     KernelWeightFormat::VL1VL_BL16,
-    [](const GemmArgs &args) { return args._ci->has_sve(); },
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._fast_mode; },
     [](const GemmArgs &args) { return GemmHybridIndirectFixedFormat<cls_sve_ffhybrid_fp16_mla_6x4VL, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_sve_ffhybrid_fp16_mla_6x4VL, __fp16, __fp16>(args); }
 ),
+{
+    GemmMethod::GEMM_HYBRID,
+    "sve_ffhybrid_fp16fp32fp16_mla_6x4VL",
+    KernelWeightFormat::VL1VL_BL16,
+    [](const GemmArgs &args) { return args._ci->has_sve2(); },
+    [](const GemmArgs &args) { return !args._fast_mode; },
+    [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_sve_ffhybrid_fp16fp32fp16_mla_6x4VL, __fp16, __fp16>(args); }
+},
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #endif // ARM_COMPUTE_ENABLE_SVE
 #if defined(__aarch64__)
 GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_hybrid_fp16_mla_6x32",
-    [](const GemmArgs &args) { return args._ci->has_fp16(); },
+    [](const GemmArgs &args) { return args._ci->has_fp16() && args._fast_mode; },
     [](const GemmArgs &args) { return GemmHybridIndirect<cls_a64_hybrid_fp16_mla_6x32, __fp16, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_fp16_mla_6x32, __fp16, __fp16, __fp16>(args); }
 ),
+{
+    GemmMethod::GEMM_HYBRID,
+    "a64_hybrid_fp16fp32fp16_mla_6x16",
+    [](const GemmArgs &args) { return args._ci->has_fhm(); },
+    [](const GemmArgs &args) { return !args._fast_mode; },
+    [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_fp16fp32fp16_mla_6x16, __fp16, __fp16, __fp16>(args); }
+},
 GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_hgemm_8x24",
-    [](const GemmArgs &args) { return args._ci->has_fp16(); },
+    [](const GemmArgs &args) { return args._ci->has_fp16() && args._fast_mode; },
     [](const GemmArgs &args) { return GemmInterleaved<cls_a64_hgemm_8x24, __fp16, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_hgemm_8x24, __fp16, __fp16, __fp16>(args); }
 ),
@@ -142,7 +168,7 @@ GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_ffinterleaved_fp16_mla_8x24",
     KernelWeightFormat::VL128_BL16,
-    [](const GemmArgs &args) { return args._ci->has_fp16(); },
+    [](const GemmArgs &args) { return args._ci->has_fp16() && args._fast_mode; },
     [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_fp16_mla_8x24, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_fp16_mla_8x24, __fp16, __fp16>(args); }
 ),
@@ -150,10 +176,18 @@ GemmImplementation<__fp16, __fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "a64_ffhybrid_fp16_mla_6x32",
     KernelWeightFormat::VL128_BL16,
-    [](const GemmArgs &args) { return args._ci->has_fp16(); },
+    [](const GemmArgs &args) { return args._ci->has_fp16() && args._fast_mode; },
     [](const GemmArgs &args) { return GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_fp16_mla_6x32, __fp16, __fp16>::estimate_cycles<__fp16>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_fp16_mla_6x32, __fp16, __fp16>(args); }
 ),
+{
+    GemmMethod::GEMM_HYBRID,
+    "a64_ffhybrid_fp16fp32fp16_mla_6x16",
+    KernelWeightFormat::VL128_BL16,
+    [](const GemmArgs &args) { return args._ci->has_fhm(); },
+    [](const GemmArgs &args) { return !args._fast_mode; },
+    [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_a64_ffhybrid_fp16fp32fp16_mla_6x16, __fp16, __fp16>(args); }
+},
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 {
     GemmMethod::GEMM_INTERLEAVED,
