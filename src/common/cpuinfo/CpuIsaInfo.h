@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024 Arm Limited.
+ * Copyright (c) 2021-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ struct CpuIsaInfo
     bool sve2{false};
     bool sme{false};
     bool sme2{false};
+    bool fhm{false};
 
     /* Data-type extensions support */
     bool fp16{false};

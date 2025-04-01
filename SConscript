@@ -33,8 +33,8 @@ import codecs
 import platform
 import SCons
 
-VERSION = "v25.03"
-LIBRARY_VERSION_MAJOR = 49
+VERSION = "v25.03.1"
+LIBRARY_VERSION_MAJOR = 50
 LIBRARY_VERSION_MINOR = 0
 LIBRARY_VERSION_PATCH = 0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -565,7 +565,7 @@ if not env['thread_sanitizer'] and not env['address_sanitizer'] and not env['und
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env['os'] != 'openbsd':
-    if env['os'] == 'windows':
+    if env['os'] == 'windows' or env['os'] == 'qnx':
         arm_compute_env.Append(LIBS = [])
     else:
         arm_compute_env.Append(LIBS = ['dl'])

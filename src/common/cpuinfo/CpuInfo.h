@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024 Arm Limited.
+ * Copyright (c) 2021-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,10 @@ public:
     bool has_neon() const
     {
         return _isa.neon;
+    }
+    bool has_fhm() const
+    {
+        return _isa.fhm;
     }
     bool has_sve() const
     {

@@ -123,6 +123,11 @@ public:
      * @return true if the cpu supports integer matrix multiplication, false otherwise
      */
     bool has_svei8mm() const;
+    /** Checks if the cpu model supports fhm.
+     *
+     * @return true if the cpu supports fhm, false otherwise
+     */
+    bool has_fhm() const;
     /** Checks if the cpu model supports sve.
      *
      * @return true if the cpu supports sve, false otherwise

@@ -24,7 +24,7 @@ version = 1
 
 [[annotations]]
 path = ["filedefs.json"]
-SPDX-FileCopyrightText = "2021-2023 Arm Limited"
+SPDX-FileCopyrightText = "2021-2023, 2025 Arm Limited"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]

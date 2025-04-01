@@ -119,6 +119,7 @@ public:
      * |:------------|:-----------|:---------|:--------------|
      * |F32          |F32         |nullptr   |F32            |
      * |F16          |F16         |nullptr   |F16            |
+     * |F16          |F16         |nullptr   |F32            |
      * |BFLOAT16     |BFLOAT16    |nullptr   |BFLOAT16       |
      * |BFLOAT16     |BFLOAT16    |nullptr   |BFLOAT32       |
      *

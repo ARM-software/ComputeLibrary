@@ -64,17 +64,20 @@ public:
      * |src      |dst       |
      * |:--------|:---------|
      * |F32      |F32       |
+     * |F32      |BFLOAT16  |
      *
-     * @param[in]  input     Source tensor. Data type supported: F32. Data layouts supported: NCHW.
+     * @param[in]  input     Source tensor. Data type supported: F32.
      * @param[out] output    Destination with the same dimensions, data type, data layout as  @p input
      *                       except last dimension of data layout which needs to be multiple of blocking parameter ksize
      * @param[in]  input_wf  WeightFormat of input.
      * @param[in]  output_wf WeightFormat of output.
+     * @param[in]  transpose Whether to transpose or not.
      */
     void configure(const ITensor            *input,
                    ITensor                  *output,
                    arm_compute::WeightFormat input_wf,
-                   arm_compute::WeightFormat output_wf);
+                   arm_compute::WeightFormat output_wf,
+                   bool                      transpose);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReorderLayer
      *
@@ -85,7 +88,8 @@ public:
     static Status validate(const ITensorInfo        *input,
                            const ITensorInfo        *output,
                            arm_compute::WeightFormat input_wf,
-                           arm_compute::WeightFormat output_wf);
+                           arm_compute::WeightFormat output_wf,
+                           bool                      transpose);
 
     // Inherited methods overridden:
     void run() override;

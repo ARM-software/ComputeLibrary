@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,20 +46,20 @@ class ReorderValidationFixture : public framework::Fixture
 {
 public:
     void check_hardware_supports(WeightFormat output_wf){
-        if(!Scheduler::get().cpu_info().has_sve() && output_wf!=WeightFormat::OHWIo4){
+        if(!Scheduler::get().cpu_info().has_sve() && arm_compute::interleave_by(output_wf) != 4){
             _hardware_supports = false;
         }
-        if (Scheduler::get().cpu_info().has_sve() && arm_gemm::utils::get_vector_length<float>() != 8 && output_wf==WeightFormat::OHWIo8)
+        if (Scheduler::get().cpu_info().has_sve() && arm_gemm::utils::get_vector_length<float>() != 8 && arm_compute::interleave_by(output_wf) == 8)
         {
             _hardware_supports = false;
         }
     }
 
-    void setup(TensorShape input_shape, TensorShape output_shape, WeightFormat input_wf, WeightFormat output_wf, DataType data_type)
+    void setup(TensorShape input_shape, TensorShape output_shape, WeightFormat input_wf, WeightFormat output_wf, bool transpose, DataType data_type)
     {
         check_hardware_supports(output_wf);
         if (_hardware_supports){
-            _target    = compute_target(input_shape, output_shape, input_wf, output_wf, data_type);
+            _target    = compute_target(input_shape, output_shape, input_wf, output_wf, transpose, data_type);
             _reference = compute_reference(input_shape, output_shape, output_wf, data_type);
         }
     }
@@ -71,7 +71,7 @@ public:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, WeightFormat input_wf, WeightFormat output_wf, DataType data_type)
+    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, WeightFormat input_wf, WeightFormat output_wf, bool transpose, DataType data_type)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(input_shape, data_type);
@@ -80,7 +80,7 @@ public:
         // Create and configure function
         FunctionType reorder;
 
-        reorder.configure(&src, &dst, input_wf, output_wf);
+        reorder.configure(&src, &dst, input_wf, output_wf, transpose);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());

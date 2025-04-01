@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, 2024 Arm Limited.
+ * Copyright (c) 2018-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,6 +90,11 @@ bool CPUInfo::has_i8mm() const
 bool CPUInfo::has_svei8mm() const
 {
     return _impl->info.has_svei8mm();
+}
+
+bool CPUInfo::has_fhm() const
+{
+    return _impl->info.has_fhm();
 }
 
 bool CPUInfo::has_sve() const

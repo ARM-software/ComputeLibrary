@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,7 +74,7 @@ DATA_TEST_CASE(ValidateReorderOHWIo8, framework::DatasetMode::ALL, combine(
         TensorInfo input_tensor_info(input_shape, 1, DataType::F32);
         TensorInfo output_tensor_info(output_shape, 1, DataType::F32);
 
-        Status status = reorder_layer.validate(&input_tensor_info, &output_tensor_info, input_wf, output_wf);
+        Status status = reorder_layer.validate(&input_tensor_info, &output_tensor_info, input_wf, output_wf, true /* transpose */);
 
         ARM_COMPUTE_EXPECT((expected_bool_status == bool(status)), framework::LogLevel::ERRORS);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_INSTRUMENTS
-#define ARM_COMPUTE_TEST_INSTRUMENTS
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENTS_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENTS_H
 
-#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__)
+#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__)
 #include "MaliCounter.h"
 #include "OpenCLMemoryUsage.h"
 #include "OpenCLTimer.h"
 #include "PMUCounter.h"
-#endif /* !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) */
+#endif /* !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) */
 #include "SchedulerTimer.h"
 #include "WallClockTimer.h"
 
@@ -253,4 +253,4 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_INSTRUMENTS */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENTS_H

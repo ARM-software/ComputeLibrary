@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -258,6 +258,7 @@ int main(int argc, char **argv)
                 p->print_entry("cpu_has_bf16", support::cpp11::to_string(cpu_info.has_bf16()));
                 p->print_entry("cpu_has_dotprod", support::cpp11::to_string(cpu_info.has_dotprod()));
                 p->print_entry("cpu_has_i8mm", support::cpp11::to_string(cpu_info.has_i8mm()));
+                p->print_entry("cpu_has_fhm", support::cpp11::to_string(cpu_info.has_fhm()));
 
                 for(unsigned int j = 0; j < num_cpus; ++j)
                 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,15 +22,31 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include "utils/command_line/CommandLineParser.h"
+#include "utils/command_line/SimpleOption.h"
+#include "utils/command_line/ToggleOption.h"
 #include "utils/Utils.h"
 
 #include <cstdlib>
 
 using namespace arm_compute;
 using namespace utils;
+
+static bool file_exists(const std::string &filename)
+{
+    std::ifstream file(filename);
+    return file.good();
+}
+
+static bool equal_float(const float a, const float b)
+{
+    constexpr float tolerance = 1e-6;
+    return std::fabs(a - b) <= tolerance;
+}
 
 class NESGEMMExample : public Example
 {
@@ -40,99 +56,177 @@ public:
         NPYLoader npy0;
         NPYLoader npy1;
         NPYLoader npy2;
-        alpha = 1.0f;
-        beta  = 0.0f;
+        alpha           = 1.0f;
+        beta            = 0.0f;
+        is_dynamic      = false;
+        is_constant_b_c = false;
+        is_bias_present = false;
 
-        std::ifstream stream;
-        if (argc > 1)
+        utils::CommandLineParser parser;
+
+        auto help_opt = parser.add_option<utils::ToggleOption>("help");
+        help_opt->set_help("Print help message and exit");
+
+        auto src0_opt = parser.add_option<utils::SimpleOption<std::string>>("src0");
+        src0_opt->set_help("File name with NPY data for src0");
+
+        auto src1_opt = parser.add_option<utils::SimpleOption<std::string>>("src1");
+        src1_opt->set_help("File name with NPY data for src1");
+
+        auto src2_opt = parser.add_option<utils::SimpleOption<std::string>>("src2");
+        src2_opt->set_help("File name with NPY data for src2");
+
+        auto m_opt = parser.add_option<utils::SimpleOption<int>>("m");
+        m_opt->set_help("M shape. This cannot be set together with src0/src1/src2");
+        auto n_opt = parser.add_option<utils::SimpleOption<int>>("n");
+        n_opt->set_help("N shape. This cannot be set together with src0/src1/src2");
+        auto k_opt = parser.add_option<utils::SimpleOption<int>>("k");
+        k_opt->set_help("K shape. This cannot be set together with src0/src1/src2");
+
+        auto alpha_opt = parser.add_option<utils::SimpleOption<float>>("alpha", 1.0f);
+        alpha_opt->set_help("Alpha value. Default = 1.0");
+
+        auto beta_opt = parser.add_option<utils::SimpleOption<float>>("beta", 0.0f);
+        beta_opt->set_help("Beta value. Default = 0.0");
+
+        auto constant_b_c_opt = parser.add_option<utils::ToggleOption>("constant_b_c", false);
+        constant_b_c_opt->set_help("Whether B and C should be treated as constant data. Default = false");
+
+        auto mode_opt = parser.add_option<utils::SimpleOption<std::string>>("mode", "static");
+        mode_opt->set_help("GEMM mode. Allowed values: static, dynamic. Default value: static");
+
+        parser.parse(argc, argv);
+
+        if (help_opt->is_set() && help_opt->value())
         {
-            stream.open(argv[1], std::fstream::in);
+            parser.print_help(argv[0]);
+            return false;
+        }
+        const bool shapes_set = m_opt->is_set() && n_opt->is_set() && k_opt->is_set();
+        const bool files_set  = src0_opt->is_set() && src1_opt->is_set() && src2_opt->is_set();
+
+        if (shapes_set && files_set)
+        {
+            std::cout << "M,N,K cannot be set together with src0/src1/src2." << std::endl;
+            parser.print_help(argv[0]);
+            return false;
         }
 
-        if (argc < 3 || (argc < 4 && stream.bad()))
-        {
-            // Print help
-            std::cout << "Usage: 1) ./build/neon_sgemm input_matrix_1.npy input_matrix_2.npy [input_matrix_3.npy] "
-                         "[alpha = 1] [beta = 0]\n";
-            std::cout << "       2) ./build/neon_sgemm M N K [alpha = 1.0f] [beta = 0.0f]\n\n";
-            std::cout << "Too few or no input_matrices provided. Using M=7, N=3, K=5, alpha=1.0f and beta=0.0f\n\n";
+        alpha           = alpha_opt->value();
+        beta            = beta_opt->value();
+        is_constant_b_c = constant_b_c_opt->is_set() && constant_b_c_opt->value();
+        is_bias_present = !equal_float(beta, 0.0f);
 
-            src0.allocator()->init(TensorInfo(TensorShape(5U, 7U), 1, DataType::F32));
-            src1.allocator()->init(TensorInfo(TensorShape(3U, 5U), 1, DataType::F32));
-            src2.allocator()->init(TensorInfo(TensorShape(3U, 7U), 1, DataType::F32));
+        if (mode_opt->value() == "dynamic")
+        {
+            is_dynamic = true;
+        }
+        else if (mode_opt->value() != "static")
+        {
+            std::cout << "Invalid mode: " << mode_opt->value() << ". Allowed values: static, dynamic." << std::endl;
+            parser.print_help(argv[0]);
+            return false;
+        }
+
+        if (is_dynamic && (!equal_float(alpha, 1.0f) || !equal_float(beta, 1.0f)))
+        {
+            std::cout << "Dynamic shape tensors are only supported when 'alpha' and 'beta' equal to 1.0" << std::endl;
+            parser.print_help(argv[0]);
+            return false;
+        }
+
+        if (files_set)
+        {
+            if (!file_exists(src0_opt->value()) || !file_exists(src1_opt->value()) ||
+                (is_bias_present && !file_exists(src2_opt->value())))
+            {
+                std::cout << "Some of provided files cannot be open: " << src0_opt->value() << ", " << src1_opt->value()
+                          << ((is_bias_present) ? (", " + src2_opt->value()) : "") << std::endl;
+                return false;
+            }
+        }
+
+        if (files_set)
+        {
+            npy0.open(src0_opt->value());
+            npy0.init_tensor(src0, DataType::F32);
+            npy1.open(src1_opt->value());
+            npy1.init_tensor(src1, DataType::F32);
+
+            if (is_bias_present)
+            {
+                npy2.open(src2_opt->value());
+                npy2.init_tensor(src2, DataType::F32);
+            }
         }
         else
         {
-            if (stream.good()) /* case file1.npy file2.npy [file3.npy] [alpha = 1.0f] [beta = 0.0f] */
+            size_t M = 7;
+            size_t N = 3;
+            size_t K = 5;
+
+            if (shapes_set)
             {
-                npy0.open(argv[1]);
-                npy0.init_tensor(src0, DataType::F32);
-                npy1.open(argv[2]);
-                npy1.init_tensor(src1, DataType::F32);
-
-                if (argc > 3)
-                {
-                    stream.close();
-                    stream.clear();
-                    stream.open(argv[3], std::fstream::in);
-                    if (stream.good()) /* case with third file */
-                    {
-                        npy2.open(argv[3]);
-                        npy2.init_tensor(src2, DataType::F32);
-
-                        if (argc > 4)
-                        {
-                            // Convert string to float
-                            alpha = strtof(argv[4], nullptr);
-
-                            if (argc > 5)
-                            {
-                                // Convert string to float
-                                beta = strtof(argv[5], nullptr);
-                            }
-                        }
-                    }
-                    else /* case without third file */
-                    {
-                        alpha = strtof(argv[3], nullptr);
-
-                        if (argc > 4)
-                        {
-                            beta = strtof(argv[4], nullptr);
-                        }
-                    }
-                }
+                M = m_opt->value();
+                N = n_opt->value();
+                K = k_opt->value();
             }
-            else /* case M N K [alpha = 1.0f] [beta = 0.0f] */
+            else
             {
-                size_t M = strtol(argv[1], nullptr, 10);
-                size_t N = strtol(argv[2], nullptr, 10);
-                size_t K = strtol(argv[3], nullptr, 10);
+                std::cout << "Shapes are invalid or not provided. Using M=" << M << ", N=" << N << ", K=" << K << "."
+                          << std::endl;
+            }
 
-                src0.allocator()->init(TensorInfo(TensorShape(K, M), 1, DataType::F32));
-                src1.allocator()->init(TensorInfo(TensorShape(N, K), 1, DataType::F32));
-                src2.allocator()->init(TensorInfo(TensorShape(N, M), 1, DataType::F32));
-
-                if (argc > 4)
-                {
-                    alpha = strtof(argv[4], nullptr);
-
-                    if (argc > 5)
-                    {
-                        beta = strtof(argv[5], nullptr);
-                    }
-                }
+            src0.allocator()->init(TensorInfo(TensorShape(K, M), 1, DataType::F32));
+            src1.allocator()->init(TensorInfo(TensorShape(N, K), 1, DataType::F32));
+            if (is_bias_present)
+            {
+                const auto bias_shape = (is_dynamic) ? TensorShape(N) : TensorShape(N, M);
+                src2.allocator()->init(TensorInfo(bias_shape, 1, DataType::F32));
             }
         }
 
         init_sgemm_output(dst, src0, src1, DataType::F32);
+        auto src0_shape = src0.info()->tensor_shape();
+        auto src1_shape = src1.info()->tensor_shape();
+        auto src2_shape = src2.info()->tensor_shape();
+        auto dst_shape  = dst.info()->tensor_shape();
+
+        if (is_dynamic)
+        {
+            src0.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            if (!is_constant_b_c)
+            {
+                src1.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+                src2.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+            }
+            dst.info()->set_tensor_shape(TensorShape()).set_dynamic(true);
+        }
+        src1.info()->set_are_values_constant(is_constant_b_c);
+        src2.info()->set_are_values_constant(is_constant_b_c);
 
         // Configure function
-        sgemm.configure(&src0, &src1, nullptr, &dst, alpha, beta);
+        GEMMInfo gemm_info = {false, false, is_constant_b_c};
+        sgemm.configure(&src0, &src1, (is_bias_present) ? &src2 : nullptr, &dst, alpha, beta, gemm_info);
+
+        if (is_dynamic)
+        {
+            src0.info()->set_tensor_shape(src0_shape);
+            if (!is_constant_b_c)
+            {
+                src1.info()->set_tensor_shape(src1_shape);
+                src2.info()->set_tensor_shape(src2_shape);
+            }
+            dst.info()->set_tensor_shape(dst_shape);
+        }
 
         // Allocate all the images
         src0.allocator()->allocate();
         src1.allocator()->allocate();
+        if (is_bias_present)
+        {
+            src2.allocator()->allocate();
+        }
         dst.allocator()->allocate();
 
         // Fill the input images with either the data provided or random data
@@ -146,17 +240,17 @@ public:
 
             if (npy2.is_open())
             {
-                src2.allocator()->allocate();
                 npy2.fill_tensor(src2);
             }
         }
         else
         {
-            src2.allocator()->allocate();
-
             fill_random_tensor(src0, -1.f, 1.f);
             fill_random_tensor(src1, -1.f, 1.f);
-            fill_random_tensor(src2, -1.f, 1.f);
+            if (is_bias_present)
+            {
+                fill_random_tensor(src2, -1.f, 1.f);
+            }
         }
 
         // Dummy run for CLTuner
@@ -183,6 +277,9 @@ private:
     float       alpha{}, beta{};
     bool        is_fortran{};
     std::string output_filename{};
+    bool        is_dynamic{};
+    bool        is_constant_b_c{};
+    bool        is_bias_present{};
 };
 
 /** Main program for sgemm test

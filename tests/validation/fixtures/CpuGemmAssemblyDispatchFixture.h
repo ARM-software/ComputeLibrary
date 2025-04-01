@@ -63,7 +63,7 @@ public:
         ARM_COMPUTE_UNUSED(alpha);
         ARM_COMPUTE_UNUSED(beta);
         _target =
-            compute_target(shape_a, shape_b, shape_c, output_shape, data_type, accumulate, pretranspose_b, act_info);
+            compute_target(shape_a, shape_b, shape_c, output_shape, data_type, data_type, accumulate, pretranspose_b, act_info);
         _reference = compute_reference(shape_a, shape_b, output_shape, data_type, accumulate, act_info);
     }
 
@@ -95,6 +95,7 @@ protected:
                               const TensorShape  &shape_c,
                               const TensorShape  &output_shape,
                               DataType            data_type,
+                              DataType            output_data_type,
                               bool                accumulate,
                               bool                pretranspose_b,
                               ActivationLayerInfo act_info)
@@ -105,7 +106,7 @@ protected:
         TensorType  b            = create_tensor<TensorType>(shape_b, data_type, 1);
         TensorType  b_transposed = create_tensor<TensorType>({shape_b[1], shape_b[0]}, data_type, 1);
         TensorType *c            = nullptr;
-        TensorType  dst          = create_tensor<TensorType>(output_shape, data_type, 1);
+        TensorType  dst          = create_tensor<TensorType>(output_shape, output_data_type, 1);
 
         // Create and configure function
         FunctionType gemm;
@@ -265,6 +266,63 @@ public:
     }
 };
 
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class CpuGemmDstF32AssemblyDispatchValidationFixture
+    : protected CpuGemmAssemblyDispatchGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(TensorShape         shape_a,
+               TensorShape         shape_b,
+               TensorShape         shape_c,
+               TensorShape         output_shape,
+               float               alpha,
+               float               beta,
+               DataType            data_type,
+               bool                pretranspose_b,
+               ActivationLayerInfo act_info)
+    {
+        if((std::is_same<TensorType, Tensor>::value &&  // Cpu
+            data_type == DataType::F16 && !CPUInfo::get().has_fp16()) || !CPUInfo::get().has_fhm())
+        {
+            return;
+        }
+        ARM_COMPUTE_UNUSED(alpha);
+        ARM_COMPUTE_UNUSED(beta);
+        this->_target = this->compute_target(shape_a, shape_b, shape_c, output_shape, data_type, DataType::F32, false, pretranspose_b, act_info);
+        this->_reference = this->compute_reference(shape_a, shape_b, output_shape, data_type, act_info);
+    }
+
+protected:
+
+    SimpleTensor<float> compute_reference(const TensorShape  &shape_a,
+                                        const TensorShape  &shape_b,
+                                        const TensorShape  &output_shape,
+                                        DataType            data_type,
+                                        ActivationLayerInfo act_info)
+        {
+            // Create reference
+            SimpleTensor<T> a{shape_a, data_type, 1};
+            SimpleTensor<T> b{shape_b, data_type, 1};
+            SimpleTensor<T> c{output_shape, data_type, 1};
+            SimpleTensor<float> dst{output_shape, DataType::F32, 1};
+
+            // Fill reference
+            this->fill(a, 0, -1.f, 1.f);
+            this->fill(b, 1, -1.f, 1.f);
+            this->fill(c, 2);
+
+            dst = reference::gemm_mixed_precision<T, float>(a, b, c, 1.f, 0.f);
+
+            if (act_info.enabled())
+            {
+                return reference::activation_layer<float>(dst, act_info);
+            }
+            return dst;
+        }
+
+    SimpleTensor<float> _reference{};
+};
+
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class CpuGemmAssemblyDispatchFixedFormatFixture
@@ -373,7 +431,7 @@ protected:
         this->fill(AccessorType(b), 1, -1.f, 1.f);
 
         // Reorder weight to the expected format
-        reorder.configure(&b, &b_transformed, WeightFormat::OHWI, computed_weight_format);
+        reorder.configure(&b, &b_transformed, WeightFormat::OHWI, computed_weight_format, true);
         reorder.run();
 
         ARM_COMPUTE_ASSERT(gemm.validate(a.info(), b_transformed.info(), nullptr, dst.info(), gemm_info));

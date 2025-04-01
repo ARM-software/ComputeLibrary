@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,14 +129,14 @@ SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &out
     const int       cols = src.shape()[0];
     const int       rows = src.shape()[1];
 
-    switch(output_wf)
+    switch(arm_compute::interleave_by(output_wf))
     {
-        case WeightFormat::OHWIo4:
+        case 4:
         {
             Transform_ref<4, 1, true, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, rows, 0, rows, 0, cols);
             break;
         }
-        case WeightFormat::OHWIo8:
+        case 8:
         {
             Transform_ref<8, 1, true, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, rows, 0, rows, 0, cols);
             break;
