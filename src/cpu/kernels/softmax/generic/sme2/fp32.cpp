@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -143,9 +143,7 @@ void sme2_f32_softmax_kernel( //
 
             dup z26.s, %w[beta]  // beta
 
-            mov w10, #0x0000  // -inf: 0xff800000
-            movk w10, #0xff80  // -inf: 0xff800000
-
+            mov w10, #0xff800000  // -inf: 0xff800000
             mov w11, #0  // 0
 
             // ---------------------------------------------------------------- x13: body_length = (length / vl) * vl
