@@ -60,7 +60,7 @@ public:
         check_hardware_supports(output_wf);
         if (_hardware_supports){
             _target    = compute_target(input_shape, output_shape, input_wf, output_wf, transpose, data_type);
-            _reference = compute_reference(input_shape, output_shape, output_wf, data_type);
+            _reference = compute_reference(input_shape, output_shape, output_wf, data_type, transpose);
         }
     }
 
@@ -101,7 +101,7 @@ public:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, WeightFormat output_wf, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, WeightFormat output_wf, DataType data_type, bool transpose)
     {
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type };
@@ -109,7 +109,7 @@ public:
         // Fill reference
         fill(src);
 
-        return reference::reorder_layer<T>(src, output_shape, output_wf);
+        return reference::reorder_layer<T>(src, output_shape, output_wf, transpose);
     }
 
     bool _hardware_supports = true;

@@ -60,7 +60,10 @@ struct TransformParams
 
 std::map<TransformParams, void (*)(float *, const float *, int, int, int, int, int)> supported_float_transforms = {
     {{4, 1, true, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 1, true, arm_gemm::VLType::None, float, float>},
+    {{4, 1, false, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 1, false, arm_gemm::VLType::None, float, float>},
+    {{8, 1, false, arm_gemm::VLType::None}, &arm_gemm::Transform<8, 1, false, arm_gemm::VLType::None, float, float>},
 #ifdef ARM_COMPUTE_ENABLE_SVE
+    // When there is an asm kernel, use formula in transform.cpp to get the interleave_by_ number
     {{1, 1, true, arm_gemm::VLType::SVE}, &arm_gemm::Transform<1, 1, true, arm_gemm::VLType::SVE, float, float>},
 #endif // ARM_COMPUTE_ENABLE_SVE
 };
@@ -71,6 +74,17 @@ std::map<TransformParams, void (*)(bfloat16 *, const float *, int, int, int, int
     {{2, 4, true, arm_gemm::VLType::SVE}, &arm_gemm::Transform<2, 4, true, arm_gemm::VLType::SVE, bfloat16, float>},
 #endif // ARM_COMPUTE_ENABLE_SVE
 };
+
+#ifdef ARM_COMPUTE_ENABLE_SVE
+
+// Calculate the interleave_by parameter needed for SVE kernels
+// using the formula listed in transform.cpp
+template <typename TOut>
+inline int get_sve_interleave_by(int interleave_by, int block_by)
+{
+    return interleave_by / (get_vector_length<TOut>() / block_by);
+}
+#endif // ARM_COMPUTE_ENABLE_SVE
 
 } // namespace
 
@@ -84,7 +98,7 @@ void NEReorderKernel::run(const Window &window, const ThreadInfo &info)
     const int jump_rows           = ksize_rows_elements * window.x().start();
     const int k_start             = window.x().start() * _ksize;
     const int k_end               = std::min(window.x().end() * _ksize, _kmax);
-    const int stride              = _kmax;
+    const int stride              = _transpose ? _kmax : _xmax;
     const int block_by            = arm_compute::block_by(_output_wf);
     const int interleave_by       = arm_compute::interleave_by(_output_wf);
     ARM_COMPUTE_ERROR_ON(interleave_by != 4 && interleave_by != 8);
@@ -96,22 +110,46 @@ void NEReorderKernel::run(const Window &window, const ThreadInfo &info)
     {
         case DataType::F32:
         {
-            // Interleave_by is different for SVE cases. Refer to src/core/NEON/kernels/arm_gemm/transform.cpp
-            const int interleave_by_ = interleave_by == 8 ? interleave_by / (8 / block_by) : 4;
-            supported_float_transforms[{interleave_by_, block_by, _transpose,
-                                        interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}](
-                reinterpret_cast<float *>(_output->buffer()) + jump_rows, reinterpret_cast<float *>(_input->buffer()),
-                stride, k_start, k_end, 0, _xmax);
+            void (*transform_func)(float *, const float *, int, int, int, int, int) = nullptr;
+#ifdef ARM_COMPUTE_ENABLE_SVE
+            if (CPUInfo::get().has_sve())
+            {
+                TransformParams tparams = {get_sve_interleave_by<float>(interleave_by, block_by), block_by, _transpose,
+                                           arm_gemm::VLType::SVE};
+                if (supported_float_transforms.count(tparams))
+                {
+                    transform_func = supported_float_transforms[tparams];
+                }
+            }
+#endif // ARM_COMPUTE_ENABLE_SVE
+            if (transform_func == nullptr)
+            {
+                transform_func =
+                    supported_float_transforms[{interleave_by, block_by, _transpose, arm_gemm::VLType::None}];
+            }
+            transform_func(reinterpret_cast<float *>(_output->buffer()) + jump_rows,
+                           reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
             break;
         }
         case DataType::BFLOAT16:
         {
-            // Interleave_by is different for SVE cases. Refer to transform.cpp
-            const int interleave_by_ = interleave_by == 8 ? interleave_by / (16 / block_by) : 4;
-            supported_bf16_transforms[{interleave_by_, block_by, _transpose,
-                                       interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}](
-                reinterpret_cast<bfloat16 *>(_output->buffer()) + jump_rows,
-                reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
+            void (*transform_func)(bfloat16 *, const float *, int, int, int, int, int) = nullptr;
+#ifdef ARM_COMPUTE_ENABLE_SVE
+            if (CPUInfo::get().has_sve())
+            {
+                TransformParams tparams = {get_sve_interleave_by<bfloat16>(interleave_by, block_by), block_by,
+                                           _transpose, arm_gemm::VLType::SVE};
+                if (supported_bf16_transforms.count(tparams))
+                    transform_func = supported_bf16_transforms[tparams];
+            }
+#endif // ARM_COMPUTE_ENABLE_SVE
+            if (transform_func == nullptr)
+            {
+                transform_func =
+                    supported_bf16_transforms[{interleave_by, block_by, _transpose, arm_gemm::VLType::None}];
+            }
+            transform_func(reinterpret_cast<bfloat16 *>(_output->buffer()) + jump_rows,
+                           reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
             break;
         }
         default:
@@ -237,52 +275,38 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
         int interleave_by = arm_compute::interleave_by(output_wf);
         int block_by      = arm_compute::block_by(output_wf);
         ARM_COMPUTE_RETURN_ERROR_ON(interleave_by != 4 && interleave_by != 8);
-        if (interleave_by == 8)
-        {
-#ifdef ARM_COMPUTE_ENABLE_SVE
-            ARM_COMPUTE_RETURN_ERROR_ON(!Scheduler::get().cpu_info().has_sve() ||
-                                        arm_gemm::utils::get_vector_length<float>() != 8);
-#else  // ARM_COMPUTE_ENABLE_SVE
-            ARM_COMPUTE_RETURN_ERROR_MSG("SVE format requested on non-SVE machine");
-#endif // ARM_COMPUTE_ENABLE_SVE
-        }
         ksize = interleave_by;
 
-        if (transpose)
-        {
-            // output k_dim needs to be same as input but multiple of ksize
-            int32_t rnd_up_input_kdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_k_dim, ksize);
-            ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_kdim != output_k_dim);
-            // output x_dim needs to be same as input
-            ARM_COMPUTE_RETURN_ERROR_ON(input_x_dim != output_x_dim);
-        }
-        else
-        {
-            // output x_dim needs to be same as input but multiple of ksize
-            int32_t rnd_up_input_xdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_x_dim, ksize);
-            ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_xdim != output_x_dim);
-            // output k_dim needs to be same as input
-            ARM_COMPUTE_RETURN_ERROR_ON(input_k_dim != output_k_dim);
-        }
+        // output k_dim needs to be same as input but multiple of ksize
+        int32_t rnd_up_input_kdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_k_dim, ksize);
+        ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_kdim != output_k_dim);
+        // output x_dim needs to be same as input
+        ARM_COMPUTE_RETURN_ERROR_ON(input_x_dim != output_x_dim);
 
         switch (output->data_type())
         {
             case DataType::F32:
             {
-                // Interleave_by is different for SVE cases. Refer to transform.cpp
-                const int interleave_by_ = interleave_by == 8 ? interleave_by / (8 / block_by) : 4;
-                ARM_COMPUTE_RETURN_ERROR_ON(!supported_float_transforms.count(
-                    {interleave_by_, block_by, transpose,
-                     interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}));
+#ifdef ARM_COMPUTE_ENABLE_SVE
+                if (CPUInfo::get().has_sve() &&
+                    supported_float_transforms.count({get_sve_interleave_by<float>(interleave_by, block_by), block_by,
+                                                      transpose, arm_gemm::VLType::SVE}))
+                    break;
+#endif // ARM_COMPUTE_ENABLE_SVE
+                ARM_COMPUTE_RETURN_ERROR_ON(
+                    !supported_float_transforms.count({interleave_by, block_by, transpose, arm_gemm::VLType::None}));
                 break;
             }
             case DataType::BFLOAT16:
             {
-                // Interleave_by is different for SVE cases. Refer to transform.cpp
-                const int interleave_by_ = interleave_by == 8 ? interleave_by / (16 / block_by) : 4;
-                ARM_COMPUTE_RETURN_ERROR_ON(!supported_bf16_transforms.count(
-                    {interleave_by_, block_by, transpose,
-                     interleave_by == 8 ? arm_gemm::VLType::SVE : arm_gemm::VLType::None}));
+#ifdef ARM_COMPUTE_ENABLE_SVE
+                if (CPUInfo::get().has_sve() &&
+                    supported_bf16_transforms.count({get_sve_interleave_by<bfloat16>(interleave_by, block_by), block_by,
+                                                     transpose, arm_gemm::VLType::SVE}))
+                    break;
+#endif // ARM_COMPUTE_ENABLE_SVE
+                ARM_COMPUTE_RETURN_ERROR_ON(
+                    !supported_bf16_transforms.count({interleave_by, block_by, transpose, arm_gemm::VLType::None}));
                 break;
             }
             default:

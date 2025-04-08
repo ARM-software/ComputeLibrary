@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_VALIDATION_REFERENCE_REORDER
-#define ACL_TESTS_VALIDATION_REFERENCE_REORDER
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_REORDER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_REORDER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/Types.h"
@@ -36,9 +36,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &output_shape, WeightFormat output_wf);
+SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &output_shape, WeightFormat output_wf, bool transpose);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_VALIDATION_REFERENCE_REORDER */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_REORDER_H

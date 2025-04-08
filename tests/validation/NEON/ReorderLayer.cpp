@@ -80,7 +80,7 @@ DATA_TEST_CASE(ValidateReorderOHWIo8, framework::DatasetMode::ALL, combine(
     }
 }
 
-FIXTURE_DATA_TEST_CASE(RunBlock8, NEReorderLayerAlias<float>, framework::DatasetMode::ALL, combine(datasets::ReorderLayerDatasetBlock8(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunBlock8, NEReorderLayerAlias<float>, framework::DatasetMode::ALL, combine(datasets::ReorderLayerDatasetBlock8(), make("Transpose", {true, false}), make("DataType", DataType::F32)))
 {
     // Validate output
     if (_hardware_supports)
@@ -90,7 +90,7 @@ FIXTURE_DATA_TEST_CASE(RunBlock8, NEReorderLayerAlias<float>, framework::Dataset
 }
 #endif // ARM_COMPUTE_ENABLE_SVE
 
-FIXTURE_DATA_TEST_CASE(RunBlock4, NEReorderLayerAlias<float>, framework::DatasetMode::ALL, combine(datasets::ReorderLayerDatasetBlock4(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunBlock4, NEReorderLayerAlias<float>, framework::DatasetMode::ALL, combine(datasets::ReorderLayerDatasetBlock4(), make("Transpose", {true, false}), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -125,6 +125,9 @@ void Transform(
 /*****************************************************************************/
 
 #include "transforms/list.hpp"
+
+template void Transform<4, 1, false, VLType::None>(float *, const float *, int, int, int, int, int);
+template void Transform<8, 1, false, VLType::None>(float *, const float *, int, int, int, int, int);
 
 // We don't have assembler transforms for AArch32, generate templated ones here.
 #ifdef __arm__

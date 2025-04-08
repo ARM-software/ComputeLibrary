@@ -38,20 +38,18 @@ namespace datasets
 class ReorderLayerDataset
 {
 public:
-    using type = std::tuple<TensorShape, TensorShape, WeightFormat, WeightFormat, bool>;
+    using type = std::tuple<TensorShape, TensorShape, WeightFormat, WeightFormat>;
 
     struct iterator
     {
         iterator(std::vector<TensorShape>::const_iterator  in_it,
                  std::vector<TensorShape>::const_iterator  out_it,
                  std::vector<WeightFormat>::const_iterator _wf_in_it,
-                 std::vector<WeightFormat>::const_iterator _wf_out_it,
-                 std::vector<bool>::const_iterator _transposes_it)
+                 std::vector<WeightFormat>::const_iterator _wf_out_it)
             : _in_it{ std::move(in_it) },
               _out_it{ std::move(out_it) },
               _wf_in_it{ std::move(_wf_in_it) },
-              _wf_out_it{ std::move(_wf_out_it) },
-              _transposes_it{ std::move(_transposes_it) }
+              _wf_out_it{ std::move(_wf_out_it) }
         {
         }
 
@@ -62,13 +60,12 @@ public:
             description << "Out=" << *_out_it << ":";
             description << "Wf_In=" << *_wf_in_it << ":";
             description << "Wf_Out=" << *_wf_out_it;
-            description << "Transpose=" << *_transposes_it;
             return description.str();
         }
 
         ReorderLayerDataset::type operator*() const
         {
-            return std::make_tuple(*_in_it, *_out_it, *_wf_in_it, *_wf_out_it, *_transposes_it);
+            return std::make_tuple(*_in_it, *_out_it, *_wf_in_it, *_wf_out_it);
         }
 
         iterator &operator++()
@@ -77,7 +74,6 @@ public:
             ++_out_it;
             ++_wf_in_it;
             ++_wf_out_it;
-            ++_transposes_it;
 
             return *this;
         }
@@ -87,26 +83,24 @@ public:
         std::vector<TensorShape>::const_iterator  _out_it;
         std::vector<WeightFormat>::const_iterator _wf_in_it;
         std::vector<WeightFormat>::const_iterator _wf_out_it;
-        std::vector<bool>::const_iterator _transposes_it;
     };
 
     iterator begin() const
     {
-        return iterator(_in_shapes.begin(), _out_shapes.begin(), _in_wfs.begin(), _out_wfs.begin(), _transposes.begin());
+        return iterator(_in_shapes.begin(), _out_shapes.begin(), _in_wfs.begin(), _out_wfs.begin());
     }
 
     int size() const
     {
-        return std::min(_in_shapes.size(), std::min(_out_shapes.size(), std::min(_in_wfs.size(), std::min(_out_wfs.size(), _transposes.size()))));
+        return std::min(_in_shapes.size(), std::min(_out_shapes.size(), std::min(_in_wfs.size(), _out_wfs.size())));
     }
 
-    void add_config(TensorShape in, TensorShape out, WeightFormat in_wf, WeightFormat out_wf, bool transpose)
+    void add_config(TensorShape in, TensorShape out, WeightFormat in_wf, WeightFormat out_wf)
     {
         _in_shapes.emplace_back(std::move(in));
         _out_shapes.emplace_back(std::move(out));
         _in_wfs.emplace_back(std::move(in_wf));
         _out_wfs.emplace_back(std::move(out_wf));
-        _transposes.emplace_back(transpose);
     }
 
     // protected:
@@ -118,7 +112,6 @@ public:
     std::vector<TensorShape>  _out_shapes{};
     std::vector<WeightFormat> _in_wfs{};
     std::vector<WeightFormat> _out_wfs{};
-    std::vector<bool> _transposes{};
 };
 
 /** [ReorderLayer datasets] **/
@@ -128,16 +121,16 @@ class ReorderLayerDatasetBlock4 final : public ReorderLayerDataset
     public:
     ReorderLayerDatasetBlock4()
     {
-        add_config(TensorShape(10U, 9U), TensorShape(10U, 12U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(16U, 16U), TensorShape(16U, 16U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(10U, 511U), TensorShape(10U, 512U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(234U, 301U), TensorShape(234U, 304U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(1024U, 1024U), TensorShape(1024U, 1024U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(10U, 9U, 1U, 1U), TensorShape(10U, 12U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(16U, 16U, 1U, 1U), TensorShape(16U, 16U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(10U, 511U, 1U, 1U), TensorShape(10U, 512U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(234U, 301U, 1U, 1U), TensorShape(234U, 304U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
-        add_config(TensorShape(1024U, 1024U, 1U, 1U), TensorShape(1024U, 1024U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4, true);
+        add_config(TensorShape(10U, 9U), TensorShape(10U, 12U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(16U, 16U), TensorShape(16U, 16U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(10U, 511U), TensorShape(10U, 512U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(234U, 301U), TensorShape(234U, 304U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(1024U, 1024U), TensorShape(1024U, 1024U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(10U, 9U, 1U, 1U), TensorShape(10U, 12U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(16U, 16U, 1U, 1U), TensorShape(16U, 16U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(10U, 511U, 1U, 1U), TensorShape(10U, 512U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(234U, 301U, 1U, 1U), TensorShape(234U, 304U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4);
+        add_config(TensorShape(1024U, 1024U, 1U, 1U), TensorShape(1024U, 1024U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo4);
     }
 };
 
@@ -146,16 +139,16 @@ class ReorderLayerDatasetBlock8 final : public ReorderLayerDataset
     public:
     ReorderLayerDatasetBlock8()
     {
-        add_config(TensorShape(10U, 9U), TensorShape(10U, 16U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(16U, 16U), TensorShape(16U, 16U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(10U, 511U), TensorShape(10U, 512U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(234U, 301U), TensorShape(234U, 304U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(1024U, 1024U), TensorShape(1024U, 1024U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(10U, 9U, 1U, 1U), TensorShape(10U, 16U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(16U, 16U, 1U, 1U), TensorShape(16U, 16U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(10U, 511U, 1U, 1U), TensorShape(10U, 512U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(234U, 301U, 1U, 1U), TensorShape(234U, 304U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
-        add_config(TensorShape(1024U, 1024U, 1U, 1U), TensorShape(1024U, 1024U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8, true);
+        add_config(TensorShape(10U, 9U), TensorShape(10U, 16U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(16U, 16U), TensorShape(16U, 16U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(10U, 511U), TensorShape(10U, 512U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(234U, 301U), TensorShape(234U, 304U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(1024U, 1024U), TensorShape(1024U, 1024U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(10U, 9U, 1U, 1U), TensorShape(10U, 16U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(16U, 16U, 1U, 1U), TensorShape(16U, 16U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(10U, 511U, 1U, 1U), TensorShape(10U, 512U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(234U, 301U, 1U, 1U), TensorShape(234U, 304U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8);
+        add_config(TensorShape(1024U, 1024U, 1U, 1U), TensorShape(1024U, 1024U, 1U, 1U), WeightFormat::OHWI, WeightFormat::OHWIo8);
     }
 };
 
