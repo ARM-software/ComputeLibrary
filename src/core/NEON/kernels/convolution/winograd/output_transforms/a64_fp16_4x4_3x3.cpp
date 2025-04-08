@@ -49,6 +49,7 @@ void a64_fp16_4x4_3x3(unsigned int n_channels,
 
     // For each channel of the output
     int channels_remaining = n_channels;
+    const __fp16 scale_factor = 16.0f;
 
 #ifdef __aarch64__
     for (; channels_remaining >= 8; channels_remaining -= 8)
@@ -66,36 +67,52 @@ void a64_fp16_4x4_3x3(unsigned int n_channels,
     }
     inptr += 8;
 
+    const auto _1over2q = vdupq_n_f16(1.0f/2.0f);
+    const auto _1over4q = vdupq_n_f16(1.0f/4.0f);
+    const auto _1over8q = vdupq_n_f16(1.0f/8.0f);
+
     // Compute the matrix F Z
     for (int i = 0; i < 6; i++)
     {
-      // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
-      FZ[i][0] = vaddq_f16(vaddq_f16(vaddq_f16(F[i][0], F[i][1]), vaddq_f16(F[i][2], F[i][3])), F[i][4]);
+      // FZ[i][0] = 16 * (0.5*(F[i][0] + F[i][1] + F[i][2]) + F[i][3] + 0.125*F[i][4])
+      auto tmp1 = vmulq_f16(vaddq_f16(vaddq_f16(F[i][0], F[i][1]), F[i][2]), _1over2q);
+      auto tmp2 = vaddq_f16(F[i][3], vmulq_f16(F[i][4], _1over8q));
+      FZ[i][0] = vmulq_n_f16(vaddq_f16(tmp1, tmp2), scale_factor);
 
-      // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][1] = vaddq_f16(vsubq_f16(F[i][1], F[i][2]), vmulq_f16(vsubq_f16(F[i][3], F[i][4]), vdupq_n_f16(2.0f)));
+      // FZ[i][1] = 16 * (-0.5*(F[i][1] + F[i][3] - F[i][2]) + 0.25*F[i][4])
+      tmp1 = vmulq_f16(vsubq_f16(F[i][2], vaddq_f16(F[i][1], F[i][3])), _1over2q);
+      FZ[i][1] = vmulq_n_f16(vaddq_f16(tmp1, vmulq_f16(F[i][4], _1over4q)), scale_factor);
 
-      // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][2] = vaddq_f16(vaddq_f16(F[i][1], F[i][2]), vmulq_f16(vaddq_f16(F[i][3], F[i][4]), vdupq_n_f16(4.0f)));
+      // FZ[i][2] = 16 * (0.5*(F[i][1] + F[i][2] + F[i][4]) + 0.25*F[i][3])
+      tmp1 = vmulq_f16(vaddq_f16(vaddq_f16(F[i][1], F[i][2]), F[i][4]), _1over2q);
+      FZ[i][2] = vmulq_n_f16(vaddq_f16(tmp1, vmulq_f16(F[i][3], _1over4q)), scale_factor);
 
-      // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
-      FZ[i][3] = vaddq_f16(vaddq_f16(vsubq_f16(F[i][1], F[i][2]), vmulq_f16(vsubq_f16(F[i][3], F[i][4]), vdupq_n_f16(8.0f))), F[i][5]);
+      // FZ[i][3] = 16 * (0.5*(F[i][5] + F[i][2] - F[i][1]) + (F[i][4] - 0.125*F[i][3]))
+      tmp1 = vmulq_f16(vsubq_f16(vaddq_f16(F[i][5], F[i][2]), F[i][1]), _1over2q);
+      tmp2 = vsubq_f16(F[i][4], vmulq_f16(F[i][3], _1over8q));
+      FZ[i][3] = vmulq_n_f16(vaddq_f16(tmp1, tmp2), scale_factor);
     }
 
     // Compute the output tile f = ZT F Z
     for (int j = 0; j < 4; j++)
     {
-      // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
-      f[0][j] = vaddq_f16(vaddq_f16(vaddq_f16(FZ[0][j], FZ[1][j]), vaddq_f16(FZ[2][j], FZ[3][j])), FZ[4][j]);
+        // f[0][j] = 16 * (0.5*(FZ[0][j] + FZ[1][j] + FZ[2][j]) + FZ[3][j] + 0.125*FZ[4][j])
+        auto tmp1 = vmulq_f16(vaddq_f16(vaddq_f16(FZ[0][j], FZ[1][j]), FZ[2][j]), _1over2q);
+        auto tmp2 = vaddq_f16(FZ[3][j], vmulq_f16(FZ[4][j], _1over8q));
+        f[0][j] = vmulq_n_f16(vaddq_f16(tmp1, tmp2), scale_factor);
 
-      // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[1][j] = vaddq_f16(vsubq_f16(FZ[1][j], FZ[2][j]), vmulq_f16(vsubq_f16(FZ[3][j], FZ[4][j]), vdupq_n_f16(2.0f)));
+        // f[1][j] = 16 * (-0.5*(FZ[1][j] + FZ[3][j] - FZ[2][j]) + 0.25*FZ[4][j])
+        tmp1 = vmulq_f16(vsubq_f16(FZ[2][j], vaddq_f16(FZ[1][j], FZ[3][j])), _1over2q);
+        f[1][j] = vmulq_n_f16(vaddq_f16(tmp1, vmulq_f16(FZ[4][j], _1over4q)), scale_factor);
 
-      // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[2][j] = vaddq_f16(vaddq_f16(FZ[1][j], FZ[2][j]), vmulq_f16(vaddq_f16(FZ[3][j], FZ[4][j]), vdupq_n_f16(4.0f)));
+        // f[2][j] = 16 * (0.5*(FZ[1][j] + FZ[2][j] + FZ[4][j]) + 0.25*FZ[3][j])
+        tmp1 = vmulq_f16(vaddq_f16(vaddq_f16(FZ[1][j], FZ[2][j]), FZ[4][j]), _1over2q);
+        f[2][j] = vmulq_n_f16(vaddq_f16(tmp1, vmulq_f16(FZ[3][j], _1over4q)), scale_factor);
 
-      // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
-      f[3][j] = vaddq_f16(vaddq_f16(vsubq_f16(FZ[1][j], FZ[2][j]), vmulq_f16(vsubq_f16(FZ[3][j], FZ[4][j]), vdupq_n_f16(8.0f))), FZ[5][j]);
+        // f[3][j] = 16 * (0.5*(FZ[5][j] + FZ[2][j] - FZ[1][j]) + (FZ[4][j] - 0.125*FZ[3][j]))
+        tmp1 = vmulq_f16(vsubq_f16(vaddq_f16(FZ[5][j], FZ[2][j]), FZ[1][j]), _1over2q);
+        tmp2 = vsubq_f16(FZ[4][j], vmulq_f16(FZ[3][j], _1over8q));
+        f[3][j] = vmulq_n_f16(vaddq_f16(tmp1, tmp2), scale_factor);
     }
 
     // Write out the output tile
@@ -137,36 +154,52 @@ void a64_fp16_4x4_3x3(unsigned int n_channels,
     }
     inptr += 4;
 
+    const auto _1over2 = vdup_n_f16(1.0f/2.0f);
+    const auto _1over4 = vdup_n_f16(1.0f/4.0f);
+    const auto _1over8 = vdup_n_f16(1.0f/8.0f);
+
     // Compute the matrix F Z
     for (int i = 0; i < 6; i++)
     {
-      // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
-      FZ[i][0] = vadd_f16(vadd_f16(vadd_f16(F[i][0], F[i][1]), vadd_f16(F[i][2], F[i][3])), F[i][4]);
+        // FZ[i][0] = 16 * (0.5*(F[i][0] + F[i][1] + F[i][2]) + F[i][3] + 0.125*F[i][4])
+        auto tmp1 = vmul_f16(vadd_f16(vadd_f16(F[i][0], F[i][1]), F[i][2]), _1over2);
+        auto tmp2 = vadd_f16(F[i][3], vmul_f16(F[i][4], _1over8));
+        FZ[i][0] = vmul_n_f16(vadd_f16(tmp1, tmp2), scale_factor);
 
-      // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][1] = vadd_f16(vsub_f16(F[i][1], F[i][2]), vmul_f16(vsub_f16(F[i][3], F[i][4]), vdup_n_f16(2.0f)));
+        // FZ[i][1] = 16 * (-0.5*(F[i][1] + F[i][3] - F[i][2]) + 0.25*F[i][4])
+        tmp1 = vmul_f16(vsub_f16(F[i][2], vadd_f16(F[i][1], F[i][3])), _1over2);
+        FZ[i][1] = vmul_n_f16(vadd_f16(tmp1, vmul_f16(F[i][4], _1over4)), scale_factor);
 
-      // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][2] = vadd_f16(vadd_f16(F[i][1], F[i][2]), vmul_f16(vadd_f16(F[i][3], F[i][4]), vdup_n_f16(4.0f)));
+        // FZ[i][2] = 16 * (0.5*(F[i][1] + F[i][2] + F[i][4]) + 0.25*F[i][3])
+        tmp1 = vmul_f16(vadd_f16(vadd_f16(F[i][1], F[i][2]), F[i][4]), _1over2);
+        FZ[i][2] = vmul_n_f16(vadd_f16(tmp1, vmul_f16(F[i][3], _1over4)), scale_factor);
 
-      // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
-      FZ[i][3] = vadd_f16(vadd_f16(vsub_f16(F[i][1], F[i][2]), vmul_f16(vsub_f16(F[i][3], F[i][4]), vdup_n_f16(8.0f))), F[i][5]);
+        // FZ[i][3] = 16 * (0.5*(F[i][5] + F[i][2] - F[i][1]) + (F[i][4] - 0.125*F[i][3]))
+        tmp1 = vmul_f16(vsub_f16(vadd_f16(F[i][5], F[i][2]), F[i][1]), _1over2);
+        tmp2 = vsub_f16(F[i][4], vmul_f16(F[i][3], _1over8));
+        FZ[i][3] = vmul_n_f16(vadd_f16(tmp1, tmp2), scale_factor);
     }
 
     // Compute the output tile f = ZT F Z
     for (int j = 0; j < 4; j++)
     {
-      // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
-      f[0][j] = vadd_f16(vadd_f16(vadd_f16(FZ[0][j], FZ[1][j]), vadd_f16(FZ[2][j], FZ[3][j])), FZ[4][j]);
+        // f[0][j] = 16 * (0.5*(FZ[0][j] + FZ[1][j] + FZ[2][j]) + FZ[3][j] + 0.125*FZ[4][j])
+        auto tmp1 = vmul_f16(vadd_f16(vadd_f16(FZ[0][j], FZ[1][j]), FZ[2][j]), _1over2);
+        auto tmp2 = vadd_f16(FZ[3][j], vmul_f16(FZ[4][j], _1over8));
+        f[0][j] = vmul_n_f16(vadd_f16(tmp1, tmp2), scale_factor);
 
-      // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[1][j] = vadd_f16(vsub_f16(FZ[1][j], FZ[2][j]), vmul_f16(vsub_f16(FZ[3][j], FZ[4][j]), vdup_n_f16(2.0f)));
+        // f[1][j] = 16 * (-0.5*(FZ[1][j] + FZ[3][j] - FZ[2][j]) + 0.25*FZ[4][j])
+        tmp1 = vmul_f16(vsub_f16(FZ[2][j], vadd_f16(FZ[1][j], FZ[3][j])), _1over2);
+        f[1][j] = vmul_n_f16(vadd_f16(tmp1, vmul_f16(FZ[4][j], _1over4)), scale_factor);
 
-      // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[2][j] = vadd_f16(vadd_f16(FZ[1][j], FZ[2][j]), vmul_f16(vadd_f16(FZ[3][j], FZ[4][j]), vdup_n_f16(4.0f)));
+        // f[2][j] = 16 * (0.5*(FZ[1][j] + FZ[2][j] + FZ[4][j]) + 0.25*FZ[3][j])
+        tmp1 = vmul_f16(vadd_f16(vadd_f16(FZ[1][j], FZ[2][j]), FZ[4][j]), _1over2);
+        f[2][j] = vmul_n_f16(vadd_f16(tmp1, vmul_f16(FZ[3][j], _1over4)), scale_factor);
 
-      // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
-      f[3][j] = vadd_f16(vadd_f16(vsub_f16(FZ[1][j], FZ[2][j]), vmul_f16(vsub_f16(FZ[3][j], FZ[4][j]), vdup_n_f16(8.0f))), FZ[5][j]);
+        // f[3][j] = 16 * (0.5*(FZ[5][j] + FZ[2][j] - FZ[1][j]) + (FZ[4][j] - 0.125*FZ[3][j]))
+        tmp1 = vmul_f16(vsub_f16(vadd_f16(FZ[5][j], FZ[2][j]), FZ[1][j]), _1over2);
+        tmp2 = vsub_f16(FZ[4][j], vmul_f16(FZ[3][j], _1over8));
+        f[3][j] = vmul_n_f16(vadd_f16(tmp1, tmp2), scale_factor);
     }
 
     // Write out the output tile
@@ -210,19 +243,49 @@ void a64_fp16_4x4_3x3(unsigned int n_channels,
         // Compute the matrix F Z
         for (int i = 0; i < 6; i++)
         {
-            FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
-            FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-            FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-            FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+            FZ[i][0] = scale_factor * (
+                0.5f * (F[i][0] + F[i][1] + F[i][2]) +
+                F[i][3] + 0.125f * F[i][4]
+            );
+
+            FZ[i][1] = scale_factor * (
+                0.5f * (F[i][2] - (F[i][1] + F[i][3])) +
+                0.25f * F[i][4]
+            );
+
+            FZ[i][2] = scale_factor * (
+                0.5f * (F[i][1] + F[i][2] + F[i][4]) +
+                0.25f * F[i][3]
+            );
+
+            FZ[i][3] = scale_factor * (
+                0.5f * (F[i][5] + F[i][2] - F[i][1]) +
+                (F[i][4] - 0.125f * F[i][3])
+            );
         }
 
         // Compute the output tile f = ZT F Z
         for (int j = 0; j < 4; j++)
         {
-            f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
-            f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-            f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-            f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+            f[0][j] = scale_factor * (
+                0.5f * (FZ[0][j] + FZ[1][j] + FZ[2][j]) +
+                FZ[3][j] + 0.125f * FZ[4][j]
+            );
+
+            f[1][j] = scale_factor * (
+                0.5f * (FZ[2][j] - (FZ[1][j] + FZ[3][j])) +
+                0.25f * FZ[4][j]
+            );
+
+            f[2][j] = scale_factor * (
+                0.5f * (FZ[1][j] + FZ[2][j] + FZ[4][j]) +
+                0.25f * FZ[3][j]
+            );
+
+            f[3][j] = scale_factor * (
+                0.5f * (FZ[5][j] + FZ[2][j] - FZ[1][j]) +
+                (FZ[4][j] - 0.125f * FZ[3][j])
+            );
         }
 
         // Write out the output tile

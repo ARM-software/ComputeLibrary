@@ -48,50 +48,59 @@ void a64_fp16_4x4_3x3(unsigned int n_channels, const __fp16 * inptr,
         }
       }
 
+      const auto _1over3q = vdupq_n_f16(1.0f/3.0f);
+      const auto minus_1over3q = vdupq_n_f16(-1.0f/3.0f);
+
       // Compute the matrix W w
       for (int j = 0; j < 3; j++)
       {
-        // Ww[0][j] =  6*w[0][j];
-        Ww[0][j] = vmulq_n_f16(w[0][j], 6.0);
+        // Ww[0][j] = 1*w[0][j];
+        Ww[0][j] = w[0][j];
 
-        // Ww[1][j] = -4*w[0][j] + -4*w[1][j] + -4*w[2][j];
-        Ww[1][j] = vmulq_n_f16(vaddq_f16(vaddq_f16(w[0][j], w[1][j]), w[2][j]), -4.0);
+        // Ww[1][j] = (w[0][j] - w[1][j] + w[2][j]) * (1/3)
+        Ww[1][j] = vmulq_f16(vsubq_f16(vaddq_f16(w[0][j], w[2][j]), w[1][j]), _1over3q);
 
-        // Ww[2][j] = -4*w[0][j] +  4*w[1][j] + -4*w[2][j];
-        Ww[2][j] = vmulq_n_f16(vsubq_f16(vsubq_f16(w[1][j], w[0][j]), w[2][j]), 4.0);
+        // Ww[2][j] = (-w[0][j] - w[1][j] - w[2][j]) * (1/3)
+        Ww[2][j] = vmulq_f16(vaddq_f16(vaddq_f16(w[0][j], w[1][j]), w[2][j]), minus_1over3q);
 
-        // Ww[3][j] =  1*w[0][j] +  2*w[1][j] +  4*w[2][j];
-        Ww[3][j] = vaddq_f16(vaddq_f16(w[0][j], vmulq_f16(w[1][j], vdupq_n_f16(2.0f))), vmulq_f16(w[2][j], vdupq_n_f16(4.0f)));
+        // Ww[3][j] = -8/15*w[0][j] + 4/15*w[1][j] - 2/15*w[2][j]
+        auto tmp1 = vmulq_n_f16(w[1][j], 4.0f/15.0f);
+        auto tmp2 = vaddq_f16( vmulq_n_f16(w[0][j], 8.0f/15.0f), vmulq_n_f16(w[2][j], 2.0f/15.0f));
+        Ww[3][j] = vsubq_f16(tmp1, tmp2);
 
-        // Ww[4][j] =  1*w[0][j] + -2*w[1][j] +  4*w[2][j];
-        Ww[4][j] = vaddq_f16(vsubq_f16(w[0][j], vmulq_f16(w[1][j], vdupq_n_f16(2.0f))), vmulq_f16(w[2][j], vdupq_n_f16(4.0f)));
+        // Ww[4][j] = 2/15*w[0][j] + 4/15*w[1][j] + 8/15*w[2][j]
+        tmp1 = vmulq_n_f16(w[0][j], 2.0f/15.0f);
+        tmp2 = vaddq_f16( vmulq_n_f16(w[1][j], 4.0f/15.0f), vmulq_n_f16(w[2][j], 8.0f/15.0f));
+        Ww[4][j] = vaddq_f16(tmp1, tmp2);
 
-        // Ww[5][j] = 24*w[2][j];
-        Ww[5][j] = vmulq_n_f16(w[2][j], 24.0f);
+        // Ww[5][j] = 1*w[2][j];
+        Ww[5][j] = w[2][j];
       }
 
       // Compute V = W w WT
       for (int i = 0; i < 6; i++)
       {
-        const float recip576 = 1.0f / 576.0f;
+        // V[i][0] = 1*Ww[i][0];
+        V[i][0] = Ww[i][0];
 
-        // V[i][0] =  6*Ww[i][0];
-        V[i][0] = vmulq_n_f16(vmulq_n_f16(Ww[i][0], 6.0), recip576);
+        // V[i][1] = (Ww[i][0] - Ww[i][1] + Ww[i][2]) * (1/3)
+        V[i][1] = vmulq_f16(vsubq_f16(vaddq_f16(Ww[i][0], Ww[i][2]), Ww[i][1]), _1over3q);
 
-        // V[i][1] = -4*Ww[i][0] + -4*Ww[i][1] + -4*Ww[i][2];
-        V[i][1] = vmulq_n_f16(vmulq_n_f16(vaddq_f16(vaddq_f16(Ww[i][0], Ww[i][1]), Ww[i][2]), -4.0), recip576);
+        // V[i][2] = (-Ww[i][0] - Ww[i][1] - Ww[i][2]) * (1/3)
+        V[i][2] = vmulq_f16(vaddq_f16(vaddq_f16(Ww[i][0], Ww[i][1]), Ww[i][2]), minus_1over3q);
 
-        // V[i][2] = -4*Ww[i][0] +  4*Ww[i][1] + -4*Ww[i][2];
-        V[i][2] = vmulq_n_f16(vmulq_n_f16(vsubq_f16(vsubq_f16(Ww[i][1], Ww[i][0]), Ww[i][2]), 4.0), recip576);
+        // V[i][3] = -8/15*Ww[i][0] + 4/15*Ww[i][1] - 2/15*Ww[i][2]
+        auto tmp1 = vmulq_n_f16(Ww[i][1], 4.0f/15.0f);
+        auto tmp2 = vaddq_f16( vmulq_n_f16(Ww[i][0], 8.0f/15.0f), vmulq_n_f16(Ww[i][2], 2.0f/15.0f));
+        V[i][3] = vsubq_f16(tmp1, tmp2);
 
-        // V[i][3] =  1*Ww[i][0] +  2*Ww[i][1] +  4*Ww[i][2];
-        V[i][3] = vmulq_n_f16(vaddq_f16(vaddq_f16(Ww[i][0], vmulq_f16(Ww[i][1], vdupq_n_f16(2.0f))), vmulq_f16(Ww[i][2], vdupq_n_f16(4.0f))), recip576);
+        // V[i][4] = 2/15*Ww[i][0] + 4/15*Ww[i][1] + 8/15*Ww[i][2]
+        tmp1 = vmulq_n_f16(Ww[i][0], 2.0f/15.0f);
+        tmp2 = vaddq_f16( vmulq_n_f16(Ww[i][1], 4.0f/15.0f), vmulq_n_f16(Ww[i][2], 8.0f/15.0f));
+        V[i][4] = vaddq_f16(tmp1, tmp2);
 
-        // V[i][4] =  1*Ww[i][0] + -2*Ww[i][1] +  4*Ww[i][2];
-        V[i][4] = vmulq_n_f16(vaddq_f16(vsubq_f16(Ww[i][0], vmulq_f16(Ww[i][1], vdupq_n_f16(2.0f))), vmulq_f16(Ww[i][2], vdupq_n_f16(4.0f))), recip576);
-
-        // V[i][5] = 24*Ww[i][2];
-        V[i][5] = vmulq_n_f16(vmulq_n_f16(Ww[i][2], 24.0f), recip576);
+        // V[i][5] = 1*Ww[i][2];
+        V[i][5] = Ww[i][2];
       }
 
       // Store the transformed weights
@@ -109,6 +118,9 @@ void a64_fp16_4x4_3x3(unsigned int n_channels, const __fp16 * inptr,
 #ifdef __arm_any__
     for (; n_channels >= 4; n_channels -= 4)
     {
+      const auto _1over3 = vdup_n_f16(1.0f/3.0f);
+      const auto minus_1over3 = vdup_n_f16(-1.0f/3.0f);
+
       // Matrices used and computed in this kernel
       float16x4_t w[3][3], Ww[6][3], V[6][6];
 
@@ -124,47 +136,53 @@ void a64_fp16_4x4_3x3(unsigned int n_channels, const __fp16 * inptr,
       // Compute the matrix W w
       for (int j = 0; j < 3; j++)
       {
-        // Ww[0][j] =  6*w[0][j];
-        Ww[0][j] = vmul_n_f16(w[0][j], 6.0);
+        // Ww[0][j] = 1*w[0][j];
+        Ww[0][j] = w[0][j];
 
-        // Ww[1][j] = -4*w[0][j] + -4*w[1][j] + -4*w[2][j];
-        Ww[1][j] = vmul_n_f16(vadd_f16(vadd_f16(w[0][j], w[1][j]), w[2][j]), -4.0);
+        // Ww[1][j] = (w[0][j] - w[1][j] + w[2][j]) * (1/3)
+        Ww[1][j] = vmul_f16(vsub_f16(vadd_f16(w[0][j], w[2][j]), w[1][j]), _1over3);
 
-        // Ww[2][j] = -4*w[0][j] +  4*w[1][j] + -4*w[2][j];
-        Ww[2][j] = vmul_n_f16(vsub_f16(vsub_f16(w[1][j], w[0][j]), w[2][j]), 4.0);
+        // Ww[2][j] = (-w[0][j] - w[1][j] - w[2][j]) * (1/3)
+        Ww[2][j] = vmul_f16(vadd_f16(vadd_f16(w[0][j], w[1][j]), w[2][j]), minus_1over3);
 
-        // Ww[3][j] =  1*w[0][j] +  2*w[1][j] +  4*w[2][j];
-        Ww[3][j] = vadd_f16(vadd_f16(w[0][j], vmul_f16(w[1][j], vdup_n_f16(2.0f))), vmul_f16(w[2][j], vdup_n_f16(4.0f)));
+        // Ww[3][j] = -8/15*w[0][j] + 4/15*w[1][j] - 2/15*w[2][j]
+        auto tmp1 = vmul_n_f16(w[1][j], 4.0f/15.0f);
+        auto tmp2 = vadd_f16( vmul_n_f16(w[0][j], 8.0f/15.0f), vmul_n_f16(w[2][j], 2.0f/15.0f));
+        Ww[3][j] = vsub_f16(tmp1, tmp2);
 
-        // Ww[4][j] =  1*w[0][j] + -2*w[1][j] +  4*w[2][j];
-        Ww[4][j] = vadd_f16(vsub_f16(w[0][j], vmul_f16(w[1][j], vdup_n_f16(2.0f))), vmul_f16(w[2][j], vdup_n_f16(4.0f)));
+        // Ww[4][j] = 2/15*w[0][j] + 4/15*w[1][j] + 8/15*w[2][j]
+        tmp1 = vmul_n_f16(w[0][j], 2.0f/15.0f);
+        tmp2 = vadd_f16( vmul_n_f16(w[1][j], 4.0f/15.0f), vmul_n_f16(w[2][j], 8.0f/15.0f));
+        Ww[4][j] = vadd_f16(tmp1, tmp2);
 
-        // Ww[5][j] = 24*w[2][j];
-        Ww[5][j] = vmul_n_f16(w[2][j], 24.0f);
+        // Ww[5][j] = 1*w[2][j];
+        Ww[5][j] = w[2][j];
       }
 
       // Compute V = W w WT
       for (int i = 0; i < 6; i++)
       {
-        const float recip576 = 1.0f / 576.0f;
+        // V[i][0] = 1 * Ww[i][0];
+        V[i][0] = Ww[i][0];
 
-        // V[i][0] =  6*Ww[i][0];
-        V[i][0] = vmul_n_f16(vmul_n_f16(Ww[i][0], 6.0), recip576);
+        // V[i][1] = (Ww[i][0] - Ww[i][1] + Ww[i][2]) * (1/3)
+        V[i][1] = vmul_f16(vsub_f16(vadd_f16(Ww[i][0], Ww[i][2]), Ww[i][1]), _1over3);
 
-        // V[i][1] = -4*Ww[i][0] + -4*Ww[i][1] + -4*Ww[i][2];
-        V[i][1] = vmul_n_f16(vmul_n_f16(vadd_f16(vadd_f16(Ww[i][0], Ww[i][1]), Ww[i][2]), -4.0), recip576);
+        // V[i][2] = (-Ww[i][0] - Ww[i][1] - Ww[i][2]) * (1/3)
+        V[i][2] = vmul_f16(vadd_f16(vadd_f16(Ww[i][0], Ww[i][1]), Ww[i][2]), minus_1over3);
 
-        // V[i][2] = -4*Ww[i][0] +  4*Ww[i][1] + -4*Ww[i][2];
-        V[i][2] = vmul_n_f16(vmul_n_f16(vsub_f16(vsub_f16(Ww[i][1], Ww[i][0]), Ww[i][2]), 4.0), recip576);
+        // V[i][3] = -8/15*Ww[i][0] + 4/15*Ww[i][1] - 2/15*Ww[i][2]
+        auto tmp1 = vmul_n_f16(Ww[i][1], 4.0f/15.0f);
+        auto tmp2 = vadd_f16( vmul_n_f16(Ww[i][0], 8.0f/15.0f), vmul_n_f16(Ww[i][2], 2.0f/15.0f));
+        V[i][3] = vsub_f16(tmp1, tmp2);
 
-        // V[i][3] =  1*Ww[i][0] +  2*Ww[i][1] +  4*Ww[i][2];
-        V[i][3] = vmul_n_f16(vadd_f16(vadd_f16(Ww[i][0], vmul_f16(Ww[i][1], vdup_n_f16(2.0f))), vmul_f16(Ww[i][2], vdup_n_f16(4.0f))), recip576);
+        // V[i][4] = 2/15*Ww[i][0] + 4/15*Ww[i][1] + 8/15*Ww[i][2]
+        tmp1 = vmul_n_f16(Ww[i][0], 2.0f/15.0f);
+        tmp2 = vadd_f16( vmul_n_f16(Ww[i][1], 4.0f/15.0f), vmul_n_f16(Ww[i][2], 8.0f/15.0f));
+        V[i][4] = vadd_f16(tmp1, tmp2);
 
-        // V[i][4] =  1*Ww[i][0] + -2*Ww[i][1] +  4*Ww[i][2];
-        V[i][4] = vmul_n_f16(vadd_f16(vsub_f16(Ww[i][0], vmul_f16(Ww[i][1], vdup_n_f16(2.0f))), vmul_f16(Ww[i][2], vdup_n_f16(4.0f))), recip576);
-
-        // V[i][5] = 24*Ww[i][2];
-        V[i][5] = vmul_n_f16(vmul_n_f16(Ww[i][2], 24.0f), recip576);
+        // V[i][5] = 1 * Ww[i][2];
+        V[i][5] = Ww[i][2];
       }
 
       // Store the transformed weights
@@ -196,23 +214,23 @@ void a64_fp16_4x4_3x3(unsigned int n_channels, const __fp16 * inptr,
       // Compute the matrix W w
       for (int j = 0; j < 3; j++)
       {
-        Ww[0][j] =  6*w[0][j];
-        Ww[1][j] = -4*w[0][j] + -4*w[1][j] + -4*w[2][j];
-        Ww[2][j] = -4*w[0][j] +  4*w[1][j] + -4*w[2][j];
-        Ww[3][j] =  1*w[0][j] +  2*w[1][j] +  4*w[2][j];
-        Ww[4][j] =  1*w[0][j] + -2*w[1][j] +  4*w[2][j];
-        Ww[5][j] = 24*w[2][j];
+        Ww[0][j] = w[0][j];
+        Ww[1][j] = (w[0][j] + w[2][j] - w[1][j]) * (1.0f / 3.0f);
+        Ww[2][j] = -(w[0][j] + w[1][j] + w[2][j]) * (1.0f / 3.0f);
+        Ww[3][j] = (4.0f / 15.0f) * w[1][j] - ((8.0f / 15.0f) * w[0][j] + (2.0f / 15.0f) * w[2][j]);
+        Ww[4][j] = (2.0f / 15.0f) * w[0][j] + (4.0f / 15.0f) * w[1][j] + (8.0f / 15.0f) * w[2][j];
+        Ww[5][j] = w[2][j];
       }
 
       // Compute V = W w WT
       for (int i = 0; i < 6; i++)
       {
-        V[i][0] = ( 6*Ww[i][0]) / 576.0;
-        V[i][1] = (-4*Ww[i][0] + -4*Ww[i][1] + -4*Ww[i][2]) / 576.0;
-        V[i][2] = (-4*Ww[i][0] +  4*Ww[i][1] + -4*Ww[i][2]) / 576.0;
-        V[i][3] = ( 1*Ww[i][0] +  2*Ww[i][1] +  4*Ww[i][2]) / 576.0;
-        V[i][4] = ( 1*Ww[i][0] + -2*Ww[i][1] +  4*Ww[i][2]) / 576.0;
-        V[i][5] = (24*Ww[i][2]) / 576.0;
+        V[i][0] = Ww[i][0];
+        V[i][1] = (Ww[i][0] + Ww[i][2] - Ww[i][1]) * (1.0f / 3.0f);
+        V[i][2] = -(Ww[i][0] + Ww[i][1] + Ww[i][2]) * (1.0f / 3.0f);
+        V[i][3] = (4.0f / 15.0f) * Ww[i][1] - ((8.0f / 15.0f) * Ww[i][0] + (2.0f / 15.0f) * Ww[i][2]);
+        V[i][4] = (2.0f / 15.0f) * Ww[i][0] + (4.0f / 15.0f) * Ww[i][1] + (8.0f / 15.0f) * Ww[i][2];
+        V[i][5] = Ww[i][2];
       }
 
       // Store the transformed weights

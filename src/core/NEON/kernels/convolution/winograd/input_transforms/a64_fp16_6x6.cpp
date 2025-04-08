@@ -91,47 +91,77 @@ void a64_fp16_6x6(unsigned int n_channels, const __fp16 * input_base,
         }
 
         // Compute XT . x
+        const auto _1over4q = vdupq_n_f16(1.0f/4.0f);
+        const auto _1over8q = vdupq_n_f16(1.0f/8.0f);
+        const auto _1over16q = vdupq_n_f16(1.0f/16.0f);
+        const auto _3over16q = vdupq_n_f16(3.0f/16.0f);
+        const auto _5over16q = vdupq_n_f16(5.0f/16.0f);
+
         for (int j = 0; j < inner_tile_cols; j++)
         {
-            // XTx[0][j] =  4*x[0][j] + -5*x[2][j] +  1*x[4][j];
-            XTx[0][j] = vsubq_f16(vaddq_f16(x[4][j], vmulq_f16(x[0][j], vdupq_n_f16(4.0f))), vmulq_f16(x[2][j], vdupq_n_f16(5.0f)));
+            // XTx[0][j] = (1/8)*(x[0][j] + x[4][j]) + (3/16)*(x[1][j] - x[3][j]) - (1/4)*x[2][j]
+            auto tmp1 = vmulq_f16(vaddq_f16(x[0][j], x[4][j]), _1over8q);
+            auto tmp2 = vmulq_f16(vsubq_f16(x[1][j], x[3][j]), _3over16q);
+            XTx[0][j] = vsubq_f16(vaddq_f16(tmp1, tmp2), vmulq_f16(x[2][j], _1over4q));
 
-            // XTx[1][j] = -4*x[1][j] + -4*x[2][j] +  1*x[3][j] +  1*x[4][j];
-            XTx[1][j] = vsubq_f16(vaddq_f16(x[3][j], x[4][j]), vmulq_f16(vaddq_f16(x[1][j], x[2][j]),  vdupq_n_f16(4.0f)));
+            // XTx[1][j] = (1/8)*(x[1][j] + x[4][j]) + (1/16)*x[2][j] - (5/16)*x[3][j]
+            tmp1 = vmulq_f16(vaddq_f16(x[1][j], x[4][j]), _1over8q);
+            tmp2 = vsubq_f16( vmulq_f16(x[2][j], _1over16q), vmulq_f16(x[3][j], _5over16q) );
+            XTx[1][j] = vaddq_f16(tmp1, tmp2);
 
-            // XTx[2][j] =  4*x[1][j] + -4*x[2][j] + -1*x[3][j] +  1*x[4][j];
-            XTx[2][j] = vaddq_f16(vsubq_f16(x[4][j], x[3][j]), vmulq_f16(vsubq_f16(x[1][j], x[2][j]), vdupq_n_f16(4.0f)));
+            // XTx[2][j] = (1/8)*(x[4][j] - x[1][j]) - (5/16)*x[2][j] - (1/16)*x[3][j]
+            tmp1 = vmulq_f16(vsubq_f16(x[4][j], x[1][j]), _1over8q);
+            tmp2 = vaddq_f16(vmulq_f16(x[2][j], _5over16q), vmulq_f16(x[3][j], _1over16q));
+            XTx[2][j] = vsubq_f16(tmp1, tmp2);
 
-            // XTx[3][j] = -2*x[1][j] + -1*x[2][j] +  2*x[3][j] +  1*x[4][j];
-            XTx[3][j] = vaddq_f16(vsubq_f16(x[4][j], x[2][j]), vmulq_f16(vsubq_f16(x[3][j], x[1][j]), vdupq_n_f16(2.0f)));
+            // XTx[3][j] = (1/4)*(x[1][j] - x[3][j]) + (1/8)*(x[4][j] - x[2][j])
+            tmp1 = vmulq_f16(vsubq_f16(x[1][j], x[3][j]), _1over4q);
+            tmp2 = vmulq_f16(vsubq_f16(x[4][j], x[2][j]), _1over8q);
+            XTx[3][j] = vaddq_f16(tmp1, tmp2);
 
-            // XTx[4][j] =  2*x[1][j] + -1*x[2][j] + -2*x[3][j] +  1*x[4][j];
-            XTx[4][j] = vaddq_f16(vsubq_f16(x[4][j], x[2][j]), vmulq_f16(vsubq_f16(x[1][j], x[3][j]), vdupq_n_f16(2.0f)));
+            // XTx[4][j] = (1/8)*(x[3][j] - x[1][j]) + (1/4)*(x[4][j] - x[2][j])
+            tmp1 = vmulq_f16(vsubq_f16(x[3][j], x[1][j]), _1over8q);
+            tmp2 = vmulq_f16(vsubq_f16(x[4][j], x[2][j]), _1over4q);
+            XTx[4][j] = vaddq_f16(tmp1, tmp2);
 
-            // XTx[5][j] =  4*x[1][j] + -5*x[3][j] +  1*x[5][j];
-            XTx[5][j] = vsubq_f16(vaddq_f16(x[5][j], vmulq_f16(x[1][j], vdupq_n_f16(4.0f))), vmulq_f16(x[3][j], vdupq_n_f16(5.0f)));
+            // XTx[5][j] = (1/8)*(x[1][j] + x[5][j]) + (3/16)*(x[2][j] - x[4][j]) - (1/4)*x[3][j]
+            tmp1 = vmulq_f16(vaddq_f16(x[1][j], x[5][j]), _1over8q);
+            tmp2 = vmulq_f16(vsubq_f16(x[2][j], x[4][j]), _3over16q);
+            XTx[5][j] = vsubq_f16(vaddq_f16(tmp1, tmp2), vmulq_f16(x[3][j], _1over4q));
         }
 
         // Compute U = XT . x . X
         for (int i = 0; i < inner_tile_rows; i++)
         {
-            // U[i][0] =  4*XTx[i][0] + -5*XTx[i][2] +  1*XTx[i][4];
-            U[i][0] = vsubq_f16(vaddq_f16(XTx[i][4], vmulq_f16(XTx[i][0], vdupq_n_f16(4.0f))), vmulq_f16(XTx[i][2], vdupq_n_f16(5.0f)));
+            // U[i][0] = (1/8)*(XTx[i][0] + XTx[i][4]) + (3/16)*(XTx[i][1] - XTx[i][3]) - (1/4)*XTx[i][2]
+            auto tmp1 = vmulq_f16(vaddq_f16(XTx[i][0], XTx[i][4]), _1over8q);
+            auto tmp2 = vmulq_f16(vsubq_f16(XTx[i][1], XTx[i][3]), _3over16q);
+            U[i][0] = vsubq_f16(vaddq_f16(tmp1, tmp2), vmulq_f16(XTx[i][2], _1over4q));
 
-            // U[i][1] = -4*XTx[i][1] + -4*XTx[i][2] +  1*XTx[i][3] +  1*XTx[i][4];
-            U[i][1] = vsubq_f16(vaddq_f16(XTx[i][3], XTx[i][4]), vmulq_f16(vaddq_f16(XTx[i][1], XTx[i][2]), vdupq_n_f16(4.0f)));
+            // U[i][1] = (1/8)*(XTx[i][1] + XTx[i][4]) + (1/16)*XTx[i][2] - (5/16)*XTx[i][3]
+            tmp1 = vmulq_f16(vaddq_f16(XTx[i][1], XTx[i][4]), _1over8q);
+            tmp2 = vsubq_f16(vmulq_f16(XTx[i][2], _1over16q), vmulq_f16(XTx[i][3], _5over16q));
+            U[i][1] = vaddq_f16(tmp1, tmp2);
 
-            // U[i][2] =  4*XTx[i][1] + -4*XTx[i][2] + -1*XTx[i][3] +  1*XTx[i][4];
-            U[i][2] = vaddq_f16(vsubq_f16(XTx[i][4], XTx[i][3]), vmulq_f16(vsubq_f16(XTx[i][1], XTx[i][2]), vdupq_n_f16(4.0f)));
+            // U[i][2] = (1/8)*(XTx[i][4] - XTx[i][1]) - (5/16)*XTx[i][2] - (1/16)*XTx[i][3]
+            tmp1 = vmulq_f16(vsubq_f16(XTx[i][4], XTx[i][1]), _1over8q);
+            tmp2 = vaddq_f16(vmulq_f16(XTx[i][2], _5over16q), vmulq_f16(XTx[i][3], _1over16q));
+            U[i][2] = vsubq_f16(tmp1, tmp2);
 
-            // U[i][3] = -2*XTx[i][1] + -1*XTx[i][2] +  2*XTx[i][3] +  1*XTx[i][4];
-            U[i][3] = vaddq_f16(vsubq_f16(XTx[i][4], XTx[i][2]), vmulq_f16(vsubq_f16(XTx[i][3], XTx[i][1]), vdupq_n_f16(2.0f)));
+            // U[i][3] = (1/4)*(XTx[i][1] - XTx[i][3]) + (1/8)*(XTx[i][4] - XTx[i][2])
+            tmp1 = vmulq_f16(vsubq_f16(XTx[i][1], XTx[i][3]), _1over4q);
+            tmp2 = vmulq_f16(vsubq_f16(XTx[i][4], XTx[i][2]), _1over8q);
+            U[i][3] = vaddq_f16(tmp1, tmp2);
 
-            // U[i][4] =  2*XTx[i][1] + -1*XTx[i][2] + -2*XTx[i][3] +  1*XTx[i][4];
-            U[i][4] = vaddq_f16(vsubq_f16(XTx[i][4], XTx[i][2]), vmulq_f16(vsubq_f16(XTx[i][1], XTx[i][3]), vdupq_n_f16(2.0f)));
+            // U[i][4] = (1/8)*(XTx[i][3] - XTx[i][1]) + (1/4)*(XTx[i][4] - XTx[i][2])
+            tmp1 = vmulq_f16(vsubq_f16(XTx[i][3], XTx[i][1]), _1over8q);
+            tmp2 = vmulq_f16(vsubq_f16(XTx[i][4], XTx[i][2]), _1over4q);
+            U[i][4] = vaddq_f16(tmp1, tmp2);
 
-            // U[i][5] =  4*XTx[i][1] + -5*XTx[i][3] +  1*XTx[i][5];
-            U[i][5] = vsubq_f16(vaddq_f16(XTx[i][5], vmulq_f16(XTx[i][1], vdupq_n_f16(4.0f))), vmulq_f16(XTx[i][3], vdupq_n_f16(5.0f)));
+            // U[i][5] = (1/8)*(XTx[i][1] + XTx[i][5]) + (3/16)*(XTx[i][2] - XTx[i][4]) - (1/4)*XTx[i][3]
+            tmp1 = vmulq_f16(vaddq_f16(XTx[i][1], XTx[i][5]), _1over8q);
+            tmp2 = vmulq_f16(vsubq_f16(XTx[i][2], XTx[i][4]), _3over16q);
+            U[i][5] = vsubq_f16(vaddq_f16(tmp1, tmp2), vmulq_f16(XTx[i][3], _1over4q));
         }
 
         // Store the transformed matrix
@@ -170,47 +200,77 @@ void a64_fp16_6x6(unsigned int n_channels, const __fp16 * input_base,
         }
 
         // Compute XT . x
+        const auto _1over4 = vdup_n_f16(1.0f/4.0f);
+        const auto _1over8 = vdup_n_f16(1.0f/8.0f);
+        const auto _1over16 = vdup_n_f16(1.0f/16.0f);
+        const auto _3over16 = vdup_n_f16(3.0f/16.0f);
+        const auto _5over16 = vdup_n_f16(5.0f/16.0f);
+
         for (int j = 0; j < inner_tile_cols; j++)
         {
-            // XTx[0][j] =  4*x[0][j] + -5*x[2][j] +  1*x[4][j];
-            XTx[0][j] = vsub_f16(vadd_f16(x[4][j], vmul_f16(x[0][j], vdup_n_f16(4.0f))), vmul_f16(x[2][j], vdup_n_f16(5.0f)));
+            // XTx[0][j] = (1/8)*(x[0][j] + x[4][j]) + (3/16)*(x[1][j] - x[3][j]) - (1/4)*x[2][j]
+            auto tmp1 = vmul_f16(vadd_f16(x[0][j], x[4][j]), _1over8);
+            auto tmp2 = vmul_f16(vsub_f16(x[1][j], x[3][j]), _3over16);
+            XTx[0][j] = vsub_f16(vadd_f16(tmp1, tmp2), vmul_f16(x[2][j], _1over4));
 
-            // XTx[1][j] = -4*x[1][j] + -4*x[2][j] +  1*x[3][j] +  1*x[4][j];
-            XTx[1][j] = vsub_f16(vadd_f16(x[3][j], x[4][j]), vmul_f16(vadd_f16(x[1][j], x[2][j]),  vdup_n_f16(4.0f)));
+            // XTx[1][j] = (1/8)*(x[1][j] + x[4][j]) + (1/16)*x[2][j] - (5/16)*x[3][j]
+            tmp1 = vmul_f16(vadd_f16(x[1][j], x[4][j]), _1over8);
+            tmp2 = vsub_f16(vmul_f16(x[2][j], _1over16), vmul_f16(x[3][j], _5over16));
+            XTx[1][j] = vadd_f16(tmp1, tmp2);
 
-            // XTx[2][j] =  4*x[1][j] + -4*x[2][j] + -1*x[3][j] +  1*x[4][j];
-            XTx[2][j] = vadd_f16(vsub_f16(x[4][j], x[3][j]), vmul_f16(vsub_f16(x[1][j], x[2][j]), vdup_n_f16(4.0f)));
+            // XTx[2][j] = (1/8)*(x[4][j] - x[1][j]) - (5/16)*x[2][j] - (1/16)*x[3][j]
+            tmp1 = vmul_f16(vsub_f16(x[4][j], x[1][j]), _1over8);
+            tmp2 = vadd_f16(vmul_f16(x[2][j], _5over16), vmul_f16(x[3][j], _1over16));
+            XTx[2][j] = vsub_f16(tmp1, tmp2);
 
-            // XTx[3][j] = -2*x[1][j] + -1*x[2][j] +  2*x[3][j] +  1*x[4][j];
-            XTx[3][j] = vadd_f16(vsub_f16(x[4][j], x[2][j]), vmul_f16(vsub_f16(x[3][j], x[1][j]), vdup_n_f16(2.0f)));
+            // XTx[3][j] = (1/4)*(x[1][j] - x[3][j]) + (1/8)*(x[4][j] - x[2][j])
+            tmp1 = vmul_f16(vsub_f16(x[1][j], x[3][j]), _1over4);
+            tmp2 = vmul_f16(vsub_f16(x[4][j], x[2][j]), _1over8);
+            XTx[3][j] = vadd_f16(tmp1, tmp2);
 
-            // XTx[4][j] =  2*x[1][j] + -1*x[2][j] + -2*x[3][j] +  1*x[4][j];
-            XTx[4][j] = vadd_f16(vsub_f16(x[4][j], x[2][j]), vmul_f16(vsub_f16(x[1][j], x[3][j]), vdup_n_f16(2.0f)));
+            // XTx[4][j] = (1/8)*(x[3][j] - x[1][j]) + (1/4)*(x[4][j] - x[2][j])
+            tmp1 = vmul_f16(vsub_f16(x[3][j], x[1][j]), _1over8);
+            tmp2 = vmul_f16(vsub_f16(x[4][j], x[2][j]), _1over4);
+            XTx[4][j] = vadd_f16(tmp1, tmp2);
 
-            // XTx[5][j] =  4*x[1][j] + -5*x[3][j] +  1*x[5][j];
-            XTx[5][j] = vsub_f16(vadd_f16(x[5][j], vmul_f16(x[1][j], vdup_n_f16(4.0f))), vmul_f16(x[3][j], vdup_n_f16(5.0f)));
+            // XTx[5][j] = (1/8)*(x[1][j] + x[5][j]) + (3/16)*(x[2][j] - x[4][j]) - (1/4)*x[3][j]
+            tmp1 = vmul_f16(vadd_f16(x[1][j], x[5][j]), _1over8);
+            tmp2 = vmul_f16(vsub_f16(x[2][j], x[4][j]), _3over16);
+            XTx[5][j] = vsub_f16(vadd_f16(tmp1, tmp2), vmul_f16(x[3][j], _1over4));
         }
 
         // Compute U = XT . x . X
         for (int i = 0; i < inner_tile_rows; i++)
         {
-            // U[i][0] =  4*XTx[i][0] + -5*XTx[i][2] +  1*XTx[i][4];
-            U[i][0] = vsub_f16(vadd_f16(XTx[i][4], vmul_f16(XTx[i][0], vdup_n_f16(4.0f))), vmul_f16(XTx[i][2], vdup_n_f16(5.0f)));
+            // U[i][0] = (1/8)*(XTx[i][0] + XTx[i][4]) + (3/16)*(XTx[i][1] - XTx[i][3]) - (1/4)*XTx[i][2]
+            auto tmp1 = vmul_f16(vadd_f16(XTx[i][0], XTx[i][4]), _1over8);
+            auto tmp2 = vmul_f16(vsub_f16(XTx[i][1], XTx[i][3]), _3over16);
+            U[i][0] = vsub_f16(vadd_f16(tmp1, tmp2), vmul_f16(XTx[i][2], _1over4));
 
-            // U[i][1] = -4*XTx[i][1] + -4*XTx[i][2] +  1*XTx[i][3] +  1*XTx[i][4];
-            U[i][1] = vsub_f16(vadd_f16(XTx[i][3], XTx[i][4]), vmul_f16(vadd_f16(XTx[i][1], XTx[i][2]), vdup_n_f16(4.0f)));
+            // U[i][1] = (1/8)*(XTx[i][1] + XTx[i][4]) + (1/16)*XTx[i][2] - (5/16)*XTx[i][3]
+            tmp1 = vmul_f16(vadd_f16(XTx[i][1], XTx[i][4]), _1over8);
+            tmp2 = vsub_f16(vmul_f16(XTx[i][2], _1over16), vmul_f16(XTx[i][3], _5over16));
+            U[i][1] = vadd_f16(tmp1, tmp2);
 
-            // U[i][2] =  4*XTx[i][1] + -4*XTx[i][2] + -1*XTx[i][3] +  1*XTx[i][4];
-            U[i][2] = vadd_f16(vsub_f16(XTx[i][4], XTx[i][3]), vmul_f16(vsub_f16(XTx[i][1], XTx[i][2]), vdup_n_f16(4.0f)));
+            // U[i][2] = (1/8)*(XTx[i][4] - XTx[i][1]) - (5/16)*XTx[i][2] - (1/16)*XTx[i][3]
+            tmp1 = vmul_f16(vsub_f16(XTx[i][4], XTx[i][1]), _1over8);
+            tmp2 = vadd_f16(vmul_f16(XTx[i][2], _5over16), vmul_f16(XTx[i][3], _1over16));
+            U[i][2] = vsub_f16(tmp1, tmp2);
 
-            // U[i][3] = -2*XTx[i][1] + -1*XTx[i][2] +  2*XTx[i][3] +  1*XTx[i][4];
-            U[i][3] = vadd_f16(vsub_f16(XTx[i][4], XTx[i][2]), vmul_f16(vsub_f16(XTx[i][3], XTx[i][1]), vdup_n_f16(2.0f)));
+            // U[i][3] = (1/4)*(XTx[i][1] - XTx[i][3]) + (1/8)*(XTx[i][4] - XTx[i][2])
+            tmp1 = vmul_f16(vsub_f16(XTx[i][1], XTx[i][3]), _1over4);
+            tmp2 = vmul_f16(vsub_f16(XTx[i][4], XTx[i][2]), _1over8);
+            U[i][3] = vadd_f16(tmp1, tmp2);
 
-            // U[i][4] =  2*XTx[i][1] + -1*XTx[i][2] + -2*XTx[i][3] +  1*XTx[i][4];
-            U[i][4] = vadd_f16(vsub_f16(XTx[i][4], XTx[i][2]), vmul_f16(vsub_f16(XTx[i][1], XTx[i][3]), vdup_n_f16(2.0f)));
+            // U[i][4] = (1/8)*(XTx[i][3] - XTx[i][1]) + (1/4)*(XTx[i][4] - XTx[i][2])
+            tmp1 = vmul_f16(vsub_f16(XTx[i][3], XTx[i][1]), _1over8);
+            tmp2 = vmul_f16(vsub_f16(XTx[i][4], XTx[i][2]), _1over4);
+            U[i][4] = vadd_f16(tmp1, tmp2);
 
-            // U[i][5] =  4*XTx[i][1] + -5*XTx[i][3] +  1*XTx[i][5];
-            U[i][5] = vsub_f16(vadd_f16(XTx[i][5], vmul_f16(XTx[i][1], vdup_n_f16(4.0f))), vmul_f16(XTx[i][3], vdup_n_f16(5.0f)));
+            // U[i][5] = (1/8)*(XTx[i][1] + XTx[i][5]) + (3/16)*(XTx[i][2] - XTx[i][4]) - (1/4)*XTx[i][3]
+            tmp1 = vmul_f16(vadd_f16(XTx[i][1], XTx[i][5]), _1over8);
+            tmp2 = vmul_f16(vsub_f16(XTx[i][2], XTx[i][4]), _3over16);
+            U[i][5] = vsub_f16(vadd_f16(tmp1, tmp2), vmul_f16(XTx[i][3], _1over4));
         }
 
         // Store the transformed matrix
@@ -237,23 +297,23 @@ void a64_fp16_6x6(unsigned int n_channels, const __fp16 * input_base,
         // Compute XT . x
         for (int j = 0; j < inner_tile_cols; j++)
         {
-            XTx[0][j] =  4*x[0][j] + -5*x[2][j] +  1*x[4][j];
-            XTx[1][j] = -4*x[1][j] + -4*x[2][j] +  1*x[3][j] +  1*x[4][j];
-            XTx[2][j] =  4*x[1][j] + -4*x[2][j] + -1*x[3][j] +  1*x[4][j];
-            XTx[3][j] = -2*x[1][j] + -1*x[2][j] +  2*x[3][j] +  1*x[4][j];
-            XTx[4][j] =  2*x[1][j] + -1*x[2][j] + -2*x[3][j] +  1*x[4][j];
-            XTx[5][j] =  4*x[1][j] + -5*x[3][j] +  1*x[5][j];
+            XTx[0][j] = ((x[0][j] + x[4][j]) * (1.0f / 8.0f) + (x[1][j] - x[3][j]) * (3.0f / 16.0f)) - x[2][j] * (1.0f / 4.0f);
+            XTx[1][j] = (x[1][j] + x[4][j]) * (1.0f / 8.0f) + (x[2][j] * (1.0f / 16.0f) - x[3][j] * (5.0f / 16.0f));
+            XTx[2][j] = (x[4][j] - x[1][j]) * (1.0f / 8.0f) - (x[2][j] * (5.0f / 16.0f) + x[3][j] * (1.0f / 16.0f));
+            XTx[3][j] = (x[1][j] - x[3][j]) * (1.0f / 4.0f) + (x[4][j] - x[2][j]) * (1.0f / 8.0f);
+            XTx[4][j] = (x[3][j] - x[1][j]) * (1.0f / 8.0f) + (x[4][j] - x[2][j]) * (1.0f / 4.0f);
+            XTx[5][j] = ((x[1][j] + x[5][j]) * (1.0f / 8.0f) + (x[2][j] - x[4][j]) * (3.0f / 16.0f)) - x[3][j] * (1.0f / 4.0f);
         }
 
         // Compute U = XT . x . X
         for (int i = 0; i < inner_tile_rows; i++)
         {
-            U[i][0] =  4*XTx[i][0] + -5*XTx[i][2] +  1*XTx[i][4];
-            U[i][1] = -4*XTx[i][1] + -4*XTx[i][2] +  1*XTx[i][3] +  1*XTx[i][4];
-            U[i][2] =  4*XTx[i][1] + -4*XTx[i][2] + -1*XTx[i][3] +  1*XTx[i][4];
-            U[i][3] = -2*XTx[i][1] + -1*XTx[i][2] +  2*XTx[i][3] +  1*XTx[i][4];
-            U[i][4] =  2*XTx[i][1] + -1*XTx[i][2] + -2*XTx[i][3] +  1*XTx[i][4];
-            U[i][5] =  4*XTx[i][1] + -5*XTx[i][3] +  1*XTx[i][5];
+            U[i][0] = ((XTx[i][0] + XTx[i][4]) * (1.0f / 8.0f) + (XTx[i][1] - XTx[i][3]) * (3.0f / 16.0f)) - XTx[i][2] * (1.0f / 4.0f);
+            U[i][1] = (XTx[i][1] + XTx[i][4]) * (1.0f / 8.0f) + (XTx[i][2] * (1.0f / 16.0f) - XTx[i][3] * (5.0f / 16.0f));
+            U[i][2] = (XTx[i][4] - XTx[i][1]) * (1.0f / 8.0f) - (XTx[i][2] * (5.0f / 16.0f) + XTx[i][3] * (1.0f / 16.0f));
+            U[i][3] = (XTx[i][1] - XTx[i][3]) * (1.0f / 4.0f) + (XTx[i][4] - XTx[i][2]) * (1.0f / 8.0f);
+            U[i][4] = (XTx[i][3] - XTx[i][1]) * (1.0f / 8.0f) + (XTx[i][4] - XTx[i][2]) * (1.0f / 4.0f);
+            U[i][5] = ((XTx[i][1] + XTx[i][5]) * (1.0f / 8.0f) + (XTx[i][2] - XTx[i][4]) * (3.0f / 16.0f)) - XTx[i][3] * (1.0f / 4.0f);
         }
 
         // Store the transformed matrix
