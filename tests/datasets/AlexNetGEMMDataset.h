@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 Arm Limited.
+ * Copyright (c) 2017, 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ALEXNET_GEMM_DATASET
-#define ARM_COMPUTE_TEST_ALEXNET_GEMM_DATASET
+#ifndef ACL_TESTS_DATASETS_ALEXNETGEMMDATASET_H
+#define ACL_TESTS_DATASETS_ALEXNETGEMMDATASET_H
 
 #include "tests/datasets/GEMMDataset.h"
-
-#include "arm_compute/core/TensorShape.h"
 
 namespace arm_compute
 {
@@ -39,17 +37,17 @@ class AlexNetGEMMDataset final : public GEMMDataset
 public:
     AlexNetGEMMDataset()
     {
-        add_config(TensorShape{ 364U, 3025U }, TensorShape{ 96U, 364U }, TensorShape{ 96U, 3025U }, TensorShape{ 96U, 3025U }, 1.f, 0.f);
-        add_config(TensorShape{ 1201U, 729U }, TensorShape{ 128U, 1201U }, TensorShape{ 128U, 729U }, TensorShape{ 128U, 729U }, 1.f, 0.f);
-        add_config(TensorShape{ 2305U, 169U }, TensorShape{ 384U, 2305U }, TensorShape{ 384U, 169U }, TensorShape{ 384U, 169U }, 1.f, 0.f);
-        add_config(TensorShape{ 1729U, 169U }, TensorShape{ 192U, 1729U }, TensorShape{ 192U, 169U }, TensorShape{ 192U, 169U }, 1.f, 0.f);
-        add_config(TensorShape{ 1729U, 169U }, TensorShape{ 128U, 1729U }, TensorShape{ 128U, 169U }, TensorShape{ 128U, 169U }, 1.f, 0.f);
-        add_config(TensorShape{ 9216U, 1U }, TensorShape{ 4096U, 9216U }, TensorShape{ 4096U, 1U }, TensorShape{ 4096U, 1U }, 1.f, 0.f);
-        add_config(TensorShape{ 4096U, 1U }, TensorShape{ 4096U, 4096U }, TensorShape{ 4096U, 1U }, TensorShape{ 4096U, 1U }, 1.f, 0.f);
-        add_config(TensorShape{ 4096U, 1U }, TensorShape{ 1000U, 4096U }, TensorShape{ 1000U, 1U }, TensorShape{ 1000U, 1U }, 1.f, 0.f);
+        add_config(1, 1000, 4096, 1.f, 0.f);
+        add_config(1, 4096, 4096, 1.f, 0.f);
+        add_config(1, 4096, 9216, 1.f, 0.f);
+        add_config(169, 128, 1729, 1.f, 0.f);
+        add_config(169, 192, 1729, 1.f, 0.f);
+        add_config(169, 384, 2305, 1.f, 0.f);
+        add_config(729, 128, 1201, 1.f, 0.f);
+        add_config(3025, 96, 364, 1.f, 0.f);
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ALEXNET_GEMM_DATASET */
+#endif // ACL_TESTS_DATASETS_ALEXNETGEMMDATASET_H

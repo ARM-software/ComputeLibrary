@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_GEMM_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_GEMM_DATASET
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV1_GOOGLENETINCEPTIONV1GEMMDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV1_GOOGLENETINCEPTIONV1GEMMDATASET_H
 
 #include "tests/datasets/GEMMDataset.h"
-
-#include "utils/TypePrinter.h"
-
-#include "arm_compute/core/TensorShape.h"
 
 namespace arm_compute
 {
@@ -41,73 +37,63 @@ class GoogLeNetInceptionV1GEMMDataset final : public GEMMDataset
 public:
     GoogLeNetInceptionV1GEMMDataset()
     {
-        add_config(TensorShape(147U, 12544U), TensorShape(64U, 147U), TensorShape(64U, 12544U), TensorShape(64U, 12544U), 1.0f, 0.0f);
-        add_config(TensorShape(64U, 3136U), TensorShape(64U, 64U), TensorShape(64U, 3136U), TensorShape(64U, 3136U), 1.0f, 0.0f);
-        add_config(TensorShape(576U, 3136U), TensorShape(192U, 576U), TensorShape(192U, 3136U), TensorShape(192U, 3136U), 1.0f, 0.0f);
-        add_config(TensorShape(192U, 784U), TensorShape(64U, 192U), TensorShape(64U, 784U), TensorShape(64U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(192U, 784U), TensorShape(96U, 192U), TensorShape(96U, 784U), TensorShape(96U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(864U, 784U), TensorShape(128U, 864U), TensorShape(128U, 784U), TensorShape(128U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(192U, 784U), TensorShape(16U, 192U), TensorShape(16U, 784U), TensorShape(16U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(400U, 784U), TensorShape(32U, 400U), TensorShape(32U, 784U), TensorShape(32U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(192U, 784U), TensorShape(32U, 192U), TensorShape(32U, 784U), TensorShape(32U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(256U, 784U), TensorShape(128U, 256U), TensorShape(128U, 784U), TensorShape(128U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(256U, 784U), TensorShape(128U, 256U), TensorShape(128U, 784U), TensorShape(128U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(1152U, 784U), TensorShape(192U, 1152U), TensorShape(192U, 784U), TensorShape(192U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(256U, 784U), TensorShape(32U, 256U), TensorShape(32U, 784U), TensorShape(32U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(800U, 784U), TensorShape(96U, 800U), TensorShape(96U, 784U), TensorShape(96U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(256U, 784U), TensorShape(64U, 256U), TensorShape(64U, 784U), TensorShape(64U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(480U, 196U), TensorShape(192U, 480U), TensorShape(192U, 196U), TensorShape(192U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(480U, 196U), TensorShape(96U, 480U), TensorShape(96U, 196U), TensorShape(96U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(864U, 196U), TensorShape(204U, 864U), TensorShape(204U, 196U), TensorShape(204U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(480U, 196U), TensorShape(16U, 480U), TensorShape(16U, 196U), TensorShape(16U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(400U, 196U), TensorShape(48U, 400U), TensorShape(48U, 196U), TensorShape(48U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(480U, 196U), TensorShape(64U, 480U), TensorShape(64U, 196U), TensorShape(64U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(508U, 196U), TensorShape(160U, 508U), TensorShape(160U, 196U), TensorShape(160U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(508U, 196U), TensorShape(112U, 508U), TensorShape(112U, 196U), TensorShape(112U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(1008U, 196U), TensorShape(224U, 1008U), TensorShape(224U, 196U), TensorShape(224U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(508U, 196U), TensorShape(24U, 508U), TensorShape(24U, 196U), TensorShape(24U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(600U, 196U), TensorShape(64U, 600U), TensorShape(64U, 196U), TensorShape(64U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(508U, 196U), TensorShape(64U, 508U), TensorShape(64U, 196U), TensorShape(64U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(128U, 512U), TensorShape(128U, 196U), TensorShape(128U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(128U, 512U), TensorShape(128U, 196U), TensorShape(128U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(1152U, 196U), TensorShape(256U, 1152U), TensorShape(256U, 196U), TensorShape(256U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(24U, 512U), TensorShape(24U, 196U), TensorShape(24U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(600U, 196U), TensorShape(64U, 600U), TensorShape(64U, 196U), TensorShape(64U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(64U, 512U), TensorShape(64U, 196U), TensorShape(64U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(112U, 512U), TensorShape(112U, 196U), TensorShape(112U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(144U, 512U), TensorShape(144U, 196U), TensorShape(144U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(1296U, 196U), TensorShape(288U, 1296U), TensorShape(288U, 196U), TensorShape(288U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(32U, 512U), TensorShape(32U, 196U), TensorShape(32U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(800U, 196U), TensorShape(64U, 800U), TensorShape(64U, 196U), TensorShape(64U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(512U, 196U), TensorShape(64U, 512U), TensorShape(64U, 196U), TensorShape(64U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(528U, 196U), TensorShape(256U, 528U), TensorShape(256U, 196U), TensorShape(256U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(528U, 196U), TensorShape(160U, 528U), TensorShape(160U, 196U), TensorShape(160U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(1440U, 196U), TensorShape(320U, 1440U), TensorShape(320U, 196U), TensorShape(320U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(528U, 196U), TensorShape(32U, 528U), TensorShape(32U, 196U), TensorShape(32U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(800U, 196U), TensorShape(128U, 800U), TensorShape(128U, 196U), TensorShape(128U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(528U, 196U), TensorShape(128U, 528U), TensorShape(128U, 196U), TensorShape(128U, 196U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(256U, 832U), TensorShape(256U, 49U), TensorShape(256U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(160U, 832U), TensorShape(160U, 49U), TensorShape(160U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(1440U, 49U), TensorShape(320U, 1440U), TensorShape(320U, 49U), TensorShape(320U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(48U, 832U), TensorShape(48U, 49U), TensorShape(48U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(1200U, 49U), TensorShape(128U, 1200U), TensorShape(128U, 49U), TensorShape(128U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(128U, 832U), TensorShape(128U, 49U), TensorShape(128U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(384U, 832U), TensorShape(384U, 49U), TensorShape(384U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(192U, 832U), TensorShape(192U, 49U), TensorShape(192U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(1728U, 49U), TensorShape(384U, 1728U), TensorShape(384U, 49U), TensorShape(384U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(48U, 832U), TensorShape(48U, 49U), TensorShape(48U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(1200U, 49U), TensorShape(128U, 1200U), TensorShape(128U, 49U), TensorShape(128U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(832U, 49U), TensorShape(128U, 832U), TensorShape(128U, 49U), TensorShape(128U, 49U), 1.0f, 0.0f);
-        add_config(TensorShape(508U, 16U), TensorShape(128U, 508U), TensorShape(128U, 16U), TensorShape(128U, 16U), 1.0f, 0.0f);
-        add_config(TensorShape(2048U, 1U), TensorShape(1024U, 2048U), TensorShape(1024U, 1U), TensorShape(1024U, 1U), 1.0f, 0.0f);
-        add_config(TensorShape(1024U, 1U), TensorShape(1008U, 1024U), TensorShape(1008U, 1U), TensorShape(1008U, 1U), 1.0f, 0.0f);
-        add_config(TensorShape(528U, 16U), TensorShape(128U, 528U), TensorShape(128U, 16U), TensorShape(128U, 16U), 1.0f, 0.0f);
-        add_config(TensorShape(2048U, 1U), TensorShape(1024U, 2048U), TensorShape(1024U, 1U), TensorShape(1024U, 1U), 1.0f, 0.0f);
-        add_config(TensorShape(1024U, 1U), TensorShape(1008U, 1024U), TensorShape(1008U, 1U), TensorShape(1008U, 1U), 1.0f, 0.0f);
-        add_config(TensorShape(1024U, 1U), TensorShape(1008U, 1024U), TensorShape(1008U, 1U), TensorShape(1008U, 1U), 1.0f, 0.0f);
+        add_config(1, 1008, 1024, 1.0f, 0.0f);
+        add_config(1, 1024, 2048, 1.0f, 0.0f);
+        add_config(16, 128, 508, 1.0f, 0.0f);
+        add_config(16, 128, 528, 1.0f, 0.0f);
+        add_config(49, 128, 1200, 1.0f, 0.0f);
+        add_config(49, 128, 832, 1.0f, 0.0f);
+        add_config(49, 160, 832, 1.0f, 0.0f);
+        add_config(49, 192, 832, 1.0f, 0.0f);
+        add_config(49, 256, 832, 1.0f, 0.0f);
+        add_config(49, 320, 1440, 1.0f, 0.0f);
+        add_config(49, 384, 1728, 1.0f, 0.0f);
+        add_config(49, 384, 832, 1.0f, 0.0f);
+        add_config(49, 48, 832, 1.0f, 0.0f);
+        add_config(196, 112, 508, 1.0f, 0.0f);
+        add_config(196, 112, 512, 1.0f, 0.0f);
+        add_config(196, 128, 512, 1.0f, 0.0f);
+        add_config(196, 128, 528, 1.0f, 0.0f);
+        add_config(196, 128, 800, 1.0f, 0.0f);
+        add_config(196, 144, 512, 1.0f, 0.0f);
+        add_config(196, 16, 480, 1.0f, 0.0f);
+        add_config(196, 160, 508, 1.0f, 0.0f);
+        add_config(196, 160, 528, 1.0f, 0.0f);
+        add_config(196, 192, 480, 1.0f, 0.0f);
+        add_config(196, 204, 864, 1.0f, 0.0f);
+        add_config(196, 224, 1008, 1.0f, 0.0f);
+        add_config(196, 24, 508, 1.0f, 0.0f);
+        add_config(196, 24, 512, 1.0f, 0.0f);
+        add_config(196, 256, 1152, 1.0f, 0.0f);
+        add_config(196, 256, 528, 1.0f, 0.0f);
+        add_config(196, 288, 1296, 1.0f, 0.0f);
+        add_config(196, 32, 512, 1.0f, 0.0f);
+        add_config(196, 32, 528, 1.0f, 0.0f);
+        add_config(196, 320, 1440, 1.0f, 0.0f);
+        add_config(196, 48, 400, 1.0f, 0.0f);
+        add_config(196, 64, 480, 1.0f, 0.0f);
+        add_config(196, 64, 508, 1.0f, 0.0f);
+        add_config(196, 64, 512, 1.0f, 0.0f);
+        add_config(196, 64, 600, 1.0f, 0.0f);
+        add_config(196, 64, 800, 1.0f, 0.0f);
+        add_config(196, 96, 480, 1.0f, 0.0f);
+        add_config(784, 128, 256, 1.0f, 0.0f);
+        add_config(784, 128, 864, 1.0f, 0.0f);
+        add_config(784, 16, 192, 1.0f, 0.0f);
+        add_config(784, 192, 1152, 1.0f, 0.0f);
+        add_config(784, 32, 192, 1.0f, 0.0f);
+        add_config(784, 32, 256, 1.0f, 0.0f);
+        add_config(784, 32, 400, 1.0f, 0.0f);
+        add_config(784, 64, 192, 1.0f, 0.0f);
+        add_config(784, 64, 256, 1.0f, 0.0f);
+        add_config(784, 96, 192, 1.0f, 0.0f);
+        add_config(784, 96, 800, 1.0f, 0.0f);
+        add_config(3136, 192, 576, 1.0f, 0.0f);
+        add_config(3136, 64, 64, 1.0f, 0.0f);
+        add_config(12544, 64, 147, 1.0f, 0.0f);
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_GEMM_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV1_GOOGLENETINCEPTIONV1GEMMDATASET_H

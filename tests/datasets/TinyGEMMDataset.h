@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TINY_GEMM_DATASET
-#define ARM_COMPUTE_TEST_TINY_GEMM_DATASET
+#ifndef ACL_TESTS_DATASETS_TINYGEMMDATASET_H
+#define ACL_TESTS_DATASETS_TINYGEMMDATASET_H
 
 #include "tests/datasets/GEMMDataset.h"
-
-#include "utils/TypePrinter.h"
-
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -42,11 +37,11 @@ class TinyGEMMDataset final : public GEMMDataset
 public:
     TinyGEMMDataset()
     {
-        add_config(TensorShape(21U, 13U), TensorShape(33U, 21U), TensorShape(33U, 13U), TensorShape(33U, 13U), 1.0f, 0.0f);
-        add_config(TensorShape(31U, 1U), TensorShape(23U, 31U), TensorShape(23U, 1U), TensorShape(23U, 1U), 1.0f, 0.0f);
+        add_config(1, 23, 31, 1.0f, 0.0f);
+        add_config(13, 33, 21, 1.0f, 0.0f);
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TINY_GEMM_DATASET */
+#endif // ACL_TESTS_DATASETS_TINYGEMMDATASET_H
