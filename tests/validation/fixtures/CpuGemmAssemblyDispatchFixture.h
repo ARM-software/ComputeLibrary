@@ -64,6 +64,9 @@ public:
         {
             return;
         }
+        if (fast_math && !CPUInfo::get().has_bf16()) {
+            return;
+        }
         ARM_COMPUTE_UNUSED(alpha);
         ARM_COMPUTE_UNUSED(beta);
         _target =
