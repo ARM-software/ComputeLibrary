@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 #if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+
+#include "arm.hpp"
+
 #include <cstddef>
 #include <arm_neon.h>
 

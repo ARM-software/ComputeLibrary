@@ -23,6 +23,8 @@
  */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
+#include "arm.hpp"
+
 #include <algorithm>
 #include <arm_neon.h>
 #include <cstddef>
