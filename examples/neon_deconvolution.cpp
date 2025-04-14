@@ -35,6 +35,15 @@ class NEDeconvolutionExample : public Example
 public:
     bool do_setup(int argc, char **argv) override
     {
+        TensorShape   input_shape{8, 200, 200};
+        TensorShape   weights_shape{8, 4, 4, 4};
+        TensorShape   output_shape{4, 800, 800};
+        TensorInfo    input_info{input_shape, 1, DataType::F16, DataLayout::NHWC};
+        TensorInfo    weights_info{weights_shape, 1, DataType::F16, DataLayout::NHWC};
+        TensorInfo    output_info{output_shape, 1, DataType::F16, DataLayout::NHWC};
+        PadStrideInfo ps_info{4, 4, 0, 0, DimensionRoundingType::FLOOR};
+        bool          fast_math{true};
+
         if (argc == 12)
         {
             try
@@ -49,36 +58,17 @@ public:
                 uint32_t stride_y        = static_cast<uint32_t>(std::stoul(argv[8]));
                 uint32_t pad_x           = static_cast<uint32_t>(std::stoul(argv[9]));
                 uint32_t pad_y           = static_cast<uint32_t>(std::stoul(argv[10]));
-                bool     fast_math       = std::stoul(argv[11]);
+                fast_math                = std::stoul(argv[11]);
 
-                TensorShape   input_shape{input_z, input_x, input_y};
-                TensorInfo    input_info{input_shape, 1, DataType::F16, DataLayout::NHWC};
-                TensorShape   weights_shape{input_z, kernel_size_x, kernel_size_y, output_channels};
-                TensorInfo    weights_info{weights_shape, 1, DataType::F16, DataLayout::NHWC};
-                PadStrideInfo ps_info{stride_x, stride_y, pad_x, pad_y, DimensionRoundingType::FLOOR};
+                input_shape   = TensorShape{input_z, input_x, input_y};
+                input_info    = TensorInfo{input_shape, 1, DataType::F16, DataLayout::NHWC};
+                weights_shape = TensorShape{input_z, kernel_size_x, kernel_size_y, output_channels};
+                weights_info  = TensorInfo{weights_shape, 1, DataType::F16, DataLayout::NHWC};
+                ps_info       = PadStrideInfo{stride_x, stride_y, pad_x, pad_y, DimensionRoundingType::FLOOR};
                 auto out_dim = deconvolution_output_dimensions(input_x, input_y, kernel_size_x, kernel_size_y, ps_info);
-                TensorShape output_shape = arm_compute::misc::shape_calculator::compute_deconvolution_output_shape(
+                output_shape = arm_compute::misc::shape_calculator::compute_deconvolution_output_shape(
                     out_dim, input_info, weights_info);
-                TensorInfo output_info{output_shape, 1, DataType::F16, DataLayout::NHWC};
-
-                input.allocator()->init(input_info);
-                weights.allocator()->init(weights_info);
-                output.allocator()->init(output_info);
-
-                auto status = NEDeconvolutionLayer::validate(input.info(), weights.info(), nullptr, output.info(),
-                                                             ps_info, fast_math);
-                if (status.error_code() != ErrorCode::OK)
-                {
-                    ARM_COMPUTE_ERROR(status.error_description().c_str());
-                    return false;
-                }
-
-                deconv.configure(&input, &weights, nullptr, &output, ps_info, fast_math);
-                input.allocator()->allocate();
-                weights.allocator()->allocate();
-                output.allocator()->allocate();
-
-                return true;
+                output_info = TensorInfo{output_shape, 1, DataType::F16, DataLayout::NHWC};
             }
             catch (const std::exception &e)
             {
@@ -86,7 +76,7 @@ public:
                 return false;
             }
         }
-        else
+        else if (argc != 1)
         {
             ARM_COMPUTE_ERROR(
                 "Invalid number of arguments. Usage:\n"
@@ -94,7 +84,25 @@ public:
                 "<stride_x> <stride_y> <pad_x> <pad_y> <fast_math (0/1)>\n");
             return false;
         }
-        return false;
+
+        input.allocator()->init(input_info);
+        weights.allocator()->init(weights_info);
+        output.allocator()->init(output_info);
+
+        auto status =
+            NEDeconvolutionLayer::validate(input.info(), weights.info(), nullptr, output.info(), ps_info, fast_math);
+        if (status.error_code() != ErrorCode::OK)
+        {
+            ARM_COMPUTE_ERROR(status.error_description().c_str());
+            return false;
+        }
+
+        deconv.configure(&input, &weights, nullptr, &output, ps_info, fast_math);
+        input.allocator()->allocate();
+        weights.allocator()->allocate();
+        output.allocator()->allocate();
+
+        return true;
     }
 
     void do_run() override
