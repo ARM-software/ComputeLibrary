@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,6 +121,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 template <typename T>
 using NESoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NESoftmaxLayer, T>;
 
+template <typename T>
+using NESoftmaxLayerNumericalStressFixture = SoftmaxNumericalStressValidationFixture<Tensor, Accessor, NESoftmaxLayer, T>;
+
 DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
     concat(
         combine(
@@ -164,6 +167,23 @@ FIXTURE_DATA_TEST_CASE(RunSmall2D, NESoftmaxLayerFixture<half>, framework::Datas
         datasets::SoftmaxLayerSmallShapes(),
         make("DataType", DataType::F16),
         make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 })))
+{
+    if(CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunNumericalStressTest, NESoftmaxLayerNumericalStressFixture<half>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F16),
+        make("Beta", { 1.0f }),
         make("Axis", { 0, -1 })))
 {
     if(CPUInfo::get().has_fp16())
@@ -264,6 +284,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall2D, NESoftmaxLayerFixture<float>, framework::Data
         datasets::SoftmaxLayerSmallShapes(),
         make("DataType", DataType::F32),
         make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunNumericalStressTest, NESoftmaxLayerNumericalStressFixture<float>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F32),
+        make("Beta", { 1.0f }),
         make("Axis", { 0, -1 })))
 {
     // Validate output

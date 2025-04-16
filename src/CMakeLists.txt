@@ -255,6 +255,7 @@ target_sources(
 	core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp16_mla_6x4VL/a64fx.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp16_mla_6x4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp16fp32_mla_6x4VL/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp16fp32fp16_mla_6x4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp32_mla_6x4VL/a64fx.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp32_mla_6x4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp32bf16fp32_mmla_4x6VL/generic.cpp
@@ -269,6 +270,7 @@ target_sources(
 	core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp16_mla_6x4VL/a64fx.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp16_mla_6x4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp16fp32_mla_6x4VL/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp16fp32fp16_mla_6x4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp32_mla_6x4VL/a64fx.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp32_mla_6x4VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp32_mla_8x1VL/a64fx.cpp
@@ -1018,6 +1020,7 @@ target_sources(
 	core/NEON/kernels/arm_gemm/gemm_s8fp16.cpp
 	core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp16_mla_6x32/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp16fp32_mla_6x16/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp16fp32fp16_mla_6x16/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/a64_ffinterleaved_fp16_mla_8x24/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/a55r1.cpp
 	core/NEON/kernels/arm_gemm/kernels/a64_hgemm_8x24/generic.cpp
@@ -1025,6 +1028,7 @@ target_sources(
 	core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/a55.cpp
 	core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16_mla_6x32/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16fp32_mla_6x16/generic.cpp
+	core/NEON/kernels/arm_gemm/kernels/a64_hybrid_fp16fp32fp16_mla_6x16/generic.cpp
 	core/NEON/kernels/arm_gemm/mergeresults-fp16.cpp
 	core/NEON/kernels/arm_gemm/quantized-fp16.cpp
 	core/NEON/kernels/batchnormalization/impl/NEON/fp16.cpp

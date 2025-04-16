@@ -37,7 +37,7 @@ namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
 SimpleTensor<T>
-gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta)
+gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta, bool fast_math)
 {
     // Create reference
     SimpleTensor<T> dst{c.shape(), c.data_type(), 1};
@@ -94,7 +94,11 @@ gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &
 
                     for (int k = 0; k < K; ++k)
                     {
-                        acc += a[base_addr_a + k + row * K] * b[base_addr_b + col + k * N];
+                        if (fast_math) {
+                            acc += to_bf_precision(a[base_addr_a + k + row * K]) * to_bf_precision(b[base_addr_b + col + k * N]);
+                        } else {
+                            acc += a[base_addr_a + k + row * K] * b[base_addr_b + col + k * N];
+                        }
                     }
 
                     // Finalize the result: alpha * A * B + beta * C
@@ -189,9 +193,10 @@ void gemm_accumulate(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
     reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, dst, dst_gemm, dst, ConvertPolicy::SATURATE);
 }
 
-template SimpleTensor<bfloat16> gemm(const SimpleTensor<bfloat16> &a, const SimpleTensor<bfloat16> &b, const SimpleTensor<bfloat16> &c, float alpha, float beta);
-template SimpleTensor<float> gemm(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta);
-template SimpleTensor<half> gemm(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
+template SimpleTensor<bfloat16> gemm(const SimpleTensor<bfloat16> &a, const SimpleTensor<bfloat16> &b, const SimpleTensor<bfloat16> &c, float alpha, float beta, bool fast_math=false);
+template SimpleTensor<float> gemm(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta, bool fast_math=false);
+template SimpleTensor<half> gemm(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta, bool fast_math=false);
+
 template void gemm_accumulate(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta, SimpleTensor<float> &dst);
 template void gemm_accumulate(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta, SimpleTensor<half> &dst);
 

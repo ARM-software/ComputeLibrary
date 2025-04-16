@@ -827,10 +827,15 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
     const CPUInfo &ci          = NEScheduler::get().cpu_info();
     unsigned int   num_threads = NEScheduler::get().num_threads();
 
+    // If fast_mode is disabled, we must enable it when fp32 accumulation is not set for fp16.
+    bool is_fp16 =
+        a->data_type() == DataType::F16 && b->data_type() == DataType::F16 && d->data_type() == DataType::F16;
+    bool fast_mode = info.fast_mode || (is_fp16 && !info.use_fp32_acc);
+
     arm_gemm::GemmConfig cfg;
     cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
     arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads,
-                            info.fixed_format, info.fast_mode, info.accumulate, &cfg);
+                            info.fixed_format, fast_mode, info.accumulate, &cfg);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeWeight, TypeOutput>>();
@@ -939,11 +944,17 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
     Params               p           = extract_parameters(a, b, d, info);
     const CPUInfo       &ci          = NEScheduler::get().cpu_info();
     unsigned int         num_threads = NEScheduler::get().num_threads();
+
+    // If fast_mode is disabled, we must enable it when fp32 accumulation is not set for fp16.
+    bool is_fp16 =
+        a->data_type() == DataType::F16 && b->data_type() == DataType::F16 && d->data_type() == DataType::F16;
+    bool fast_mode = info.fast_mode || (is_fp16 && !info.use_fp32_acc);
+
     arm_gemm::GemmConfig cfg;
     cfg.weight_format                           = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
     arm_gemm::WeightFormat arm_gemm_expected_wf = assembly_utils::map_to_arm_gemm_weight_format(expected_weight_format);
     arm_gemm::GemmArgs     args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, act, num_threads,
-                                info.fixed_format, info.fast_mode, info.accumulate, &cfg);
+                                info.fixed_format, fast_mode, info.accumulate, &cfg);
     // TODO(COMPMID-6595): Incorporate info.transpose_b
     switch (a->data_type())
     {

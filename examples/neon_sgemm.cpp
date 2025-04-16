@@ -95,6 +95,10 @@ public:
         auto mode_opt = parser.add_option<utils::SimpleOption<std::string>>("mode", "static");
         mode_opt->set_help("GEMM mode. Allowed values: static, dynamic. Default value: static");
 
+        auto threads_ops = parser.add_option<utils::SimpleOption<int>>("threads", 0);
+        threads_ops->set_help(
+            "Number of threads to use. When 0 or not present - one thread per CPU core will be used.");
+
         parser.parse(argc, argv);
 
         if (help_opt->is_set() && help_opt->value())
@@ -252,6 +256,8 @@ public:
                 fill_random_tensor(src2, -1.f, 1.f);
             }
         }
+
+        Scheduler::get().set_num_threads(threads_ops->value());
 
         // Dummy run for CLTuner
         sgemm.run();
