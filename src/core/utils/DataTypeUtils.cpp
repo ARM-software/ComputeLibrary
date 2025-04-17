@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,7 @@ const std::string &string_from_data_type(DataType dt)
         {DataType::QASYMM8_SIGNED, "QASYMM8_SIGNED"},
         {DataType::QSYMM16, "QSYMM16"},
         {DataType::QASYMM16, "QASYMM16"},
+        {DataType::BFLOAT16, "BFLOAT16"},
     };
 
     return dt_map[dt];
