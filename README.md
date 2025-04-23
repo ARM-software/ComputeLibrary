@@ -1,8 +1,13 @@
-
-> **⚠ Deprecation Notice**
-> 24.01 announcement: NCHW data format specific optimizations will gradually be removed from the code base in
-> future releases. The implication of this is that the user is expected to translate NCHW models into NHWC in
-> order to benefit from the optimizations.
+> [!IMPORTANT]
+> **Versioning Change: CalVer → SemVer**
+>
+> We have updated our versioning scheme for the Arm Compute Library.
+>
+> - **v25.04** is the **last release** using Calendar Versioning (**CalVer**).
+> - Starting from the next release, we are switching to **Semantic Versioning (**SemVer**).
+> - The next version will be: **v52.0.0**
+>
+> This change provides clearer version semantics and better compatibility tracking for users and integrators.
 
 <br>
 <div align="center">
