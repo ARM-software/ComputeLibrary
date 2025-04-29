@@ -586,6 +586,8 @@ public:
 
     // Stateless execute
     void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, Tw, Tr>& g_arrays) override {
+        assert(FixedFormat);
+
         return execute_common(work_range, thread_locator, threadid, g_arrays);
     }
 

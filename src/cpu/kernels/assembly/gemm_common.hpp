@@ -30,6 +30,7 @@
 #include "convolution_parameters.hpp"
 #include "gemm_arrays.hpp"
 #include "ndrange.hpp"
+
 #include <cstddef>
 
 namespace arm_gemm
@@ -307,10 +308,14 @@ public:
      * @param [in] threadid       a unique threadid
      * @param [out] GemmArrays    structure containing the input/output addresses, and stride info
      */
-    virtual void execute_stateless(const ndcoord_t        &work_range,
-                                   const ndcoord_t        &thread_locator,
-                                   int                     threadid,
-                                   GemmArrays<To, Tw, Tr> &gemm_array) = 0;
+    virtual void execute_stateless(const ndcoord_t &,
+                                   const ndcoord_t &,
+                                   int,
+                                   GemmArrays<To, Tw, Tr> &)
+    {
+        // This must be overridden in the derived class to be used
+        assert(0);
+    }
 };
 } // namespace arm_gemm
 

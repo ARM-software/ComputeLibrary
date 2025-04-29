@@ -108,8 +108,8 @@ struct GemmArrays : public IGemmArrays
 
     GemmArrays(const GemmArrays<To, Tw, Tr> &)            = default;
     GemmArrays &operator=(const GemmArrays<To, Tw, Tr> &) = default;
-    GemmArrays(GemmArrays<To, Tw, Tr> &&)                 = delete;
-    GemmArrays &operator=(GemmArrays<To, Tw, Tr> &&)      = delete;
+    GemmArrays(GemmArrays<To, Tw, Tr> &&)                 = default;
+    GemmArrays &operator=(GemmArrays<To, Tw, Tr> &&)      = default;
     ~GemmArrays() override                                = default;
 
     /* Pass in the pointers to the arrays to be operated on and their

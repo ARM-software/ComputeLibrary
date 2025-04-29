@@ -789,40 +789,51 @@ void Fallback<TypeInput, TypeWeight, TypeOutput, OutputStage>::run(ITensorPack &
         multi_stride_a = 0;
     }
 
-    Tensor in0_tensor;
-    in0_tensor.allocator()->init(*(a->info()));
-    in0_tensor.allocator()->import_memory(const_cast<TypeInput *>(in0_ptr));
-
-    Tensor in1_tensor;
-    if (b)
-    {
-        in1_tensor.allocator()->init(*(b->info()));
-        in1_tensor.allocator()->import_memory(const_cast<TypeWeight *>(in1_ptr));
-    }
-
-    Tensor bias_tensor;
-    if (c)
-    {
-        bias_tensor.allocator()->init(*(c->info()));
-        bias_tensor.allocator()->import_memory(bias);
-    }
-
-    Tensor out_tensor;
-    out_tensor.allocator()->init(*(d->info()));
-    out_tensor.allocator()->import_memory(out_ptr);
-
-    ITensorPack gemm_pack{{ACL_SRC_0, &in0_tensor},
-                          {ACL_SRC_1, &in1_tensor},
-                          {ACL_SRC_2, &bias_tensor},
-                          {ACL_SRC_3, workspace.get()},
-                          {ACL_DST, &out_tensor}};
-
     // Set gemm parameters
     _gemm_kernel_asm->set_arrays(in0_ptr, lda, batch_stride_a, multi_stride_a, in1_ptr, ldb, multi_stride_b, out_ptr,
                                  ldd, batch_stride_d, multi_stride_d, bias, 0);
 
+    // Need to pack the input/output pointers separately to use the thread-safe,
+    // stateless-execution interface for fixed-format kernels.
+    if (_gemm_info.fixed_format)
+    {
+        Tensor in0_tensor;
+        in0_tensor.allocator()->init(*(a->info()));
+        in0_tensor.allocator()->import_memory(const_cast<TypeInput *>(in0_ptr));
+
+        Tensor in1_tensor;
+        if (b)
+        {
+            in1_tensor.allocator()->init(*(b->info()));
+            in1_tensor.allocator()->import_memory(const_cast<TypeWeight *>(in1_ptr));
+        }
+
+        Tensor bias_tensor;
+        if (c)
+        {
+            bias_tensor.allocator()->init(*(c->info()));
+            bias_tensor.allocator()->import_memory(bias);
+        }
+
+        Tensor out_tensor;
+        out_tensor.allocator()->init(*(d->info()));
+        out_tensor.allocator()->import_memory(out_ptr);
+
+        ITensorPack gemm_pack{{ACL_SRC_0, &in0_tensor},
+                              {ACL_SRC_1, &in1_tensor},
+                              {ACL_SRC_2, &bias_tensor},
+                              {ACL_SRC_3, workspace.get()},
+                              {ACL_DST, &out_tensor}};
+
+        // Schedule thread-safe stateless execution
+        NEScheduler::get().schedule_op(_optimised_kernel.get(), scheduling_hint, _optimised_kernel->window(),
+                                       gemm_pack);
+
+        return;
+    }
+
     // Schedule
-    NEScheduler::get().schedule_op(_optimised_kernel.get(), scheduling_hint, _optimised_kernel->window(), gemm_pack);
+    NEScheduler::get().schedule(_optimised_kernel.get(), scheduling_hint);
 }
 
 template <typename TypeInput, typename TypeWeight, typename TypeOutput>

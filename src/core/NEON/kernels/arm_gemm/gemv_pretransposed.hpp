@@ -136,12 +136,14 @@ public:
         return { iceildiv(_args._Nsize, strategy::out_width()) * _args._nmulti };
     }
 
-    // Common execution logic.
-    void execute_common(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, To, Tr>& g_arrays) {
+    // Actually execute the GEMV.
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
         strategy strat(_args._ci);
+
+        auto& g_arrays = this->_gemm_arrays;
 
         const auto start = work_range.get_position(0);
         const auto end   = work_range.get_position_end(0);
@@ -182,16 +184,6 @@ public:
                 }
             }
         }
-    }
-
-    // Stateless execute
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &g_arrays) override {
-        return execute_common(work_range, thread_locator, threadid, g_arrays);
-    }
-
-    // Actually execute the GEMV.
-    void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
-        execute_common(work_range, thread_locator, threadid, this->_gemm_arrays);
     }
 
     /* Pretransposed interface implementation */

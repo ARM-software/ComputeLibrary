@@ -474,9 +474,9 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
     unsigned int get_col_sum_size() const {
         if (std::is_same<OutputStage, Requantize32>::value) {
             return _Nsize * _nmulti * sizeof(int32_t);
-        } else {
-            return 0;
         }
+
+        return 0;
     }
 
     /* We will need to walk through the blocks of B in a few contexts, so
@@ -576,9 +576,9 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
     size_t get_c_working_size() const {
         if (MergeStep) {
             return ROUND_UP(sizeof(Tri) * _x_block * strategy::out_height());
-        } else {
-            return 0;
         }
+
+        return 0;
     }
 
     // Accumulation buffer size
@@ -1129,6 +1129,8 @@ public:
 
     // Stateless execute
     void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<Tlo, Tro, Tr> &g_arrays) override {
+        assert(FixedFormat);
+
         return execute_common(work_range, thread_locator, threadid, g_arrays);
     }
 
