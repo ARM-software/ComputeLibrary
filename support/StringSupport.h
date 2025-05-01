@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_STRINGSUPPORT
-#define ARM_COMPUTE_TEST_STRINGSUPPORT
+#ifndef ACL_SUPPORT_STRINGSUPPORT_H
+#define ACL_SUPPORT_STRINGSUPPORT_H
 
 #include <cassert>
 #include <memory>
@@ -113,7 +113,7 @@ inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, Numeric
     return value;
 }
 
-#if (__ANDROID__ || BARE_METAL)
+#if defined(__ANDROID__) || defined(BARE_METAL)
 /** Convert integer and float values to string.
  *
  * @note This function implements the same behaviour as std::to_string. The
@@ -203,4 +203,4 @@ inline std::string to_string(bool value)
 } // namespace cpp11
 } // namespace support
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_STRINGSUPPORT */
+#endif // ACL_SUPPORT_STRINGSUPPORT_H

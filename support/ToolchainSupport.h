@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ namespace support
 {
 namespace cpp11
 {
-#if (__ANDROID__ || BARE_METAL)
+#if defined(__ANDROID__) || defined(BARE_METAL)
 template <typename T>
 inline T nearbyint(T value)
 {
