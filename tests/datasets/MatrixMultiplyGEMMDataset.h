@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MATRIXMULTIPLY_GEMM_DATASET
-#define ARM_COMPUTE_TEST_MATRIXMULTIPLY_GEMM_DATASET
+#ifndef ACL_TESTS_DATASETS_MATRIXMULTIPLYGEMMDATASET_H
+#define ACL_TESTS_DATASETS_MATRIXMULTIPLYGEMMDATASET_H
 
 #include "tests/datasets/GEMMDataset.h"
-
-#include "utils/TypePrinter.h"
-
-#include "arm_compute/core/TensorShape.h"
 
 namespace arm_compute
 {
@@ -41,18 +37,18 @@ class MatrixMultiplyGEMMDataset final : public GEMMDataset
 public:
     MatrixMultiplyGEMMDataset()
     {
-        add_config(TensorShape(1024U, 1U), TensorShape(1000U, 1024U), TensorShape(1000U, 1U), TensorShape(1000U, 1U), 1.0f, 0.0f);
-        add_config(TensorShape(256U, 784U), TensorShape(64U, 256U), TensorShape(64U, 784U), TensorShape(64U, 784U), 1.0f, 0.0f);
-        add_config(TensorShape(1152U, 2704U), TensorShape(256U, 1152U), TensorShape(256U, 2704U), TensorShape(256U, 2704U), 1.0f, 0.0f);
-        add_config(TensorShape{ 128U, 256U }, TensorShape{ 128U, 128U }, TensorShape{ 128U, 256U }, TensorShape{ 128U, 256U }, 1.1f, 0.0f);
-        add_config(TensorShape{ 512U, 128U }, TensorShape{ 512U, 512U }, TensorShape{ 512U, 128U }, TensorShape{ 512U, 128U }, 0.5f, 0.0f);
-        add_config(TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, 0.5f, 0.0f);
-        add_config(TensorShape{ 128U, 256U }, TensorShape{ 128U, 128U }, TensorShape{ 128U, 256U }, TensorShape{ 128U, 256U }, 1.1f, 1.5f);
-        add_config(TensorShape{ 512U, 128U }, TensorShape{ 512U, 512U }, TensorShape{ 512U, 128U }, TensorShape{ 512U, 128U }, 1.2f, 1.1f);
-        add_config(TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, 0.5f, 1.3f);
+        add_config(1, 1000, 1024, 1.0f, 0.0f);
+        add_config(128, 512, 512, 0.5f, 0.0f);
+        add_config(128, 512, 512, 1.2f, 1.1f);
+        add_config(256, 128, 128, 1.1f, 0.0f);
+        add_config(256, 128, 128, 1.1f, 1.5f);
+        add_config(256, 256, 256, 0.5f, 0.0f);
+        add_config(256, 256, 256, 0.5f, 1.3f);
+        add_config(784, 64, 256, 1.0f, 0.0f);
+        add_config(2704, 256, 1152, 1.0f, 0.0f);
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MATRIXMULTIPLY_GEMM_DATASET */
+#endif // ACL_TESTS_DATASETS_MATRIXMULTIPLYGEMMDATASET_H

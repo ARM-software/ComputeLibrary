@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,7 @@ const AbsoluteTolerance<float> abs_tolerance_1xN_f32(0.0041f);        /**< Absol
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
+const RelativeTolerance<half> rel_tolerance_convolution_layer_f16(half(0.2f));  // Used for numerical stress tests
 constexpr float               tolerance_num_f16 = 0.15f;
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
@@ -684,6 +685,7 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 using NEWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, half, float>;
+using NEWinogradConvolutionLayeNumericalStressFixture16 = WinogradConvolutionLayerFastMathNumericalStressValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, half, float>;
 
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(
                    make("InputInfo", { TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F16),
@@ -732,6 +734,30 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFastMathFixture16, fr
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunNumericalStressTest, NEWinogradConvolutionLayeNumericalStressFixture16, framework::DatasetMode::PRECOMMIT,
+                       combine(make("In", {TensorShape(8U, 8U, 32U)}),
+                               make("Weights", {TensorShape(3U, 3U, 32U, 1U)}),
+                               make("Biases", {TensorShape(1U)}),
+                               make("Out", {TensorShape(6U, 6U, 1U)}),
+                               make("Info", {PadStrideInfo(1, 1, 0, 0)}),
+                               make("Dilation", {Size2D(1U,1U)}),
+                               make("DataType", { DataType::F16 }),
+                               make("ActivationInfo", ActivationLayerInfo()),
+                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, rel_tolerance_convolution_layer_f16, tolerance_num_f16);
     }
     else
     {

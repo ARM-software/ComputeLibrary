@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 project(
   ArmCompute
-  VERSION 51.0.0
+  VERSION 52.0.0
   DESCRIPTION
   "The Compute Library is a collection of low-level machine learning functions \
    optimized for Arm® Cortex®-A, Arm® Neoverse™ CPU and Arm® Mali™ GPU \

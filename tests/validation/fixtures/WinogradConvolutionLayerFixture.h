@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,11 +52,11 @@ namespace validation
 using namespace arm_compute::misc::shape_calculator;
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename T1 = T, bool use_bias = true, bool mixed_layout = false>
-class WinogradConvolutionLayerFastMathValidationFixture : public framework::Fixture
+class WinogradConvolutionLayerFastMathGenericValidationFixture : public framework::Fixture
 {
 public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
-               DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout)
+               DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout, bool numerical_stress_test)
 
     {
         if(std::is_same<TensorType, Tensor>::value &&  // Cpu
@@ -66,6 +66,10 @@ public:
         }
 
         ARM_COMPUTE_UNUSED(dilation);
+
+        _fp_min_range = numerical_stress_test ? 50.f : -0.5f;
+        _fp_max_range = numerical_stress_test ? -50.f : 0.5f;
+
         _mixed_layout = mixed_layout;
         _target       = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
         _reference    = compute_reference(input_shape, weights_shape, bias_shape, info, data_type, act_info);
@@ -152,9 +156,9 @@ protected:
         ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
-        fill(AccessorType(src), 0, -0.5f, 0.5f);
-        fill(AccessorType(weights), 1, -0.5f, 0.5f);
-        fill(AccessorType(bias), 2, -0.5f, 0.5f);
+        fill(AccessorType(src), 0, _fp_min_range, _fp_max_range);
+        fill(AccessorType(weights), 1, _fp_min_range, _fp_max_range);
+        fill(AccessorType(bias), 2, _fp_min_range, _fp_max_range);
 
         if(_mixed_layout)
         {
@@ -177,14 +181,14 @@ protected:
         SimpleTensor<T> bias_t{ bias_shape, data_type, 1 };
 
         // Fill reference
-        fill(src_t, 0, -0.5f, 0.5f);
+        fill(src_t, 0, _fp_min_range, _fp_max_range);
         SimpleTensor<T1> src_t1(copy_tensor<T1, T>(src_t));
 
-        fill(weights_t, 1, -0.5f, 0.5f);
+        fill(weights_t, 1, _fp_min_range, _fp_max_range);
         SimpleTensor<T1> weights_t1(copy_tensor<T1, T>(weights_t));
         if(use_bias)
         {
-            fill(bias_t, 2, -0.5f, 0.5f);
+            fill(bias_t, 2, _fp_min_range, _fp_max_range);
         }
         else
         {
@@ -239,9 +243,55 @@ protected:
         return (act_info.enabled()) ? reference::activation_layer<T>(conv_out_t, act_info) : conv_out_t;
     }
 
+    float           _fp_min_range{};
+    float           _fp_max_range{};
     TensorType      _target{};
     SimpleTensor<T> _reference{};
     bool            _mixed_layout{ false };
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename T1 = T, bool use_bias = true, bool mixed_layout = false>
+class WinogradConvolutionLayerFastMathValidationFixture : public WinogradConvolutionLayerFastMathGenericValidationFixture<TensorType, AccessorType, FunctionType, T, T1, use_bias, mixed_layout>
+{
+public:
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
+               DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout)
+    {
+        WinogradConvolutionLayerFastMathGenericValidationFixture<TensorType, AccessorType, FunctionType, T, T1, use_bias, mixed_layout>::setup(
+            input_shape,
+            weights_shape,
+            bias_shape,
+            output_shape,
+            info,
+            dilation,
+            data_type,
+            act_info,
+            data_layout,
+            false /* numerical_stress_test */
+        );
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename T1 = T, bool use_bias = true, bool mixed_layout = false>
+class WinogradConvolutionLayerFastMathNumericalStressValidationFixture : public WinogradConvolutionLayerFastMathGenericValidationFixture<TensorType, AccessorType, FunctionType, T, T1, use_bias, mixed_layout>
+{
+public:
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
+               DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout)
+    {
+        WinogradConvolutionLayerFastMathGenericValidationFixture<TensorType, AccessorType, FunctionType, T, T1, use_bias, mixed_layout>::setup(
+            input_shape,
+            weights_shape,
+            bias_shape,
+            output_shape,
+            info,
+            dilation,
+            data_type,
+            act_info,
+            data_layout,
+            true /* numerical_stress_test */
+        );
+    }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>

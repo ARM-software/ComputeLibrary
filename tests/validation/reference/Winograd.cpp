@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,12 +55,12 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
 
     static const std::array<float, 36> imatrix4x4_3x3 =
     {
-        4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, -4.0f, -4.0f, 1.0f, 1.0f, 0.0f,
-        0.0f, 4.0f, -4.0f, -1.0f, 1.0f, 0.0f,
-        0.0f, -2.0f, -1.0f, 2.0f, 1.0f, 0.0f,
-        0.0f, 2.0f, -1.0f, -2.0f, 1.0f, 0.0f,
-        0.0f, 4.0f, 0.0f, -5.0f, 0.0f, 1.0f,
+        0.125f,   0.1875f, -0.25f,   -0.1875f,  0.125f,   0.0f,
+        0.0f,     0.125f,   0.0625f, -0.3125f,  0.125f,   0.0f,
+        0.0f,    -0.125f,  -0.3125f, -0.0625f,  0.125f,   0.0f,
+        0.0f,     0.25f,   -0.125f,  -0.25f,    0.125f,   0.0f,
+        0.0f,    -0.125f,  -0.25f,    0.125f,   0.25f,    0.0f,
+        0.0f,     0.125f,   0.1875f, -0.25f,   -0.1875f,  0.125f
     };
 
     static const std::array<float, 64> imatrix4x4_5x5 =
@@ -100,12 +100,12 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
 
     static const std::array<float, 18> fmatrix4x4_3x3 =
     {
-        0.25f, 0.0f, 0.0f,
-        -1.0f / 6.0f, -1.0f / 6.0f, -1.0f / 6.0f,
-        -1.0f / 6.0f, 1.0f / 6.0f, -1.0f / 6.0f,
-        1.0f / 24.0f, 1.0f / 12.0f, 1.0f / 6.0f,
-        1.0f / 24.0f, -1.0f / 12.0f, 1.0f / 6.0f,
-        0.0f, 0.0f, 1.0f
+        1.0f,        0.0f,        0.0f,
+        1.0f/3.0f,  -1.0f/3.0f,   1.0f/3.0f,
+        -1.0f/3.0f,  -1.0f/3.0f,  -1.0f/3.0f,
+        -8.0f/15.0f,  4.0f/15.0f, -2.0f/15.0f,
+        2.0f/15.0f,  4.0f/15.0f,  8.0f/15.0f,
+        0.0f,        0.0f,        1.0f
     };
 
     static const std::array<float, 40> fmatrix4x4_5x5 =
@@ -144,10 +144,10 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
 
     static const std::array<float, 24> omatrix4x4_3x3 =
     {
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, -1.0f, 2.0f, -2.0f, 0.0f,
-        0.0f, 1.0f, 1.0f, 4.0f, 4.0f, 0.0f,
-        0.0f, 1.0f, -1.0f, 8.0f, -8.0f, 1.0f
+        0.5f,     0.5f,     0.5f,     1.0f,     0.125f,   0.0f,
+        0.0f,    -0.5f,     0.5f,    -0.5f,     0.25f,    0.0f,
+        0.0f,     0.5f,     0.5f,     0.25f,    0.5f,     0.0f,
+        0.0f,    -0.5f,     0.5f,    -0.125f,   1.0f,     0.5f
     };
 
     static const std::array<float, 36> omatrix4x4_5x5 =
@@ -528,6 +528,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     // Initialize with zeros the input tile
     zeros<T>(input_tile, Coordinates(0, 0), input_tile.shape());
 
+    const T scale_factor = (kernel_size.width == 3 || kernel_size.height == 3) ? T(16.f) : T(1.f);
     for(int n = 0; n < num_batches; ++n)
     {
         for(int y = 0; y < h_in; ++y)
@@ -560,7 +561,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
                         // Check out-of-bound writes
                         if((xo + xi < w_out) && (yo + yi < h_out))
                         {
-                            out[output_offset + yi * stridey_out + xi] = output_tile[xi + yi * step_y_transf_tile];
+                            out[output_offset + yi * stridey_out + xi] = scale_factor * scale_factor * output_tile[xi + yi * step_y_transf_tile];
 
                             // Add bias
                             out[output_offset + yi * stridey_out + xi] += b[zo];

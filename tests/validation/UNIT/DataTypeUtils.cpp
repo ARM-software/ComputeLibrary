@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2025 Arm Limited.
+ * Copyright (c) 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_DATASETS_TINYGEMMDATASET_H
-#define ACL_TESTS_DATASETS_TINYGEMMDATASET_H
 
-#include "tests/datasets/GEMMDataset.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
+
+#include "tests/datasets/DatatypeDataset.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/CartesianProductDataset.h"
+
+#include <string>
 
 namespace arm_compute
 {
 namespace test
 {
-namespace datasets
+namespace validation
 {
-class TinyGEMMDataset final : public GEMMDataset
+
+TEST_SUITE(UNIT)
+TEST_SUITE(DataTypeUtils)
+
+// Whenever a new data type is added, this test will ensure string conversion
+// explicitly deals with that data type
+DATA_TEST_CASE(CheckDataTypeIsPrinted, framework::DatasetMode::ALL,
+    datasets::AllDataTypes("DataType"), dtype)
 {
-public:
-    TinyGEMMDataset()
-    {
-        add_config(1, 23, 31, 1.0f, 0.0f);
-        add_config(13, 33, 21, 1.0f, 0.0f);
-    }
-};
-} // namespace datasets
+    ARM_COMPUTE_EXPECT(string_from_data_type(dtype) != "",
+        framework::LogLevel::ERRORS);
+}
+
+TEST_SUITE_END() // DataTypeUtils
+TEST_SUITE_END() // UNIT
+
+} // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif // ACL_TESTS_DATASETS_TINYGEMMDATASET_H

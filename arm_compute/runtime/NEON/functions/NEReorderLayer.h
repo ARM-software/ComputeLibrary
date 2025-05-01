@@ -77,7 +77,7 @@ public:
                    ITensor                  *output,
                    arm_compute::WeightFormat input_wf,
                    arm_compute::WeightFormat output_wf,
-                   bool                      transpose);
+                   bool                      transpose = true);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReorderLayer
      *
@@ -89,7 +89,7 @@ public:
                            const ITensorInfo        *output,
                            arm_compute::WeightFormat input_wf,
                            arm_compute::WeightFormat output_wf,
-                           bool                      transpose);
+                           bool                      transpose = true);
 
     // Inherited methods overridden:
     void run() override;
