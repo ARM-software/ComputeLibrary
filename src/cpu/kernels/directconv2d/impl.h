@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,13 +61,13 @@ void linearize_volume_nchw(const uint8_t *const in_ptr,
                            int                  dilation_x,
                            int                  dilation_y)
 {
-    const int kernel_size2 = kernel_width * kernel_height;
-    const int x_e          = top_left_x + kernel_width * dilation_x;
-    const int y_e          = top_left_y + kernel_height * dilation_y;
+    const int kernel_area = kernel_width * kernel_height;
+    const int x_e         = top_left_x + kernel_width * dilation_x;
+    const int y_e         = top_left_y + kernel_height * dilation_y;
 
     // Linearize volume
     int d = 0;
-    // This for loop linearize a volume with 3 slices. This allows:
+    // This for loop linearizes a volume with 3 slices. This allows:
     // 1) to reduce the iterations of the outer for loop "d"
     // 2) to have an optimized im2col for the first convolution layer where usually we have 3 IFMs
     for (; d <= (kernel_depth - 3); d += 3)
@@ -79,9 +79,9 @@ void linearize_volume_nchw(const uint8_t *const in_ptr,
                 // All the values will be the offset (will be zeros when not quantized)
                 for (int x = top_left_x; x < x_e; x += dilation_x, ++out_ptr)
                 {
-                    *(out_ptr + 0 * kernel_size2) = pad_value;
-                    *(out_ptr + 1 * kernel_size2) = pad_value;
-                    *(out_ptr + 2 * kernel_size2) = pad_value;
+                    *(out_ptr + 0 * kernel_area) = pad_value;
+                    *(out_ptr + 1 * kernel_area) = pad_value;
+                    *(out_ptr + 2 * kernel_area) = pad_value;
                 }
             }
             else
@@ -90,23 +90,23 @@ void linearize_volume_nchw(const uint8_t *const in_ptr,
                 {
                     if ((x < 0 || x >= input_w) && has_pads)
                     {
-                        *(out_ptr + 0 * kernel_size2) = pad_value;
-                        *(out_ptr + 1 * kernel_size2) = pad_value;
-                        *(out_ptr + 2 * kernel_size2) = pad_value;
+                        *(out_ptr + 0 * kernel_area) = pad_value;
+                        *(out_ptr + 1 * kernel_area) = pad_value;
+                        *(out_ptr + 2 * kernel_area) = pad_value;
                     }
                     else
                     {
-                        *(out_ptr + 0 * kernel_size2) = *(reinterpret_cast<const T *>(
+                        *(out_ptr + 0 * kernel_area) = *(reinterpret_cast<const T *>(
                             in_ptr + ((d + 0) * input_stride_z + y * input_stride_y + x * input_stride_x)));
-                        *(out_ptr + 1 * kernel_size2) = *(reinterpret_cast<const T *>(
+                        *(out_ptr + 1 * kernel_area) = *(reinterpret_cast<const T *>(
                             in_ptr + ((d + 1) * input_stride_z + y * input_stride_y + x * input_stride_x)));
-                        *(out_ptr + 2 * kernel_size2) = *(reinterpret_cast<const T *>(
+                        *(out_ptr + 2 * kernel_area) = *(reinterpret_cast<const T *>(
                             in_ptr + ((d + 2) * input_stride_z + y * input_stride_y + x * input_stride_x)));
                     }
                 }
             }
         }
-        out_ptr += 2 * kernel_size2;
+        out_ptr += 2 * kernel_area;
     }
 
     // Left over
@@ -252,6 +252,7 @@ void linearize_volume_nhwc(const uint8_t *const in_ptr,
             for (int e = 0; e < kernel_width; e++)
             {
                 memcpy(out_ptr, reinterpret_cast<const T *>(offset_ptr + e * channel_chunk_size), channel_chunk_size);
+                memset(static_cast<void *>(out_ptr + input_c), pad_value, pad_right * element_size);
                 out_ptr += input_c + pad_right;
             }
         }
@@ -278,6 +279,7 @@ void linearize_volume_nhwc(const uint8_t *const in_ptr,
                     {
                         memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + x * input_stride_y)),
                                channel_chunk_size);
+                        memset(static_cast<void *>(out_ptr + input_c), pad_value, pad_right * element_size);
                         out_ptr += input_c + pad_right;
                     }
                 }
@@ -289,6 +291,7 @@ void linearize_volume_nhwc(const uint8_t *const in_ptr,
                 {
                     memcpy(out_ptr, reinterpret_cast<const T *>(offset_ptr + e * channel_chunk_size),
                            channel_chunk_size);
+                    memset(static_cast<void *>(out_ptr + input_c), pad_value, pad_right * element_size);
                     out_ptr += input_c + pad_right;
                 }
             }
@@ -359,6 +362,7 @@ void run_im2col(const ITensor                        *src,
             // Linearize volume
             if (is_nchw)
             {
+                ARM_COMPUTE_ERROR_ON(input_pad_right > 0);
                 linearize_volume_nchw<T, has_pads>(
                     input_ptr, output_ptr, has_bias, start_w, start_h, kernel_width, kernel_height, input_c, input_w,
                     input_h, input_stride_x, input_stride_y, input_stride_z, pad_value, dilation.x(), dilation.y());
