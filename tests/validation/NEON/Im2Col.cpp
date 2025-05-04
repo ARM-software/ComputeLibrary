@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,75 +40,196 @@ namespace validation
 {
 namespace
 {
-const auto im2col_shapes = framework::dataset::make("Shape", { TensorShape{ 11U, 11U, 11U }, TensorShape{ 16U, 16U, 16U }, TensorShape{ 27U, 13U, 7U }, TensorShape{ 31U, 27U, 17U, 2U }, TensorShape{ 27U, 13U, 5U, 4U }, TensorShape{ 11U, 11U, 5U, 5U } });
 
-const auto conv_filter_sizes = framework::dataset::make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U), Size2D(5U, 5U), Size2D(7U, 7U) });
-const auto conv_args         = combine(combine(combine(combine(conv_filter_sizes, framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(2U, 2U, 0U, 2U) })),
-                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("NumGroups", { 1 }));
+using framework::dataset::make;
 
-const auto conv_filter_sizes_small = framework::dataset::make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U) });
-const auto conv_args_small         = combine(combine(combine(combine(conv_filter_sizes_small, framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U) })),
-                                                             framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                             framework::dataset::make("NumGroups", { 1 }));
+const auto im2col_shapes = make("Shape",
+    {
+        TensorShape{ 11U, 11U, 11U },
+        TensorShape{ 16U, 16U, 16U },
+        TensorShape{ 27U, 13U, 7U },
+        TensorShape{ 31U, 27U, 17U, 2U },
+        TensorShape{ 27U, 13U, 5U, 4U },
+        TensorShape{ 11U, 11U, 5U, 5U }
+    }
+);
+
+const auto conv_filter_sizes = make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U), Size2D(5U, 5U), Size2D(7U, 7U) });
+
+const auto conv_args = combine(
+    conv_filter_sizes,
+    make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(2U, 2U, 0U, 2U) }),
+    make("QuantizationInfo", QuantizationInfo(0.5f, 10)),
+    make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    make("NumGroups", { 1 })
+);
+
+const auto conv_filter_sizes_small = make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U) });
+
+const auto conv_args_small_core = combine(
+    conv_filter_sizes_small,
+    make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U) }),
+    make("QuantizationInfo", QuantizationInfo(0.5f, 10))
+);
+
+const auto conv_args_small_nhwc = combine(
+    conv_args_small_core,
+    make("DataLayout", { DataLayout::NHWC }),
+    make("NumGroups", { 1 })
+);
+
+const auto conv_args_small_nchw = combine(
+    conv_args_small_core,
+    make("DataLayout", { DataLayout::NCHW }),
+    make("NumGroups", { 1 })
+);
+
+const auto conv_args_small = concat(
+    conv_args_small_nhwc,
+    conv_args_small_nchw
+);
+
+// Channel padding logic is data type agnostic, therefore it's tested
+// on a subset of the data types, including the major use case, Bf16.
+const auto conv_args_small_channel_padding = combine(
+    conv_args_small_nhwc,
+    make("ChannelPadRight", {3})
+);
+
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(Im2Col)
 
 using CpuIm2Col = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuIm2ColKernel>;
 
-// *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::U8),      // Unsupported data type
-                                                       TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::F32),     // Mismatching data type
-                                                       TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Bias not supported with QASYMM8
-                                                       TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Mismatching shapes
-                                                       TensorInfo(TensorShape(10U, 12U, 2U, 2U), 1, DataType::QASYMM8),
-                                                     }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::QASYMM8),
-                                                       TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::QASYMM8),
-                                                       TensorInfo(TensorShape(18U, 80U, 1U, 2U), 1, DataType::QASYMM8),
-                                                     })),
-               framework::dataset::make("HasBias", { true, true, true, false, false })),
-               framework::dataset::make("Expected", { false, false, false, false, true })),
-               input_info, output_info, has_bias, expected)
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+    make("InputInfo", {
+        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::U8),      // Unsupported data type
+        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::F32),     // Mismatching data type
+        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Bias not supported with QASYMM8
+        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Mismatching shapes
+        TensorInfo(TensorShape(10U, 12U, 2U, 2U), 1, DataType::QASYMM8),
+    }),
+    make("OutputInfo",{
+        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
+        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
+        TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::QASYMM8),
+        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::QASYMM8),
+        TensorInfo(TensorShape(18U, 80U, 1U, 2U), 1, DataType::QASYMM8),
+    }),
+    make("HasBias", { true, true, true, false, false }),
+    make("Expected", { false, false, false, false, true })),
+    input_info, output_info, has_bias, expected)
 {
     bool status = bool(cpu::kernels::CpuIm2ColKernel::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));
     ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
-// *INDENT-ON*
+
+DATA_TEST_CASE(ChannelPaddingNotSupportedInNCHW, framework::DatasetMode::ALL, zip(
+    make("InputInfo", {
+        TensorInfo(TensorShape(10U, 12U, 2U, 2U), 1, DataType::F32, DataLayout::NCHW),
+        TensorInfo(TensorShape(2U, 12U, 10U, 2U), 1, DataType::F32, DataLayout::NHWC)
+    }),
+    make("OutputInfo", {
+        TensorInfo(TensorShape(45U, 80U, 1U, 2U), 1, DataType::F32, DataLayout::UNKNOWN),
+        TensorInfo(TensorShape(45U, 80U, 1U, 2U), 1, DataType::F32, DataLayout::UNKNOWN)
+    }),
+    make("ChannelPadRight", {3U, 3U}),
+    make("Expected", {false, true})),
+    input_info, output_info, channel_pad_right, expected)
+{
+    const bool has_bias = false;
+    const auto dilation = Size2D(1U, 1U);
+    const unsigned int num_groups = 1U;
+
+    const Status status = cpu::kernels::CpuIm2ColKernel::validate(&input_info, &output_info, Size2D(3U, 3U),
+        PadStrideInfo(), has_bias, dilation, num_groups, channel_pad_right);
+
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
 
 template <typename T>
 using CpuIm2ColFixture = Im2ColOpValidationFixture<Tensor, Accessor, CpuIm2Col, T, false>;
 
+template <typename T>
+using CpuIm2ColWithChannelPadFixture = Im2ColOpValidationWithChannelPadFixture<Tensor, Accessor, CpuIm2Col, T, false>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(im2col_shapes, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                     conv_args_small))
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<float>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        im2col_shapes,
+        make("DataType", DataType::F32),
+        conv_args_small)
+    )
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(concat(im2col_shapes, datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                           DataType::F32)),
-                                                                                                   conv_args))
+FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<float>, framework::DatasetMode::NIGHTLY,
+    combine(
+        concat(im2col_shapes, datasets::LargeShapes()),
+        make("DataType", DataType::F32),
+        conv_args)
+    )
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // FP32
 
+#ifdef ARM_COMPUTE_ENABLE_BF16
+TEST_SUITE(BF16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<bfloat16>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        im2col_shapes,
+        make("DataType", DataType::BFLOAT16),
+        conv_args_small
+    ))
+{
+    if(CPUInfo::get().has_bf16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support Bf16 data type. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunSmallWithChannelPadding, CpuIm2ColWithChannelPadFixture<bfloat16>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        im2col_shapes,
+        make("DataType", DataType::BFLOAT16),
+        conv_args_small_channel_padding
+    ))
+{
+    if(CPUInfo::get().has_bf16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support Bf16 data type. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+TEST_SUITE_END() // BF16
+#endif // ARM_COMPUTE_ENABLE_BF16
+
 #ifdef ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(im2col_shapes, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                    conv_args_small))
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<half>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        im2col_shapes,
+        make("DataType", DataType::F16),
+        conv_args_small)
+    )
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -121,9 +242,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<half>, framework::DatasetMode:
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(concat(im2col_shapes, datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                          DataType::F16)),
-                                                                                                  conv_args))
+FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<half>, framework::DatasetMode::NIGHTLY,
+    combine(
+        concat(im2col_shapes, datasets::LargeShapes()),
+        make("DataType", DataType::F16),
+        conv_args)
+    )
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -143,15 +267,32 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(im2col_shapes, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                       conv_args_small))
+FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        im2col_shapes,
+        make("DataType", DataType::QASYMM8),
+        conv_args_small)
+    )
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(concat(im2col_shapes, datasets::LargeShapes()),
-                                                                                                             framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                     conv_args))
+FIXTURE_DATA_TEST_CASE(RunSmallWithChannelPadding, CpuIm2ColWithChannelPadFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        im2col_shapes,
+        make("DataType", DataType::QASYMM8),
+        conv_args_small_channel_padding)
+    )
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+    combine(
+        concat(im2col_shapes, datasets::LargeShapes()),
+        make("DataType", DataType::QASYMM8),
+        conv_args)
+    )
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -218,7 +359,7 @@ TEST_CASE(PaddedChannelNHWC, framework::DatasetMode::PRECOMMIT)
 
 #ifndef DOXYGEN_SKIP_THIS
     // Run reference function
-    reference::im2col(src_ref, dst_ref, spatial_kernel, conv_info, has_bias, num_groups);
+    reference::im2col(src_ref, dst_ref, spatial_kernel, conv_info, has_bias, num_groups, 0);
 #endif // DOXYGEN_SKIP_THIS
 
     // Validate
