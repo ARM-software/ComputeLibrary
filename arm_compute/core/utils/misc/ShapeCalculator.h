@@ -575,14 +575,14 @@ inline TensorShape compute_deconvolution_output_shape(const std::pair<unsigned i
 
 /** Calculate the im2col output shape of a tensor
  *
- * @param[in] input             Input tensor info
- * @param[in] kernel_dims       The kernel dimensions (width and height).
- * @param[in] conv_info         Contains padding and stride information
- * @param[in] has_bias          In case biases are provided expands the matrix with 1
- * @param[in] dilation          Dilation, in elements, across x and y
- * @param[in] batch_size_on_z   True if batch size is on z axis
- * @param[in] num_groups        (Optional) Number of groups when performing a grouped convolution
- * @param[in] channel_pad_right (Optional) Amount of padding applied to the channel dimension
+ * @param[in] input           Input tensor info
+ * @param[in] kernel_dims     The kernel dimensions (width and height).
+ * @param[in] conv_info       Contains padding and stride information
+ * @param[in] has_bias        In case biases are provided expands the matrix with 1
+ * @param[in] dilation        Dilation, in elements, across x and y
+ * @param[in] batch_size_on_z True if batch size is on z axis
+ * @param[in] num_groups      (Optional)  Number of groups when performing a grouped convolution
+ * @param[in] input_pad_right (Optional) When fast-math is selected, per element padding for the im2col matrix may be necessary
  *
  * @return the calculated shape
  */
@@ -592,8 +592,8 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo   *input,
                                              bool                 has_bias,
                                              const Size2D        &dilation,
                                              bool                 batch_size_on_z,
-                                             unsigned int         num_groups        = 1,
-                                             unsigned int         channel_pad_right = 0)
+                                             unsigned int         num_groups      = 1,
+                                             unsigned int         input_pad_right = 0)
 {
     // The output shape will be the 3D shape [ out_channels * kernel_area, num_elems_per_out_channel, batches ]                           if batch_size_on_z == true
     //                       or the 4D shape [ out_channels * kernel_area / num_groups, num_elems_per_out_channel, num_groups, batches ]  if batch_size_on_z == false
@@ -611,7 +611,7 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo   *input,
 
     std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(
         output_shape[width_idx], output_shape[height_idx], kernel_dims.width, kernel_dims.height, conv_info, dilation);
-    output_shape.set(0, ((output_shape[channel_idx] + channel_pad_right) / num_groups * kernel_dims.area() +
+    output_shape.set(0, ((output_shape[channel_idx] + input_pad_right) / num_groups * kernel_dims.area() +
                          (has_bias ? 1 : 0))); // NOLINT
     output_shape.set(1, (out_dims.first * out_dims.second));
     if (batch_size_on_z && output_shape.num_dimensions() >= 3)

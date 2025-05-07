@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,11 +59,11 @@ void run_im2col_fp32_pad(const ITensor                        *src,
                          std::pair<unsigned int, unsigned int> convolved_dims,
                          const Size2D                         &kernel_dims,
                          const Size2D                         &dilation,
-                         uint32_t                              channel_pad_right,
+                         uint32_t                              input_pad_right,
                          bool                                  has_bias)
 {
     arm_compute::cpu::kernels::run_im2col<float, true, false>(src, dst, window, data_layout, conv_info, convolved_dims,
-                                                              kernel_dims, dilation, channel_pad_right, has_bias);
+                                                              kernel_dims, dilation, input_pad_right, has_bias);
 }
 
 void run_im2col_fp32_nopad(const ITensor                        *src,
@@ -74,11 +74,11 @@ void run_im2col_fp32_nopad(const ITensor                        *src,
                            std::pair<unsigned int, unsigned int> convolved_dims,
                            const Size2D                         &kernel_dims,
                            const Size2D                         &dilation,
-                           uint32_t                              channel_pad_right,
+                           uint32_t                              input_pad_right,
                            bool                                  has_bias)
 {
     arm_compute::cpu::kernels::run_im2col<float, false, false>(src, dst, window, data_layout, conv_info, convolved_dims,
-                                                               kernel_dims, dilation, channel_pad_right, has_bias);
+                                                               kernel_dims, dilation, input_pad_right, has_bias);
 }
 
 #if defined(ARM_COMPUTE_ENABLE_BF16)
@@ -90,11 +90,11 @@ void run_im2col_bf16_pad(const ITensor                        *src,
                          std::pair<unsigned int, unsigned int> convolved_dims,
                          const Size2D                         &kernel_dims,
                          const Size2D                         &dilation,
-                         uint32_t                              channel_pad_right,
+                         uint32_t                              input_pad_right,
                          bool                                  has_bias)
 {
     arm_compute::cpu::kernels::run_im2col<bfloat16, true, false>(
-        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, channel_pad_right, has_bias);
+        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
 
 void run_im2col_bf16_nopad(const ITensor                        *src,
@@ -105,11 +105,11 @@ void run_im2col_bf16_nopad(const ITensor                        *src,
                            std::pair<unsigned int, unsigned int> convolved_dims,
                            const Size2D                         &kernel_dims,
                            const Size2D                         &dilation,
-                           uint32_t                              channel_pad_right,
+                           uint32_t                              input_pad_right,
                            bool                                  has_bias)
 {
     arm_compute::cpu::kernels::run_im2col<bfloat16, false, false>(
-        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, channel_pad_right, has_bias);
+        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 
@@ -121,11 +121,11 @@ void run_im2col_int8_nopad_nhwc(const ITensor                        *src,
                                 std::pair<unsigned int, unsigned int> convolved_dims,
                                 const Size2D                         &kernel_dims,
                                 const Size2D                         &dilation,
-                                uint32_t                              channel_pad_right,
+                                uint32_t                              input_pad_right,
                                 bool                                  has_bias)
 {
     arm_compute::cpu::kernels::run_im2col<int8_t, false, false>(
-        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, channel_pad_right, has_bias);
+        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
 
 void run_im2col_uint8_nopad_nhwc(const ITensor                        *src,
@@ -136,11 +136,11 @@ void run_im2col_uint8_nopad_nhwc(const ITensor                        *src,
                                  std::pair<unsigned int, unsigned int> convolved_dims,
                                  const Size2D                         &kernel_dims,
                                  const Size2D                         &dilation,
-                                 uint32_t                              channel_pad_right,
+                                 uint32_t                              input_pad_right,
                                  bool                                  has_bias)
 {
     arm_compute::cpu::kernels::run_im2col<uint8_t, false, false>(
-        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, channel_pad_right, has_bias);
+        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
 
 void run_im2col_qasymm8_pad_nhwc(const ITensor                        *src,
@@ -151,11 +151,11 @@ void run_im2col_qasymm8_pad_nhwc(const ITensor                        *src,
                                  std::pair<unsigned int, unsigned int> convolved_dims,
                                  const Size2D                         &kernel_dims,
                                  const Size2D                         &dilation,
-                                 uint32_t                              channel_pad_right,
+                                 uint32_t                              input_pad_right,
                                  bool                                  has_bias)
 {
     arm_compute::cpu::kernels::run_im2col<qasymm8_t, true, false>(
-        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, channel_pad_right, has_bias);
+        src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
 
 void internal_run_im2col_fp16_pad(const ITensor                        *src,
@@ -166,7 +166,7 @@ void internal_run_im2col_fp16_pad(const ITensor                        *src,
                                   std::pair<unsigned int, unsigned int> convolved_dims,
                                   const Size2D                         &kernel_dims,
                                   const Size2D                         &dilation,
-                                  uint32_t                              channel_pad_right,
+                                  uint32_t                              input_pad_right,
                                   bool                                  has_bias)
 {
 /*
@@ -176,10 +176,10 @@ void internal_run_im2col_fp16_pad(const ITensor                        *src,
 */
 #if defined(ENABLE_FP16_KERNELS)
     arm_compute::cpu::kernels::run_im2col_fp16_pad(src, dst, window, data_layout, conv_info, convolved_dims,
-                                                   kernel_dims, dilation, channel_pad_right, has_bias);
+                                                   kernel_dims, dilation, input_pad_right, has_bias);
 #else  // defined(ENABLE_FP16_KERNELS)
-    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation,
-                       channel_pad_right, has_bias);
+    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right,
+                       has_bias);
 #endif // defined(ENABLE_FP16_KERNELS)
 }
 
@@ -191,15 +191,15 @@ void internal_run_im2col_fp16_nopad(const ITensor                        *src,
                                     std::pair<unsigned int, unsigned int> convolved_dims,
                                     const Size2D                         &kernel_dims,
                                     const Size2D                         &dilation,
-                                    uint32_t                              channel_pad_right,
+                                    uint32_t                              input_pad_right,
                                     bool                                  has_bias)
 {
 #if defined(ENABLE_FP16_KERNELS)
     arm_compute::cpu::kernels::run_im2col_fp16_nopad(src, dst, window, data_layout, conv_info, convolved_dims,
-                                                     kernel_dims, dilation, channel_pad_right, has_bias);
+                                                     kernel_dims, dilation, input_pad_right, has_bias);
 #else  // defined(ENABLE_FP16_KERNELS)
-    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation,
-                       channel_pad_right, has_bias);
+    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right,
+                       has_bias);
 #endif // defined(ENABLE_FP16_KERNELS)
 }
 
@@ -211,15 +211,15 @@ void internal_run_im2col_fp16_nchw_pad(const ITensor                        *src
                                        std::pair<unsigned int, unsigned int> convolved_dims,
                                        const Size2D                         &kernel_dims,
                                        const Size2D                         &dilation,
-                                       uint32_t                              channel_pad_right,
+                                       uint32_t                              input_pad_right,
                                        bool                                  has_bias)
 {
 #if defined(ENABLE_FP16_KERNELS)
     arm_compute::cpu::kernels::run_im2col_fp16_nchw_pad(src, dst, window, data_layout, conv_info, convolved_dims,
-                                                        kernel_dims, dilation, channel_pad_right, has_bias);
+                                                        kernel_dims, dilation, input_pad_right, has_bias);
 #else  // defined(ENABLE_FP16_KERNELS)
-    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation,
-                       channel_pad_right, has_bias);
+    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right,
+                       has_bias);
 #endif // defined(ENABLE_FP16_KERNELS)
 }
 
@@ -231,15 +231,15 @@ void internal_run_im2col_fp16_nchw_nopad(const ITensor                        *s
                                          std::pair<unsigned int, unsigned int> convolved_dims,
                                          const Size2D                         &kernel_dims,
                                          const Size2D                         &dilation,
-                                         uint32_t                              channel_pad_right,
+                                         uint32_t                              input_pad_right,
                                          bool                                  has_bias)
 {
 #if defined(ENABLE_FP16_KERNELS)
     arm_compute::cpu::kernels::run_im2col_fp16_nchw_nopad(src, dst, window, data_layout, conv_info, convolved_dims,
-                                                          kernel_dims, dilation, channel_pad_right, has_bias);
+                                                          kernel_dims, dilation, input_pad_right, has_bias);
 #else  //  defined(ENABLE_FP16_KERNELS)
-    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation,
-                       channel_pad_right, has_bias);
+    ARM_COMPUTE_UNUSED(src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right,
+                       has_bias);
 #endif // defined(ENABLE_FP16_KERNELS)
 }
 
@@ -252,7 +252,7 @@ Status validate_arguments(const ITensorInfo   *input,
                           bool                 has_bias,
                           const Size2D        &dilation,
                           unsigned int         num_groups,
-                          unsigned int         channel_pad_right)
+                          unsigned int         input_pad_right)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
@@ -261,8 +261,6 @@ Status validate_arguments(const ITensorInfo   *input,
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(input->data_type()) && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Number of groups greater than one are not supported on Neon");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(channel_pad_right > 0 && input->data_layout() != DataLayout::NHWC,
-                                    "Channel padding is not supported for data layouts other than NHWC");
 
     // Since there's no implicit padding added, check the total input spatial dimensions (with conv paddings) are big enough for the kernel dimensions
     const unsigned int width_idx   = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
@@ -274,7 +272,7 @@ Status validate_arguments(const ITensorInfo   *input,
     if (output->total_size() > 0)
     {
         TensorInfo expected_output = output->clone()->set_tensor_shape(compute_im2col_conv_shape(
-            input, kernel_dims, conv_info, has_bias, dilation, false, num_groups, channel_pad_right));
+            input, kernel_dims, conv_info, has_bias, dilation, false, num_groups, input_pad_right));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
@@ -291,25 +289,26 @@ void CpuIm2ColKernel::configure(const ITensorInfo   *src,
                                 bool                 has_bias,
                                 const Size2D        &dilation,
                                 unsigned int         num_groups,
-                                unsigned int         channel_pad_right)
+                                unsigned int         input_pad_right)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(
-        validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, channel_pad_right));
+        validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, input_pad_right));
+    ARM_COMPUTE_UNUSED(num_groups);
 
     _data_layout                   = src->data_layout();
     const unsigned int width_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int channel_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
 
-    _conv_info         = conv_info;
-    _kernel_width      = kernel_dims.width;
-    _kernel_height     = kernel_dims.height;
-    _channel_pad_right = channel_pad_right;
-    _dilation          = dilation;
-    _convolved_dims    = scaled_dimensions(src->dimension(width_idx), src->dimension(height_idx), _kernel_width,
-                                           _kernel_height, _conv_info, _dilation);
-    _has_bias          = has_bias;
+    _conv_info       = conv_info;
+    _kernel_width    = kernel_dims.width;
+    _kernel_height   = kernel_dims.height;
+    _input_pad_right = input_pad_right;
+    _dilation        = dilation;
+    _convolved_dims  = scaled_dimensions(src->dimension(width_idx), src->dimension(height_idx), _kernel_width,
+                                         _kernel_height, _conv_info, _dilation);
+    _has_bias        = has_bias;
 
     if (_data_layout == DataLayout::NCHW)
     {
@@ -366,7 +365,7 @@ void CpuIm2ColKernel::configure(const ITensorInfo   *src,
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(
         *dst, src->clone()->set_tensor_shape(compute_im2col_conv_shape(src, kernel_dims, conv_info, has_bias, dilation,
-                                                                       false, num_groups, _channel_pad_right)));
+                                                                       false, num_groups, _input_pad_right)));
 
     std::pair<unsigned int, unsigned int> convolved_dims =
         scaled_dimensions(src->dimension(width_idx), src->dimension(height_idx), kernel_dims.width, kernel_dims.height,
@@ -387,10 +386,10 @@ Status CpuIm2ColKernel::validate(const ITensorInfo   *src,
                                  bool                 has_bias,
                                  const Size2D        &dilation,
                                  unsigned int         num_groups,
-                                 unsigned int         channel_pad_right)
+                                 unsigned int         input_pad_right)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(
-        validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, channel_pad_right));
+        validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, input_pad_right));
     return Status{};
 }
 
@@ -404,7 +403,7 @@ void CpuIm2ColKernel::run_op(ITensorPack &tensors, const Window &window, const T
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
     _func(src, dst, window, _data_layout, _conv_info, _convolved_dims, Size2D(_kernel_width, _kernel_height), _dilation,
-          _channel_pad_right, _has_bias);
+          _input_pad_right, _has_bias);
 }
 
 const char *CpuIm2ColKernel::name() const

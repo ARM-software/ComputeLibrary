@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, 2025 Arm Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_VALIDATION_REFERENCE_IM2COL_H
-#define ACL_TESTS_VALIDATION_REFERENCE_IM2COL_H
+#ifndef ARM_COMPUTE_TEST_IM2COL_H
+#define ARM_COMPUTE_TEST_IM2COL_H
 
 #include "tests/SimpleTensor.h"
 
@@ -35,10 +35,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
-void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims,
-    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right);
+void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif // ACL_TESTS_VALIDATION_REFERENCE_IM2COL_H
+#endif /* ARM_COMPUTE_TEST_IM2COL_H */

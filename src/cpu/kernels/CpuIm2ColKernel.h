@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, 2025 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,26 +67,26 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuIm2ColKernel);
     /** Set the input and output of the kernel.
      *
-     * @param[in]  src               The input tensor info to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                               while every optional dimension from 4 and above represent a batch of inputs.
-     *                               Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32
-     *                               Note: QASYMM8/QASYMM8_SIGNED works only for has_bias = false
-     * @param[out] dst               The output tensor info. Data types supported: Same as @p input
-     * @param[in]  kernel_dims       The kernel dimensions (width and height).
-     * @param[in]  conv_info         Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in]  has_bias          In case biases are provided expands the matrix with 1.
-     * @param[in]  dilation          (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in]  num_groups        (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
-     * @param[in]  channel_pad_right (Optional) Amount of padding applied to the channel dimension.
+     * @param[in]  src             The input tensor info to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                             while every optional dimension from 4 and above represent a batch of inputs.
+     *                             Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32
+     *                             Note: QASYMM8/QASYMM8_SIGNED works only for has_bias = false
+     * @param[out] dst             The output tensor info. Data types supported: Same as @p input
+     * @param[in]  kernel_dims     The kernel dimensions (width and height).
+     * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  has_bias        In case biases are provided expands the matrix with 1.
+     * @param[in]  dilation        (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
+     * @param[in]  input_pad_right (Optional) When fast-math is selected, per element padding for the im2col matrix may be necessary
      */
     void configure(const ITensorInfo   *src,
                    ITensorInfo         *dst,
                    const Size2D        &kernel_dims,
                    const PadStrideInfo &conv_info,
                    bool                 has_bias,
-                   const Size2D        &dilation          = Size2D(1U, 1U),
-                   unsigned int         num_groups        = 1,
-                   unsigned int         channel_pad_right = 0);
+                   const Size2D        &dilation        = Size2D(1U, 1U),
+                   unsigned int         num_groups      = 1,
+                   unsigned int         input_pad_right = 0);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuIm2ColKernel::configure()
@@ -98,9 +98,9 @@ public:
                            const Size2D        &kernel_dims,
                            const PadStrideInfo &conv_info,
                            bool                 has_bias,
-                           const Size2D        &dilation          = Size2D(1U, 1U),
-                           unsigned int         num_groups        = 1,
-                           unsigned int         channel_pad_right = 0);
+                           const Size2D        &dilation        = Size2D(1U, 1U),
+                           unsigned int         num_groups      = 1,
+                           unsigned int         input_pad_right = 0);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -127,7 +127,7 @@ private:
                                        std::pair<unsigned int, unsigned int> convolved_dims,
                                        const Size2D                         &kernel_dims,
                                        const Size2D                         &dilation,
-                                       uint32_t                              channel_pad_right,
+                                       uint32_t                              input_pad_right,
                                        bool                                  has_bias);
 
     Im2ColFunctionPtr                     _func{nullptr};
@@ -135,7 +135,7 @@ private:
     PadStrideInfo                         _conv_info{};
     unsigned int                          _kernel_width{0};
     unsigned int                          _kernel_height{0};
-    unsigned int                          _channel_pad_right{0};
+    unsigned int                          _input_pad_right{0};
     bool                                  _has_bias{false};
     Size2D                                _dilation{1U, 1U};
     DataLayout                            _data_layout{DataLayout::UNKNOWN};
