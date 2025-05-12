@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,14 @@ namespace validation
 namespace reference
 {
 template <typename T>
-void im2col_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups)
+void im2col_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims,
+    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right)
 {
+    ARM_COMPUTE_UNUSED(channel_pad_right);
+
+    ARM_COMPUTE_ERROR_ON(channel_pad_right > 0);
     ARM_COMPUTE_ERROR_ON(src.data_layout() != DataLayout::NCHW);
+
     const int stride_x      = conv_info.stride().first;
     const int stride_y      = conv_info.stride().second;
     const int kernel_width  = kernel_dims.width;
@@ -90,8 +95,19 @@ void im2col_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
 }
 
 template <typename T>
-void im2col_nhwc(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+void im2col_nhwc(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims,
+    const PadStrideInfo &conv_info, bool has_bias, unsigned int channel_pad_right)
 {
+    // Zero initialize the dst tensor for test cases involving padding
+    if(is_data_type_quantized(src.data_type()))
+    {
+        memset(static_cast<void *>(dst.data()), src.quantization_info().uniform().offset, dst.size());
+    }
+    else
+    {
+        memset(static_cast<void *>(dst.data()), 0, dst.size());
+    }
+
     ARM_COMPUTE_ERROR_ON(src.data_layout() != DataLayout::NHWC);
     const int stride_x      = conv_info.stride().first;
     const int stride_y      = conv_info.stride().second;
@@ -126,8 +142,9 @@ void im2col_nhwc(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
                 {
                     for(int xk = 0; xk < kernel_width; ++xk)
                     {
-                        dst[ci + (xk + yk * kernel_width) * src_channels + yo * dst.shape().x() + b * dst.shape().x() * dst.shape().y()] = tensor_elem_at(src, Coordinates(ci, xi + xk - pad_x, yi + yk - pad_y, b),
-                                                                                                                                           BorderMode::CONSTANT, static_cast<T>(pad_val));
+                        dst[ci + (xk + yk * kernel_width) * (src_channels + channel_pad_right) + yo * dst.shape().x() +
+                            b * dst.shape().x() * dst.shape().y()] = tensor_elem_at(src, Coordinates(ci, xi + xk - pad_x, yi + yk - pad_y, b),
+                                                                        BorderMode::CONSTANT, static_cast<T>(pad_val));
                     }
                 }
             }
@@ -141,18 +158,19 @@ void im2col_nhwc(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
 }
 
 template <typename T>
-void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups)
+void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims,
+    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right)
 {
     switch(src.data_layout())
     {
         case DataLayout::NCHW:
         {
-            im2col_nchw(src, dst, kernel_dims, conv_info, has_bias, num_groups);
+            im2col_nchw(src, dst, kernel_dims, conv_info, has_bias, num_groups, channel_pad_right);
             break;
         }
         case DataLayout::NHWC:
         {
-            im2col_nhwc(src, dst, kernel_dims, conv_info, has_bias);
+            im2col_nhwc(src, dst, kernel_dims, conv_info, has_bias, channel_pad_right);
             break;
         }
         default:
@@ -163,9 +181,20 @@ void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kern
     }
 }
 
-template void im2col(const SimpleTensor<uint8_t> &src, SimpleTensor<uint8_t> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups);
-template void im2col(const SimpleTensor<half> &src, SimpleTensor<half> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups);
-template void im2col(const SimpleTensor<float> &src, SimpleTensor<float> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups);
+template void im2col(const SimpleTensor<uint8_t> &src, SimpleTensor<uint8_t> &dst, const Size2D &kernel_dims,
+    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right);
+
+template void im2col(const SimpleTensor<half> &src, SimpleTensor<half> &dst, const Size2D &kernel_dims,
+    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right);
+
+template void im2col(const SimpleTensor<float> &src, SimpleTensor<float> &dst, const Size2D &kernel_dims,
+    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right);
+
+#ifdef ARM_COMPUTE_ENABLE_BF16
+template void im2col(const SimpleTensor<bfloat16> &src, SimpleTensor<bfloat16> &dst, const Size2D &kernel_dims,
+    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right);
+#endif // ARM_COMPUTE_ENABLE_BF16
+
 } // namespace reference
 } // namespace validation
 } // namespace test

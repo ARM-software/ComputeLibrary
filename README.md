@@ -14,7 +14,7 @@
  <img src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png"/><br><br>
 </div>
 
-# Compute Library ![](https://img.shields.io/badge/latest_release-52.0.0-green)
+# Compute Library ![](https://img.shields.io/badge/latest_release-52.0.1-green)
 
 
 The Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A, Arm® Neoverse™ and Arm® Mali™ GPUs architectures.<br>
@@ -42,7 +42,7 @@ Key Features:
 <br>
 
 ## Documentation
-[![Documentation](https://img.shields.io/badge/documentation-52.0.0-green)](https://artificial-intelligence.sites.arm.com/computelibrary/v52.0.0/index.xhtml)
+[![Documentation](https://img.shields.io/badge/documentation-52.0.1-green)](https://artificial-intelligence.sites.arm.com/computelibrary/v52.0.1/index.xhtml)
 
 > Note: The documentation includes the reference API, changelogs, build guide, contribution guide, errata, etc.
 
@@ -55,22 +55,22 @@ All the binaries can be downloaded from [here](https://github.com/ARM-software/C
 
 | Platform       | Operating System | Release archive (Download) |
 | -------------- | ---------------- | -------------------------- |
-| Raspberry Pi 4 | Linux® 32bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-armv7a-cpu-bin.tar.gz) |
-| Raspberry Pi 4 | Linux® 64bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-aarch64-cpu-bin.tar.gz) |
-| Odroid N2      | Linux® 64bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-aarch64-cpu-gpu-bin.tar.gz) |
-| HiKey960       | Linux® 64bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-aarch64-cpu-gpu-bin.tar.gz) |
+| Raspberry Pi 4 | Linux® 32bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-armv7a-cpu-bin.tar.gz) |
+| Raspberry Pi 4 | Linux® 64bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-aarch64-cpu-bin.tar.gz) |
+| Odroid N2      | Linux® 64bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-aarch64-cpu-gpu-bin.tar.gz) |
+| HiKey960       | Linux® 64bit      | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-aarch64-cpu-gpu-bin.tar.gz) |
 
 <br>
 
 | Architecture | Operating System | Release archive (Download) |
 | ------------ | ---------------- | -------------------------- |
-| armv7        | Linux®            | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-armv7a-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-armv7a-cpu-gpu-bin.tar.gz) |
-| arm64-v8a    | Android™          | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-android-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-android-aarch64-cpu-gpu-bin.tar.gz) |
-| arm64-v8a    | Linux®            | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.0/arm_compute-v52.0.0-linux-aarch64-cpu-gpu-bin.tar.gz) |
+| armv7        | Linux®            | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-armv7a-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-armv7a-cpu-gpu-bin.tar.gz) |
+| arm64-v8a    | Android™          | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-android-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-android-aarch64-cpu-gpu-bin.tar.gz) |
+| arm64-v8a    | Linux®            | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-aarch64-cpu-bin.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v52.0.1/arm_compute-v52.0.1-linux-aarch64-cpu-gpu-bin.tar.gz) |
 
 <br>
 
-Please refer to the following link for more pre-built binaries: [![](https://img.shields.io/badge/v52.0.0-bins-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/tag/v52.0.0)
+Please refer to the following link for more pre-built binaries: [![](https://img.shields.io/badge/v52.0.1-bins-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/tag/v52.0.1)
 
 Pre-build binaries are generated with the following security / good coding practices related flags:
 > -Wall, -Wextra, -Wformat=2, -Winit-self, -Wstrict-overflow=2, -Wswitch-default, -Woverloaded-virtual, -Wformat-security, -Wctor-dtor-privacy, -Wsign-promo, -Weffc++, -pedantic, -fstack-protector-strong
@@ -113,13 +113,13 @@ Pre-build binaries are generated with the following security / good coding pract
 
 ## Experimental builds
 
-**⚠ Important** Bazel and CMake builds are experimental CPU only builds, please see the [documentation](https://artificial-intelligence.sites.arm.com/computelibrary/v52.0.0/how_to_build.xhtml) for more details.
+**⚠ Important** Bazel and CMake builds are experimental CPU only builds, please see the [documentation](https://artificial-intelligence.sites.arm.com/computelibrary/v52.0.1/how_to_build.xhtml) for more details.
 
 <br>
 
 ## How to contribute
 
-Contributions to the Compute Library are more than welcome. If you are interested on contributing, please have a look at our [how to contribute guidelines](https://artificial-intelligence.sites.arm.com/computelibrary/v52.0.0/contribution_guidelines.xhtml).
+Contributions to the Compute Library are more than welcome. If you are interested on contributing, please have a look at our [how to contribute guidelines](https://artificial-intelligence.sites.arm.com/computelibrary/v52.0.1/contribution_guidelines.xhtml).
 
 ### Developer Certificate of Origin (DCO)
 Before the Compute Library accepts your contribution, you need to certify its origin and give us your permission. To manage this process we use the Developer Certificate of Origin (DCO) V1.1 (https://developercertificate.org/)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,6 +134,8 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     info.cpu_info    = &cpu_info();
     info.num_threads = num_threads_to_use;
 
+    ARM_COMPUTE_ERROR_ON(amount_of_work > _num_threads);
+
 #if !defined(__ANDROID__)
     // Use fixed number of omp threads in the thread pool because changing this
     // in-between kernel execution negatively affects the scheduler performance,
@@ -149,9 +151,7 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     schedule(static, 1)
     for (unsigned int wid = 0; wid < amount_of_work; ++wid)
     {
-        const int tid = omp_get_thread_num();
-
-        info.thread_id = tid;
+        info.thread_id = wid;
         workloads[wid](info);
     }
 }
