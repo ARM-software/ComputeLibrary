@@ -35,8 +35,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &output_shape, WeightFormat output_wf, bool transpose);
+template <typename TOut, typename TIn>
+SimpleTensor<TOut> reorder_layer(const SimpleTensor<TIn> &src, const TensorShape &output_shape, WeightFormat output_wf, DataType output_data_type, bool transpose);
 } // namespace reference
 } // namespace validation
 } // namespace test

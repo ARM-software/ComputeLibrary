@@ -605,6 +605,7 @@ filegroup(
 	"core/NEON/kernels/arm_gemm/quantized.cpp",
 	"core/NEON/kernels/arm_gemm/rowsum_indirect_s8.cpp",
 	"core/NEON/kernels/arm_gemm/rowsum_indirect_u8.cpp",
+	"core/NEON/kernels/arm_gemm/transform-bf16.cpp",
 	"core/NEON/kernels/arm_gemm/transform.cpp",
 	"core/NEON/kernels/batchnormalization/impl/NEON/fp32.cpp",
 	"core/NEON/kernels/convolution/common/padding.cpp",

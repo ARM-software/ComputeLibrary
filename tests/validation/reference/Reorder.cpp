@@ -91,24 +91,24 @@ struct Transform_ref
                         // In-range copy.  If it's transposed, we reverse the sense of rows and columns here.
                         if(transposed)
                         {
-                            out[out_index] = in[(x_base + col) * stride + y_base + row];
+                            out[out_index] = static_cast<d_type>(in[(x_base + col) * stride + y_base + row]);
                             out_index++;
                         }
                         else
                         {
-                            out[out_index] = in[(y_base + row) * stride + x_base + col];
+                            out[out_index] = static_cast<d_type>(in[(y_base + row) * stride + x_base + col]);
                             out_index++;
                         }
                     }
                     // "col" tail - row is in range but column is out of range.
                     for(int col = 0; col < blank_cols; col++)
                     {
-                        out[out_index] = 0;
+                        out[out_index] = static_cast<d_type>(0);
                         out_index++;
                     }
                 }
                 // "row" tail - row is out of range so fill with zeros always.
-                const d_type zeroval = 0;
+                const d_type zeroval = static_cast<d_type>(0);
                 const int    pads    = blank_rows * (fill_cols + blank_cols);
 
                 for(int i = 0; i < pads; i++)
@@ -122,33 +122,30 @@ struct Transform_ref
     }
 };
 
-template <typename T>
-SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &output_shape, WeightFormat output_wf, bool transpose)
+template <typename TOut, typename TIn>
+SimpleTensor<TOut> reorder_layer(const SimpleTensor<TIn> &src, const TensorShape &output_shape, WeightFormat output_wf, DataType output_data_type, bool transpose)
 {
-    SimpleTensor<T> dst{ output_shape, src.data_type() };
+    SimpleTensor<TOut> dst{ output_shape, output_data_type };
     const int       cols = src.shape()[0];
     const int       rows = src.shape()[1];
 
-    switch(arm_compute::interleave_by(output_wf))
-    {
-        case 4:
-        {
-            Transform_ref<4, 1, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
-            break;
-        }
-        case 8:
-        {
-            Transform_ref<8, 1, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
-            break;
-        }
-        default:
-            break;
+    const auto interleave_by = arm_compute::interleave_by(output_wf);
+    const auto block_by = arm_compute::block_by(output_wf);
+    if (interleave_by == 4 && block_by == 1) {
+        Transform_ref<4, 1, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
+    } else if (interleave_by == 8 && block_by == 1) {
+        Transform_ref<8, 1, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
+    } else if (interleave_by == 4 && block_by == 4) {
+        Transform_ref<4, 4, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
+    } else if (interleave_by == 8 && block_by == 4) {
+        Transform_ref<8, 4, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
     }
 
     return dst;
 }
 
-template SimpleTensor<float> reorder_layer(const SimpleTensor<float> &src, const TensorShape &output_shape, WeightFormat output_wf, bool transpose);
+template SimpleTensor<float> reorder_layer(const SimpleTensor<float> &src, const TensorShape &output_shape, WeightFormat output_wf, DataType output_data_type, bool transpose);
+template SimpleTensor<bfloat16> reorder_layer(const SimpleTensor<float> &src, const TensorShape &output_shape, WeightFormat output_wf, DataType output_data_type, bool transpose);
 
 } // namespace reference
 } // namespace validation
