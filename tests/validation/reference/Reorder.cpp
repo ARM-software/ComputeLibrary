@@ -44,12 +44,12 @@ namespace reference
  * Need to cope with the work requested in either dimension not actually
  * being a multiple of the block sizes.
  */
-template <unsigned int tIntBy, unsigned int BlockBy, bool Transposed, size_t TOutSize, size_t TInSize, typename d_type, arm_gemm::VLType vlt>
+template <unsigned int tIntBy, unsigned int BlockBy, size_t TOutSize, size_t TInSize, typename d_type, arm_gemm::VLType vlt>
 struct Transform_ref
 {
     template <typename TOut, typename TIn>
     static void Transform(TOut &out, const TIn in, const int stride,
-                          const int y0, const int ymax, const int x0, const int xmax)
+                          const int y0, const int ymax, const int x0, const int xmax, bool transposed)
     {
         // NOTE: This code is disabled to avoid the call to get_vector_length(), so templated transforms will not be
         // correct for SVE.  This is not an issue as we have specializations for all SVE cases.
@@ -89,7 +89,7 @@ struct Transform_ref
                     for(int col = 0; col < fill_cols; col++)
                     {
                         // In-range copy.  If it's transposed, we reverse the sense of rows and columns here.
-                        if(Transposed)
+                        if(transposed)
                         {
                             out[out_index] = in[(x_base + col) * stride + y_base + row];
                             out_index++;
@@ -123,7 +123,7 @@ struct Transform_ref
 };
 
 template <typename T>
-SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &output_shape, WeightFormat output_wf)
+SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &output_shape, WeightFormat output_wf, bool transpose)
 {
     SimpleTensor<T> dst{ output_shape, src.data_type() };
     const int       cols = src.shape()[0];
@@ -133,12 +133,12 @@ SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &out
     {
         case 4:
         {
-            Transform_ref<4, 1, true, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, rows, 0, rows, 0, cols);
+            Transform_ref<4, 1, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
             break;
         }
         case 8:
         {
-            Transform_ref<8, 1, true, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, rows, 0, rows, 0, cols);
+            Transform_ref<8, 1, sizeof(float), sizeof(float), float, arm_gemm::VLType::None>::Transform<SimpleTensor<T> &, SimpleTensor<T>>(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
             break;
         }
         default:
@@ -148,7 +148,7 @@ SimpleTensor<T> reorder_layer(const SimpleTensor<T> &src, const TensorShape &out
     return dst;
 }
 
-template SimpleTensor<float> reorder_layer(const SimpleTensor<float> &src, const TensorShape &output_shape, WeightFormat output_wf);
+template SimpleTensor<float> reorder_layer(const SimpleTensor<float> &src, const TensorShape &output_shape, WeightFormat output_wf, bool transpose);
 
 } // namespace reference
 } // namespace validation

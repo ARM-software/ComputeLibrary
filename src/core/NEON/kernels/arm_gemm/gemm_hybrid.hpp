@@ -144,8 +144,8 @@ public:
         return true;
     }
 
-    // Common execution logic.
-    void execute_common(const ndcoord_t &work_range, const ndcoord_t &, int, GemmArrays<To, To, Tr>& g_arrays) {
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -155,6 +155,8 @@ public:
         assert(_B_transposed);
         static_assert(std::is_same<To, Toi>::value, "gemm_native: Operand types must be the same.");
         static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
+
+        auto &g_arrays = this->_gemm_arrays;
 
         /* For now, each work item implies all the K for a given output
          * pixel (so we don't need to synchronize access to the output
@@ -206,16 +208,6 @@ public:
             } while (p.next_dim1());
         }
 
-    }
-
-    // Stateless execute
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &g_arrays) override {
-        return execute_common(work_range, thread_locator, threadid, g_arrays);
-    }
-
-    // Execute
-    void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_common(work_range, thread_locator, threadid, this->_gemm_arrays);
     }
 
     // Interface implementation - pretransposed

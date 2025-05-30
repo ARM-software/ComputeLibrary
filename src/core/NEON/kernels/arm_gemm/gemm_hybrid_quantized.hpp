@@ -166,12 +166,14 @@ public:
         return true;
     }
 
-    // Common execution logic.
-    void execute_common(const ndcoord_t &work_range, const ndcoord_t &, int threadid, GemmArrays<To, To, Tr> &g_arrays) {
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int threadid) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
         strategy strat(_ci);
+
+        auto &g_arrays = this->_gemm_arrays;
 
         void *working_space = g_arrays._workspace;
         auto working_int = reinterpret_cast<uintptr_t>(working_space);
@@ -241,16 +243,6 @@ public:
                 }
             } while (p.next_dim0());
         }
-    }
-
-    // Stateless execute
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &g_arrays) override {
-        return execute_common(work_range, thread_locator, threadid, g_arrays);
-    }
-
-    // Execute
-    void execute(const ndcoord_t &work_range, const ndcoord_t & thread_locator, int threadid) override {
-        execute_common(work_range, thread_locator, threadid, this->_gemm_arrays);
     }
 
     // Working space needed for intermediate result buffers.

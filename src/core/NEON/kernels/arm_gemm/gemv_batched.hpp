@@ -64,12 +64,8 @@ public:
         _subgemm->set_nthreads(nthreads);
     }
 
-    void execute_stateless(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid, GemmArrays<To, To, Tr> &) override {
-        _subgemm->execute(work_range, thread_locator, threadid);
-    }
-
     void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
-        execute_stateless(work_range, thread_locator, threadid, this->_gemm_arrays);
+        _subgemm->execute(work_range, thread_locator, threadid);
     }
 
     size_t get_working_size() const override {
