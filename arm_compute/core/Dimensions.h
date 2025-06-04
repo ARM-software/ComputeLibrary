@@ -167,15 +167,17 @@ public:
 
         if (last > (first + 1))
         {
+            auto it_first = _id.begin() + first;
+            auto it_last  = _id.begin() + last;
             // Collapse dimensions into the first
-            _id[first] = std::accumulate(&_id[first], &_id[last], 1, std::multiplies<T>());
+            _id[first] = std::accumulate(it_first, it_last, 1, std::multiplies<T>());
             // Shift the remaining dimensions down
-            std::copy(&_id[last], &_id[_num_dimensions], &_id[first + 1]);
+            std::copy(it_last, _id.begin() + _num_dimensions, it_first + 1);
             // Reduce the number of dimensions
             const size_t old_num_dimensions = _num_dimensions;
             _num_dimensions -= last - first - 1;
             // Fill the now empty dimensions with zero
-            std::fill(&_id[_num_dimensions], &_id[old_num_dimensions], 0);
+            std::fill(_id.begin() + _num_dimensions, _id.begin() + old_num_dimensions, 0);
         }
     }
 
