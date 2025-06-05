@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/conv3d/generic/neon/float_impl.h"
 
 namespace arm_compute
@@ -38,6 +39,7 @@ void directconv3d_fp32_neon_ndhwc(const ITensor    *src0,
                                   const Conv3dInfo &conv_info,
                                   const Window     &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "directconv3d_fp32_neon_ndhwc");
     directconv3d_float_neon_ndhwc<float>(src0, src1, src2, dst, conv_info, window);
 }
 

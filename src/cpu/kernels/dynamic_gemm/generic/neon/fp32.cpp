@@ -32,6 +32,7 @@
 #include "kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p8x1biasf32_6x8x4_neon_mla.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p8x1biasf32_f32_f32_neon.h"
 #endif // __aarch64__ && ENABLE_FP32_KERNELS
+#include "src/common/utils/profile/acl_profile.h"
 
 namespace arm_compute
 {
@@ -41,6 +42,7 @@ namespace cpu
 #if defined(__aarch64__) && defined(ENABLE_FP32_KERNELS)
 void neon_fp32_dynamic_gemm_pack_rhs(const ITensor *rhs, const ITensor *bias, ITensor *pack_b)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_dynamic_gemm_pack_rhs");
     const size_t      num_groups  = 1;
     const size_t      n           = rhs->info()->tensor_shape().x();
     const size_t      k           = rhs->info()->tensor_shape().y();
@@ -61,6 +63,7 @@ void neon_fp32_dynamic_gemm_pack_rhs(const ITensor *rhs, const ITensor *bias, IT
 void neon_fp32_dynamic_gemm_run(
     const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, ITensor *pack_b, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_dynamic_gemm_run");
     ARM_COMPUTE_UNUSED(b);
     ARM_COMPUTE_UNUSED(c);
 

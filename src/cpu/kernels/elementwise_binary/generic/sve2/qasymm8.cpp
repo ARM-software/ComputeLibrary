@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/elementwise_binary/generic/sve2/impl.h"
 namespace arm_compute
 {
@@ -32,7 +33,8 @@ namespace cpu
 template <ArithmeticOperation op>
 void sve2_qasymm8_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithmetic_quantized_op<uint8_t>(in1, in2, out, op, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve2_qasymm8_elementwise_binary");
+    elementwise_arithmetic_quantized_op<uint8_t>(in1, in2, out, op, window);
 }
 
 template void sve2_qasymm8_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1,
@@ -74,7 +76,9 @@ void sve2_qasymm8_comparison_elementwise_binary(const ITensor *in1,
                                                 ITensor       *out,
                                                 const Window  &window)
 {
-    return elementwise_comparison_quantized_op<uint8_t>(in1, in2, out, op, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "sve2_qasymm8_comparison_elementwise_binary");
+    elementwise_comparison_quantized_op<uint8_t>(in1, in2, out, op, window);
 }
 
 template void sve2_qasymm8_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1,

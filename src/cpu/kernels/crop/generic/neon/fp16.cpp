@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/crop/generic/neon/impl.h"
 
 namespace arm_compute
@@ -39,8 +40,9 @@ void fp16_in_bounds_crop_window(const ITensor *input,
                                 bool           input_has_single_channel,
                                 bool           is_width_flipped)
 {
-    return in_bounds_crop_window<float16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
-                                            output_width_limit, input_has_single_channel, is_width_flipped);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_in_bounds_crop_window");
+    in_bounds_crop_window<float16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                     output_width_limit, input_has_single_channel, is_width_flipped);
 }
 } // namespace cpu
 } // namespace arm_compute

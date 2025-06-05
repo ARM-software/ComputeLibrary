@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/dequantize/generic/neon/impl.h"
 
 namespace arm_compute
@@ -30,6 +31,7 @@ namespace cpu
 {
 void fp16_run_dequantization_core(const ITensor *input, ITensor *output, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_run_dequantization_core");
     run_dequantization_core<float16_t>(input, output, window);
 }
 } // namespace cpu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.h"
 
@@ -37,7 +38,8 @@ void neon_fp16_deptwiseconv2dnative(const ITensor         *src,
                                     bool                   has_biases,
                                     const ConvolutionInfo &info)
 {
-    return run_depthwise_float<float16_t, float16_t>(src, weights, bias, dst, window, has_biases, info);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_deptwiseconv2dnative");
+    run_depthwise_float<float16_t, float16_t>(src, weights, bias, dst, window, has_biases, info);
 }
 } // namespace cpu
 } // namespace arm_compute

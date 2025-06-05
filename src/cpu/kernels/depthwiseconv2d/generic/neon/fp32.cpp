@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.h"
 namespace arm_compute
 {
@@ -34,7 +35,8 @@ void neon_fp32_deptwiseconv2dnative(const ITensor         *src,
                                     bool                   has_biases,
                                     const ConvolutionInfo &info)
 {
-    return run_depthwise_float<float, float>(src, weights, bias, dst, window, has_biases, info);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_deptwiseconv2dnative");
+    run_depthwise_float<float, float>(src, weights, bias, dst, window, has_biases, info);
 }
 } // namespace cpu
 } // namespace arm_compute

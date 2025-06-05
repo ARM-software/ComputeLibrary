@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/directconv2d/nhwc/neon/impl.h"
 
 namespace arm_compute
@@ -33,6 +34,7 @@ namespace kernels
 void neon_fp32_nhwc_directconv2d(
     const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_nhwc_directconv2d");
     convolve_nhwc<float>(window, src, weights, dst, conv_info);
 }
 } // namespace kernels

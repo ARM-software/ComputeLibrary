@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/elementwise_binary/generic/neon/impl.h"
 namespace arm_compute
 {
@@ -31,7 +32,8 @@ namespace cpu
 template <ArithmeticOperation op>
 void neon_s32_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s32_elementwise_binary");
+    elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int32_t, 4>>(in1, in2, out, window);
 }
 
 template void neon_s32_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1,
@@ -70,7 +72,8 @@ template void neon_s32_elementwise_binary<ArithmeticOperation::PRELU>(const ITen
 template <ArithmeticOperation op>
 void neon_s16_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s16_elementwise_binary");
+    elementwise_arithm_op<op, typename wrapper::traits::neon_vector<int16_t, 8>>(in1, in2, out, window);
 }
 template void neon_s16_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1,
                                                                     const ITensor *in2,
@@ -108,7 +111,9 @@ template void neon_s16_elementwise_binary<ArithmeticOperation::PRELU>(const ITen
 template <ComparisonOperation op>
 void neon_u8_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comp_op_8<op, uint8_t, uint8x16_t>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "neon_u8_comparison_elementwise_binary");
+    elementwise_comp_op_8<op, uint8_t, uint8x16_t>(in1, in2, out, window);
 }
 template void neon_u8_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1,
                                                                                 const ITensor *in2,
@@ -138,7 +143,9 @@ template void neon_u8_comparison_elementwise_binary<ComparisonOperation::LessEqu
 template <ComparisonOperation op>
 void neon_s16_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comp_op_16<op, int16_t, int16x8_t>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "neon_s16_comparison_elementwise_binary");
+    elementwise_comp_op_16<op, int16_t, int16x8_t>(in1, in2, out, window);
 }
 template void neon_s16_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1,
                                                                                  const ITensor *in2,
@@ -168,7 +175,9 @@ template void neon_s16_comparison_elementwise_binary<ComparisonOperation::LessEq
 template <ComparisonOperation op>
 void neon_s32_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comp_op_32<op, int32_t, int32x4_t>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "neon_s32_comparison_elementwise_binary");
+    elementwise_comp_op_32<op, int32_t, int32x4_t>(in1, in2, out, window);
 }
 template void neon_s32_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1,
                                                                                  const ITensor *in2,

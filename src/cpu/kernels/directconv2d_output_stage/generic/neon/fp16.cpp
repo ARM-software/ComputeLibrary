@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/directconv2d_output_stage/generic/neon/float_impl.h"
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
@@ -40,6 +41,7 @@ void output_stage_nhwc_fp16(ITensor       *src,
                             int            result_shift,
                             int            result_offset_after_shift)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "output_stage_nhwc_fp16");
     output_stage_nhwc_fp<float16_t>(src, bias, window, dst, result_fixedpoint_multiplier, result_shift,
                                     result_offset_after_shift);
 }
@@ -52,6 +54,7 @@ void output_stage_nchw_fp16(ITensor       *src,
                             int            result_shift,
                             int            result_offset_after_shift)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "output_stage_nchw_fp16");
     output_stage_nchw_fp<float16_t>(src, bias, window, dst, result_fixedpoint_multiplier, result_shift,
                                     result_offset_after_shift);
 }

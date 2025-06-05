@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/kernels/detail/NEDirectConvolutionDetail.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -55,6 +56,7 @@ void run_im2col_fp32_nchw_pad(const ITensor                        *src,
                               uint32_t                              input_pad_right,
                               bool                                  has_bias)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "run_im2col_fp32_nchw_pad");
     arm_compute::cpu::kernels::run_im2col<float, true, true>(src, dst, window, data_layout, conv_info, convolved_dims,
                                                              kernel_dims, dilation, input_pad_right, has_bias);
 }
@@ -70,6 +72,7 @@ void run_im2col_fp32_nchw_nopad(const ITensor                        *src,
                                 uint32_t                              input_pad_right,
                                 bool                                  has_bias)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "run_im2col_fp32_nchw_nopad");
     arm_compute::cpu::kernels::run_im2col<float, false, true>(src, dst, window, data_layout, conv_info, convolved_dims,
                                                               kernel_dims, dilation, input_pad_right, has_bias);
 }
@@ -85,6 +88,7 @@ void run_im2col_qasymm8_nchw_pad(const ITensor                        *src,
                                  uint32_t                              input_pad_right,
                                  bool                                  has_bias)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "run_im2col_qasymm8_nchw_pad");
     arm_compute::cpu::kernels::run_im2col<qasymm8_t, true, true>(
         src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
@@ -100,6 +104,7 @@ void run_im2col_qasymm8_nchw_nopad(const ITensor                        *src,
                                    uint32_t                              input_pad_right,
                                    bool                                  has_bias)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "run_im2col_qasymm8_nchw_nopad");
     arm_compute::cpu::kernels::run_im2col<qasymm8_t, false, true>(
         src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
@@ -115,6 +120,7 @@ void run_im2col_bf16_nchw_pad(const ITensor                        *src,
                               uint32_t                              input_pad_right,
                               bool                                  has_bias)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "run_im2col_bf16_nchw_pad");
     arm_compute::cpu::kernels::run_im2col<bfloat16, true, true>(
         src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }
@@ -130,6 +136,7 @@ void run_im2col_bf16_nchw_nopad(const ITensor                        *src,
                                 uint32_t                              input_pad_right,
                                 bool                                  has_bias)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "run_im2col_bf16_nchw_nopad");
     arm_compute::cpu::kernels::run_im2col<bfloat16, false, true>(
         src, dst, window, data_layout, conv_info, convolved_dims, kernel_dims, dilation, input_pad_right, has_bias);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/directconv2d_output_stage/generic/neon/quantized_impl.h"
 
 namespace arm_compute
@@ -38,6 +39,7 @@ void output_stage_nhwc_qs8(ITensor       *src,
                            int            result_shift,
                            int            result_offset_after_shift)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "output_stage_nhwc_qs8");
     output_stage_nhwc_quant<int8_t>(src, bias, window, dst, result_fixedpoint_multiplier, result_shift,
                                     result_offset_after_shift);
 }
@@ -50,6 +52,7 @@ void output_stage_nchw_qs8(ITensor       *src,
                            int            result_shift,
                            int            result_offset_after_shift)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "output_stage_nchw_qs8");
     output_stage_nchw_quant<int8_t>(src, bias, window, dst, result_fixedpoint_multiplier, result_shift,
                                     result_offset_after_shift);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 
 #include "arm_compute/core/Error.h"
 
+#include "src/common/utils/profile/acl_profile.h"
+
 #include <cstdint>
 #include <cstring>
 
@@ -41,6 +43,7 @@ void depth_to_space_nchw_any( //
     uintptr_t       element_size,
     uintptr_t       block_size)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "depth_to_space_nchw_any");
     ARM_COMPUTE_ERROR_ON(src_strides[0] != element_size);
     ARM_COMPUTE_ERROR_ON(dst_strides[0] != element_size);
 

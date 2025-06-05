@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/elementwise_unary/generic/sve/impl.h"
 
@@ -34,8 +35,9 @@ namespace cpu
 void sve_fp32_elementwise_unary(
     const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve_fp32_elementwise_unary");
     ARM_COMPUTE_UNUSED(lut);
-    return elementwise_sve_op<float32_t>(in, out, window, op);
+    elementwise_sve_op<float32_t>(in, out, window, op);
 }
 } // namespace cpu
 } // namespace arm_compute

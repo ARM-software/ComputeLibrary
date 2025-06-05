@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/elementwise_binary/generic/neon/impl.h"
 
 namespace arm_compute
@@ -33,7 +34,8 @@ namespace cpu
 template <ArithmeticOperation op>
 void neon_fp16_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_elementwise_binary");
+    elementwise_arithm_op<op, typename wrapper::traits::neon_vector<float16_t, 8>>(in1, in2, out, window);
 }
 
 template void neon_fp16_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1,
@@ -72,7 +74,9 @@ template void neon_fp16_elementwise_binary<ArithmeticOperation::PRELU>(const ITe
 template <ComparisonOperation op>
 void neon_fp16_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comp_op_16<op, float16_t, float16x8_t>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "neon_fp16_comparison_elementwise_binary");
+    elementwise_comp_op_16<op, float16_t, float16x8_t>(in1, in2, out, window);
 }
 
 template void neon_fp16_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1,

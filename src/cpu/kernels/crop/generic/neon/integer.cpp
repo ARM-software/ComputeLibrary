@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/crop/generic/neon/impl.h"
 #include "src/cpu/kernels/crop/list.h"
 
@@ -39,8 +40,9 @@ void u8_in_bounds_crop_window(const ITensor *input,
                               bool           input_has_single_channel,
                               bool           is_width_flipped)
 {
-    return in_bounds_crop_window<uint8_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
-                                          output_width_limit, input_has_single_channel, is_width_flipped);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_in_bounds_crop_window");
+    in_bounds_crop_window<uint8_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                   output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
 void u16_in_bounds_crop_window(const ITensor *input,
@@ -53,8 +55,9 @@ void u16_in_bounds_crop_window(const ITensor *input,
                                bool           input_has_single_channel,
                                bool           is_width_flipped)
 {
-    return in_bounds_crop_window<uint16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
-                                           output_width_limit, input_has_single_channel, is_width_flipped);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u16_in_bounds_crop_window");
+    in_bounds_crop_window<uint16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                    output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
 void u32_in_bounds_crop_window(const ITensor *input,
@@ -67,8 +70,9 @@ void u32_in_bounds_crop_window(const ITensor *input,
                                bool           input_has_single_channel,
                                bool           is_width_flipped)
 {
-    return in_bounds_crop_window<uint32_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
-                                           output_width_limit, input_has_single_channel, is_width_flipped);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u32_in_bounds_crop_window");
+    in_bounds_crop_window<uint32_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                    output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
 void s8_in_bounds_crop_window(const ITensor *input,
@@ -81,8 +85,9 @@ void s8_in_bounds_crop_window(const ITensor *input,
                               bool           input_has_single_channel,
                               bool           is_width_flipped)
 {
-    return in_bounds_crop_window<int8_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
-                                         output_width_limit, input_has_single_channel, is_width_flipped);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "s8_in_bounds_crop_window");
+    in_bounds_crop_window<int8_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                  output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
 void s16_in_bounds_crop_window(const ITensor *input,
@@ -95,8 +100,9 @@ void s16_in_bounds_crop_window(const ITensor *input,
                                bool           input_has_single_channel,
                                bool           is_width_flipped)
 {
-    return in_bounds_crop_window<int16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
-                                          output_width_limit, input_has_single_channel, is_width_flipped);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "s16_in_bounds_crop_window");
+    in_bounds_crop_window<int16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                   output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
 void s32_in_bounds_crop_window(const ITensor *input,
@@ -109,8 +115,9 @@ void s32_in_bounds_crop_window(const ITensor *input,
                                bool           input_has_single_channel,
                                bool           is_width_flipped)
 {
-    return in_bounds_crop_window<int32_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
-                                          output_width_limit, input_has_single_channel, is_width_flipped);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "s32_in_bounds_crop_window");
+    in_bounds_crop_window<int32_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                   output_width_limit, input_has_single_channel, is_width_flipped);
 }
 } // namespace cpu
 } // namespace arm_compute

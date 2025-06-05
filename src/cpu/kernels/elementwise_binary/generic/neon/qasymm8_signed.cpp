@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/elementwise_binary/generic/neon/impl.h"
 
 namespace arm_compute
@@ -32,7 +33,9 @@ namespace cpu
 template <ArithmeticOperation op>
 void neon_qasymm8_signed_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithm_op_quantized_signed<op>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "neon_qasymm8_signed_elementwise_binary");
+    elementwise_arithm_op_quantized_signed<op>(in1, in2, out, window);
 }
 
 template void neon_qasymm8_signed_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1,
@@ -74,7 +77,9 @@ void neon_qasymm8_signed_comparison_elementwise_binary(const ITensor *in1,
                                                        ITensor       *out,
                                                        const Window  &window)
 {
-    return elementwise_comp_op_quantized_signed<op>(in1, in2, out, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "neon_qasymm8_signed_comparison_elementwise_binary");
+    elementwise_comp_op_quantized_signed<op>(in1, in2, out, window);
 }
 
 template void neon_qasymm8_signed_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1,

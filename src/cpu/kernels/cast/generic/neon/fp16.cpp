@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/TensorInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/cast/list.h"
 #include "src/cpu/kernels/CpuCastKernel.h"
 #include "support/SaturateCast.h"
@@ -39,6 +40,7 @@ namespace cpu
 void neon_qasymm8_signed_to_fp16_cast(
     const ITensor *_src, ITensor *_dst, const ThreadInfo &info, ConvertPolicy _policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_qasymm8_signed_to_fp16_cast");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(_policy);
 
@@ -85,6 +87,7 @@ void neon_qasymm8_signed_to_fp16_cast(
 void neon_s32_to_fp16_cast(
     const ITensor *_src, ITensor *_dst, const ThreadInfo &info, ConvertPolicy _policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s32_to_fp16_cast");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(_policy);
 
@@ -133,6 +136,7 @@ void neon_s32_to_fp16_cast(
 void neon_fp32_to_fp16_cast(
     const ITensor *_src, ITensor *_dst, const ThreadInfo &info, ConvertPolicy _policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_to_fp16_cast");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(_policy);
 
@@ -180,6 +184,7 @@ void neon_fp32_to_fp16_cast(
 void neon_fp16_to_other_dt_cast(
     const ITensor *_src, ITensor *_dst, const ThreadInfo &info, ConvertPolicy _policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_to_other_dt_cast");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(_policy);
 
@@ -329,6 +334,7 @@ void neon_fp16_to_other_dt_cast(
 void neon_u8_to_fp16_cast(
     const ITensor *_src, ITensor *_dst, const ThreadInfo &info, ConvertPolicy _policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_u8_to_fp16_cast");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(_policy);
 
@@ -372,7 +378,6 @@ void neon_u8_to_fp16_cast(
             }
         },
         src, dst);
-    return;
 }
 
 } // namespace cpu

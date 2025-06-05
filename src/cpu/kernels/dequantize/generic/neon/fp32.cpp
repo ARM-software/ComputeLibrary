@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/dequantize/generic/neon/impl.h"
 
 namespace arm_compute
@@ -29,6 +30,7 @@ namespace cpu
 {
 void fp32_run_dequantization_core(const ITensor *input, ITensor *output, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp32_run_dequantization_core");
     run_dequantization_core<float>(input, output, window);
 }
 } // namespace cpu
