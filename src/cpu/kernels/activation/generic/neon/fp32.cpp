@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/activation/generic/neon/fp_impl.h"
 namespace arm_compute
 {
@@ -33,6 +34,7 @@ constexpr ActFpImplParams Fp32Params = {static_cast<float>(1e-24), 4};
 } // namespace
 void neon_fp32_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_activation");
     fp_neon_activation_impl<float, Fp32Params>(src, dst, act_info, window);
 }
 } // namespace cpu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -115,6 +116,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 
 void CpuPool3dKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const Pooling3dLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool3dKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Perform validation step
@@ -151,15 +153,16 @@ void CpuPool3dKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
 
 Status CpuPool3dKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const Pooling3dLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool3dKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, pool_info));
-
     return Status{};
 }
 
 void CpuPool3dKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool3dKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

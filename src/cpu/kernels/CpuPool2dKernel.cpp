@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -303,6 +304,7 @@ void CpuPool2dKernel::configure(ITensorInfo            *src,
                                 const PoolingLayerInfo &pool_info,
                                 ITensorInfo            *indices)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool2dKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info;
     const bool          is_global_pooling = pool_info.is_global_pooling;
@@ -353,6 +355,7 @@ Status CpuPool2dKernel::validate(const ITensorInfo      *src,
                                  const PoolingLayerInfo &pool_info,
                                  const ITensorInfo      *indices)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool2dKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
     unsigned int num_elems_processed_per_iteration = 0;
@@ -379,6 +382,7 @@ Status CpuPool2dKernel::validate(const ITensorInfo      *src,
 
 void CpuPool2dKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool2dKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

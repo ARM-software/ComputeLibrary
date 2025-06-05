@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/utils/InterpolationPolicyUtils.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -401,6 +402,7 @@ void CpuScaleKernel::configure(const ITensorInfo     *src,
                                ITensorInfo           *dst,
                                const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScaleKernel::configure");
     ARM_COMPUTE_UNUSED(dx, dy, offsets);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     // Perform validation step
@@ -493,12 +495,14 @@ Status CpuScaleKernel::validate(const ITensorInfo     *input,
                                 ITensorInfo           *output,
                                 const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScaleKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, dx, dy, offsets, output, info));
     return Status{};
 }
 
 void CpuScaleKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScaleKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

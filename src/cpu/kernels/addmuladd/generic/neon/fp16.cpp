@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 
 #include <cstddef>
@@ -54,6 +55,7 @@ void a64_add_bn_clamp_direct_fp16_2x32(float16_t       *out,
                                        size_t           width,
                                        size_t           height)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "a64_add_bn_clamp_direct_fp16_2x32");
     struct KernelArgs
     {
         float16_t minval;
@@ -889,6 +891,7 @@ void add_mul_add_fp16_neon(const ITensor             *input1,
                            const ActivationLayerInfo &act_info,
                            const Window              &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "add_mul_add_fp16_neon");
     ARM_COMPUTE_UNUSED(policy);
 
     const size_t out_stride        = final_output->info()->strides_in_bytes()[1];

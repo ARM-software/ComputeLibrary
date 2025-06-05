@@ -27,6 +27,7 @@
 #include "arm_compute/core/TensorInfo.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -73,6 +74,7 @@ void CpuScatterKernel::configure(const ITensorInfo *updates,
                                  ITensorInfo       *dst,
                                  const ScatterInfo &scatter_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScatterKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(updates, dst, indices);
     ARM_COMPUTE_ERROR_THROW_ON(validate(updates, indices, dst, scatter_info));
     ARM_COMPUTE_LOG_PARAMS(updates, indices, dst, scatter_info);
@@ -117,6 +119,7 @@ Status CpuScatterKernel::validate(const ITensorInfo *updates,
                                   const ITensorInfo *dst,
                                   const ScatterInfo &scatter_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScatterKernel::validate");
     ARM_COMPUTE_UNUSED(scatter_info);
 
     const TensorShape &ind_shape = indices->tensor_shape();
@@ -172,6 +175,7 @@ Status CpuScatterKernel::validate(const ITensorInfo *updates,
 
 void CpuScatterKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScatterKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

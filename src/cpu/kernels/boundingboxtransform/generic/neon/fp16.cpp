@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/boundingboxtransform/generic/neon/impl.h"
 
@@ -35,7 +36,8 @@ void neon_fp16_boundingboxtransform(const ITensor           *boxes,
                                     BoundingBoxTransformInfo bbinfo,
                                     const Window            &window)
 {
-    return bounding_box_transform<float16_t>(boxes, pred_boxes, deltas, bbinfo, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_boundingboxtransform");
+    bounding_box_transform<float16_t>(boxes, pred_boxes, deltas, bbinfo, window);
 }
 } // namespace cpu
 } // namespace arm_compute

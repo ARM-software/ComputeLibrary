@@ -27,6 +27,8 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
+
 #include "qsymm16_impl.h"
 
 namespace arm_compute
@@ -38,6 +40,7 @@ void neon_qsymm16_activation(const ITensor             *src,
                              const ActivationLayerInfo &act_info,
                              const Window              &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_qsymm16_activation");
     constexpr int                                 window_step_x  = 8;
     const auto                                    window_start_x = static_cast<int>(window.x().start());
     const auto                                    window_end_x   = static_cast<int>(window.x().end());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -200,6 +201,7 @@ void run_permute(const Window &window, const ITensor *src, const ITensor *dst, c
 
 void CpuPermuteKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPermuteKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     const TensorShape dst_shape = misc::shape_calculator::compute_permutation_output_shape(*src, perm);
     // Destination auto inizialitation if not yet initialized
@@ -220,12 +222,14 @@ void CpuPermuteKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const
 
 Status CpuPermuteKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPermuteKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, perm));
     return Status{};
 }
 
 void CpuPermuteKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPermuteKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

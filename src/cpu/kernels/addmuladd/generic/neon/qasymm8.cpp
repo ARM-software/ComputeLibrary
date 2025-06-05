@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,8 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
+#include "src/common/utils/profile/acl_profile.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -59,6 +61,7 @@ void a64_add_bn_clamp_direct_u8_fp32_2x16(uint8_t       *out,
                                           size_t         width,
                                           size_t         height)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "a64_add_bn_clamp_direct_u8_fp32_2x16");
     float scales[4] = {in0_scale, in1_scale, 1.0f / out_scale, 1.0f / out_direct_scale};
     struct KernelArgs
     {
@@ -748,6 +751,7 @@ void add_mul_add_u8_neon(const ITensor             *input1,
                          const ActivationLayerInfo &act_info,
                          const Window              &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "add_mul_add_u8_neon");
     ARM_COMPUTE_UNUSED(policy);
 
     const ITensorInfo *final_output_info = final_output->info();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "src/cpu/kernels/boundingboxtransform/generic/neon/impl.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 
 namespace arm_compute
@@ -36,6 +37,7 @@ void bounding_box_transform_qsymm16(const ITensor           *boxes,
                                     const Window            &window)
 
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "bounding_box_transform_qsymm16");
     const size_t num_classes  = deltas->info()->tensor_shape()[0] >> 2;
     const size_t deltas_width = deltas->info()->tensor_shape()[0];
     const int    img_h        = std::floor(bbinfo.img_height() / bbinfo.scale() + 0.5f);

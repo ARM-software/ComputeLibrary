@@ -29,6 +29,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/SVEMath.h"
 #include "src/cpu/kernels/lut/list.h"
 
@@ -43,6 +44,7 @@ namespace cpu
 {
 void sve_fp16_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve_fp16_activation");
     const auto                                    window_start_x = static_cast<int>(window.x().start());
     const auto                                    window_end_x   = static_cast<int>(window.x().end());
     const ActivationLayerInfo::ActivationFunction act            = act_info.activation();
@@ -88,6 +90,7 @@ void sve_fp16_activation_lut(const ITensor             *src,
                              const ActivationLayerInfo &act_info,
                              const Window              &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve_fp16_activation_lut");
     ARM_COMPUTE_ERROR_ON(src->info()->data_type() != DataType::F16);
     const auto window_start_x = window.x().start();
     const auto window_end_x   = window.x().end();

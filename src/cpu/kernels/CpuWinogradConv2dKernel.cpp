@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 
 #include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
 
+#include "src/common/utils/profile/acl_profile.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -37,6 +39,8 @@ CpuWinogradConv2dTransformInputKernel::CpuWinogradConv2dTransformInputKernel(arm
 
 void CpuWinogradConv2dTransformInputKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuWinogradConv2dTransformInputKernel::run_op");
     ARM_COMPUTE_UNUSED(window);
     const ITensor *input_nhwc               = tensors.get_const_tensor(TensorType::ACL_SRC);
     const ITensor *winograd_input_transform = tensors.get_const_tensor(TensorType::ACL_DST);
@@ -71,6 +75,8 @@ CpuWinogradConv2dTransformOutputKernel::CpuWinogradConv2dTransformOutputKernel(a
 // Inherited methods overridden:
 void CpuWinogradConv2dTransformOutputKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuWinogradConv2dTransformOutputKernel::run_op");
     ARM_COMPUTE_UNUSED(window);
     const ITensor *dst_nhwc                  = tensors.get_const_tensor(TensorType::ACL_DST);
     const ITensor *winograd_output_transform = tensors.get_const_tensor(TensorType::ACL_SRC_0);

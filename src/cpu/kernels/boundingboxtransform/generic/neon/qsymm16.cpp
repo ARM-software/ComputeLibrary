@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/boundingboxtransform/generic/neon/impl.h"
 namespace arm_compute
 {
@@ -32,7 +33,8 @@ void neon_qu16_boundingboxtransform(const ITensor           *boxes,
                                     BoundingBoxTransformInfo bbinfo,
                                     const Window            &window)
 {
-    return bounding_box_transform_qsymm16(boxes, pred_boxes, deltas, bbinfo, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_qu16_boundingboxtransform");
+    bounding_box_transform_qsymm16(boxes, pred_boxes, deltas, bbinfo, window);
 }
 } // namespace cpu
 } // namespace arm_compute

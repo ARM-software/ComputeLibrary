@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/activation/generic/neon/fp_impl.h"
 
 namespace arm_compute
@@ -36,6 +37,7 @@ constexpr ActFpImplParams Fp16Params = {static_cast<float16_t>(1e-7), 8};
 
 void neon_fp16_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_activation");
     fp_neon_activation_impl<float16_t, Fp16Params>(src, dst, act_info, window);
 }
 } // namespace cpu

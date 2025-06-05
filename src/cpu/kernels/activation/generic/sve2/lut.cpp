@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/lut/list.h"
 
 namespace arm_compute
@@ -34,6 +35,7 @@ namespace cpu
 #ifdef __aarch64__
 void sve2_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve2_q8_activation_lut");
     ARM_COMPUTE_ERROR_ON( // LUT does not provide any performance benefit for ReLU as it's a single max() operation
         (src->info()->data_type() != DataType::QASYMM8 && src->info()->data_type() != DataType::QASYMM8_SIGNED) ||
         act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU);
