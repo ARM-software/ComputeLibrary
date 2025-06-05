@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021,2024 Arm Limited.
+ * Copyright (c) 2017-2021,2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/TensorInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -83,6 +84,8 @@ void CpuGemmLowpMatrixAReductionKernel::configure(const ITensorInfo             
                                                   ITensorInfo                       *dst,
                                                   const GEMMLowpReductionKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixAReductionKernel::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(src, dst, info));
@@ -115,6 +118,8 @@ Status CpuGemmLowpMatrixAReductionKernel::validate(const ITensorInfo            
                                                    const ITensorInfo                 *dst,
                                                    const GEMMLowpReductionKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixAReductionKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_a_reduction(src, dst, info));
     return Status{};
 }
@@ -194,6 +199,8 @@ void CpuGemmLowpMatrixAReductionKernel::run_internal(const ITensor             *
 
 void CpuGemmLowpMatrixAReductionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixAReductionKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
@@ -213,6 +220,8 @@ void CpuGemmLowpMatrixBReductionKernel::configure(const ITensorInfo             
                                                   ITensorInfo                       *dst,
                                                   const GEMMLowpReductionKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixBReductionKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(src, dst, info));
 
@@ -249,6 +258,8 @@ Status CpuGemmLowpMatrixBReductionKernel::validate(const ITensorInfo            
                                                    const ITensorInfo                 *dst,
                                                    const GEMMLowpReductionKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixBReductionKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(src, dst, info));
     return Status{};
 }
@@ -430,6 +441,8 @@ void CpuGemmLowpMatrixBReductionKernel::run_internal(const ITensor    *src,
 
 void CpuGemmLowpMatrixBReductionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixBReductionKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

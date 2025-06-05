@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -293,6 +294,7 @@ void CpuComparisonKernel::configure_common(const ITensorInfo *src0, const ITenso
 template <class Derived>
 void CpuElementwiseKernel<Derived>::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
@@ -321,6 +323,7 @@ void CpuArithmeticKernel::configure(ArithmeticOperation op,
                                     const ITensorInfo  *src1,
                                     ITensorInfo        *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuArithmeticKernel::configure");
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = op;
     CpuArithmeticKernel::configure_common(src0, src1, dst);
@@ -343,6 +346,7 @@ Status CpuArithmeticKernel::validate(ArithmeticOperation op,
                                      const ITensorInfo  *src1,
                                      const ITensorInfo  *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuArithmeticKernel::validate");
     ARM_COMPUTE_UNUSED(op);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src0, *src1, *dst));
@@ -395,6 +399,7 @@ size_t CpuArithmeticKernel::get_mws(const CPUInfo &platform, size_t thread_count
 
 void CpuDivisionKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDivisionKernel::configure");
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = ArithmeticOperation::DIV;
     CpuArithmeticKernel::configure_common(src0, src1, dst);
@@ -449,6 +454,7 @@ Status CpuDivisionKernel::validate_arguments(const ITensorInfo &src0, const ITen
 
 Status CpuDivisionKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDivisionKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src0, *src1, *dst));
     return Status{};
@@ -457,6 +463,7 @@ Status CpuDivisionKernel::validate(const ITensorInfo *src0, const ITensorInfo *s
 /** The power operator */
 void CpuPowerKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPowerKernel::configure");
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = ArithmeticOperation::POWER;
     CpuArithmeticKernel::configure_common(src0, src1, dst);
@@ -470,6 +477,7 @@ Status CpuPowerKernel::validate_arguments(const ITensorInfo &src0, const ITensor
 
 Status CpuPowerKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPowerKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src0, *src1, *dst));
     return Status{};
@@ -481,6 +489,7 @@ void CpuComparisonKernel::configure(ComparisonOperation op,
                                     const ITensorInfo  *src1,
                                     ITensorInfo        *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComparisonKernel::configure");
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = op;
     CpuComparisonKernel::configure_common(src0, src1, dst);
@@ -504,6 +513,7 @@ Status CpuComparisonKernel::validate(ComparisonOperation op,
                                      const ITensorInfo  *src1,
                                      const ITensorInfo  *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComparisonKernel::validate");
     ARM_COMPUTE_UNUSED(op);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src0, *src1, *dst));

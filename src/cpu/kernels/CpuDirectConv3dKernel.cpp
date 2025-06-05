@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024 Arm Limited.
+ * Copyright (c) 2021-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -124,6 +125,7 @@ void CpuDirectConv3dKernel::configure(const ITensorInfo *src0,
                                       ITensorInfo       *dst,
                                       const Conv3dInfo  &conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv3dKernel::configure");
     ARM_COMPUTE_UNUSED(src2);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
@@ -159,13 +161,14 @@ Status CpuDirectConv3dKernel::validate(const ITensorInfo *src0,
                                        const ITensorInfo *dst,
                                        const Conv3dInfo  &conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv3dKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, src2, dst, conv_info));
-
     return Status{};
 }
 
 void CpuDirectConv3dKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv3dKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

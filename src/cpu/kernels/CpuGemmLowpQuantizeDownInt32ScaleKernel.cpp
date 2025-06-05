@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -269,6 +270,8 @@ void CpuGemmLowpQuantizeDownInt32ScaleKernel::configure(ITensorInfo             
                                                         ITensorInfo                   *dst,
                                                         const GEMMLowpOutputStageInfo *output_stage)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpQuantizeDownInt32ScaleKernel::configure");
     ARM_COMPUTE_UNUSED(bias);
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst, output_stage);
@@ -311,12 +314,16 @@ Status CpuGemmLowpQuantizeDownInt32ScaleKernel::validate(const ITensorInfo      
                                                          const ITensorInfo             *dst,
                                                          const GEMMLowpOutputStageInfo *output_stage)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpQuantizeDownInt32ScaleKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, bias, dst, output_stage));
     return Status{};
 }
 
 void CpuGemmLowpQuantizeDownInt32ScaleKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpQuantizeDownInt32ScaleKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

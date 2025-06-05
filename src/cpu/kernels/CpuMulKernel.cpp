@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -1778,6 +1779,7 @@ Status CpuMulKernel::validate(const ITensorInfo *src1,
                               ConvertPolicy      overflow_policy,
                               RoundingPolicy     rounding_policy)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMulKernel::validate");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src1, src2, dst, scale, overflow_policy, rounding_policy));
 
@@ -1839,6 +1841,7 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
 
 void CpuComplexMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComplexMulKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(src1, src2, dst));
 
@@ -1856,6 +1859,7 @@ void CpuComplexMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITenso
 
 Status CpuComplexMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComplexMulKernel::validate");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_complex(src1, src2, dst));
 
@@ -1864,6 +1868,7 @@ Status CpuComplexMulKernel::validate(const ITensorInfo *src1, const ITensorInfo 
 
 void CpuComplexMulKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComplexMulKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

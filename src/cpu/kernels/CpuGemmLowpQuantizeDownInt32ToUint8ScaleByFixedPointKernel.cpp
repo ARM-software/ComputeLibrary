@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/NEAsymm.h"
@@ -190,6 +191,8 @@ void CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(ITens
                                                                            int          min,
                                                                            int          max)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure");
     ARM_COMPUTE_UNUSED(bias);
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
@@ -217,6 +220,8 @@ void CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(ITens
 Status CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(
     const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, int min, int max)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, bias, dst, min, max));
     return Status{};
@@ -226,6 +231,8 @@ void CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run_op(ITensorP
                                                                         const Window     &window,
                                                                         const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

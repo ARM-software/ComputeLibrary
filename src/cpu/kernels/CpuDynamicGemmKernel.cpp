@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/function_info/GEMMInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
@@ -49,6 +50,7 @@ void CpuDynamicGemmKernel::configure(const ITensorInfo *a,
                                      size_t             base_aux_slot,
                                      const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDynamicGemmKernel::configure");
     ARM_COMPUTE_ERROR_THROW_ON(CpuDynamicGemmKernel::validate(a, b, c, d, alpha, beta, gemm_info));
 
     _heuristics = CpuDynamicGemmKernelHeuristics{a, b, c, d, alpha, beta, gemm_info};
@@ -70,6 +72,7 @@ Status CpuDynamicGemmKernel::validate(const ITensorInfo *a,
                                       float              beta,
                                       const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDynamicGemmKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, c, d);
     ARM_COMPUTE_UNUSED(d);
     ARM_COMPUTE_UNUSED(alpha);
@@ -123,6 +126,7 @@ Status CpuDynamicGemmKernel::validate(const ITensorInfo *a,
 
 void CpuDynamicGemmKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDynamicGemmKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_EXIT_ON_MSG(tensors.empty(), "No inputs provided");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Steps.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/NEAsymm.h"
 
@@ -58,6 +59,7 @@ Status validate_arguments(const ITensorInfo *src, unsigned int width_offset, con
 
 void CpuConcatenateWidthKernel::configure(const ITensorInfo *src, unsigned int width_offset, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenateWidthKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, width_offset, dst));
     ARM_COMPUTE_UNUSED(dst);
@@ -72,12 +74,14 @@ void CpuConcatenateWidthKernel::configure(const ITensorInfo *src, unsigned int w
 
 Status CpuConcatenateWidthKernel::validate(const ITensorInfo *src, unsigned int width_offset, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenateWidthKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, width_offset, dst));
     return Status{};
 }
 
 void CpuConcatenateWidthKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenateWidthKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

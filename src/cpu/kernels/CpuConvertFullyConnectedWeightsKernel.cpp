@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -41,6 +42,8 @@ void CpuConvertFullyConnectedWeightsKernel::configure(const ITensorInfo *src,
                                                       DataLayout         data_layout)
 
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuConvertFullyConnectedWeightsKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Output tensor auto initialisation if not yet initialized
@@ -71,6 +74,8 @@ Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
                                                        const TensorShape &original_input_shape,
                                                        DataLayout         data_layout)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuConvertFullyConnectedWeightsKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(src->num_dimensions() != 2);
@@ -89,6 +94,8 @@ Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
 
 void CpuConvertFullyConnectedWeightsKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuConvertFullyConnectedWeightsKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

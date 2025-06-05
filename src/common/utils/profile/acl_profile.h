@@ -37,9 +37,8 @@
 #define ARM_COMPUTE_PROF_CAT_SCHEDULER "SCHEDULER"
 
 // Define ACL profile levels
-#define ARM_COMPUTE_PROF_L0 0
-#define ARM_COMPUTE_PROF_L1 1
-#define ARM_COMPUTE_PROF_L2 2
+#define ARM_COMPUTE_PROF_LVL_CPU 0
+#define ARM_COMPUTE_PROF_LVL_GPU 1
 
 #define ARM_COMPUTE_TRACE_EVENT(category, level, name) \
     (void)category;                                    \

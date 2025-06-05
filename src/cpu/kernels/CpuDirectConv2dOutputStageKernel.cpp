@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -103,6 +104,8 @@ void CpuDirectConv2dOutputStageKernel::configure(ITensorInfo                    
                                                  ITensorInfo                                       *dst,
                                                  const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDirectConv2dOutputStageKernel::configure");
     ARM_COMPUTE_UNUSED(bias);
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
@@ -217,12 +220,16 @@ Status CpuDirectConv2dOutputStageKernel::validate(const ITensorInfo             
                                                   const ITensorInfo                                 *dst,
                                                   const DirectConvolutionLayerOutputStageKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDirectConv2dOutputStageKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, bias, dst, info));
     return Status{};
 }
 
 void CpuDirectConv2dOutputStageKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDirectConv2dOutputStageKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

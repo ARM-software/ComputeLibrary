@@ -32,6 +32,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -119,6 +120,8 @@ void CpuGemmLowpOffsetContributionKernel::configure(ITensorInfo *mm_result,
                                                     int32_t      b_offset,
                                                     float        scale)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpOffsetContributionKernel::configure");
     // Perform validate step
     ARM_COMPUTE_UNUSED(vector_sum_row);
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result);
@@ -188,12 +191,16 @@ Status CpuGemmLowpOffsetContributionKernel::validate(const ITensorInfo *mm_resul
                                                      int32_t            a_offset,
                                                      int32_t            b_offset)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpOffsetContributionKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, a_offset, b_offset));
     return Status{};
 }
 
 void CpuGemmLowpOffsetContributionKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpOffsetContributionKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

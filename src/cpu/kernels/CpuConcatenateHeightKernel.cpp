@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/NEAsymm.h"
@@ -65,6 +66,8 @@ Status validate_arguments(const ITensorInfo *src, unsigned int height_offset, co
 
 void CpuConcatenateHeightKernel::configure(const ITensorInfo *src, unsigned int height_offset, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuConcatenateHeightKernel::configure");
     ARM_COMPUTE_UNUSED(src);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, height_offset, dst));
@@ -78,12 +81,14 @@ void CpuConcatenateHeightKernel::configure(const ITensorInfo *src, unsigned int 
 
 Status CpuConcatenateHeightKernel::validate(const ITensorInfo *src, unsigned int height_offset, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenateHeightKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, height_offset, dst));
     return Status{};
 }
 
 void CpuConcatenateHeightKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenateHeightKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

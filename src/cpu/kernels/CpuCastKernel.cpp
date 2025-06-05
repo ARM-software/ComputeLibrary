@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -162,6 +163,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
 
 void CpuCastKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCastKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Auto initialize dst shape if not initialized (We can only auto-configure the shape, datatype must be given)
@@ -179,6 +181,7 @@ void CpuCastKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ConvertP
 
 Status CpuCastKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, ConvertPolicy policy)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCastKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, policy));
     return Status{};
 }
@@ -270,6 +273,7 @@ convert64(Iterator &src, Iterator &dst, const Window &win, int window_start_x, i
 
 void CpuCastKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCastKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);

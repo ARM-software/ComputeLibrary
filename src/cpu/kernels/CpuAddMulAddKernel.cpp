@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -127,6 +128,7 @@ void CpuAddMulAddKernel::configure(const ITensorInfo         *input1,
                                    ConvertPolicy              policy,
                                    const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAddMulAddKernel::configure");
     ARM_COMPUTE_UNUSED(bn_mul, bn_add, input2);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, bn_add, bn_mul, final_output);
     ARM_COMPUTE_ERROR_THROW_ON(
@@ -167,6 +169,7 @@ Status CpuAddMulAddKernel::validate(const ITensorInfo         *input1,
                                     ConvertPolicy              policy,
                                     const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAddMulAddKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, bn_mul, bn_add, final_output);
 
     ARM_COMPUTE_RETURN_ON_ERROR(
@@ -177,6 +180,7 @@ Status CpuAddMulAddKernel::validate(const ITensorInfo         *input1,
 
 void CpuAddMulAddKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAddMulAddKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);

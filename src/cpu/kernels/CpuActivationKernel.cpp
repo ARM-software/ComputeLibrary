@@ -27,6 +27,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -199,6 +200,7 @@ void init_lut(ActivationLayerInfo::ActivationFunction act_func,
 
 void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivationKernel::configure");
     ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_ERROR_THROW_ON(CpuActivationKernel::validate(src, dst, activation_info));
@@ -248,9 +250,9 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 Status
 CpuActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivationKernel::validate");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, act_info));
-
     return Status{};
 }
 
@@ -264,6 +266,7 @@ size_t CpuActivationKernel::get_mws(const CPUInfo &platform, size_t thread_count
 
 void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivationKernel::run_op");
     // Early exit on disabled activation
     if (!_act_info.enabled())
     {

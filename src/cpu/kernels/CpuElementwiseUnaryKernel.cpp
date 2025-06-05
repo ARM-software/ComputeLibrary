@@ -29,6 +29,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -184,6 +185,7 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
 
 void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseUnaryKernel::configure");
     ARM_COMPUTE_ERROR_THROW_ON(validate(op, src, dst));
     const auto uk = CpuElementwiseUnaryKernel::get_implementation(
         DataTypeISASelectorData{src.data_type(), CPUInfo::get().get_isa()});
@@ -211,6 +213,7 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
 
 Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseUnaryKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
 
     const auto *uk = CpuElementwiseUnaryKernel::get_implementation(
@@ -247,6 +250,7 @@ Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInf
 
 void CpuElementwiseUnaryKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseUnaryKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
 
     auto src = tensors.get_const_tensor(TensorType::ACL_SRC);

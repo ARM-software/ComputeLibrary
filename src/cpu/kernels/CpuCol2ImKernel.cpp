@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -64,6 +65,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 
 void CpuCol2ImKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const Size2D &convolved_dims)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCol2ImKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, convolved_dims));
 
@@ -81,12 +83,14 @@ void CpuCol2ImKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
 
 Status CpuCol2ImKernel::validate(const ITensorInfo *src, const ITensorInfo *output, const Size2D &convolved_dims)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCol2ImKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, output, convolved_dims));
     return Status{};
 }
 
 void CpuCol2ImKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCol2ImKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

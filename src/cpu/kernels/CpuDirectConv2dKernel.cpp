@@ -26,6 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -110,6 +111,7 @@ void CpuDirectConv2dKernel::configure(ITensorInfo         *src,
                                       ITensorInfo         *dst,
                                       const PadStrideInfo &conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv2dKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
     _conv_info   = conv_info;
@@ -138,6 +140,7 @@ Status CpuDirectConv2dKernel::validate(const ITensorInfo   *src,
                                        const ITensorInfo   *dst,
                                        const PadStrideInfo &conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv2dKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, dst, conv_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get()).first);
 
@@ -146,6 +149,7 @@ Status CpuDirectConv2dKernel::validate(const ITensorInfo   *src,
 
 void CpuDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv2dKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

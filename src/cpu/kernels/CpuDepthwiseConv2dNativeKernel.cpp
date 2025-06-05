@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -132,6 +133,8 @@ void CpuDepthwiseConv2dNativeKernel::configure(const ITensorInfo     *src,
                                                ITensorInfo           *dst,
                                                const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dNativeKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, (biases != nullptr) ? biases : nullptr, dst, info));
 
@@ -160,12 +163,16 @@ Status CpuDepthwiseConv2dNativeKernel::validate(const ITensorInfo     *src,
                                                 const ITensorInfo     *dst,
                                                 const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dNativeKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, info));
     return Status{};
 }
 
 void CpuDepthwiseConv2dNativeKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dNativeKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -81,6 +82,7 @@ validate_and_configure_window_with_padding(const ITensorInfo *src, ITensorInfo *
 
 void CpuCopyKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const PaddingList &padding)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCopyKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, padding));
 
@@ -104,6 +106,7 @@ Status CpuCopyKernel::validate(const arm_compute::ITensorInfo *src,
                                const arm_compute::ITensorInfo *dst,
                                const PaddingList              &padding)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCopyKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, padding));
 
     if (padding.empty())
@@ -121,6 +124,7 @@ Status CpuCopyKernel::validate(const arm_compute::ITensorInfo *src,
 
 void CpuCopyKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCopyKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);

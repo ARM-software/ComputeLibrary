@@ -32,6 +32,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -293,6 +294,7 @@ void CpuIm2ColKernel::configure(const ITensorInfo   *src,
                                 unsigned int         num_groups,
                                 unsigned int         channel_pad_right)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuIm2ColKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(
         validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, channel_pad_right));
@@ -389,6 +391,7 @@ Status CpuIm2ColKernel::validate(const ITensorInfo   *src,
                                  unsigned int         num_groups,
                                  unsigned int         channel_pad_right)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuIm2ColKernel::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(
         validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, channel_pad_right));
     return Status{};
@@ -396,6 +399,7 @@ Status CpuIm2ColKernel::validate(const ITensorInfo   *src,
 
 void CpuIm2ColKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuIm2ColKernel::run_op");
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
