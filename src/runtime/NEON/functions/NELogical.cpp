@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2024 Arm Limited.
+ * Copyright (c) 2020-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NELogicalKernel.h"
 
 namespace arm_compute
@@ -47,6 +48,7 @@ NELogicalAnd::~NELogicalAnd() = default;
 
 void NELogicalAnd::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalAnd::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
 
@@ -61,12 +63,14 @@ void NELogicalAnd::configure(const ITensor *input1, const ITensor *input2, ITens
 
 Status NELogicalAnd::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalAnd::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return kernels::NELogicalKernel::validate(input1, input2, output, LogicalOperation::And);
 }
 
 void NELogicalAnd::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalAnd::run");
     NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->kernel->window(), _impl->pack);
 }
 
@@ -80,6 +84,7 @@ NELogicalOr::~NELogicalOr() = default;
 
 void NELogicalOr::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalOr::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
 
@@ -94,12 +99,14 @@ void NELogicalOr::configure(const ITensor *input1, const ITensor *input2, ITenso
 
 Status NELogicalOr::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalOr::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return kernels::NELogicalKernel::validate(input1, input2, output, LogicalOperation::Or);
 }
 
 void NELogicalOr::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalOr::run");
     NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->kernel->window(), _impl->pack);
 }
 
@@ -113,6 +120,7 @@ NELogicalNot::~NELogicalNot() = default;
 
 void NELogicalNot::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalNot::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_LOG_PARAMS(input, output);
 
@@ -126,12 +134,14 @@ void NELogicalNot::configure(const ITensor *input, ITensor *output)
 
 Status NELogicalNot::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalNot::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return kernels::NELogicalKernel::validate(input, nullptr, output, LogicalOperation::Not);
 }
 
 void NELogicalNot::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELogicalNot::run");
     NEScheduler::get().schedule_op(_impl->kernel.get(), Window::DimY, _impl->kernel->window(), _impl->pack);
 }
 } // namespace arm_compute

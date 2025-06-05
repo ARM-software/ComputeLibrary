@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, 2024 Arm Limited.
+ * Copyright (c) 2020-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
 #include "src/cpu/operators/CpuMaxUnpooling.h"
 
@@ -53,6 +54,7 @@ void NEMaxUnpoolingLayer::configure(ITensor                *input,
                                     ITensor                *output,
                                     const PoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEMaxUnpoolingLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, indices, output, pool_info);
 
     const PixelValue zero_value(0.f);
@@ -72,6 +74,7 @@ Status NEMaxUnpoolingLayer::validate(const ITensorInfo      *input,
                                      const ITensorInfo      *output,
                                      const PoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEMaxUnpoolingLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, indices);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, indices, output);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuMaxUnpooling::validate(input, indices, output, pool_info));
@@ -80,6 +83,7 @@ Status NEMaxUnpoolingLayer::validate(const ITensorInfo      *input,
 
 void NEMaxUnpoolingLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEMaxUnpoolingLayer::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->indices);

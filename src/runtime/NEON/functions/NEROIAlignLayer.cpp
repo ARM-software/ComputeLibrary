@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEROIAlignLayerKernel.h"
 
@@ -36,6 +37,7 @@ Status NEROIAlignLayer::validate(const ITensorInfo         *input,
                                  ITensorInfo               *output,
                                  const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEROIAlignLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, rois, output);
     ARM_COMPUTE_RETURN_ON_ERROR(NEROIAlignLayerKernel::validate(input, rois, output, pool_info));
 
@@ -47,6 +49,7 @@ void NEROIAlignLayer::configure(const ITensor             *input,
                                 ITensor                   *output,
                                 const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEROIAlignLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, rois, output, pool_info);
 
     // Configure ROI pooling kernel

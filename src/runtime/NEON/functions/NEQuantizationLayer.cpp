@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuQuantize.h"
 
 namespace arm_compute
@@ -45,12 +46,14 @@ NEQuantizationLayer::~NEQuantizationLayer() = default;
 
 Status NEQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEQuantizationLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return cpu::CpuQuantize::validate(input, output);
 }
 
 void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEQuantizationLayer::configure");
     _impl->src = input;
     _impl->dst = output;
     _impl->op  = std::make_unique<cpu::CpuQuantize>();
@@ -59,6 +62,7 @@ void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
 
 void NEQuantizationLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEQuantizationLayer::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);

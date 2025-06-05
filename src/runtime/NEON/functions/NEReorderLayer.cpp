@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEReorderKernel.h"
 
 namespace arm_compute
@@ -44,6 +45,7 @@ void NEReorderLayer::configure(const ITensor            *input,
                                arm_compute::WeightFormat output_wf,
                                bool                      transpose)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReorderLayer::configure");
     auto k = std::make_unique<NEReorderKernel>();
     k->configure(input, output, input_wf, output_wf, transpose);
     _reorder_kernel = std::move(k);
@@ -51,6 +53,7 @@ void NEReorderLayer::configure(const ITensor            *input,
 
 void NEReorderLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReorderLayer::run");
     // Run Reorder
     NEScheduler::get().schedule(_reorder_kernel.get(), Window::DimX);
 }
@@ -61,6 +64,7 @@ Status NEReorderLayer::validate(const ITensorInfo        *input,
                                 arm_compute::WeightFormat output_wf,
                                 bool                      transpose)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReorderLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEReorderKernel::validate(input, output, input_wf, output_wf, transpose);
 }

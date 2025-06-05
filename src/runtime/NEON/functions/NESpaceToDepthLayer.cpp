@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NESpaceToDepthLayerKernel.h"
 
 namespace arm_compute
@@ -43,6 +44,7 @@ NESpaceToDepthLayer::NESpaceToDepthLayer() : _space_to_depth_kernel()
 
 void NESpaceToDepthLayer::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToDepthLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
 
@@ -52,6 +54,7 @@ void NESpaceToDepthLayer::configure(const ITensor *input, ITensor *output, int32
 
 Status NESpaceToDepthLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToDepthLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(NESpaceToDepthLayerKernel::validate(input, output, block_shape));
     return Status{};
@@ -59,6 +62,7 @@ Status NESpaceToDepthLayer::validate(const ITensorInfo *input, const ITensorInfo
 
 void NESpaceToDepthLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToDepthLayer::run");
     NEScheduler::get().schedule(_space_to_depth_kernel.get(), Window::DimY);
 }
 } // namespace arm_compute

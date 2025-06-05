@@ -29,6 +29,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
@@ -69,6 +70,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor             *input,
                                            const ActivationLayerInfo &act_info,
                                            bool                       enable_fast_math)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEWinogradConvolutionLayer::configure");
     _impl->is_prepared      = false;
     _impl->original_weights = weights;
     _impl->op               = std::make_unique<cpu::CpuWinogradConv2d>();
@@ -84,6 +87,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor             *input,
 
 void NEWinogradConvolutionLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEWinogradConvolutionLayer::run");
     prepare();
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
@@ -98,6 +102,7 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo         *input,
                                             const ActivationLayerInfo &act_info,
                                             bool                       enable_fast_math)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEWinogradConvolutionLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return cpu::CpuWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math);
 }

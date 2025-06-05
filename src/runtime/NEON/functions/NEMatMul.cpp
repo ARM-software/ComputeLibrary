@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuMatMul.h"
 
@@ -56,6 +57,7 @@ void NEMatMul::configure(ITensor                   *lhs,
                          const CpuMatMulSettings   &settings,
                          const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEMatMul::configure");
     _impl->lhs    = lhs;
     _impl->rhs    = rhs;
     _impl->output = output;
@@ -74,12 +76,14 @@ Status NEMatMul::validate(const ITensorInfo         *lhs,
                           const CpuMatMulSettings   &settings,
                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEMatMul::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(lhs, rhs, output);
     return cpu::CpuMatMul::validate(lhs, rhs, output, info, settings, act_info);
 }
 
 void NEMatMul::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEMatMul::run");
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->op->run(_impl->run_pack);
 }

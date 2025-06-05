@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,10 +30,13 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "src/common/utils/profile/acl_profile.h"
+
 namespace arm_compute
 {
 void NESplit::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESplit::run");
     for (unsigned i = 0; i < _num_outputs; ++i)
     {
         _slice_functions[i].run();

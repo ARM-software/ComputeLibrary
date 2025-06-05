@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
 #include "src/cpu/operators/CpuSoftmax.h"
@@ -61,6 +62,7 @@ NESoftmaxLayerGeneric<IS_LOG>::~NESoftmaxLayerGeneric() = default;
 template <bool IS_LOG>
 void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, float beta, int32_t axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESoftmaxLayerGeneric::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _impl->src = input;
@@ -76,6 +78,7 @@ template <bool IS_LOG>
 Status
 NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESoftmaxLayerGeneric::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuSoftmaxGeneric::validate(input, output, beta, axis, IS_LOG));
@@ -85,6 +88,7 @@ NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorI
 template <bool IS_LOG>
 void NESoftmaxLayerGeneric<IS_LOG>::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESoftmaxLayerGeneric::run");
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);

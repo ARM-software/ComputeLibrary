@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2024 Arm Limited.
+ * Copyright (c) 2016-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuMul.h"
 
 #include <utility>
@@ -53,6 +54,7 @@ Status NEPixelWiseMultiplication::validate(const ITensorInfo         *input1,
                                            RoundingPolicy             rounding_policy,
                                            const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPixelWiseMultiplication::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuMul::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
@@ -65,6 +67,7 @@ void NEPixelWiseMultiplication::configure(const ITensor             *input1,
                                           RoundingPolicy             rounding_policy,
                                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPixelWiseMultiplication::configure");
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -75,6 +78,7 @@ void NEPixelWiseMultiplication::configure(const ITensor             *input1,
 
 void NEPixelWiseMultiplication::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPixelWiseMultiplication::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -100,6 +104,8 @@ Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo         *inp
                                                   const ITensorInfo         *output,
                                                   const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEComplexPixelWiseMultiplication::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuComplexMul::validate(input1, input2, output, act_info);
 }
@@ -109,6 +115,8 @@ void NEComplexPixelWiseMultiplication::configure(ITensor                   *inpu
                                                  ITensor                   *output,
                                                  const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEComplexPixelWiseMultiplication::configure");
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -118,6 +126,8 @@ void NEComplexPixelWiseMultiplication::configure(ITensor                   *inpu
 
 void NEComplexPixelWiseMultiplication::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEComplexPixelWiseMultiplication::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);

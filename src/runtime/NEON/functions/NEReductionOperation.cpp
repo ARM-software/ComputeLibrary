@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
@@ -73,6 +74,7 @@ NEReductionOperation::NEReductionOperation(std::shared_ptr<IMemoryManager> memor
 Status NEReductionOperation::validate(
     const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReductionOperation::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions,
                                     "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
@@ -119,6 +121,7 @@ Status NEReductionOperation::validate(
 void NEReductionOperation::configure(
     ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReductionOperation::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_LOG_PARAMS(input, output, axis, op, keep_dims);
 
@@ -172,6 +175,7 @@ void NEReductionOperation::configure(
 
 void NEReductionOperation::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReductionOperation::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
     NEScheduler::get().schedule(_reduction_kernel.get(), _window_split);
     if (_is_reshape_required)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
 namespace arm_compute
@@ -56,6 +57,7 @@ Status NESlice::validate(const ITensorInfo *input,
                          const Coordinates &starts,
                          const Coordinates &ends)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESlice::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
@@ -89,12 +91,14 @@ Status NESlice::validate(const ITensorInfo *input,
                          const Coordinates &starts,
                          const Coordinates &ends)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESlice::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return experimental::NESlice::validate(input, output, starts, ends);
 }
 
 void NESlice::configure(const ITensor *input, ITensor *output, const Coordinates &starts, const Coordinates &ends)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESlice::configure");
     _impl->src = input;
     _impl->dst = output;
     _impl->op  = std::make_unique<experimental::NESlice>();
@@ -103,6 +107,7 @@ void NESlice::configure(const ITensor *input, ITensor *output, const Coordinates
 
 void NESlice::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESlice::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);

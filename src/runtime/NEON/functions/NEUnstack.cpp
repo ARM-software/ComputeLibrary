@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 
 namespace arm_compute
 {
@@ -64,6 +65,7 @@ NEUnstack::NEUnstack() // NOLINT
 
 void NEUnstack::configure(const ITensor *input, const std::vector<ITensor *> &output_vector, int axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEUnstack::configure");
     std::vector<ITensorInfo *> outputs_vector_info(output_vector.size());
     std::transform(output_vector.begin(), output_vector.end(), outputs_vector_info.begin(),
                    [](ITensor *t)
@@ -95,6 +97,7 @@ void NEUnstack::configure(const ITensor *input, const std::vector<ITensor *> &ou
 
 Status NEUnstack::validate(const ITensorInfo *input, const std::vector<ITensorInfo *> &output_vector, int axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEUnstack::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON(output_vector.empty());
     ARM_COMPUTE_RETURN_ERROR_ON(axis < (-static_cast<int>(input->tensor_shape().num_dimensions())));
@@ -125,6 +128,7 @@ Status NEUnstack::validate(const ITensorInfo *input, const std::vector<ITensorIn
 
 void NEUnstack::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEUnstack::run");
     for (unsigned i = 0; i < _num_slices; ++i)
     {
         _strided_slice_vector[i].run();

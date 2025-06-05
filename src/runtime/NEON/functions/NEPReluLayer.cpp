@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuPRelu.h"
 
 namespace arm_compute
@@ -49,6 +50,7 @@ NEPReluLayer::~NEPReluLayer()                          = default;
 
 void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPReluLayer::configure");
     _impl->src_0 = input;
     _impl->src_1 = alpha;
     _impl->dst   = output;
@@ -58,6 +60,7 @@ void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor
 
 void NEPReluLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPReluLayer::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -67,6 +70,7 @@ void NEPReluLayer::run()
 
 Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPReluLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, alpha, output);
     return OperatorType::validate(input, alpha, output);
 }

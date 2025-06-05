@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
 
 namespace arm_compute
@@ -44,6 +45,7 @@ NENormalizationLayer::NENormalizationLayer(std::shared_ptr<IMemoryManager> memor
 
 void NENormalizationLayer::configure(const ITensor *input, ITensor *output, const NormalizationLayerInfo &norm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NENormalizationLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_LOG_PARAMS(input, output, norm_info);
 
@@ -66,6 +68,7 @@ Status NENormalizationLayer::validate(const ITensorInfo            *input,
                                       const ITensorInfo            *output,
                                       const NormalizationLayerInfo &norm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NENormalizationLayer::validate");
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
@@ -79,6 +82,7 @@ Status NENormalizationLayer::validate(const ITensorInfo            *input,
 
 void NENormalizationLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NENormalizationLayer::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
     _multiply_f.run();
     NEScheduler::get().schedule(_norm_kernel.get(), Window::DimY);

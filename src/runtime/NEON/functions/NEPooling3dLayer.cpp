@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024 Arm Limited.
+ * Copyright (c) 2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuPool3d.h"
 
@@ -51,6 +52,7 @@ NEPooling3dLayer::NEPooling3dLayer(std::shared_ptr<IMemoryManager> memory_manage
 
 void NEPooling3dLayer::configure(const ITensor *input, ITensor *output, const Pooling3dLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPooling3dLayer::configure");
     _impl->src = input;
     _impl->dst = output;
     _impl->op  = std::make_unique<cpu::CpuPool3d>();
@@ -63,12 +65,14 @@ void NEPooling3dLayer::configure(const ITensor *input, ITensor *output, const Po
 Status
 NEPooling3dLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const Pooling3dLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPooling3dLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return cpu::CpuPool3d::validate(input, output, pool_info);
 }
 
 void NEPooling3dLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPooling3dLayer::run");
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
     _impl->op->run(_impl->run_pack);

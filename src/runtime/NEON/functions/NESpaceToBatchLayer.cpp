@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 
 namespace arm_compute
@@ -47,6 +48,7 @@ void NESpaceToBatchLayer::configure(const ITensor *input,
                                     const ITensor *paddings,
                                     ITensor       *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToBatchLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, block_shape, paddings, output);
     ARM_COMPUTE_LOG_PARAMS(input, block_shape, paddings, output);
 
@@ -67,6 +69,7 @@ void NESpaceToBatchLayer::configure(const ITensor *input,
                                     const Size2D  &padding_right,
                                     ITensor       *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToBatchLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     if (input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
@@ -84,6 +87,7 @@ Status NESpaceToBatchLayer::validate(const ITensorInfo *input,
                                      const ITensorInfo *paddings,
                                      const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToBatchLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, block_shape, paddings, output);
     ARM_COMPUTE_RETURN_ON_ERROR(NESpaceToBatchLayerKernel::validate(input, block_shape, paddings, output));
 
@@ -97,6 +101,7 @@ Status NESpaceToBatchLayer::validate(const ITensorInfo *input,
                                      const Size2D      &padding_right,
                                      const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToBatchLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(
         NESpaceToBatchLayerKernel::validate(input, block_shape_x, block_shape_y, padding_left, padding_right, output));
@@ -106,6 +111,7 @@ Status NESpaceToBatchLayer::validate(const ITensorInfo *input,
 
 void NESpaceToBatchLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESpaceToBatchLayer::run");
     // Zero out output only if we have paddings
     if (_has_padding)
     {

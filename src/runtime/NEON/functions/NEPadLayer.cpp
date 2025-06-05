@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 
@@ -189,6 +190,7 @@ void NEPadLayer::configure(ITensor           *input,
                            const PixelValue   constant_value,
                            const PaddingMode  mode)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPadLayer::configure");
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
     ARM_COMPUTE_LOG_PARAMS(input, output, padding, constant_value, mode);
 
@@ -234,6 +236,7 @@ Status NEPadLayer::validate(const ITensorInfo *input,
                             const PixelValue   constant_value,
                             const PaddingMode  mode)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPadLayer::validate");
     ARM_COMPUTE_UNUSED(constant_value);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
@@ -279,6 +282,7 @@ Status NEPadLayer::validate(const ITensorInfo *input,
 
 void NEPadLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPadLayer::run");
     if (_num_dimensions > 0)
     {
         switch (_mode)

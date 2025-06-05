@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuReshape.h"
 
 #include <utility>
@@ -47,6 +48,7 @@ NEReshapeLayer::~NEReshapeLayer()                            = default;
 
 void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReshapeLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _impl->src = input;
@@ -57,6 +59,7 @@ void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
 
 Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReshapeLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuReshape::validate(input, output));
@@ -66,6 +69,7 @@ Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 
 void NEReshapeLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReshapeLayer::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);

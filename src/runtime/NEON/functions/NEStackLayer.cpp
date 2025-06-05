@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEStackLayerKernel.h"
 
 namespace arm_compute
@@ -45,6 +46,7 @@ NEStackLayer::NEStackLayer() // NOLINT
 
 void NEStackLayer::configure(const std::vector<ITensor *> &input, int axis, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEStackLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, axis, output);
 
     // Wrap around negative values
@@ -55,6 +57,7 @@ void NEStackLayer::configure(const std::vector<ITensor *> &input, int axis, ITen
 
 Status NEStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEStackLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(input.empty());
 
@@ -76,6 +79,7 @@ Status NEStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis,
 
 void NEStackLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEStackLayer::run");
     if (!_is_prepared)
     {
         _stack_kernel->prepare();

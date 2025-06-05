@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
@@ -116,11 +117,13 @@ Status NEReduceMean::validate(const ITensorInfo *input,
                               bool               keep_dims,
                               const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReduceMean::validate");
     return validate_config(input, reduction_axis, keep_dims, output);
 }
 
 void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, bool keep_dims, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReduceMean::configure");
     ARM_COMPUTE_LOG_PARAMS(input, reduction_axis, keep_dims, output);
 
     // Perform validate step
@@ -195,6 +198,7 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
 
 void NEReduceMean::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReduceMean::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
     for (auto &kernel : _reduction_kernels)
     {

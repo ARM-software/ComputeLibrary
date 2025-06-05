@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuPool2d.h"
 
@@ -52,6 +53,7 @@ NEPoolingLayer::NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager) :
 
 void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info, ITensor *indices)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPoolingLayer::configure");
     _impl->src     = input;
     _impl->dst     = output;
     _impl->indices = indices;
@@ -69,12 +71,14 @@ Status NEPoolingLayer::validate(const ITensorInfo      *input,
                                 const PoolingLayerInfo &pool_info,
                                 const ITensorInfo      *indices)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPoolingLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, indices);
     return cpu::CpuPool2d::validate(input, output, pool_info, indices);
 }
 
 void NEPoolingLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEPoolingLayer::run");
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
     _impl->op->run(_impl->run_pack);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,12 +26,14 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEReverseKernel.h"
 
 namespace arm_compute
 {
 void NEReverse::configure(const ITensor *input, ITensor *output, const ITensor *axis, bool use_inverted_axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReverse::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, axis);
 
     auto k = std::make_unique<NEReverseKernel>();
@@ -44,6 +46,7 @@ Status NEReverse::validate(const ITensorInfo *input,
                            const ITensorInfo *axis,
                            bool               use_inverted_axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEReverse::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, axis);
     return NEReverseKernel::validate(input, output, axis, use_inverted_axis);
 }

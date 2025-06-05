@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, 2024 Arm Limited.
+ * Copyright (c) 2020-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 #include "src/cpu/kernels/CpuGemmLowpMatrixReductionKernel.h"
@@ -83,6 +84,8 @@ NEQLSTMLayer::TensorCopyKernel::~TensorCopyKernel() = default;
 
 Status NEQLSTMLayer::TensorCopyKernel::validate(const ITensorInfo &src, const ITensorInfo &dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEQLSTMLayer::TensorCopyKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON(src.tensor_shape().num_dimensions() > max_dimension_supported);
     ARM_COMPUTE_RETURN_ERROR_ON(dst.tensor_shape().num_dimensions() > max_dimension_supported);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
@@ -92,6 +95,8 @@ Status NEQLSTMLayer::TensorCopyKernel::validate(const ITensorInfo &src, const IT
 
 void NEQLSTMLayer::TensorCopyKernel::configure(ITensor &src, ITensor &dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEQLSTMLayer::TensorCopyKernel::configure");
     ARM_COMPUTE_ERROR_THROW_ON(NEQLSTMLayer::TensorCopyKernel::validate(*src.info(), *dst.info()));
     ARM_COMPUTE_LOG_PARAMS(src, dst);
 
@@ -103,6 +108,7 @@ void NEQLSTMLayer::TensorCopyKernel::configure(ITensor &src, ITensor &dst)
 
 void NEQLSTMLayer::TensorCopyKernel::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEQLSTMLayer::TensorCopyKernel::run");
     Iterator input_iter{_src, _window};
     Iterator output_iter{_dst, _window};
 
@@ -239,6 +245,7 @@ void NEQLSTMLayer::configure(const ITensor             *input,
                              ITensor                   *output,
                              const LSTMParams<ITensor> &lstm_params)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEQLSTMLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
                                  recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
                                  forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in,
@@ -797,6 +804,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo             *input,
                               const ITensorInfo             *output,
                               const LSTMParams<ITensorInfo> &lstm_params)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEQLSTMLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
                                         recurrent_to_forget_weights, recurrent_to_cell_weights,
                                         recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
@@ -1312,6 +1320,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo             *input,
 
 void NEQLSTMLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEQLSTMLayer::run");
     prepare();
 
     // Acquire all the temporaries

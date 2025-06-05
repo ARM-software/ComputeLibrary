@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 
 namespace arm_compute
@@ -42,6 +43,7 @@ Status NEROIPoolingLayer::validate(const ITensorInfo         *input,
                                    const ITensorInfo         *output,
                                    const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEROIPoolingLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, rois, output);
     return NEROIPoolingLayerKernel::validate(input, rois, output, pool_info);
 }
@@ -51,6 +53,7 @@ void NEROIPoolingLayer::configure(const ITensor             *input,
                                   const ITensor             *output,
                                   const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEROIPoolingLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, rois, output, pool_info);
 
     _roi_kernel = std::make_unique<NEROIPoolingLayerKernel>();
@@ -59,6 +62,7 @@ void NEROIPoolingLayer::configure(const ITensor             *input,
 
 void NEROIPoolingLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEROIPoolingLayer::run");
     NEScheduler::get().schedule(_roi_kernel.get(), Window::DimX);
 }
 } // namespace arm_compute

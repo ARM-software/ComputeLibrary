@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuScatter.h"
 
@@ -52,6 +53,7 @@ NEScatter::~NEScatter() = default;
 void NEScatter::configure(
     const ITensor *src, const ITensor *updates, const ITensor *indices, ITensor *dst, const ScatterInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEScatter::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(updates, indices, dst);
 
     if (src == nullptr)
@@ -91,6 +93,7 @@ Status NEScatter::validate(const ITensorInfo *src,
                            const ITensorInfo *dst,
                            const ScatterInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEScatter::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(src, updates, indices, dst);
 
     return cpu::CpuScatter::validate(src, updates, indices, dst, info);
@@ -98,6 +101,7 @@ Status NEScatter::validate(const ITensorInfo *src,
 
 void NEScatter::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEScatter::run");
     _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute

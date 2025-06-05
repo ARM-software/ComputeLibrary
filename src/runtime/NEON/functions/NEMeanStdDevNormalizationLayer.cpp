@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuMeanStdDevNormalization.h"
 
 namespace arm_compute
@@ -45,6 +46,8 @@ NEMeanStdDevNormalizationLayer::~NEMeanStdDevNormalizationLayer() = default;
 
 void NEMeanStdDevNormalizationLayer::configure(ITensor *input, ITensor *output, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEMeanStdDevNormalizationLayer::configure");
     _impl->input  = input;
     _impl->output = (output == nullptr) ? input : output;
     _impl->op     = std::make_unique<cpu::CpuMeanStdDevNormalization>();
@@ -53,11 +56,14 @@ void NEMeanStdDevNormalizationLayer::configure(ITensor *input, ITensor *output, 
 
 Status NEMeanStdDevNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEMeanStdDevNormalizationLayer::validate");
     return cpu::CpuMeanStdDevNormalization::validate(input, output, epsilon);
 }
 
 void NEMeanStdDevNormalizationLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEMeanStdDevNormalizationLayer::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->input);
     pack.add_tensor(TensorType::ACL_DST, _impl->output);

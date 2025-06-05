@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,12 +26,14 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NETileKernel.h"
 
 namespace arm_compute
 {
 void NETile::configure(const ITensor *input, ITensor *output, const Multiples &multiples)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NETile::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, multiples);
 
     auto k = std::make_unique<NETileKernel>();
@@ -41,6 +43,7 @@ void NETile::configure(const ITensor *input, ITensor *output, const Multiples &m
 
 Status NETile::validate(const ITensorInfo *input, const ITensorInfo *output, const Multiples &multiples)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NETile::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NETileKernel::validate(input, output, multiples);
 }

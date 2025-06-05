@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,14 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NESelectKernel.h"
 
 namespace arm_compute
 {
 void NESelect::configure(const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESelect::configure");
     ARM_COMPUTE_LOG_PARAMS(c, x, y, output);
 
     auto k = std::make_unique<NESelectKernel>();
@@ -42,6 +44,7 @@ void NESelect::configure(const ITensor *c, const ITensor *x, const ITensor *y, I
 
 Status NESelect::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NESelect::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(c, x, y, output);
     return NESelectKernel::validate(c, x, y, output);
 }

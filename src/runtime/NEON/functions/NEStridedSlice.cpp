@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
 namespace arm_compute
@@ -59,6 +60,7 @@ Status NEStridedSlice::validate(const ITensorInfo *input,
                                 int32_t            end_mask,
                                 int32_t            shrink_axis_mask)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEStridedSlice::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEStridedSliceKernel::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
@@ -87,6 +89,7 @@ void NEStridedSlice::configure(const ITensor     *input,
                                int32_t            end_mask,
                                int32_t            shrink_axis_mask)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEStridedSlice::configure");
     _impl->src = input;
     _impl->dst = output;
     _impl->op  = std::make_unique<experimental::NEStridedSlice>();
@@ -95,6 +98,7 @@ void NEStridedSlice::configure(const ITensor     *input,
 
 void NEStridedSlice::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEStridedSlice::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
@@ -110,6 +114,7 @@ Status NEStridedSlice::validate(const ITensorInfo *input,
                                 int32_t            end_mask,
                                 int32_t            shrink_axis_mask)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEStridedSlice::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return experimental::NEStridedSlice::validate(input, output, starts, ends, strides, begin_mask, end_mask,
                                                   shrink_axis_mask);
