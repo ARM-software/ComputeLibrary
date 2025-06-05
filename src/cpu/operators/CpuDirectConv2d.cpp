@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
 
@@ -59,6 +60,7 @@ void CpuDirectConv2d::configure(ITensorInfo               *src,
                                 const PadStrideInfo       &conv_info,
                                 const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv2d::configure");
     ARM_COMPUTE_ERROR_ON(src->data_layout() != DataLayout::NCHW && src->data_layout() != DataLayout::NHWC);
     ARM_COMPUTE_LOG_PARAMS(src, weights, bias, dst, conv_info, act_info);
 
@@ -144,6 +146,7 @@ Status CpuDirectConv2d::validate(const ITensorInfo         *src,
                                  const PadStrideInfo       &conv_info,
                                  const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv2d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     TensorInfo acc_to_use{};
     if (src->data_layout() == DataLayout::NCHW)
@@ -219,6 +222,7 @@ experimental::MemoryRequirements CpuDirectConv2d::workspace() const
 
 void CpuDirectConv2d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv2d::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     auto src     = tensors.get_tensor(TensorType::ACL_SRC_0);

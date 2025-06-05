@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/Utils.h"
@@ -433,6 +434,7 @@ void CpuGemmConv2d::configure(const ITensorInfo         *src,
                               bool                       enable_fast_math,
                               unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmConv2d::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_UNUSED(num_groups, weights_info);
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmConv2d::validate(src, weights, biases, dst, conv_info, weights_info, dilation,
@@ -665,6 +667,7 @@ Status CpuGemmConv2d::validate(const ITensorInfo         *src,
                                bool                       enable_fast_math,
                                unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmConv2d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
@@ -859,6 +862,7 @@ void CpuGemmConv2d::update_quantization_parameters(ITensorPack &tensors)
 
 void CpuGemmConv2d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmConv2d::run");
     prepare(tensors);
 
     auto src               = tensors.get_const_tensor(ACL_SRC_0);

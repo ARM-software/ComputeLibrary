@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuAddKernel.h"
-
 namespace arm_compute
 {
 namespace cpu
@@ -38,6 +38,7 @@ void CpuAdd::configure(const ITensorInfo         *src0,
                        ConvertPolicy              policy,
                        const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAdd::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst, policy, act_info);
     auto k = std::make_unique<kernels::CpuAddKernel>();
@@ -51,12 +52,14 @@ Status CpuAdd::validate(const ITensorInfo         *src0,
                         ConvertPolicy              policy,
                         const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAdd::validate");
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuAddKernel::validate(src0, src1, dst, policy);
 }
 
 void CpuAdd::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAdd::run");
     const auto split_dimension = static_cast<kernels::CpuAddKernel *>(_kernel.get())->get_split_dimension();
 
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);

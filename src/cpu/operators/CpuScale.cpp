@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/cpu/kernels/CpuScaleKernel.h"
 #include "support/Rounding.h"
@@ -96,6 +97,7 @@ void precompute_dx_dy_offsets(
 
 void CpuScale::configure(ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScale::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(CpuScale::validate(src, dst, info));
     ARM_COMPUTE_LOG_PARAMS(src, dst, info);
@@ -159,6 +161,7 @@ void CpuScale::configure(ITensorInfo *src, ITensorInfo *dst, const ScaleKernelIn
 
 Status CpuScale::validate(const ITensorInfo *src, const ITensorInfo *dst, const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScale::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(info.sampling_policy != SamplingPolicy::CENTER &&
                                 info.sampling_policy != SamplingPolicy::TOP_LEFT);
@@ -281,6 +284,7 @@ void CpuScale::prepare(ITensorPack &tensors)
 
 void CpuScale::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScale::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     prepare(tensors);
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);

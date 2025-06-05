@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/cpu/kernels/CpuConcatenateBatchKernel.h"
 #include "src/cpu/kernels/CpuConcatenateDepthKernel.h"
@@ -44,6 +45,7 @@ namespace cpu
 {
 void CpuConcatenate::configure(const std::vector<const ITensorInfo *> &srcs_vector, ITensorInfo *dst, size_t axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenate::configure");
     ARM_COMPUTE_ERROR_ON(dst == nullptr);
     ARM_COMPUTE_LOG_PARAMS(srcs_vector, dst, axis);
 
@@ -100,6 +102,7 @@ void CpuConcatenate::configure(const std::vector<const ITensorInfo *> &srcs_vect
 Status
 CpuConcatenate::validate(const std::vector<const ITensorInfo *> &srcs_vector, const ITensorInfo *dst, size_t axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenate::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(dst);
     ARM_COMPUTE_RETURN_ERROR_ON(srcs_vector.size() < 2);
 
@@ -146,6 +149,7 @@ CpuConcatenate::validate(const std::vector<const ITensorInfo *> &srcs_vector, co
 
 void CpuConcatenate::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConcatenate::run");
     if (tensors.empty())
     {
         ARM_COMPUTE_ERROR("No inputs provided");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuQuantizeKernel.h"
 
 namespace arm_compute
@@ -37,12 +38,14 @@ namespace cpu
 {
 Status CpuQuantize::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuQuantize::validate");
     ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuQuantizeKernel::validate(src, dst));
     return Status{};
 }
 
 void CpuQuantize::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuQuantize::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_LOG_PARAMS(src, dst);
 
@@ -54,6 +57,7 @@ void CpuQuantize::configure(const ITensorInfo *src, ITensorInfo *dst)
 
 void CpuQuantize::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuQuantize::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto split_dimension = static_cast<kernels::CpuQuantizeKernel *>(_kernel.get())->get_split_dimension_hint();
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/AssemblyUtils.h"
@@ -59,6 +60,8 @@ void CpuDepthwiseConv2dAssemblyDispatch::configure(const ITensorInfo     *src,
                                                    ITensorInfo           *dst,
                                                    const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dAssemblyDispatch::configure");
     ARM_COMPUTE_LOG_PARAMS(src, weights, bias, dst, info);
     const CPUInfo     &ci          = NEScheduler::get().cpu_info();
     const unsigned int num_threads = NEScheduler::get().num_threads();
@@ -88,6 +91,8 @@ Status CpuDepthwiseConv2dAssemblyDispatch::validate(const ITensorInfo     *src,
                                                     const ITensorInfo     *dst,
                                                     const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dAssemblyDispatch::validate");
     return kernels::CpuDepthwiseConv2dAssemblyWrapperKernel::validate(src, weights, bias, dst, info);
 }
 
@@ -104,6 +109,8 @@ bool CpuDepthwiseConv2dAssemblyDispatch::is_activation_supported(const Activatio
 
 void CpuDepthwiseConv2dAssemblyDispatch::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dAssemblyDispatch::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
 
     prepare(tensors);

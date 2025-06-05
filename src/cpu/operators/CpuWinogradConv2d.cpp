@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -178,6 +179,7 @@ void CpuWinogradConv2d::configure(const ITensorInfo         *src,
                                   const ActivationLayerInfo &act_info,
                                   bool                       enable_fast_math)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuWinogradConv2d::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate(src, weights, biases, dst, conv_info, act_info, enable_fast_math));
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info, enable_fast_math);
@@ -326,6 +328,7 @@ Status CpuWinogradConv2d::validate(const ITensorInfo         *src,
                                    const ActivationLayerInfo &act_info,
                                    bool                       enable_fast_math)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuWinogradConv2d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv_info));
 
@@ -355,6 +358,7 @@ Status CpuWinogradConv2d::validate(const ITensorInfo         *src,
 
 void CpuWinogradConv2d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuWinogradConv2d::run");
     prepare(tensors);
     auto   src    = tensors.get_const_tensor(ACL_SRC_0);
     auto   biases = tensors.get_const_tensor(ACL_SRC_2);

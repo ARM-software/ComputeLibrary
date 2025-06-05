@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
@@ -101,6 +102,7 @@ Status CpuMatMul::validate(const ITensorInfo         *lhs,
                            const CpuMatMulSettings   &settings,
                            const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMatMul::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16, DataType::BFLOAT16,
                                                          DataType::QASYMM8, DataType::QASYMM8_SIGNED);
@@ -182,6 +184,7 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
                           const CpuMatMulSettings   &settings,
                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMatMul::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, dst, info, settings);
     ARM_COMPUTE_ERROR_THROW_ON(CpuMatMul::validate(lhs, rhs, dst, info, settings));
@@ -284,6 +287,7 @@ void CpuMatMul::configure(ITensorInfo               *lhs,
 
 void CpuMatMul::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMatMul::run");
     // Retrieve tensors from tensor pack
     auto lhs = tensors.get_tensor(ACL_SRC_0);
     auto rhs = tensors.get_const_tensor(ACL_SRC_1);

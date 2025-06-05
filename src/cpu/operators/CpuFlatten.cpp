@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Arm Limited.
+ * Copyright (c) 2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuFlatten.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuReshape.h"
 
 namespace arm_compute
@@ -38,6 +39,7 @@ CpuFlatten::~CpuFlatten() = default;
 
 void CpuFlatten::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFlatten::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst);
     _reshape = std::make_unique<CpuReshape>();
     _reshape->configure(src, dst);
@@ -45,11 +47,13 @@ void CpuFlatten::configure(const ITensorInfo *src, ITensorInfo *dst)
 
 Status CpuFlatten::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFlatten::validate");
     return CpuReshape::validate(src, dst);
 }
 
 void CpuFlatten::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFlatten::run");
     _reshape->run(tensors);
 }
 } // namespace cpu

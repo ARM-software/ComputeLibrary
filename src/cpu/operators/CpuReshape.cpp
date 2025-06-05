@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuReshapeKernel.h"
 
 namespace arm_compute
@@ -34,6 +35,7 @@ namespace cpu
 {
 void CpuReshape::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuReshape::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::CpuReshapeKernel>();
     k->configure(src, dst);
@@ -42,11 +44,13 @@ void CpuReshape::configure(const ITensorInfo *src, ITensorInfo *dst)
 
 Status CpuReshape::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuReshape::validate");
     return kernels::CpuReshapeKernel::validate(src, dst);
 }
 
 void CpuReshape::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuReshape::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     if (!_is_prepared)
     {

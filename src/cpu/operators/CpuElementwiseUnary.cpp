@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuElementwiseUnary.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuElementwiseUnaryKernel.h"
 
@@ -35,6 +36,7 @@ using KernelType = kernels::CpuElementwiseUnaryKernel;
 
 void CpuElementwiseUnary::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseUnary::configure");
     ARM_COMPUTE_LOG_PARAMS(op, src, dst);
     auto k = std::make_unique<KernelType>();
     k->configure(op, src, dst);
@@ -43,11 +45,13 @@ void CpuElementwiseUnary::configure(ElementWiseUnary op, const ITensorInfo &src,
 
 Status CpuElementwiseUnary::validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseUnary::validate");
     return KernelType::validate(op, src, dst);
 }
 
 void CpuElementwiseUnary::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseUnary::run");
     if (_kernel->is_window_configured())
     {
         ICpuOperator::run(tensors);

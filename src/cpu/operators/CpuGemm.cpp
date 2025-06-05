@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
@@ -69,6 +70,7 @@ void CpuGemm::configure(const ITensorInfo *a,
                         float              beta,
                         const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemm::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemm::validate(a, b, c, d, alpha, beta, gemm_info));
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, gemm_info);
@@ -219,6 +221,7 @@ Status CpuGemm::validate(const ITensorInfo *a,
                          float              beta,
                          const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemm::validate");
     ARM_COMPUTE_UNUSED(alpha);
     // When using accumulation(in place summation), for now, the only supported values for alpha and beta are 1 respectively 0.
     // Do the appropriate checks before proceeding.
@@ -413,6 +416,7 @@ Status CpuGemm::validate(const ITensorInfo *a,
 
 void CpuGemm::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemm::run");
     prepare(tensors);
 
     auto a = tensors.get_const_tensor(ACL_SRC_0);

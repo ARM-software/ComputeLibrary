@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuMaxUnpooling.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
 
 namespace arm_compute
@@ -35,6 +36,7 @@ void CpuMaxUnpooling::configure(const ITensorInfo      *src,
                                 ITensorInfo            *dst,
                                 const PoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMaxUnpooling::configure");
     ARM_COMPUTE_LOG_PARAMS(src, indices, dst, pool_info);
     auto k = std::make_unique<kernels::CpuMaxUnpoolingLayerKernel>();
     k->configure(src, indices, dst, pool_info);
@@ -46,6 +48,7 @@ Status CpuMaxUnpooling::validate(const ITensorInfo      *src,
                                  const ITensorInfo      *dst,
                                  const PoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMaxUnpooling::validate");
     return kernels::CpuMaxUnpoolingLayerKernel::validate(src, indices, dst, pool_info);
 }
 } // namespace cpu

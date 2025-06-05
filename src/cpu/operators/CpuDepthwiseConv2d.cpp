@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
 
 namespace arm_compute
@@ -145,6 +146,8 @@ Status CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::validate(const I
                                                                          const ITensorInfo     *dst,
                                                                          const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::validate");
     return validate_arguments_optimized(src, weights, biases, dst, info);
 }
 
@@ -346,6 +349,8 @@ Status CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::validate(const ITensorInfo
                                                                const ITensorInfo     *dst,
                                                                const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     if (src->data_layout() == DataLayout::NCHW)
     {
@@ -476,6 +481,7 @@ void CpuDepthwiseConv2d::configure(ITensorInfo           *src,
                                    ITensorInfo           *dst,
                                    const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDepthwiseConv2d::configure");
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, info);
 
     _depth_conv_func =
@@ -499,6 +505,7 @@ Status CpuDepthwiseConv2d::validate(const ITensorInfo     *src,
                                     const ITensorInfo     *dst,
                                     const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDepthwiseConv2d::validate");
     DepthwiseConvolutionFunction depth_conv_func = get_depthwiseconvolution_function(src, weights, biases, dst, info);
     switch (depth_conv_func)
     {
@@ -531,6 +538,7 @@ DepthwiseConvolutionFunction CpuDepthwiseConv2d::get_depthwiseconvolution_functi
 
 void CpuDepthwiseConv2d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDepthwiseConv2d::run");
     switch (_depth_conv_func)
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:

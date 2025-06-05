@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
 #include "src/cpu/kernels/CpuSoftmaxKernel.h"
@@ -47,6 +48,7 @@ CpuSoftmaxGeneric::CpuSoftmaxGeneric() : _softmax_kernel(), _tmp(), _aux_mem(Int
 
 void CpuSoftmaxGeneric::configure(const ITensorInfo *src, ITensorInfo *dst, float beta, int32_t axis, bool is_log)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuSoftmaxGeneric::configure");
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(CpuSoftmaxGeneric::validate(src, dst, beta, axis, is_log));
@@ -88,6 +90,7 @@ void CpuSoftmaxGeneric::configure(const ITensorInfo *src, ITensorInfo *dst, floa
 Status
 CpuSoftmaxGeneric::validate(const ITensorInfo *src, const ITensorInfo *dst, float beta, int32_t axis, bool is_log)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuSoftmaxGeneric::validate");
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->num_dimensions() > 4, "Only up to 4 dimensions are supported");
@@ -113,6 +116,7 @@ CpuSoftmaxGeneric::validate(const ITensorInfo *src, const ITensorInfo *dst, floa
 
 void CpuSoftmaxGeneric::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuSoftmaxGeneric::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
 
     auto src = tensors.get_const_tensor(TensorType::ACL_SRC);

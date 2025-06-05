@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/ITensorInfo.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuCopyKernel.h"
 #include "src/cpu/kernels/CpuPermuteKernel.h"
 #include "src/cpu/kernels/CpuTransposeKernel.h"
@@ -74,6 +75,7 @@ bool prefer_transpose(const PermutationVector &v)
 
 void CpuPermute::configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPermute::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst, perm);
 
     if (prefer_copy(perm))
@@ -98,6 +100,7 @@ void CpuPermute::configure(const ITensorInfo *src, ITensorInfo *dst, const Permu
 
 Status CpuPermute::validate(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPermute::validate");
     if (prefer_copy(perm))
     {
         return kernels::CpuCopyKernel::validate(src, dst);

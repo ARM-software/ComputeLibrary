@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuDirectConv2d.h"
 #include "src/cpu/operators/CpuGemm.h"
 #include "src/cpu/operators/CpuGemmConv2d.h"
@@ -54,6 +55,7 @@ void CpuConv2d::configure(ITensorInfo               *input,
                           bool                       enable_fast_math,
                           unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConv2d::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_UNUSED(num_groups);
@@ -114,6 +116,7 @@ Status CpuConv2d::validate(const ITensorInfo         *input,
                            bool                       enable_fast_math,
                            unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConv2d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1), "Grouping (num_groups != 1) is not supported on Neon");
 
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
@@ -291,6 +294,7 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo         *i
 
 void CpuConv2d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConv2d::run");
     prepare(tensors);
     _function->run(tensors);
 }

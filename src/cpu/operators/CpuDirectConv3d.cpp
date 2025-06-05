@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 
 namespace arm_compute
 {
@@ -49,6 +50,7 @@ CpuDirectConv3d::CpuDirectConv3d(std::shared_ptr<IMemoryManager> memory_manager)
 void CpuDirectConv3d::configure(
     ITensorInfo *src0, ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv3d::configure");
     ARM_COMPUTE_LOG_PARAMS(src0, src1, src2, dst, conv_info);
     ARM_COMPUTE_ERROR_ON(src0->data_layout() != DataLayout::NDHWC);
 
@@ -79,6 +81,7 @@ Status CpuDirectConv3d::validate(const ITensorInfo *src0,
                                  const ITensorInfo *dst,
                                  const Conv3dInfo   conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv3d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
 
     // Validate Convolution kernel
@@ -94,6 +97,7 @@ Status CpuDirectConv3d::validate(const ITensorInfo *src0,
 
 void CpuDirectConv3d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDirectConv3d::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     auto dst = tensors.get_tensor(TensorType::ACL_DST);

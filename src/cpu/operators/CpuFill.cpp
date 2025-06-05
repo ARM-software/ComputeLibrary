@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuFill.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuFillKernel.h"
 
 namespace arm_compute
@@ -32,6 +33,7 @@ namespace cpu
 {
 void CpuFill::configure(const ITensorInfo *tensor, PixelValue constant_value)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFill::configure");
     ARM_COMPUTE_LOG_PARAMS(tensor, constant_value);
     auto k = std::make_unique<kernels::CpuFillKernel>();
     k->configure(tensor, constant_value);

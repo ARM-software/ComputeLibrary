@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.h"
 
 namespace arm_compute
@@ -37,6 +38,8 @@ void CpuConvertFullyConnectedWeights::configure(const ITensorInfo *src,
                                                 const TensorShape &original_src_shape,
                                                 DataLayout         data_layout)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuConvertFullyConnectedWeights::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst, original_src_shape, data_layout);
     auto k = std::make_unique<kernels::CpuConvertFullyConnectedWeightsKernel>();
     k->configure(src, dst, original_src_shape, data_layout);
@@ -48,11 +51,14 @@ Status CpuConvertFullyConnectedWeights::validate(const ITensorInfo *src,
                                                  const TensorShape &original_src_shape,
                                                  DataLayout         data_layout)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuConvertFullyConnectedWeights::validate");
     return kernels::CpuConvertFullyConnectedWeightsKernel::validate(src, dst, original_src_shape, data_layout);
 }
 
 void CpuConvertFullyConnectedWeights::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConvertFullyConnectedWeights::run");
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimZ, _kernel->window(), tensors);
 }
 } // namespace cpu

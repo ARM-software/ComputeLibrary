@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/FunctionDescriptors.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
 #include "support/Cast.h"
@@ -115,6 +116,7 @@ void CpuGemmDirectConv2d::configure(const ITensorInfo *src,
                                     ITensorInfo       *dst,
                                     const Conv2dInfo  &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmDirectConv2d::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_ERROR_THROW_ON(
         CpuGemmDirectConv2d::validate(src, weights, biases != nullptr ? biases : nullptr, dst, info));
@@ -166,6 +168,7 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
                                      const ITensorInfo *dst,
                                      const Conv2dInfo  &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmDirectConv2d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::BFLOAT16, DataType::F16, DataType::F32);
@@ -205,6 +208,7 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
 }
 void CpuGemmDirectConv2d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmDirectConv2d::run");
     prepare(tensors);
 
     _gemm_asm_func->run(tensors);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "src/common/IOperator.h"
 #include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuContext.h"
 #include "src/cpu/kernels/CpuActivationKernel.h"
 
@@ -37,6 +38,7 @@ namespace cpu
 {
 void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivation::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, activation_info);
     auto k = std::make_unique<kernels::CpuActivationKernel>();
     k->configure(input, output, activation_info);
@@ -46,11 +48,13 @@ void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, con
 Status
 CpuActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivation::validate");
     return kernels::CpuActivationKernel::validate(input, output, activation_info);
 }
 
 void CpuActivation::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivation::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto split_dimension = static_cast<kernels::CpuActivationKernel *>(_kernel.get())->get_split_dimension_hint();
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);

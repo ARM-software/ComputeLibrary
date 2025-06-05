@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/CpuAddMulAddKernel.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
@@ -44,6 +45,7 @@ void CpuAddMulAdd::configure(const ITensorInfo         *input1,
                              ConvertPolicy              policy,
                              const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAddMulAdd::configure");
     ARM_COMPUTE_LOG_PARAMS(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info);
 
     auto k = std::make_unique<kernels::CpuAddMulAddKernel>();
@@ -82,6 +84,7 @@ Status CpuAddMulAdd::validate(const ITensorInfo         *input1,
                               ConvertPolicy              policy,
                               const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAddMulAdd::validate");
     const DataType data_type = input1->data_type();
     if (is_data_type_quantized(data_type))
     {
@@ -103,6 +106,7 @@ Status CpuAddMulAdd::validate(const ITensorInfo         *input1,
 
 void CpuAddMulAdd::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuAddMulAdd::run");
     const DataType data_type = tensors.get_const_tensor(TensorType::ACL_SRC_0)->info()->data_type();
 
     if (is_data_type_quantized(data_type))

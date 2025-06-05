@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuMeanStdDevNormalizationKernel.h"
 
 namespace arm_compute
@@ -36,6 +37,8 @@ namespace cpu
 {
 void CpuMeanStdDevNormalization::configure(ITensorInfo *input, ITensorInfo *output, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuMeanStdDevNormalization::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, epsilon);
 
     auto k = std::make_unique<kernels::CpuMeanStdDevNormalizationKernel>();
@@ -44,12 +47,14 @@ void CpuMeanStdDevNormalization::configure(ITensorInfo *input, ITensorInfo *outp
 }
 Status CpuMeanStdDevNormalization::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMeanStdDevNormalization::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return arm_compute::cpu::kernels::CpuMeanStdDevNormalizationKernel::validate(input, output, epsilon);
 }
 
 void CpuMeanStdDevNormalization::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMeanStdDevNormalization::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }

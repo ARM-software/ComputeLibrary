@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuScatterKernel.h"
 
 namespace arm_compute
@@ -41,6 +42,7 @@ void CpuScatter::configure(const ITensorInfo *src,
                            ITensorInfo       *dst,
                            const ScatterInfo &scatter_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScatter::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(updates, indices, dst);
     ARM_COMPUTE_LOG_PARAMS(src, updates, indices, dst, scatter_info);
     _fill_zero = scatter_info.zero_initialization;
@@ -71,6 +73,7 @@ Status CpuScatter::validate(const ITensorInfo *src,
                             const ITensorInfo *dst,
                             const ScatterInfo &scatter_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScatter::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(updates, indices, dst);
     if (src != nullptr)
     {
@@ -85,6 +88,7 @@ Status CpuScatter::validate(const ITensorInfo *src,
 
 void CpuScatter::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScatter::run");
     auto src = tensors.get_const_tensor(ACL_SRC_0);
     auto dst = tensors.get_tensor(ACL_DST);
 

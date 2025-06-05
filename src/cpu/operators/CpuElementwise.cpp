@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuElementwise.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuElementwiseKernel.h"
 
@@ -33,6 +34,7 @@ namespace cpu
 {
 void CpuElementwiseBase::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseBase::run");
     // If the kernel has been configured, use the window from the kernel.
     if (_kernel->is_window_configured())
     {
@@ -49,6 +51,7 @@ void CpuElementwiseBase::run(ITensorPack &tensors)
 template <ArithmeticOperation op>
 void CpuElementwiseArithmetic<op>::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseArithmetic::configure");
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuArithmeticKernel>();
     k->configure(op, src0, src1, dst);
@@ -58,6 +61,7 @@ void CpuElementwiseArithmetic<op>::configure(const ITensorInfo *src0, const ITen
 template <ArithmeticOperation op>
 Status CpuElementwiseArithmetic<op>::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseArithmetic::validate");
     return kernels::CpuArithmeticKernel::validate(op, src0, src1, dst);
 }
 
@@ -68,6 +72,7 @@ template class CpuElementwiseArithmetic<ArithmeticOperation::PRELU>;
 
 void CpuElementwiseDivision::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseDivision::configure");
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuDivisionKernel>();
     k->configure(src0, src1, dst);
@@ -76,11 +81,13 @@ void CpuElementwiseDivision::configure(const ITensorInfo *src0, const ITensorInf
 
 Status CpuElementwiseDivision::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseDivision::validate");
     return kernels::CpuDivisionKernel::validate(src0, src1, dst);
 }
 
 void CpuElementwisePower::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwisePower::configure");
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuPowerKernel>();
     k->configure(src0, src1, dst);
@@ -95,6 +102,8 @@ Status CpuElementwisePower::validate(const ITensorInfo *src0, const ITensorInfo 
 template <ComparisonOperation COP>
 void CpuElementwiseComparisonStatic<COP>::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuElementwiseComparisonStatic::configure");
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuComparisonKernel>();
     k->configure(COP, src0, src1, dst);
@@ -105,6 +114,8 @@ template <ComparisonOperation COP>
 Status
 CpuElementwiseComparisonStatic<COP>::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuElementwiseComparisonStatic::validate");
     return kernels::CpuComparisonKernel::validate(COP, src0, src1, dst);
 }
 
@@ -113,6 +124,7 @@ void CpuElementwiseComparison::configure(const ITensorInfo  *src0,
                                          ITensorInfo        *dst,
                                          ComparisonOperation op)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseComparison::configure");
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuComparisonKernel>();
     k->configure(op, src0, src1, dst);
@@ -124,6 +136,7 @@ Status CpuElementwiseComparison::validate(const ITensorInfo  *src0,
                                           const ITensorInfo  *dst,
                                           ComparisonOperation op)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseComparison::validate");
     return kernels::CpuComparisonKernel::validate(op, src0, src1, dst);
 }
 

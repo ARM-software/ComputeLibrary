@@ -34,6 +34,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
@@ -110,6 +111,8 @@ CpuGemmLowpMatrixMultiplyCore::~CpuGemmLowpMatrixMultiplyCore() = default;
 void CpuGemmLowpMatrixMultiplyCore::configure(
     const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *dst, const GEMMInfo &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixMultiplyCore::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, dst);
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmLowpMatrixMultiplyCore::validate(a, b, c, dst, gemm_info));
     ARM_COMPUTE_LOG_PARAMS(a, b, c, dst, gemm_info);
@@ -349,6 +352,8 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
                                                const ITensorInfo *output,
                                                const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuGemmLowpMatrixMultiplyCore::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
@@ -600,6 +605,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
 
 void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmLowpMatrixMultiplyCore::run");
     prepare(tensors);
 
     auto a        = tensors.get_const_tensor(TensorType::ACL_SRC_0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuTranspose.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuTransposeKernel.h"
 
 namespace arm_compute
@@ -32,6 +33,7 @@ namespace cpu
 {
 void CpuTranspose::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuTranspose::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::CpuTransposeKernel>();
     k->configure(src, dst);
@@ -40,6 +42,7 @@ void CpuTranspose::configure(const ITensorInfo *src, ITensorInfo *dst)
 
 Status CpuTranspose::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuTranspose::validate");
     return kernels::CpuTransposeKernel::validate(src, dst);
 }
 } // namespace cpu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/Scheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuPool3dKernel.h"
 
 using namespace arm_compute::experimental;
@@ -44,6 +45,7 @@ CpuPool3d::~CpuPool3d() = default;
 
 void CpuPool3d::configure(const ITensorInfo *src, ITensorInfo *dst, const Pooling3dLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool3d::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst, pool_info);
 
     // Configure pooling kernel
@@ -54,11 +56,13 @@ void CpuPool3d::configure(const ITensorInfo *src, ITensorInfo *dst, const Poolin
 
 Status CpuPool3d::validate(const ITensorInfo *src, const ITensorInfo *dst, const Pooling3dLayerInfo &pool_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool3d::validate");
     return kernels::CpuPool3dKernel::validate(src, dst, pool_info);
 }
 
 void CpuPool3d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool3d::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No tensors provided");
 
     Scheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);

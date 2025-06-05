@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.h"
 #include "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
 #include "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
@@ -42,6 +43,7 @@ void CpuGemmLowpOutputStage::configure(ITensorInfo                   *src,
                                        ITensorInfo                   *dst,
                                        const GEMMLowpOutputStageInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmLowpOutputStage::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmLowpOutputStage::validate(src, bias, dst, info));
     ARM_COMPUTE_LOG_PARAMS(src, bias, dst, info);
@@ -114,6 +116,7 @@ Status CpuGemmLowpOutputStage::validate(const ITensorInfo             *src,
                                         const ITensorInfo             *dst,
                                         const GEMMLowpOutputStageInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmLowpOutputStage::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_type() == DataType::UNKNOWN,
                                     "CpuGemmLowpOutputStage cannot be used with UNKNOWN output data type.");
@@ -159,6 +162,7 @@ Status CpuGemmLowpOutputStage::validate(const ITensorInfo             *src,
 
 void CpuGemmLowpOutputStage::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmLowpOutputStage::run");
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }
 } // namespace cpu

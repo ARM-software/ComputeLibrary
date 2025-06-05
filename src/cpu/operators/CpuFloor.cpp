@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuFloor.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuFloorKernel.h"
 
 namespace arm_compute
@@ -32,6 +33,7 @@ namespace cpu
 {
 void CpuFloor::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFloor::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::CpuFloorKernel>();
     k->configure(src, dst);
@@ -40,6 +42,7 @@ void CpuFloor::configure(const ITensorInfo *src, ITensorInfo *dst)
 
 Status CpuFloor::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFloor::validate");
     return kernels::CpuFloorKernel::validate(src, dst);
 }
 } // namespace cpu

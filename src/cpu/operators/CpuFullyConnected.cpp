@@ -31,6 +31,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/quantization/AsymmHelpers.h"
@@ -236,6 +237,7 @@ void CpuFullyConnected::configure(const ITensorInfo      *src,
                                   FullyConnectedLayerInfo fc_info,
                                   const WeightsInfo      &weights_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFullyConnected::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_ERROR_THROW_ON(
@@ -381,6 +383,7 @@ Status CpuFullyConnected::validate(const ITensorInfo      *src,
                                    FullyConnectedLayerInfo fc_info,
                                    const WeightsInfo      &weights_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFullyConnected::validate");
     ARM_COMPUTE_UNUSED(fc_info.retain_internal_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
 
@@ -499,6 +502,7 @@ Status CpuFullyConnected::validate(const ITensorInfo      *src,
 
 void CpuFullyConnected::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFullyConnected::run");
     prepare(tensors);
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED

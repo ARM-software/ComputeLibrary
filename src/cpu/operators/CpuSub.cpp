@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuSubKernel.h"
 
 namespace arm_compute
@@ -38,6 +39,7 @@ void CpuSub::configure(const ITensorInfo         *src0,
                        ConvertPolicy              policy,
                        const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuSub::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst, policy);
     auto k = std::make_unique<kernels::CpuSubKernel>();
@@ -51,12 +53,14 @@ Status CpuSub::validate(const ITensorInfo         *src0,
                         ConvertPolicy              policy,
                         const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuSub::validate");
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuSubKernel::validate(src0, src1, dst, policy);
 }
 
 void CpuSub::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuSub::run");
     const auto split_dimension = static_cast<kernels::CpuSubKernel *>(_kernel.get())->get_split_dimension();
 
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);

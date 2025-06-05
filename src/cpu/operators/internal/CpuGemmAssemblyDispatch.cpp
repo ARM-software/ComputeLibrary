@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/AssemblyUtils.h"
@@ -1080,6 +1081,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
 Status CpuGemmAssemblyDispatch::validate(
     const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmAssemblyDispatch::validate");
     ARM_COMPUTE_UNUSED(c, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
@@ -1150,6 +1152,7 @@ bool CpuGemmAssemblyDispatch::is_activation_supported(const ActivationLayerInfo 
 void CpuGemmAssemblyDispatch::configure(
     const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *d, const AsmGemmInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmAssemblyDispatch::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
     arm_gemm::Activation act = assembly_utils::map_to_arm_gemm_activation(info.activation_info);
 
@@ -1251,6 +1254,7 @@ bool CpuGemmAssemblyDispatch::is_configured() const
 
 void CpuGemmAssemblyDispatch::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmAssemblyDispatch::run");
     ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
     _arm_gemm->run(tensors);
 }

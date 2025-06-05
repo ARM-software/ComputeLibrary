@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuCast.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuCastKernel.h"
 
 namespace arm_compute
@@ -32,6 +33,7 @@ namespace cpu
 {
 void CpuCast::configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCast::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst, policy);
     auto k = std::make_unique<kernels::CpuCastKernel>();
     k->configure(src, dst, policy);
@@ -40,6 +42,7 @@ void CpuCast::configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy 
 
 Status CpuCast::validate(const ITensorInfo *src, const ITensorInfo *dst, ConvertPolicy policy)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuCast::validate");
     return kernels::CpuCastKernel::validate(src, dst, policy);
 }
 } // namespace cpu

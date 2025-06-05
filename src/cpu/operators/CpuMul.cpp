@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuMulKernel.h"
 
 namespace arm_compute
@@ -42,6 +43,7 @@ Status CpuMul::validate(const ITensorInfo         *src1,
                         RoundingPolicy             rounding_policy,
                         const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMul::validate");
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuMulKernel::validate(src1, src2, dst, scale, overflow_policy, rounding_policy);
 }
@@ -54,6 +56,7 @@ void CpuMul::configure(ITensorInfo               *src1,
                        RoundingPolicy             rounding_policy,
                        const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMul::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
 
@@ -64,6 +67,7 @@ void CpuMul::configure(ITensorInfo               *src1,
 
 void CpuMul::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuMul::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     auto split_dimension = static_cast<kernels::CpuMulKernel *>(_kernel.get())->get_split_dimension_hint();
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
@@ -74,6 +78,7 @@ Status CpuComplexMul::validate(const ITensorInfo         *src1,
                                const ITensorInfo         *dst,
                                const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComplexMul::validate");
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuComplexMulKernel::validate(src1, src2, dst);
 }
@@ -83,6 +88,7 @@ void CpuComplexMul::configure(ITensorInfo               *src1,
                               ITensorInfo               *dst,
                               const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComplexMul::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
 
@@ -93,6 +99,7 @@ void CpuComplexMul::configure(ITensorInfo               *src1,
 
 void CpuComplexMul::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuComplexMul::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, _kernel->window(), tensors);
 }

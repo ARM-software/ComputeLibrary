@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Arm Limited.
+ * Copyright (c) 2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/CpuPool2dKernel.h"
 #include "src/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
 
@@ -51,6 +52,7 @@ CpuPool2d::~CpuPool2d() = default;
 
 void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool2d::configure");
     ARM_COMPUTE_LOG_PARAMS(src, dst, pool_info, indices);
 
     // Check if we can run assembly kernels. Currently, indices are not supported by those kernels
@@ -97,6 +99,7 @@ Status CpuPool2d::validate(const ITensorInfo      *src,
                            const PoolingLayerInfo &pool_info,
                            const ITensorInfo      *indices)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool2d::validate");
     const bool run_optimised =
         bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
 
@@ -110,6 +113,7 @@ Status CpuPool2d::validate(const ITensorInfo      *src,
 
 void CpuPool2d::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuPool2d::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No tensors provided");
 
     if (_asm_glue)

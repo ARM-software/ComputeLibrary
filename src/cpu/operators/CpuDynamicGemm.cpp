@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuDynamicGemmKernel.h"
@@ -45,6 +46,7 @@ void CpuDynamicGemm::configure(const ITensorInfo *a,
                                float              beta,
                                const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDynamicGemm::configure");
     ARM_COMPUTE_ERROR_THROW_ON(CpuDynamicGemm::validate(a, b, c, d, alpha, beta, gemm_info));
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, gemm_info);
 
@@ -62,11 +64,13 @@ Status CpuDynamicGemm::validate(const ITensorInfo *a,
                                 float              beta,
                                 const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDynamicGemm::validate");
     return kernels::CpuDynamicGemmKernel::validate(a, b, c, d, alpha, beta, gemm_info);
 }
 
 void CpuDynamicGemm::run(ITensorPack &tensors)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuDynamicGemm::run");
     ARM_COMPUTE_EXIT_ON_MSG(tensors.empty(), "No inputs provided");
 
     kernels::CpuDynamicGemmKernel *dynamic_gemm = _kernel.get();
