@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/meanstddevnorm/generic/neon/impl.h"
@@ -104,7 +105,8 @@ void mean_stddev_normalization<float16_t, 8>(ITensor *input, ITensor *output, fl
 
 void neon_fp16_meanstddevnorm(ITensor *input, ITensor *output, float epsilon, const Window &window)
 {
-    return mean_stddev_normalization<float16_t, 8>(input, output, epsilon, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_meanstddevnorm");
+    mean_stddev_normalization<float16_t, 8>(input, output, epsilon, window);
 }
 } // namespace cpu
 } // namespace arm_compute

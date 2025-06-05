@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/fuse_batch_normalization/generic/impl.h"
 #include "src/cpu/kernels/fuse_batch_normalization/nhwc/neon/impl.h"
 
@@ -40,8 +41,10 @@ void fused_batch_normalization_dwc_nhwc_f32(const ITensor *dwc_weights,
                                             float          epsilon,
                                             const Window  &window)
 {
-    return fused_batch_normalization_dwc_nhwc<float32_t>(dwc_weights, dwc_bias, fused_weights, fused_bias, bn_mean,
-                                                         bn_var, bn_beta, bn_gamma, epsilon, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "fused_batch_normalization_dwc_nhwc_f32");
+    fused_batch_normalization_dwc_nhwc<float32_t>(dwc_weights, dwc_bias, fused_weights, fused_bias, bn_mean, bn_var,
+                                                  bn_beta, bn_gamma, epsilon, window);
 }
 
 } // namespace cpu

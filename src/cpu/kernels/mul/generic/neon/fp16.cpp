@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/CpuTypes.h"
@@ -36,6 +37,7 @@ namespace cpu
 {
 void mul_F16_F16_F16(const ITensor *src1, const ITensor *src2, ITensor *out, const Window &window, float scale)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "mul_F16_F16_F16");
     // Create input windows
     Window input1_win = window.broadcast_if_dimension_le_one(src1->info()->tensor_shape());
     Window input2_win = window.broadcast_if_dimension_le_one(src2->info()->tensor_shape());

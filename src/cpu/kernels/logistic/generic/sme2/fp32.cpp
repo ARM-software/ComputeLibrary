@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Window.h"
+
+#include "src/common/utils/profile/acl_profile.h"
 
 namespace arm_compute
 {
@@ -399,6 +401,7 @@ void sme2_f32_logistic_kernel(const float    *src,
 
 void sme2_fp32_logistic(const ITensor *in, ITensor *out, const ActivationLayerInfo &act_info, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sme2_fp32_logistic");
     ARM_COMPUTE_UNUSED(act_info);
     const auto *src_info = in->info();
     const auto *dst_info = out->info();

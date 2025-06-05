@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/maxunpool/generic/neon/impl.h"
 namespace arm_compute
 {
@@ -29,7 +30,8 @@ namespace cpu
 {
 void neon_fp16_maxunpooling(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window)
 {
-    return max_unpooling<float16_t>(input, indices, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_maxunpooling");
+    max_unpooling<float16_t>(input, indices, output, window);
 }
 } // namespace cpu
 } // namespace arm_compute

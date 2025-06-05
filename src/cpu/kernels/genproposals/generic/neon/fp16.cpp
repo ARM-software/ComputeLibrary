@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/genproposals/generic/neon/impl.h"
 namespace arm_compute
 {
@@ -32,7 +33,8 @@ void neon_fp16_computeallanchors(const ITensor     *anchors,
                                  ComputeAnchorsInfo anchors_info,
                                  const Window      &window)
 {
-    return compute_all_anchors<float16_t>(anchors, all_anchors, anchors_info, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_computeallanchors");
+    compute_all_anchors<float16_t>(anchors, all_anchors, anchors_info, window);
 }
 } // namespace cpu
 } // namespace arm_compute

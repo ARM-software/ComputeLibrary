@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/pool3d/neon/impl.h"
 
@@ -31,7 +32,8 @@ namespace cpu
 {
 void neon_fp16_pool3d(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window)
 {
-    return poolingMxNxD_fp_neon_ndhwc<float16_t>(src, dst0, pool_info, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_pool3d");
+    poolingMxNxD_fp_neon_ndhwc<float16_t>(src, dst0, pool_info, window);
 }
 } // namespace cpu
 } // namespace arm_compute

@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/gemmlowp/generic/neon/impl.h"
 
 namespace arm_compute
@@ -78,6 +79,7 @@ void neon_run_offset_contribution_fp16(const Window  &window,
                                        bool           slide_vector_sum_col,
                                        bool           is_gemm3d)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_run_offset_contribution_fp16");
     neon_run_offset_contribution_float<float16_t>(window, mm_result, vector_sum_col, vector_sum_row, a_offset, b_offset,
                                                   k_offset, scale, slide_vector_sum_col, is_gemm3d);
 }

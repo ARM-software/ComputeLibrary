@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/fuse_batch_normalization/generic/impl.h"
 
 namespace arm_compute
@@ -40,8 +41,9 @@ void fused_batch_normalization_conv_f16(const ITensor *conv_weights,
                                         float          epsilon,
                                         const Window  &window)
 {
-    return fused_batch_normalization_conv<float16_t>(conv_weights, conv_bias, fused_weights, fused_bias, bn_mean,
-                                                     bn_var, bn_beta, bn_gamma, epsilon, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fused_batch_normalization_conv_f16");
+    fused_batch_normalization_conv<float16_t>(conv_weights, conv_bias, fused_weights, fused_bias, bn_mean, bn_var,
+                                              bn_beta, bn_gamma, epsilon, window);
 }
 
 void fused_batch_normalization_dwc_nchw_f16(const ITensor *dwc_weights,
@@ -55,8 +57,10 @@ void fused_batch_normalization_dwc_nchw_f16(const ITensor *dwc_weights,
                                             float          epsilon,
                                             const Window  &window)
 {
-    return fused_batch_normalization_dwc_nchw<float16_t>(dwc_weights, dwc_bias, fused_weights, fused_bias, bn_mean,
-                                                         bn_var, bn_beta, bn_gamma, epsilon, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "fused_batch_normalization_dwc_nchw_f16");
+    fused_batch_normalization_dwc_nchw<float16_t>(dwc_weights, dwc_bias, fused_weights, fused_bias, bn_mean, bn_var,
+                                                  bn_beta, bn_gamma, epsilon, window);
 }
 } // namespace cpu
 } // namespace arm_compute

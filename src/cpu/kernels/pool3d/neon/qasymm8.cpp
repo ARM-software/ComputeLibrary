@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/pool3d/neon/impl.h"
 namespace arm_compute
 {
@@ -28,7 +29,8 @@ namespace cpu
 {
 void neon_q8_pool3d(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window)
 {
-    return poolingMxNxD_q8_neon_ndhwc<uint8_t>(src, dst0, pool_info, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_q8_pool3d");
+    poolingMxNxD_q8_neon_ndhwc<uint8_t>(src, dst0, pool_info, window);
 }
 } // namespace cpu
 } // namespace arm_compute

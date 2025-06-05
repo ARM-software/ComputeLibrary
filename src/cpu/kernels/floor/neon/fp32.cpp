@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/common/utils/Validate.h"
 #include "src/core/NEON/NEMath.h"
 
@@ -36,6 +37,7 @@ constexpr int step = 4;
 
 void fp32_neon_floor(const void *src, void *dst, int len)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp32_neon_floor");
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
     ARM_COMPUTE_ASSERT(len >= 0);

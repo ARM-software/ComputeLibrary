@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -210,6 +211,8 @@ void CpuDepthwiseConv2dAssemblyWrapperKernel::configure(const ITensorInfo *src,
                                                         const ConvolutionInfo &info,
                                                         const CPUInfo         &cpu_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dAssemblyWrapperKernel::configure");
     ARM_COMPUTE_UNUSED(cpu_info);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
@@ -327,6 +330,8 @@ Status CpuDepthwiseConv2dAssemblyWrapperKernel::validate(const ITensorInfo     *
 
 void CpuDepthwiseConv2dAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "CpuDepthwiseConv2dAssemblyWrapperKernel::run_op");
     ARM_COMPUTE_ERROR_ON_NULLPTR(_kernel_asm.get());
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_UNUSED(window);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/detail/NEActivationFunctionDetail.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -44,6 +45,8 @@ void fp32_batch_normalization_nchw_non_fused(const Window       &window,
                                              float               epsilon,
                                              ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "fp32_batch_normalization_nchw_non_fused");
     batch_normalization_nchw<float, false, detail::dummy<float, 4>>(window, input, output, mean, var, beta, gamma,
                                                                     epsilon, act_info);
 }
@@ -58,6 +61,8 @@ void fp32_batch_normalization_nchw_non_fused_relu(const Window       &window,
                                                   float               epsilon,
                                                   ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "fp32_batch_normalization_nchw_non_fused_relu");
     batch_normalization_nchw<float, true, detail::relu<float, 4>>(window, input, output, mean, var, beta, gamma,
                                                                   epsilon, act_info);
 }
@@ -72,6 +77,8 @@ void fp32_batch_normalization_nchw_non_fused_brelu(const Window       &window,
                                                    float               epsilon,
                                                    ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "fp32_batch_normalization_nchw_non_fused_brelu");
     batch_normalization_nchw<float, true, detail::brelu<float, 4>>(window, input, output, mean, var, beta, gamma,
                                                                    epsilon, act_info);
 }
@@ -86,6 +93,8 @@ void fp32_batch_normalization_nchw_non_fused_lubrelu(const Window       &window,
                                                      float               epsilon,
                                                      ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "fp32_batch_normalization_nchw_non_fused_lubrelu");
     batch_normalization_nchw<float, true, detail::lubrelu<float, 4>>(window, input, output, mean, var, beta, gamma,
                                                                      epsilon, act_info);
 }

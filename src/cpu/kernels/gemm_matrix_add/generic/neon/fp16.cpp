@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/gemm_matrix_add/generic/neon/impl.h"
 
 #include <arm_neon.h>
@@ -78,7 +79,8 @@ void matrix_addition_f16(const ITensor *src, ITensor *dst, const Window &window,
 } // namespace
 void neon_fp16_gemm_matrix_add(const ITensor *src, ITensor *dst, const Window &window, float beta)
 {
-    return matrix_addition_f16(src, dst, window, beta);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_gemm_matrix_add");
+    matrix_addition_f16(src, dst, window, beta);
 }
 } // namespace cpu
 } // namespace arm_compute

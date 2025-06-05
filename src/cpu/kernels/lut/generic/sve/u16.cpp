@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,8 @@
 #ifdef __aarch64__
 #ifdef ARM_COMPUTE_ENABLE_SVE
 
+#include "src/common/utils/profile/acl_profile.h"
+
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -36,6 +38,7 @@ namespace cpu
 {
 void lut_u16_sve(const uint16_t *table, size_t num_strings, size_t size, const uint16_t *input, uint16_t *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "lut_u16_sve");
     int64_t cnth  = svcnth();
     int64_t tail  = size & (4 * cnth - 1);
     int64_t count = size - tail;

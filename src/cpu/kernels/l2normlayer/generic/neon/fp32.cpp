@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/l2normlayer/generic/neon/impl.h"
 
 namespace arm_compute
@@ -33,14 +34,16 @@ namespace cpu
 void neon_fp32_l2_normalize_x(
     const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t unused_axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_l2_normalize_x");
     ARM_COMPUTE_UNUSED(unused_axis);
-    return l2_normalize_x<float, 4>(in, sum, out, epsilon, window);
+    l2_normalize_x<float, 4>(in, sum, out, epsilon, window);
 }
 
 void neon_fp32_l2_normalize_yz(
     const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)
 {
-    return l2_normalize_yz<float, 4>(in, sum, out, epsilon, window, axis);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_l2_normalize_yz");
+    l2_normalize_yz<float, 4>(in, sum, out, epsilon, window, axis);
 }
 
 } // namespace cpu

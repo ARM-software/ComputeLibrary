@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/utils/helpers/float_ops.h"
 #include "src/cpu/kernels/gemm_matrix_mul/generic/neon/impl.h"
 
@@ -410,8 +411,9 @@ void neon_fp16_gemm_matrix_mul(const ITensor    *lhs,
                                float             alpha,
                                const bool        is_dst_vector)
 {
-    return (is_dst_vector) ? vector_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha)
-                           : matrix_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_gemm_matrix_mul");
+    (is_dst_vector) ? vector_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha)
+                    : matrix_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha);
 }
 } // namespace cpu
 } // namespace arm_compute

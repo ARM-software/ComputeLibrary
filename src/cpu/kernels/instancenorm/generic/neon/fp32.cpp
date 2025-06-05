@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/instancenorm/generic/neon/impl.h"
 namespace arm_compute
 {
@@ -34,8 +35,9 @@ void neon_fp32_instancenorm(ITensor      *input,
                             bool          use_mixed_precision,
                             const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp32_instancenorm");
     ARM_COMPUTE_UNUSED(use_mixed_precision);
-    return instance_normalization_nchw<float>(input, output, gamma, beta, epsilon, window);
+    instance_normalization_nchw<float>(input, output, gamma, beta, epsilon, window);
 }
 } // namespace cpu
 } // namespace arm_compute

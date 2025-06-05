@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/common/utils/Validate.h"
 #include "src/core/NEON/NEMath.h"
 
@@ -38,6 +39,7 @@ constexpr int step = 8;
 
 void fp16_neon_floor(const void *src, void *dst, int len)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_neon_floor");
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
     ARM_COMPUTE_ASSERT(len >= 0);

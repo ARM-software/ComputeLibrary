@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/instancenorm/generic/neon/impl.h"
 
@@ -185,13 +186,14 @@ void neon_fp16_instancenorm(ITensor      *input,
                             bool          use_mixed_precision,
                             const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_instancenorm");
     if (use_mixed_precision)
     {
-        return instance_normalization_nchw_fp16<float>(input, output, gamma, beta, epsilon, window);
+        instance_normalization_nchw_fp16<float>(input, output, gamma, beta, epsilon, window);
     }
     else
     {
-        return instance_normalization_nchw_fp16<float16_t>(input, output, gamma, beta, epsilon, window);
+        instance_normalization_nchw_fp16<float16_t>(input, output, gamma, beta, epsilon, window);
     }
 }
 } // namespace cpu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/cpu/kernels/pool2d/neon/impl.h"
@@ -290,6 +291,7 @@ void pooling2_fp16_neon_nchw(const ITensor    *src,
                              const Window     &window_src,
                              const Window     &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "pooling2_fp16_neon_nchw");
     if (pool_info.pool_type == PoolingType::MAX && dst1)
     {
         pooling2_nchw_maxpool_indices<float16_t>(src, dst0, dst1, pool_info, window_src, window);
@@ -376,6 +378,7 @@ void poolingMxN_fp16_neon_nchw(const ITensor    *src,
                                const Window     &window_src,
                                const Window     &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "poolingMxN_fp16_neon_nchw");
     ARM_COMPUTE_UNUSED(dst1);
     Iterator in(src, window_src);
     Iterator out(dst0, window);
@@ -474,6 +477,7 @@ void poolingMxN_fp16_neon_nhwc(const ITensor    *src,
                                const Window     &window_src,
                                const Window     &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "poolingMxN_fp16_neon_nhwc");
     if (pool_info.pool_size == Size2D(2, 2) && pool_info.pool_type == PoolingType::MAX && dst1)
     {
         pooling2_f16_maxpool_indices(src, dst0, dst1, pool_info, window_src, window);

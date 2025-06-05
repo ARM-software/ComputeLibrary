@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #ifdef __aarch64__
 #ifdef ARM_COMPUTE_ENABLE_SVE
 
+#include "src/common/utils/profile/acl_profile.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -34,6 +36,7 @@ namespace cpu
 void lut_u8_sve2(
     const uint8_t *table, size_t num_strings, size_t string_length, const uint8_t *const *input, uint8_t *const *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "lut_u8_sve2");
     __asm__ __volatile__(
         "ptrue p0.b\n"
         "cntd x25\n"

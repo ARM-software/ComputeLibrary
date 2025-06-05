@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/lut/list.h"
 
 namespace arm_compute
@@ -34,6 +35,7 @@ namespace cpu
 void lut_u8_neon(
     const uint8_t *table, size_t num_strings, size_t string_length, const uint8_t *const *input, uint8_t *const *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "lut_u8_neon");
     __asm__ __volatile__("ldr q16, [%x[table], #0x0]\n"
                          "ldr q17, [%x[table], #0x10]\n"
                          "mov x23, #0x0\n"

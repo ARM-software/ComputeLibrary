@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/norm_layer/generic/neon/impl.h"
@@ -35,30 +36,35 @@ namespace cpu
 void neon_normalize_float16_8_0_2D(
     const Window &window, const ITensor *in, const ITensor *in_squared, ITensor *out, NormalizationLayerInfo ninfo)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_normalize_float16_8_0_2D");
     arm_compute::normalize_float<float16_t, 8, 0, true>(window, in, in_squared, out, ninfo);
 }
 
 void neon_normalize_float16_8_0(
     const Window &window, const ITensor *in, const ITensor *in_squared, ITensor *out, NormalizationLayerInfo ninfo)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_normalize_float16_8_0");
     arm_compute::normalize_float<float16_t, 8, 0, false>(window, in, in_squared, out, ninfo);
 }
 
 void neon_normalize_float16_8_1_2D(
     const Window &window, const ITensor *in, const ITensor *in_squared, ITensor *out, NormalizationLayerInfo ninfo)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_normalize_float16_8_1_2D");
     arm_compute::normalize_float<float16_t, 8, 1, true>(window, in, in_squared, out, ninfo);
 }
 
 void neon_normalize_float16_8_1(
     const Window &window, const ITensor *in, const ITensor *in_squared, ITensor *out, NormalizationLayerInfo ninfo)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_normalize_float16_8_1");
     arm_compute::normalize_float<float16_t, 8, 1, false>(window, in, in_squared, out, ninfo);
 }
 
 void neon_normalize_float16_8_2(
     const Window &window, const ITensor *in, const ITensor *in_squared, ITensor *out, NormalizationLayerInfo ninfo)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_normalize_float16_8_2");
     arm_compute::normalize_float<float16_t, 8, 2, false>(window, in, in_squared, out, ninfo);
 }
 

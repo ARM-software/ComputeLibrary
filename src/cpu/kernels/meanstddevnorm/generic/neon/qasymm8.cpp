@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -51,6 +52,7 @@ namespace cpu
 {
 void neon_qasymm8_meanstddevnorm(ITensor *input, ITensor *output, float epsilon, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_qasymm8_meanstddevnorm");
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 

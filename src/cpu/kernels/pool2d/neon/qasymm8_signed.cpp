@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/cpu/kernels/pool2d/neon/list.h"
@@ -41,6 +42,7 @@ void poolingMxN_qasymm8_signed_neon_nhwc(const ITensor    *src,
                                          const Window     &window_src,
                                          const Window     &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "poolingMxN_qasymm8_signed_neon_nhwc");
     poolingMxN_q8_neon_nhwc<int8_t>(src, dst0, dst1, pool_info, window_src, window);
 }
 } // namespace cpu
