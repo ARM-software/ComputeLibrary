@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -208,6 +209,7 @@ void fp16_bilinear_neon_scale_nchw(const ITensor      *src,
                                    bool                align_corners,
                                    const Window       &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_bilinear_neon_scale_nchw");
     ARM_COMPUTE_UNUSED(policy);
     arm_compute::cpu::scale_bilinear_nchw<float16_t>(src, dst, dx, dy, offsets, border_mode, constant_border_value,
                                                      sampling_offset, align_corners, window);
@@ -225,6 +227,7 @@ void fp16_nearest_neon_scale_nchw(const ITensor      *src,
                                   bool                align_corners,
                                   const Window       &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_nearest_neon_scale_nchw");
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_UNUSED(border_mode);
     arm_compute::cpu::scale_nearest_nchw<float16_t>(src, dst, dx, dy, offsets, constant_border_value, sampling_offset,
@@ -243,6 +246,7 @@ void fp16_neon_scale(const ITensor      *src,
                      bool                align_corners,
                      const Window       &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_neon_scale");
     if (policy == InterpolationPolicy::BILINEAR)
     {
         fp16_neon_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset,
@@ -266,6 +270,7 @@ void fp16_common_neon_scale(const ITensor      *src,
                             bool                align_corners,
                             const Window       &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_common_neon_scale");
     arm_compute::cpu::common_neon_scale<float16_t>(src, dst, offsets, dx, dy, policy, border_mode,
                                                    constant_border_value, sampling_offset, align_corners, window);
 }

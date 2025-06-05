@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -158,6 +159,7 @@ void u8_sve_scale(const ITensor      *src,
                   bool                align_corners,
                   const Window       &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_sve_scale");
     ARM_COMPUTE_UNUSED(dx, dy, border_mode, constant_border_value);
     if (policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
@@ -181,6 +183,7 @@ void s16_sve_scale(const ITensor      *src,
                    bool                align_corners,
                    const Window       &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "s16_sve_scale");
     ARM_COMPUTE_UNUSED(dx, dy, border_mode, constant_border_value);
     if (policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {

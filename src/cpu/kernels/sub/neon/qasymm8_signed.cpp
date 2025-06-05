@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/add/generic/neon/impl.h"
 
 namespace arm_compute
@@ -34,12 +35,14 @@ namespace cpu
 void sub_qasymm8_signed_neon_fixedpoint(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sub_qasymm8_signed_neon_fixedpoint");
     add_sub_q8_neon_fixedpoint<int8_t>(src0, src1, dst, policy, window, false /*is_addition*/);
 }
 
 void sub_qasymm8_signed_neon(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sub_qasymm8_signed_neon");
     add_sub_qasymm8_signed_neon(src0, src1, dst, policy, window, false /*is_addition*/);
 }
 

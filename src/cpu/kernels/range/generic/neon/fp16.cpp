@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/range/generic/neon/impl.h"
 
@@ -34,7 +35,8 @@ namespace cpu
 {
 void fp16_neon_range_function(ITensor *output, float start, float step, const Window &window)
 {
-    return neon_range_function<float16_t>(output, start, step, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_neon_range_function");
+    neon_range_function<float16_t>(output, start, step, window);
 }
 } // namespace cpu
 } // namespace arm_compute

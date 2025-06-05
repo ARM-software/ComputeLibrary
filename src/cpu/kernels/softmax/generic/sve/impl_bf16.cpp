@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 
 namespace arm_compute
@@ -41,6 +42,7 @@ void sve_softmax_bf16(const ITensor *in,
                       const Window  &window,
                       const void    *lut_ptr)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve_softmax_bf16");
     ARM_COMPUTE_UNUSED(tmp);
     ARM_COMPUTE_UNUSED(beta);
     ARM_COMPUTE_UNUSED(axis);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/cpu/kernels/scale/neon/list.h"
 
@@ -384,6 +385,7 @@ void qasymm8_neon_scale(const ITensor      *src,
                         bool                align_corners,
                         const Window       &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "qasymm8_neon_scale");
     if (policy == InterpolationPolicy::BILINEAR)
     {
         if (src->info()->quantization_info() == dst->info()->quantization_info())

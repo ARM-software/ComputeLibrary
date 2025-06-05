@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/quantize/generic/neon/impl.h"
 
 namespace arm_compute
@@ -29,53 +30,67 @@ namespace cpu
 {
 void u8_u8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_u8_run_quantize_qasymm8");
     run_quantize_qasymm8<uint8_t, uint8_t>(src, dst, window);
 }
 void u8_i8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_i8_run_quantize_qasymm8");
     run_quantize_qasymm8<uint8_t, int8_t>(src, dst, window);
 }
 void i8_u8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "i8_u8_run_quantize_qasymm8");
     run_quantize_qasymm8<int8_t, uint8_t>(src, dst, window);
 }
 void i8_i8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "i8_i8_run_quantize_qasymm8");
     run_quantize_qasymm8<int8_t, int8_t>(src, dst, window);
 }
 
 void u8_run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_run_quantize_qasymm16");
     run_quantize_qasymm16<uint8_t>(src, dst, window);
 }
 void i8_run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "i8_run_quantize_qasymm16");
     run_quantize_qasymm16<int8_t>(src, dst, window);
 }
 
 void u8_u8_run_requantize_offset_only(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_u8_run_requantize_offset_only");
     run_requantize_offset_only<uint8_t, uint8_t>(src, dst, window);
 }
 void u8_i8_run_requantize_offset_only(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_i8_run_requantize_offset_only");
     run_requantize_offset_only<uint8_t, int8_t>(src, dst, window);
 }
 void i8_u8_run_requantize_offset_only(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "i8_u8_run_requantize_offset_only");
     run_requantize_offset_only<int8_t, uint8_t>(src, dst, window);
 }
 void i8_i8_run_requantize_offset_only(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "i8_i8_run_requantize_offset_only");
     run_requantize_offset_only<int8_t, int8_t>(src, dst, window);
 }
 
 void i8_u8_run_requantize_offset_only_convert(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "i8_u8_run_requantize_offset_only_convert");
     run_requantize_offset_only_convert<int8_t, uint8_t>(src, dst, window);
 }
 void u8_i8_run_requantize_offset_only_convert(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "u8_i8_run_requantize_offset_only_convert");
     run_requantize_offset_only_convert<uint8_t, int8_t>(src, dst, window);
 }
 } // namespace cpu

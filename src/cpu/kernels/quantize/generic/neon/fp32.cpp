@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/quantize/generic/neon/impl.h"
 
 namespace arm_compute
@@ -29,19 +30,23 @@ namespace cpu
 {
 void fp32_u8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp32_u8_run_quantize_qasymm8");
     run_quantize_qasymm8<float, uint8_t>(src, dst, window);
 }
 void fp32_i8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp32_i8_run_quantize_qasymm8");
     run_quantize_qasymm8<float, int8_t>(src, dst, window);
 }
 void fp32_run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp32_run_quantize_qasymm16");
     run_quantize_qasymm16<float>(src, dst, window);
 }
 
 void fp32_i8_run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp32_i8_run_quantize_qsymm8");
     run_quantize_qsymm8<float, int8_t>(src, dst, window);
 }
 

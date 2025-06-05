@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
@@ -39,6 +40,7 @@ template <typename ScalarType>
 void sve2_softmax_logits_1d_quantized(
     const ITensor *in, const ITensor *max, void *const tmp, ITensor *out, float beta, bool is_log, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve2_softmax_logits_1d_quantized");
     const int start_x     = in->info()->valid_region().anchor.x();
     const int input_width = in->info()->valid_region().shape.x();
 

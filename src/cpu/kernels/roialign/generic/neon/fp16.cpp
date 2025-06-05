@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/roialign/generic/neon/impl.h"
 
@@ -36,7 +37,8 @@ void neon_fp16_roialign(const ITensor      *input,
                         const Window       &window,
                         const ThreadInfo   &info)
 {
-    return roi_align<float16_t, float16_t>(input, output, rois, pool_info, window, info);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_roialign");
+    roi_align<float16_t, float16_t>(input, output, rois, pool_info, window, info);
 }
 } // namespace cpu
 } // namespace arm_compute

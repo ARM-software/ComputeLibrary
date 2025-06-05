@@ -27,6 +27,8 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -532,6 +534,7 @@ void sme2_qasymm8_softmax_lut_512VL(const ITensor *in,
                                     const Window  &window,
                                     const void    *lut_ptr)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sme2_qasymm8_softmax_lut_512VL");
     ARM_COMPUTE_UNUSED(axis);
 
     auto lut_fp32_ptr = reinterpret_cast<const float *>(lut_ptr);

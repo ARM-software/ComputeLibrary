@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/quantize/generic/neon/impl.h"
 
 namespace arm_compute
@@ -30,14 +31,17 @@ namespace cpu
 {
 void fp16_u8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_u8_run_quantize_qasymm8");
     run_quantize_qasymm8<float16_t, uint8_t>(src, dst, window);
 }
 void fp16_i8_run_quantize_qasymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_i8_run_quantize_qasymm8");
     run_quantize_qasymm8<float16_t, int8_t>(src, dst, window);
 }
 void fp16_run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "fp16_run_quantize_qasymm16");
     run_quantize_qasymm16<float16_t>(src, dst, window);
 }
 } // namespace cpu

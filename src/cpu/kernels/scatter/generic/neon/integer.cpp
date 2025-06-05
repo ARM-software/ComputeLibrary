@@ -23,6 +23,7 @@
  */
 #include "arm_compute/function_info/ScatterInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/scatter/generic/neon/impl.h"
 
 namespace arm_compute
@@ -67,8 +68,8 @@ void scatter_s32_neon(const ITensor         *src,
                       const Window          &window,
                       const int              data_block_length)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "scatter_s32_neon");
     scatter_integer_generic<int32_t>(src, indices, dst, scatter_func, window, data_block_length);
-    return;
 }
 
 void scatter_s16_neon(const ITensor         *src,
@@ -78,8 +79,8 @@ void scatter_s16_neon(const ITensor         *src,
                       const Window          &window,
                       const int              data_block_length)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "scatter_s16_neon");
     scatter_integer_generic<int16_t>(src, indices, dst, scatter_func, window, data_block_length);
-    return;
 }
 
 void scatter_s8_neon(const ITensor         *src,
@@ -89,8 +90,8 @@ void scatter_s8_neon(const ITensor         *src,
                      const Window          &window,
                      const int              data_block_length)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "scatter_s8_neon");
     scatter_integer_generic<int8_t>(src, indices, dst, scatter_func, window, data_block_length);
-    return;
 }
 
 void scatter_u32_neon(const ITensor         *src,
@@ -100,8 +101,8 @@ void scatter_u32_neon(const ITensor         *src,
                       const Window          &window,
                       const int              data_block_length)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "scatter_u32_neon");
     scatter_integer_generic<uint32_t>(src, indices, dst, scatter_func, window, data_block_length);
-    return;
 }
 
 void scatter_u16_neon(const ITensor         *src,
@@ -111,8 +112,8 @@ void scatter_u16_neon(const ITensor         *src,
                       const Window          &window,
                       const int              data_block_length)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "scatter_u16_neon");
     scatter_integer_generic<uint16_t>(src, indices, dst, scatter_func, window, data_block_length);
-    return;
 }
 
 void scatter_u8_neon(const ITensor         *src,
@@ -122,8 +123,8 @@ void scatter_u8_neon(const ITensor         *src,
                      const Window          &window,
                      const int              data_block_length)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "scatter_u8_neon");
     scatter_integer_generic<uint8_t>(src, indices, dst, scatter_func, window, data_block_length);
-    return;
 }
 } // namespace cpu
 } // namespace arm_compute

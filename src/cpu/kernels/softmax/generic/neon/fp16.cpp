@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/softmax/generic/neon/impl.h"
 
@@ -41,6 +42,7 @@ void neon_fp16_softmax(const ITensor *in,
                        const Window  &window,
                        const void    *lut_ptr)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_fp16_softmax");
     ARM_COMPUTE_UNUSED(lut_ptr);
     if (axis == 0)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/select/generic/neon/impl.h"
 
 #include <arm_neon.h>
@@ -36,62 +37,74 @@ namespace cpu
 void neon_s8_select_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_8<int8_t, uint8x16_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s8_select_same_rank");
+    select_op_8<int8_t, uint8x16_t>(c, x, y, output, window);
 }
 void neon_s16_select_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_16<int16_t, uint16x8_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s16_select_same_rank");
+    select_op_16<int16_t, uint16x8_t>(c, x, y, output, window);
 }
 void neon_s32_select_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_32<int32_t, uint32x4_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s32_select_same_rank");
+    select_op_32<int32_t, uint32x4_t>(c, x, y, output, window);
 }
 void neon_s8_select_not_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_not_same_rank<int8_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s8_select_not_same_rank");
+    select_op_not_same_rank<int8_t>(c, x, y, output, window);
 }
 void neon_s16_select_not_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_not_same_rank<int16_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s16_select_not_same_rank");
+    select_op_not_same_rank<int16_t>(c, x, y, output, window);
 }
 void neon_s32_select_not_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_not_same_rank<int32_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_s32_select_not_same_rank");
+    select_op_not_same_rank<int32_t>(c, x, y, output, window);
 }
 void neon_u8_select_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_8<uint8_t, uint8x16_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_u8_select_same_rank");
+    select_op_8<uint8_t, uint8x16_t>(c, x, y, output, window);
 }
 void neon_u16_select_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_16<uint16_t, uint16x8_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_u16_select_same_rank");
+    select_op_16<uint16_t, uint16x8_t>(c, x, y, output, window);
 }
 void neon_u32_select_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_32<uint32_t, uint32x4_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_u32_select_same_rank");
+    select_op_32<uint32_t, uint32x4_t>(c, x, y, output, window);
 }
 void neon_u8_select_not_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_not_same_rank<uint8_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_u8_select_not_same_rank");
+    select_op_not_same_rank<uint8_t>(c, x, y, output, window);
 }
 void neon_u16_select_not_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_not_same_rank<uint16_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_u16_select_not_same_rank");
+    select_op_not_same_rank<uint16_t>(c, x, y, output, window);
 }
 void neon_u32_select_not_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_not_same_rank<uint32_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_u32_select_not_same_rank");
+    select_op_not_same_rank<uint32_t>(c, x, y, output, window);
 }
 
 } // namespace cpu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/reduction_layer/generic/neon/impl.h"
 
 namespace arm_compute
@@ -34,7 +35,8 @@ void reduce_RedOpX_reduceX_float16_8(const Window            &window,
                                      ITensor                 *output,
                                      const ReductionOperation op)
 {
-    return Reducer<RedOpX<float16_t, 8>>::reduceX(window, input, output, RedOpX<float16_t, 8>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpX_reduceX_float16_8");
+    Reducer<RedOpX<float16_t, 8>>::reduceX(window, input, output, RedOpX<float16_t, 8>(), op);
 }
 
 void reduce_RedOpYZW_reduceY_float16_8(const Window            &window,
@@ -42,7 +44,8 @@ void reduce_RedOpYZW_reduceY_float16_8(const Window            &window,
                                        ITensor                 *output,
                                        const ReductionOperation op)
 {
-    return Reducer<RedOpYZW<float16_t, 8>>::reduceY(window, input, output, RedOpYZW<float16_t, 8>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpYZW_reduceY_float16_8");
+    Reducer<RedOpYZW<float16_t, 8>>::reduceY(window, input, output, RedOpYZW<float16_t, 8>(), op);
 }
 
 void reduce_RedOpYZW_reduceZ_float16_8(const Window            &window,
@@ -50,7 +53,8 @@ void reduce_RedOpYZW_reduceZ_float16_8(const Window            &window,
                                        ITensor                 *output,
                                        const ReductionOperation op)
 {
-    return Reducer<RedOpYZW<float16_t, 8>>::reduceZ(window, input, output, RedOpYZW<float16_t, 8>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpYZW_reduceZ_float16_8");
+    Reducer<RedOpYZW<float16_t, 8>>::reduceZ(window, input, output, RedOpYZW<float16_t, 8>(), op);
 }
 
 void reduce_RedOpYZW_reduceW_float16_8(const Window            &window,
@@ -58,7 +62,8 @@ void reduce_RedOpYZW_reduceW_float16_8(const Window            &window,
                                        ITensor                 *output,
                                        const ReductionOperation op)
 {
-    return Reducer<RedOpYZW<float16_t, 8>>::reduceW(window, input, output, RedOpYZW<float16_t, 8>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpYZW_reduceW_float16_8");
+    Reducer<RedOpYZW<float16_t, 8>>::reduceW(window, input, output, RedOpYZW<float16_t, 8>(), op);
 }
 } // namespace cpu
 } // namespace arm_compute

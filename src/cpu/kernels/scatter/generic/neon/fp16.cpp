@@ -25,6 +25,7 @@
 
 #include "arm_compute/function_info/ScatterInfo.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/scatter/generic/neon/impl.h"
 
 namespace arm_compute
@@ -38,6 +39,7 @@ void scatter_fp16_neon(const ITensor         *src,
                        const Window          &window,
                        const int              data_block_length)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "scatter_fp16_neon");
     switch (scatter_func)
     {
         case ScatterFunction::Update:
@@ -58,7 +60,6 @@ void scatter_fp16_neon(const ITensor         *src,
         default:
             ARM_COMPUTE_ERROR("Invalid reduction function for scatter.");
     }
-    return;
 }
 } // namespace cpu
 } // namespace arm_compute

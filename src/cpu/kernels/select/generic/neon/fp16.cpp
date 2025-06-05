@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/select/generic/neon/impl.h"
 
@@ -35,12 +36,14 @@ namespace cpu
 void neon_f16_select_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_16<float16_t, uint16x8_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_f16_select_same_rank");
+    select_op_16<float16_t, uint16x8_t>(c, x, y, output, window);
 }
 void neon_f16_select_not_same_rank(
     const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window)
 {
-    return select_op_not_same_rank<float16_t>(c, x, y, output, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_f16_select_not_same_rank");
+    select_op_not_same_rank<float16_t>(c, x, y, output, window);
 }
 
 } // namespace cpu

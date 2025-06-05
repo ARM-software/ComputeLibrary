@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/roialign/generic/neon/impl.h"
 namespace arm_compute
 {
@@ -33,7 +34,8 @@ void neon_qu8_roialign(const ITensor      *input,
                        const Window       &window,
                        const ThreadInfo   &info)
 {
-    return roi_align<uint8_t, uint16_t>(input, output, rois, pool_info, window, info);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "neon_qu8_roialign");
+    roi_align<uint8_t, uint16_t>(input, output, rois, pool_info, window, info);
 }
 } // namespace cpu
 } // namespace arm_compute

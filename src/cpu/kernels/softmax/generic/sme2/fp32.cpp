@@ -27,6 +27,8 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/common/utils/profile/acl_profile.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -525,6 +527,7 @@ void sme2_f32_softmax_kernel( //
 void sme2_fp32_softmax(
     const ITensor *in, void *const, ITensor *out, const float beta, int axis, const Window &window, const void *lut_ptr)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sme2_fp32_softmax");
     ARM_COMPUTE_UNUSED(lut_ptr);
     ARM_COMPUTE_UNUSED(axis);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/range/generic/neon/impl.h"
 
 #include <cstdint>
@@ -32,32 +33,38 @@ namespace cpu
 {
 void u8_neon_range_function(ITensor *output, float start, float step, const Window &window)
 {
-    return neon_range_function<uint8_t>(output, start, step, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u8_neon_range_function");
+    neon_range_function<uint8_t>(output, start, step, window);
 }
 
 void u16_neon_range_function(ITensor *output, float start, float step, const Window &window)
 {
-    return neon_range_function<uint16_t>(output, start, step, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u16_neon_range_function");
+    neon_range_function<uint16_t>(output, start, step, window);
 }
 
 void u32_neon_range_function(ITensor *output, float start, float step, const Window &window)
 {
-    return neon_range_function<uint32_t>(output, start, step, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "u32_neon_range_function");
+    neon_range_function<uint32_t>(output, start, step, window);
 }
 
 void s8_neon_range_function(ITensor *output, float start, float step, const Window &window)
 {
-    return neon_range_function<int8_t>(output, start, step, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "s8_neon_range_function");
+    neon_range_function<int8_t>(output, start, step, window);
 }
 
 void s16_neon_range_function(ITensor *output, float start, float step, const Window &window)
 {
-    return neon_range_function<int16_t>(output, start, step, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "s16_neon_range_function");
+    neon_range_function<int16_t>(output, start, step, window);
 }
 
 void s32_neon_range_function(ITensor *output, float start, float step, const Window &window)
 {
-    return neon_range_function<int32_t>(output, start, step, window);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "s32_neon_range_function");
+    neon_range_function<int32_t>(output, start, step, window);
 }
 
 } // namespace cpu

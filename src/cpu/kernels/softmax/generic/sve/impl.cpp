@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "src/cpu/kernels/softmax/generic/sve/impl.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 
 namespace arm_compute
@@ -36,6 +37,7 @@ namespace cpu
 template <typename ScalarType>
 void sve_logits_1d_max(const ITensor *in, ITensor *out, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve_logits_1d_max");
     const auto all_true_pg    = wrapper::svptrue<ScalarType>();
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
@@ -83,6 +85,7 @@ void sve_softmax_logits_1d_float(const ITensor *in,
                                  bool           is_log,
                                  const Window  &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sve_softmax_logits_1d_float");
     const int start_x     = in->info()->valid_region().anchor.x();
     const int input_width = in->info()->valid_region().shape.x();
 

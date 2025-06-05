@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/reduction_layer/generic/neon/impl.h"
 
 namespace arm_compute
@@ -33,7 +34,8 @@ void reduce_RedOpX_reduceX_qasymm8(const Window            &window,
                                    ITensor                 *output,
                                    const ReductionOperation op)
 {
-    return Reducer<RedOpX_quantized<uint8_t>>::reduceX(window, input, output, RedOpX_quantized<uint8_t>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpX_reduceX_qasymm8");
+    Reducer<RedOpX_quantized<uint8_t>>::reduceX(window, input, output, RedOpX_quantized<uint8_t>(), op);
 }
 
 void reduce_RedOpYZW_reduceY_qasymm8(const Window            &window,
@@ -41,7 +43,8 @@ void reduce_RedOpYZW_reduceY_qasymm8(const Window            &window,
                                      ITensor                 *output,
                                      const ReductionOperation op)
 {
-    return Reducer<RedOpYZW_quantized<uint8_t>>::reduceY(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpYZW_reduceY_qasymm8");
+    Reducer<RedOpYZW_quantized<uint8_t>>::reduceY(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
 }
 
 void reduce_RedOpYZW_reduceZ_qasymm8(const Window            &window,
@@ -49,7 +52,8 @@ void reduce_RedOpYZW_reduceZ_qasymm8(const Window            &window,
                                      ITensor                 *output,
                                      const ReductionOperation op)
 {
-    return Reducer<RedOpYZW_quantized<uint8_t>>::reduceZ(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpYZW_reduceZ_qasymm8");
+    Reducer<RedOpYZW_quantized<uint8_t>>::reduceZ(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
 }
 
 void reduce_RedOpYZW_reduceW_qasymm8(const Window            &window,
@@ -57,7 +61,8 @@ void reduce_RedOpYZW_reduceW_qasymm8(const Window            &window,
                                      ITensor                 *output,
                                      const ReductionOperation op)
 {
-    return Reducer<RedOpYZW_quantized<uint8_t>>::reduceW(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "reduce_RedOpYZW_reduceW_qasymm8");
+    Reducer<RedOpYZW_quantized<uint8_t>>::reduceW(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
 }
 } // namespace cpu
 } // namespace arm_compute

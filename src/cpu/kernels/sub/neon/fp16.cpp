@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/kernels/sub/neon/impl.h"
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
@@ -35,6 +36,7 @@ namespace cpu
 void sub_same_neon_fp16(
     const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "sub_same_neon_fp16");
     sub_same_neon<float16_t>(src0, src1, dst, policy, window);
 }
 } // namespace cpu
