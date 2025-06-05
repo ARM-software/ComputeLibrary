@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEBitwiseOr.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEBitwiseOrKernel.h"
 
 #include <utility>
@@ -32,6 +33,7 @@ using namespace arm_compute;
 
 void NEBitwiseOr::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBitwiseOr::configure");
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
     auto k = std::make_unique<NEBitwiseOrKernel>();
     k->configure(input1, input2, output);

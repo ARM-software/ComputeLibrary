@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
@@ -77,6 +78,7 @@ void NEGenerateProposalsLayer::configure(const ITensor               *scores,
                                          ITensor                     *num_valid_proposals,
                                          const GenerateProposalsInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGenerateProposalsLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
     ARM_COMPUTE_ERROR_THROW_ON(NEGenerateProposalsLayer::validate(scores->info(), deltas->info(), anchors->info(),
                                                                   proposals->info(), scores_out->info(),
@@ -228,6 +230,7 @@ Status NEGenerateProposalsLayer::validate(const ITensorInfo           *scores,
                                           const ITensorInfo           *num_valid_proposals,
                                           const GenerateProposalsInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGenerateProposalsLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(scores, DataLayout::NCHW, DataLayout::NHWC);
@@ -367,6 +370,7 @@ Status NEGenerateProposalsLayer::validate(const ITensorInfo           *scores,
 
 void NEGenerateProposalsLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGenerateProposalsLayer::run");
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_memory_group);
 

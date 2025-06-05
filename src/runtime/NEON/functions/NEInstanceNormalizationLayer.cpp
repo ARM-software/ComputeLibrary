@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 
 namespace arm_compute
@@ -47,6 +48,8 @@ NEInstanceNormalizationLayer::NEInstanceNormalizationLayer(std::shared_ptr<IMemo
 
 void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, float gamma, float beta, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEInstanceNormalizationLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, gamma, beta, epsilon);
 
     const DataLayout data_layout       = input->info()->data_layout();
@@ -82,6 +85,8 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
 Status NEInstanceNormalizationLayer::validate(
     const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEInstanceNormalizationLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEInstanceNormalizationLayerKernel::validate(
         &input->clone()->set_data_layout(DataLayout::NCHW), &output->clone()->set_data_layout(DataLayout::NCHW),
@@ -90,6 +95,7 @@ Status NEInstanceNormalizationLayer::validate(
 
 void NEInstanceNormalizationLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEInstanceNormalizationLayer::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Permute input

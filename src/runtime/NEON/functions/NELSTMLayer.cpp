@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, 2024 Arm Limited.
+ * Copyright (c) 2018-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/runtime/common/LSTMParams.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 
 namespace arm_compute
 {
@@ -146,6 +147,7 @@ void NELSTMLayer::configure(const ITensor             *input,
                             float                      cell_threshold,
                             float                      projection_threshold)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELSTMLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
                                  recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
                                  forget_gate_bias, cell_bias, output_gate_bias, output_state_in, cell_state_in,
@@ -502,6 +504,7 @@ Status NELSTMLayer::validate(const ITensorInfo             *input,
                              float                          cell_threshold,
                              float                          projection_threshold)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELSTMLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(
         input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_forget_weights,
         recurrent_to_cell_weights, recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
@@ -770,6 +773,7 @@ Status NELSTMLayer::validate(const ITensorInfo             *input,
 
 void NELSTMLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NELSTMLayer::run");
     prepare();
 
     MemoryGroupResourceScope scope_mg(_memory_group);

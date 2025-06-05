@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuDepthwiseConv2d.h"
 
 using namespace arm_compute::misc;
@@ -70,6 +71,8 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
     const ActivationLayerInfo &act_info,
     const Size2D              &dilation)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayerOptimizedInternal::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     bool is_nhwc   = input->info()->data_layout() == DataLayout::NCHW;
@@ -159,12 +162,16 @@ NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::valid
                                                                                     const ActivationLayerInfo &act_info,
                                                                                     const Size2D              &dilation)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayerOptimizedInternal::validate");
     ConvolutionInfo info{conv_info, depth_multiplier, act_info, dilation};
     return cpu::CpuDepthwiseConv2d::validate(input, weights, biases, output, info);
 }
 
 void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayerOptimizedInternal::run");
     prepare();
     MemoryGroupResourceScope scope_mg(_memory_group);
 
@@ -230,6 +237,8 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
                                                                                 const ActivationLayerInfo &act_info,
                                                                                 const Size2D              &dilation)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayerGeneric::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     const ConvolutionInfo info{conv_info, depth_multiplier, act_info, dilation};
@@ -293,12 +302,16 @@ Status NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::validate
                                                                                  const ActivationLayerInfo &act_info,
                                                                                  const Size2D              &dilation)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayerGeneric::validate");
     ConvolutionInfo info{conv_info, depth_multiplier, act_info, dilation};
     return cpu::CpuDepthwiseConv2d::validate(input, weights, biases, output, info);
 }
 
 void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayerGeneric::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->weights);
@@ -335,6 +348,8 @@ void NEDepthwiseConvolutionLayer::configure(ITensor                   *input,
                                             const ActivationLayerInfo &act_info,
                                             const Size2D              &dilation)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     ARM_COMPUTE_LOG_PARAMS(input, weights, output, conv_info, depth_multiplier, biases, act_info, dilation);
@@ -370,6 +385,8 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo         *input,
                                              const ActivationLayerInfo &act_info,
                                              const Size2D              &dilation)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEDepthwiseConvolutionLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     ConvolutionInfo info{conv_info, depth_multiplier, act_info, dilation};
     return cpu::CpuDepthwiseConv2d::validate(input, weights, biases, output, info);
@@ -377,6 +394,7 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo         *input,
 
 void NEDepthwiseConvolutionLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDepthwiseConvolutionLayer::run");
     switch (_impl->depth_conv_func)
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:

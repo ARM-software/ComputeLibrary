@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuDynamicGemm.h"
@@ -117,6 +118,7 @@ void NEGEMM::configure(const ITensor  *a,
                        float           beta,
                        const GEMMInfo &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMM::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
 
     _impl->is_dynamic = is_dynamic(a, b, c, d);
@@ -164,6 +166,7 @@ Status NEGEMM::validate(const ITensorInfo *a,
                         float              beta,
                         const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMM::validate");
     // Make the B matrix dynamic values.
     auto b_to_use = b->clone();
     if (!gemm_info.reshape_b_only_on_first_run())
@@ -198,6 +201,7 @@ Status NEGEMM::has_opt_impl(arm_compute::WeightFormat &expected_weight_format,
 
 void NEGEMM::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMM::run");
     prepare();
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);

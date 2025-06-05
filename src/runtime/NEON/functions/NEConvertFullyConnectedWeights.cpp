@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuConvertFullyConnectedWeights.h"
 
 namespace arm_compute
@@ -45,6 +46,8 @@ void NEConvertFullyConnectedWeights::configure(const ITensor     *input,
                                                const TensorShape &original_input_shape,
                                                DataLayout         data_layout)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEConvertFullyConnectedWeights::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _impl->src = input;
@@ -58,12 +61,16 @@ Status NEConvertFullyConnectedWeights::validate(const ITensorInfo *input,
                                                 const TensorShape &original_input_shape,
                                                 DataLayout         data_layout)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEConvertFullyConnectedWeights::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return cpu::CpuConvertFullyConnectedWeights::validate(input, output, original_input_shape, data_layout);
 }
 
 void NEConvertFullyConnectedWeights::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConvertFullyConnectedWeights::run");
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);

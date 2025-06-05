@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,14 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEChannelShuffleLayerKernel.h"
 
 namespace arm_compute
 {
 void NEChannelShuffleLayer::configure(const ITensor *input, ITensor *output, unsigned int num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEChannelShuffleLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, num_groups);
     auto k = std::make_unique<NEChannelShuffleLayerKernel>();
     k->configure(input, output, num_groups);
@@ -41,6 +43,7 @@ void NEChannelShuffleLayer::configure(const ITensor *input, ITensor *output, uns
 
 Status NEChannelShuffleLayer::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEChannelShuffleLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEChannelShuffleLayerKernel::validate(input, output, num_groups);
 }

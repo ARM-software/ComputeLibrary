@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuElementwise.h"
 
 #include <utility>
@@ -49,6 +50,7 @@ NEElementwiseMax::~NEElementwiseMax()                              = default;
 
 void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseMax::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseMax::validate(input1->info(), input2->info(), output->info(), act_info));
 
@@ -64,6 +66,7 @@ Status NEElementwiseMax::validate(const ITensorInfo         *input1,
                                   const ITensorInfo         *output,
                                   const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseMax::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseMax::validate(input1, input2, output);
@@ -71,6 +74,7 @@ Status NEElementwiseMax::validate(const ITensorInfo         *input1,
 
 void NEElementwiseMax::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseMax::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -95,6 +99,7 @@ NEElementwiseMin::~NEElementwiseMin()                              = default;
 
 void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseMin::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseMin::validate(input1->info(), input2->info(), output->info(), act_info));
 
@@ -110,6 +115,7 @@ Status NEElementwiseMin::validate(const ITensorInfo         *input1,
                                   const ITensorInfo         *output,
                                   const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseMin::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseMin::validate(input1, input2, output);
@@ -117,6 +123,7 @@ Status NEElementwiseMin::validate(const ITensorInfo         *input1,
 
 void NEElementwiseMin::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseMin::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -144,6 +151,7 @@ void NEElementwiseSquaredDiff::configure(ITensor                   *input1,
                                          ITensor                   *output,
                                          const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseSquaredDiff::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_ERROR_THROW_ON(
         NEElementwiseSquaredDiff::validate(input1->info(), input2->info(), output->info(), act_info));
@@ -160,6 +168,7 @@ Status NEElementwiseSquaredDiff::validate(const ITensorInfo         *input1,
                                           const ITensorInfo         *output,
                                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseSquaredDiff::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseSquaredDiff::validate(input1, input2, output);
@@ -167,6 +176,7 @@ Status NEElementwiseSquaredDiff::validate(const ITensorInfo         *input1,
 
 void NEElementwiseSquaredDiff::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseSquaredDiff::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -194,6 +204,7 @@ void NEElementwiseDivision::configure(ITensor                   *input1,
                                       ITensor                   *output,
                                       const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseDivision::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_ERROR_THROW_ON(
         NEElementwiseDivision::validate(input1->info(), input2->info(), output->info(), act_info));
@@ -210,12 +221,14 @@ Status NEElementwiseDivision::validate(const ITensorInfo         *input1,
                                        const ITensorInfo         *output,
                                        const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseDivision::validate");
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwiseDivision::validate(input1, input2, output);
 }
 
 void NEElementwiseDivision::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseDivision::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -243,6 +256,7 @@ void NEElementwisePower::configure(ITensor                   *input1,
                                    ITensor                   *output,
                                    const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwisePower::configure");
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_ERROR_THROW_ON(NEElementwisePower::validate(input1->info(), input2->info(), output->info(), act_info));
 
@@ -258,6 +272,7 @@ Status NEElementwisePower::validate(const ITensorInfo         *input1,
                                     const ITensorInfo         *output,
                                     const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwisePower::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return cpu::CpuElementwisePower::validate(input1, input2, output);
@@ -265,6 +280,7 @@ Status NEElementwisePower::validate(const ITensorInfo         *input1,
 
 void NEElementwisePower::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwisePower::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -296,6 +312,8 @@ NEElementwiseComparisonStatic<COP>::~NEElementwiseComparisonStatic() = default;
 template <ComparisonOperation COP>
 void NEElementwiseComparisonStatic<COP>::configure(ITensor *input1, ITensor *input2, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEElementwiseComparisonStatic::configure");
     ARM_COMPUTE_ERROR_THROW_ON(
         NEElementwiseComparisonStatic<COP>::validate(input1->info(), input2->info(), output->info()));
 
@@ -318,6 +336,7 @@ Status NEElementwiseComparisonStatic<COP>::validate(const ITensorInfo *input1,
 template <ComparisonOperation COP>
 void NEElementwiseComparisonStatic<COP>::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseComparisonStatic::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);
@@ -342,6 +361,7 @@ NEElementwiseComparison::~NEElementwiseComparison()                             
 
 void NEElementwiseComparison::configure(ITensor *input1, ITensor *input2, ITensor *output, ComparisonOperation op)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseComparison::configure");
     ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseComparison::validate(input1->info(), input2->info(), output->info(), op));
 
     _impl->src_0 = input1;
@@ -356,12 +376,14 @@ Status NEElementwiseComparison::validate(const ITensorInfo  *input1,
                                          const ITensorInfo  *output,
                                          ComparisonOperation op)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseComparison::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuElementwiseComparison::validate(input1, input2, output, op);
 }
 
 void NEElementwiseComparison::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseComparison::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);

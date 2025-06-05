@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
 
 namespace arm_compute
@@ -50,6 +51,7 @@ void NEBatchNormalizationLayer::configure(ITensor            *input,
                                           float               epsilon,
                                           ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBatchNormalizationLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, mean, var, beta, gamma, epsilon, act_info);
     // Configure kernel
     _norm_kernel = std::make_unique<NEBatchNormalizationLayerKernel>();
@@ -65,6 +67,7 @@ Status NEBatchNormalizationLayer::validate(const ITensorInfo  *input,
                                            float               epsilon,
                                            ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBatchNormalizationLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output, mean, var, beta, gamma);
     ARM_COMPUTE_RETURN_ON_ERROR(
         NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon, act_info));
@@ -73,6 +76,7 @@ Status NEBatchNormalizationLayer::validate(const ITensorInfo  *input,
 
 void NEBatchNormalizationLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBatchNormalizationLayer::run");
     NEScheduler::get().schedule(_norm_kernel.get(), Window::DimY);
 }
 } // namespace arm_compute

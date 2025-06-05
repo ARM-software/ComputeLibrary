@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 
 namespace arm_compute
@@ -40,6 +41,7 @@ void NEFillBorder::configure(ITensor          *input,
                              BorderMode        border_mode,
                              const PixelValue &constant_border_value)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFillBorder::configure");
     ARM_COMPUTE_LOG_PARAMS(input, border_width, border_mode, constant_border_value);
     _border_handler = std::make_unique<NEFillBorderKernel>();
     _border_handler->configure(input, BorderSize(border_width), border_mode, constant_border_value);
@@ -47,6 +49,7 @@ void NEFillBorder::configure(ITensor          *input,
 
 void NEFillBorder::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFillBorder::run");
     NEScheduler::get().schedule(_border_handler.get(), Window::DimZ);
 }
 } // namespace arm_compute

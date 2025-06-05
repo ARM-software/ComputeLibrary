@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuFill.h"
 
 #include <utility>
@@ -46,6 +47,7 @@ NEFill::~NEFill()                    = default;
 
 void NEFill::configure(ITensor *tensor, PixelValue constant_value)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFill::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
 
     _impl->tensor = tensor;
@@ -55,6 +57,7 @@ void NEFill::configure(ITensor *tensor, PixelValue constant_value)
 
 void NEFill::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFill::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_DST, _impl->tensor);
     _impl->op->run(pack);

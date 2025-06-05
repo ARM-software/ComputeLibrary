@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuDirectConv3d.h"
 
 namespace arm_compute
@@ -49,6 +50,7 @@ NEConv3D::~NEConv3D() = default;
 void NEConv3D::configure(
     ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv3dInfo &conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConv3D::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(cpu::CpuDirectConv3d::validate(
@@ -72,6 +74,7 @@ Status NEConv3D::validate(const ITensorInfo *input,
                           const ITensorInfo *output,
                           const Conv3dInfo  &conv_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConv3D::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuDirectConv3d::validate(input, weights, biases, output, conv_info));
 
@@ -80,6 +83,7 @@ Status NEConv3D::validate(const ITensorInfo *input,
 
 void NEConv3D::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConv3D::run");
     if (_impl->op != nullptr)
     {
         _impl->op->run(_impl->run_pack);

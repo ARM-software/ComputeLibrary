@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/Scheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 
 namespace arm_compute
 {
@@ -43,6 +44,7 @@ NEFFT2D::NEFFT2D(std::shared_ptr<IMemoryManager> memory_manager)
 
 void NEFFT2D::configure(const ITensor *input, ITensor *output, const FFT2DInfo &config)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFT2D::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEFFT2D::validate(input->info(), output->info(), config));
     ARM_COMPUTE_LOG_PARAMS(input, output, config);
@@ -64,6 +66,7 @@ void NEFFT2D::configure(const ITensor *input, ITensor *output, const FFT2DInfo &
 
 Status NEFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, const FFT2DInfo &config)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFT2D::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
@@ -94,6 +97,7 @@ Status NEFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
 void NEFFT2D::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFT2D::run");
     _memory_group.acquire();
 
     _first_pass_func.run();

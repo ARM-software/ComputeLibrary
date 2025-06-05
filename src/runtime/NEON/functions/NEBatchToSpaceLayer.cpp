@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,12 +30,14 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEBatchToSpaceLayerKernel.h"
 
 namespace arm_compute
 {
 void NEBatchToSpaceLayer::configure(const ITensor *input, const ITensor *block_shape, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBatchToSpaceLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, block_shape, output);
     auto k = std::make_unique<NEBatchToSpaceLayerKernel>();
     k->configure(input, block_shape, output);
@@ -45,6 +47,7 @@ void NEBatchToSpaceLayer::configure(const ITensor *input, const ITensor *block_s
 void NEBatchToSpaceLayer::configure(
     const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBatchToSpaceLayer::configure");
     auto k = std::make_unique<NEBatchToSpaceLayerKernel>();
     k->configure(input, block_shape_x, block_shape_y, output, crop_info);
     _kernel = std::move(k);
@@ -53,6 +56,7 @@ void NEBatchToSpaceLayer::configure(
 Status
 NEBatchToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBatchToSpaceLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, block_shape, output);
     return NEBatchToSpaceLayerKernel::validate(input, block_shape, output);
 }
@@ -63,6 +67,7 @@ Status NEBatchToSpaceLayer::validate(const ITensorInfo *input,
                                      const ITensorInfo *output,
                                      const CropInfo    &crop_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBatchToSpaceLayer::validate");
     return NEBatchToSpaceLayerKernel::validate(input, block_shape_x, block_shape_y, output, crop_info);
 }
 } // namespace arm_compute

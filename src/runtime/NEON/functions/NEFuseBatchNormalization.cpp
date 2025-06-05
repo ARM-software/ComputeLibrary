@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEFuseBatchNormalizationKernel.h"
 
 namespace arm_compute
@@ -51,6 +52,7 @@ void NEFuseBatchNormalization::configure(const ITensor             *input_weight
                                          float                      epsilon,
                                          FuseBatchNormalizationType fbn_type)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFuseBatchNormalization::configure");
     ARM_COMPUTE_LOG_PARAMS(input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma,
                            epsilon, fbn_type);
 
@@ -70,6 +72,7 @@ Status NEFuseBatchNormalization::validate(const ITensorInfo         *input_weigh
                                           float                      epsilon,
                                           FuseBatchNormalizationType fbn_type)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFuseBatchNormalization::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input_weights, bn_mean, bn_var, fused_bias, fused_weights, input_bias,
                                               bn_beta, bn_gamma);
     return NEFuseBatchNormalizationKernel::validate(input_weights, bn_mean, bn_var, fused_weights, fused_bias,
@@ -78,6 +81,7 @@ Status NEFuseBatchNormalization::validate(const ITensorInfo         *input_weigh
 
 void NEFuseBatchNormalization::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFuseBatchNormalization::run");
     NEScheduler::get().schedule(_fuse_bn_kernel.get(), Window::DimY);
 }
 } // namespace arm_compute

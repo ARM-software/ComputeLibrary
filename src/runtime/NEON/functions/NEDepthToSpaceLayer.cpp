@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 
 namespace arm_compute
@@ -42,6 +43,7 @@ NEDepthToSpaceLayer::~NEDepthToSpaceLayer() = default;
 
 void NEDepthToSpaceLayer::configure(const ITensor *input, ITensor *output, int32_t block_shape)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDepthToSpaceLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
 
     auto k = std::make_unique<NEDepthToSpaceLayerKernel>();
@@ -51,12 +53,14 @@ void NEDepthToSpaceLayer::configure(const ITensor *input, ITensor *output, int32
 
 Status NEDepthToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDepthToSpaceLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return NEDepthToSpaceLayerKernel::validate(input, output, block_shape);
 }
 
 void NEDepthToSpaceLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDepthToSpaceLayer::run");
     NEScheduler::get().schedule(_kernel.get(), _kernel->get_split_dimension());
 }
 

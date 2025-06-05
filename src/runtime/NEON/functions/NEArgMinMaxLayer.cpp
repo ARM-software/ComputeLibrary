@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
 namespace arm_compute
@@ -56,6 +57,7 @@ NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manage
 
 void NEArgMinMaxLayer::configure(ITensor *input, int axis, ITensor *output, const ReductionOperation &op)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEArgMinMaxLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, axis, output, op);
     _impl->reduction_function = std::make_unique<NEReductionOperation>();
     if (output->info() &&
@@ -78,6 +80,7 @@ void NEArgMinMaxLayer::configure(ITensor *input, int axis, ITensor *output, cons
 Status
 NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEArgMinMaxLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN,
                                     "Invalid operation");
@@ -86,6 +89,7 @@ NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo
 
 void NEArgMinMaxLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEArgMinMaxLayer::run");
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->reduction_function->run();
     if (_impl->tmp_reduction_result != nullptr)

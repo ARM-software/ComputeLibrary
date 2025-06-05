@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
 #include "src/core/NEON/kernels/NEFFTScaleKernel.h"
@@ -52,6 +53,7 @@ NEFFT1D::NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager)
 
 void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &config)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFT1D::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEFFT1D::validate(input->info(), output->info(), config));
     ARM_COMPUTE_LOG_PARAMS(input, output, config);
@@ -121,6 +123,7 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
 
 Status NEFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, const FFT1DInfo &config)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFT1D::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
@@ -148,6 +151,7 @@ Status NEFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
 void NEFFT1D::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFT1D::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     NEScheduler::get().schedule(_digit_reverse_kernel.get(), (_axis == 0 ? Window::DimY : Window::DimZ));

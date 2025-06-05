@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuCast.h"
 
 namespace arm_compute
@@ -46,6 +47,7 @@ NECast::~NECast()                    = default;
 
 void NECast::configure(ITensor *input, ITensor *output, ConvertPolicy policy)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NECast::configure");
     _impl->src = input;
     _impl->dst = output;
 
@@ -57,12 +59,14 @@ void NECast::configure(ITensor *input, ITensor *output, ConvertPolicy policy)
 
 Status NECast::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NECast::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     return cpu::CpuCast::validate(input, output, policy);
 }
 
 void NECast::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NECast::run");
     ITensorPack pack = {{ACL_SRC, _impl->src}, {ACL_DST, _impl->dst}};
     _impl->op->run(pack);
 }

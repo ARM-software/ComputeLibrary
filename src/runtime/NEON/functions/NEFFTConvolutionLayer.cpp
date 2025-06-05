@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
@@ -111,6 +112,7 @@ void NEFFTConvolutionLayer::configure(ITensor                   *input,
                                       const ActivationLayerInfo &act_info,
                                       bool                       enable_fast_math)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFTConvolutionLayer::configure");
     ARM_COMPUTE_UNUSED(enable_fast_math);
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, act_info, enable_fast_math);
 
@@ -281,6 +283,7 @@ Status NEFFTConvolutionLayer::validate(const ITensorInfo         *input,
                                        const ActivationLayerInfo &act_info,
                                        bool                       enable_fast_math)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFTConvolutionLayer::validate");
     ARM_COMPUTE_UNUSED(enable_fast_math);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
 
@@ -330,6 +333,7 @@ Status NEFFTConvolutionLayer::validate(const ITensorInfo         *input,
 
 void NEFFTConvolutionLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFFTConvolutionLayer::run");
     prepare();
 
     MemoryGroupResourceScope scope_mg(_memory_group);

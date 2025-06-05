@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 
 namespace arm_compute
@@ -35,6 +36,7 @@ void NEBoundingBoxTransform::configure(const ITensor                  *boxes,
                                        const ITensor                  *deltas,
                                        const BoundingBoxTransformInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBoundingBoxTransform::configure");
     ARM_COMPUTE_LOG_PARAMS(boxes, pred_boxes, deltas, info);
     // Configure Bounding Box kernel
     auto k = std::make_unique<NEBoundingBoxTransformKernel>();
@@ -47,6 +49,7 @@ Status NEBoundingBoxTransform::validate(const ITensorInfo              *boxes,
                                         const ITensorInfo              *deltas,
                                         const BoundingBoxTransformInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEBoundingBoxTransform::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(boxes, pred_boxes, deltas);
     return NEBoundingBoxTransformKernel::validate(boxes, pred_boxes, deltas, info);
 }

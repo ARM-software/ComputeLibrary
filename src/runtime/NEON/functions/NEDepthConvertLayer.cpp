@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2024 Arm Limited.
+ * Copyright (c) 2016-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuCast.h"
 
 #include <utility>
@@ -47,6 +48,7 @@ NEDepthConvertLayer::~NEDepthConvertLayer()                                 = de
 
 void NEDepthConvertLayer::configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDepthConvertLayer::configure");
     ARM_COMPUTE_UNUSED(shift);
 
     _impl->src = input;
@@ -62,6 +64,7 @@ void NEDepthConvertLayer::configure(const ITensor *input, ITensor *output, Conve
 Status
 NEDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDepthConvertLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(shift != 0);
     return cpu::CpuCast::validate(input, output, policy);
@@ -69,6 +72,7 @@ NEDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *outpu
 
 void NEDepthConvertLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDepthConvertLayer::run");
     ITensorPack pack = {{ACL_SRC, _impl->src}, {ACL_DST, _impl->dst}};
     _impl->op->run(pack);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuSub.h"
 
 #include <utility>
@@ -53,6 +54,7 @@ Status NEArithmeticSubtraction::validate(const ITensorInfo         *input1,
                                          ConvertPolicy              policy,
                                          const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEArithmeticSubtraction::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, output);
     return cpu::CpuSub::validate(input1, input2, output, policy, act_info);
 }
@@ -63,6 +65,7 @@ void NEArithmeticSubtraction::configure(const ITensor             *input1,
                                         ConvertPolicy              policy,
                                         const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEArithmeticSubtraction::configure");
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
@@ -72,6 +75,7 @@ void NEArithmeticSubtraction::configure(const ITensor             *input1,
 
 void NEArithmeticSubtraction::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEArithmeticSubtraction::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC_0, _impl->src_0);
     pack.add_tensor(TensorType::ACL_SRC_1, _impl->src_1);

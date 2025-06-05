@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuAddMulAdd.h"
 
@@ -56,6 +57,7 @@ void NEAddMulAdd::configure(ITensor                   *input1,
                             const ConvertPolicy        policy,
                             const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEAddMulAdd::configure");
     ARM_COMPUTE_LOG_PARAMS(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info);
 
     _impl->op = std::make_unique<cpu::CpuAddMulAdd>();
@@ -79,12 +81,14 @@ Status NEAddMulAdd::validate(const ITensorInfo         *input1,
                              ConvertPolicy              policy,
                              const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEAddMulAdd::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input1, input2, bn_mul, bn_add, add_output, final_output);
     return cpu::CpuAddMulAdd::validate(input1, input2, bn_mul, bn_add, add_output, final_output, policy, act_info);
 }
 
 void NEAddMulAdd::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEAddMulAdd::run");
     _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute

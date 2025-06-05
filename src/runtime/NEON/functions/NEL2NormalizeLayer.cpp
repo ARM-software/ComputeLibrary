@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
@@ -45,6 +46,7 @@ NEL2NormalizeLayer::NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_ma
 
 void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, int axis, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEL2NormalizeLayer::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, axis, epsilon);
 
     // Manage intermediate buffers
@@ -62,6 +64,7 @@ void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, int axis, fl
 
 Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEL2NormalizeLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
 
     TensorShape shape(input->tensor_shape());
@@ -86,6 +89,7 @@ Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
 
 void NEL2NormalizeLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEL2NormalizeLayer::run");
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     _reduce_func.run();

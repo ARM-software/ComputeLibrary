@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuConv2d.h"
 #include "src/cpu/operators/CpuDirectConv2d.h"
@@ -72,6 +73,7 @@ void NEConvolutionLayer::configure(ITensor                   *input,
                                    bool                       enable_fast_math,
                                    unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConvolutionLayer::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_UNUSED(num_groups);
@@ -131,6 +133,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo         *input,
                                     bool                       enable_fast_math,
                                     unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConvolutionLayer::validate");
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!weights->are_values_constant(), "Dynamic weights are not supported");
@@ -180,6 +183,7 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo  
 
 void NEConvolutionLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConvolutionLayer::run");
     prepare();
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);

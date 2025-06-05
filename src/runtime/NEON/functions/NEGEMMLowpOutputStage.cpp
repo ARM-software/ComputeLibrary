@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuGemmLowpOutputStage.h"
 
 namespace arm_compute
@@ -49,6 +50,7 @@ void NEGEMMLowpOutputStage::configure(const ITensor                 *input,
                                       ITensor                       *output,
                                       const GEMMLowpOutputStageInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMLowpOutputStage::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(
@@ -68,12 +70,14 @@ Status NEGEMMLowpOutputStage::validate(const ITensorInfo             *input,
                                        const ITensorInfo             *output,
                                        const GEMMLowpOutputStageInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMLowpOutputStage::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, bias, output);
     return cpu::CpuGemmLowpOutputStage::validate(input, bias, output, info);
 }
 
 void NEGEMMLowpOutputStage::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMLowpOutputStage::run");
     _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute

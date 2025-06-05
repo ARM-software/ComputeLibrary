@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NEGatherKernel.h"
 
 #include <utility>
@@ -34,6 +35,7 @@ namespace arm_compute
 {
 void NEGather::configure(const ITensor *input, const ITensor *indices, ITensor *output, int axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGather::configure");
     ARM_COMPUTE_LOG_PARAMS(input, indices, output, axis);
     auto k = std::make_unique<NEGatherKernel>();
     k->configure(input, indices, output, axis);
@@ -42,6 +44,7 @@ void NEGather::configure(const ITensor *input, const ITensor *indices, ITensor *
 
 Status NEGather::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGather::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, indices, output);
     return NEGatherKernel::validate(input, indices, output, axis);
 }

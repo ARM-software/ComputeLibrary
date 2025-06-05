@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/cpu/operators/CpuElementwiseUnary.h"
 
 #include <utility>
@@ -55,6 +56,7 @@ NEElementwiseUnaryLayer<op> &NEElementwiseUnaryLayer<op>::operator=(NEElementwis
 template <ElementWiseUnary op>
 void NEElementwiseUnaryLayer<op>::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseUnaryLayer::configure");
     ARM_COMPUTE_ERROR_THROW_ON(NEElementwiseUnaryLayer<op>::validate(input->info(), output->info()));
 
     _impl->src    = input;
@@ -66,12 +68,14 @@ void NEElementwiseUnaryLayer<op>::configure(const ITensor *input, ITensor *outpu
 template <ElementWiseUnary op>
 Status NEElementwiseUnaryLayer<op>::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseUnaryLayer::validate");
     return OperatorType::validate(op, *input, *output);
 }
 
 template <ElementWiseUnary op>
 void NEElementwiseUnaryLayer<op>::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEElementwiseUnaryLayer::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);

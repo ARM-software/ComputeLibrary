@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/cpu/operators/CpuConcatenate.h"
 
@@ -53,6 +54,7 @@ NEConcatenateLayer::~NEConcatenateLayer()                                = defau
 
 void NEConcatenateLayer::configure(std::vector<const ITensor *> inputs_vector, ITensor *output, size_t axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConcatenateLayer::configure");
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     _impl->srcs       = inputs_vector;
@@ -74,6 +76,7 @@ Status NEConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
                                     const ITensorInfo                      *output,
                                     size_t                                  axis)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConcatenateLayer::validate");
     for (const auto &input : inputs_vector)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input);
@@ -84,6 +87,7 @@ Status NEConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
 
 void NEConcatenateLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConcatenateLayer::run");
     ITensorPack pack;
     for (unsigned i = 0; i < _impl->num_inputs; ++i)
     {

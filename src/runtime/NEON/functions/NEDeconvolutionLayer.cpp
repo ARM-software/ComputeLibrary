@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 using namespace arm_compute::misc::shape_calculator;
@@ -99,6 +100,7 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo   *input,
                                       bool                 enable_fast_math,
                                       const WeightsInfo   &weights_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDeconvolutionLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8,
                                                          DataType::QASYMM8_SIGNED);
@@ -214,6 +216,7 @@ void NEDeconvolutionLayer::configure(ITensor             *input,
                                      bool                 enable_fast_math,
                                      const WeightsInfo   &weights_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDeconvolutionLayer::configure");
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(),
@@ -297,6 +300,7 @@ void NEDeconvolutionLayer::configure(ITensor             *input,
 
 void NEDeconvolutionLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDeconvolutionLayer::run");
     prepare();
 
     MemoryGroupResourceScope scope_mg(_memory_group);

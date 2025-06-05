@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuGemmConv2d.h"
 
@@ -67,6 +68,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor             *input,
                                        bool                       enable_fast_math,
                                        unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMConvolutionLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     _impl->is_prepared = false;
@@ -95,6 +97,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo         *input,
                                         bool                       enable_fast_math,
                                         unsigned int               num_groups)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMConvolutionLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return cpu::CpuGemmConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info,
                                         enable_fast_math, num_groups);
@@ -117,6 +120,7 @@ Status NEGEMMConvolutionLayer::has_opt_impl(arm_compute::WeightFormat &expected_
 
 void NEGEMMConvolutionLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMConvolutionLayer::run");
     prepare();
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->op->run(_impl->run_pack);

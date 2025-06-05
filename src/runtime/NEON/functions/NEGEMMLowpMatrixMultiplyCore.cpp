@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/quantization/AsymmHelpers.h"
 #include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
@@ -68,6 +69,8 @@ NEGEMMLowpMatrixMultiplyCore::~NEGEMMLowpMatrixMultiplyCore() = default;
 void NEGEMMLowpMatrixMultiplyCore::configure(
     const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output, const GEMMInfo &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEGEMMLowpMatrixMultiplyCore::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
 
     // Make the B matrix dynamic values.
@@ -99,6 +102,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
                                               const ITensorInfo *output,
                                               const GEMMInfo    &gemm_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
+                            "NEGEMMLowpMatrixMultiplyCore::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(a, b, c, output);
     // Make the B matrix dynamic values.
     auto b_info_to_use = b->clone();
@@ -155,6 +160,7 @@ void NEGEMMLowpMatrixMultiplyCore::update_quantization_parameters()
 
 void NEGEMMLowpMatrixMultiplyCore::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMLowpMatrixMultiplyCore::run");
     prepare();
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->op->run(_impl->run_pack);

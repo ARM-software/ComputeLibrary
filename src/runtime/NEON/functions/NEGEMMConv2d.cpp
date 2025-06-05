@@ -26,6 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuGemmDirectConv2d.h"
 
@@ -56,6 +57,7 @@ NEGEMMConv2d::~NEGEMMConv2d() = default;
 void NEGEMMConv2d::configure(
     ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv2dInfo &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMConv2d::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     _impl->weights     = weights;
@@ -78,12 +80,14 @@ Status NEGEMMConv2d::validate(const ITensorInfo *input,
                               const ITensorInfo *output,
                               const Conv2dInfo  &info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMConv2d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return OperatorType::validate(input, weights, biases, output, info);
 }
 
 void NEGEMMConv2d::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEGEMMConv2d::run");
     prepare();
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);

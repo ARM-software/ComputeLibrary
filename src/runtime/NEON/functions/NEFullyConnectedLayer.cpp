@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuFullyConnected.h"
 
@@ -70,6 +71,7 @@ void NEFullyConnectedLayer::configure(const ITensor          *input,
                                       FullyConnectedLayerInfo fc_info,
                                       const WeightsInfo      &weights_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFullyConnectedLayer::configure");
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEFullyConnectedLayer::validate(input->info(), weights->info(),
@@ -117,12 +119,14 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo      *input,
                                        FullyConnectedLayerInfo fc_info,
                                        const WeightsInfo      &weights_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFullyConnectedLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);
     return cpu::CpuFullyConnected::validate(input, weights, biases, output, fc_info, weights_info);
 }
 
 void NEFullyConnectedLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFullyConnectedLayer::run");
     if (!_impl->dynamic_weights)
     {
         prepare();

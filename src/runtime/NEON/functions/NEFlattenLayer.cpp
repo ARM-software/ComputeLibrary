@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/cpu/operators/CpuFlatten.h"
 
@@ -48,6 +49,7 @@ NEFlattenLayer::~NEFlattenLayer()                            = default;
 
 void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFlattenLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     _impl->src = input;
     _impl->dst = output;
@@ -60,6 +62,7 @@ void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
 
 Status NEFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFlattenLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, output);
     // Checks performed when output is configured
     if (output->total_size() != 0)
@@ -72,6 +75,7 @@ Status NEFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 }
 void NEFlattenLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEFlattenLayer::run");
     ITensorPack pack;
     pack.add_tensor(TensorType::ACL_SRC, _impl->src);
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/common/utils/Log.h"
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
 
 #include <cstddef>
@@ -55,6 +56,7 @@ Status NECropResize::validate(const ITensorInfo  *input,
                               InterpolationPolicy method,
                               float               extrapolation_value)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NECropResize::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, boxes, box_ind, output);
     ARM_COMPUTE_RETURN_ERROR_ON(crop_size.x <= 0 || crop_size.y <= 0);
     ARM_COMPUTE_RETURN_ERROR_ON(method == InterpolationPolicy::AREA);
@@ -80,6 +82,7 @@ void NECropResize::configure(const ITensor      *input,
                              InterpolationPolicy method,
                              float               extrapolation_value)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NECropResize::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NECropResize::validate(input->info(), boxes->info(), box_ind->info(), output->info(),
                                                       crop_size, method, extrapolation_value));
@@ -128,6 +131,7 @@ void NECropResize::configure(const ITensor      *input,
 
 void NECropResize::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NECropResize::run");
     ARM_COMPUTE_ERROR_ON_MSG(_output == nullptr, "Unconfigured function");
 
     for (unsigned int i = 0; i < _num_boxes; ++i)

@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuDirectConv2d.h"
 
@@ -58,6 +59,7 @@ void NEDirectConvolutionLayer::configure(ITensor                   *input,
                                          const PadStrideInfo       &conv_info,
                                          const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDirectConvolutionLayer::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     _impl->memory_group.mappings().clear();
     _impl->src     = input;
@@ -80,12 +82,14 @@ Status NEDirectConvolutionLayer::validate(const ITensorInfo         *input,
                                           const PadStrideInfo       &conv_info,
                                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDirectConvolutionLayer::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, bias, output);
     return cpu::CpuDirectConv2d::validate(input, weights, bias, output, conv_info, act_info);
 }
 
 void NEDirectConvolutionLayer::run()
 {
+    ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEDirectConvolutionLayer::run");
     _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute
