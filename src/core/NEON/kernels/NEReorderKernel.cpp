@@ -311,7 +311,7 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
         }
         case DataType::BFLOAT16:
         {
-            ARM_COMPUTE_ERROR_ON(!CPUInfo::get().has_bf16());
+            ARM_COMPUTE_RETURN_ERROR_ON(!CPUInfo::get().has_bf16());
 #ifdef ARM_COMPUTE_ENABLE_SVE
             if (CPUInfo::get().has_sve() &&
                 supported_bf16_transforms.count({get_sve_interleave_by<bfloat16>(interleave_by, block_by), block_by,
