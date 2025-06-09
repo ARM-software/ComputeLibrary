@@ -810,7 +810,21 @@ void CpuGemmLowpMatrixMultiplyCore::update_quantization_parameters(const GEMMLow
 {
     auto lowp_os = output_info;
     _gemm_info.set_gemmlowp_output_stage(lowp_os);
-    _asm_glue->update_quantization_parameters(output_info, a, b, is_prepared, negated_offsets);
+
+    const QuantizationInfo *a_to_use = &a;
+    QuantizationInfo        a_signed;
+
+    if (_flip_signedness)
+    {
+        const int32_t                 offset_correction = 128;
+        const UniformQuantizationInfo a_uniform         = a.uniform();
+
+        ARM_COMPUTE_ERROR_ON(a.scale().size() > 1);
+        a_signed = QuantizationInfo(a_uniform.scale, a_uniform.offset + offset_correction);
+        a_to_use = &a_signed;
+    }
+
+    _asm_glue->update_quantization_parameters(output_info, *a_to_use, b, is_prepared, negated_offsets);
     _is_prepared = is_prepared;
 }
 } // namespace cpu

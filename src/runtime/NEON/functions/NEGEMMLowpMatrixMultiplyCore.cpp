@@ -146,7 +146,8 @@ void NEGEMMLowpMatrixMultiplyCore::update_quantization_parameters()
     output_info.gemmlowp_max_bound       = max_activation;
     output_info.is_quantized_per_channel = false;
     output_info.output_data_type         = dst->info()->data_type();
-    quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
+    const Status status = quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
+    ARM_COMPUTE_ERROR_ON(!bool(status));
 
     _impl->op->update_quantization_parameters(output_info, src->info()->quantization_info(),
                                               wei->info()->quantization_info(), true, true);
