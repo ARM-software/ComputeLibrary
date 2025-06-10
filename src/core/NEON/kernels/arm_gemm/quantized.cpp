@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2024 Arm Limited.
+ * Copyright (c) 2019, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -682,20 +682,16 @@ namespace {
         template<typename T>
         inline int16x8_t accumulate_16(const T *ptr, int16x8_t sum);
 
-        /* Load a full 16 byte vector, but mask before accumulation (see above). */
+        /* Load "odd" bytes */
         template<typename T>
-        inline int16x8_t accumulate_masked_16(const T *ptr, int16x8_t sum, uint64x2_t mask);
-
-        /* Load 8 bytes and mask before accumulation. */
-        template<typename T>
-        inline int16x8_t accumulate_masked_8(const T *ptr, int16x8_t sum, uint64x2_t mask);
+        inline int16x8_t accumulate_odds_16(const T *ptr, int16x8_t sum, size_t odds);
 
         /* This function does the actual work for up to 4 rows at a time.
          * It's pulled out so we can template on the row count to generate
          * the 4 different cases.  4 rows are computed at a time as this
          * reduces to a single vector write.  */
         template<unsigned int rows, typename T>
-        void compute_some_rows(unsigned int blocks, const T *input, unsigned int in_stride, int32_t *row_bias, unsigned int mask_mode, uint64x2_t mask, int32x4_t offset_mul) {
+        void compute_some_rows(unsigned int blocks, const T *input, unsigned int in_stride, int32_t *row_bias, size_t odds, int32x4_t offset_mul) {
             int16x8_t sums[rows];
             int32x4_t finalsums[rows];
 
@@ -731,14 +727,10 @@ namespace {
                 }
             }
 
-            /* Handle the final masked read if needed. */
-            if (mask_mode > 0) {
+            /* Handle the final odd read if needed. */
+            if (odds > 0) {
                 for (unsigned int r=0; r<rows; r++) {
-                    if (mask_mode == 1) {
-                        sums[r] = accumulate_masked_8(input + (r * in_stride) + (blocks * 16), sums[r], mask);
-                    } else {
-                        sums[r] = accumulate_masked_16(input + (r * in_stride) + (blocks * 16), sums[r], mask);
-                    }
+                    sums[r] = accumulate_odds_16(input + (r * in_stride) + (blocks * 16), sums[r], odds);
                 }
             }
 
@@ -814,30 +806,13 @@ namespace {
         return vpadalq_s8(sum, vld1q_s8(ptr));
     }
 
-    template<>
-    int16x8_t row_sum_helpers::accumulate_masked_16(const int8_t *ptr, int16x8_t sum, uint64x2_t mask) {
-        int8x16_t v = vandq_s8(vld1q_s8(ptr), vreinterpretq_s8_u64(mask));
-        return vpadalq_s8(sum, v);
-    }
-
-    template<>
-    int16x8_t row_sum_helpers::accumulate_masked_16(const uint8_t *ptr, int16x8_t sum, uint64x2_t mask) {
-        uint8x16_t v = vandq_u8(vld1q_u8(ptr), vreinterpretq_u8_u64(mask));
-        return vreinterpretq_s16_u16(vpadalq_u8(vreinterpretq_u16_s16(sum), v));
-    }
-
-    template<>
-    int16x8_t row_sum_helpers::accumulate_masked_8(const int8_t *ptr, int16x8_t sum, uint64x2_t mask) {
-        int8x16_t v = vcombine_s8(vld1_s8(ptr), vdup_n_s8(0));
-        v = vreinterpretq_s8_u64(vandq_u64(mask, vreinterpretq_u64_s8(v)));
-        return vpadalq_s8(sum, v);
-    }
-
-    template<>
-    int16x8_t row_sum_helpers::accumulate_masked_8(const uint8_t *ptr, int16x8_t sum, uint64x2_t mask) {
-        uint8x16_t v = vcombine_u8(vld1_u8(ptr), vdup_n_u8(0));
-        v = vreinterpretq_u8_u64(vandq_u64(mask, vreinterpretq_u64_u8(v)));
-        return vreinterpretq_s16_u16(vpadalq_u8(vreinterpretq_u16_s16(sum), v));
+    template<typename T>
+    int16x8_t row_sum_helpers::accumulate_odds_16(const T *ptr, int16x8_t sum, size_t odds) {
+        T buffer[16] = {};
+        for(size_t i=0; i<odds; i++) {
+            buffer[i] = ptr[i];
+        }
+        return accumulate_16(buffer, sum);
     }
 }
 
@@ -859,40 +834,20 @@ void compute_row_sums(const Requantize32 &qp, unsigned int width, unsigned int h
     unsigned int blocks = (width / 16);
     const unsigned int odds = width % 16;
 
-    /* Generate a mask to use on the last iteration, if necessary. */
-    uint64x2_t mask = vdupq_n_u64(0);
-    unsigned int mask_mode = 0;
-
-    if (odds > 0 && odds <= 8) {
-        /* 1-8 odds: mask in the low lane, 0 in the top */
-        uint64_t maskval = (~0ULL) >> (8 * (8-odds));
-
-        mask = vsetq_lane_u64(maskval, vdupq_n_u64(0), 0);
-
-        mask_mode = 1;
-    } else if (odds > 8) {
-        /* 9-15 odds: mask in the top lane, all 1s in the bottom. */
-        uint64_t maskval = (~0ULL) >> (8 * (16-odds));
-
-        mask = vsetq_lane_u64(maskval, vdupq_n_u64(~0ULL), 1);
-
-        mask_mode = 2;
-    }
-
     for (unsigned int row=0; row<height; row+=4) {
         switch(height-row) {
             default:
             case 4:
-                thehelpers.compute_some_rows<4>(blocks, input + (row * in_stride), in_stride, row_bias + row, mask_mode, mask, offset_mul);
+                thehelpers.compute_some_rows<4>(blocks, input + (row * in_stride), in_stride, row_bias + row, odds, offset_mul);
                 break;
             case 3:
-                thehelpers.compute_some_rows<3>(blocks, input + (row * in_stride), in_stride, row_bias + row, mask_mode, mask, offset_mul);
+                thehelpers.compute_some_rows<3>(blocks, input + (row * in_stride), in_stride, row_bias + row, odds, offset_mul);
                 break;
             case 2:
-                thehelpers.compute_some_rows<2>(blocks, input + (row * in_stride), in_stride, row_bias + row, mask_mode, mask, offset_mul);
+                thehelpers.compute_some_rows<2>(blocks, input + (row * in_stride), in_stride, row_bias + row, odds, offset_mul);
                 break;
             case 1:
-                thehelpers.compute_some_rows<1>(blocks, input + (row * in_stride), in_stride, row_bias + row, mask_mode, mask, offset_mul);
+                thehelpers.compute_some_rows<1>(blocks, input + (row * in_stride), in_stride, row_bias + row, odds, offset_mul);
                 break;
         }
     }
