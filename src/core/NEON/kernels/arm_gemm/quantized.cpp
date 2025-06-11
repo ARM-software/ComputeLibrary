@@ -642,22 +642,6 @@ template void requantize_block_32(const Requantize32 &qp, unsigned int width, un
 /*
  * Routine (and helpers) to compute row sums needed for offset correction.
  *
- * This is often needed for a lot of short rows (e.g.  Syrax 5 - 6400 rows
- * of length 27), therefore it's important not to sacrifice performance on
- * odd length rows.
- *
- * To minimize performance loss in these cases, this routine will overread
- * by up to 7 bytes.
- *
- * This is handled via "mask" and "mask mode" parameters to the inner
- * routines; mask mode == 1 indicates that are between 1 and 8 bytes
- * (inclusive) needed at the end; in these cases we always read 8 bytes.
- * mask mode == 2 indicates that there are between 9 and 15 bytes needed at
- * the end, and in this case we always read 16 bytes.  In both cases the
- * 'mask' vector is set up so that the read value can be masked off to clear
- * the overread lanes.  This is handled by 'accumulate_masked_8' and
- * 'accumulate_masked_16' above.
- *
  * This routine is templated on the type to be accumulated, because the
  * innermost instruction used needs to be of the correct signedness.
  * However, beyond this point we always use signed values in both cases.
@@ -670,19 +654,21 @@ template void requantize_block_32(const Requantize32 &qp, unsigned int width, un
  * accumulators.  The 4 accumulators for up to 4 rows being processed are
  * then added together into a single output vector using pairwise adds.
  *
+ * For odd lengths (not multiples of 16), the odd bytes are copied into a
+ * temporary 16-byte buffer before calling the standard routine to avoid
+ * overreading the input.
+ *
  * This reduction from the 8x16-bit into the 4x32-bit accumulators needs to
  * occur before the 16-bit accumulators can overflow - which is every 32
  * iterations (512 total bytes processed).  This is explained more below.
  */
 namespace {
     struct row_sum_helpers {
-        const Requantize32 &qp;
-
         /* Load a full 16 byte vector, pairwise accumulate into 'sum' with uadalp or sadalp */
         template<typename T>
         inline int16x8_t accumulate_16(const T *ptr, int16x8_t sum);
 
-        /* Load "odd" bytes */
+        /* Handle "odd" bytes by copying to a temporary buffer */
         template<typename T>
         inline int16x8_t accumulate_odds_16(const T *ptr, int16x8_t sum, size_t odds);
 
@@ -792,8 +778,6 @@ namespace {
                     UNREACHABLE("Impossible.");
             }
         }
-
-        row_sum_helpers(const Requantize32 &qp) : qp(qp) { }
     };
 
     template<>
@@ -814,7 +798,7 @@ namespace {
         }
         return accumulate_16(buffer, sum);
     }
-}
+} // anonymous namespace
 
 template<typename T>
 void compute_row_sums(const Requantize32 &qp, unsigned int width, unsigned int height,
@@ -825,7 +809,7 @@ void compute_row_sums(const Requantize32 &qp, unsigned int width, unsigned int h
         return;
     }
 
-    row_sum_helpers thehelpers(qp);
+    row_sum_helpers thehelpers;
 
     const int32x4_t offset_mul = vdupq_n_s32(-qp.b_offset);
 
