@@ -24,10 +24,6 @@
 #ifndef ACL_ARM_COMPUTE_CORE_ERROR_H
 #define ACL_ARM_COMPUTE_CORE_ERROR_H
 
-/** @file
- * @publicapi
- */
-
 #include <array>
 #include <string>
 
