@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
-#include "src/cpu/kernels/activation/generic/neon/impl.h"
+#include "src/cpu/kernels/activation/generic/neon/fp_impl.h"
 
 namespace arm_compute
 {
