@@ -62,6 +62,7 @@ std::map<TransformParams, void (*)(float *, const float *, int, int, int, int, i
     {{4, 1, true, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 1, true, arm_gemm::VLType::None, float, float>},
     {{4, 1, false, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 1, false, arm_gemm::VLType::None, float, float>},
     {{8, 1, false, arm_gemm::VLType::None}, &arm_gemm::Transform<8, 1, false, arm_gemm::VLType::None, float, float>},
+    {{8, 1, true, arm_gemm::VLType::None}, &arm_gemm::Transform<8, 1, true, arm_gemm::VLType::None, float, float>},
 #ifdef ARM_COMPUTE_ENABLE_SVE
     // When there is an asm kernel, use formula in transform.cpp to get the interleave_by_ number
     {{1, 1, true, arm_gemm::VLType::SVE}, &arm_gemm::Transform<1, 1, true, arm_gemm::VLType::SVE, float, float>},
@@ -69,10 +70,15 @@ std::map<TransformParams, void (*)(float *, const float *, int, int, int, int, i
 };
 
 std::map<TransformParams, void (*)(bfloat16 *, const float *, int, int, int, int, int)> supported_bf16_transforms = {
+#ifdef ARM_COMPUTE_ENABLE_BF16
     {{4, 4, true, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 4, true, arm_gemm::VLType::None, bfloat16, float>},
+    {{4, 4, false, arm_gemm::VLType::None}, &arm_gemm::Transform<4, 4, false, arm_gemm::VLType::None, bfloat16, float>},
+    {{8, 4, false, arm_gemm::VLType::None}, &arm_gemm::Transform<8, 4, false, arm_gemm::VLType::None, bfloat16, float>},
+    {{8, 4, true, arm_gemm::VLType::None}, &arm_gemm::Transform<8, 4, true, arm_gemm::VLType::None, bfloat16, float>},
 #ifdef ARM_COMPUTE_ENABLE_SVE
     {{2, 4, true, arm_gemm::VLType::SVE}, &arm_gemm::Transform<2, 4, true, arm_gemm::VLType::SVE, bfloat16, float>},
 #endif // ARM_COMPUTE_ENABLE_SVE
+#endif // ARM_COMPUTE_ENABLE_BF16
 };
 
 #ifdef ARM_COMPUTE_ENABLE_SVE
@@ -133,23 +139,28 @@ void NEReorderKernel::run(const Window &window, const ThreadInfo &info)
         }
         case DataType::BFLOAT16:
         {
-            void (*transform_func)(bfloat16 *, const float *, int, int, int, int, int) = nullptr;
+            if (CPUInfo::get().has_bf16())
+            {
+                void (*transform_func)(bfloat16 *, const float *, int, int, int, int, int) = nullptr;
 #ifdef ARM_COMPUTE_ENABLE_SVE
-            if (CPUInfo::get().has_sve())
-            {
-                TransformParams tparams = {get_sve_interleave_by<bfloat16>(interleave_by, block_by), block_by,
-                                           _transpose, arm_gemm::VLType::SVE};
-                if (supported_bf16_transforms.count(tparams))
-                    transform_func = supported_bf16_transforms[tparams];
-            }
+                if (CPUInfo::get().has_sve())
+                {
+                    TransformParams tparams = {get_sve_interleave_by<bfloat16>(interleave_by, block_by), block_by,
+                                               _transpose, arm_gemm::VLType::SVE};
+                    if (supported_bf16_transforms.count(tparams))
+                        transform_func = supported_bf16_transforms[tparams];
+                }
 #endif // ARM_COMPUTE_ENABLE_SVE
-            if (transform_func == nullptr)
-            {
-                transform_func =
-                    supported_bf16_transforms[{interleave_by, block_by, _transpose, arm_gemm::VLType::None}];
+                if (transform_func == nullptr)
+                {
+                    transform_func =
+                        supported_bf16_transforms[{interleave_by, block_by, _transpose, arm_gemm::VLType::None}];
+                }
+                transform_func(reinterpret_cast<bfloat16 *>(_output->buffer()) + jump_rows,
+                               reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
+                break;
             }
-            transform_func(reinterpret_cast<bfloat16 *>(_output->buffer()) + jump_rows,
-                           reinterpret_cast<float *>(_input->buffer()), stride, k_start, k_end, 0, _xmax);
+            ARM_COMPUTE_ERROR("Trying to run BF16 on unsupported machine\n");
             break;
         }
         default:
@@ -236,84 +247,85 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
     ARM_COMPUTE_UNUSED(input_wf);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    if (output->tensor_shape().total_size() != 0)
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(output->data_type() != DataType::F32 && output->data_type() != DataType::BFLOAT16);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+
+    int  input_x_dim;
+    int  input_k_dim;
+    int  output_x_dim;
+    int  output_k_dim;
+    auto dims = output->num_dimensions();
+    switch (dims)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->data_type() != DataType::F32 && output->data_type() != DataType::BFLOAT16);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-
-        int  input_x_dim;
-        int  input_k_dim;
-        int  output_x_dim;
-        int  output_k_dim;
-        auto dims = output->num_dimensions();
-        switch (dims)
+        case 2:
         {
-            case 2:
-            {
-                input_x_dim  = input->dimension(0);  // Number of columns in input matrix
-                input_k_dim  = input->dimension(1);  // Number of rows in input matrix
-                output_x_dim = output->dimension(0); // Number of columns in output matrix
-                output_k_dim = output->dimension(1); // Number of rows in output matrix
-                break;
-            }
-            case 4:
-            {
-                input_x_dim  = input->dimension(2);  // Number of columns in input matrix
-                input_k_dim  = input->dimension(3);  // Number of rows in input matrix
-                output_x_dim = output->dimension(2); // Number of columns in output matrix
-                output_k_dim = output->dimension(3); // Number of rows in output matrix
-                break;
-            }
-            default:
-            {
-                ARM_COMPUTE_RETURN_ERROR_MSG("Only 2 or 4 dimensions supported.");
-            }
+            input_x_dim  = input->dimension(0);  // Number of columns in input matrix
+            input_k_dim  = input->dimension(1);  // Number of rows in input matrix
+            output_x_dim = output->dimension(0); // Number of columns in output matrix
+            output_k_dim = output->dimension(1); // Number of rows in output matrix
+            break;
         }
-
-        int ksize         = 0;
-        int interleave_by = arm_compute::interleave_by(output_wf);
-        int block_by      = arm_compute::block_by(output_wf);
-        ARM_COMPUTE_RETURN_ERROR_ON(interleave_by != 4 && interleave_by != 8);
-        ksize = interleave_by;
-
-        // output k_dim needs to be same as input but multiple of ksize
-        int32_t rnd_up_input_kdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_k_dim, ksize);
-        ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_kdim != output_k_dim);
-        // output x_dim needs to be same as input
-        ARM_COMPUTE_RETURN_ERROR_ON(input_x_dim != output_x_dim);
-
-        switch (output->data_type())
+        case 4:
         {
-            case DataType::F32:
-            {
+            input_x_dim  = input->dimension(2);  // Number of columns in input matrix
+            input_k_dim  = input->dimension(3);  // Number of rows in input matrix
+            output_x_dim = output->dimension(2); // Number of columns in output matrix
+            output_k_dim = output->dimension(3); // Number of rows in output matrix
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_RETURN_ERROR_MSG("Only 2 or 4 dimensions supported.");
+        }
+    }
+
+    int ksize         = 0;
+    int interleave_by = arm_compute::interleave_by(output_wf);
+    int block_by      = arm_compute::block_by(output_wf);
+    ARM_COMPUTE_RETURN_ERROR_ON(interleave_by != 4 && interleave_by != 8);
+    ksize = interleave_by;
+
+    // output x_dim needs to be same as input but multiple of block_by
+    int32_t rnd_up_input_xdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_x_dim, block_by);
+    ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_xdim != output_x_dim);
+    // output k_dim needs to be same as input but multiple of ksize
+    int32_t rnd_up_input_kdim = arm_compute::ceil_to_multiple<int32_t, int32_t>(input_k_dim, ksize);
+    ARM_COMPUTE_RETURN_ERROR_ON(rnd_up_input_kdim != output_k_dim);
+    // output x_dim needs to be same as input
+    ARM_COMPUTE_RETURN_ERROR_ON(input_x_dim != output_x_dim);
+
+    switch (output->data_type())
+    {
+        case DataType::F32:
+        {
 #ifdef ARM_COMPUTE_ENABLE_SVE
-                if (CPUInfo::get().has_sve() &&
-                    supported_float_transforms.count({get_sve_interleave_by<float>(interleave_by, block_by), block_by,
-                                                      transpose, arm_gemm::VLType::SVE}))
-                    break;
-#endif // ARM_COMPUTE_ENABLE_SVE
-                ARM_COMPUTE_RETURN_ERROR_ON(
-                    !supported_float_transforms.count({interleave_by, block_by, transpose, arm_gemm::VLType::None}));
+            if (CPUInfo::get().has_sve() &&
+                supported_float_transforms.count({get_sve_interleave_by<float>(interleave_by, block_by), block_by,
+                                                  transpose, arm_gemm::VLType::SVE}))
                 break;
-            }
-            case DataType::BFLOAT16:
-            {
+#endif // ARM_COMPUTE_ENABLE_SVE
+            ARM_COMPUTE_RETURN_ERROR_ON(
+                !supported_float_transforms.count({interleave_by, block_by, transpose, arm_gemm::VLType::None}));
+            break;
+        }
+        case DataType::BFLOAT16:
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON(!CPUInfo::get().has_bf16());
 #ifdef ARM_COMPUTE_ENABLE_SVE
-                if (CPUInfo::get().has_sve() &&
-                    supported_bf16_transforms.count({get_sve_interleave_by<bfloat16>(interleave_by, block_by), block_by,
-                                                     transpose, arm_gemm::VLType::SVE}))
-                    break;
+            if (CPUInfo::get().has_sve() &&
+                supported_bf16_transforms.count({get_sve_interleave_by<bfloat16>(interleave_by, block_by), block_by,
+                                                 transpose, arm_gemm::VLType::SVE}))
+                break;
 #endif // ARM_COMPUTE_ENABLE_SVE
-                ARM_COMPUTE_RETURN_ERROR_ON(
-                    !supported_bf16_transforms.count({interleave_by, block_by, transpose, arm_gemm::VLType::None}));
-                break;
-            }
-            default:
-            {
-                ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported output data type");
-                break;
-            }
+            ARM_COMPUTE_RETURN_ERROR_ON(
+                !supported_bf16_transforms.count({interleave_by, block_by, transpose, arm_gemm::VLType::None}));
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported output data type");
+            break;
         }
     }
     return Status{};

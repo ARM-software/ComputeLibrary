@@ -23,6 +23,7 @@
  */
 #include "utils.hpp"
 
+#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "bfloat.hpp"
 
 #if !defined(_WIN64) && !defined(__OpenBSD__)
@@ -31,28 +32,27 @@
 
 namespace arm_gemm {
 
-/*
- * Generic transform.
- *
- * Assuming the untransposed case, this works by first reading <BlockBy>
- * consecutive values from the first input row.  This same number of values
- * are then read from the next <IntBy-1> rows.  Now return to the first
- * input row and repeat.
- *
- * Need to cope with the work requested in either dimension not actually
- * being a multiple of the block sizes.
- */
+#ifdef ARM_COMPUTE_ENABLE_BF16
 template <unsigned int tIntBy, unsigned int BlockBy, bool Transposed, size_t TOutSize, size_t TInSize, VLType vlt>
 struct TransformImpl {
-    template <typename TOut, typename TIn>
-    static void Transform(TOut* out, const TIn* const in, const int stride,
-                          const int y0, const int ymax, const int x0, const int xmax) {
+    /*
+    * Generic BF16 transform.
+    *
+    * Assuming the untransposed case, this works by first reading <BlockBy>
+    * consecutive values from the first input row.  This same number of values
+    * are then read from the next <IntBy-1> rows.  Now return to the first
+    * input row and repeat.
+    *
+    * Need to cope with the work requested in either dimension not actually
+    * being a multiple of the block sizes.
+    */
+    static void Transform(bfloat16* out, const float* const in, const int stride,
+        const int y0, const int ymax, const int x0, const int xmax) {
         // NOTE: This code is disabled to avoid the call to get_vector_length(), so templated transforms will not be
         // correct for SVE.  This is not an issue as we have specializations for all SVE cases.
         // For SVE cases we multiply the interleave factor by the vector length.
-        // const unsigned int IntBy = tIntBy * (vlt == VLType::SVE ? get_vector_length<TOut>() / BlockBy : 1);
+        // const unsigned int IntBy = tIntBy * (vlt == VLType::SVE ? get_vector_length<bfloat16>() / BlockBy : 1);
         const unsigned int IntBy = tIntBy;
-
         const int n_whole_y_blocks = (ymax - y0) / IntBy;
         const int y_remainders = (ymax - y0) % IntBy;
         const int n_y_blocks = n_whole_y_blocks + (y_remainders ? 1 : 0);
@@ -60,7 +60,6 @@ struct TransformImpl {
         const int n_whole_x_blocks = (xmax - x0) / BlockBy;
         const int x_remainders = (xmax - x0) % BlockBy;
         const int n_x_blocks = n_whole_x_blocks + (x_remainders ? 1 : 0);
-
         // "Y" loop: advance down the rows of the source IntBy rows at a time.
         // Set up fill_rows to show the number rows to copy from, and blank_rows
         // for the number of blank rows to add.
@@ -78,21 +77,46 @@ struct TransformImpl {
                 int x_base = x0 + (x_block * BlockBy);
 
                 for (int row = 0; row < fill_rows; row++) {
-                    for (int col = 0; col < fill_cols; col++) {
-                        // In-range copy.  If it's transposed, we reverse the sense of rows and columns here.
+                    int full_vecs = fill_cols / 8;
+                    int tail = fill_cols % 8;
+                    int col = 0;
+                    // Use neon vectors for f32->bf16 conversion
+                    for (int i = 0; i < full_vecs; i++) {
                         if (Transposed) {
-                            *out++ = static_cast<TOut>(in[(x_base + col) * stride + y_base + row]);
+                            const float v[8] = {
+                                in[(x_base + col) * stride + y_base + row],
+                                in[(x_base + col + 1) * stride + y_base + row],
+                                in[(x_base + col + 2) * stride + y_base + row],
+                                in[(x_base + col + 3) * stride + y_base + row],
+                                in[(x_base + col + 4) * stride + y_base + row],
+                                in[(x_base + col + 5) * stride + y_base + row],
+                                in[(x_base + col + 6) * stride + y_base + row],
+                                in[(x_base + col + 7) * stride + y_base + row]
+                            };
+                            arm_compute::wrapper::vcvt_bf16_f32(v, reinterpret_cast<uint16_t *>(out));
                         } else {
-                            *out++ = static_cast<TOut>(in[(y_base + row) * stride + x_base + col]);
+                            const float * v = &in[(y_base + row) * stride + x_base + col];
+                            arm_compute::wrapper::vcvt_bf16_f32(v, reinterpret_cast<uint16_t *>(out));
                         }
+                        out += 8;
+                        col += 8;
+                    }
+                    // Tail loop for vectorized load
+                    for (int i = 0; i < tail; i++) {
+                        if (Transposed) {
+                            *out++ = static_cast<bfloat16>(in[(x_base + col) * stride + y_base + row]);
+                        } else {
+                            *out++ = static_cast<bfloat16>(in[(y_base + row) * stride + x_base + col]);
+                        }
+                        col++;
                     }
                     // "col" tail - row is in range but column is out of range.
                     for (int col=0; col < blank_cols; col++) {
-                        *out++ = static_cast<TOut>(0);
+                        *out++ = static_cast<bfloat16>(0);
                     }
                 }
                 // "row" tail - row is out of range so fill with zeros always.
-                TOut zeroval = static_cast<TOut>(0);
+                bfloat16 zeroval = static_cast<bfloat16>(0);
                 int pads = blank_rows * (fill_cols + blank_cols);
 
                 for (int i=0; i<pads; i++) {
@@ -102,12 +126,6 @@ struct TransformImpl {
                 out += pads;
             }
         }
-    }
-
-    template <typename T>
-    static void Transform(T* out, const T* const in, const int stride,
-                                 const int k0, const int kmax, const int x0, const int xmax) {
-        Transform<T, T>(out, in, stride, k0, kmax, x0, xmax);
     }
 };
 
@@ -124,27 +142,9 @@ void Transform(
 }
 /*****************************************************************************/
 
-#include "transforms/list.hpp"
-
-template void Transform<4, 1, false, VLType::None>(float *, const float *, int, int, int, int, int);
-template void Transform<8, 1, false, VLType::None>(float *, const float *, int, int, int, int, int);
-template void Transform<8, 1, true, VLType::None>(float *, const float *, int, int, int, int, int);
-
-// We don't have assembler transforms for AArch32, generate templated ones here.
-#ifdef __arm__
-#if defined(ARM_COMPUTE_ENABLE_FP16)
-template void Transform<8, 1, true, VLType::None>(float *, const __fp16 *, int, int, int, int, int);
-#endif // defined(ARM_COMPUTE_ENABLE_FP16)
-#ifdef ARM_COMPUTE_ENABLE_BF16
-template void Transform<8, 1, true, VLType::None>(float *, const bfloat16 *, int, int, int, int, int);
-#endif // ARM_COMPUTE_ENABLE_BF16
-#endif // AArch32
-
-#if defined(ARM_COMPUTE_ENABLE_FP16)
-template void Transform<12, 1, false, VLType::None>(float *, const __fp16 *, int, int, int, int, int);
-#endif // defined(ARM_COMPUTE_ENABLE_FP16)
-#ifdef ARM_COMPUTE_ENABLE_BF16
-template void Transform<12, 1, false, VLType::None>(float *, const bfloat16 *, int, int, int, int, int);
+template void Transform<4, 4, false, VLType::None>(bfloat16 *, const float *, int, int, int, int, int);
+template void Transform<8, 4, false, VLType::None>(bfloat16 *, const float *, int, int, int, int, int);
+template void Transform<8, 4, true, VLType::None>(bfloat16 *, const float *, int, int, int, int, int);
 #endif // ARM_COMPUTE_ENABLE_BF16
 
 } // namespace arm_gemm

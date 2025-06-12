@@ -1653,6 +1653,7 @@
               "src/core/NEON/kernels/arm_gemm/rowsum_indirect_s8.cpp",
               "src/core/NEON/kernels/arm_gemm/rowsum_indirect_u8.cpp",
               "src/core/NEON/kernels/arm_gemm/transform.cpp",
+              "src/core/NEON/kernels/arm_gemm/transform-bf16.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s16_8x12/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s8_4x4/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_gemm_s8_8x12/a55r1.cpp",

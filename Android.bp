@@ -350,6 +350,7 @@ cc_library_static {
         "src/core/NEON/kernels/arm_gemm/quantized.cpp",
         "src/core/NEON/kernels/arm_gemm/rowsum_indirect_s8.cpp",
         "src/core/NEON/kernels/arm_gemm/rowsum_indirect_u8.cpp",
+        "src/core/NEON/kernels/arm_gemm/transform-bf16.cpp",
         "src/core/NEON/kernels/arm_gemm/transform-sve.cpp",
         "src/core/NEON/kernels/arm_gemm/transform.cpp",
         "src/core/NEON/kernels/batchnormalization/impl/NEON/fp16.cpp",

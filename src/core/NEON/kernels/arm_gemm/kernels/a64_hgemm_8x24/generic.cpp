@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2024 Arm Limited.
+ * Copyright (c) 2017-2018, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,9 +76,7 @@ void a64_hgemm_asimd_8x24(const __fp16 *Apanel, const __fp16 *Bpanel, __fp16 *Cp
                 "movi    v11.8h, #0x0\n"
                 "ldr    %q[b2], [%[b_ptr], #32]\n"
                 "movi    v12.8h, #0x0\n"
-                "ldr    %q[b0a], [%[b_ptr], #48]\n"
                 "movi    v13.8h, #0x0\n"
-                "ldr    %q[b1a], [%[b_ptr], #64]\n"
                 "movi    v14.8h, #0x0\n"
                 ASM_PREFETCH("[%[b_ptr], #64]")
                 "movi    v15.8h, #0x0\n"
@@ -109,25 +107,27 @@ void a64_hgemm_asimd_8x24(const __fp16 *Apanel, const __fp16 *Bpanel, __fp16 *Cp
 
                 "1:\n"
                 "fmla     v8.8h , %[b0].8h, %[a0].h[0]\n"
-                "fmla      v9.8h , %[b0].8h, %[a0].h[1]\n"
+                "fmla     v9.8h , %[b0].8h, %[a0].h[1]\n"
                 "ldr    %q[a0a], [%[a_ptr], #16]\n"
                 "fmla    v10.8h, %[b0].8h, %[a0].h[2]\n"
                 "fmla    v11.8h, %[b0].8h, %[a0].h[3]\n"
-                "ldr    %q[b2a], [%[b_ptr], #80]\n"
+                "ldr    %q[b0a], [%[b_ptr], #48]\n"
                 "fmla     v12.8h, %[b0].8h, %[a0].h[4]\n"
                 "fmla    v13.8h, %[b0].8h, %[a0].h[5]\n"
+                "ldr    %q[b1a], [%[b_ptr], #64]\n"
                 "fmla    v14.8h, %[b0].8h, %[a0].h[6]\n"
                 "fmla    v15.8h, %[b0].8h, %[a0].h[7]\n"
                 "ldr    %q[b0], [%[b_ptr], #96]\n"
 
                 "fmla    v16.8h, %[b1].8h, %[a0].h[0]\n"
                 "fmla    v17.8h, %[b1].8h, %[a0].h[1]\n"
-                ASM_PREFETCH("[%[a_ptr], #128]")
+                "ldr    %q[b2a], [%[b_ptr], #80]\n"
                 "fmla    v18.8h, %[b1].8h, %[a0].h[2]\n"
                 "fmla    v19.8h, %[b1].8h, %[a0].h[3]\n"
                 "add    %[b_ptr], %[b_ptr], #96\n"
                 "fmla    v20.8h, %[b1].8h, %[a0].h[4]\n"
                 "fmla    v21.8h, %[b1].8h, %[a0].h[5]\n"
+                ASM_PREFETCH("[%[a_ptr], #128]")
                 "fmla    v22.8h, %[b1].8h, %[a0].h[6]\n"
                 "fmla    v23.8h, %[b1].8h, %[a0].h[7]\n"
                 "ldr    %q[b1], [%[b_ptr], #16]\n"
@@ -152,7 +152,6 @@ void a64_hgemm_asimd_8x24(const __fp16 *Apanel, const __fp16 *Bpanel, __fp16 *Cp
                 "fmla    v13.8h, %[b0a].8h, %[a0a].h[5]\n"
                 "fmla    v14.8h, %[b0a].8h, %[a0a].h[6]\n"
                 "fmla    v15.8h, %[b0a].8h, %[a0a].h[7]\n"
-                "ldr    %q[b0a], [%[b_ptr], #48]\n"
 
                 "fmla    v16.8h, %[b1a].8h, %[a0a].h[0]\n"
                 "fmla    v17.8h, %[b1a].8h, %[a0a].h[1]\n"
@@ -163,7 +162,6 @@ void a64_hgemm_asimd_8x24(const __fp16 *Apanel, const __fp16 *Bpanel, __fp16 *Cp
                 "fmla    v21.8h, %[b1a].8h, %[a0a].h[5]\n"
                 "fmla    v22.8h, %[b1a].8h, %[a0a].h[6]\n"
                 "fmla    v23.8h, %[b1a].8h, %[a0a].h[7]\n"
-                "ldr    %q[b1a], [%[b_ptr], #64]\n"
 
                 "fmla    v24.8h, %[b2a].8h, %[a0a].h[0]\n"
                 "fmla    v25.8h, %[b2a].8h, %[a0a].h[1]\n"
@@ -188,11 +186,13 @@ void a64_hgemm_asimd_8x24(const __fp16 *Apanel, const __fp16 *Bpanel, __fp16 *Cp
                 "ldr    %q[a0a], [%[a_ptr], #16]\n"
                 "fmla    v10.8h, %[b0].8h, %[a0].h[2]\n"
                 "fmla    v11.8h, %[b0].8h, %[a0].h[3]\n"
-                "ldr    %q[b2a], [%[b_ptr], #80]\n"
+                "ldr    %q[b0a], [%[b_ptr], #48]\n"
                 "fmla     v12.8h, %[b0].8h, %[a0].h[4]\n"
                 "fmla   v13.8h, %[b0].8h, %[a0].h[5]\n"
+                "ldr    %q[b1a], [%[b_ptr], #64]\n"
                 "fmla    v14.8h, %[b0].8h, %[a0].h[6]\n"
                 "fmla    v15.8h, %[b0].8h, %[a0].h[7]\n"
+                "ldr    %q[b2a], [%[b_ptr], #80]\n"
 
                 "fmla    v16.8h, %[b1].8h, %[a0].h[0]\n"
                 "fmla    v17.8h, %[b1].8h, %[a0].h[1]\n"
