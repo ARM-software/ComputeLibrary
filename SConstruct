@@ -94,6 +94,9 @@ vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("profile", "Profile using Perfetto, forces C++17", False),
     EnumVariable("profile_level", "Profile level. If not set, defaults to 0", allowed_values=("0", "1", "2"), default="0"),
+    EnumVariable("profile_backend", "Profile backend. If not set, defaults to 'perfetto'", allowed_values=("perfetto"), default="perfetto"),
+    EnumVariable("profile_size", "Profile size in KB. If not set, defaults to 16384", allowed_values=("16384", "32768", "65536", "131072"), default="16384"),
+    EnumVariable("profile_mode", "Profile mode. If not set, defaults to 'kInProcessBackend'", allowed_values=("kInProcessBackend", "kSystemBackend"), default="kInProcessBackend"),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Enable Logging", False),
     EnumVariable("arch", "Target Architecture. The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.", "armv7a",
@@ -255,6 +258,27 @@ if not 'windows' in env['os']:
 if env['profile']:
     env.Append(CXXFLAGS = ['-std=c++17', '-DACL_PROFILE_ENABLE'])
     env.Append(CXXFLAGS = ['-DACL_PROFILE_LEVEL=%d' % int(env['profile_level'])])
+    env.Append(CXXFLAGS = ['-DACL_PROFILE_BACKEND=%s' % env['profile_backend']])
+    env.Append(CXXFLAGS = ['-DACL_PROFILE_MODE=%s' % env['profile_mode']])
+    env.Append(CXXFLAGS = ['-DACL_ACL_PROFILE_SIZE_KB=%d' % int(env['profile_size'])])
+    if env['profile_backend'] == 'perfetto':
+        env.Append(CXXFLAGS = [
+            '-std=c++17',
+            '-Wno-switch-default',
+            '-Wno-effc++',
+            '-Wno-strict-overflow',
+            '-Wno-noexcept',
+            '-Wno-error=noexcept',
+            '-Wno-error=strict-aliasing',
+            '-Wno-error=class-memaccess',
+            '-Wno-error=maybe-uninitialized',
+            '-Wno-format-nonliteral',
+            '-Wno-error=redundant-move',
+            '-Wno-error=logical-op'])
+    if env['opencl']:
+        env.Append(CXXFLAGS = ['-DARM_COMPUTE_CL'])
+    if env['os'] == 'android':
+        env.Append(LINKFLAGS = ['-llog'])
 
 cpp_tool = {'linux': 'g++', 'android' : 'clang++',
              'tizen': 'g++', 'macos':'clang++',

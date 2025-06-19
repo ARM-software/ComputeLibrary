@@ -79,6 +79,10 @@
     "src/runtime/CPP/functions/CPPTopKV.cpp",
     "src/runtime/CPP/functions/CPPUpsample.cpp"
   ],
+  "profiling": [
+    "third_party/perfetto/perfetto.cc",
+    "src/common/utils/profile/acl_profile.cpp"
+  ],
   "logging": [
     "src/core/utils/logging/FilePrinter.cpp",
     "src/core/utils/logging/Helpers.cpp",

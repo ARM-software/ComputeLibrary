@@ -591,6 +591,14 @@ if env['fixed_format_kernels']:
 if env["logging"]:
     lib_files += filelist['logging']
 
+# Profiling files
+if env["profile"]:
+    lib_files+= filelist['profiling']
+    if env['opencl']:
+        lib_files += Glob(os.path.join(Dir('#').path,
+                            'tests', 'framework', 'instruments',
+                            'OpenCLTimer.cpp'))
+
 # C API files
 lib_files += filelist['c_api']['common']
 lib_files += filelist['c_api']['operators']

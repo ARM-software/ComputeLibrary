@@ -202,6 +202,7 @@ cc_library_static {
         "src/common/cpuinfo/CpuIsaInfo.cpp",
         "src/common/cpuinfo/CpuModel.cpp",
         "src/common/utils/LegacySupport.cpp",
+        "src/common/utils/profile/acl_profile.cpp",
         "src/core/AccessWindowAutoPadding.cpp",
         "src/core/AccessWindowStatic.cpp",
         "src/core/AccessWindowTranspose.cpp",
