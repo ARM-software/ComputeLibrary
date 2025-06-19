@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 
+#include "src/common/utils/profile/acl_profile.h"
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -70,13 +71,18 @@ void CLScheduler::set_tuner(ICLTuner *tuner)
 
 void CLScheduler::sync()
 {
+    ARM_COMPUTE_TRACE_EVENT_BEGIN(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU, "CLScheduler::sync");
     _queue.finish();
+    ARM_COMPUTE_TRACE_OPENCL_SYNC();
 }
 
 cl::Event CLScheduler::enqueue_sync_event()
 {
+    ARM_COMPUTE_TRACE_EVENT_BEGIN(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU,
+                                  "CLScheduler::enqueue_sync_event");
     cl::Event event;
     _queue.enqueueMarker(&event);
+    ARM_COMPUTE_TRACE_EVENT_END(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU);
     return event;
 }
 
@@ -179,10 +185,13 @@ void CLScheduler::init(cl::Context             context,
     _cl_tuner        = cl_tuner;
     _gemm_heuristics = gemm_h;
     _backend_type    = cl_backend_type;
+    ARM_COMPUTE_TRACE_OPENCL_BEGIN();
 }
 
 void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush)
 {
+    ARM_COMPUTE_TRACE_EVENT_BEGIN(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU,
+                                  "CLScheduler::enqueue_common");
     ARM_COMPUTE_ERROR_ON_MSG(
         !_is_initialised, "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
                              or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
@@ -199,10 +208,13 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
     inject_memory ? kernel.run_op(tensors, kernel.window(), _queue) : kernel.run(kernel.window(), _queue);
 
     flush_queue(flush);
+    ARM_COMPUTE_TRACE_EVENT_END(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU);
 }
 
 void CLScheduler::flush_queue(bool flush)
 {
+    ARM_COMPUTE_TRACE_EVENT_BEGIN(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU, "CLScheduler::flush_queue");
+    ARM_COMPUTE_TRACE_OPENCL_BEGIN();
     _enqueue_count++;
     _flush_count += flush;
     const float flush_ratio = _flush_count / (float)_enqueue_count;
@@ -232,17 +244,22 @@ void CLScheduler::flush_queue(bool flush)
         _job_chaining_count = 0;
         _queue.flush();
     }
+    ARM_COMPUTE_TRACE_EVENT_END(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU);
 }
 
 void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
 {
+    ARM_COMPUTE_TRACE_EVENT_BEGIN(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU, "CLScheduler::enqueue");
     ITensorPack pack;
     enqueue_common(kernel, pack, flush);
+    ARM_COMPUTE_TRACE_EVENT_END(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU);
 }
 
 void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush)
 {
+    ARM_COMPUTE_TRACE_EVENT_BEGIN(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU, "CLScheduler::enqueue_op");
     enqueue_common(kernel, tensors, flush);
+    ARM_COMPUTE_TRACE_EVENT_END(ARM_COMPUTE_PROF_CAT_SCHEDULER, ARM_COMPUTE_PROF_LVL_GPU);
 }
 
 void CLScheduler::enable_job_chaining(int job_chaining_size)
