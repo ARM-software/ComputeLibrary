@@ -26,23 +26,20 @@
 #define ACL_SRC_COMMON_UTILS_PROFILE_ACL_PROFILE_H
 
 // Define ACL profile categories
-#define PROF_CAT_NONE      "NONE"
-#define PROF_CAT_CPU       "CPU"
-#define PROF_CAT_NEON      "NEON"
-#define PROF_CAT_SVE       "SVE"
-#define PROF_CAT_SME       "SME"
-#define PROF_CAT_GPU       "GPU"
-#define PROF_CAT_MEMORY    "MEMORY"
-#define PROF_CAT_RUNTIME   "RUNTIME"
-#define PROF_CAT_SCHEDULER "SCHEDULER"
+#define ARM_COMPUTE_PROF_CAT_NONE      "NONE"
+#define ARM_COMPUTE_PROF_CAT_CPU       "CPU"
+#define ARM_COMPUTE_PROF_CAT_NEON      "NEON"
+#define ARM_COMPUTE_PROF_CAT_SVE       "SVE"
+#define ARM_COMPUTE_PROF_CAT_SME       "SME"
+#define ARM_COMPUTE_PROF_CAT_GPU       "GPU"
+#define ARM_COMPUTE_PROF_CAT_MEMORY    "MEMORY"
+#define ARM_COMPUTE_PROF_CAT_RUNTIME   "RUNTIME"
+#define ARM_COMPUTE_PROF_CAT_SCHEDULER "SCHEDULER"
 
 // Define ACL profile levels
-enum class ProfileLevel
-{
-    L0 = 0,
-    L1 = 1,
-    L2 = 2
-};
+#define ARM_COMPUTE_PROF_L0 0
+#define ARM_COMPUTE_PROF_L1 1
+#define ARM_COMPUTE_PROF_L2 2
 
 #define ARM_COMPUTE_TRACE_EVENT(category, level, name) \
     (void)category;                                    \
