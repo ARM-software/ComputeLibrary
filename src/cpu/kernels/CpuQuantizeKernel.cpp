@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024 Arm Limited.
+ * Copyright (c) 2017-2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,8 +55,24 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(dst->tensor_shape().total_size() == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QSYMM8, DataType::QASYMM8,
-                                                         DataType::QASYMM8_SIGNED, DataType::QASYMM16);
+    if (src->data_type() == DataType::F32)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QSYMM8, DataType::QASYMM8,
+                                                             DataType::QASYMM8_SIGNED, DataType::QASYMM16,
+                                                             DataType::QSYMM8_PER_CHANNEL);
+
+        if (dst->data_type() == DataType::QSYMM8_PER_CHANNEL)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON(
+                dst->quantization_info().scale().size() !=
+                dst->tensor_shape()[get_data_layout_dimension_index(dst->data_layout(), DataLayoutDimension::CHANNEL)]);
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QSYMM8, DataType::QASYMM8,
+                                                             DataType::QASYMM8_SIGNED, DataType::QASYMM16);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
 
     return Status{};
@@ -94,7 +110,7 @@ void CpuQuantizeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
         {"op_F32_QASYMM8", REGISTER_FP32_NEON(fp32_u8_run_quantize_qasymm8)},
         {"op_F32_QASYMM8_SIGNED", REGISTER_FP32_NEON(fp32_i8_run_quantize_qasymm8)},
         {"op_F32_QASYMM16", REGISTER_FP32_NEON(fp32_run_quantize_qasymm16)},
-
+        {"op_F32_QSYMM8_PER_CHANNEL", REGISTER_FP32_NEON(fp32_i8_run_quantize_qsymm8_per_channel)},
 #ifdef ARM_COMPUTE_ENABLE_FP16
         {"op_F16_QASYMM8", REGISTER_FP16_NEON(fp16_u8_run_quantize_qasymm8)},
         {"op_F16_QASYMM8_SIGNED", REGISTER_FP16_NEON(fp16_i8_run_quantize_qasymm8)},
@@ -125,7 +141,6 @@ void CpuQuantizeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     // Specify datatype for function
     function_to_call += string_from_data_type(src->data_type()) + "_";
     function_to_call += string_from_data_type(dst->data_type());
-
     auto it = quant_map.find(function_to_call);
 
     if (it == quant_map.end())
@@ -136,7 +151,16 @@ void CpuQuantizeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 
     // Calculate window. Squash if possible.
     Window win;
-    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
+    if (dst->data_type() == DataType::QSYMM8_PER_CHANNEL)
+    {
+        // Bring back a full N-dimensional iteration (so channel coord actually goes 0…C-1):
+        win              = calculate_max_window(*src);
+        _split_dimension = Window::DimY;
+    }
+    else
+    {
+        std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
+    }
 
     ICpuKernel::configure(win);
 }

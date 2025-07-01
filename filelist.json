@@ -1618,6 +1618,7 @@
             "src/runtime/experimental/operators/CpuDepthwiseConv2d.cpp",
             "src/runtime/experimental/operators/CpuDequantize.cpp",
             "src/runtime/experimental/operators/CpuElementwise.cpp",
+            "src/runtime/experimental/operators/CpuFullyConnected.cpp",
             "src/runtime/experimental/operators/CpuGEMMLowp.cpp",
             "src/runtime/experimental/operators/CpuGemm.cpp",
             "src/runtime/experimental/operators/CpuGemmConv2d.cpp",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,6 +135,134 @@ void run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window)
             for (; x < window_end_x; ++x)
             {
                 output_ptr[x] = quantize_qsymm8(input_ptr[x], dst->info()->quantization_info());
+            }
+        },
+        input, output);
+}
+
+inline float32x4x4_t vquantize_qsymm8_per_channel_scalevalues(const float32x4x4_t &vin, float scale)
+{
+    // pre-compute reciprocal of scale
+    const float32x4_t inv_s = vdupq_n_f32(1.f / scale);
+
+    return {vmulq_f32(vin.val[0], inv_s), vmulq_f32(vin.val[1], inv_s), vmulq_f32(vin.val[2], inv_s),
+            vmulq_f32(vin.val[3], inv_s)};
+}
+
+inline int8x16_t vconvert_to_int8(int32x4x4_t vals)
+{
+    // clamp bounds
+    const int32_t qmin = std::numeric_limits<int8_t>::min(); // -128
+    const int32_t qmax = std::numeric_limits<int8_t>::max(); // +127
+
+    const int32x4_t v_qmin = vdupq_n_s32(qmin);
+    const int32x4_t v_qmax = vdupq_n_s32(qmax);
+    vals.val[0]            = vmaxq_s32(v_qmin, vminq_s32(vals.val[0], v_qmax));
+    vals.val[1]            = vmaxq_s32(v_qmin, vminq_s32(vals.val[1], v_qmax));
+    vals.val[2]            = vmaxq_s32(v_qmin, vminq_s32(vals.val[2], v_qmax));
+    vals.val[3]            = vmaxq_s32(v_qmin, vminq_s32(vals.val[3], v_qmax));
+
+    // 3) narrow 32->16 for each
+    const int16x4_t v_s16_0 = vqmovn_s32(vals.val[0]);
+    const int16x4_t v_s16_1 = vqmovn_s32(vals.val[1]);
+    const int16x4_t v_s16_2 = vqmovn_s32(vals.val[2]);
+    const int16x4_t v_s16_3 = vqmovn_s32(vals.val[3]);
+
+    // 4) combine into two int16x8 vectors
+    const int16x8_t v_s16x8_0 = vcombine_s16(v_s16_0, v_s16_1);
+    const int16x8_t v_s16x8_1 = vcombine_s16(v_s16_2, v_s16_3);
+
+    // 5) saturating narrow 16->8
+    const int8x8_t v_s8_0 = vqmovn_s16(v_s16x8_0);
+    const int8x8_t v_s8_1 = vqmovn_s16(v_s16x8_1);
+
+    // 6) combine into one int8x16
+    return vcombine_s8(v_s8_0, v_s8_1);
+}
+
+#ifdef __aarch64__
+inline int32x4x4_t vconvert_to_int32(const float32x4x4_t &vals, arm_compute::RoundingPolicy rp)
+{
+    if (rp == RoundingPolicy::TO_NEAREST_EVEN)
+    {
+        return {vcvtaq_s32_f32(vals.val[0]), vcvtaq_s32_f32(vals.val[1]), vcvtaq_s32_f32(vals.val[2]),
+                vcvtaq_s32_f32(vals.val[3])};
+    }
+    else
+    {
+        return {vcvtq_s32_f32(vals.val[0]), vcvtq_s32_f32(vals.val[1]), vcvtq_s32_f32(vals.val[2]),
+                vcvtq_s32_f32(vals.val[3])};
+    }
+}
+
+inline int8x16_t vquantize_qsymm8_per_channel(const float32x4x4_t         vin,
+                                              float                       scale, // per-channel scale
+                                              arm_compute::RoundingPolicy rp)
+{
+    auto vscaled_vals = vquantize_qsymm8_per_channel_scalevalues(vin, scale);
+    return vconvert_to_int8(vconvert_to_int32(vscaled_vals, rp));
+}
+#else  //__aarch64__
+
+inline int32x4x4_t vconvert_to_int32(const float32x4x4_t &vals)
+{
+    return {// on AArch32 only truncating vcvtq is available
+            vcvtq_s32_f32(vals.val[0]), vcvtq_s32_f32(vals.val[1]), vcvtq_s32_f32(vals.val[2]),
+            vcvtq_s32_f32(vals.val[3])};
+}
+
+inline int8x16_t vquantize_qsymm8_per_channel(const float32x4x4_t vin, float scale)
+{
+    auto vscaled_vals = vquantize_qsymm8_per_channel_scalevalues(vin, scale);
+    return vconvert_to_int8(vconvert_to_int32(vscaled_vals));
+}
+#endif //__aarch64__
+
+template <typename TIn, typename TOut>
+void run_quantize_qsymm8_per_channel(const ITensor *src, ITensor *dst, const Window &window)
+{
+    const auto window_start_x = static_cast<int>(window.x().start());
+
+    const unsigned int channel_idx =
+        get_data_layout_dimension_index(dst->info()->data_layout(), DataLayoutDimension::CHANNEL);
+
+    Window     win_collapsed = window.collapse_if_possible(window, Window::DimX, Window::DimZ);
+    const auto window_end_x  = static_cast<int>(win_collapsed.x().end());
+
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Iterator    input(src, win_collapsed);
+    Iterator    output(dst, win_collapsed);
+    const auto &qinfo = dst->info()->quantization_info();
+
+    execute_window_loop(
+        win_collapsed,
+        [&](const Coordinates &coord)
+        {
+            auto         input_ptr  = reinterpret_cast<const TIn *>(input.ptr());
+            auto         output_ptr = reinterpret_cast<TOut *>(output.ptr());
+            int          x          = window_start_x;
+            const size_t ch         = coord[channel_idx];
+            const float  scale      = qinfo.scale()[ch];
+            for (; x <= (window_end_x - window_step); x += window_step)
+            {
+                const auto vin = load_value(&input_ptr[x]);
+#ifdef __aarch64__
+                const auto vout = vquantize_qsymm8_per_channel(vin, scale, RoundingPolicy::TO_NEAREST_EVEN);
+#else  //__aarch64__
+                const auto vout = vquantize_qsymm8_per_channel(vin, scale /* RoundingPolicy::TO_ZERO */);
+#endif //__aarch64__
+                wrapper::vstore(&output_ptr[x], vout);
+            }
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
+            {
+#ifdef __aarch64__
+                output_ptr[x] = quantize_qsymm8_per_channel(input_ptr[x], dst->info()->quantization_info(), ch,
+                                                            RoundingPolicy::TO_NEAREST_EVEN);
+#else  //__aarch64__
+                output_ptr[x]   = quantize_qsymm8_per_channel(input_ptr[x], dst->info()->quantization_info(), ch,
+                                                              RoundingPolicy::TO_ZERO);
+#endif //__aarch64__
             }
         },
         input, output);

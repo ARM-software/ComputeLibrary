@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,6 +90,20 @@ TEST_CASE(ProperlyRoundedRequantization, framework::DatasetMode::ALL)
     validate(Accessor(output), ref, zero_tolerance_s8);
 }
 
+TEST_CASE(QSymm8_per_channel_validate_scales, framework::DatasetMode::ALL)
+{
+    // In this test we make sure validate does not raise an error when we pass a properly initialized vector of scales matching
+    // the number of channels
+    const auto input_info = TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32);
+    auto output_info = TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL);
+    Tensor input = create_tensor<Tensor>(input_info);
+    std::vector<float> scale(16,0.5f);
+    Tensor output = create_tensor<Tensor>(output_info.tensor_shape(), DataType::QSYMM8_PER_CHANNEL, 1, QuantizationInfo(scale));
+    ARM_COMPUTE_EXPECT(bool(NEQuantizationLayer::validate(
+        & input.info()->clone()->set_is_resizable(false),
+        & output.info()->clone()->set_is_resizable(false))) == true, framework::LogLevel::ERRORS);
+}
+
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
@@ -97,13 +111,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),  // Wrong output data type
                                                        TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::F32),  // Missmatching shapes
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),  // Valid
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // PER_CHANNEL only supported for F32
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8),  // PER_CHANNEL only supported for F32
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM16),  // PER_CHANNEL only supported for F32
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F16),  // PER_CHANNEL only supported for F32
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32), // Quantization info's scales not initialized
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U16),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
                                                      })),
-               framework::dataset::make("Expected", { false, false, false, true})),
+               framework::dataset::make("Expected", { false, false, false, true,false,false,false,false,false})),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEQuantizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
@@ -117,6 +141,8 @@ template <typename T>
 using NEQuantizationLayerQASYMM8SignedFixture = QuantizationValidationFixture<Tensor, Accessor, NEQuantizationLayer, T, int8_t>;
 template <typename T>
 using NEQuantizationLayerQASYMM16Fixture = QuantizationValidationFixture<Tensor, Accessor, NEQuantizationLayer, T, uint16_t>;
+template <typename T>
+using NEQuantizationLayerQSYMM8_PER_CHANNEL_Fixture = QuantizationValidationFixture<Tensor, Accessor, NEQuantizationLayer, T, int8_t>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
@@ -160,6 +186,17 @@ FIXTURE_DATA_TEST_CASE(RunLargeQASYMM16, NEQuantizationLayerQASYMM16Fixture<floa
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u16);
 }
+
+
+FIXTURE_DATA_TEST_CASE(RunSmallQSYMM8_PER_CHANNEL, NEQuantizationLayerQSYMM8_PER_CHANNEL_Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataType", DataType::F32)),
+                       framework::dataset::make("DataTypeOut", { DataType::QSYMM8_PER_CHANNEL })),
+                       framework::dataset::make("QuantizationInfoIgnored", { QuantizationInfo() })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_s8);
+}
+
 TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)

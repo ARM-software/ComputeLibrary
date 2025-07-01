@@ -60,21 +60,21 @@ public:
      * - All
      *
      * Valid data type configurations:
-     * |src                |dst                                    |
-     * |:------------------|:--------------------------------------|
-     * |QASYMM8            |QASYMM8, QASYMM8_SIGNED, QASYMM16      |
-     * |QASYMM8_SIGNED     |QASYMM8, QASYMM8_SIGNED, QASYMM16      |
-     * |F16                |QASYMM8, QASYMM8_SIGNED, QASYMM16      |
-     * |F32                |QASYMM8, QASYMM8_SIGNED, QASYMM16      |
+     * |src                |dst                                                        |
+     * |:------------------|:----------------------------------------------------------|
+     * |QASYMM8            |QASYMM8, QASYMM8_SIGNED, QASYMM16                          |
+     * |QASYMM8_SIGNED     |QASYMM8, QASYMM8_SIGNED, QASYMM16                          |
+     * |F16                |QASYMM8, QASYMM8_SIGNED, QASYMM16                          |
+     * |F32                |QASYMM8, QASYMM8_SIGNED, QSYMM8_PER_CHANNEL, QASYMM16      |
      *
      * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QASYMM16
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEQuantizationLayer
      *
      * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
-     * @param[in] output Output tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16
+     * @param[in] output Output tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QASYMM16
      *
      * @return a status
      */

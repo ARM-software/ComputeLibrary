@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,16 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
 
     switch(output_data_type)
     {
+        case DataType::QSYMM8_PER_CHANNEL:
+#if defined(_OPENMP)
+            #pragma omp parallel for
+#endif /* _OPENMP */
+            for(int i = 0; i < src.num_elements(); ++i)
+            {
+                const Coordinates coord = index2coord(dst.shape(), i);
+                dst[i] =  quantize_qsymm8_per_channel( src[i], quantization_info, coord.z(),rounding_policy);
+            }
+            break;
         case DataType::QASYMM8:
 #if defined(_OPENMP)
             #pragma omp parallel for

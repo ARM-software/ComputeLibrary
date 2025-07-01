@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,11 @@ void fp32_run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &
 void fp32_i8_run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window)
 {
     run_quantize_qsymm8<float, int8_t>(src, dst, window);
+}
+
+void fp32_i8_run_quantize_qsymm8_per_channel(const ITensor *src, ITensor *dst, const Window &window)
+{
+    run_quantize_qsymm8_per_channel<float, int8_t>(src, dst, window);
 }
 } // namespace cpu
 } // namespace arm_compute

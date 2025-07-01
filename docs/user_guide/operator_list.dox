@@ -2534,7 +2534,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
     <tr><td>QASYMM8_SIGNED<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
     <tr><td>F16<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
-    <tr><td>F32<td>QASYMM8, QASYMM8_SIGNED, QASYMM16
+    <tr><td>F32<td>QASYMM8, QASYMM8_SIGNED, QSYMM8_PER_CHANNEL, QASYMM16
     </table>
 <tr>
   <td>CLQuantizationLayer

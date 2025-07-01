@@ -111,7 +111,7 @@ TensorType compute_gemmlowp_target_for_updated_sq_info_after_config(const Tensor
 {
     ARM_COMPUTE_ASSERT((std::is_same<FunctionType, NEGEMMLowpMatrixMultiplyCore>::value == true));
     ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_a));
-    ARM_COMPUTE_ASSERT(data_type_a == data_type_b);
+    ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_b));
 
     // If unknown, set to sensible defaults
     if (data_type_output == DataType::UNKNOWN) {
@@ -531,11 +531,12 @@ public:
      * 2. The data type is quantized asymmetric
      *
      */
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, GEMMLowpOutputStageType output_stage_type, DataType data_type,
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, GEMMLowpOutputStageType output_stage_type, DataType data_type_a, DataType data_type_b,
                bool reshape_b_only_on_first_run, bool updated_sq_info_after_config = false, const ActivationLayerInfo& act_info = ActivationLayerInfo())
     {
         ARM_COMPUTE_ASSERT(output_stage_type != GEMMLowpOutputStageType::NONE);
-        ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type));
+        ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_a));
+        ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_b));
 
         // Randomized dynamic quantization: randomize quantization info in a way that ensures no result saturation
         // most of the time
@@ -543,13 +544,13 @@ public:
         QuantizationInfo b_qinfo;
         QuantizationInfo output_qinfo;
         TensorFillInfo finfo;
-        setup_quantization<TI>(data_type, shape_a, shape_b, a_qinfo, b_qinfo, output_qinfo, finfo);
+        setup_quantization<TI>(data_type_a, shape_a, shape_b, a_qinfo, b_qinfo, output_qinfo, finfo);
 
         GEMMLowpOutputStageInfo output_stage;
-        init_gemmlowp_output_stage_info(data_type, a_qinfo, b_qinfo, output_qinfo, act_info, output_stage_type, output_stage);
+        init_gemmlowp_output_stage_info(data_type_a, a_qinfo, b_qinfo, output_qinfo, act_info, output_stage_type, output_stage);
 
-        _reference = compute_reference(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type, data_type, output_stage, finfo);
-        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, output_qinfo, data_type, data_type, output_stage, reshape_b_only_on_first_run, finfo, updated_sq_info_after_config, act_info);
+        _reference = compute_reference(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, data_type_a, data_type_b, output_stage, finfo);
+        _target    = compute_target(shape_a, shape_b, shape_output, a_qinfo, b_qinfo, output_qinfo, data_type_a, data_type_b, output_stage, reshape_b_only_on_first_run, finfo, updated_sq_info_after_config, act_info);
     }
 
 protected:
@@ -687,7 +688,7 @@ public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, GEMMLowpOutputStageType output_stage_type, DataType data_type, bool reshape_b_only_on_first_run)
     {
         GEMMLowpGenericMatrixMultiplyCoreFusedOffsetOutputValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW, run_twice>::setup(shape_a, shape_b,
-                shape_output, output_stage_type, data_type, reshape_b_only_on_first_run);
+                shape_output, output_stage_type, data_type, data_type, reshape_b_only_on_first_run);
     }
 };
 
@@ -697,7 +698,8 @@ class GEMMLowpBatchedMatrixMultiplyCoreFusedOffsetOutputFixture : public GEMMLow
 public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, GEMMLowpOutputStageType output_stage_type, DataType data_type, bool reshape_b_only_on_first_run)
     {
-        GEMMLowpGenericMatrixMultiplyCoreFusedOffsetOutputValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW, run_twice>::setup(shape_a, shape_b, shape_output, output_stage_type, data_type, reshape_b_only_on_first_run);
+        GEMMLowpGenericMatrixMultiplyCoreFusedOffsetOutputValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW, run_twice>
+            ::setup(shape_a, shape_b, shape_output, output_stage_type, data_type, data_type, reshape_b_only_on_first_run);
     }
 };
 

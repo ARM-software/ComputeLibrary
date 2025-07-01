@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ DECLARE_QUANTIZE_KERNEL(fp32_i8_run_quantize_qasymm8);
 DECLARE_QUANTIZE_KERNEL(fp32_run_quantize_qasymm16);
 
 DECLARE_QUANTIZE_KERNEL(fp32_i8_run_quantize_qsymm8);
-
+DECLARE_QUANTIZE_KERNEL(fp32_i8_run_quantize_qsymm8_per_channel);
 DECLARE_QUANTIZE_KERNEL(fp16_u8_run_quantize_qasymm8);
 DECLARE_QUANTIZE_KERNEL(fp16_i8_run_quantize_qasymm8);
 DECLARE_QUANTIZE_KERNEL(fp16_run_quantize_qasymm16);
