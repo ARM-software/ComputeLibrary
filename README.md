@@ -1,4 +1,10 @@
 > [!IMPORTANT]
+> **Temporary Pause in Releases Due to Team Holidays**
+>
+> Releases of the Arm Compute Library will be paused until mid-August due to team holidays.
+
+
+> [!IMPORTANT]
 > **Versioning Change: CalVer → SemVer**
 >
 > We have updated our versioning scheme for the Arm Compute Library.
