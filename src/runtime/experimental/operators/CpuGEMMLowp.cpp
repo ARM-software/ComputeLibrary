@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,13 @@
  */
 #include "arm_compute/runtime/experimental/operators/CpuGEMMLowp.h"
 
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 #include "src/core/utils/quantization/AsymmHelpers.h"
 #include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
+
+#include <set>
 
 namespace arm_compute
 {
@@ -37,6 +40,7 @@ namespace op
 struct CpuGEMMLowp::Impl
 {
     std::unique_ptr<arm_compute::cpu::CpuGemmLowpMatrixMultiplyCore> op{nullptr};
+    ActivationLayerInfo                                              act_info{};
     bool                                                             is_prepared{false};
 };
 
@@ -63,6 +67,7 @@ void CpuGEMMLowp::configure(
         b_info_to_use->set_are_values_constant(false);
     }
 
+    _impl->act_info    = gemm_info.activation_info();
     _impl->is_prepared = false;
     _impl->op->configure(a, b_info_to_use.get(), (c != nullptr ? c : nullptr), output, gemm_info);
 }
@@ -81,6 +86,44 @@ Status CpuGEMMLowp::validate(const ITensorInfo *a,
     }
 
     return cpu::CpuGemmLowpMatrixMultiplyCore::validate(a, b_info_to_use.get(), c, output, gemm_info);
+}
+
+void CpuGEMMLowp::update_quantization_parameters(const QuantizationInfo &a,
+                                                 const QuantizationInfo &b,
+                                                 const QuantizationInfo &c,
+                                                 const DataType          data_type,
+                                                 const bool              is_prepared,
+                                                 const bool              negated_offsets)
+{
+    // Supported activations in GEMM
+    const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = {
+        ActivationLayerInfo::ActivationFunction::RELU, ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU};
+
+    PixelValue type_min{};
+    PixelValue type_max{};
+    std::tie(type_min, type_max) = get_min_max(data_type);
+    int32_t min_activation       = type_min.get<int32_t>();
+    int32_t max_activation       = type_max.get<int32_t>();
+
+    const UniformQuantizationInfo uoqinfo = c.uniform();
+    if (supported_acts.find(_impl->act_info.activation()) != supported_acts.end())
+    {
+        std::tie(min_activation, max_activation) =
+            get_quantized_activation_min_max(_impl->act_info, data_type, uoqinfo);
+    }
+
+    GEMMLowpOutputStageInfo output_info;
+    output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    output_info.gemmlowp_offset          = uoqinfo.offset;
+    output_info.gemmlowp_min_bound       = min_activation;
+    output_info.gemmlowp_max_bound       = max_activation;
+    output_info.is_quantized_per_channel = false;
+    output_info.output_data_type         = data_type;
+    const Status status                  = quantization::calculate_quantized_multipliers(a, b, c, output_info);
+    ARM_COMPUTE_ERROR_ON(!bool(status));
+
+    _impl->op->update_quantization_parameters(output_info, a, b, is_prepared, negated_offsets);
 }
 
 void CpuGEMMLowp::run(ITensorPack &tensors)

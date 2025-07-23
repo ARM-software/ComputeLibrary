@@ -84,6 +84,17 @@ public:
                            const ITensorInfo *output,
                            const GEMMInfo    &gemm_info = GEMMInfo());
 
+    /** Update of quantization information at the run stage so that the quantization multipliers can be properly calculated.
+    *
+    *  Please have a look at NEGEMMConvolutionLayer.h for a more in-depth explanation and example.
+    */
+    void update_quantization_parameters(const QuantizationInfo &a,
+                                        const QuantizationInfo &b,
+                                        const QuantizationInfo &c,
+                                        const DataType          data_type,
+                                        const bool              is_prepared,
+                                        const bool              negated_offsets);
+
     // Inherited methods overridden
     void run(ITensorPack &tensors) override;
     void prepare(ITensorPack &tensors) override;
