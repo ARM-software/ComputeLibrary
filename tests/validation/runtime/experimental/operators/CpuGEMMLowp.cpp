@@ -46,7 +46,14 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
 using framework::dataset::make;
+
+/** Tolerance for float operations */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+} // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
@@ -251,7 +258,7 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8), make("bool", false)/*is_multithreaded*/))
 {
     // Validate output
-    validate(Accessor(_targets[0]), _references[0]);
+    validate(Accessor(_targets[0]), _references[0], tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 
@@ -259,7 +266,7 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8_SIGNED), make("bool", false)/*is_multithreaded*/))
 {
     // Validate output
-    validate(Accessor(_targets[0]), _references[0]);
+    validate(Accessor(_targets[0]), _references[0], tolerance_qasymm8_signed);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 
@@ -270,7 +277,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuGEMMLowpStaticQu
     // Validate output
     for(int i = 0; i < _num_parallel_runs; ++i)
     {
-        validate(Accessor(_targets[i]), _references[i]);
+        validate(Accessor(_targets[i]), _references[i], tolerance_qasymm8_signed);
     }
 }
 TEST_SUITE_END() // ThreadSafety
