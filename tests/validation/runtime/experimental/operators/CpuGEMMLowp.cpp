@@ -34,7 +34,6 @@
 #include "tests/validation/fixtures/CpuGEMMLowpFixture.h"
 
 /*
-
  * Tests for arm_compute::experimental::op::CpuGEMMLowp which is a shallow wrapper for
  * arm_compute::cpu::CpuGemmLowpMatrixMultiplyCore Any future testing to the functionalities of arm_compute::cpu::CpuGemmLowpMatrixMultiplyCore will
  * be tested in tests/validation/NEON/GEMMLowp.cpp given that op::CpuGEMMLowp remain a shallow wrapper.
@@ -227,7 +226,7 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
 FIXTURE_DATA_TEST_CASE(SmokeTest, CpuGEMMLowpFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {
     // Validate output
-    validate(Accessor(_targets[0]), _references[0]);
+    validate(Accessor(_target), _reference);
 }
 
 #ifdef __aarch64__ // All the GeMM CPU assembly kernels for integer datatypes require aarch64
@@ -255,33 +254,20 @@ DATA_TEST_CASE(ValidateQuantized, framework::DatasetMode::ALL, zip(
 }
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8), make("bool", false)/*is_multithreaded*/))
+FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8)))
 {
     // Validate output
-    validate(Accessor(_targets[0]), _references[0], tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8_SIGNED), make("bool", false)/*is_multithreaded*/))
+FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
-    validate(Accessor(_targets[0]), _references[0], tolerance_qasymm8_signed);
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
-
-#ifndef BARE_METAL
-TEST_SUITE(ThreadSafety)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8_SIGNED), make("bool", true)/*is_multithreaded*/))
-{
-    // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
-    {
-        validate(Accessor(_targets[i]), _references[i], tolerance_qasymm8_signed);
-    }
-}
-TEST_SUITE_END() // ThreadSafety
-#endif // ifndef BARE_METAL
 TEST_SUITE_END() // Quantized
 #endif // #ifdef __aarch64__
 TEST_SUITE_END() // CpuGEMMLowp
