@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@
 #include "tests/validation/reference/PadLayer.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
-
+#include "tests/validation/reference/DequantizationLayer.h"
 #include <random>
 #include <type_traits>
 
@@ -85,13 +85,28 @@ configure_conv_function(ConvolutionFunction &func,
 #endif // ARM_COMPUTE_OPENCL_ENABLED
 } // namespace detail
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW, typename TO=T>
 class ConvolutionValidationGenericFixture : public framework::Fixture
 {
 public:
-    using TBias = typename std::conditional < std::is_same<typename std::decay<T>::type, uint8_t>::value
-                  || std::is_same<typename std::decay<T>::type, int8_t>::value,
-                  int32_t, T >::type;
+    // Quantized input?
+    static constexpr bool T_is_q =
+        std::is_same<typename std::decay<T>::type, uint8_t>::value ||
+        std::is_same<typename std::decay<T>::type, int8_t>::value;
+
+    // Float output?
+    static constexpr bool TO_is_f32 =
+        std::is_same<typename std::decay<TO>::type, float>::value;
+
+    // Bias type:
+    //  - Q->F32: float
+    //  - Q->Q  : int32_t
+    //  - FP->* : T
+    using TBias = typename std::conditional<
+        (T_is_q && TO_is_f32),
+        float,
+        typename std::conditional<T_is_q, int32_t, T>::type
+    >::type;
 
     void setup_quantization(TensorShape input_shape, TensorShape weights_shape, QuantizationInfo &input_q_info,
         QuantizationInfo &weights_q_info, DataType data_type)
@@ -144,13 +159,20 @@ public:
         _data_type                = data_type;
         _weights_data_type        = weights_data_type;
         const bool is_quantized   = is_data_type_quantized(weights_data_type);
-        _is_bfloat16              = data_type == DataType::BFLOAT16;
-        _bias_data_type           = is_quantized ? DataType::S32 : (_is_bfloat16 ? DataType::F32 : data_type);
-        _output_data_type         = _is_bfloat16 ? DataType::F32 : data_type;
+
+        _is_bfloat16            = data_type == DataType::BFLOAT16;
+        _output_data_type       = (_is_bfloat16 || std::is_same<TO, float>::value) ? DataType::F32 : data_type;
+
+        const bool q_to_f32     = is_quantized && (_output_data_type == DataType::F32);
+        _bias_data_type         = q_to_f32 ? DataType::F32
+                                   : (is_quantized ? DataType::S32
+                                                   : (_is_bfloat16 ? DataType::F32 : data_type));
+
         _quantization_info        = quantization_info;
         _weight_quantization_info = weight_quantization_info;
         _data_layout              = data_layout;
         _dst_q_info               = quantization_info;
+
 
         if(is_quantized && !is_data_type_quantized_symmetric(weights_data_type) && (!act_info.enabled() || act_info.activation() == ActivationFunction::IDENTITY))
         {
@@ -354,6 +376,7 @@ protected:
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
         // Test "add padding after configure" behavior. This behavior should not affect the correctness
         add_padding_x({ &src, &bias, &dst }, _data_layout);
+
         // Padding weights may affect code path in some backends
         if (padded_weights)
         {
@@ -385,7 +408,6 @@ protected:
             // Compute Convolution function
             conv.run();
         }
-
         return dst;
     }
 
@@ -472,6 +494,7 @@ protected:
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
         // Test "add padding after configure" behavior. This behavior should not affect the correctness
         add_padding_x({ &src, &bias, &dst }, _data_layout);
+
         // Padding weights may affect code path in some backends
         if (padded_weights)
         {
@@ -503,11 +526,10 @@ protected:
             // Compute Convolution function
             conv.run();
         }
-
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
+    SimpleTensor<TO> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
                                       const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
@@ -534,19 +556,19 @@ protected:
             regularize_values(static_cast<void *>(src.data()), src.num_elements());
             regularize_values(static_cast<void *>(weights.data()), weights.num_elements());
         }
-
         if(pre_pad_layer.size() > 0)
         {
             src = reference::pad_layer<T>(src, pre_pad_layer, PixelValue(0), PaddingMode::CONSTANT);
         }
 
-        return (act_info.enabled()) ? reference::activation_layer<T>(reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation, num_groups, _dst_q_info),
-                                                                     act_info) :
-               reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation, num_groups, _dst_q_info);
+        auto conv = reference::convolution_layer<T,TW,TBias,TO>(src, weights, bias, output_shape, info, dilation, num_groups, _dst_q_info);
+        auto res=  (act_info.enabled()) ? reference::activation_layer<TO>(conv, act_info) : conv;
+
+        return res;
     }
 
     TensorType       _target{};
-    SimpleTensor<T>  _reference{};
+    SimpleTensor<TO> _reference{};
     DataType         _data_type{};
     DataType         _weights_data_type{};
     DataType         _bias_data_type{};
@@ -602,14 +624,14 @@ public:
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false, typename TO = T>
+class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T, TO>
 {
 public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T, TO>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
                                                                                                  data_type, data_type, data_layout, quantization_info, quantization_info, act_info, mixed_layout);
     }
 };
