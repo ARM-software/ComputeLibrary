@@ -86,6 +86,10 @@ const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);              
 constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
 #endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
 
+#if __aarch64__
+constexpr float                           tolerance_num_dequantize_f32 = 1e-5f;                     /**< Tolerance number for the FP32 dequantization */
+#endif // #if __aarch64__
+
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** CNN data types */
@@ -142,6 +146,72 @@ const auto QuantizationData = make("QuantizationInfo",
 
 TEST_SUITE(NEON)
 TEST_SUITE(ConvolutionLayer)
+
+#ifdef __aarch64_
+DATA_TEST_CASE(DequantFP32_SupportedTypes, framework::DatasetMode::ALL,
+               zip(
+                   make("InputDataType", {
+                       DataType::QASYMM8_SIGNED,
+                       DataType::QASYMM8_SIGNED,
+                       DataType::QASYMM8_SIGNED,
+                       DataType::QASYMM8,
+                       DataType::QASYMM8,
+                       DataType::F32,
+                       DataType::F16
+                   }),
+                   make("WeightsDataType", {
+                       DataType::QASYMM8_SIGNED,
+                       DataType::QASYMM8_SIGNED,
+                       DataType::QASYMM8,
+                       DataType::QASYMM8_SIGNED,
+                       DataType::QASYMM8,
+                       DataType::QASYMM8_SIGNED,
+                       DataType::QASYMM8_SIGNED
+                   }),
+                   make("BiasDataType", {
+                       DataType::F32,
+                       DataType::S32,
+                       DataType::F32,
+                       DataType::F32,
+                       DataType::S32,
+                       DataType::F32,
+                       DataType::F32
+                   }),
+                   make("Expected", {
+                      true,
+                      false, false, false, false, false, false
+                   })),
+               in_dt, w_dt, b_dt, expected)
+{
+    TensorInfo input_info   = TensorInfo(TensorShape(7, 7, 3), 1, in_dt);
+    TensorInfo weights_info = TensorInfo(TensorShape(3, 3, 3, 4), 1, w_dt);
+    TensorInfo bias_info    = TensorInfo(TensorShape(4), 1, b_dt);
+    TensorInfo output_info  = TensorInfo(TensorShape(5, 5, 4), 1, DataType::F32);
+
+    if(is_data_type_quantized(in_dt))
+    {
+        const bool is_signed = (in_dt == DataType::QASYMM8_SIGNED);
+        input_info.set_quantization_info(
+            QuantizationInfo(0.5f, is_signed ? 0 : 128));
+    }
+    if(is_data_type_quantized(w_dt))
+    {
+        const bool is_signed = (w_dt == DataType::QASYMM8_SIGNED);
+        weights_info.set_quantization_info(
+            QuantizationInfo(0.25f, is_signed ? 0 : 128));
+    }
+
+    Status status = NEConvolutionLayer::validate(
+        &input_info,
+        &weights_info,
+        &bias_info,
+        &output_info,
+        PadStrideInfo(1, 1, 0, 0));
+
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+#endif // __aarch64_
+
 DATA_TEST_CASE(SupportedTypes, framework::DatasetMode::ALL, zip(
                 make("DataType", {
                     DataType::F32,
@@ -184,33 +254,39 @@ data_type_const, weights_data_type_const, expected_const)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(
                                           make("InputInfo", { TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F32),
                                                                                   TensorInfo(TensorShape(23U, 27U, 32U, 4U), 1, DataType::F32),
                                                                                   TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
-                                                                                  TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32)
+                                                                                  TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32),
+                                                                                  TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::QASYMM8_SIGNED)
                                           }),
                                           make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F32),
                                                                                     TensorInfo(TensorShape(5U, 5U, 32U, 21U), 1, DataType::F32),
                                                                                     TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
-                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16)
-                                          })),
+                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16),
+                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::QASYMM8_SIGNED)
+                                          }),
                                           make("OutputInfo", { TensorInfo(TensorShape(16U, 16U, 21U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(19U, 23U, 21U, 4U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
+                                                                                   TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32)
-                                          })),
+                                          }),
                                           make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
                                                                                  PadStrideInfo(1, 1, 0, 0),
                                                                                  PadStrideInfo(2, 1, 0, 0),
+                                                                                 PadStrideInfo(3, 2, 1, 0),
                                                                                  PadStrideInfo(3, 2, 1, 0)
-                                          })),
+                                          }),
                                           make("FastMath", { true,
                                                                                  true,
                                                                                  false,
-                                                                                 false
-                                          })),
-                                                                           make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
+                                                                                 false,
+                                                                                 false,
+                                          }),
+                                           make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM,
+                                                                ConvolutionMethod::GEMM,ConvolutionMethod::GEMM })),
                input_info, weights_info, output_info, conv_info, fast_math, expected)
 {
     ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
@@ -218,6 +294,52 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                             &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
+
+#ifdef __aarch64__
+template <typename T>
+using NEConvolutionLayerQuantizedF32OutputFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T,false,float>;
+
+TEST_SUITE(QASYMM8_SIGNED)
+
+using RunDequantizeF32Fixture =
+    NEConvolutionLayerQuantizedF32OutputFixture<int8_t>;
+
+FIXTURE_DATA_TEST_CASE(
+    RunSmallDequantizeF32,
+    RunDequantizeF32Fixture,
+    framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallConvolutionLayerDataset(),
+        framework::dataset::make("ReshapeWeights", { true }),
+        framework::dataset::make("DataType",       { DataType::QASYMM8_SIGNED }),
+        framework::dataset::make("DataLayout",     { DataLayout::NCHW, DataLayout::NHWC }),
+        framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) }),
+        ActivationFunctionsDataset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+
+FIXTURE_DATA_TEST_CASE(
+    RunLargeDequantizeF32,
+    RunDequantizeF32Fixture,
+    framework::DatasetMode::NIGHTLY,
+    combine(
+        datasets::LargeConvolutionLayerDataset(),
+        framework::dataset::make("ReshapeWeights", { true }),
+        framework::dataset::make("DataType",       { DataType::QASYMM8_SIGNED }),
+        framework::dataset::make("DataLayout",     { DataLayout::NCHW, DataLayout::NHWC }),
+        framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) }),
+        ActivationFunctionsDataset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+#endif // #ifdef __aarch64__
+
 // clang-format on
 // *INDENT-ON*
 TEST_SUITE_END() // ConvolutionLayer
@@ -1364,6 +1486,8 @@ using NEGEMMConvolutionLayerForUpdatedStaticQuantInfoAfterConfigureFixture = Con
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 template <typename T>
+using NEGEMMConvolutionLayerQuantizedF32OutputFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T,false,float>;
+template <typename T>
 using NEGEMMConvolutionLayerQuantizedMixedDataLayoutFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
 
 using NEGEMMConvolutionLayerQuantizedMixedSignFixture = ConvolutionValidationQuantizedMixedTypeFixture<Tensor, Accessor, NEConvolutionLayer, uint8_t, int8_t>;
@@ -1415,16 +1539,17 @@ TEST_SUITE_END() // UpdateStaticQuantInfoAfterConfigure
 #endif // __aarch64__
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true }),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                                                                                                       framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) }),
                                                                                                                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                    framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
@@ -1445,6 +1570,45 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixtur
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
+#ifdef __aarch64__
+using RunNEGEMMDequantizeF32Fixture =
+    NEGEMMConvolutionLayerQuantizedF32OutputFixture<int8_t>;
+
+FIXTURE_DATA_TEST_CASE(
+    RunSmallDequantizeF32,
+    RunNEGEMMDequantizeF32Fixture,
+    framework::DatasetMode::ALL,
+    combine(
+        datasets::SmallConvolutionLayerDataset(),
+        framework::dataset::make("ReshapeWeights", { true }),
+        framework::dataset::make("DataType",       { DataType::QASYMM8_SIGNED }),
+        framework::dataset::make("DataLayout",     { DataLayout::NCHW, DataLayout::NHWC }),
+        framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) }),
+        ActivationFunctionsDataset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+
+FIXTURE_DATA_TEST_CASE(
+    RunLargeDequantizeF32,
+    RunNEGEMMDequantizeF32Fixture,
+    framework::DatasetMode::NIGHTLY,
+    combine(
+        datasets::LargeConvolutionLayerDataset(),
+        framework::dataset::make("ReshapeWeights", { true }),
+        framework::dataset::make("DataType",       { DataType::QASYMM8_SIGNED }),
+        framework::dataset::make("DataLayout",     { DataLayout::NCHW, DataLayout::NHWC }),
+        framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) }),
+        ActivationFunctionsDataset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+#endif // #ifdef __aarch64__
+
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
