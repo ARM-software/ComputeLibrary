@@ -287,12 +287,29 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo         *src,
         }
 
         GEMMLowpOutputStageInfo output_info;
-        output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-        output_info.gemmlowp_offset          = uoqinfo.offset;
-        output_info.gemmlowp_min_bound       = min_activation;
-        output_info.gemmlowp_max_bound       = max_activation;
-        output_info.is_quantized_per_channel = (tmp_weights.data_type() == DataType::QSYMM8_PER_CHANNEL);
-        quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
+
+        // F32 dequant path? (input quantized, output float)
+        const bool dequantize_f32 = (dst->data_type() == DataType::F32);
+
+        if (dequantize_f32)
+        {
+            // No requant stage; offsets are handled via offset-contribution on int32
+            output_info.type                     = GEMMLowpOutputStageType::NONE;
+            output_info.gemmlowp_offset          = 0;
+            output_info.gemmlowp_min_bound       = 0;
+            output_info.gemmlowp_max_bound       = 0;
+            output_info.is_quantized_per_channel = false; // irrelevant when NONE
+        }
+        else
+        {
+            // Existing Q->Q path
+            output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+            output_info.gemmlowp_offset          = uoqinfo.offset;
+            output_info.gemmlowp_min_bound       = min_activation;
+            output_info.gemmlowp_max_bound       = max_activation;
+            output_info.is_quantized_per_channel = (tmp_weights.data_type() == DataType::QSYMM8_PER_CHANNEL);
+            quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
+        }
 
         const GEMMInfo gemm_info =
             GEMMInfo(false /* is_a_reshaped */, false /* is_b_reshaped */, true /* reshape_b_only_on_first_run */,
@@ -504,9 +521,11 @@ void CpuGemmConv2d::configure(const ITensorInfo         *src,
     }
 
     const unsigned int mat_weights_cols = weights->dimension(idx_kernels);
+    const bool         dequantize_f32   = is_data_type_quantized(data_type) && dst->data_type() == DataType::F32;
 
     // Create temporary GEMM output tensor in case we cannot skip col2im
-    const DataType output_data_type = data_type == DataType::BFLOAT16 ? DataType::F32 : data_type;
+    const DataType output_data_type = data_type == DataType::BFLOAT16 || dequantize_f32 ? DataType::F32 : data_type;
+
     if (!_skip_col2im)
     {
         TensorShape shape_gemm;
@@ -725,7 +744,14 @@ Status CpuGemmConv2d::validate(const ITensorInfo         *src,
     {
         if (is_quantized)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+            if (data_type == DataType::QASYMM8_SIGNED && dst->data_type() == DataType::F32)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F32);
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+            }
         }
         else if (is_bf16)
         {
@@ -776,8 +802,9 @@ Status CpuGemmConv2d::validate(const ITensorInfo         *src,
         gemm_input_to_use = &im2col_reshaped_info;
     }
 
+    const bool dequantize_f32 = is_data_type_quantized(data_type) && dst->data_type() == DataType::F32;
     // Create temporary GEMM output tensor in case we cannot skip col2im
-    const DataType output_data_type = data_type == DataType::BFLOAT16 ? DataType::F32 : data_type;
+    const DataType output_data_type = data_type == DataType::BFLOAT16 || dequantize_f32 ? DataType::F32 : data_type;
     if (!skip_col2im)
     {
         TensorShape shape_gemm = gemm_input_to_use->tensor_shape();

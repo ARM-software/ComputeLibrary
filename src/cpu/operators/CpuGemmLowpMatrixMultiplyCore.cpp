@@ -200,7 +200,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
             case DataType::U8:
             case DataType::S8:
             {
-                if (is_data_type_quantized_asymmetric(a_to_use->data_type()) &&
+                if (dst->data_type() != DataType::F32 && is_data_type_quantized_asymmetric(a_to_use->data_type()) &&
                     info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
                 {
                     auto c_info_to_use = c == nullptr ? nullptr : c;

@@ -1364,6 +1364,10 @@ using NEGEMMConvolutionLayerForUpdatedStaticQuantInfoAfterConfigureFixture = Con
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 template <typename T>
+using NEGEMMConvolutionLayerQuantizedF32OutputFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T,false,float>;
+
+
+template <typename T>
 using NEGEMMConvolutionLayerQuantizedMixedDataLayoutFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
 
 using NEGEMMConvolutionLayerQuantizedMixedSignFixture = ConvolutionValidationQuantizedMixedTypeFixture<Tensor, Accessor, NEConvolutionLayer, uint8_t, int8_t>;
@@ -1397,6 +1401,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerForUpdatedStaticQuantInfo
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+
+FIXTURE_DATA_TEST_CASE(RunSmallDequantizeF32, NEGEMMConvolutionLayerQuantizedF32OutputFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                            framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                            framework::dataset::make("ActivationInfo", {ActivationLayerInfo()})))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+
+
+
+
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE(QASYMM8)
@@ -1425,6 +1444,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                                                    framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
