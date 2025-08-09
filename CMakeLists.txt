@@ -163,6 +163,7 @@ set_target_properties(
   INCLUDE_DIRECTORIES "${ARM_COMPUTE_GRAPH_INCLUDE}"
   LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
 )
+target_link_libraries(arm_compute_graph PUBLIC arm_compute)
 
 add_library(
   arm_compute
