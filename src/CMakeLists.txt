@@ -627,6 +627,7 @@ target_sources(
 	core/NEON/kernels/convolution/winograd/winograd_fp32.cpp
 	core/Rounding.cpp
 	core/Size2D.cpp
+	core/SparseTensor.cpp
 	core/SubTensorInfo.cpp
 	core/TensorInfo.cpp
 	core/Utils.cpp
@@ -974,7 +975,10 @@ target_sources(
 	runtime/SchedulerUtils.cpp
 	runtime/SubTensor.cpp
 	runtime/Tensor.cpp
+	runtime/COOTensor.cpp
+	runtime/CSRTensor.cpp
 	runtime/TensorAllocator.cpp
+	runtime/SparseTensorAllocator.cpp
 	runtime/Utils.cpp
 	runtime/experimental/low_level/CpuGemmAssemblyDispatch.cpp
 	runtime/experimental/operators/CpuActivation.cpp
