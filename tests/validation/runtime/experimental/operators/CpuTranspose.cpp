@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,12 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+using framework::dataset::make;
+
+} // namespace
+
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 
@@ -48,15 +54,111 @@ TEST_SUITE(CpuTranspose)
 template <typename T>
 using CpuTransposeFixture = CpuTransposeValidationFixture<Tensor, Accessor, experimental::op::CpuTranspose, T>;
 
+template <typename T>
+using CpuTransposeThreadSafeFixture =
+    CpuTransposeThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuTranspose, T>;
+
+    template <typename T>
+using CpuTransposeQuantizedThreadSafeFixture =
+    CpuTransposeQuantizedThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuTranspose, T>;
+
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(SmokeTest, CpuTransposeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
-                                                                                                          framework::dataset::make("DataType", DataType::U8)))
+                                                                                                          make("DataType", DataType::U8)))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
 }
-TEST_SUITE_END() // U8
+TEST_SUITE_END() //U8
 
+#ifndef BARE_METAL
+TEST_SUITE(ThreadSafety)
+TEST_SUITE(Float)
+TEST_SUITE(F32)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuTransposeThreadSafeFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small2DShapes(), make("DataType", DataType::F32)))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+TEST_SUITE_END() // F32
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(F16)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuTransposeThreadSafeFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Tiny4DShapes(), make("DataType", DataType::F16)))
+{
+    if (CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        for(int i = 0; i < _num_parallel_runs; ++i)
+        {
+            validate(Accessor(_target[i]), _reference[i]);
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+TEST_SUITE_END() // F16
+#endif // ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE_END() // Float
+TEST_SUITE(Integer)
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuTransposeThreadSafeFixture<int32_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Tiny4DShapes(), make("DataType", DataType::S32)))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+TEST_SUITE_END() // S32
+TEST_SUITE_END() // Integer
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuTransposeQuantizedThreadSafeFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Tiny4DShapes(), make("DataType", DataType::QASYMM8_SIGNED), make("QuantizationInfoIn", {QuantizationInfo(0.5f, 0)})))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuTransposeQuantizedThreadSafeFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Tiny4DShapes(), make("DataType", DataType::QASYMM8), make("QuantizationInfoIn", {QuantizationInfo(0.5f, 0)})))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
+TEST_SUITE_END() // ThreadSafety
+#endif // #ifndef BARE_METAL
 TEST_SUITE_END() // CpuTranspose
 
 TEST_SUITE_END() // OPERATORS

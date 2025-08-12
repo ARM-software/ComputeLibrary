@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019,2024 Arm Limited.
+ * Copyright (c) 2017-2019,2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,7 @@ template SimpleTensor<int8_t>   permute(const SimpleTensor<int8_t> &src, Permuta
 template SimpleTensor<uint8_t>  permute(const SimpleTensor<uint8_t> &src, PermutationVector perm);
 template SimpleTensor<int16_t>  permute(const SimpleTensor<int16_t> &src, PermutationVector perm);
 template SimpleTensor<uint16_t> permute(const SimpleTensor<uint16_t> &src, PermutationVector perm);
+template SimpleTensor<int32_t>  permute(const SimpleTensor<int32_t> &src, PermutationVector perm);
 template SimpleTensor<uint32_t> permute(const SimpleTensor<uint32_t> &src, PermutationVector perm);
 template SimpleTensor<float>    permute(const SimpleTensor<float> &src, PermutationVector perm);
 template SimpleTensor<half>     permute(const SimpleTensor<half> &src, PermutationVector perm);
