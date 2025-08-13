@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if ARM_COMPUTE_OPENMP_SCHEDULER
 #include "arm_compute/runtime/OMP/OMPScheduler.h"
 
 #include "arm_compute/core/CPP/ICPPKernel.h"
@@ -157,3 +158,4 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
 }
 #endif /* DOXYGEN_SKIP_THIS */
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_OPENMP_SCHEDULER */
