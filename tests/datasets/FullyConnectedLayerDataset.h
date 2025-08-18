@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FULLYCONNECTED_LAYER_DATASET
-#define ARM_COMPUTE_TEST_FULLYCONNECTED_LAYER_DATASET
+#ifndef ACL_TESTS_DATASETS_FULLYCONNECTEDLAYERDATASET_H
+#define ACL_TESTS_DATASETS_FULLYCONNECTEDLAYERDATASET_H
 
 #include "utils/TypePrinter.h"
 
@@ -140,6 +140,7 @@ public:
         add_config(TensorShape(1U, 3U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U, 3U));
     }
 };
+
 class SmallFullyConnectedLayerDataset final : public FullyConnectedLayerDataset
 {
 public:
@@ -166,6 +167,22 @@ public:
     }
 };
 
+class SmallFCFCFullyConnectedLayerDataset final : public FullyConnectedLayerDataset
+{
+public:
+    SmallFCFCFullyConnectedLayerDataset()
+    {
+        // FC -> FC
+        add_config(TensorShape(1U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U));
+        // FC -> FC (batched)
+        add_config(TensorShape(1U, 3U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U, 3U));
+        // FC -> FC
+        add_config(TensorShape(201U), TensorShape(201U, 529U), TensorShape(529U), TensorShape(529U));
+        // FC -> FC (batched)
+        add_config(TensorShape(201U, 3U), TensorShape(201U, 529U), TensorShape(529U), TensorShape(529U, 3U));
+    }
+};
+
 class LargeFullyConnectedLayerDataset final : public FullyConnectedLayerDataset
 {
 public:
@@ -183,4 +200,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FULLYCONNECTED_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_FULLYCONNECTEDLAYERDATASET_H

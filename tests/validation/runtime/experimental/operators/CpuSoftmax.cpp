@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,11 +48,14 @@ namespace
 using framework::dataset::make;
 
 /** Tolerance for float operations */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
+RelativeTolerance<half>              tolerance_f16(half(0.2));
+constexpr AbsoluteTolerance<float>   tolerance_f32(0.000001f);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 } // namespace
+
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
-
 TEST_SUITE(CpuSoftmax)
 
 // clang-format off
@@ -150,6 +153,12 @@ TEST_CASE(OpCpuSoftmaxMemoryInjection, framework::DatasetMode::ALL)
 template <typename T>
 using CpuOpSoftmaxFixture = CpuSoftmaxValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuSoftmax, T>;
 
+template <typename T>
+using CpuSoftmaxThreadSafeFixture = CpuSoftmaxThreadSafeValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuSoftmax, T>;
+
+template <typename T>
+using CpuSoftmaxQuantizedThreadSafeFixture = CpuSoftmaxQuantizedThreadSafeValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuSoftmax, T>;
+
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(SmokeTest, CpuOpSoftmaxFixture<float>, framework::DatasetMode::PRECOMMIT,
     combine(
@@ -159,10 +168,122 @@ FIXTURE_DATA_TEST_CASE(SmokeTest, CpuOpSoftmaxFixture<float>, framework::Dataset
         make("Axis", { 0, -1 })))
 {
     // Validate output
-    validate(Accessor(target_), reference_, tolerance_f32);
+    for(int i = 0; i < num_parallel_runs_; ++i)
+    {
+        validate(Accessor(target_[i]), reference_[i], tolerance_f32);
+    }
 }
-
 TEST_SUITE_END() //FP32
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(SmokeTest, CpuOpSoftmaxFixture<half>, framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F16),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 })))
+{
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        for(int i = 0; i < num_parallel_runs_; ++i)
+        {
+            validate(Accessor(target_[i]), reference_[i], tolerance_f16);
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+TEST_SUITE_END() //FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
+
+#ifndef BARE_METAL
+TEST_SUITE(ThreadSafety)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuSoftmaxThreadSafeFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F32),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 })))
+{
+    // Validate output
+    for(int i = 0; i < num_parallel_runs_; ++i)
+    {
+        validate(Accessor(target_[i]), reference_[i], tolerance_f32);
+    }
+}
+TEST_SUITE_END() //FP32
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuSoftmaxThreadSafeFixture<half>,
+                       framework::DatasetMode::ALL,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::F16),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 })))
+{
+    if(CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        for(int i = 0; i < num_parallel_runs_; ++i)
+        {
+            validate(Accessor(target_[i]), reference_[i], tolerance_f16);
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("Device does not support fp16. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+TEST_SUITE_END() //F16
+#endif           // ARM_COMPUTE_ENABLE_FP16
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuSoftmaxQuantizedThreadSafeFixture<int8_t>, framework::DatasetMode::ALL,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::QASYMM8_SIGNED),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 }),
+        make("QuantizationInfo", {QuantizationInfo(0.5f, 10), QuantizationInfo(0.25f, 0)})
+    ))
+{
+    // Validate output
+    for(int i = 0; i < num_parallel_runs_; ++i)
+    {
+        validate(Accessor(target_[i]), reference_[i], tolerance_qasymm8_signed);
+    }
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuSoftmaxQuantizedThreadSafeFixture<uint8_t>, framework::DatasetMode::ALL,
+    combine(
+        datasets::SoftmaxLayerSmallShapes(),
+        make("DataType", DataType::QASYMM8),
+        make("Beta", { 1.0f, 2.0f }),
+        make("Axis", { 0, -1 }),
+        make("QuantizationInfo", {QuantizationInfo(0.5f, 10), QuantizationInfo(0.25f, 0)})
+    ))
+{
+    // Validate output
+    for(int i = 0; i < num_parallel_runs_; ++i)
+    {
+        validate(Accessor(target_[i]), reference_[i], tolerance_qasymm8);
+    }
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
+TEST_SUITE_END() // ThreadSafety
+#endif // #ifndef BARE_METAL
 TEST_SUITE_END() //CpuSoftmax
 TEST_SUITE_END() //OPERATORS
 TEST_SUITE_END() //NEON

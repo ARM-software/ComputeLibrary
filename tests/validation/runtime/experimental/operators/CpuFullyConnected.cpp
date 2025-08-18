@@ -56,6 +56,9 @@ template <typename T>
 using CpuFullyConnectedFixture = CpuFullyConnectedValidationFixture<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
 
 template <typename T>
+using CpuFullyConnectedFixtureNoBias = CpuFullyConnectedValidationFixtureNoBias<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
+
+template <typename T>
 using CpuFullyConnectedThreadSafeFixture = CpuFullyConnectedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
 
 TEST_SUITE(SmokeTest)
@@ -65,7 +68,21 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(SmokeTest,
                        CpuFullyConnectedFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(datasets::SmallFullyConnectedLayerDataset(),
+                       combine(datasets::SmallFCFCFullyConnectedLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC) })))
+{
+    // Validate output
+    for(int i = 0; i < _num_parallel_runs; ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i], tolerance_f32);
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(SmokeTestNoBias,
+                       CpuFullyConnectedFixtureNoBias<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallFCFCFullyConnectedLayerDataset(),
                                make("DataType", DataType::F32),
                                make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC) })))
 {
@@ -84,7 +101,7 @@ TEST_SUITE(ThreadSafety)
 FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        CpuFullyConnectedThreadSafeFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallFullyConnectedLayerDataset(),
+                       combine(datasets::SmallFCFCFullyConnectedLayerDataset(),
                                make("DataType", DataType::F32),
                                make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC) })))
 {

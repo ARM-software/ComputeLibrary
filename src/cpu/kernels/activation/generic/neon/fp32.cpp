@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/cpu/kernels/activation/generic/neon/impl.h"
+#include "src/cpu/kernels/activation/generic/neon/fp_impl.h"
 namespace arm_compute
 {
 namespace cpu

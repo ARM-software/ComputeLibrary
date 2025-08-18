@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@
 #include "tests/validation/fixtures/CpuGEMMLowpFixture.h"
 
 /*
-
  * Tests for arm_compute::experimental::op::CpuGEMMLowp which is a shallow wrapper for
  * arm_compute::cpu::CpuGemmLowpMatrixMultiplyCore Any future testing to the functionalities of arm_compute::cpu::CpuGemmLowpMatrixMultiplyCore will
  * be tested in tests/validation/NEON/GEMMLowp.cpp given that op::CpuGEMMLowp remain a shallow wrapper.
@@ -46,15 +45,21 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
 using framework::dataset::make;
+
+/** Tolerance for float operations */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+} // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuGEMMLowp)
 
 using CpuGEMMLowpFixture = CpuGEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuGEMMLowp>;
-
-using framework::dataset::make;
+using CpuGEMMLowpStaticQuantFixture = CpuGEMMLowpStaticQuantMatrixMultiplyCoreValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuGEMMLowp>;
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
                shape_a, shape_b, shape_c, a_offset, b_offset)
@@ -224,10 +229,50 @@ FIXTURE_DATA_TEST_CASE(SmokeTest, CpuGEMMLowpFixture, framework::DatasetMode::AL
     validate(Accessor(_target), _reference);
 }
 
+#ifdef __aarch64__ // All the GeMM CPU assembly kernels for integer datatypes require aarch64
+TEST_SUITE(Quantized)
 
+DATA_TEST_CASE(ValidateQuantized, framework::DatasetMode::ALL, zip(
+    make("InputAInfo", { TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/255, 10)),
+                         TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),
+                                          }),
+    make("InputBInfo",{ TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/256, 10)),
+                        TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/256, 10)),
+                                          }),
+    make("OutputInfo",{ TensorInfo(TensorShape(64U, 32U), 1, DataType::QASYMM8_SIGNED),
+                        TensorInfo(TensorShape(64U, 32U), 1, DataType::QASYMM8),
+                                           }),
+    make("Expected", { true, true })),
+    a_info, b_info, output_info, expected)
+{
+    // Lock tensors
+    Status status = arm_compute::experimental::op::CpuGEMMLowp::validate(&a_info.clone()->set_is_resizable(false),
+                                                            &b_info.clone()->set_is_resizable(false),
+                                                            nullptr,
+                                                            &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8_SIGNED)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
+#endif // #ifdef __aarch64__
 TEST_SUITE_END() // CpuGEMMLowp
 TEST_SUITE_END() // OPERATORS
-TEST_SUITE_END() // CpuGEMMLowp
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

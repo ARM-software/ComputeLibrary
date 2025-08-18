@@ -62,9 +62,9 @@ Status CpuFullyConnected::validate(const ITensorInfo      *src,
                                    const WeightsInfo      &weights_info)
 {
     bool fp32_ok = src->data_type() == DataType::F32 && weights->data_type() == DataType::F32 &&
-                   (biases->data_type() == DataType::F32 || biases == nullptr) && dst->data_type() == DataType::F32;
+                   (biases == nullptr || biases->data_type() == DataType::F32) && dst->data_type() == DataType::F32;
     bool fp16_ok = src->data_type() == DataType::F16 && weights->data_type() == DataType::F16 &&
-                   (biases->data_type() == DataType::F16 || biases == nullptr) && dst->data_type() == DataType::F16;
+                   (biases == nullptr || biases->data_type() == DataType::F16) && dst->data_type() == DataType::F16;
     if (!(fp32_ok || fp16_ok))
     {
         return Status(ErrorCode::RUNTIME_ERROR, "datatype is not supported");

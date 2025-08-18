@@ -24,6 +24,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/core/utils/StringUtils.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/RuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -254,6 +255,9 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
     ActivationLayerInfo::ActivationFunction::LOGISTIC,
     ActivationLayerInfo::ActivationFunction::TANH,
     ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
+#ifdef __aarch64__
+    ActivationLayerInfo::ActivationFunction::GELU,
+#endif
 });
 
 const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
