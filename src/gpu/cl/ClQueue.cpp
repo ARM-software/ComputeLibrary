@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,6 +92,7 @@ bool ClQueue::set_cl_queue(::cl::CommandQueue queue)
 
 StatusCode ClQueue::finish()
 {
+    // Test edit of gpu related file
     arm_compute::CLScheduler::get().queue().finish();
     return StatusCode::Success;
 }
