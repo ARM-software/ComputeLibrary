@@ -256,29 +256,29 @@ if not 'windows' in env['os']:
     env.Append(CXXFLAGS = ['-Wall','-std=c++14', '-pedantic' ])
 
 if env['profile']:
-    env.Append(CXXFLAGS = ['-std=c++17', '-DACL_PROFILE_ENABLE'])
+    env.Append(CXXFLAGS = ['-DACL_PROFILE_ENABLE'])
     env.Append(CXXFLAGS = ['-DACL_PROFILE_LEVEL=%d' % int(env['profile_level'])])
     env.Append(CXXFLAGS = ['-DACL_PROFILE_BACKEND=%s' % env['profile_backend']])
     env.Append(CXXFLAGS = ['-DACL_PROFILE_MODE=%s' % env['profile_mode']])
     env.Append(CXXFLAGS = ['-DACL_ACL_PROFILE_SIZE_KB=%d' % int(env['profile_size'])])
     if env['profile_backend'] == 'perfetto':
-        env.Append(CXXFLAGS = [
-            '-std=c++17',
-            '-Wno-switch-default',
-            '-Wno-effc++',
-            '-Wno-strict-overflow',
-            '-Wno-noexcept',
-            '-Wno-error=noexcept',
-            '-Wno-error=strict-aliasing',
-            '-Wno-error=class-memaccess',
-            '-Wno-error=maybe-uninitialized',
-            '-Wno-format-nonliteral',
-            '-Wno-error=redundant-move',
-            '-Wno-error=logical-op'])
+        env.Append(CXXFLAGS = ['-std=c++17', '-Wno-switch-default'])
+        if env['os'] == 'android':
+            env.Append(LINKFLAGS = ['-llog'])
+        elif env['os'] == 'linux':
+            env.Append(CXXFLAGS = [
+                '-Wno-effc++',
+                '-Wno-strict-overflow',
+                '-Wno-noexcept',
+                '-Wno-error=noexcept',
+                '-Wno-error=strict-aliasing',
+                '-Wno-error=class-memaccess',
+                '-Wno-error=maybe-uninitialized',
+                '-Wno-format-nonliteral',
+                '-Wno-error=redundant-move',
+                '-Wno-error=logical-op'])
     if env['opencl']:
         env.Append(CXXFLAGS = ['-DARM_COMPUTE_CL'])
-    if env['os'] == 'android':
-        env.Append(LINKFLAGS = ['-llog'])
 
 cpp_tool = {'linux': 'g++', 'android' : 'clang++',
              'tizen': 'g++', 'macos':'clang++',
