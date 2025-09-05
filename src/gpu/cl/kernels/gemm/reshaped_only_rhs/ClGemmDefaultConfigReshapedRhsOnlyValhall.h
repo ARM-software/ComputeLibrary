@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_GEMM_DEFAULT_CONFIG_RESHAPED_RHS_ONLY_VALHALL_H
-#define ARM_COMPUTE_CL_GEMM_DEFAULT_CONFIG_RESHAPED_RHS_ONLY_VALHALL_H
+#ifndef ACL_SRC_GPU_CL_KERNELS_GEMM_RESHAPED_ONLY_RHS_CLGEMMDEFAULTCONFIGRESHAPEDRHSONLYVALHALL_H
+#define ACL_SRC_GPU_CL_KERNELS_GEMM_RESHAPED_ONLY_RHS_CLGEMMDEFAULTCONFIGRESHAPEDRHSONLYVALHALL_H
 
 #include "src/gpu/cl/kernels/gemm/IClGemmKernelConfig.h"
 
@@ -65,9 +65,11 @@ private:
     configure_G715_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
     configure_G715_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure_G1_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace gemm
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_GEMM_DEFAULT_CONFIG_RESHAPED_RHS_ONLY_VALHALL_H */
+#endif // ACL_SRC_GPU_CL_KERNELS_GEMM_RESHAPED_ONLY_RHS_CLGEMMDEFAULTCONFIGRESHAPEDRHSONLYVALHALL_H

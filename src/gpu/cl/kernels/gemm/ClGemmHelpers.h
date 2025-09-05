@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_GEMM_HELPERS_H
-#define ARM_COMPUTE_CL_GEMM_HELPERS_H
+#ifndef ACL_SRC_GPU_CL_KERNELS_GEMM_CLGEMMHELPERS_H
+#define ACL_SRC_GPU_CL_KERNELS_GEMM_CLGEMMHELPERS_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -105,7 +105,7 @@ void update_padding_for_cl_image(ITensorInfo *tensor);
  */
 Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, const GEMMRHSMatrixInfo &rhs_info);
 
-/** Determine if the MMUL kernels should be preferred
+/** Determine if the FP32 MMUL kernels should be preferred
  *
  * @param[in]      m         Number of rows of the LHS matrix
  * @param[in]      n         Number of columns of the RHS matrix
@@ -117,13 +117,33 @@ Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, 
  *
  * @return true if MMUL kernel is preferred over kernels w/o MMUL, false otherwise
  */
-bool is_mmul_kernel_preferred(const unsigned int m,
-                              const unsigned int n,
-                              const unsigned int k,
-                              const unsigned int b,
-                              const DataType     data_type,
-                              unsigned int      &best_m0,
-                              unsigned int      &best_n0);
+bool is_mmul_kernel_preferred_fp32_acc(const unsigned int m,
+                                       const unsigned int n,
+                                       const unsigned int k,
+                                       const unsigned int b,
+                                       const DataType     data_type,
+                                       unsigned int      &best_m0,
+                                       unsigned int      &best_n0);
+
+/** Determine if the FP16 MMUL kernels should be preferred
+ *
+ * @param[in]      m         Number of rows of the LHS matrix
+ * @param[in]      n         Number of columns of the RHS matrix
+ * @param[in]      k         Number of columns of the LHS matrix, rows of the RHS matrix
+ * @param[in]      b         Batch size
+ * @param[in]      data_type Data type FP32/FP16
+ * @param[in, out] best_m0   Suggested M0 (number of rows of the output block) for the kernel
+ * @param[in, out] best_n0   Suggested N0 (number of columns of the output block) for the kernel
+ *
+ * @return true if MMUL kernel is preferred over kernels w/o MMUL, false otherwise
+ */
+bool is_mmul_kernel_preferred_fp16_acc(const unsigned int m,
+                                       const unsigned int n,
+                                       const unsigned int k,
+                                       const unsigned int b,
+                                       const DataType     data_type,
+                                       unsigned int      &best_m0,
+                                       unsigned int      &best_n0);
 
 /** Find the preferred configurations for the LHS and RHS tensor using the GeMMConfigsMatrix provided by the user
  *
@@ -141,4 +161,4 @@ find_lhs_rhs_info(const GeMMConfigsMatrix &configs, unsigned int m, unsigned int
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_GEMM_HELPERS_H */
+#endif // ACL_SRC_GPU_CL_KERNELS_GEMM_CLGEMMHELPERS_H

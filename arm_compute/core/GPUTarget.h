@@ -69,6 +69,7 @@ enum class GPUTarget
     G615                = 0x351,
     G720                = 0x410,
     G620                = 0x411,
+    G1                  = 0x480
 
     // When new models are added, watch out for heuristics.
     // The default/unrecognized Gpu will be the latest one and

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 Arm Limited.
+ * Copyright (c) 2020-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,11 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
         &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G715_f16,
         &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_u8);
 
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G1(
+        &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G715_f32,
+        &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G1_f16,
+        &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_u8);
+
     ConfigurationFunctionExecutorPtr func = nullptr;
 
     switch (_target)
@@ -87,7 +92,6 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
         case GPUTarget::G610:
             func = configs_G710.get_function(data_type);
             break;
-        case GPUTarget::FIFTHGEN:
         case GPUTarget::G720:
         case GPUTarget::G620:
         case GPUTarget::G715:
@@ -95,8 +99,12 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
             func = configs_G715.get_function(data_type);
             break;
         case GPUTarget::G77:
-        default:
             func = configs_G77.get_function(data_type);
+            break;
+        case GPUTarget::FIFTHGEN:
+        case GPUTarget::G1:
+        default:
+            func = configs_G1.get_function(data_type);
             break;
     }
 
@@ -604,13 +612,29 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
     unsigned int best_m0;
     unsigned int best_n0;
 
-    if (is_mmul_kernel_preferred(m, n, k, b, DataType::F32, best_m0, best_n0))
+    if (is_mmul_kernel_preferred_fp32_acc(m, n, k, b, DataType::F32, best_m0, best_n0))
     {
         return configure_lhs_rhs_info(m, n, best_m0, best_n0, 1, 1, 4, false, true, false, false, true);
     }
     else
     {
         return configure_G77_f32(m, n, k, b);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G1_f16(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    unsigned int best_m0;
+    unsigned int best_n0;
+
+    if (is_mmul_kernel_preferred_fp16_acc(m, n, k, b, DataType::F16, best_m0, best_n0))
+    {
+        return configure_lhs_rhs_info(m, n, best_m0, best_n0, 1, 1, 4, false, true, false, false, true);
+    }
+    else
+    {
+        return configure_G78_f16(m, n, k, b);
     }
 }
 
@@ -743,7 +767,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
     unsigned int best_m0;
     unsigned int best_n0;
 
-    if (is_mmul_kernel_preferred(m, n, k, b, DataType::F16, best_m0, best_n0))
+    if (is_mmul_kernel_preferred_fp32_acc(m, n, k, b, DataType::F16, best_m0, best_n0))
     {
         return configure_lhs_rhs_info(m, n, best_m0, best_n0, 1, 1, 4, false, true, false, false, true);
     }

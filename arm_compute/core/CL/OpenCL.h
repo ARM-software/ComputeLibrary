@@ -44,8 +44,8 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #if defined(__GNUG__) && __GNUG__ >= 8
 #pragma GCC diagnostic ignored "-Wcatch-value"
-#endif                   // defined(__GNUG__) && __GNUG__ >= 8
-#include <CL/opencl.hpp> // include new hpp header instead of cl2.hpp
+#endif // defined(__GNUG__) && __GNUG__ >= 8
+#include "arm_compute/core/CL/cl_definitions.h"
 #pragma GCC diagnostic pop
 
 namespace cl

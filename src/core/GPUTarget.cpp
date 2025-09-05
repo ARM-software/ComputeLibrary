@@ -68,6 +68,9 @@ GPUTarget get_gpu_target(const std::string &full_name, const std::string &base_n
         {"G620", GPUTarget::G620},            //
         {"G720", GPUTarget::G720},            //
         {"Immortalis-G720", GPUTarget::G720}, //
+        {"G1-Pro", GPUTarget::G1},            //
+        {"G1-Premium", GPUTarget::G1},        //
+        {"G1-Ultra", GPUTarget::G1},
 
     };
     // Try full name with variant.
@@ -104,26 +107,34 @@ GPUTarget get_gpu_target(const std::string &full_name, const std::string &base_n
 const std::string &string_from_target(GPUTarget target)
 {
     static std::map<GPUTarget, const std::string> gpu_target_map = {
-        {GPUTarget::MIDGARD, "midgard"},  {GPUTarget::BIFROST, "bifrost"}, {GPUTarget::VALHALL, "valhall"},
-        {GPUTarget::FIFTHGEN, "5th Gen"},
+        {GPUTarget::MIDGARD, "midgard"}, {GPUTarget::BIFROST, "bifrost"},
+        {GPUTarget::VALHALL, "valhall"}, {GPUTarget::FIFTHGEN, "5th Gen"},
 
-        {GPUTarget::T600, "t600"},        {GPUTarget::T700, "t700"},       {GPUTarget::T800, "t800"},
-        {GPUTarget::G71, "g71"},          {GPUTarget::G72, "g72"},         {GPUTarget::G51, "g51"},
-        {GPUTarget::G51BIG, "g51big"},    {GPUTarget::G51LIT, "g51lit"},   {GPUTarget::G31, "g31"},
-        {GPUTarget::G76, "g76"},          {GPUTarget::G52, "g52"},         {GPUTarget::G52LIT, "g52lit"},
-        {GPUTarget::G77, "g77"},          {GPUTarget::G57, "g57"},         {GPUTarget::G78, "g78"},
-        {GPUTarget::G68, "g68"},          {GPUTarget::G78AE, "g78ae"},     {GPUTarget::G710, "g710"},
-        {GPUTarget::G610, "g610"},        {GPUTarget::G510, "g510"},       {GPUTarget::G310, "g310"},
-        {GPUTarget::G715, "g715"},        {GPUTarget::G615, "g615"},       {GPUTarget::G720, "g720"},
-        {GPUTarget::G620, "g620"}};
+        {GPUTarget::T600, "t600"},       {GPUTarget::T700, "t700"},
+        {GPUTarget::T800, "t800"},       {GPUTarget::G71, "g71"},
+        {GPUTarget::G72, "g72"},         {GPUTarget::G51, "g51"},
+        {GPUTarget::G51BIG, "g51big"},   {GPUTarget::G51LIT, "g51lit"},
+        {GPUTarget::G31, "g31"},         {GPUTarget::G76, "g76"},
+        {GPUTarget::G52, "g52"},         {GPUTarget::G52LIT, "g52lit"},
+        {GPUTarget::G77, "g77"},         {GPUTarget::G57, "g57"},
+        {GPUTarget::G78, "g78"},         {GPUTarget::G68, "g68"},
+        {GPUTarget::G78AE, "g78ae"},     {GPUTarget::G710, "g710"},
+        {GPUTarget::G610, "g610"},       {GPUTarget::G510, "g510"},
+        {GPUTarget::G310, "g310"},       {GPUTarget::G715, "g715"},
+        {GPUTarget::G615, "g615"},       {GPUTarget::G720, "g720"},
+        {GPUTarget::G620, "g620"},       {GPUTarget::G1, "g1"}};
 
     return gpu_target_map[target];
 }
 
 GPUTarget get_target_from_name(const std::string &device_name)
 {
-    std::regex mali_regex(R"(Mali-(([A-Za-z]+\d*)\w*))");
-    std::regex immortalis_regex(R"(Immortalis-(([A-Za-z]+\d*)\w*))");
+    /* Below regex matches format:
+    Mali-[at least one letter][optional numbers]['-' or arbitrary characters] */
+    std::regex mali_regex(R"(Mali-(([A-Za-z]+\d*)[\w-]*))");
+    /* Below regex matches format:
+    Immortalis-[at least one letter][optional numbers]['-' or arbitrary characters] */
+    std::regex immortalis_regex(R"(Immortalis-(([A-Za-z]+\d*)[\w-]*))");
 
     std::smatch name_parts_mali;
     std::smatch name_parts_immortalis;
@@ -144,13 +155,13 @@ GPUTarget get_target_from_name(const std::string &device_name)
 
     if (found_mali)
     {
-        full_name = name_parts_mali.str(1);
-        base_name = name_parts_mali.str(2);
+        full_name = name_parts_mali.str(1); // Contains the string after Mali (e.g. "G51LIT")
+        base_name = name_parts_mali.str(2); // Contains just the G followed by just the numbers (e.g. "G51").
     }
     else
     {
-        full_name = name_parts_immortalis.str(1);
-        base_name = name_parts_immortalis.str(2);
+        full_name = name_parts_immortalis.str(1); // Contains the string after Immportalis
+        base_name = name_parts_immortalis.str(2); // Contains just the G followed by just the numbers
     }
 
     const auto gpu_target = get_gpu_target(full_name, base_name);

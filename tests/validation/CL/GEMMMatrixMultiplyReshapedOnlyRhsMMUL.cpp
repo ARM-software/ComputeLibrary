@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,11 +68,14 @@ const auto beta_values = framework::dataset::make("beta", {0.0f, -0.75f} );
 const auto m_values = framework::dataset::make("M", {49});
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", {257});
+const auto n_values              = framework::dataset::make("N", {257, 64, 48});
+const auto n_values_fp16         = framework::dataset::make("N", {79, 32, 80});
+const auto n_values_texture_fp16 = framework::dataset::make("N", {128, 96, 48});
 
 /** K values to test */
 /** The test case requires this to be multiple of 4*/
 const auto k_values = framework::dataset::make("K", {192});
+const auto k_values_fp16 = framework::dataset::make("K", {64});
 
 /** Batch size values to test */
 const auto b_values = framework::dataset::make("batch_size", {1, 2});
@@ -81,14 +84,17 @@ const auto b_values = framework::dataset::make("batch_size", {1, 2});
 const auto act_values = framework::dataset::make("Activation",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU)
 });
 
 /** M0 values to test - Precommit */
 const auto m0_values_precommit = framework::dataset::make("M0", { 1, 2, 4 });
+const auto m0_values_precommit_fp16 = framework::dataset::make("M0", { 1, 2, 3, 4, 8 });
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit = framework::dataset::make("N0", { 4, 8 });
+const auto n0_values_precommit              = framework::dataset::make("N0", { 4, 8 });
+const auto n0_values_precommit_fp16         = framework::dataset::make("N0", { 2, 4, 8, 16 });
+const auto n0_values_precommit_texture_fp16 = framework::dataset::make("N0", { 4, 8 });
 
 /** K0 values to test - Precommit */
 const auto k0_values_precommit = framework::dataset::make("K0", { 1 });
@@ -103,20 +109,19 @@ TEST_SUITE(GEMMMatrixMultiplyReshapedOnlyRhsMMUL)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   framework::dataset::make("ExportToCLImage", false)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values),
-                                                                   beta_values),
-                                                                   broadcast_bias_values),
-                                                                   act_values))
+                combine(m_values,
+                        n_values,
+                        k_values,
+                        b_values,
+                        m0_values_precommit,
+                        n0_values_precommit,
+                        k0_values_precommit,
+                        framework::dataset::make("ExportToCLImage", false),
+                        framework::dataset::make("DataType", DataType::F32),
+                        a_values,
+                        beta_values,
+                        broadcast_bias_values,
+                        act_values))
 {
     // Validate output
     if(validate_result)
@@ -134,20 +139,19 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   framework::dataset::make("ExportToCLImage", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values),
-                                                                   beta_values),
-                                                                   broadcast_bias_values),
-                                                                   act_values))
+                combine(m_values,
+                        n_values_fp16,
+                        k_values_fp16,
+                        b_values,
+                        m0_values_precommit_fp16,
+                        n0_values_precommit_fp16,
+                        k0_values_precommit,
+                        framework::dataset::make("ExportToCLImage", false),
+                        framework::dataset::make("DataType", DataType::F16),
+                        a_values,
+                        beta_values,
+                        broadcast_bias_values,
+                        act_values))
 {
     // Validate output
     if(validate_result)
@@ -165,20 +169,19 @@ TEST_SUITE_END() // FP16
 TEST_SUITE(ExportToCLImage)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   framework::dataset::make("ExportToCLImage", true)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values),
-                                                                   beta_values),
-                                                                   broadcast_bias_values),
-                                                                   act_values))
+                combine(m_values,
+                        n_values,
+                        k_values,
+                        b_values,
+                        m0_values_precommit,
+                        n0_values_precommit,
+                        k0_values_precommit,
+                        framework::dataset::make("ExportToCLImage", true),
+                        framework::dataset::make("DataType", DataType::F32),
+                        a_values,
+                        beta_values,
+                        broadcast_bias_values,
+                        act_values))
 {
     // Validate output
     if(validate_result)
@@ -196,20 +199,19 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   framework::dataset::make("ExportToCLImage", true)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values),
-                                                                   beta_values),
-                                                                   broadcast_bias_values),
-                                                                   act_values))
+                combine(m_values,
+                        n_values_fp16,
+                        k_values_fp16,
+                        b_values,
+                        m0_values_precommit_fp16,
+                        n0_values_precommit_texture_fp16,
+                        k0_values_precommit,
+                        framework::dataset::make("ExportToCLImage", true),
+                        framework::dataset::make("DataType", DataType::F16),
+                        a_values,
+                        beta_values,
+                        broadcast_bias_values,
+                        act_values))
 {
     // Validate output
     if(validate_result)
