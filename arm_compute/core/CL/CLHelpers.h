@@ -276,6 +276,14 @@ void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<in
  */
 bool arm_matrix_multiply_supported(const cl::Device &device);
 
+/** Helper function to check whether the cl_arm_matrix_multiply with fp16 extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool arm_matrix_multiply_fp16_supported(const cl::Device &device);
+
 /** Check whether cl_khr_command_buffer extension is supported by the specified CL device.
  *
  * @param[in] device The CL device

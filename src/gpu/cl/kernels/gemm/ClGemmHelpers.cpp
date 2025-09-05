@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,13 +148,13 @@ Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, 
     return Status{};
 }
 
-bool is_mmul_kernel_preferred(const unsigned int m,
-                              const unsigned int n,
-                              const unsigned int k,
-                              const unsigned int b,
-                              const DataType     data_type,
-                              unsigned int      &best_m0,
-                              unsigned int      &best_n0)
+bool is_mmul_kernel_preferred_fp32_acc(const unsigned int m,
+                                       const unsigned int n,
+                                       const unsigned int k,
+                                       const unsigned int b,
+                                       const DataType     data_type,
+                                       unsigned int      &best_m0,
+                                       unsigned int      &best_n0)
 {
     if (data_type == DataType::F32 && arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
     {
@@ -173,6 +173,31 @@ bool is_mmul_kernel_preferred(const unsigned int m,
     }
 
     return false;
+}
+
+bool is_mmul_kernel_preferred_fp16_acc(const unsigned int m,
+                                       const unsigned int n,
+                                       const unsigned int k,
+                                       const unsigned int b,
+                                       const DataType     data_type,
+                                       unsigned int      &best_m0,
+                                       unsigned int      &best_n0)
+{
+    ARM_COMPUTE_ERROR_ON(data_type != DataType::F16);
+    ARM_COMPUTE_UNUSED(n, k, b, data_type);
+
+    const unsigned int mmul_k0 = 4;
+    const unsigned int mmul_n0 = 4;
+
+    // Block sizes are chosen empirically.
+    best_m0 = 4;
+    best_n0 = (n >= 8 * mmul_n0) ? 8 : 4;
+
+    const unsigned int ceil_to_multiple_m_m0             = ceil_to_multiple(m, best_m0);
+    const unsigned int m_div_m0                          = ceil_to_multiple_m_m0 / best_m0;
+    const unsigned int ceil_to_multiple_m_div_m0_mmul_k0 = ceil_to_multiple(m_div_m0, mmul_k0);
+    const unsigned int gws_y                             = ceil_to_multiple_m_div_m0_mmul_k0 / mmul_k0;
+    return ((k % mmul_k0) == 0) && (gws_y >= 4);
 }
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>

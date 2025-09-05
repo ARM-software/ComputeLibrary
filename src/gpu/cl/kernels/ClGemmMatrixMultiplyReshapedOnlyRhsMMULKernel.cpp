@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,7 @@ using ElementsProcessed = Steps;
 
 // Block size dimensions for the MMUL extension
 constexpr int mmul_m0 = 4;
+// Note: For FP16 Acc., this should be 8, however, we force n0 to be greater than or equal to 2, so that we keep this value.
 constexpr int mmul_n0 = 4;
 constexpr int mmul_k0 = 4;
 
@@ -89,9 +90,28 @@ Status validate_arguments(const ITensorInfo       *src0,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.fp_mixed_precision, "Mixed precision not supported");
     ARM_COMPUTE_RETURN_ON_ERROR(gemm::validate_image2d_support_on_rhs(*src1, rhs_info));
 
-    const unsigned int m = gemm_info.m;
-    const unsigned int n = gemm_info.n;
-    const unsigned int k = gemm_info.k;
+    const unsigned int m       = gemm_info.m;
+    const unsigned int n       = gemm_info.n;
+    const unsigned int k       = gemm_info.k;
+    const bool         is_fp16 = (src0->data_type() == DataType::F16);
+
+    if (is_fp16)
+    {
+        if (arm_matrix_multiply_fp16_supported(CLKernelLibrary::get().get_device()))
+        {
+            // These error messages are for FP16 acc.
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG((n > rhs_info.n0 * mmul_n0),
+                                            "N must be greater than N0 * MMUL_N0 in the FP16 MMUL Kernel");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(((k % 4) != 0), "K must be multiple of 4 in the FP16 MMUL Kernel");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG((m < 4), "M must be greater than or equal to 4 in the FP16 MMUL Kernel");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG((lhs_info.k0 != 1), "k0 must be equal to 1 in the FP16 MMUL Kernel");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                (rhs_info.n0 != 2 && rhs_info.n0 != 4 && rhs_info.n0 != 8 && rhs_info.n0 != 16),
+                "Only 2,4,8 and 16 are supported for n0 in the FP16 MMUL Kernel");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG((m < lhs_info.m0 * mmul_m0),
+                                            "M must be greater than or equal to m0 * mmul_m0 in the FP16 MMUL Kernel");
+        }
+    }
 
     ARM_COMPUTE_UNUSED(m);
     ARM_COMPUTE_UNUSED(n);
@@ -205,13 +225,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo             
     const unsigned int n_div_n0 = ceil_to_multiple_n_n0 / rhs_info.n0;
     const unsigned int m_div_m0 = ceil_to_multiple_m_m0 / lhs_info.m0;
 
-    // Make n_div_n0 and m_div_m0 multiple of mmul_n0 and mmul_k0 respectively
+    // Make n_div_n0 and m_div_m0 multiple of mmul_n0 and mmul_m0 respectively
     const unsigned int ceil_to_multiple_n_div_n0_mmul_n0 = ceil_to_multiple(n_div_n0, mmul_n0);
-    const unsigned int ceil_to_multiple_m_div_m0_mmul_k0 = ceil_to_multiple(m_div_m0, mmul_k0);
-
+    const unsigned int ceil_to_multiple_m_div_m0_mmul_m0 = ceil_to_multiple(m_div_m0, mmul_m0);
     // Ensure x_dimension is multiple of MMUL block size (mmul_n0 * mmul_k0)
-    x_dimension.set_end(ceil_to_multiple_n_div_n0_mmul_n0 * mmul_k0);
-    y_dimension.set_end(ceil_to_multiple_m_div_m0_mmul_k0 / mmul_k0);
+    x_dimension.set_end(ceil_to_multiple_n_div_n0_mmul_n0 * mmul_n0);
+    y_dimension.set_end(ceil_to_multiple_m_div_m0_mmul_m0 / mmul_m0);
 
     collapsed.set(Window::DimX, x_dimension);
     collapsed.set(Window::DimY, y_dimension);
@@ -269,7 +288,6 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::configure(const CLCompileCon
     build_opts.add_option_if(src2 != nullptr, "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_option_if(helpers::float_ops::is_one(beta), "-DUNIT_BETA");
     build_opts.add_option_if(gemm_info.broadcast_bias, "-DBROADCAST_BIAS");
-    build_opts.add_option_if(src0->data_type() == DataType::F16, "-DHALF_PRECISION");
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
@@ -289,6 +307,18 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::configure(const CLCompileCon
 
     std::string kernel_name("gemm_mm_reshaped_only_rhs_nt_mmul");
     kernel_name += _export_to_cl_image ? "_texture" : "";
+
+    if (src0->data_type() == DataType::F16)
+    {
+        if (arm_matrix_multiply_fp16_supported(CLKernelLibrary::get().get_device()))
+        {
+            kernel_name += "_fp16";
+        }
+        else
+        {
+            build_opts.add_option("-DHALF_PRECISION");
+        }
+    }
 
     // A macro guard to compile ONLY the kernel of interest
     build_opts.add_option("-D" + upper_string(kernel_name));
