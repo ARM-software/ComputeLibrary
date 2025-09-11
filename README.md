@@ -31,15 +31,6 @@ Key Features:
 - Advanced optimization techniques such as kernel fusion, Fast math enablement and texture utilization
 - Device and workload specific tuning using OpenCL tuner and GeMM optimized heuristics
 
-<br>
-
-| Repository  | Link                                                             |
-| ----------- | ---------------------------------------------------------------- |
-| Release     | https://github.com/arm-software/ComputeLibrary                   |
-| Development | https://review.mlplatform.org/#/admin/projects/ml/ComputeLibrary |
-
-<br>
-
 ## Documentation
 [![Documentation](https://img.shields.io/badge/documentation-latest-green)](https://artificial-intelligence.sites.arm.com/computelibrary/latest/index.xhtml)
 

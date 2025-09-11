@@ -48,7 +48,7 @@ SPDX-License-Identifier = "MIT"
 
 [[annotations]]
 path = ["CONTRIBUTING.md"]
-SPDX-FileCopyrightText = "2022-2024 Arm Limited"
+SPDX-FileCopyrightText = "2022-2025 Arm Limited"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
