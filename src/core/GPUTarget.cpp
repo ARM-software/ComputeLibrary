@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,20 +52,22 @@ GPUTarget get_gpu_target(const std::string &full_name, const std::string &base_n
         {"G72", GPUTarget::G72},       //
         {"G76", GPUTarget::G76},       //
         // Vallhall
-        {"G57", GPUTarget::G57},     //
-        {"G77", GPUTarget::G77},     //
-        {"G68", GPUTarget::G68},     //
-        {"G78", GPUTarget::G78},     //
-        {"G78AE", GPUTarget::G78AE}, //
-        {"G310", GPUTarget::G310},   //
-        {"G510", GPUTarget::G510},   //
-        {"G610", GPUTarget::G610},   //
-        {"G710", GPUTarget::G710},   //
-        {"G615", GPUTarget::G615},   //
-        {"G715", GPUTarget::G715},   //
+        {"G57", GPUTarget::G57},              //
+        {"G77", GPUTarget::G77},              //
+        {"G68", GPUTarget::G68},              //
+        {"G78", GPUTarget::G78},              //
+        {"G78AE", GPUTarget::G78AE},          //
+        {"G310", GPUTarget::G310},            //
+        {"G510", GPUTarget::G510},            //
+        {"G610", GPUTarget::G610},            //
+        {"G710", GPUTarget::G710},            //
+        {"G615", GPUTarget::G615},            //
+        {"G715", GPUTarget::G715},            //
+        {"Immortalis-G715", GPUTarget::G715}, //
         // 5th Gen
-        {"G620", GPUTarget::G620}, //
-        {"G720", GPUTarget::G720}, //
+        {"G620", GPUTarget::G620},            //
+        {"G720", GPUTarget::G720},            //
+        {"Immortalis-G720", GPUTarget::G720}, //
 
     };
     // Try full name with variant.
@@ -120,19 +122,38 @@ const std::string &string_from_target(GPUTarget target)
 
 GPUTarget get_target_from_name(const std::string &device_name)
 {
-    std::regex  mali_regex(R"(Mali-(([A-Za-z]+\d*)\w*))");
-    std::smatch name_parts;
-    const bool  found_mali = std::regex_search(device_name, name_parts, mali_regex);
-    if (!found_mali)
+    std::regex mali_regex(R"(Mali-(([A-Za-z]+\d*)\w*))");
+    std::regex immortalis_regex(R"(Immortalis-(([A-Za-z]+\d*)\w*))");
+
+    std::smatch name_parts_mali;
+    std::smatch name_parts_immortalis;
+
+    const bool found_mali       = std::regex_search(device_name, name_parts_mali, mali_regex);
+    const bool found_immortalis = std::regex_search(device_name, name_parts_immortalis, immortalis_regex);
+
+    if (!found_mali && !found_immortalis)
     {
         ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Can't find valid Arm® Mali™ GPU device name: %s. "
                                                   "Target is set to default: %s",
                                                   device_name.c_str(), string_from_target(GPUTarget::FIFTHGEN).c_str());
         return GPUTarget::FIFTHGEN;
     }
-    const auto &full_name  = name_parts.str(1);
-    const auto &base_name  = name_parts.str(2);
-    const auto  gpu_target = get_gpu_target(full_name, base_name);
+
+    std::string full_name;
+    std::string base_name;
+
+    if (found_mali)
+    {
+        full_name = name_parts_mali.str(1);
+        base_name = name_parts_mali.str(2);
+    }
+    else
+    {
+        full_name = name_parts_immortalis.str(1);
+        base_name = name_parts_immortalis.str(2);
+    }
+
+    const auto gpu_target = get_gpu_target(full_name, base_name);
     ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("Found Arm® Mali™ GPU device name %s. Target is set to %s.",
                                               full_name.c_str(), string_from_target(gpu_target).c_str());
     return gpu_target;
