@@ -1919,19 +1919,13 @@ protected:
         ReshapeRHSOperatorType reshape_rhs;
         GEMMOperatorType       gemm;
 
-        validate_result = bool(reshape_rhs.validate(rhs.info(), rhs_reshaped.info(), rhs_info));
+        validate_result = arm_matrix_multiply_supported(CLKernelLibrary::get().get_device());
         if(!validate_result)
         {
             return nullptr;
         }
 
         reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
-
-        validate_result = bool(gemm.validate(lhs.info(), rhs_reshaped.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info));
-        if(!validate_result)
-        {
-            return nullptr;
-        }
 
         gemm.configure(lhs.info(), rhs_reshaped.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
 

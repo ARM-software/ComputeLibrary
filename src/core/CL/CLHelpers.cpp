@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -499,6 +499,21 @@ void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<in
 bool arm_matrix_multiply_supported(const cl::Device &device)
 {
     return device_supports_extension(device, "cl_arm_matrix_multiply");
+}
+
+bool arm_matrix_multiply_fp16_supported(const cl::Device &device)
+{
+    if (!arm_matrix_multiply_supported(device))
+    {
+        return false;
+    }
+
+    cl_ulong   caps = 0;
+    const auto err  = clGetDeviceInfo( //
+        device(), CL_DEVICE_MATRIX_MULTIPLY_CAPABILITIES_ARM, sizeof(caps), &caps, nullptr);
+
+    const auto supported = err == CL_SUCCESS && (caps & CL_DEVICE_MATRIX_MULTIPLY_FP16_WITH_FP16_ACCUMULATORS_ARM) != 0;
+    return supported;
 }
 
 bool command_buffer_supported(const cl::Device &device)

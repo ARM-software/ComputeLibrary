@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CLGEMMDEFAULTTYPEVALHALL_H
-#define SRC_CLGEMMDEFAULTTYPEVALHALL_H
+#ifndef ACL_SRC_RUNTIME_CL_GEMM_CLGEMMDEFAULTTYPEVALHALL_H
+#define ACL_SRC_RUNTIME_CL_GEMM_CLGEMMDEFAULTTYPEVALHALL_H
 
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
 
@@ -53,7 +53,8 @@ private:
     CLGEMMKernelType g710_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
     CLGEMMKernelType g715_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
     CLGEMMKernelType g715_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    CLGEMMKernelType G1_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /* SRC_CLGEMMDEFAULTTYPEVALHALL_H */
+#endif // ACL_SRC_RUNTIME_CL_GEMM_CLGEMMDEFAULTTYPEVALHALL_H

@@ -2301,6 +2301,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G620:
             os << "G620";
             break;
+        case GPUTarget::G1:
+            os << "G1";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -2548,6 +2551,10 @@ inline std::string to_string(CLGEMMKernelType val)
         case CLGEMMKernelType::RESHAPED_ONLY_RHS:
         {
             return "Reshaped_Only_RHS";
+        }
+        case CLGEMMKernelType::RESHAPED_ONLY_RHS_MMUL:
+        {
+            return "Reshaped_Only_RHS_MMUL";
         }
         case CLGEMMKernelType::RESHAPED:
         {

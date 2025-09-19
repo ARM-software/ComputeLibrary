@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -264,6 +264,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map = 
     {"gemm_mv_quantized", "common/gemv.cl"},
     {"gemm_mm_native", "common/gemm.cl"},
     {"gemm_mm_reshaped_only_rhs_nt_mmul", "common/gemm_reshaped_only_rhs_mmul.cl"},
+    {"gemm_mm_reshaped_only_rhs_nt_mmul_fp16", "common/gemm_reshaped_only_rhs_mmul.cl"},
+    {"gemm_mm_reshaped_only_rhs_nt_mmul_texture_fp16", "common/gemm_reshaped_only_rhs_mmul.cl"},
     {"gemm_mm_reshaped_only_rhs_nt_mmul_texture", "common/gemm_reshaped_only_rhs_mmul.cl"},
     {"gemm_mm_reshaped_lhs_nt_rhs_t", "common/gemm.cl"},
     {"gemm_mm_reshaped_lhs_nt_rhs_t_texture", "common/gemm.cl"},
