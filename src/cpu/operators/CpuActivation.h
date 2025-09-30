@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_ACTIVATION_H
-#define ARM_COMPUTE_CPU_ACTIVATION_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUACTIVATION_H
+#define ACL_SRC_CPU_OPERATORS_CPUACTIVATION_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
@@ -53,7 +53,10 @@ public:
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
+
+private:
+    bool _is_prepared{};
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_ACTIVATION_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUACTIVATION_H
