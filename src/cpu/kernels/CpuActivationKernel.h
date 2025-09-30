@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ACL_SRC_CPU_KERNELS_CPUACTIVATIONKERNEL_H
 #define ACL_SRC_CPU_KERNELS_CPUACTIVATIONKERNEL_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "src/core/common/Macros.h"
@@ -86,10 +87,20 @@ public:
         return _heuristics.scheduler_hint().split_dimension();
     }
 
+    /** Prepare the activation kernel for execution (Only executed once)
+     *
+     * @param[in] tensors Pack of input and output tensors
+     *
+     */
+    void prepare(ITensorPack &tensors);
+
 private:
     ActivationLayerInfo                       _act_info{};
     std::string                               _name{};
     heuristics::CpuActivationKernelHeuristics _heuristics{};
+    PaddingSize                               _src_padding{};
+    PaddingSize                               _dst_padding{};
+    bool                                      _inplace{};
 };
 } // namespace kernels
 } // namespace cpu
