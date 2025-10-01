@@ -98,13 +98,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
         case GPUTarget::G615:
             func = configs_G715.get_function(data_type);
             break;
-        case GPUTarget::G77:
-            func = configs_G77.get_function(data_type);
-            break;
         case GPUTarget::FIFTHGEN:
         case GPUTarget::G1:
-        default:
             func = configs_G1.get_function(data_type);
+            break;
+        case GPUTarget::G77:
+        default:
+            func = configs_G77.get_function(data_type);
             break;
     }
 
