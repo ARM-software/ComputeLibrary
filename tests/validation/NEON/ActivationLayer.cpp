@@ -50,7 +50,6 @@ namespace test
 {
 namespace validation
 {
-using framework::dataset::make;
 namespace
 {
 
@@ -63,11 +62,6 @@ const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions
 
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
-const auto ActivationDatasetForPaddingAfterConfigure = combine(
-    make("InPlace", { false, true }),
-    NeonActivationFunctionsDataset,
-    make("AlphaBeta", { 0.5f })
-);
 
 template <typename T, ARM_COMPUTE_REQUIRES_TA(arm_compute::utils::traits::is_floating_point<T>::value)>
 void test_float_sqrt_boundary_value()
@@ -187,8 +181,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 template <typename T>
 using NEActivationLayerFixture = ActivationValidationFixture<Tensor, Accessor, NEActivationLayer, T>;
-template <typename T>
-using NEActivationLayerWithPaddingFixture = ActivationWithPaddingValidationFixture<Tensor, Accessor, NEActivationLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
@@ -212,25 +204,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::Data
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-
-FIXTURE_DATA_TEST_CASE(PaddingAfterConfigure, NEActivationLayerWithPaddingFixture<half>, framework::DatasetMode::ALL,
-    combine(
-        make("Shape", TensorShape{ 7U, 7U, 17U, 2U }),
-        ActivationDatasetForPaddingAfterConfigure,
-        make("DataType", DataType::F16))
-    )
-{
-    if(CPUInfo::get().has_fp16())
-    {
-        // Validate output
-        validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
 TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
@@ -239,28 +212,18 @@ TEST_CASE(SqrtBoundaryValue, framework::DatasetMode::ALL)
 {
     test_float_sqrt_boundary_value<float>();
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset), make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
                                                                                                        DataType::F32)))
 
 {
     // Validate output
-    validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
-}
-
-FIXTURE_DATA_TEST_CASE(PaddingAfterConfigure, NEActivationLayerWithPaddingFixture<float>, framework::DatasetMode::ALL,
-    combine(
-        make("Shape", TensorShape{ 7U, 7U, 17U, 2U }),
-        ActivationDatasetForPaddingAfterConfigure,
-        make("DataType", DataType::F32))
-    )
-{
     validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
 }
 // Run only on SME Devices to stress Logistic SME kernel
 #ifdef ARM_COMPUTE_ENABLE_SME2
 TEST_SUITE(SME)
-const auto LogisticDataset =  combine(make("InPlace", { false }), make("Function", ActivationLayerInfo::ActivationFunction::LOGISTIC), make("AlphaBeta", { 1.f }));
-FIXTURE_DATA_TEST_CASE(RunLogistic5D, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::Tiny5dShapes(), LogisticDataset, make("DataType",
+const auto LogsisticDataset =  combine(framework::dataset::make("InPlace", { false }), framework::dataset::make("Function", ActivationLayerInfo::ActivationFunction::LOGISTIC), framework::dataset::make("AlphaBeta", { 1.f }));
+FIXTURE_DATA_TEST_CASE(RunLogistic5D, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::Tiny5dShapes(), LogsisticDataset, framework::dataset::make("DataType",
                                                                                                        DataType::F32)))
 
 {
@@ -268,15 +231,8 @@ FIXTURE_DATA_TEST_CASE(RunLogistic5D, NEActivationLayerFixture<float>, framework
     validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
 }
 
-FIXTURE_DATA_TEST_CASE(RunLogisticSME, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::LogisticSMEStressShapesFp32(), LogisticDataset, make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLogisticSME, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::LogisticSMEStressShapesFp32(), LogsisticDataset, framework::dataset::make("DataType",
                                                                                                        DataType::F32)))
-
-{
-    // Validate output
-    validate(Accessor(_target), _reference, helper::relative_tolerance(_data_type, _function), 0.f, helper::absolute_tolerance(_data_type, _function));
-}
-FIXTURE_DATA_TEST_CASE(PaddingAfterConfigure, NEActivationLayerWithPaddingFixture<float>, framework::DatasetMode::ALL,
-    combine(datasets::LogisticSMEStressShapesFp32(), LogisticDataset, make("DataType", DataType::F32)))
 
 {
     // Validate output
@@ -289,8 +245,6 @@ TEST_SUITE_END() // Float
 
 template <typename T>
 using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;
-template <typename T>
-using NEActivationLayerWithPaddingQuantizedFixture = ActivationWithPaddingValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;
 
 /** Input data sets. */
 const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction",
@@ -309,13 +263,6 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
                                                         concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
-const auto QuantizedActivationDatasetForPaddingAfterConfigure = combine(
-    make("InPlace", { false }),
-    concat(QuantizedActivationFunctionsDataset,
-        make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH)
-    ),
-    make("AlphaBeta", { 0.5f})
-);
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -327,17 +274,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, fra
     // Validate output
     validate(Accessor(_target), _reference, helper::tolerance_qasymm8(_function));
 }
-FIXTURE_DATA_TEST_CASE(PaddingAfterConfigure, NEActivationLayerWithPaddingQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-    combine(
-        make("Shape", TensorShape{ 7U, 7U, 17U, 2U }),
-        QuantizedActivationDatasetForPaddingAfterConfigure,
-        make("DataType", DataType::QASYMM8),
-        make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) }
-    )))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, helper::tolerance_qasymm8(_function));
-}
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
@@ -345,17 +281,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, fram
                                                                                                                  framework::dataset::make("DataType",
                                                                                                                          DataType::QASYMM8_SIGNED)),
                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, helper::tolerance_qasymm8(_function));
-}
-FIXTURE_DATA_TEST_CASE(PaddingAfterConfigure, NEActivationLayerWithPaddingQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-    combine(
-        make("Shape", TensorShape{ 7U, 7U, 17U, 2U }),
-        QuantizedActivationDatasetForPaddingAfterConfigure,
-        make("DataType", DataType::QASYMM8_SIGNED),
-        make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) }
-    )))
 {
     // Validate output
     validate(Accessor(_target), _reference, helper::tolerance_qasymm8(_function));
@@ -372,28 +297,11 @@ const auto Int16QuantizedActivationFunctionsDataset = framework::dataset::make("
 const auto Int16QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), Int16QuantizedActivationFunctionsDataset),
                                                      framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
-const auto Int16QuantizedActivationDatasetForPaddingAfterConfigure = combine(
-    make("InPlace", { false }),
-    Int16QuantizedActivationFunctionsDataset,
-    make("AlphaBeta", { 0.5f })
-);
-
 TEST_SUITE(QSYMM16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), Int16QuantizedActivationDataset),
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::QSYMM16)),
                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qsymm16);
-}
-FIXTURE_DATA_TEST_CASE(PaddingAfterConfigure, NEActivationLayerWithPaddingQuantizedFixture<int16_t>, framework::DatasetMode::ALL,
-    combine(
-        make("Shape", TensorShape{ 7U, 7U, 17U, 2U }),
-        Int16QuantizedActivationDatasetForPaddingAfterConfigure,
-        make("DataType", DataType::QSYMM16),
-        make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) }))
-    )
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qsymm16);
