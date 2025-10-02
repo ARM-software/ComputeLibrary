@@ -40,9 +40,7 @@ void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, con
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivation::configure");
     ARM_COMPUTE_LOG_PARAMS(input, output, activation_info);
-
-    _is_prepared = false;
-    auto k       = std::make_unique<kernels::CpuActivationKernel>();
+    auto k = std::make_unique<kernels::CpuActivationKernel>();
     k->configure(input, output, activation_info);
     _kernel = std::move(k);
 }
@@ -58,15 +56,7 @@ void CpuActivation::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivation::run");
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-
-    auto kernel_casted = static_cast<kernels::CpuActivationKernel *>(_kernel.get());
-    if (!_is_prepared)
-    {
-        kernel_casted->prepare(tensors);
-        _is_prepared = true;
-    }
-
-    const size_t split_dimension = kernel_casted->get_split_dimension_hint();
+    auto split_dimension = static_cast<kernels::CpuActivationKernel *>(_kernel.get())->get_split_dimension_hint();
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
