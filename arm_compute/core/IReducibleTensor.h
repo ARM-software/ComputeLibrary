@@ -26,12 +26,16 @@
 #define ACL_ARM_COMPUTE_CORE_IREDUCIBLETENSOR_H
 
 #include "arm_compute/core/SparseTensor.h"
-#include "arm_compute/runtime/COOTensor.h"
-#include "arm_compute/runtime/CSRTensor.h"
 
 namespace arm_compute
 {
-/** */
+/** Forward declaration of COOTensor and CSRTensor class */
+class COOTensor;
+class CSRTensor;
+
+/** Interface for all reducible tensors, i.e. all tensors that can be
+ *  converted to a sparse representation.
+ */
 class IReducibleTensor
 {
 public:
