@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 project(
   ArmCompute
-  VERSION 0.0.0
+  VERSION 52.5.0
   DESCRIPTION
   "The Compute Library is a collection of low-level machine learning functions \
    optimized for Arm® Cortex®-A, Arm® Neoverse™ CPU and Arm® Mali™ GPU \
@@ -365,7 +365,7 @@ configure_package_config_file(
 # Configure *ConfigVersion.cmake which exports the version info
 write_basic_package_version_file(
   "${ARM_COMPUTE_CONFIG_VERSION_OUTPUT_FILE}"
-  VERSION ${${PROJECT_NAME}_VERSION}
+  VERSION 52.5.0
   COMPATIBILITY AnyNewerVersion
 )
 
