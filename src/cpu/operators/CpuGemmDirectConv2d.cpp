@@ -202,6 +202,8 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+
     cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuGemmAssemblyDispatch::validate(src, weights, biases, dst, asm_info));
     return Status{};
