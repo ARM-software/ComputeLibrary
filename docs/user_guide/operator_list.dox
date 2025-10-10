@@ -610,6 +610,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8<td>QASYMM8_SIGNED<td>S32<td>QASYMM8
     <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>F32<td>F32
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
@@ -1712,6 +1713,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
     <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>F32<td>F32
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
