@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -192,7 +192,7 @@ using NECastToQASYMM8_SIGNEDFixture = CastValidationFixture<Tensor, Accessor, NE
 
 #define CAST_SUITE(NAME, idt, odt, type, dataset, tolerance)                                                                     \
     TEST_SUITE(NAME)                                                                                                             \
-    FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), dataset), \
+    FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), dataset, \
                                                                                       datasets::ConvertPolicies()))              \
     {                                                                                                                            \
         if((idt != DataType::F16 && odt != DataType::F16) || CPUInfo::get().has_fp16())                                          \
