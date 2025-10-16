@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,8 +58,8 @@ using NEGlobalPoolingLayerFixture = GlobalPoolingLayerValidationFixture<Tensor, 
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, NEGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
-                                                                                                                  DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling, NEGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
+                                                                                                                  DataType::F32),
                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,10 +121,10 @@ using NEROIPoolingLayerQuantizedFixture = ROIPoolingLayerQuantizedFixture<Tensor
 TEST_SUITE(QASYMM8)
 
 FIXTURE_DATA_TEST_CASE(Small, NEROIPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(datasets::SmallROIDataset(),
-                                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) })),
+                       combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8 }),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
                                framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
 {
     // Validate output
