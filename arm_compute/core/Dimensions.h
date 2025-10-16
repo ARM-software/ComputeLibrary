@@ -58,6 +58,15 @@ public:
     {
     }
 
+    /** Constructor to initialize the tensor shape with a list of dim values.
+     *
+     * @param[in] dims Vector of values to initialize the dimensions.
+     */
+    explicit Dimensions(std::vector<T> dims) : _id(), _num_dimensions{dims.size()}
+    {
+        std::copy_n(dims.begin(), std::min(num_max_dimensions, dims.size()), _id.begin());
+    }
+
     /** Allow instances of this class to be copy constructed */
     Dimensions(const Dimensions &) = default;
 
