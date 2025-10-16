@@ -410,8 +410,8 @@ DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
-                                                                                                         make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
+                                                                                                         make("ReshapeWeights", { true, false }),
                                                                                                  make("DataType", DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -426,8 +426,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PR
     }
 
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
-                                                                                                       make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
+                                                                                                       make("ReshapeWeights", { true, false }),
                                                                                                make("DataType", DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -443,8 +443,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NI
 }
 
 TEST_SUITE(BATCHED_MATMUL)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
-                                                                                                                  make("ReshapeWeights", { false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchedMatMulDataset(),
+                                                                                                                  make("ReshapeWeights", { false }),
                                                                                                           make("DataType", DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -464,15 +464,15 @@ TEST_SUITE_END() // FP16
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
-                                                                                                          make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
+                                                                                                          make("ReshapeWeights", { true, false }),
                                                                                                   make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
-                                                                                                        make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
+                                                                                                        make("ReshapeWeights", { true, false }),
                                                                                                 make("DataType", DataType::F32)))
 {
     // Validate output
@@ -560,8 +560,8 @@ TEST_SUITE_END() // DynamicShape
 #endif // __aarch64__
 
 TEST_SUITE(BATCHED_MATMUL)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
-                                                                                                                   make("ReshapeWeights", { false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchedMatMulDataset(),
+                                                                                                                   make("ReshapeWeights", { false }),
                                                                                                            make("DataType", DataType::F32)))
 {
     // Validate output
