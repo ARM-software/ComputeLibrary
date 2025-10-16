@@ -49,37 +49,37 @@ const auto data_types = framework::dataset::make("DataType", { DataType::F16, Da
 const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-const auto dataset_quant_f32 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
-                                               framework::dataset::make("DataType", DataType::F32)),
+const auto dataset_quant_f32 = combine(datasets::SmallShapes(), datasets::QuantizedTypes(),
+                                               framework::dataset::make("DataType", DataType::F32),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_f16 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
-                                               framework::dataset::make("DataType", DataType::F16)),
+const auto dataset_quant_f16 = combine(datasets::SmallShapes(), datasets::QuantizedTypes(),
+                                               framework::dataset::make("DataType", DataType::F16),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_asymm_signed_f32 = combine(combine(combine(datasets::SmallShapes(),
-                                                                    framework::dataset::make("QuantizedTypes", { DataType::QASYMM8_SIGNED })),
-                                                            framework::dataset::make("DataType", DataType::F32)),
+const auto dataset_quant_asymm_signed_f32 = combine(datasets::SmallShapes(),
+                                                                    framework::dataset::make("QuantizedTypes", { DataType::QASYMM8_SIGNED }),
+                                                            framework::dataset::make("DataType", DataType::F32),
                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_asymm_signed_f16 = combine(combine(combine(datasets::SmallShapes(),
-                                                                    framework::dataset::make("QuantizedTypes", { DataType::QASYMM8_SIGNED })),
-                                                            framework::dataset::make("DataType", DataType::F16)),
+const auto dataset_quant_asymm_signed_f16 = combine(datasets::SmallShapes(),
+                                                                    framework::dataset::make("QuantizedTypes", { DataType::QASYMM8_SIGNED }),
+                                                            framework::dataset::make("DataType", DataType::F16),
                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_per_channel_f32 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes()),
-                                                           framework::dataset::make("DataType", DataType::F32)),
+const auto dataset_quant_per_channel_f32 = combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes(),
+                                                           framework::dataset::make("DataType", DataType::F32),
                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
-const auto dataset_quant_per_channel_f16 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes()),
-                                                           framework::dataset::make("DataType", DataType::F16)),
+const auto dataset_quant_per_channel_f16 = combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes(),
+                                                           framework::dataset::make("DataType", DataType::F16),
                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
-const auto dataset_quant_nightly_f32 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
-                                                       framework::dataset::make("DataType", DataType::F32)),
+const auto dataset_quant_nightly_f32 = combine(datasets::LargeShapes(), datasets::QuantizedTypes(),
+                                                       framework::dataset::make("DataType", DataType::F32),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_nightly_f16 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
-                                                       framework::dataset::make("DataType", DataType::F16)),
+const auto dataset_quant_nightly_f16 = combine(datasets::LargeShapes(), datasets::QuantizedTypes(),
+                                                       framework::dataset::make("DataType", DataType::F16),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_per_channel_nightly_f32 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes()),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
+const auto dataset_quant_per_channel_nightly_f32 = combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes(),
+                                                                   framework::dataset::make("DataType", DataType::F32),
                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
-const auto dataset_quant_per_channel_nightly_f16 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes()),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
+const auto dataset_quant_per_channel_nightly_f16 = combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes(),
+                                                                   framework::dataset::make("DataType", DataType::F16),
                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
 
 const auto dataset_precommit_f16 = concat(concat(dataset_quant_f16, dataset_quant_per_channel_f16), dataset_quant_asymm_signed_f16);

@@ -105,10 +105,10 @@ TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmallAxis0,
                        NEArgMinMaxValidationFixture_S32_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(ArgMinMaxSmallDatasetAxis0,
-                                                       framework::dataset::make("DataTypeIn", DataType::S32)),
-                                               framework::dataset::make("DataTypeOut", DataType::S32)),
-                                       framework::dataset::make("Axis", { 0 })),
+                       combine(ArgMinMaxSmallDatasetAxis0,
+                                                       framework::dataset::make("DataTypeIn", DataType::S32),
+                                               framework::dataset::make("DataTypeOut", DataType::S32),
+                                       framework::dataset::make("Axis", { 0 }),
                                OpsDataset))
 {
     // Validate output
@@ -118,10 +118,10 @@ FIXTURE_DATA_TEST_CASE(RunSmallAxis0,
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArgMinMaxValidationFixture_S32_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(ArgMinMaxSmallDataset(),
-                                                       framework::dataset::make("DataTypeIn", DataType::S32)),
-                                               framework::dataset::make("DataTypeOut", DataType::S32)),
-                                       AxisDataset),
+                       combine(ArgMinMaxSmallDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::S32),
+                                               framework::dataset::make("DataTypeOut", DataType::S32),
+                                       AxisDataset,
                                OpsDataset))
 {
     // Validate output
@@ -130,10 +130,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEArgMinMaxValidationFixture_S32_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(ArgMinMaxLargeDataset(),
-                                                       framework::dataset::make("DataTypeIn", DataType::S32)),
-                                               framework::dataset::make("DataTypeOut", DataType::S32)),
-                                       AxisDataset),
+                       combine(ArgMinMaxLargeDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::S32),
+                                               framework::dataset::make("DataTypeOut", DataType::S32),
+                                       AxisDataset,
                                OpsDataset))
 {
     // Validate output
@@ -148,10 +148,10 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArgMinMaxValidationFixture_F16_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(ArgMinMaxSmallDataset(),
-                                                       framework::dataset::make("DataTypeIn", DataType::F16)),
-                                               framework::dataset::make("DataTypeOut", DataType::S32)),
-                                       AxisDataset),
+                       combine(ArgMinMaxSmallDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::F16),
+                                               framework::dataset::make("DataTypeOut", DataType::S32),
+                                       AxisDataset,
                                OpsDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -169,10 +169,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEArgMinMaxValidationFixture_F16_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(ArgMinMaxLargeDataset(),
-                                                       framework::dataset::make("DataTypeIn", DataType::F16)),
-                                               framework::dataset::make("DataTypeOut", DataType::S32)),
-                                       AxisDataset),
+                       combine(ArgMinMaxLargeDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::F16),
+                                               framework::dataset::make("DataTypeOut", DataType::S32),
+                                       AxisDataset,
                                OpsDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -193,10 +193,10 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArgMinMaxValidationFixture_F32_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(ArgMinMaxSmallDataset(),
-                                                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                                               framework::dataset::make("DataTypeOut", DataType::S32)),
-                                       AxisDataset),
+                       combine(ArgMinMaxSmallDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::F32),
+                                               framework::dataset::make("DataTypeOut", DataType::S32),
+                                       AxisDataset,
                                OpsDataset))
 {
     // Validate output
@@ -207,10 +207,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunSmall_F32_S64,
                        NEArgMinMaxValidationFixture_F32_S64,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(ArgMinMaxSmallDataset(),
-                                                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                                               framework::dataset::make("DataTypeOut", DataType::S64)),
-                                       AxisDataset),
+                       combine(ArgMinMaxSmallDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::F32),
+                                               framework::dataset::make("DataTypeOut", DataType::S64),
+                                       AxisDataset,
                                OpsDataset))
 {
     // Validate output
@@ -221,10 +221,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall_F32_S64,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEArgMinMaxValidationFixture_F32_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(ArgMinMaxLargeDataset(),
-                                                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                                               framework::dataset::make("DataTypeOut", DataType::S32)),
-                                       AxisDataset),
+                       combine(ArgMinMaxLargeDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::F32),
+                                               framework::dataset::make("DataTypeOut", DataType::S32),
+                                       AxisDataset,
                                OpsDataset))
 {
     // Validate output
@@ -243,11 +243,11 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArgMinMaxQuantizedValidationFixture_U8_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(ArgMinMaxSmallDataset(),
-                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8)),
-                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
-                                               AxisDataset),
-                                       OpsDataset),
+                       combine(ArgMinMaxSmallDataset(),
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32),
+                                               AxisDataset,
+                                       OpsDataset,
                                QInfoDataset))
 {
     // Validate output
@@ -256,11 +256,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEArgMinMaxQuantizedValidationFixture_U8_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(ArgMinMaxLargeDataset(),
-                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8)),
-                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
-                                               AxisDataset),
-                                       OpsDataset),
+                       combine(ArgMinMaxLargeDataset(),
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32),
+                                               AxisDataset,
+                                       OpsDataset,
                                QInfoDataset))
 {
     // Validate output
@@ -272,11 +272,11 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArgMinMaxQuantizedValidationFixture_S8_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(ArgMinMaxSmallDataset(),
-                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED)),
-                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
-                                               AxisDataset),
-                                       OpsDataset),
+                       combine(ArgMinMaxSmallDataset(),
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32),
+                                               AxisDataset,
+                                       OpsDataset,
                                QInfoDataset))
 {
     // Validate output
@@ -285,11 +285,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEArgMinMaxQuantizedValidationFixture_S8_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(ArgMinMaxLargeDataset(),
-                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED)),
-                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
-                                               AxisDataset),
-                                       OpsDataset),
+                       combine(ArgMinMaxLargeDataset(),
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32),
+                                               AxisDataset,
+                                       OpsDataset,
                                QInfoDataset))
 {
     // Validate output

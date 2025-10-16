@@ -83,14 +83,14 @@ template <typename T>
 using NEConvertFullyConnectedWeightsFixture = ConvertFullyConnectedWeightsValidationFixture<Tensor, Accessor, NEConvertFullyConnectedWeights, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                    DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                    DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                        DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                        DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -99,8 +99,8 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                   DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                   DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -113,8 +113,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<half>, fr
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                       DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                       DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -131,15 +131,15 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                      DataType::QASYMM8))))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                      DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params,
                        framework::dataset::make("DataType",
-                                                DataType::QASYMM8))))
+                                                DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

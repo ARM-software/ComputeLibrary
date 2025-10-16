@@ -164,8 +164,8 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
 {
     // Validate output
@@ -176,8 +176,8 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
                        NEComparisonQuantizedBroadcastFixture<int8_t>,
                        framework::DatasetMode::ALL,
-                       combine(combine(combine(run_small_broadcast_dataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1, -30) })),
+                       combine(run_small_broadcast_dataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
 {
     // Validate output
@@ -187,8 +187,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonQuantizedFixture<int8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1, -30) })),
+                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
 {
     // Validate output

@@ -50,11 +50,11 @@ constexpr AbsoluteTolerance<float> tolerance_f16(0.1f);
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 
 /** Input data set. */
-const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
-                                                  framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+const auto NormalizationDataset = combine(datasets::SmallShapes(), datasets::NormalizationTypes(), framework::dataset::make("NormalizationSize", 3, 9, 2),
+                                                  framework::dataset::make("Beta", { 0.5f, 1.f, 2.f }),
                                           framework::dataset::make("IsScaled", { true }));
-const auto NormalizationDatasetFP32 = combine(combine(combine(datasets::NormalizationTypes(), framework::dataset::make("NormalizationSize", 3, 9, 2)),
-                                                      framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+const auto NormalizationDatasetFP32 = combine(datasets::NormalizationTypes(), framework::dataset::make("NormalizationSize", 3, 9, 2),
+                                                      framework::dataset::make("Beta", { 0.5f, 1.f, 2.f }),
                                               framework::dataset::make("IsScaled", { true, false }));
 } // namespace
 
@@ -97,8 +97,8 @@ using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Acces
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(NormalizationDataset,
-                                                                                                                 framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::ALL, combine(NormalizationDataset,
+                                                                                                                 framework::dataset::make("DataType", DataType::F16),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     if(CPUInfo::get().has_fp16())
@@ -116,15 +116,15 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), NormalizationDatasetFP32),
-                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), NormalizationDatasetFP32,
+                                                                                                                        framework::dataset::make("DataType", DataType::F32),
                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), NormalizationDatasetFP32),
-                                                                                                                      framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), NormalizationDatasetFP32,
+                                                                                                                      framework::dataset::make("DataType", DataType::F32),
                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output

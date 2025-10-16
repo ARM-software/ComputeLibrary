@@ -74,16 +74,16 @@ template <typename T>
 using NEChannelShuffleLayerFixture = ChannelShuffleLayerValidationFixture<Tensor, Accessor, NEChannelShuffleLayer, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(),
+                                                                                                                   framework::dataset::make("DataType", DataType::U8),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeRandomChannelShuffleLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(),
                                                                                                                  framework::dataset::make("DataType",
-                                                                                                                         DataType::U8)),
+                                                                                                                         DataType::U8),
                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -94,9 +94,9 @@ TEST_SUITE_END() // U8
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(),
                                                                                                                         framework::dataset::make("DataType",
-                                                                                                                                DataType::F16)),
+                                                                                                                                DataType::F16),
                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     if(CPUInfo::get().has_fp16())
@@ -110,9 +110,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<half>, framework::
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeRandomChannelShuffleLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(),
                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                              DataType::F16)),
+                                                                                                                              DataType::F16),
                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     if(CPUInfo::get().has_fp16())
@@ -130,17 +130,17 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelShuffleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(),
                                                                                                                  framework::dataset::make("DataType",
-                                                                                                                         DataType::F32)),
+                                                                                                                         DataType::F32),
                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeRandomChannelShuffleLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelShuffleLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(),
                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                               DataType::F32)),
+                                                                                                                               DataType::F32),
                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output

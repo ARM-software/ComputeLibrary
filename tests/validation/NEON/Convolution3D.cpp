@@ -58,7 +58,7 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
 });
 
-const auto data_precommit = combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+const auto data_precommit = combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
                                                                                     datasets::SmallDirectConv3DShapes(),
                                                                                     framework::dataset::make("StrideX", { 1, 5, 8 })),
                                                                                 framework::dataset::make("StrideY", { 1, 2, 3 })),
@@ -70,7 +70,7 @@ const auto data_precommit = combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(
                                                         framework::dataset::make("KernelHeight", { 2, 1, 3 })),
                                                     framework::dataset::make("KernelDepth", { 1, 2, 3 })),
                                                 framework::dataset::make("NumKernels", { 2, 3, 8 })),
-                                            framework::dataset::make("HasBias", { true, false })),
+                                            framework::dataset::make("HasBias", { true, false }),
                                     ActivationFunctionsDataset);
 } // namespace
 
@@ -131,8 +131,8 @@ using NEDirectConvolution3DFixture = DirectConvolution3DValidationFixture<Tensor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(data_precommit,
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit,
+                                                                                                                 framework::dataset::make("DataType", DataType::F32),
                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NDHWC })))
 {
     // Validate output
@@ -142,8 +142,8 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(data_precommit,
-                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DFixture<half>, framework::DatasetMode::PRECOMMIT, combine(data_precommit,
+                                                                                                                        framework::dataset::make("DataType", DataType::F16),
                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NDHWC })))
 {
     if(CPUInfo::get().has_fp16())
@@ -168,7 +168,7 @@ using NEDirectConvolution3DQuantizedFixture = DirectConvolution3DValidationQuant
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                       combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
                                                                                                                    framework::dataset::make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
                                                                                                                            TensorShape(15U, 7U, 11U, 7U),
                                                                                                                            TensorShape(19U, 5U, 16U, 4U),
@@ -185,11 +185,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DQuantizedFixture<uint8_t>,
                                                                                    framework::dataset::make("KernelDepth", { 7, 5, 3, 1 })),
                                                                                framework::dataset::make("NumKernels", { 5, 3, 1, 11 })),
                                                                            framework::dataset::make("HasBias", { true, true, true, false })),
-                                                                       framework::dataset::make("Activation", ActivationLayerInfo())),
-                                                               framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC)),
-                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10))),
-                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
+                                                                       framework::dataset::make("Activation", ActivationLayerInfo()),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8),
+                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC),
+                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10)),
+                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20)),
                                framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
 {
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -199,7 +199,7 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                       combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
                                                                                                                    framework::dataset::make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
                                                                                                                            TensorShape(15U, 7U, 11U, 7U),
                                                                                                                            TensorShape(19U, 5U, 16U, 4U),
@@ -216,11 +216,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DQuantizedFixture<int8_t>, 
                                                                                    framework::dataset::make("KernelDepth", { 7, 5, 3, 1 })),
                                                                                framework::dataset::make("NumKernels", { 5, 3, 1, 11 })),
                                                                            framework::dataset::make("HasBias", { true, true, true, false })),
-                                                                       framework::dataset::make("Activation", ActivationLayerInfo())),
-                                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC)),
-                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10))),
-                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
+                                                                       framework::dataset::make("Activation", ActivationLayerInfo()),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC),
+                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10)),
+                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20)),
                                framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
 {
     validate(Accessor(_target), _reference, tolerance_qasymm8);

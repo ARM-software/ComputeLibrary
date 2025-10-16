@@ -104,15 +104,15 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                    DataType::F32)),
+FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                    DataType::F32),
                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                  DataType::F32)),
+FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                  DataType::F32),
                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -121,15 +121,15 @@ FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<float>, framework::Data
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToBatchLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F16),
                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F16),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -143,17 +143,17 @@ using NESpaceToBatchLayerQuantizedFixture = SpaceToBatchLayerValidationQuantized
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallSpaceToBatchLayerDataset(),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                        framework::dataset::make("QuantizationInfo", { 1.f / 255.f, 9.f })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeSpaceToBatchLayerDataset(),
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                      framework::dataset::make("QuantizationInfo", { 1.f / 255.f, 9.f })))
 {
     // Validate output

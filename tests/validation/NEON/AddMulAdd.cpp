@@ -98,8 +98,8 @@ using NEAddMulAddFloatFixtureWoIntermOut = AddMulAddFloatValidationFixture<Tenso
 TEST_SUITE(Float)
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::F32),
                                                                                                             ActivationFunctionsDataset))
 {
     // Validate outputs
@@ -108,16 +108,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<float>, framework::Data
 }
 
 // This test is to stress the case when there is no intermediate output required (i.e. nullptr)
-FIXTURE_DATA_TEST_CASE(RunSmallWithoutIntermOutput, NEAddMulAddFloatFixtureWoIntermOut<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmallWithoutIntermOutput, NEAddMulAddFloatFixtureWoIntermOut<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::F32),
                        framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })))
 {
     // Validate outputs
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
+                                                                                                                  framework::dataset::make("DataType", DataType::F32),
                                                                                                           ActivationFunctionsDataset))
 {
     // Validate outputs
@@ -129,8 +129,8 @@ TEST_SUITE_END() // F32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F16),
                                                                                                            ActivationFunctionsDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -145,8 +145,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<half>, framework::Datas
     }
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F16),
                                                                                                          ActivationFunctionsDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -175,14 +175,14 @@ using NEAddMulAddQuantizedFixtureWoIntermOut = AddMulAddQuantizedValidationFixtu
 TEST_SUITE(Quantized)
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                       ActivationFunctionsDataset),
-                                                                                                                       qasymm8_input1_qinfo_set),
-                                                                                                                       qasymm8_input2_qinfo_set),
-                                                                                                                       qasymm8_bn_mul_qinfo_set),
-                                                                                                                       qasymm8_bn_add_qinfo_set),
-                                                                                                                       qasymm8_add_output_qinfo_set),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       ActivationFunctionsDataset,
+                                                                                                                       qasymm8_input1_qinfo_set,
+                                                                                                                       qasymm8_input2_qinfo_set,
+                                                                                                                       qasymm8_bn_mul_qinfo_set,
+                                                                                                                       qasymm8_bn_add_qinfo_set,
+                                                                                                                       qasymm8_add_output_qinfo_set,
                                                                                                                qasymm8_final_output_qinfo_set))
 {
     // Validate outputs
@@ -190,14 +190,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<uint8_t>, framework::D
     validate(Accessor(_target), _reference, tolerance_quant);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                     ActivationFunctionsDataset),
-                                                                                                                     qasymm8_input1_qinfo_set),
-                                                                                                                     qasymm8_input2_qinfo_set),
-                                                                                                                     qasymm8_bn_mul_qinfo_set),
-                                                                                                                     qasymm8_bn_add_qinfo_set),
-                                                                                                                     qasymm8_add_output_qinfo_set),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                     ActivationFunctionsDataset,
+                                                                                                                     qasymm8_input1_qinfo_set,
+                                                                                                                     qasymm8_input2_qinfo_set,
+                                                                                                                     qasymm8_bn_mul_qinfo_set,
+                                                                                                                     qasymm8_bn_add_qinfo_set,
+                                                                                                                     qasymm8_add_output_qinfo_set,
                                                                                                              qasymm8_final_output_qinfo_set))
 {
     // Validate outputs
@@ -207,14 +207,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulQuantizedFixture<uint8_t>, framework::D
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                      ActivationFunctionsDataset),
-                                                                                                                      qasymm8_signed_input1_qinfo_set),
-                                                                                                                      qasymm8_signed_input2_qinfo_set),
-                                                                                                                      qasymm8_signed_bn_mul_qinfo_set),
-                                                                                                                      qasymm8_signed_bn_add_qinfo_set),
-                                                                                                                      qasymm8_signed_add_output_qinfo_set),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                      ActivationFunctionsDataset,
+                                                                                                                      qasymm8_signed_input1_qinfo_set,
+                                                                                                                      qasymm8_signed_input2_qinfo_set,
+                                                                                                                      qasymm8_signed_bn_mul_qinfo_set,
+                                                                                                                      qasymm8_signed_bn_add_qinfo_set,
+                                                                                                                      qasymm8_signed_add_output_qinfo_set,
                                                                                                               qasymm8_signed_final_output_qinfo_set))
 {
     // Validate outputs
@@ -222,14 +222,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<int8_t>, framework::Da
     validate(Accessor(_target), _reference, tolerance_quant);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                    ActivationFunctionsDataset),
-                                                                                                                    qasymm8_signed_input1_qinfo_set),
-                                                                                                                    qasymm8_signed_input2_qinfo_set),
-                                                                                                                    qasymm8_signed_bn_mul_qinfo_set),
-                                                                                                                    qasymm8_signed_bn_add_qinfo_set),
-                                                                                                                    qasymm8_signed_add_output_qinfo_set),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                    ActivationFunctionsDataset,
+                                                                                                                    qasymm8_signed_input1_qinfo_set,
+                                                                                                                    qasymm8_signed_input2_qinfo_set,
+                                                                                                                    qasymm8_signed_bn_mul_qinfo_set,
+                                                                                                                    qasymm8_signed_bn_add_qinfo_set,
+                                                                                                                    qasymm8_signed_add_output_qinfo_set,
                                                                                                             qasymm8_signed_final_output_qinfo_set))
 {
     // Validate outputs

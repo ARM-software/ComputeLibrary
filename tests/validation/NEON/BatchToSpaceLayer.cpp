@@ -88,8 +88,8 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                       DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                       DataType::F32),
                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -97,16 +97,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchToSpaceLayerFixture<float>, framework::D
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallWithCropping, NEBatchToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), framework::dataset::make("DataType",
-                                                                                                                       DataType::F32)),
+                       combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), framework::dataset::make("DataType",
+                                                                                                                       DataType::F32),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEBatchToSpaceLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                     DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEBatchToSpaceLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                     DataType::F32),
                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -115,24 +115,24 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEBatchToSpaceLayerFixture<float>, framework::D
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                      DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                      DataType::F16),
                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunSmallWithCropping, NEBatchToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), framework::dataset::make("DataType",
-                                                                                                                       DataType::F16)),
+                       combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), framework::dataset::make("DataType",
+                                                                                                                       DataType::F16),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEBatchToSpaceLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                    DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEBatchToSpaceLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                    DataType::F16),
                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output

@@ -47,13 +47,13 @@ TEST_SUITE(PoolingLayer)
 template <typename T>
 using NEMaxUnpoolingLayerFixture = MaxUnpoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, NEMaxUnpoolingLayer, T>;
 
-const auto PoolingLayerIndicesDatasetFPSmall = combine(combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+const auto PoolingLayerIndicesDatasetFPSmall = combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2) }),
                                                        framework::dataset::make("PadStride", { PadStrideInfo(2, 2, 0, 0), PadStrideInfo(2, 1, 0, 0) }));
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                   framework::dataset::make("DataType", DataType::F32))),
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
+                                                                                                                   framework::dataset::make("DataType", DataType::F32),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                   ))
@@ -64,8 +64,8 @@ FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framewor
 TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                  framework::dataset::make("DataType", DataType::F16))),
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
+                                                                                                                  framework::dataset::make("DataType", DataType::F16),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                  ))

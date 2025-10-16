@@ -119,10 +119,10 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(10.5, 0), QuantizationInfo(0.5, -10)  })),
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(10.5, 0), QuantizationInfo(0.5, -10)  }),
                        framework::dataset::make("OutputQInfo", { QuantizationInfo(5, 10) })))
 {
     // Validate output
@@ -131,10 +131,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<uint8_t>, framework:
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.75, -128) })),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.75, -128) }),
                        framework::dataset::make("OutputQInfo", { QuantizationInfo(12.5, -2) })))
 {
     // Validate output

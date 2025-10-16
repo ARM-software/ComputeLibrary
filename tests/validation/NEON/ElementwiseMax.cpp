@@ -44,23 +44,23 @@ namespace
 constexpr RelativeTolerance<float>  tolerance_fp32(0.000001f);
 constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_signed(1);
 /** Input data sets **/
-const auto ElementwiseMaxQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
+const auto ElementwiseMaxQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8),
                                                   framework::dataset::make("DataType",
                                                                            DataType::QASYMM8));
-const auto ElementwiseMaxQASYMM8SignedDataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+const auto ElementwiseMaxQASYMM8SignedDataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
                                                         framework::dataset::make("DataType",
                                                                                  DataType::QASYMM8_SIGNED));
 
 /** Input data sets **/
-const auto ElementwiseMaxS32Dataset = combine(combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("DataType",
+const auto ElementwiseMaxS32Dataset = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType",
                                               DataType::S32));
-const auto ElementwiseMaxS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
+const auto ElementwiseMaxS16Dataset = combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16),
                                               framework::dataset::make("DataType", DataType::S16));
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const auto ElementwiseMaxFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
+const auto ElementwiseMaxFP16Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16),
                                                framework::dataset::make("DataType", DataType::F16));
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-const auto ElementwiseMaxFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
+const auto ElementwiseMaxFP32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32),
                                                framework::dataset::make("DataType", DataType::F32));
 const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
 const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
@@ -113,7 +113,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // *INDENT-ON*
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ElementwiseMaxS32Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMaxS32Dataset,
                                                                                                               InPlaceDataSet))
 {
     // Validate output
@@ -122,7 +122,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<int32_t>, framework::Da
 TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMaxS16Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxS16Dataset,
                                                                                                         InPlaceDataSet))
 {
     // Validate output
@@ -135,11 +135,11 @@ using NEElementwiseMaxQuantizedFixture = ElementwiseMaxValidationQuantizedFixtur
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                       ElementwiseMaxQASYMM8Dataset),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                       ElementwiseMaxQASYMM8Dataset,
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }),
                                                                                                                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -150,11 +150,11 @@ template <typename T>
 using NEElementwiseMaxQuantizedBroadcastFixture = ElementwiseMaxQuantizedBroadcastValidationFixture<Tensor, Accessor, NEElementwiseMax, T>;
 
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseMaxQuantizedBroadcastFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(datasets::SmallShapesBroadcast(),
-                                                               ElementwiseMaxQASYMM8Dataset),
-                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) })),
+                       combine(datasets::SmallShapesBroadcast(),
+                                                               ElementwiseMaxQASYMM8Dataset,
+                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }),
                                OutOfPlaceDataSet))
 {
     // Validate output
@@ -163,21 +163,21 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseMaxQuantizedBroadcastFixt
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                      ElementwiseMaxQASYMM8SignedDataset),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, 20) })),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f, 0) })),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f, -27) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                      ElementwiseMaxQASYMM8SignedDataset,
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, 20) }),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f, 0) }),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f, -27) }),
                                                                                                                       OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallInPlace, NEElementwiseMaxQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                       ElementwiseMaxQASYMM8SignedDataset),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, -20) })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, -20) })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, -20) })),
+FIXTURE_DATA_TEST_CASE(RunSmallInPlace, NEElementwiseMaxQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                       ElementwiseMaxQASYMM8SignedDataset,
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, -20) }),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, -20) }),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, -20) }),
                        InPlaceDataSet))
 {
     // Validate output
@@ -190,7 +190,7 @@ TEST_SUITE_END()
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMaxFP16Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxFP16Dataset,
                                                                                                      InPlaceDataSet))
 {
     if(CPUInfo::get().has_fp16())
@@ -208,7 +208,7 @@ TEST_SUITE_END() // F16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMaxFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxFP32Dataset,
                                                                                                       InPlaceDataSet))
 {
     // Validate output
@@ -217,15 +217,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMaxFixture<float>, framework::Data
 template <typename T>
 using NEElementwiseMaxBroadcastFixture = ElementwiseMaxBroadcastValidationFixture<Tensor, Accessor, NEElementwiseMax, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapesBroadcast(),
-                                                                                                                        ElementwiseMaxFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
+                                                                                                                        ElementwiseMaxFP32Dataset,
                                                                                                                         OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcastInplace(),
-                       ElementwiseMaxFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::TinyShapesBroadcastInplace(),
+                       ElementwiseMaxFP32Dataset,
                        InPlaceDataSet))
 {
     // Validate output

@@ -97,9 +97,9 @@ using NEInstanceNormalizationLayerFixture = InstanceNormalizationLayerValidation
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(),
-                                               framework::dataset::make("DataType", DataType::F32)),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                       combine(datasets::Small4DShapes(),
+                                               framework::dataset::make("DataType", DataType::F32),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                framework::dataset::make("InPlace", { false, true })))
 {
     // Validate output
@@ -111,9 +111,9 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(),
-                                               framework::dataset::make("DataType", DataType::F16)),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                       combine(datasets::SmallShapes(),
+                                               framework::dataset::make("DataType", DataType::F16),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                framework::dataset::make("InPlace", { false, true })))
 {
     if(CPUInfo::get().has_fp16())

@@ -86,9 +86,9 @@ using NEDepthConcatenateLayerFixture = ConcatenateLayerValidationFixture<Tensor,
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                          DataType::F16)),
+                                                                                                                          DataType::F16),
                                                                                                                   framework::dataset::make("Axis", 2)))
 {
     if(CPUInfo::get().has_fp16())
@@ -102,8 +102,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<half>, framework
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::ConcatenateLayerShapes(), framework::dataset::make("DataType",
-                                                                                                                        DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), framework::dataset::make("DataType",
+                                                                                                                        DataType::F16),
                                                                                                                 framework::dataset::make("Axis", 2)))
 {
     if(CPUInfo::get().has_fp16())
@@ -121,16 +121,16 @@ TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small3DShapes(), datasets::Tiny4DShapes()),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small3DShapes(), datasets::Tiny4DShapes()),
                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                           DataType::F32)),
+                                                                                                                           DataType::F32),
                                                                                                                    framework::dataset::make("Axis", 2)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::ConcatenateLayerShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::F32),
                                                                                                                  framework::dataset::make("Axis", 2)))
 {
     // Validate output
@@ -141,9 +141,9 @@ TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small3DShapes(), datasets::Tiny4DShapes()),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small3DShapes(), datasets::Tiny4DShapes()),
                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                             DataType::QASYMM8)),
+                                                                                                                             DataType::QASYMM8),
                                                                                                                      framework::dataset::make("Axis", 2)))
 {
     // Validate output
@@ -151,9 +151,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<uint8_t>, framew
 }
 TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small3DShapes(), datasets::Tiny4DShapes()),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small3DShapes(), datasets::Tiny4DShapes()),
                                                                                                                     framework::dataset::make("DataType",
-                                                                                                                            DataType::QASYMM8_SIGNED)),
+                                                                                                                            DataType::QASYMM8_SIGNED),
                                                                                                                     framework::dataset::make("Axis", 2)))
 {
     // Validate output

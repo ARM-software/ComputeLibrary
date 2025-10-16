@@ -72,15 +72,15 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToDepthLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                    DataType::F32)),
+FIXTURE_DATA_TEST_CASE(Small, NESpaceToDepthLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                    DataType::F32),
                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                  DataType::F32)),
+FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                  DataType::F32),
                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -89,15 +89,15 @@ FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<float>, framework::Data
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToDepthLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                   DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Small, NESpaceToDepthLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                   DataType::F16),
                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                 DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                 DataType::F16),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output

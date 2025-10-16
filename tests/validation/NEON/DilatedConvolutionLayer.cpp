@@ -115,10 +115,10 @@ using NEGEMMDilatedConvolutionLayerFixture = ConvolutionValidationFixture<Tensor
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true }),
+                                                                                                                        framework::dataset::make("DataType", DataType::F16),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW }),
                                                                                                                         framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     if(CPUInfo::get().has_fp16())
@@ -132,10 +132,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, fra
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                      framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true }),
+                                                                                                                      framework::dataset::make("DataType", DataType::F16),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW }),
                                                                                                                       framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     if(CPUInfo::get().has_fp16())
@@ -153,19 +153,19 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType", DataType::F32)),
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true }),
+                       framework::dataset::make("DataType", DataType::F32),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                        framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true }),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                        framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
@@ -185,22 +185,22 @@ TEST_SUITE(Quantized)
 /// quantization info.
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                               framework::dataset::make("ReshapeWeights", { true })),
-                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("IgnoredQuantizationInfo", { QuantizationInfo() })),
+                       combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                                                               framework::dataset::make("ReshapeWeights", { true }),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }),
+                                       framework::dataset::make("IgnoredQuantizationInfo", { QuantizationInfo() }),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                               framework::dataset::make("ReshapeWeights", { true })),
-                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("IgnoredQuantizationInfo", { QuantizationInfo() })),
+                       combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                                                               framework::dataset::make("ReshapeWeights", { true }),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }),
+                                       framework::dataset::make("IgnoredQuantizationInfo", { QuantizationInfo() }),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output

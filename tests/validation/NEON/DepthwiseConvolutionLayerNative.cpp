@@ -137,13 +137,13 @@ TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL)
 
 TEST_SUITE(KERNEL_SELECTION)
 DATA_TEST_CASE(KernelSelection_mul_and_add, framework::DatasetMode::ALL,
-               combine(combine(framework::dataset::make("CpuExt", std::string("NEON")),
+               combine(framework::dataset::make("CpuExt", std::string("NEON")),
                        framework::dataset::make("DataType", { DataType::F32,
                                                               DataType::F16,
                                                               DataType::QASYMM8_SIGNED,
                                                               DataType::QASYMM8,
                                                               DataType::QSYMM8_PER_CHANNEL
-                                                            })),
+                                                            }),
                        framework::dataset::make("DataType_per_channel", { DataType::QASYMM8,
                                                                           DataType::QASYMM8_SIGNED
                                                             })),
@@ -176,16 +176,16 @@ TEST_SUITE_END() // KERNEL_SELECTION
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CpuDepthwiseConvolutionNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                data_type_values),
+                combine(width_values_precommit,
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                data_type_values,
                                                                                                 data_layout_values))
 {
     // Validate output
@@ -193,16 +193,16 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CpuDepthwiseConvolutionNativeFixture<float>
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CpuDepthwiseConvolutionNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_nightly,
-                                                                                                height_values_nightly),
-                                                                                                channel_values_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                data_type_values),
+                combine(width_values_nightly,
+                                                                                                height_values_nightly,
+                                                                                                channel_values_nightly,
+                                                                                                batch_values_nightly,
+                                                                                                kernel_sz_values_nightly,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                data_type_values,
                                                                                                 data_layout_values))
 {
     // Validate output

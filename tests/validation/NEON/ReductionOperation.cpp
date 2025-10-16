@@ -107,8 +107,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis",
-{ 0, 1 })), framework::dataset::make("ReductionOperation", {ReductionOperation::SUM,})), KeepDims),
+DATA_TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32), framework::dataset::make("Axis",
+{ 0, 1 }), framework::dataset::make("ReductionOperation", {ReductionOperation::SUM,}), KeepDims),
                shape, data_type, axis, op, keep_dims)
 {
     TensorShape         input_shape = TensorShape(shape);
@@ -136,13 +136,13 @@ using NEReductionOperationFixture = ReductionOperationFixture<Tensor, Accessor, 
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), Axises), ReductionOperations), KeepDims))
+                       combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32), Axises, ReductionOperations, KeepDims))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), Axises), ReductionOperations), KeepDims))
+                       combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32), Axises, ReductionOperations, KeepDims))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);
@@ -152,7 +152,7 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F16)), Axises), ReductionOperations), KeepDims))
+                       combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F16), Axises, ReductionOperations, KeepDims))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -166,7 +166,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<half>, framework::D
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F16)), Axises), ReductionOperations), KeepDims))
+                       combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F16), Axises, ReductionOperations, KeepDims))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -187,9 +187,9 @@ using NEReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<
 
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), Axises),
-                                               ReductionOperations),
-                                       QuantizationInfos),
+                       combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8), Axises,
+                                               ReductionOperations,
+                                       QuantizationInfos,
                                KeepDims))
 {
     // Validate output
@@ -199,9 +199,9 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), Axises),
-                                               ReductionOperations),
-                                       QuantizationInfos),
+                       combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), Axises,
+                                               ReductionOperations,
+                                       QuantizationInfos,
                                KeepDims))
 {
     // Validate output

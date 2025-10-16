@@ -257,10 +257,10 @@ TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
 }
 TEST_SUITE_END() // Validate
 
-DATA_TEST_CASE(CheckNoPadding, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::Medium4DShapes(),
-                                                                                            framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 })),
-                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::BILINEAR, InterpolationPolicy::NEAREST_NEIGHBOR })),
-                                                                            framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT })),
+DATA_TEST_CASE(CheckNoPadding, framework::DatasetMode::ALL, combine(datasets::Medium4DShapes(),
+                                                                                            framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 }),
+                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::BILINEAR, InterpolationPolicy::NEAREST_NEIGHBOR }),
+                                                                            framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT }),
                                                                     framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
                shape, data_type, interpolation_policy, sampling_policy, data_layout)
 {
@@ -291,10 +291,10 @@ DATA_TEST_CASE(CheckNoPadding, framework::DatasetMode::ALL, combine(combine(comb
     validate(dst.info()->padding(), PaddingSize(0, 0, 0, 0));
 }
 
-DATA_TEST_CASE(CheckNoPaddingInterpAREA, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::Medium4DShapes(),
-                                                                                                      framework::dataset::make("DataType", { DataType::U8 })),
-                                                                                              framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::AREA })),
-                                                                                      framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT })),
+DATA_TEST_CASE(CheckNoPaddingInterpAREA, framework::DatasetMode::ALL, combine(datasets::Medium4DShapes(),
+                                                                                                      framework::dataset::make("DataType", { DataType::U8 }),
+                                                                                              framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::AREA }),
+                                                                                      framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT }),
                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                shape, data_type, interpolation_policy, sampling_policy, data_layout)
 {

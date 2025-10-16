@@ -79,9 +79,9 @@ using NEMeanStdDevNormalizationLayerFixture = MeanStdDevNormalizationLayerValida
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::F16)),
-                       framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
+                       framework::dataset::make("DataType", DataType::F16),
+                       framework::dataset::make("InPlace", { false, true }),
                        framework::dataset::make("Epsilon", { 1e-3 })))
 {
     if(CPUInfo::get().has_fp16())
@@ -95,9 +95,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, fr
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                       framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DMeanStdDevNormalizationShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::F16),
+                                                                                                                       framework::dataset::make("InPlace", { false, true }),
                                                                                                                        framework::dataset::make("Epsilon", { 1e-8 })))
 {
     if(CPUInfo::get().has_fp16())
@@ -115,17 +115,17 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::F32)),
-                       framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
+                       framework::dataset::make("DataType", DataType::F32),
+                       framework::dataset::make("InPlace", { false, true }),
                        framework::dataset::make("Epsilon", { 1e-7 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                        framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DMeanStdDevNormalizationShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::F32),
+                                                                                                                        framework::dataset::make("InPlace", { false, true }),
                                                                                                                         framework::dataset::make("Epsilon", { 1e-8 })))
 {
     // Validate output
@@ -137,9 +137,9 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       framework::dataset::make("InPlace", { false, true }),
                        framework::dataset::make("Epsilon", { 1e-7 })))
 {
     // Validate output

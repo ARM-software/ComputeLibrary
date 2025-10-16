@@ -117,7 +117,7 @@ using NEBoundingBoxTransformFixture = BoundingBoxTransformFixture<Tensor, Access
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::F32 })))
+                       combine(DeltaDataset, BboxInfoDataset, framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance_f32, 0.f, absolute_tolerance_f32);
@@ -127,7 +127,7 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformFixture<half>, framework::DatasetMode::ALL,
-                       combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::F16 })))
+                       combine(DeltaDataset, BboxInfoDataset, framework::dataset::make("DataType", { DataType::F16 })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -151,7 +151,7 @@ template <typename T>
 using NEBoundingBoxTransformQuantizedFixture = BoundingBoxTransformQuantizedFixture<Tensor, Accessor, NEBoundingBoxTransform, T>;
 
 FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformQuantizedFixture<uint16_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::QASYMM16 })),
+                       combine(DeltaDataset, BboxInfoDataset, framework::dataset::make("DataType", { DataType::QASYMM16 }),
                                framework::dataset::make("DeltasQuantInfo", { QuantizationInfo(0.125f, 0) })))
 {
     // Validate output

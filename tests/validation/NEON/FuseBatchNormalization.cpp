@@ -79,13 +79,13 @@ TEST_SUITE(Convolution)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<float>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         shape_conv_values_precommit,
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -94,13 +94,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<float>, fra
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationConvFixture<float>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         shape_conv_values_nightly,
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -111,13 +111,13 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         shape_conv_values_precommit,
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     if(CPUInfo::get().has_fp16())
@@ -134,13 +134,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<half>, fram
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         shape_conv_values_nightly,
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     if(CPUInfo::get().has_fp16())
@@ -163,13 +163,13 @@ TEST_SUITE(DepthwiseConvolution)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         datasets::Small3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -178,13 +178,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<float>, fram
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         datasets::Large3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -196,13 +196,13 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         datasets::Small3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     if(CPUInfo::get().has_fp16())
@@ -219,13 +219,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<half>, frame
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
+                                        combine(
                                                         datasets::Large3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     if(CPUInfo::get().has_fp16())

@@ -143,10 +143,10 @@ using NEROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<Tensor, Ac
 
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(datasets::SmallROIDataset(),
-                                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) })),
+                       combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8 }),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
                                framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
 {
     // Validate output
@@ -156,10 +156,10 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(datasets::SmallROIDataset(),
-                                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) })),
+                       combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED }),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
                                framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
 {
     // Validate output

@@ -185,10 +185,10 @@ TEST_SUITE(QSYMM16)
 constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
 
 #define QSYMM16_DATASET_ITER(num_input_batch, num_iter)                                                              \
-    combine(combine(zip(zip(QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>("InputShape"), \
+    combine(zip(zip(QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>("InputShape"), \
                             QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape")),             \
                         QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),                   \
-                    framework::dataset::make("DataType", DataType::QSYMM16)),                                        \
+                    framework::dataset::make("DataType", DataType::QSYMM16),                                        \
             framework::dataset::make("WeightQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(8192) }))
 
 #define QSYMM16_DATASET_1D \

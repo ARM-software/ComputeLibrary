@@ -46,10 +46,10 @@ RelativeTolerance<float> tolerance_fp32(0.001f);
 /** Input data sets **/
 #ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half> tolerance_fp16(static_cast<half>(0.01f));
-const auto              ElementwisePowerFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
+const auto              ElementwisePowerFP16Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16),
                                                               framework::dataset::make("DataType", DataType::F16));
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-const auto ElementwisePowerFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
+const auto ElementwisePowerFP32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32),
                                                  framework::dataset::make("DataType", DataType::F32));
 const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
 const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
@@ -93,7 +93,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwisePowerFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwisePowerFP16Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwisePowerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwisePowerFP16Dataset,
                                                                                                        InPlaceDataSet))
 {
     if(CPUInfo::get().has_fp16())
@@ -112,14 +112,14 @@ TEST_SUITE_END() // F16
 
 TEST_SUITE(F32)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwisePowerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwisePowerFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwisePowerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwisePowerFP32Dataset,
                                                                                                         InPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwisePowerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ElementwisePowerFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwisePowerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwisePowerFP32Dataset,
                                                                                                             InPlaceDataSet))
 {
     // Validate output
@@ -129,22 +129,22 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwisePowerFixture<float>, framework::Da
 template <typename T>
 using NEElementwisePowerBroadcastFixture = ElementwisePowerBroadcastValidationFixture<Tensor, Accessor, NEElementwisePower, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapesBroadcast(),
-                       ElementwisePowerFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
+                       ElementwisePowerFP32Dataset,
                        OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcastInplace(),
-                       ElementwisePowerFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::TinyShapesBroadcastInplace(),
+                       ElementwisePowerFP32Dataset,
                        InPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapesBroadcast(),
-                       ElementwisePowerFP32Dataset),
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
+                       ElementwisePowerFP32Dataset,
                        OutOfPlaceDataSet))
 {
     // Validate output

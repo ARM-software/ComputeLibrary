@@ -72,9 +72,9 @@ using NELogSoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NELo
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small4DShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                    framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small4DShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::F16),
+                                                                                                                    framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                             framework::dataset::make("Axis", { 0, -1 })))
 {
     if(CPUInfo::get().has_fp16())
@@ -88,9 +88,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELogSoftmaxLayerFixture<half>, framework::Data
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small4DShapes(),
-                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                      framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small4DShapes(),
+                                                                                                                      framework::dataset::make("DataType", DataType::F16),
+                                                                                                                      framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                               framework::dataset::make("Axis", { 0, -3, 2 })))
 {
     if(CPUInfo::get().has_fp16())
@@ -104,9 +104,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerFixture<half>, framework::Da
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                  framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                  framework::dataset::make("DataType", DataType::F16),
+                                                                                                                  framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                           framework::dataset::make("Axis", { 0 })))
 {
     if(CPUInfo::get().has_fp16())
@@ -124,25 +124,25 @@ TEST_SUITE_END() //FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall2D, NELogSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunSmall2D, NELogSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32),
+                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                                framework::dataset::make("Axis", { 0, 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small4DShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small4DShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32),
+                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                                framework::dataset::make("Axis", { 0, 2, -1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                   framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                                                                   framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                            framework::dataset::make("Axis", { 0 })))
 {
     // Validate output
@@ -156,28 +156,25 @@ using NELogSoftmaxLayerQuantizedFixture = SoftmaxValidationQuantizedFixture<Tens
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall2D, NELogSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                    combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.f }))),
+FIXTURE_DATA_TEST_CASE(RunSmall2D, NELogSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8),framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.f }),
                                                                                                                     framework::dataset::make("Axis", { 0, 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small4DShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                    combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.f }))),
+FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8),framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.f }),
                                                                                                                     framework::dataset::make("Axis", { 0, -1, 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                      combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                              framework::dataset::make("Beta", { 1.0f, 2.0f }))),
+FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8),framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                              framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                                       framework::dataset::make("Axis", { 0 })))
 {
     // Validate output
@@ -188,9 +185,8 @@ TEST_SUITE_END() //QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall2D, NELogSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
     combine(datasets::SoftmaxLayerSmallShapes(),
-        make("DataType", DataType::QASYMM8_SIGNED),
-        combine(make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                make("Beta", { 1.0f, 2.f })),
+        make("DataType", DataType::QASYMM8_SIGNED),make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                make("Beta", { 1.0f, 2.f }),
         make("Axis", { 0, 1 })))
 {
     // Validate output
@@ -198,9 +194,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall2D, NELogSoftmaxLayerQuantizedFixture<int8_t>, fr
 }
 FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
     combine(datasets::Small4DShapes(),
-        make("DataType", DataType::QASYMM8_SIGNED),
-        combine(make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                make("Beta", { 1.0f, 2.f })),
+        make("DataType", DataType::QASYMM8_SIGNED),make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                make("Beta", { 1.0f, 2.f }),
         make("Axis", { 0, -1, 1 })))
 {
     // Validate output
@@ -208,9 +203,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerQuantizedFixture<int8_t>, fr
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY,
     combine(datasets::SoftmaxLayerLargeShapes(),
-        make("DataType", DataType::QASYMM8_SIGNED),
-        combine(make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                make("Beta", { 1.0f, 2.f })),
+        make("DataType", DataType::QASYMM8_SIGNED),make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                make("Beta", { 1.0f, 2.f }),
         make("Axis", { 0 })))
 {
     // Validate output

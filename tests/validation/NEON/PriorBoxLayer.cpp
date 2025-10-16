@@ -72,15 +72,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallPriorBoxLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallPriorBoxLayerDataset(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F32),
                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, 0);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargePriorBoxLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargePriorBoxLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output

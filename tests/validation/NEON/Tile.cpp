@@ -78,13 +78,13 @@ using NETileFixture = TileValidationFixture<Tensor, Accessor, NETile, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16),
                                                                                                  MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16), MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -92,13 +92,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<half>, framework::DatasetMode::NI
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32),
                                                                                                   MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32),
                                                                                                 MultiplesDataset))
 {
     // Validate output
@@ -110,8 +110,7 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S8 }),
                            MultiplesDataset))
 {
     // Validate output
@@ -123,8 +122,7 @@ TEST_SUITE_END() // Integer
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                       combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 }),
                            MultiplesDataset))
 {
     // Validate output

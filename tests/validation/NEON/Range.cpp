@@ -120,10 +120,10 @@ template <typename T>
 using NERangeFixture = RangeFixture<Tensor, Accessor, NERange, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(
                                                                                                                  framework::dataset::make("DataType", DataType::U8),
-                                                                                                                 unsigned_start_dataset),
-                                                                                                             unsigned_step_dataset),
+                                                                                                                 unsigned_start_dataset,
+                                                                                                             unsigned_step_dataset,
                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
 {
     // Validate output
@@ -132,10 +132,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<uint8_t>, framework::DatasetMode
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(
                                                                                                                  framework::dataset::make("DataType", DataType::S16),
-                                                                                                                 start_dataset),
-                                                                                                             step_dataset),
+                                                                                                                 start_dataset,
+                                                                                                             step_dataset,
                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
 {
     // Validate output
@@ -146,10 +146,10 @@ TEST_SUITE_END() // S16
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<half>, framework::DatasetMode::PRECOMMIT, combine(
                                                                                                               framework::dataset::make("DataType", DataType::F16),
-                                                                                                              start_dataset),
-                                                                                                          float_step_dataset),
+                                                                                                              start_dataset,
+                                                                                                          float_step_dataset,
                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
 {
     if(CPUInfo::get().has_fp16())
@@ -167,10 +167,10 @@ TEST_SUITE_END() // FP16
 #endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<float>, framework::DatasetMode::PRECOMMIT, combine(
                                                                                                                framework::dataset::make("DataType", DataType::F32),
-                                                                                                               start_dataset),
-                                                                                                           float_step_dataset),
+                                                                                                               start_dataset,
+                                                                                                           float_step_dataset,
                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
 {
     // Validate output

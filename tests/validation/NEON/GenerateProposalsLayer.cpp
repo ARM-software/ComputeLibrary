@@ -379,7 +379,7 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
 }
 
 FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, NEComputeAllAnchorsFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset), framework::dataset::make("DataType", { DataType::F32 })))
+                       combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset, framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -388,7 +388,7 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, NEComputeAllAnchorsFixture<half>, framework::DatasetMode::ALL,
-                       combine(combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset), framework::dataset::make("DataType", { DataType::F16 })))
+                       combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset, framework::dataset::make("DataType", { DataType::F16 })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -412,8 +412,8 @@ using NEComputeAllAnchorsQuantizedFixture = ComputeAllAnchorsQuantizedFixture<Te
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, NEComputeAllAnchorsQuantizedFixture<int16_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset),
-                                       framework::dataset::make("DataType", { DataType::QSYMM16 })),
+                       combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset,
+                                       framework::dataset::make("DataType", { DataType::QSYMM16 }),
                                framework::dataset::make("QuantInfo", { QuantizationInfo(0.125f, 0) })))
 {
     // Validate output
