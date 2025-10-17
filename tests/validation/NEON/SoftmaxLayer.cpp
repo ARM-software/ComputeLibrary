@@ -329,10 +329,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall2D, NESoftmaxLayerQuantizedFixture<uint8_t>, fram
     combine(
         datasets::SoftmaxLayerSmallShapes(),
         make("DataType", DataType::QASYMM8),
-        combine(
             make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
             make("Beta", { 1.0f, 2.f })
-        ),
+        ,
         make("Axis", { 0, -1 })))
 {
     // Validate output
@@ -342,9 +341,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall4D, NESoftmaxLayerQuantizedFixture<uint8_t>, fram
     combine(
         datasets::Small4DShapes(),
         make("DataType", DataType::QASYMM8),
-        combine(
             make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-            make("Beta", { 1.0f, 2.f })),
+            make("Beta", { 1.0f, 2.f }),
         make("Axis", { 0, 1, -2 })))
 {
     // Validate output
@@ -354,10 +352,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerQuantizedFixture<uint8_t>, framew
     combine(
         datasets::SoftmaxLayerLargeShapes(),
         make("DataType", DataType::QASYMM8),
-        combine(
             make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
             make("Beta", { 1.0f, 2.0f })
-        ),
+        ,
         make("Axis", { 0 })))
 {
     // Validate output
@@ -370,10 +367,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall2D, NESoftmaxLayerQuantizedFixture<int8_t>, frame
     combine(
         datasets::SoftmaxLayerSmallShapes(),
         make("DataType", DataType::QASYMM8_SIGNED),
-        combine(
             make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
             make("Beta", { 1.0f, 2.f })
-        ),
+        ,
         make("Axis", { 0, -1 })))
 {
     // Validate output
@@ -383,10 +379,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall4D, NESoftmaxLayerQuantizedFixture<int8_t>, frame
     combine(
         datasets::Small4DShapes(),
         make("DataType", DataType::QASYMM8_SIGNED),
-        combine(
             make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
             make("Beta", { 1.0f, 2.f })
-        ),
+        ,
         make("Axis", { 0, 1, -1 })))
 {
     // Validate output

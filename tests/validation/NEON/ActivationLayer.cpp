@@ -62,7 +62,7 @@ const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions
                                                    framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::HARD_SWISH, ActivationLayerInfo::ActivationFunction::SWISH }));
 
 /** Input data sets. */
-const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+const auto ActivationDataset = combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset, framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 const auto ActivationDatasetForPaddingAfterConfigure = combine(
     make("InPlace", { false, true }),
     NeonActivationFunctionsDataset,
@@ -197,7 +197,7 @@ TEST_CASE(SqrtBoundaryValue, framework::DatasetMode::ALL)
 {
     test_float_sqrt_boundary_value<half>();
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ActivationDataset,
                                                                                                       framework::dataset::make("DataType",
                                                                                                               DataType::F16)))
 {
@@ -239,7 +239,7 @@ TEST_CASE(SqrtBoundaryValue, framework::DatasetMode::ALL)
 {
     test_float_sqrt_boundary_value<float>();
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset), make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ActivationDataset, make("DataType",
                                                                                                        DataType::F32)))
 
 {
@@ -306,8 +306,8 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 #endif
 });
 
-const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
-                                                        concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),
+const auto QuantizedActivationDataset = combine(framework::dataset::make("InPlace", { false }),
+                                                        concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH)),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 const auto QuantizedActivationDatasetForPaddingAfterConfigure = combine(
     make("InPlace", { false }),
@@ -319,9 +319,9 @@ const auto QuantizedActivationDatasetForPaddingAfterConfigure = combine(
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), QuantizedActivationDataset,
                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                          DataType::QASYMM8)),
+                                                                                                                          DataType::QASYMM8),
                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
@@ -341,9 +341,9 @@ FIXTURE_DATA_TEST_CASE(PaddingAfterConfigure, NEActivationLayerWithPaddingQuanti
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), QuantizedActivationDataset,
                                                                                                                  framework::dataset::make("DataType",
-                                                                                                                         DataType::QASYMM8_SIGNED)),
+                                                                                                                         DataType::QASYMM8_SIGNED),
                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
 {
     // Validate output
@@ -369,7 +369,7 @@ const auto Int16QuantizedActivationFunctionsDataset = framework::dataset::make("
     ActivationLayerInfo::ActivationFunction::TANH,
     ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
 });
-const auto Int16QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), Int16QuantizedActivationFunctionsDataset),
+const auto Int16QuantizedActivationDataset = combine(framework::dataset::make("InPlace", { false }), Int16QuantizedActivationFunctionsDataset,
                                                      framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 const auto Int16QuantizedActivationDatasetForPaddingAfterConfigure = combine(
@@ -379,9 +379,9 @@ const auto Int16QuantizedActivationDatasetForPaddingAfterConfigure = combine(
 );
 
 TEST_SUITE(QSYMM16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), Int16QuantizedActivationDataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), Int16QuantizedActivationDataset,
                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                          DataType::QSYMM16)),
+                                                                                                                          DataType::QSYMM16),
                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) })))
 {
     // Validate output
