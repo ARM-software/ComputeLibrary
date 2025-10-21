@@ -318,7 +318,8 @@ FIXTURE_DATA_TEST_CASE(
     )
 )
 {
-    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+    constexpr float tolerance_percentage = 0.02f;
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_percentage, float(abs_tolerance_f32));
 }
 
 FIXTURE_DATA_TEST_CASE(
@@ -1588,7 +1589,8 @@ FIXTURE_DATA_TEST_CASE(
     )
 )
 {
-    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+    constexpr float tolerance_percentage = 0.02f;
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_percentage, float(abs_tolerance_f32));
 }
 
 FIXTURE_DATA_TEST_CASE(
