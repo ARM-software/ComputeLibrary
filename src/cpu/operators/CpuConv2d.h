@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,6 @@ public:
      * |QASYMM8        |QASYMM8_SIGNED     |S32    |QASYMM8        |
      * |QASYMM8        |QSYMM8_PER_CHANNEL |S32    |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
-     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |F32    |F32            |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32    |QASYMM8_SIGNED |
      *
      * @param[in]  src              Source tensor info. 3 lower dimensions represent a single input [width, height, IFM],
@@ -98,7 +97,6 @@ public:
      *                              Data type supported: Same as @p src, also could be QSYMM8_PER_CHANNEL or QASYMM8_SIGNED if input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  biases           Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                              Data type supported: Same as @p src, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
-     *                              For F32 dequantization the bias must be F32.
      * @param[out] dst              Destination tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                              Data types supported: Same as @p src.
      * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo.

@@ -66,9 +66,8 @@ void neon_run_offset_contribution_float(const Window  &window,
     const int window_step_x  = 16;
 
     // if vector_sum_col is nullptr then stride_y is 0, else get stride_y
-    const size_t sum_col_stride_w = (vector_sum_col != nullptr) ? vector_sum_col->info()->strides_in_bytes()[3] : 0;
-
-    Iterator mm_result_it(mm_result, collapsed_window);
+    const size_t sum_col_stride_y = (vector_sum_col != nullptr) ? (vector_sum_col->info()->strides_in_bytes().y()) : 0;
+    Iterator     mm_result_it(mm_result, collapsed_window);
 
     if ((a_offset != 0) && (b_offset != 0) && (vector_sum_col != nullptr) && (vector_sum_row != nullptr)) // true, true
     {
@@ -97,7 +96,7 @@ void neon_run_offset_contribution_float(const Window  &window,
             [&](const Coordinates &id)
             {
                 const int    batch_id         = id.z() / depth_input;
-                const size_t batch_offset_col = batch_id * sum_col_stride_w;
+                const size_t batch_offset_col = batch_id * sum_col_stride_y;
                 auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_offset_col +
                                                                             batch_id * vector_sum_col_batch_offset);
                 auto mm_result_ptr      = reinterpret_cast<T *>(mm_result_it.ptr());
@@ -217,7 +216,7 @@ void neon_run_offset_contribution_float(const Window  &window,
                 const int    batch_id = id.z() / depth_input;
                 const size_t batch_offset_col =
                     batch_id *
-                    sum_col_stride_w; // Value to offset vector_sum_col_ptr to allow for iteration of w values in tensor
+                    sum_col_stride_y; // Value to offset vector_sum_col_ptr to allow for iteration of y values in tensor
                 auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_offset_col +
                                                                             batch_id * vector_sum_col_batch_offset);
                 auto mm_result_ptr      = reinterpret_cast<T *>(mm_result_it.ptr());

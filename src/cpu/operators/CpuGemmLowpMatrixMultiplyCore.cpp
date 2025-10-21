@@ -58,11 +58,6 @@ namespace cpu
 {
 namespace
 {
-inline bool int8_dequantize_f32_path(DataType src, DataType dst)
-{
-    return src == DataType::QASYMM8_SIGNED && dst == DataType::F32;
-}
-
 cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
 {
     cpu::AsmGemmInfo asm_info;
@@ -137,18 +132,10 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
                        _reshape_b_only_on_first_run;
     _gemm_info = gemm_info;
 
-    // F32 dequant path? (input quantized, output float)
-    const bool dequantize_f32 = int8_dequantize_f32_path(a->data_type(), dst->data_type());
-
     const ITensorInfo *a_to_use = a;
+
     // Initialize assembly kernel meta-data
-    cpu::AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);
-    if (dequantize_f32)
-    {
-        // We don't want arm_gemm to compute the activations because bias and offsets are added in ACL at a later step
-        // so we disable activation in arm_gemm and run it as a post op in ACL
-        asm_info.activation_info = arm_compute::ActivationLayerInfo();
-    }
+    const cpu::AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);
 
     const int32_t                 offset_correction = 128;
     const DataType                dt                = DataType::QASYMM8_SIGNED;
@@ -164,6 +151,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
     {
         _flip_signedness = true;
     }
+
     _asm_glue = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
 
     // Convert to QASYMM8 -> QASYMM8_SIGNED and back
@@ -212,7 +200,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
             case DataType::U8:
             case DataType::S8:
             {
-                if (!dequantize_f32 && is_data_type_quantized_asymmetric(a_to_use->data_type()) &&
+                if (is_data_type_quantized_asymmetric(a_to_use->data_type()) &&
                     info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
                 {
                     auto c_info_to_use = c == nullptr ? nullptr : c;
@@ -322,9 +310,8 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
     }
     // Configure activation
     const ActivationLayerInfo &activation = gemm_info.activation_info();
-
-    _run_activation = activation.enabled() && (dequantize_f32 || !_assembly_path ||
-                                               !cpu::CpuGemmAssemblyDispatch::is_activation_supported(activation));
+    _run_activation =
+        activation.enabled() && (!_assembly_path || !cpu::CpuGemmAssemblyDispatch::is_activation_supported(activation));
     if (_run_activation)
     {
         _activation_func = std::make_unique<CpuActivation>();
@@ -383,12 +370,6 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.pretranspose_A(), "Matrix A already pretransposed is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.pretranspose_B(), "Matrix B already pretransposed is not supported");
-
-    if (int8_dequantize_f32_path(a->data_type(), output->data_type()))
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8_SIGNED);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::QASYMM8_SIGNED);
-    }
 
     // When using accumulation(in place summation), for now, the only supported DataType for output is S32.
     if (gemm_info.accumulate())
@@ -487,32 +468,6 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
                 a_to_use, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output, asm_info));
         }
     }
-    auto validate_lowp_reductions = [&](const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *a_to_use,
-                                        bool a_offset_kernel_needed, bool b_offset_kernel_needed,
-                                        TensorInfo &info_vector_sum_col, // out
-                                        TensorInfo &info_vector_sum_row  // out
-                                        ) -> Status
-    {
-        const GEMMLowpReductionKernelInfo reduction_info(a_to_use->dimension(0), false, 0, false);
-
-        // Validate matrix B reduction kernel only if _a_offset is not equal to 0
-        if (a_offset_kernel_needed)
-        {
-            info_vector_sum_col = TensorInfo(compute_reductionA_shape(*b), 1, DataType::S32);
-            ARM_COMPUTE_RETURN_ON_ERROR(
-                kernels::CpuGemmLowpMatrixBReductionKernel::validate(b, &info_vector_sum_col, reduction_info));
-        }
-
-        // Validate Matrix A reduction kernel only if _b_offset is not equal to 0
-        if (b_offset_kernel_needed)
-        {
-            info_vector_sum_row = TensorInfo(compute_reductionB_shape(*a), 1, DataType::S32);
-            ARM_COMPUTE_RETURN_ON_ERROR(
-                kernels::CpuGemmLowpMatrixAReductionKernel::validate(a_to_use, &info_vector_sum_row, reduction_info));
-        }
-
-        return Status{}; // success
-    };
 
     if (run_optimised)
     {
@@ -532,21 +487,6 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         else
         {
             ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(1) != output->dimension(1));
-        }
-
-        // Q -> F32 path, we add offsets in ACL so we need to validate:
-        if (a->data_type() == DataType::QASYMM8_SIGNED && output->data_type() == DataType::F32)
-        {
-            TensorInfo info_vector_sum_col{};
-            TensorInfo info_vector_sum_row{};
-
-            ARM_COMPUTE_RETURN_ON_ERROR(validate_lowp_reductions(a, b, a_to_use, a_offset_kernel_needed,
-                                                                 b_offset_kernel_needed, info_vector_sum_col,
-                                                                 info_vector_sum_row));
-
-            ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuGemmLowpOffsetContributionKernel::validate(
-                output, a_offset_kernel_needed ? &info_vector_sum_col : nullptr,
-                b_offset_kernel_needed ? &info_vector_sum_row : nullptr, a_offset, b_offset));
         }
     }
     else
@@ -586,8 +526,27 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         TensorInfo info_vector_sum_col{};
         TensorInfo info_vector_sum_row{};
 
-        ARM_COMPUTE_RETURN_ON_ERROR(validate_lowp_reductions(
-            a, b, a_to_use, a_offset_kernel_needed, b_offset_kernel_needed, info_vector_sum_col, info_vector_sum_row));
+        const GEMMLowpReductionKernelInfo reduction_info(a_to_use->dimension(0), false, 0, false);
+
+        // Validate matrix B reduction kernel only if _a_offset is not equal to 0
+        if (a_offset_kernel_needed)
+        {
+            info_vector_sum_col = TensorInfo(compute_reductionA_shape(*b), 1, DataType::S32);
+
+            // Configure Matrix B reduction kernel
+            ARM_COMPUTE_RETURN_ON_ERROR(
+                kernels::CpuGemmLowpMatrixBReductionKernel::validate(b, &info_vector_sum_col, reduction_info));
+        }
+
+        // Validate Matrix A reduction kernel only if _b_offset is not equal to 0
+        if (b_offset_kernel_needed)
+        {
+            info_vector_sum_row = TensorInfo(compute_reductionB_shape(*a), 1, DataType::S32);
+
+            // Configure matrix A reduction kernel
+            ARM_COMPUTE_RETURN_ON_ERROR(
+                kernels::CpuGemmLowpMatrixAReductionKernel::validate(a_to_use, &info_vector_sum_row, reduction_info));
+        }
 
         if (fuse_output_stage)
         {
