@@ -35,6 +35,7 @@ SOFTWARE.
         <tab type="user" url="@ref conv2d_heuristic" title="Convolution 2D heuristic"/>
         <tab type="user" url="@ref operators_list" title="Operator List"/>
         <tab type="user" url="@ref tests" title="Validation and benchmarks"/>
+        <tab type="user" url="@ref profiling" title="Profiling"/>
         <tab type="user" url="@ref advanced" title="Advanced"/>
         <tab type="user" url="@ref versions_changelogs" title="Release Versions and Changelog"/>
         <tab type="user" url="@ref errata" title="Errata"/>
