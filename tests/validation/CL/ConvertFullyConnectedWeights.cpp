@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,8 +49,7 @@ TEST_SUITE(ConvertFullyConnectedWeights)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching data types
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),     // Valid
                                             TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching shapes
                                             TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Wrong DataLayout
@@ -59,17 +58,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
-                                          })),
+                                          }),
     framework::dataset::make("OriginalInput", { TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
-                                               })),
+                                               }),
     framework::dataset::make("DataLayout", { DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::UNKNOWN,
-                                               })),
+                                               }),
     framework::dataset::make("Expected", { false, true, false, false})),
     input_info, output_info, original_input_shape, data_layout, expected)
 {
@@ -82,14 +81,14 @@ template <typename T>
 using CLConvertFullyConnectedWeightsFixture = ConvertFullyConnectedWeightsValidationFixture<CLTensor, CLAccessor, CLConvertFullyConnectedWeights, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Tiny3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                    DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Tiny3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                    DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                        DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                        DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -97,14 +96,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<float>, f
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Tiny3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                   DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Tiny3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                   DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                       DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                       DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -112,15 +111,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<half>, fr
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Tiny3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                      DataType::QASYMM8))))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Tiny3DShapes(), params, framework::dataset::make("DataType",
+                                                                                                                      DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params,
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params,
                        framework::dataset::make("DataType",
-                                                DataType::QASYMM8))))
+                                                DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

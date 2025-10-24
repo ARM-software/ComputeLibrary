@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,8 +91,7 @@ TEST_SUITE(FullyConnectedLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-    make("InputInfo", { TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Mismatching data types
                                             TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Invalid weights dimensions
@@ -103,21 +102,21 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                              TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
                                              TensorInfo(TensorShape(217U, 231U), 1, DataType::F32),
                                              TensorInfo(TensorShape(217U, 315U), 1, DataType::F32),
-                                          })),
+                                          }),
     make("BiasInfo",{ TensorInfo(TensorShape(271U), 1, DataType::F32),
                                           TensorInfo(TensorShape(192U), 1, DataType::F32),
                                           TensorInfo(TensorShape(192U), 1, DataType::F32),
                                           TensorInfo(TensorShape(271U), 1, DataType::F32),
                                           TensorInfo(TensorShape(271U), 1, DataType::F32),
-                                          })),
+                                          }),
     make("OutputInfo",{ TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                                             TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                                             TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
-                                           })),
-    make("TransposeWeights",{ true, true, false, true, true })),
-    make("ReshapedWeights",{ false, false, false, false, false})),
+                                           }),
+    make("TransposeWeights",{ true, true, false, true, true }),
+    make("ReshapedWeights",{ false, false, false, false, false}),
     make("Expected", { false, true, true, false, false })),
     input_info, weights_info, bias_info, output_info, transpose_weights, reshaped_weights, expected)
 {

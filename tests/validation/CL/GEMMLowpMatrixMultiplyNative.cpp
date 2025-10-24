@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,11 +100,11 @@ const auto k0_values_nightly = framework::dataset::make("K0", { 1, 2, 3, 4, 8, 1
 TEST_SUITE(CL)
 TEST_SUITE(GEMMLowpMatrixMultiplyNative)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyNativeFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(m_n_values,
-                                                                k_values),
-                                                                b_values),
-                                                                m0_values_precommit),
-                                                                n0_values_precommit),
+                combine(m_n_values,
+                                                                k_values,
+                                                                b_values,
+                                                                m0_values_precommit,
+                                                                n0_values_precommit,
                                                                 k0_values_precommit))
 {
     // Validate output
@@ -112,11 +112,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyNativeFixture, framewor
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyNativeFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(m_n_values,
-                                                                k_values),
-                                                                b_values),
-                                                                m0_values_nightly),
-                                                                n0_values_nightly),
+                combine(m_n_values,
+                                                                k_values,
+                                                                b_values,
+                                                                m0_values_nightly,
+                                                                n0_values_nightly,
                                                                 k0_values_nightly))
 {
     // Validate output
@@ -124,13 +124,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyNativeFixture, framewor
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMLowpMatrixMultiplyNative3DFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(m_w_values,
-                                                                        m_h_values),
-                                                                        n_values),
-                                                                        k_values),
-                                                                        b_values),
-                                                                        m0_values_precommit),
-                                                                        n0_values_precommit),
+                combine(m_w_values,
+                                                                        m_h_values,
+                                                                        n_values,
+                                                                        k_values,
+                                                                        b_values,
+                                                                        m0_values_precommit,
+                                                                        n0_values_precommit,
                                                                         k0_values_precommit))
 {
     // Validate output
@@ -138,13 +138,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMLowpMatrixMultiplyNative3DFixture, fram
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyNative3DFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(m_w_values,
-                                                                        m_h_values),
-                                                                        n_values),
-                                                                        k_values),
-                                                                        b_values),
-                                                                        m0_values_nightly),
-                                                                        n0_values_nightly),
+                combine(m_w_values,
+                                                                        m_h_values,
+                                                                        n_values,
+                                                                        k_values,
+                                                                        b_values,
+                                                                        m0_values_nightly,
+                                                                        n0_values_nightly,
                                                                         k0_values_nightly))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2023 Arm Limited.
+ * Copyright (c) 2018-2020, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,8 +44,7 @@ TEST_SUITE(Gather)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),                // Invalid Output shape
@@ -67,7 +66,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
-        })),
+        }),
         framework::dataset::make("OutputInfo", {
                                                 TensorInfo(TensorShape(10U, 27U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(27U, 10U), 1, DataType::F32),
@@ -79,7 +78,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(27U, 10U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
-        })),
+        }),
         framework::dataset::make("Axis", {
                                             0,
                                             1,
@@ -91,7 +90,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                             1,
                                             2,
                                             -3,
-        })),
+        }),
         framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, false, false })),
         input_info, indices_info, output_info, axis, expected)
 {

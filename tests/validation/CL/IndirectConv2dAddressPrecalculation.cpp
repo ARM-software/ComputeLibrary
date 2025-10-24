@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,13 +69,13 @@ TEST_SUITE(CL)
 TEST_SUITE(IndirectConv2dAddressPrecalculation)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLIndirectConv2dAddressPrecalculationFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(src_w_values,
-                                                                        src_h_values),
-                                                                        src_b_values),
-                                                                        wei_w_values),
-                                                                        wei_h_values),
-                                                                        pad_values),
-                                                                        stride_values),
+                combine(src_w_values,
+                                                                        src_h_values,
+                                                                        src_b_values,
+                                                                        wei_w_values,
+                                                                        wei_h_values,
+                                                                        pad_values,
+                                                                        stride_values,
                                                                         m0_values))
 {
     // Validate output

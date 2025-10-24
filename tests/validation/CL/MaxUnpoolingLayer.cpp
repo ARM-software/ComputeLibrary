@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,13 +46,13 @@ TEST_SUITE(MaxUnpoolingLayer)
 template <typename T>
 using CLMaxUnpoolingLayerFixture = MaxUnpoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, CLMaxUnpoolingLayer, T>;
 
-const auto PoolingLayerIndicesDatasetFPSmall = combine(combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
+const auto PoolingLayerIndicesDatasetFPSmall = combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2) }),
                                                        framework::dataset::make("PadStride", { PadStrideInfo(2, 2, 0, 0), PadStrideInfo(2, 1, 0, 0) }));
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                   framework::dataset::make("DataType", DataType::F32))),
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
+                                                                                                                   framework::dataset::make("DataType", DataType::F32),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                   ))
@@ -63,8 +63,8 @@ FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<float>, framewor
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                  framework::dataset::make("DataType", DataType::F16))),
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
+                                                                                                                  framework::dataset::make("DataType", DataType::F16),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                  ))

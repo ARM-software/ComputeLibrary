@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,8 +46,7 @@ TEST_SUITE(Transpose)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::U16), // Invalid shape
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::U16), // Invalid shape
                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::U8),  // Wrong data type
                                             TensorInfo(TensorShape(20U, 16U), 1, DataType::U32), // Valid
                                             TensorInfo(TensorShape(20U, 16U, 3U, 3U), 1, DataType::U16), // Transpose only first two dimensions
@@ -56,7 +55,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                             TensorInfo(TensorShape(31U, 20U), 1, DataType::U16),
                                             TensorInfo(TensorShape(16U, 20U), 1, DataType::U32),
                                             TensorInfo(TensorShape(16U, 20U, 3U, 3U), 1, DataType::U16),
-                                           })),
+                                           }),
     framework::dataset::make("Expected", { false, false, true, true })),
     a_info, output_info, expected)
 {

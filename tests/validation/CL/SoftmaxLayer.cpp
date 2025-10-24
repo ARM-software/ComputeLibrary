@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,8 +111,7 @@ TEST_CASE(SimpleMemoryManaged, framework::DatasetMode::ALL)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Mismatching shapes
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::QASYMM8, // Invalid output quantization info
                                                                   QuantizationInfo(1.f/256, 12)),
@@ -139,7 +138,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                                   QuantizationInfo(1.f/256, -128)),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8_SIGNED,
                                                                   QuantizationInfo(1.f/256, -128)),
-                                                     })),
+                                                     }),
                framework::dataset::make("beta", { 1.0,
                                                   2.0,
                                                   1.0,
@@ -148,7 +147,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                   2.0,
                                                   1.0,
                                                   2.0,
-                                                })),
+                                                }),
                framework::dataset::make("axis", {
                                                   0,
                                                   0,
@@ -158,7 +157,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                   -1,
                                                   2,
                                                   -3,
-                                                })),
+                                                }),
                framework::dataset::make("Expected", { false, false, false, true, true, true, false, false })),
                input_info, output_info, beta, axis, expected)
 {
@@ -172,25 +171,25 @@ using CLSoftmaxLayerFixture = SoftmaxValidationFixture<CLTensor, CLAccessor, CLS
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                    framework::dataset::make("Axis", { 0, -1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
-                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::F16),
+                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                        framework::dataset::make("Axis", { 0 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F16)),
-                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayer4DShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::F16),
+                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                     framework::dataset::make("Axis", { 0, -1, 2 })))
 {
     // Validate output
@@ -199,25 +198,25 @@ FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerFixture<half>, framework::DatasetMod
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                    framework::dataset::make("DataType", DataType::F32),
+                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                     framework::dataset::make("Axis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::F32),
+                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                         framework::dataset::make("Axis", { 0 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
-                                                                                                                     framework::dataset::make("DataType", DataType::F32)),
-                                                                                                             framework::dataset::make("Beta", { 1.0f, 2.0f })),
+FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayer4DShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::F32),
+                                                                                                             framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                      framework::dataset::make("Axis", { 0, -2, 3 })))
 {
     // Validate output
@@ -231,28 +230,28 @@ using CLSoftmaxLayerQuantizedFixture = SoftmaxValidationQuantizedFixture<CLTenso
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                       combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.f }))),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.f }),
                                                                                                                framework::dataset::make("Axis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                   combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f }))),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                                    framework::dataset::make("Axis", { 0 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                        combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f }))),
+FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayer4DShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f }),
                                                                                                                 framework::dataset::make("Axis", { 0, -4, 1 })))
 {
     // Validate output
@@ -263,10 +262,10 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                      combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                              framework::dataset::make("Beta", { 1.0f, 2.f }))),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                              framework::dataset::make("Beta", { 1.0f, 2.f }),
                                                                                                               framework::dataset::make("Axis", { 0, 1 })))
 {
     // Validate output

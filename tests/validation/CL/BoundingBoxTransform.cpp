@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,8 +74,7 @@ TEST_SUITE(BBoxTransform)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("BoxesInfo", { TensorInfo(TensorShape(4U, 128U), 1, DataType::F32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("BoxesInfo", { TensorInfo(TensorShape(4U, 128U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 128U), 1, DataType::F32), // Wrong number of box fields
                                                        TensorInfo(TensorShape(4U, 128U), 1, DataType::F16), // Wrong data type
                                                        TensorInfo(TensorShape(4U, 128U), 1, DataType::F32), // Wrong number of classes
@@ -86,18 +85,18 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                           TensorInfo(TensorShape(127U, 128U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
-                                                          TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)})),
+                                                          TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)}),
                framework::dataset::make("DeltasInfo", { TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(127U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)})),
+                                                        TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)}),
                framework::dataset::make("BoundingBoxTransofmInfo", { BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
-                                                                     BoundingBoxTransformInfo(800.f, 600.f, 0.f)})),
+                                                                     BoundingBoxTransformInfo(800.f, 600.f, 0.f)}),
                framework::dataset::make("Expected", { true, false, false, false, false, false})),
                boxes_info, pred_boxes_info, deltas_info, bbox_info, expected)
 {
@@ -112,7 +111,7 @@ using CLBoundingBoxTransformFixture = BoundingBoxTransformFixture<CLTensor, CLAc
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::F32 })))
+                       combine(DeltaDataset, BboxInfoDataset, framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f32, 0.f, absolute_tolerance_f32);
@@ -121,7 +120,7 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformFixture<half>, framework::DatasetMode::ALL,
-                       combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::F16 })))
+                       combine(DeltaDataset, BboxInfoDataset, framework::dataset::make("DataType", { DataType::F16 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f16, 0.03f, absolute_tolerance_f16);
@@ -135,7 +134,7 @@ using CLBoundingBoxTransformQuantizedFixture = BoundingBoxTransformQuantizedFixt
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM16)
 FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformQuantizedFixture<uint16_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::QASYMM16 })),
+                       combine(DeltaDataset, BboxInfoDataset, framework::dataset::make("DataType", { DataType::QASYMM16 }),
                                framework::dataset::make("DeltasQuantInfo", { QuantizationInfo(1.f / 255.f, 127) })))
 {
     // Validate output

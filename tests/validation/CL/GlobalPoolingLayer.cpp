@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,8 +59,8 @@ using CLGlobalPoolingLayerFixture = GlobalPoolingLayerValidationFixture<CLTensor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
-                                                                                                                  DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
+                                                                                                                  DataType::F32),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
@@ -69,8 +69,8 @@ FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<float>, fra
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
-                                                                                                                 DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
+                                                                                                                 DataType::F16),
                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output

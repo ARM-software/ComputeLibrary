@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,8 +49,7 @@ using CLSpaceToDepthLayerFixture = SpaceToDepthLayerValidationFixture<CLTensor, 
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Negative block shapes
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong tensor shape
@@ -59,8 +58,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 8U, 8U, 1U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 8U, 8U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 8U, 1U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("BlockShape", { 2, 2, -2, 2 })),
+                                                     }),
+               framework::dataset::make("BlockShape", { 2, 2, -2, 2 }),
                framework::dataset::make("Expected", { true, false, false, false})),
                input_info, output_info, block_shape, expected)
 {
@@ -72,15 +71,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSpaceToDepthLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                       DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSpaceToDepthLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                       DataType::F32),
                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSpaceToDepthLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                     DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSpaceToDepthLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                     DataType::F32),
                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -89,15 +88,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSpaceToDepthLayerFixture<float>, framework::D
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSpaceToDepthLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                      DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSpaceToDepthLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                      DataType::F16),
                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSpaceToDepthLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                    DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSpaceToDepthLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToDepthLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                    DataType::F16),
                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output

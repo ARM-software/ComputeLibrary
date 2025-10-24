@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2023 Arm Limited.
+ * Copyright (c) 2018-2020, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,8 +56,7 @@ TEST_SUITE(Comparison)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-        framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching input types
                                                  TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
@@ -68,13 +67,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-        })),
+        }),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-        })),
+        }),
         framework::dataset::make("Expected", { false, false, true, false, true})),
         input1_info, input2_info, output_info, expected)
 {
@@ -138,8 +137,8 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLComparisonQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,8 +88,7 @@ TEST_SUITE(StackLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-                         framework::dataset::make("InputInfo", { std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::U8) },
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::U8) },
                          std::vector<TensorInfo>{ TensorInfo(TensorShape(1U, 2U), 1, DataType::U8) , TensorInfo(TensorShape(1U, 2U), 1, DataType::U8), TensorInfo(TensorShape(1U, 2U), 1, DataType::U8)},
                          std::vector<TensorInfo>{ TensorInfo(TensorShape(2U, 3U), 1, DataType::S32) },
                          std::vector<TensorInfo>{ TensorInfo(TensorShape(7U, 5U, 3U, 8U, 2U), 1, DataType::S32), TensorInfo(TensorShape(7U, 5U, 3U, 8U, 2U), 1, DataType::S32)},
@@ -100,8 +99,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                   TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::S32),  // fails axis <  (- input's rank)
                                                                   TensorInfo(TensorShape(3U, 7U, 5U), 1, DataType::S32),  // fails, input dimensions > 4
                                                                   TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::U8),   // fails mismatching data types
-                         })),
-                         framework::dataset::make("Axis", { -3, 1, -4, -3, 1 })),
+                         }),
+                         framework::dataset::make("Axis", { -3, 1, -4, -3, 1 }),
                          framework::dataset::make("Expected", { true, true, false, false, false })),
                          input_info, output_info, axis, expected)
 {
@@ -119,8 +118,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 TEST_SUITE(Shapes1D)
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_1d_small,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_1d_small,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -128,8 +127,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMod
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<int>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_1d_large,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_1d_large,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -139,8 +138,8 @@ TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_1d_small,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_1d_small,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -148,8 +147,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetM
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<short>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_1d_large,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_1d_large,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -159,8 +158,8 @@ TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_1d_small,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_1d_small,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output
@@ -168,8 +167,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMo
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<char>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_1d_large,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_1d_large,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output
@@ -181,8 +180,8 @@ TEST_SUITE_END() // Shapes1D
 TEST_SUITE(Shapes2D)
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_2d_small,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_2d_small,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -190,8 +189,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMod
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<int>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_2d_large,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_2d_large,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -201,8 +200,8 @@ TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_2d_small,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_2d_small,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -210,8 +209,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetM
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<short>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_2d_large,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_2d_large,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -221,8 +220,8 @@ TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_2d_small,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_2d_small,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output
@@ -230,8 +229,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMo
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<char>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_2d_large,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_2d_large,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output
@@ -243,8 +242,8 @@ TEST_SUITE_END() // Shapes2D
 TEST_SUITE(Shapes3D)
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_3d_small,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_3d_small,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -252,8 +251,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMod
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<int>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_3d_large,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_3d_large,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -263,8 +262,8 @@ TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_3d_small,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_3d_small,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -272,8 +271,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetM
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<short>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_3d_large,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_3d_large,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -283,8 +282,8 @@ TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_3d_small,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_3d_small,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output
@@ -292,8 +291,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMo
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<char>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_3d_large,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_3d_large,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output
@@ -305,8 +304,8 @@ TEST_SUITE_END() // Shapes3D
 TEST_SUITE(Shapes4D)
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_4d_small,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_4d_small,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -314,8 +313,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<int>, framework::DatasetMod
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<int>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_4d_large,
-                                       framework::dataset::make("DataType", { DataType::S32 })),
+                       combine(shapes_4d_large,
+                                       framework::dataset::make("DataType", { DataType::S32 }),
                                n_values))
 {
     // Validate output
@@ -325,8 +324,8 @@ TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_4d_small,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_4d_small,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -334,8 +333,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<short>, framework::DatasetM
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<short>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_4d_large,
-                                       framework::dataset::make("DataType", { DataType::S16 })),
+                       combine(shapes_4d_large,
+                                       framework::dataset::make("DataType", { DataType::S16 }),
                                n_values))
 {
     // Validate output
@@ -345,8 +344,8 @@ TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMode::ALL,
-                       combine(combine(shapes_4d_small,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_4d_small,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output
@@ -354,8 +353,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLStackLayerFixture<char>, framework::DatasetMo
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLStackLayerFixture<char>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(shapes_4d_large,
-                                       framework::dataset::make("DataType", { DataType::S8 })),
+                       combine(shapes_4d_large,
+                                       framework::dataset::make("DataType", { DataType::S8 }),
                                n_values))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,13 +91,13 @@ TEST_SUITE(CL)
 TEST_SUITE(GEMMReshapeLHSMatrix)
 
 FIXTURE_DATA_TEST_CASE(S32, CLGEMMReshapeLHSMatrixFixture<int>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S32)),
-                                                                   m0_values_s32),
-                                                                   k0_values_s32),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape2DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S32),
+                                                                   m0_values_s32,
+                                                                   k0_values_s32,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    t_values))
 {
     // Validate output
@@ -105,13 +105,13 @@ FIXTURE_DATA_TEST_CASE(S32, CLGEMMReshapeLHSMatrixFixture<int>, framework::Datas
 }
 
 FIXTURE_DATA_TEST_CASE(S16, CLGEMMReshapeLHSMatrixFixture<short>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S16)),
-                                                                   m0_values_s16),
-                                                                   k0_values_s16),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape2DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S16),
+                                                                   m0_values_s16,
+                                                                   k0_values_s16,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    t_values))
 {
     // Validate output
@@ -119,13 +119,13 @@ FIXTURE_DATA_TEST_CASE(S16, CLGEMMReshapeLHSMatrixFixture<short>, framework::Dat
 }
 
 FIXTURE_DATA_TEST_CASE(S8, CLGEMMReshapeLHSMatrixFixture<char>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S8)),
-                                                                   m0_values_s8),
-                                                                   k0_values_s8),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape2DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S8),
+                                                                   m0_values_s8,
+                                                                   k0_values_s8,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    t_values))
 {
     // Validate output
@@ -134,13 +134,13 @@ FIXTURE_DATA_TEST_CASE(S8, CLGEMMReshapeLHSMatrixFixture<char>, framework::Datas
 
 TEST_SUITE(NotTransposed)
 FIXTURE_DATA_TEST_CASE(S16, CLGEMMReshapeLHSMatrixFixture<short>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S16)),
-                                                                   m0_values_s16_nt),
-                                                                   k0_values_s16),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape2DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S16),
+                                                                   m0_values_s16_nt,
+                                                                   k0_values_s16,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    framework::dataset::make("transpose", { false })))
 {
     // Validate output
@@ -148,13 +148,13 @@ FIXTURE_DATA_TEST_CASE(S16, CLGEMMReshapeLHSMatrixFixture<short>, framework::Dat
 }
 
 FIXTURE_DATA_TEST_CASE(S8, CLGEMMReshapeLHSMatrixFixture<char>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S8)),
-                                                                   m0_values_s8_nt),
-                                                                   k0_values_s8),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape2DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S8),
+                                                                   m0_values_s8_nt,
+                                                                   k0_values_s8,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    framework::dataset::make("transpose", { false })))
 {
     // Validate output
@@ -165,13 +165,13 @@ TEST_SUITE_END()
 
 TEST_SUITE(ReinterpretInputAs3D)
 FIXTURE_DATA_TEST_CASE(S32, CLGEMMReshapeLHSMatrix3DFixture<int>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape3DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S32)),
-                                                                   m0_values_s32),
-                                                                   k0_values_s32),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape3DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S32),
+                                                                   m0_values_s32,
+                                                                   k0_values_s32,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    t_values))
 {
     // Validate output
@@ -179,13 +179,13 @@ FIXTURE_DATA_TEST_CASE(S32, CLGEMMReshapeLHSMatrix3DFixture<int>, framework::Dat
 }
 
 FIXTURE_DATA_TEST_CASE(S16, CLGEMMReshapeLHSMatrix3DFixture<short>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape3DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S16)),
-                                                                   m0_values_s16),
-                                                                   k0_values_s16),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape3DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S16),
+                                                                   m0_values_s16,
+                                                                   k0_values_s16,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    t_values))
 {
     // Validate output
@@ -193,13 +193,13 @@ FIXTURE_DATA_TEST_CASE(S16, CLGEMMReshapeLHSMatrix3DFixture<short>, framework::D
 }
 
 FIXTURE_DATA_TEST_CASE(S8, CLGEMMReshapeLHSMatrix3DFixture<char>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape3DShapes(),
-                                                                   b_values),
-                                                                   framework::dataset::make("DataType", DataType::S8)),
-                                                                   m0_values_s8),
-                                                                   k0_values_s8),
-                                                                   v0_values),
-                                                                   i_values),
+                combine(datasets::SmallGEMMReshape3DShapes(),
+                                                                   b_values,
+                                                                   framework::dataset::make("DataType", DataType::S8),
+                                                                   m0_values_s8,
+                                                                   k0_values_s8,
+                                                                   v0_values,
+                                                                   i_values,
                                                                    t_values))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,8 +75,7 @@ TEST_SUITE(FFT1D)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32), // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32), // Mismatching data types
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32), // Mismatching shapes
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 3, DataType::F32), // Invalid channels
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32), // Unsupported axis
@@ -89,8 +88,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32),
                                                 TensorInfo(TensorShape(11U, 13U, 2U), 2, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 13U, 2U), 2, DataType::F32),
-        })),
-        framework::dataset::make("Axis", { 0, 0, 0, 2, 0, 0 })),
+        }),
+        framework::dataset::make("Axis", { 0, 0, 0, 2, 0, 0 }),
         framework::dataset::make("Expected", { false, false, false, false, false, true })),
         input_info, output_info, axis, expected)
 {
@@ -128,8 +127,7 @@ TEST_SUITE(FFT2D)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 25U, 2U), 2, DataType::F32), // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 25U, 2U), 2, DataType::F32), // Mismatching data types
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 2, DataType::F32), // Mismatching shapes
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 3, DataType::F32), // Invalid channels
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32), // Undecomposable FFT
@@ -140,7 +138,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 2, DataType::F32),
-        })),
+        }),
         framework::dataset::make("Expected", { false, false, false, false, true })),
                input_info, output_info, expected)
 {
@@ -180,17 +178,17 @@ using CLFFTConvolutionLayerMixedDataLayoutFixture = FFTConvolutionValidationFixt
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                  ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFFTConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFFTConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                  ActivationFunctionsSmallDataset))
 {
     // Validate output
@@ -198,9 +196,9 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFFTConvolutionLayerMixedDataLayoutF
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("DataType", DataType::F16),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                 ActivationFunctionsSmallDataset))
 {
     // Validate output

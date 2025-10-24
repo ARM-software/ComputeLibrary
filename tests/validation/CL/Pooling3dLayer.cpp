@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2024 Arm Limited.
+ * Copyright (c) 2022, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,20 +49,20 @@ namespace validation
 namespace
 {
 /** Input data sets for floating-point data types */
-const auto Pooling3dLayerDatasetFP = combine(combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { Size3D(2, 3, 2) })),
-                                                             framework::dataset::make("Stride", { Size3D(1, 1, 1), Size3D(2, 1, 1), Size3D(1, 2, 1), Size3D(2, 2, 1) })),
-                                                     framework::dataset::make("Padding", { Padding3D(0, 1, 0), Padding3D(1, 1, 1) })),
+const auto Pooling3dLayerDatasetFP = combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { Size3D(2, 3, 2) }),
+                                                             framework::dataset::make("Stride", { Size3D(1, 1, 1), Size3D(2, 1, 1), Size3D(1, 2, 1), Size3D(2, 2, 1) }),
+                                                     framework::dataset::make("Padding", { Padding3D(0, 1, 0), Padding3D(1, 1, 1) }),
                                              framework::dataset::make("ExcludePadding", { true, false }));
 
-const auto Pooling3dLayerDatasetFPSmall = combine(combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { Size3D(2, 2, 2), Size3D(3, 3, 3) })),
-                                                                  framework::dataset::make("Stride", { Size3D(2, 2, 2), Size3D(2, 1, 1) })),
-                                                          framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) })),
+const auto Pooling3dLayerDatasetFPSmall = combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { Size3D(2, 2, 2), Size3D(3, 3, 3) }),
+                                                                  framework::dataset::make("Stride", { Size3D(2, 2, 2), Size3D(2, 1, 1) }),
+                                                          framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) }),
                                                   framework::dataset::make("ExcludePadding", { true, false }));
 
-const auto Pooling3DLayerDatasetQuantized = combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
-                                                                            framework::dataset::make("PoolingSize", { Size3D(2, 3, 2) })),
-                                                                    framework::dataset::make("Stride", { Size3D(1, 1, 1), Size3D(2, 1, 1), Size3D(1, 2, 1), Size3D(1, 1, 2), Size3D(2, 2, 1)})),
-                                                            framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) })),
+const auto Pooling3DLayerDatasetQuantized = combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                                            framework::dataset::make("PoolingSize", { Size3D(2, 3, 2) }),
+                                                                    framework::dataset::make("Stride", { Size3D(1, 1, 1), Size3D(2, 1, 1), Size3D(1, 2, 1), Size3D(1, 1, 2), Size3D(2, 2, 1)}),
+                                                            framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) }),
                                                     framework::dataset::make("ExcludePadding", { true }));
 
 using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
@@ -121,8 +121,7 @@ TEST_CASE(RoundToNearestInteger, framework::DatasetMode::ALL)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 27U, 13U, 4U, 3U), 1, DataType::F32, DataLayout::NDHWC), // Mismatching data type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 27U, 13U, 4U, 3U), 1, DataType::F32, DataLayout::NDHWC), // Mismatching data type
                                                        TensorInfo(TensorShape(2U, 27U, 13U, 4U, 2U), 1, DataType::F32, DataLayout::NDHWC), // Invalid pad/size combination
                                                        TensorInfo(TensorShape(2U, 27U, 13U, 4U, 2U), 1, DataType::F32, DataLayout::NDHWC), // Invalid pad/size combination
                                                        TensorInfo(TensorShape(2U, 27U, 13U, 4U, 3U), 1, DataType::F32, DataLayout::NDHWC), // Invalid output shape
@@ -151,7 +150,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(5U, 6U, 6U, 2U, 2U),  1, DataType::F32, DataLayout::NDHWC),
                                                        TensorInfo(TensorShape(5U, 6U, 6U, 2U, 3U),  1, DataType::F32, DataLayout::NDHWC),
                                                        TensorInfo(TensorShape(5U, 6U, 6U, 2U, 3U),  1, DataType::F32, DataLayout::NDHWC),
-                                                     })),
+                                                     }),
                framework::dataset::make("PoolInfo",  { Pooling3dLayerInfo(PoolingType::AVG, 3, Size3D(1, 1, 1), Padding3D(0, 0, 0)),
                                                        Pooling3dLayerInfo(PoolingType::AVG, 2, Size3D(1, 1, 1), Padding3D(2, 0, 0)),
                                                        Pooling3dLayerInfo(PoolingType::AVG, 2, Size3D(1, 1, 1), Padding3D(0, 0, 0)),
@@ -166,7 +165,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        Pooling3dLayerInfo(PoolingType::AVG, 1, Size3D(2U, 2U, 2U), Padding3D(2, 2, 2), true), // Pool size is smaller than the padding size with padding excluded
                                                        Pooling3dLayerInfo(PoolingType::AVG, 1, Size3D(2U, 2U, 2U), Padding3D(2, 2, 2), false), // Pool size is smaller than the padding size with padding included
                                                        Pooling3dLayerInfo(PoolingType::AVG, 3, Size3D(2U, 2U, 2U), Padding3D(2,1,2,2,1,2), false, false, DimensionRoundingType::CEIL), // CEIL with asymmetric Padding
-                                                      })),
+                                                      }),
                framework::dataset::make("Expected", { false, false, false, false, true, false, false, false, true , false, true, false, false, false})),
                input_info, output_info, pool_info, expected)
 {
@@ -192,10 +191,10 @@ TEST_SUITE(QUANTIZED)
 
 TEST_SUITE(QASYMM8)
 // Small Dataset Quantized Dataset
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small5dShapes(),
-                                                                                                                       combine(Pooling3DLayerDatasetQuantized,
-                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, 10), QuantizationInfo(1.f / 127.f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small5dShapes(),
+                                                                                                                       Pooling3DLayerDatasetQuantized,
+                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, 10), QuantizationInfo(1.f / 127.f, 10) }),
                                                                                                                        framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, 5), QuantizationInfo(1.f / 127.f, 10) })))
 {
     // Validate output
@@ -203,10 +202,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<uint8_t>, fram
 }
 
 // Large Dataset Quantized Dataset
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large5dShapes(),
-                                                                                                                       combine(Pooling3DLayerDatasetQuantized,
-                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, 10), QuantizationInfo(1.f / 127.f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(),
+                                                                                                                       Pooling3DLayerDatasetQuantized,
+                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, 10), QuantizationInfo(1.f / 127.f, 10) }),
                                                                                                                        framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, 5), QuantizationInfo(1.f / 127.f, 10) })))
 {
     // Validate output
@@ -217,10 +216,10 @@ TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
 
 // Large Dataset Quantized Dataset Signed
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small5dShapes(),
-                                                                                                                      combine(Pooling3DLayerDatasetQuantized,
-                                                                                                                              framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
-                                                                                                                      framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small5dShapes(),
+                                                                                                                      Pooling3DLayerDatasetQuantized,
+                                                                                                                              framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                      framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) }),
                                                                                                                       framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -5), QuantizationInfo(1.f / 127.f, -10) })))
 {
     // Validate output
@@ -228,10 +227,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<int8_t>, frame
 }
 
 // Large Dataset Quantized pooling test
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large5dShapes(),
-                                                                                                                    combine(Pooling3DLayerDatasetQuantized,
-                                                                                                                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
-                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) })),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(),
+                                                                                                                    Pooling3DLayerDatasetQuantized,
+                                                                                                                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) }),
                                                                                                                     framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -5), QuantizationInfo(1.f / 127.f, -10) })))
 {
     // Validate output
@@ -250,15 +249,15 @@ FIXTURE_DATA_TEST_CASE(RunSpecial, CLSpecialPooling3dLayerFixture<float>, framew
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small5dShapes(), combine(Pooling3dLayerDatasetFPSmall,
-                                                                                                            framework::dataset::make("DataType", DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small5dShapes(), Pooling3dLayerDatasetFPSmall,
+                                                                                                            framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(), combine(Pooling3dLayerDatasetFP,
-                                                                                                          framework::dataset::make("DataType", DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(), Pooling3dLayerDatasetFP,
+                                                                                                          framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -268,15 +267,14 @@ TEST_SUITE(GlobalPooling)
 // *INDENT-OFF*
 // clang-format off
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(combine(combine(
-                                    framework::dataset::make("InputShape", { TensorShape(3U, 27U, 13U, 4U),
+                       combine(framework::dataset::make("InputShape", { TensorShape(3U, 27U, 13U, 4U),
                                                                              TensorShape(4U, 27U, 13U, 4U, 2U)
                                                                            }),
-                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
-                                    framework::dataset::make("PoolingSize", { Size3D(27, 13, 4) })),
-                                    framework::dataset::make("Strides",  Size3D(1, 1, 1))),
-                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0))),
-                                    framework::dataset::make("ExcludePadding", false)),
+                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX }),
+                                    framework::dataset::make("PoolingSize", { Size3D(27, 13, 4) }),
+                                    framework::dataset::make("Strides",  Size3D(1, 1, 1)),
+                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0)),
+                                    framework::dataset::make("ExcludePadding", false),
                                     framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -284,26 +282,24 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<float>, framework::Data
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallGlobal, CLPooling3dLayerGlobalFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(
-                                    framework::dataset::make("InputShape", { TensorShape(27U, 13U, 4U, 3U),
+                       combine(framework::dataset::make("InputShape", { TensorShape(27U, 13U, 4U, 3U),
                                                                              TensorShape(27U, 13U, 4U, 4U, 2U)
                                                                            }),
-                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
+                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX }),
                                     framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(
-                                    framework::dataset::make("InputShape", { TensorShape(4U, 79U, 37U, 11U),
+                       combine(framework::dataset::make("InputShape", { TensorShape(4U, 79U, 37U, 11U),
                                                                              TensorShape(4U, 79U, 37U, 11U, 2U)
                                                                            }),
-                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
-                                    framework::dataset::make("PoolingSize", { Size3D(79, 37, 11) })),
-                                    framework::dataset::make("Strides",  Size3D(1, 1, 1))),
-                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0))),
-                                    framework::dataset::make("ExcludePadding", false)),
+                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX }),
+                                    framework::dataset::make("PoolingSize", { Size3D(79, 37, 11) }),
+                                    framework::dataset::make("Strides",  Size3D(1, 1, 1)),
+                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0)),
+                                    framework::dataset::make("ExcludePadding", false),
                                     framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -316,15 +312,15 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small5x5Shapes(), combine(Pooling3dLayerDatasetFPSmall,
-                                                                                                           framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small5x5Shapes(), Pooling3dLayerDatasetFPSmall,
+                                                                                                           framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(), combine(Pooling3dLayerDatasetFP,
-                                                                                                         framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(), Pooling3dLayerDatasetFP,
+                                                                                                         framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -334,15 +330,14 @@ TEST_SUITE(GlobalPooling)
 // *INDENT-OFF*
 // clang-format off
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<half>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(combine(combine(
-                                    framework::dataset::make("InputShape", { TensorShape(3U, 27U, 13U, 4U),
+                       combine(framework::dataset::make("InputShape", { TensorShape(3U, 27U, 13U, 4U),
                                                                              TensorShape(4U, 27U, 13U, 4U, 2U)
                                                                            }),
-                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
-                                    framework::dataset::make("PoolingSize", { Size3D(27, 13, 4) })),
-                                    framework::dataset::make("Strides",  Size3D(1, 1, 1))),
-                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0))),
-                                    framework::dataset::make("ExcludePadding", false)),
+                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX }),
+                                    framework::dataset::make("PoolingSize", { Size3D(27, 13, 4) }),
+                                    framework::dataset::make("Strides",  Size3D(1, 1, 1)),
+                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0)),
+                                    framework::dataset::make("ExcludePadding", false),
                                     framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -350,26 +345,24 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<half>, framework::Datas
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallGlobal, CLPooling3dLayerGlobalFixture<half>, framework::DatasetMode::ALL,
-                       combine(combine(
-                                    framework::dataset::make("InputShape", { TensorShape(27U, 13U, 4U, 3U),
+                       combine(framework::dataset::make("InputShape", { TensorShape(27U, 13U, 4U, 3U),
                                                                              TensorShape(27U, 13U, 4U, 4U, 2U)
                                                                            }),
-                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
+                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX }),
                                     framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(
-                                    framework::dataset::make("InputShape", { TensorShape(4U, 79U, 37U, 11U),
+                       combine(framework::dataset::make("InputShape", { TensorShape(4U, 79U, 37U, 11U),
                                                                              TensorShape(4U, 79U, 37U, 11U, 2U)
                                                                            }),
-                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
-                                    framework::dataset::make("PoolingSize", { Size3D(79, 37, 11) })),
-                                    framework::dataset::make("Strides",  Size3D(1, 1, 1))),
-                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0))),
-                                    framework::dataset::make("ExcludePadding", false)),
+                                    framework::dataset::make("PoolingType", { PoolingType::AVG, PoolingType::L2, PoolingType::MAX }),
+                                    framework::dataset::make("PoolingSize", { Size3D(79, 37, 11) }),
+                                    framework::dataset::make("Strides",  Size3D(1, 1, 1)),
+                                    framework::dataset::make("Paddings", Padding3D(0, 0, 0)),
+                                    framework::dataset::make("ExcludePadding", false),
                                     framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output

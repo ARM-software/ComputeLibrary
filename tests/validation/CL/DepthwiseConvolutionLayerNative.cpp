@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -155,20 +155,19 @@ TEST_SUITE(DepthwiseConvolutionLayerNative)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_precommit),
+                combine(width_values_precommit,
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 1),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                n0_values_precommit,
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -176,20 +175,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<fl
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_nightly,
-                                                                                                height_values_nightly),
-                                                                                                channel_values_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values_nightly),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                make("Activation", { ActivationLayerInfo() })),
-                                                                                                n0_values_nightly),
+                combine(width_values_nightly,
+                                                                                                height_values_nightly,
+                                                                                                channel_values_nightly,
+                                                                                                batch_values_nightly,
+                                                                                                kernel_sz_values_nightly,
+                                                                                                make("depth_multiplier", 1),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values_nightly,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                make("Activation", { ActivationLayerInfo() }),
+                                                                                                n0_values_nightly,
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -219,20 +217,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunActivations, CLDepthwiseConvolutionLayerNativeFixt
 
 TEST_SUITE(ExportWeightsToCLImage)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_export_to_cl_image_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_export_to_cl_image_precommit),
+                combine(width_values_precommit,
+                                                                                                height_values_precommit,
+                                                                                                channel_values_export_to_cl_image_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 1),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                n0_values_export_to_cl_image_precommit,
                                                                                                 make("ExportToCLImage", true)))
 {
    // Validate output
@@ -249,20 +246,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<fl
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_nightly,
-                                                                                                height_values_nightly),
-                                                                                                channel_values_export_to_cl_image_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values_nightly),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                make("Activation", { ActivationLayerInfo() })),
-                                                                                                n0_values_export_to_cl_image_nightly),
+                combine(width_values_nightly,
+                                                                                                height_values_nightly,
+                                                                                                channel_values_export_to_cl_image_nightly,
+                                                                                                batch_values_nightly,
+                                                                                                kernel_sz_values_nightly,
+                                                                                                make("depth_multiplier", 1),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values_nightly,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                make("Activation", { ActivationLayerInfo() }),
+                                                                                                n0_values_export_to_cl_image_nightly,
                                                                                                 make("ExportToCLImage", true)))
 {
    // Validate output
@@ -283,40 +279,38 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_precommit),
+                combine(width_values_precommit,
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 1),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                n0_values_precommit,
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
         validate(CLAccessor(_target), _reference, rel_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 47U } ),
-                                                                                                make("height", { 39U } )),
-                                                                                                make("channels", { 19U } )),
-                                                                                                batch_values_nightly),
-                                                                                                make("kernel_size", { Size2D(5U, 5U) })),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                make("dilation", { Size2D(3U, 3U) })),
-                                                                                                make("stride", { Size2D(3U, 2U) })),
-                                                                                                padding_valid_values_nightly),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                make("Activation", { ActivationLayerInfo() })),
-                                                                                                n0_values_nightly),
+                combine(make("width", { 47U } ),
+                                                                                                make("height", { 39U } ),
+                                                                                                make("channels", { 19U } ),
+                                                                                                batch_values_nightly,
+                                                                                                make("kernel_size", { Size2D(5U, 5U) }),
+                                                                                                make("depth_multiplier", 1),
+                                                                                                make("dilation", { Size2D(3U, 3U) }),
+                                                                                                make("stride", { Size2D(3U, 2U) }),
+                                                                                                padding_valid_values_nightly,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                make("Activation", { ActivationLayerInfo() }),
+                                                                                                n0_values_nightly,
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -346,20 +340,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunActivations, CLDepthwiseConvolutionLayerNativeFixt
 
 TEST_SUITE(ExportWeightsToCLImage)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_export_to_cl_image_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                n0_values_export_to_cl_image_precommit),
+                combine(width_values_precommit,
+                                                                                                height_values_precommit,
+                                                                                                channel_values_export_to_cl_image_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 1),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                n0_values_export_to_cl_image_precommit,
                                                                                                 make("ExportToCLImage", true)))
 {
    // Validate output
@@ -375,20 +368,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<ha
     }
 }
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 47U } ),
-                                                                                                make("height", { 39U } )),
-                                                                                                channel_values_export_to_cl_image_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                make("kernel_size", { Size2D(5U, 5U) })),
-                                                                                                make("depth_multiplier", 1)),
-                                                                                                make("dilation", { Size2D(3U, 3U) })),
-                                                                                                make("stride", { Size2D(3U, 2U) })),
-                                                                                                padding_valid_values_nightly),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                make("Activation", { ActivationLayerInfo() })),
-                                                                                                n0_values_export_to_cl_image_nightly),
+                combine(make("width", { 47U } ),
+                                                                                                make("height", { 39U } ),
+                                                                                                channel_values_export_to_cl_image_nightly,
+                                                                                                batch_values_nightly,
+                                                                                                make("kernel_size", { Size2D(5U, 5U) }),
+                                                                                                make("depth_multiplier", 1),
+                                                                                                make("dilation", { Size2D(3U, 3U) }),
+                                                                                                make("stride", { Size2D(3U, 2U) }),
+                                                                                                padding_valid_values_nightly,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                make("Activation", { ActivationLayerInfo() }),
+                                                                                                n0_values_export_to_cl_image_nightly,
                                                                                                 make("ExportToCLImage", true)))
 {
    // Validate output
@@ -411,20 +403,19 @@ TEST_SUITE(DepthMultiplier)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 33U } ),
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                make("N0", 1)),
+                combine(make("width", { 33U } ),
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                make("N0", 1),
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -432,20 +423,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<fl
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 53U } ),
-                                                                                                height_values_nightly),
-                                                                                                channel_values_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values_nightly),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                make("Activation", { ActivationLayerInfo() })),
-                                                                                                make("N0", 1)),
+                combine(make("width", { 53U } ),
+                                                                                                height_values_nightly,
+                                                                                                channel_values_nightly,
+                                                                                                batch_values_nightly,
+                                                                                                kernel_sz_values_nightly,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values_nightly,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                make("Activation", { ActivationLayerInfo() }),
+                                                                                                make("N0", 1),
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -454,20 +444,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<fl
 
 TEST_SUITE(DepthMultiplierMultipleOfOutputChannels)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 33U } ),
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 2)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                make("N0", {2})),
+                combine(make("width", { 33U } ),
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 2),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                make("N0", {2}),
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -476,20 +465,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<fl
 
 TEST_SUITE(ExportWeightsToCLImage)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 33U } ),
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 4)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F32)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                make("N0", {4})),
+                combine(make("width", { 33U } ),
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 4),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F32),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                make("N0", {4}),
                                                                                                 make("ExportToCLImage", true)))
 {
    // Validate output
@@ -510,20 +498,19 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 33U } ),
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                make("N0", 1)),
+                combine(make("width", { 33U } ),
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                make("N0", 1),
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -531,20 +518,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<ha
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 53U } ),
-                                                                                                height_values_nightly),
-                                                                                                channel_values_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values_nightly),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                make("Activation", { ActivationLayerInfo() })),
-                                                                                                make("N0", 1)),
+                combine(make("width", { 53U } ),
+                                                                                                height_values_nightly,
+                                                                                                channel_values_nightly,
+                                                                                                batch_values_nightly,
+                                                                                                kernel_sz_values_nightly,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values_nightly,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                make("Activation", { ActivationLayerInfo() }),
+                                                                                                make("N0", 1),
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -553,20 +539,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<ha
 
 TEST_SUITE(DepthMultiplierMultipleOfOutputChannels)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 33U } ),
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 2)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                make("N0", {2})),
+                combine(make("width", { 33U } ),
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 2),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                make("N0", {2}),
                                                                                                 make("ExportToCLImage", false)))
 {
     // Validate output
@@ -575,20 +560,19 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<ha
 
 TEST_SUITE(ExportWeightsToCLImage)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                                                make("width", { 33U } ),
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                make("depth_multiplier", 4)),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                make("DataType", DataType::F16)),
-                                                                                                data_layout_values),
-                                                                                                act_values),
-                                                                                                make("N0", {4})),
+                combine(make("width", { 33U } ),
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                make("depth_multiplier", 4),
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                make("DataType", DataType::F16),
+                                                                                                data_layout_values,
+                                                                                                act_values,
+                                                                                                make("N0", {4}),
                                                                                                 make("ExportToCLImage", true)))
 {
    // Validate output

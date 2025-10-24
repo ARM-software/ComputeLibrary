@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,8 +67,7 @@ TEST_SUITE(PadLayer)
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching data type input/output
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching data type input/output
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching shapes with padding
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Invalid number of pad dimensions
@@ -83,7 +82,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(29U, 15U, 4U, 3U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(29U, 17U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32)
-                                                     })),
+                                                     }),
                framework::dataset::make("PaddingSize", { PaddingList{{0, 0}},
                                                          PaddingList{{1, 1}},
                                                          PaddingList{{1, 1}, {2, 2}},
@@ -91,7 +90,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                          PaddingList{{1,1}, {1,1}, {1,1}},
                                                          PaddingList{{1, 1}, {2, 2}},
                                                          PaddingList{{0,0}, {0,0}, {1,1}}
-                                                         })),
+                                                         }),
                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT,
                                                          PaddingMode::CONSTANT,
                                                          PaddingMode::CONSTANT,
@@ -99,7 +98,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                          PaddingMode::SYMMETRIC,
                                                          PaddingMode::REFLECT,
                                                          PaddingMode::REFLECT
-                                                       })),
+                                                       }),
                framework::dataset::make("Expected", { false,
                                                       false,
                                                       true,
@@ -112,8 +111,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
     ARM_COMPUTE_EXPECT(bool(CLPadLayer::validate(&input_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), padding, PixelValue(), mode)) == expected, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(CheckFusingWithConvolution, framework::DatasetMode::ALL, zip(zip(
-                framework::dataset::make("DataLayout",  { DataLayout::NCHW,
+DATA_TEST_CASE(CheckFusingWithConvolution, framework::DatasetMode::ALL, zip(framework::dataset::make("DataLayout",  { DataLayout::NCHW,
                                                           DataLayout::NCHW,
                                                           DataLayout::NCHW,
                                                           DataLayout::NCHW,
@@ -146,7 +144,7 @@ DATA_TEST_CASE(CheckFusingWithConvolution, framework::DatasetMode::ALL, zip(zip(
                                                           PaddingList({{0, 1}}),
                                                           PaddingList({{0, 0}, {1, 1}}),
                                                           PaddingList({{0, 0}})
-                                                        })),                           // unknown
+                                                        }),                           // unknown
                 framework::dataset::make("Expected",    { false,    // nchw
                                                           true,
                                                           true,
@@ -179,21 +177,21 @@ TEST_SUITE(Float)
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::F32 })), PaddingSizesDataset3D),
+                       combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::F32 }), PaddingSizesDataset3D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunSmall4D, CLPaddingFixture<float>, framework::DatasetMode::ALL,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::F32 })), PaddingSizesDataset4D),
+                       combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::F32 }), PaddingSizesDataset4D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F32 })), PaddingSizesDataset3D),
+                       combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F32 }), PaddingSizesDataset3D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
 {
     // Validate output
@@ -203,7 +201,7 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F16 })), PaddingSizesDataset3D),
+                       combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F16 }), PaddingSizesDataset3D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
     // Validate output
@@ -215,21 +213,21 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })), PaddingSizesDataset3D),
+                       combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 }), PaddingSizesDataset3D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunSmall4D, CLPaddingFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })), PaddingSizesDataset4D),
+                       combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 }), PaddingSizesDataset4D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })), PaddingSizesDataset3D),
+                       combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 }), PaddingSizesDataset3D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
     // Validate output
@@ -239,7 +237,7 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })), PaddingSizesDataset3D),
+                       combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED }), PaddingSizesDataset3D,
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
     // Validate output
