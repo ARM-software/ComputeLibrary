@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -220,89 +220,89 @@ TEST_SUITE_END() // Validate
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::TinyMatMulDataset(),
-                                                                                                                      framework::dataset::make("TransposeA", { true, false })),
-                                                                                                                      framework::dataset::make("TransposeB", { true, false })),
-                                                                                                                      m0_values_precommit),
-                                                                                                                      n0_values_precommit),
-                                                                                                                      k0_values_precommit),
-                                                                                                                      framework::dataset::make("ExportRhsToCLImage", { false })),
+FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::TinyMatMulDataset(),
+                                                                                                                      framework::dataset::make("TransposeA", { true, false }),
+                                                                                                                      framework::dataset::make("TransposeB", { true, false }),
+                                                                                                                      m0_values_precommit,
+                                                                                                                      n0_values_precommit,
+                                                                                                                      k0_values_precommit,
+                                                                                                                      framework::dataset::make("ExportRhsToCLImage", { false }),
                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                                                                                       framework::dataset::make("TransposeA", { true, false })),
-                                                                                                                       framework::dataset::make("TransposeB", { true, false })),
-                                                                                                                       m0_values_precommit),
-                                                                                                                       n0_values_precommit),
-                                                                                                                       k0_values_precommit),
-                                                                                                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallMatMulDataset(),
+                                                                                                                       framework::dataset::make("TransposeA", { true, false }),
+                                                                                                                       framework::dataset::make("TransposeB", { true, false }),
+                                                                                                                       m0_values_precommit,
+                                                                                                                       n0_values_precommit,
+                                                                                                                       k0_values_precommit,
+                                                                                                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                                                                                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
-FIXTURE_DATA_TEST_CASE(RunWithBias, CLMatMulLowpKernelWithBiasFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                                                                                    framework::dataset::make("TransposeA", { true, false })),
-                                                                                                                    framework::dataset::make("TransposeB", { true, false })),
-                                                                                                                    m0_values_precommit),
-                                                                                                                    n0_values_precommit),
-                                                                                                                    k0_values_precommit),
-                                                                                                                    framework::dataset::make("ExportRhsToCLImage", { false })),
+FIXTURE_DATA_TEST_CASE(RunWithBias, CLMatMulLowpKernelWithBiasFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallMatMulDataset(),
+                                                                                                                    framework::dataset::make("TransposeA", { true, false }),
+                                                                                                                    framework::dataset::make("TransposeB", { true, false }),
+                                                                                                                    m0_values_precommit,
+                                                                                                                    n0_values_precommit,
+                                                                                                                    k0_values_precommit,
+                                                                                                                    framework::dataset::make("ExportRhsToCLImage", { false }),
                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { false })),
-                                                                       framework::dataset::make("TransposeB", { false })),
-                                                               m0_values_nightly_lhs_nt),
-                                                       n0_values_nightly_rhs_nt),
-                                               k0_values_nightly_lhs_nt_rhs_nt),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { false }),
+                                                                       framework::dataset::make("TransposeB", { false }),
+                                                               m0_values_nightly_lhs_nt,
+                                                       n0_values_nightly_rhs_nt,
+                                               k0_values_nightly_lhs_nt_rhs_nt,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeRhsTransposed, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { false })),
-                                                                       framework::dataset::make("TransposeB", { true })),
-                                                               m0_values_nightly_lhs_nt),
-                                                       n0_values_nightly_rhs_t),
-                                               k0_values_nightly_rhs_t),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { false }),
+                                                                       framework::dataset::make("TransposeB", { true }),
+                                                               m0_values_nightly_lhs_nt,
+                                                       n0_values_nightly_rhs_t,
+                                               k0_values_nightly_rhs_t,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { true })),
-                                                                       framework::dataset::make("TransposeB", { false })),
-                                                               m0_values_nightly_lhs_t),
-                                                       n0_values_nightly_rhs_nt),
-                                               k0_values_nightly_lhs_t_rhs_nt),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { true }),
+                                                                       framework::dataset::make("TransposeB", { false }),
+                                                               m0_values_nightly_lhs_t,
+                                                       n0_values_nightly_rhs_nt,
+                                               k0_values_nightly_lhs_t_rhs_nt,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposedRhsTransposed, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { true })),
-                                                                       framework::dataset::make("TransposeB", { true })),
-                                                               m0_values_nightly_lhs_t),
-                                                       n0_values_nightly_rhs_t),
-                                               k0_values_nightly_rhs_t),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { true }),
+                                                                       framework::dataset::make("TransposeB", { true }),
+                                                               m0_values_nightly_lhs_t,
+                                                       n0_values_nightly_rhs_t,
+                                               k0_values_nightly_rhs_t,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
@@ -311,13 +311,13 @@ FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposedRhsTransposed, CLMatMulLowpNativeKer
 // Running High Dimensional test is enough for qasymm8_signed, because we're stressing the number of dimensions, not data type or M0/N0/K0
 // It's a good idea to test for each Lhs/Rhs T/NT combinations because they're different CL kernels
 FIXTURE_DATA_TEST_CASE(RunHighDimensional, CLMatMulLowpNativeKernelFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::HighDimensionalMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { true, false })),
-                                                                       framework::dataset::make("TransposeB", { true, false })),
-                                                               framework::dataset::make("M0", { 2 })),
-                                                       framework::dataset::make("N0", { 2 })),
-                                               framework::dataset::make("K0", { 2 })),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::HighDimensionalMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { true, false }),
+                                                                       framework::dataset::make("TransposeB", { true, false }),
+                                                               framework::dataset::make("M0", { 2 }),
+                                                       framework::dataset::make("N0", { 2 }),
+                                               framework::dataset::make("K0", { 2 }),
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
@@ -326,77 +326,77 @@ FIXTURE_DATA_TEST_CASE(RunHighDimensional, CLMatMulLowpNativeKernelFixture<int8_
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::TinyMatMulDataset(),
-                                                                                                                       framework::dataset::make("TransposeA", { true, false })),
-                                                                                                                       framework::dataset::make("TransposeB", { true, false })),
-                                                                                                                       m0_values_precommit),
-                                                                                                                       n0_values_precommit),
-                                                                                                                       k0_values_precommit),
-                                                                                                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::TinyMatMulDataset(),
+                                                                                                                       framework::dataset::make("TransposeA", { true, false }),
+                                                                                                                       framework::dataset::make("TransposeB", { true, false }),
+                                                                                                                       m0_values_precommit,
+                                                                                                                       n0_values_precommit,
+                                                                                                                       k0_values_precommit,
+                                                                                                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                                                                                                framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                                                                                        framework::dataset::make("TransposeA", { true, false })),
-                                                                                                                        framework::dataset::make("TransposeB", { true, false })),
-                                                                                                                        m0_values_precommit),
-                                                                                                                        n0_values_precommit),
-                                                                                                                        k0_values_precommit),
-                                                                                                                        framework::dataset::make("ExportRhsToCLImage", { false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallMatMulDataset(),
+                                                                                                                        framework::dataset::make("TransposeA", { true, false }),
+                                                                                                                        framework::dataset::make("TransposeB", { true, false }),
+                                                                                                                        m0_values_precommit,
+                                                                                                                        n0_values_precommit,
+                                                                                                                        k0_values_precommit,
+                                                                                                                        framework::dataset::make("ExportRhsToCLImage", { false }),
                                                                                                                 framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { false })),
-                                                                       framework::dataset::make("TransposeB", { false })),
-                                                               m0_values_nightly_lhs_nt),
-                                                       n0_values_nightly_rhs_nt),
-                                               k0_values_nightly_lhs_nt_rhs_nt),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { false }),
+                                                                       framework::dataset::make("TransposeB", { false }),
+                                                               m0_values_nightly_lhs_nt,
+                                                       n0_values_nightly_rhs_nt,
+                                               k0_values_nightly_lhs_nt_rhs_nt,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeRhsTransposed, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { false })),
-                                                                       framework::dataset::make("TransposeB", { true })),
-                                                               m0_values_nightly_lhs_nt),
-                                                       n0_values_nightly_rhs_t),
-                                               k0_values_nightly_rhs_t),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { false }),
+                                                                       framework::dataset::make("TransposeB", { true }),
+                                                               m0_values_nightly_lhs_nt,
+                                                       n0_values_nightly_rhs_t,
+                                               k0_values_nightly_rhs_t,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { true })),
-                                                                       framework::dataset::make("TransposeB", { false })),
-                                                               m0_values_nightly_lhs_t),
-                                                       n0_values_nightly_rhs_nt),
-                                               k0_values_nightly_lhs_t_rhs_nt),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { true }),
+                                                                       framework::dataset::make("TransposeB", { false }),
+                                                               m0_values_nightly_lhs_t,
+                                                       n0_values_nightly_rhs_nt,
+                                               k0_values_nightly_lhs_t_rhs_nt,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposedRhsTransposed, CLMatMulLowpNativeKernelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
-                                                                               framework::dataset::make("TransposeA", { true })),
-                                                                       framework::dataset::make("TransposeB", { true })),
-                                                               m0_values_nightly_lhs_t),
-                                                       n0_values_nightly_rhs_t),
-                                               k0_values_nightly_rhs_t),
-                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                       combine(datasets::LargeMatMulDataset(),
+                                                                               framework::dataset::make("TransposeA", { true }),
+                                                                       framework::dataset::make("TransposeB", { true }),
+                                                               m0_values_nightly_lhs_t,
+                                                       n0_values_nightly_rhs_t,
+                                               k0_values_nightly_rhs_t,
+                                       framework::dataset::make("ExportRhsToCLImage", { false }),
                                framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output

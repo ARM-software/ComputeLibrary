@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,15 +53,14 @@ TEST_SUITE(MeanStdDevNormalizationLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data type input/output
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data type input/output
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching shapes
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { false, false, true })),
                input_info, output_info, expected)
 {
@@ -75,17 +74,17 @@ using CLMeanStdDevNormalizationLayerFixture = MeanStdDevNormalizationLayerValida
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::F16)),
-                       framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
+                       framework::dataset::make("DataType", DataType::F16),
+                       framework::dataset::make("InPlace", { false, true }),
                        framework::dataset::make("Epsilon", { 1e-3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                       framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DMeanStdDevNormalizationShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::F16),
+                                                                                                                       framework::dataset::make("InPlace", { false, true }),
                                                                                                                        framework::dataset::make("Epsilon", { 1e-8 })))
 {
     // Validate output
@@ -94,17 +93,17 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<half>, fr
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::F32)),
-                       framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
+                       framework::dataset::make("DataType", DataType::F32),
+                       framework::dataset::make("InPlace", { false, true }),
                        framework::dataset::make("Epsilon", { 1e-8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DMeanStdDevNormalizationShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                        framework::dataset::make("InPlace", { false, true })),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DMeanStdDevNormalizationShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::F32),
+                                                                                                                        framework::dataset::make("InPlace", { false, true }),
                                                                                                                         framework::dataset::make("Epsilon", { 1e-8 })))
 {
     // Validate output

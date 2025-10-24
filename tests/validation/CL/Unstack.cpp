@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,7 @@ const auto unstack_dataset_small = datasets::Small3DShapes() * unstack_axis_data
 TEST_SUITE(CL)
 TEST_SUITE(Unstack)
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-                                                                      framework::dataset::make("InputInfo",
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo",
 {
     TensorInfo(TensorShape(1U, 9U, 8U), 1, DataType::U8),   // Passes, 1 slice on x axis
     TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::U8),   // fails because axis > input's rank
@@ -65,9 +64,9 @@ framework::dataset::make("OutputInfo",
     std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::U8) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(2U, 3U), 1, DataType::U8) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(2U, 3U), 1, DataType::S32) },
 
     std::vector<TensorInfo>{ TensorInfo(TensorShape(7U, 5U), 1, DataType::S32), TensorInfo(TensorShape(7U, 5U), 1, DataType::S32), TensorInfo(TensorShape(7U, 5U), 1, DataType::S32) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(7U, 5U), 1, DataType::S16) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::S32) },
-})),
-framework::dataset::make("Axis", { -3, 3, -4, -3, 1, 1 })),
-framework::dataset::make("Num", { 1, 1, 1, 1, 0, 1 })),
+}),
+framework::dataset::make("Axis", { -3, 3, -4, -3, 1, 1 }),
+framework::dataset::make("Num", { 1, 1, 1, 1, 0, 1 }),
 framework::dataset::make("Expected", { true, false, false, true, false, false })),
 input_info, output_info, axis, num, expected)
 {

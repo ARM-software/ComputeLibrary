@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, 2023 Arm Limited.
+ * Copyright (c) 2018-2019, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,15 +53,14 @@ TEST_SUITE(RsqrtLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Valid
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { false, true, false })),
                input_info, output_info, expected)
 {
@@ -109,9 +108,9 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                  DataType::QASYMM8_SIGNED)),
-                                                                                                                  framework::dataset::make("SrcQInfo", { QuantizationInfo(0.4044, -128) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                  DataType::QASYMM8_SIGNED),
+                                                                                                                  framework::dataset::make("SrcQInfo", { QuantizationInfo(0.4044, -128) }),
                                                                                                                   framework::dataset::make("OutQInfo", { QuantizationInfo(0.0027, -128) })))
 {
     // Validate output
@@ -120,9 +119,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<int8_t>, framework
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QASYMM8)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::QASYMM8)),
-                                                                                                                   framework::dataset::make("SrcQInfo", { QuantizationInfo(0.4044, 0) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::QASYMM8),
+                                                                                                                   framework::dataset::make("SrcQInfo", { QuantizationInfo(0.4044, 0) }),
                                                                                                                    framework::dataset::make("OutQInfo", { QuantizationInfo(0.0027, 0) })))
 {
     // Validate output

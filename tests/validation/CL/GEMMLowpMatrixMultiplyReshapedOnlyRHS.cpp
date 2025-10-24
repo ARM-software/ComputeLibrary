@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -163,15 +163,14 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMMLowpMatrixMultiplyReshapedOnlyRHS)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   framework::dataset::make("batch_size", 1)),
-                                                                   m0_values_precommit_1),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   h0_values_precommit),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   framework::dataset::make("batch_size", 1),
+                                                                   m0_values_precommit_1,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   h0_values_precommit,
                                                                    i_values_rhs),
 m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, h0_value, i_value_rhs)
 {
@@ -179,17 +178,16 @@ m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, h0_value, i_va
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall_1, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit_1),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit_1,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
@@ -197,17 +195,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall_1, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixtur
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall_2, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit_2),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit_2,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
 {
     // Validate output
@@ -215,17 +212,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall_2, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixtur
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
@@ -233,18 +229,17 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture,
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D_1, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit_1),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit_1,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
@@ -252,18 +247,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D_1, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFi
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D_2, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit_2),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit_2,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
 {
     // Validate output
@@ -271,18 +265,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D_2, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFi
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFixture, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output

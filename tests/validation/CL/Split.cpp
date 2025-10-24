@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,13 +45,12 @@ TEST_SUITE(Split)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid number of splits
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32)
         }),
-        framework::dataset::make("Axis", { 4, 2, 2 })),
-        framework::dataset::make("Splits", { 4, 5, 4 })),
+        framework::dataset::make("Axis", { 4, 2, 2 }),
+        framework::dataset::make("Splits", { 4, 5, 4 }),
         framework::dataset::make("Expected", { false, false, true })),
         input_info, axis, splits, expected)
 {
@@ -66,16 +65,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(ValidateSplitShapes, framework::DatasetMode::ALL, zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32),
+DATA_TEST_CASE(ValidateSplitShapes, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32)
         }),
-        framework::dataset::make("Axis", { 2, 2 })),
+        framework::dataset::make("Axis", { 2, 2 }),
         framework::dataset::make("Splits", { std::vector<TensorInfo>{TensorInfo(TensorShape(27U, 3U, 4U,  2U), 1, DataType::F32),
                                                                      TensorInfo(TensorShape(27U, 3U, 4U,  2U), 1, DataType::F32),
                                                                      TensorInfo(TensorShape(27U, 3U, 8U,  2U), 1, DataType::F32)},
                                              std::vector<TensorInfo>{TensorInfo(TensorShape(27U, 3U, 3U,  2U), 1, DataType::F32),
-                                                                     TensorInfo(TensorShape(27U, 3U, 13U, 2U), 1, DataType::F32)} })),
+                                                                     TensorInfo(TensorShape(27U, 3U, 13U, 2U), 1, DataType::F32)} }),
         framework::dataset::make("Expected", { true, true })),
         input_info, axis, splits, expected)
 {

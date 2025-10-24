@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,8 +105,7 @@ TEST_CASE(ProperlyRoundedRequantizationGt16Elements, framework::DatasetMode::ALL
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Wrong output data type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Wrong output data type
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32), // Wrong output data type
                                                        TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::F32),   // Mismatching shapes
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32), // Valid
@@ -115,7 +114,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U16),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { false, false, false, true})),
                input_info, output_info, expected)
 {
@@ -133,41 +132,41 @@ using CLQuantizationLayerQASYMM16Fixture = QuantizationValidationFixture<CLTenso
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F32),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, CLQuantizationLayerQASYMM8_SIGNEDFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, CLQuantizationLayerQASYMM8_SIGNEDFixture<float>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F32),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM16, CLQuantizationLayerQASYMM16Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM16 })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM16, CLQuantizationLayerQASYMM16Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F32),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM16 }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_u16);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeQASYMM8, CLQuantizationLayerQASYMM8Fixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(QuantizationLargeShapes,
-                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
+FIXTURE_DATA_TEST_CASE(RunLargeQASYMM8, CLQuantizationLayerQASYMM8Fixture<float>, framework::DatasetMode::NIGHTLY, combine(QuantizationLargeShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F32),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeQASYMM16, CLQuantizationLayerQASYMM16Fixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(QuantizationLargeShapes,
-                       framework::dataset::make("DataTypeIn", DataType::F32)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM16 })),
+FIXTURE_DATA_TEST_CASE(RunLargeQASYMM16, CLQuantizationLayerQASYMM16Fixture<float>, framework::DatasetMode::NIGHTLY, combine(QuantizationLargeShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F32),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM16 }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
@@ -176,17 +175,17 @@ FIXTURE_DATA_TEST_CASE(RunLargeQASYMM16, CLQuantizationLayerQASYMM16Fixture<floa
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataTypeIn", DataType::F16)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F16),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeQASYMM8, CLQuantizationLayerQASYMM8Fixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(QuantizationLargeShapes,
-                       framework::dataset::make("DataTypeIn", DataType::F16)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
+FIXTURE_DATA_TEST_CASE(RunLargeQASYMM8, CLQuantizationLayerQASYMM8Fixture<half>, framework::DatasetMode::NIGHTLY, combine(QuantizationLargeShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F16),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
@@ -203,28 +202,28 @@ using CLQuantizationLayerQASYMM8_SIGNEDGenFixture = QuantizationValidationGeneri
 template <typename T>
 using CLQuantizationLayerQASYMM16GenFixture = QuantizationValidationGenericFixture<CLTensor, CLAccessor, CLQuantizationLayer, T, uint16_t>;
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8GenFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
-                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(0.5f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8GenFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 }),
+                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(0.5f, 10) }),
                        framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(2.0f, 15) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_u8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, CLQuantizationLayerQASYMM8_SIGNEDGenFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataTypeIn", DataType::QASYMM8)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED })),
-                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, CLQuantizationLayerQASYMM8_SIGNEDGenFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::QASYMM8),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED }),
+                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10) }),
                        framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(1.0f, 15) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_s8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM16, CLQuantizationLayerQASYMM16GenFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataTypeIn", DataType::QASYMM8)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM16 })),
-                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM16, CLQuantizationLayerQASYMM16GenFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::QASYMM8),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM16 }),
+                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10) }),
                        framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(4.0f, 23) })))
 {
     // Validate output
@@ -232,19 +231,19 @@ FIXTURE_DATA_TEST_CASE(RunSmallQASYMM16, CLQuantizationLayerQASYMM16GenFixture<u
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, CLQuantizationLayerQASYMM8_SIGNEDGenFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED })),
-                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, CLQuantizationLayerQASYMM8_SIGNEDGenFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED }),
+                       framework::dataset::make("QuantizationInfoOutput", { QuantizationInfo(1.0f, 10) }),
                        framework::dataset::make("QuantizationInfoInput", { QuantizationInfo(2.0f, 5) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_s8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8GenFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(QuantizationSmallShapes,
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.0f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8GenFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8 }),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.0f, 10) }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.0f, 30) })))
 {
     // Validate output

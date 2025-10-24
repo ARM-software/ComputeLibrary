@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,7 @@ using CLSpaceToBatchLayerFixture = SpaceToBatchLayerValidationFixture<CLTensor, 
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Wrong data type block shape
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U, 4U), 1, DataType::F32),    // Wrong tensor shape
@@ -60,40 +59,39 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(2U), 1, DataType::S32),
-                                                     })),
+                                                     }),
                framework::dataset::make("PaddingsShapeInfo",{ TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { true, false, false, false})),
                input_info, block_shape_info, paddings_info, output_info, expected)
 {
     bool has_error = bool(CLSpaceToBatchLayer::validate(&input_info.clone()->set_is_resizable(false), &block_shape_info.clone()->set_is_resizable(false), &paddings_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false)));
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
-DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
+DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Negative block shapes
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong paddings
                                                      }),
-               framework::dataset::make("BlockShapeX", { 2, 2, 2, 2, 2 })),
-               framework::dataset::make("BlockShapeY", { 2, 2, -2, 2, 2 })),
-               framework::dataset::make("PadLeft", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) })),
-               framework::dataset::make("PadRight", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) })),
+               framework::dataset::make("BlockShapeX", { 2, 2, 2, 2, 2 }),
+               framework::dataset::make("BlockShapeY", { 2, 2, -2, 2, 2 }),
+               framework::dataset::make("PadLeft", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
+               framework::dataset::make("PadRight", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { true, false, false, false, false})),
                input_info, block_shape_x, block_shape_y, padding_left, padding_right, output_info, expected)
 {
@@ -105,15 +103,15 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToBatchLayerDataset(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(),
+                                                                                                                    framework::dataset::make("DataType", DataType::F32),
                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(),
+                                                                                                                  framework::dataset::make("DataType", DataType::F32),
                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -122,15 +120,15 @@ FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<float>, framework::Data
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToBatchLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F16),
                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F16),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -144,17 +142,17 @@ using CLSpaceToBatchLayerQuantizedFixture = SpaceToBatchLayerValidationQuantized
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallSpaceToBatchLayerDataset(),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                        framework::dataset::make("QuantizationInfo", { 1.f / 255.f, 9.f })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeSpaceToBatchLayerDataset(),
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
                                                                                                                      framework::dataset::make("QuantizationInfo", { 1.f / 255.f, 9.f })))
 {
     // Validate output

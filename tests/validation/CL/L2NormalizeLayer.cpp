@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,8 +56,7 @@ TEST_SUITE(L2NormalizeLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-    framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching shape input/output
                                              TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
@@ -74,7 +73,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
-                                           })),
+                                           }),
     framework::dataset::make("Axis",       {
                                             0,
                                             0,
@@ -83,7 +82,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             static_cast<int>(TensorShape::num_max_dimensions),
                                             3,
                                             -2,
-                                            0 })),
+                                            0 }),
     framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true })),
     input_info, output_info, axis, expected)
 {
@@ -101,13 +100,13 @@ using CLL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<CLTensor, CL
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLL2NormalizeLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), data), framework::dataset::make("Epsilon", { 1e-12 })))
+                       combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32), data, framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLL2NormalizeLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), data), framework::dataset::make("Epsilon", { 1e-12 })))
+                       combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32), data, framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -115,13 +114,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLL2NormalizeLayerFixture<float>, framework::Da
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLL2NormalizeLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)), data), framework::dataset::make("Epsilon", { 1e-6 })))
+                       combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16), data, framework::dataset::make("Epsilon", { 1e-6 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLL2NormalizeLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), data), framework::dataset::make("Epsilon", { 1e-6 })))
+                       combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16), data, framework::dataset::make("Epsilon", { 1e-6 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

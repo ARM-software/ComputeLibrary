@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,8 +55,7 @@ using ClWeightsReshape = ClSynthetizeOperatorWithBorder<opencl::kernels::ClWeigh
  *     - num_groups != 1 is only supported for NCHW data layout
  *     - Bias' shape need to match input's shape.
  */
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-                                                                      framework::dataset::make("InputInfo",
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo",
 {
     TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),                   // Mismatching data type
     TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),                   // Mismatching data type
@@ -73,7 +72,7 @@ framework::dataset::make("BiasesInfo",
     TensorInfo(TensorShape(4U), 1, DataType::F32),
     TensorInfo(TensorShape(4U, 3U), 1, DataType::F32),
     TensorInfo(TensorShape(3U, 4U), 1, DataType::F32),
-})),
+}),
 framework::dataset::make("OutputInfo",
 {
     TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
@@ -82,8 +81,8 @@ framework::dataset::make("OutputInfo",
     TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
     TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
     TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
-})),
-framework::dataset::make("NumGroups", { 1, 1, 1, 2, 1, 2 })),
+}),
+framework::dataset::make("NumGroups", { 1, 1, 1, 2, 1, 2 }),
 framework::dataset::make("Expected", { false, false, false, false, false, false })),
 input_info, biases_info, output_info, num_groups, expected)
 {
@@ -95,27 +94,27 @@ template <typename T>
 using ClWeightsReshapeFixture = WeightsReshapeOpValidationFixture<CLTensor, CLAccessor, ClWeightsReshape, T>;
 
 TEST_SUITE(Float)
-FIXTURE_DATA_TEST_CASE(FP32, ClWeightsReshapeFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::make("InputShape", { TensorShape(3U, 3U, 48U, 120U) }),
-                                                                                                                  framework::dataset::make("DataType", DataType::F32)),
-                                                                                                          framework::dataset::make("HasBias", { true, false })),
+FIXTURE_DATA_TEST_CASE(FP32, ClWeightsReshapeFixture<float>, framework::DatasetMode::ALL, combine(framework::dataset::make("InputShape", { TensorShape(3U, 3U, 48U, 120U) }),
+                                                                                                                  framework::dataset::make("DataType", DataType::F32),
+                                                                                                          framework::dataset::make("HasBias", { true, false }),
                                                                                                   framework::dataset::make("NumGroups", { 1, 2 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(FP16, ClWeightsReshapeFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::make("InputShape", { TensorShape(13U, 13U, 96U, 240U) }),
-                                                                                                                 framework::dataset::make("DataType", DataType::F16)),
-                                                                                                         framework::dataset::make("HasBias", { true, false })),
+FIXTURE_DATA_TEST_CASE(FP16, ClWeightsReshapeFixture<half>, framework::DatasetMode::ALL, combine(framework::dataset::make("InputShape", { TensorShape(13U, 13U, 96U, 240U) }),
+                                                                                                                 framework::dataset::make("DataType", DataType::F16),
+                                                                                                         framework::dataset::make("HasBias", { true, false }),
                                                                                                  framework::dataset::make("NumGroups", { 3, 4 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(BFloat16, ClWeightsReshapeFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::make("InputShape", { TensorShape(9U, 9U, 96U, 240U) }),
-                                                                                                                     framework::dataset::make("DataType", DataType::BFLOAT16)),
-                                                                                                             framework::dataset::make("HasBias", { false })),
+FIXTURE_DATA_TEST_CASE(BFloat16, ClWeightsReshapeFixture<half>, framework::DatasetMode::ALL, combine(framework::dataset::make("InputShape", { TensorShape(9U, 9U, 96U, 240U) }),
+                                                                                                                     framework::dataset::make("DataType", DataType::BFLOAT16),
+                                                                                                             framework::dataset::make("HasBias", { false }),
                                                                                                      framework::dataset::make("NumGroups", { 3, 4 })))
 {
     // Validate output
@@ -125,18 +124,18 @@ FIXTURE_DATA_TEST_CASE(BFloat16, ClWeightsReshapeFixture<half>, framework::Datas
 TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
-FIXTURE_DATA_TEST_CASE(QASYMM8, ClWeightsReshapeFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::make("InputShape", { TensorShape(5U, 5U, 48U, 120U) }),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                               framework::dataset::make("HasBias", { false })),
+FIXTURE_DATA_TEST_CASE(QASYMM8, ClWeightsReshapeFixture<uint8_t>, framework::DatasetMode::ALL, combine(framework::dataset::make("InputShape", { TensorShape(5U, 5U, 48U, 120U) }),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                               framework::dataset::make("HasBias", { false }),
                                                                                                        framework::dataset::make("NumGroups", { 1, 2 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(QASYMM8_SIGNED, ClWeightsReshapeFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::make("InputShape", { TensorShape(5U, 5U, 48U, 120U) }),
-                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                      framework::dataset::make("HasBias", { false })),
+FIXTURE_DATA_TEST_CASE(QASYMM8_SIGNED, ClWeightsReshapeFixture<uint8_t>, framework::DatasetMode::ALL, combine(framework::dataset::make("InputShape", { TensorShape(5U, 5U, 48U, 120U) }),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                      framework::dataset::make("HasBias", { false }),
                                                                                                               framework::dataset::make("NumGroups", { 1, 2 })))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,20 +48,20 @@ RelativeTolerance<float> tolerance_fp16(0.001f);
 AbsoluteTolerance<float> tolerance_qsymm16(1);
 
 /** Input data sets **/
-const auto ElementwiseSquaredDiffU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)),
+const auto ElementwiseSquaredDiffU8Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8),
                                                      framework::dataset::make("DataType",
                                                                               DataType::U8));
-const auto ElementwiseSquaredDiffQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
+const auto ElementwiseSquaredDiffQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8),
                                                           framework::dataset::make("DataType",
                                                                                    DataType::QASYMM8));
-const auto ElementwiseSquaredDiffQSYMM16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QSYMM16), framework::dataset::make("DataType", DataType::QSYMM16)),
+const auto ElementwiseSquaredDiffQSYMM16Dataset = combine(framework::dataset::make("DataType", DataType::QSYMM16), framework::dataset::make("DataType", DataType::QSYMM16),
                                                           framework::dataset::make("DataType",
                                                                                    DataType::QSYMM16));
-const auto ElementwiseSquaredDiffS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
+const auto ElementwiseSquaredDiffS16Dataset = combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16),
                                                       framework::dataset::make("DataType", DataType::S16));
-const auto ElementwiseSquaredDiffFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
+const auto ElementwiseSquaredDiffFP16Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16),
                                                        framework::dataset::make("DataType", DataType::F16));
-const auto ElementwiseSquaredDiffFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
+const auto ElementwiseSquaredDiffFP32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32),
                                                        framework::dataset::make("DataType", DataType::F32));
 const auto EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 { ActivationLayerInfo() });
@@ -79,19 +79,18 @@ TEST_SUITE(ElementwiseSquaredDiff)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                       }),
                framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { true, false, false})),
                input1_info, input2_info, output_info, expected)
 {
@@ -105,7 +104,7 @@ using CLElementwiseSquaredDiffFixture = ElementwiseSquaredDiffValidationFixture<
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffU8Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseSquaredDiffU8Dataset,
                                                                                                                       OutOfPlaceDataSet))
 {
     // Validate output
@@ -114,7 +113,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<uint8_t>, frame
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffS16Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffS16Dataset,
                                                                                                                 OutOfPlaceDataSet))
 {
     // Validate output
@@ -128,11 +127,11 @@ using CLElementwiseSquaredDiffQuantizedFixture = ElementwiseSquaredDiffValidatio
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                       ElementwiseSquaredDiffQASYMM8Dataset),
-                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                       ElementwiseSquaredDiffQASYMM8Dataset,
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) }),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) }),
                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -140,11 +139,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<uint8_
 }
 TEST_SUITE_END()
 TEST_SUITE(QSYMM16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                       ElementwiseSquaredDiffQSYMM16Dataset),
-                       framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) })),
-                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) })),
-                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                       ElementwiseSquaredDiffQSYMM16Dataset,
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) }),
                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -158,15 +157,15 @@ using CLElementwiseSquaredDiffFloatFixture = ElementwiseSquaredDiffValidationFlo
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP16Dataset),
-                                                                                                                  EmptyActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFloatFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP16Dataset,
+                                                                                                                  EmptyActivationFunctionsDataset,
                                                                                                                   OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapes(), ElementwiseSquaredDiffFP16Dataset),
-                       ActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<half>, framework::DatasetMode::ALL, combine(datasets::TinyShapes(), ElementwiseSquaredDiffFP16Dataset,
+                       ActivationFunctionsDataset,
                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -175,15 +174,15 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<h
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset),
-                                                                                                                   EmptyActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFloatFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset,
+                                                                                                                   EmptyActivationFunctionsDataset,
                                                                                                                    OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapes(), ElementwiseSquaredDiffFP32Dataset),
-                       ActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<float>, framework::DatasetMode::ALL, combine(datasets::TinyShapes(), ElementwiseSquaredDiffFP32Dataset,
+                       ActivationFunctionsDataset,
                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -192,17 +191,17 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<f
 template <typename T>
 using CLElementwiseSquaredDiffBroadcastFloatFixture = ElementwiseSquaredDiffBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseSquaredDiffBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapesBroadcast(),
-                       ElementwiseSquaredDiffFP32Dataset),
-                       EmptyActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseSquaredDiffBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
+                       ElementwiseSquaredDiffFP32Dataset,
+                       EmptyActivationFunctionsDataset,
                        OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwiseSquaredDiffBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::TinyShapesBroadcast(),
-                       ElementwiseSquaredDiffFP32Dataset),
-                       ActivationFunctionsDataset),
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwiseSquaredDiffBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(datasets::TinyShapesBroadcast(),
+                       ElementwiseSquaredDiffFP32Dataset,
+                       ActivationFunctionsDataset,
                        OutOfPlaceDataSet))
 {
     // Validate output

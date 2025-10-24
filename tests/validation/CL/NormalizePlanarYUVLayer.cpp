@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,8 +56,7 @@ using CLNormalizePlanarYUVLayerFixture = NormalizePlanarYUVLayerValidationFixtur
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-                    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),     // Window shrink
                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Unsupported data type
                         TensorInfo(TensorShape(32U, 16U, 8U), 1, DataType::F16),
@@ -70,14 +69,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                         TensorInfo(TensorShape(32U, 16U, 8U), 1, DataType::F16),
                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
                         TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
-                        })),
+                        }),
                 framework::dataset::make("MSTDInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F16),
                     TensorInfo(TensorShape(2U), 1, DataType::F16),
                     TensorInfo(TensorShape(2U), 1, DataType::U8),
                     TensorInfo(TensorShape(8U), 1, DataType::F16),
                     TensorInfo(TensorShape(6U), 1, DataType::F16),
                     TensorInfo(TensorShape(2U), 1, DataType::F32),
-                    })),
+                    }),
                     framework::dataset::make("Expected", { false, false, false, true, false, false })),
                     input_info, output_info, msd_info, expected)
 {
@@ -91,8 +90,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
+                                                                                                                  framework::dataset::make("DataType", DataType::F16),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -101,8 +100,8 @@ FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<half>, framework
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F32),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -116,9 +115,9 @@ using CLNormalizePlanarYUVLayerQuantizedFixture = NormalizePlanarYUVLayerValidat
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
@@ -126,9 +125,9 @@ FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<uint8_t
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW }),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output

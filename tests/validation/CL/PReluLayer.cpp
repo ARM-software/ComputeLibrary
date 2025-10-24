@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,20 +47,20 @@ RelativeTolerance<float> tolerance_fp32(0.000001f);
 RelativeTolerance<float> tolerance_fp16(0.001f);
 
 /** Input data sets **/
-const auto PReluLayerU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)),
+const auto PReluLayerU8Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8),
                                          framework::dataset::make("DataType",
                                                                   DataType::U8));
-const auto PReluLayerQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
+const auto PReluLayerQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8),
                                               framework::dataset::make("DataType",
                                                                        DataType::QASYMM8));
-const auto PReluLayerQASYMM8SIGNEDDataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+const auto PReluLayerQASYMM8SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
                                                     framework::dataset::make("DataType",
                                                                              DataType::QASYMM8_SIGNED));
-const auto PReluLayerS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
+const auto PReluLayerS16Dataset = combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16),
                                           framework::dataset::make("DataType", DataType::S16));
-const auto PReluLayerFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
+const auto PReluLayerFP16Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16),
                                            framework::dataset::make("DataType", DataType::F16));
-const auto PReluLayerFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
+const auto PReluLayerFP32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32),
                                            framework::dataset::make("DataType", DataType::F32));
 } // namespace
 
@@ -69,19 +69,18 @@ TEST_SUITE(PReluLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                       }),
                framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { true, false, false})),
                input1_info, input2_info, output_info, expected)
 {
@@ -163,10 +162,10 @@ using CLPReluLayerQuantizedFixture = PReluLayerValidationQuantizedFixture<CLTens
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                   PReluLayerQASYMM8Dataset),
-                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                   PReluLayerQASYMM8Dataset,
+                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
 
                       )
@@ -177,10 +176,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<uint8_t>, framewor
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                  PReluLayerQASYMM8SIGNEDDataset),
-                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 127.f, 20) })),
-                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 127.f, 10) })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
+                                                                                                                  PReluLayerQASYMM8SIGNEDDataset,
+                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 127.f, 20) }),
+                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 127.f, 10) }),
                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 127.f, 5) }))
 
                       )

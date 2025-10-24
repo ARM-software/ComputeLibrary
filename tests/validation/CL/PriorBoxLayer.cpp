@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,19 +55,18 @@ using CLPriorBoxLayerFixture = PriorBoxLayerValidationFixture<CLTensor, CLAccess
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input1Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),    // Window shrink
                                                      }),
                framework::dataset::make("Input2Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(1200U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(1000U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("PriorBoxInfo",{ PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>()),
                                                          PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>()),
-                                                     })),
+                                                     }),
                framework::dataset::make("Expected", { true, false})),
                input1_info, input2_info, output_info, info, expected)
 {
@@ -79,15 +78,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallPriorBoxLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallPriorBoxLayerDataset(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F32),
                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargePriorBoxLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargePriorBoxLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output

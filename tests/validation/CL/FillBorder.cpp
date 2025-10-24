@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,11 +49,10 @@ const auto PaddingSizesDataset = concat(concat(
 
 const auto BorderSizesDataset  = framework::dataset::make("BorderSize", 0, 6);
 
-DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(combine(combine(combine(
-               datasets::SmallShapes(),
-               datasets::BorderModes()),
-               BorderSizesDataset),
-               PaddingSizesDataset),
+DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+               datasets::BorderModes(),
+               BorderSizesDataset,
+               PaddingSizesDataset,
                framework::dataset::make("DataType", DataType::U8)),
                shape, border_mode, size, padding, data_type)
 // clang-format on

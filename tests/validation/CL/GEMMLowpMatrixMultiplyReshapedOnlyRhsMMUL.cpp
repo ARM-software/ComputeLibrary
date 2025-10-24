@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,17 +98,16 @@ const auto broadcast_bias = framework::dataset::make("broadcast_bias", {true, fa
 TEST_SUITE(CL)
 TEST_SUITE(GEMMLowpMatrixMultiplyReshapedOnlyRhsMMUL)
 FIXTURE_DATA_TEST_CASE(Signed, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0),
-                                                                   n0),
-                                                                   k0),
-                                                                   h0),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0,
+                                                                   n0,
+                                                                   k0,
+                                                                   h0,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
 {
     // Validate output
@@ -123,17 +122,16 @@ FIXTURE_DATA_TEST_CASE(Signed, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixtur
     }
 }
 FIXTURE_DATA_TEST_CASE(Unsigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0),
-                                                                   n0),
-                                                                   k0),
-                                                                   h0),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0,
+                                                                   n0,
+                                                                   k0,
+                                                                   h0,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
                     framework::dataset::make("DataType", { DataType::QASYMM8})))
 {
     // Validate output
@@ -148,18 +146,17 @@ FIXTURE_DATA_TEST_CASE(Unsigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixt
     }
 }
 FIXTURE_DATA_TEST_CASE(OutputStageSigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageFixtureSigned, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0),
-                                                                   n0),
-                                                                   k0),
-                                                                   h0),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
-                                                                   broadcast_bias),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0,
+                                                                   n0,
+                                                                   k0,
+                                                                   h0,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
+                                                                   broadcast_bias,
                     framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED})))
 {
     // Validate output
@@ -174,18 +171,17 @@ FIXTURE_DATA_TEST_CASE(OutputStageSigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRH
     }
 }
 FIXTURE_DATA_TEST_CASE(OutputStageUnsigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageFixtureUnsigned, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0),
-                                                                   n0),
-                                                                   k0),
-                                                                   h0),
-                                                                   i_values_rhs),
-                                                                   t_values_rhs),
-                                                                   broadcast_bias),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0,
+                                                                   n0,
+                                                                   k0,
+                                                                   h0,
+                                                                   i_values_rhs,
+                                                                   t_values_rhs,
+                                                                   broadcast_bias,
                     framework::dataset::make("DataType", { DataType::QASYMM8})))
 {
     // Validate output

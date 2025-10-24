@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,8 +56,7 @@ TEST_SUITE(RoiAlign)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32),                                         // Mismatching data type input/rois
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32),                                         // Mismatching data type input/output
                                                        TensorInfo(TensorShape(250U, 128U, 2U), 1, DataType::F32),                                         // Mismatching depth size input/output
@@ -76,7 +75,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::F32),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::F32),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::QASYMM16, QuantizationInfo(0.2f, 0)),
-                                                    })),
+                                                    }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F16),
@@ -86,7 +85,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(5U, 5U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::QASYMM8, QuantizationInfo(1.f / 255.f, 120)),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::QASYMM8, QuantizationInfo(1.f / 255.f, 120)),
-                                                     })),
+                                                     }),
                framework::dataset::make("PoolInfo", { ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
@@ -95,7 +94,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
-                                                      })),
+                                                      }),
                framework::dataset::make("Expected", { true, false, false, false, false, false, false, false, false })),
                input_info, rois_info, output_info, pool_info, expected)
 {
@@ -110,8 +109,8 @@ using CLROIAlignLayerHalfFixture  = ROIAlignLayerFixture<CLTensor, CLAccessor, C
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerFloatFixture, framework::DatasetMode::ALL,
-                       combine(combine(datasets::SmallROIDataset(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
+                       combine(datasets::SmallROIDataset(),
+                                       framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -120,8 +119,8 @@ FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerFloatFixture, framework::DatasetMod
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerHalfFixture, framework::DatasetMode::ALL,
-                       combine(combine(datasets::SmallROIDataset(),
-                                       framework::dataset::make("DataType", { DataType::F16 })),
+                       combine(datasets::SmallROIDataset(),
+                                       framework::dataset::make("DataType", { DataType::F16 }),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -136,10 +135,10 @@ using CLROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<CLTensor, 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(datasets::SmallROIDataset(),
-                                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) })),
+                       combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8 }),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
                                framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
 {
     // Validate output
@@ -148,10 +147,10 @@ FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerQuantizedFixture<uint8_t>, framewor
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(datasets::SmallROIDataset(),
-                                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 65) })),
+                       combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED }),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 65) }),
                                framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 20) })))
 {
     // Validate output

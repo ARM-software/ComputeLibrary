@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,13 +77,12 @@ TEST_SUITE(Convolution)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationConvFixture<float>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        shape_conv_values_precommit,
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(shape_conv_values_precommit,
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -92,13 +91,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationConvFixture<float>, fra
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFuseBatchNormalizationConvFixture<float>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        shape_conv_values_nightly,
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(shape_conv_values_nightly,
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -110,13 +108,12 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        shape_conv_values_precommit,
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(shape_conv_values_precommit,
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -125,13 +122,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationConvFixture<half>, fram
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        shape_conv_values_nightly,
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(shape_conv_values_nightly,
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -147,13 +143,12 @@ TEST_SUITE(DepthwiseConvolution)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        datasets::Small3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(datasets::Small3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -162,13 +157,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationDWCFixture<float>, fram
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        datasets::Large3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(datasets::Large3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -180,13 +174,12 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::PRECOMMIT,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        datasets::Small3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(datasets::Small3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
@@ -195,13 +188,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationDWCFixture<half>, frame
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::NIGHTLY,
-                                        combine(combine(combine(combine(combine(combine(
-                                                        datasets::Large3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                                        data_layout_values),
-                                                        in_place_values),
-                                                        with_bias_values),
-                                                        with_gamma_values),
+                                        combine(datasets::Large3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        data_layout_values,
+                                                        in_place_values,
+                                                        with_bias_values,
+                                                        with_gamma_values,
                                                         with_beta_values))
 {
     // Validate outputs
