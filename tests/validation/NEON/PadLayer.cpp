@@ -59,7 +59,7 @@ TEST_SUITE(PadLayer)
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data type input/output
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
@@ -85,7 +85,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(29U, 15U, 4U, 3U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 14U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 3U), 1, DataType::F32)
-                                                     })),
+                                                     }),
                framework::dataset::make("PaddingSize", { PaddingList{{0, 0}},
                                                          PaddingList{{1, 1}},
                                                          PaddingList{{1, 1}, {2, 2}},
@@ -98,7 +98,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                          PaddingList{{1,1}, {1,1}, {1,1}, {1,1}},
                                                          PaddingList{{0,0}, {1,0}, {0,1}, {1,2}},
                                                          PaddingList{{0,0}, {0,0}, {0,0}, {1,1}}
-                                                         })),
+                                                         }),
                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT,
                                                          PaddingMode::CONSTANT,
                                                          PaddingMode::CONSTANT,
@@ -110,8 +110,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                          PaddingMode::REFLECT,
                                                          PaddingMode::REFLECT,
                                                          PaddingMode::REFLECT,
-                                                         PaddingMode::SYMMETRIC })),
-               framework::dataset::make("Expected", { false, false, true, true, true, true, false, false, true, false, false, true })),
+                                                         PaddingMode::SYMMETRIC }),
+               framework::dataset::make("Expected", { false, false, true, true, true, true, false, false, true, false, false, true })
+               ),
                input_info, output_info, padding, mode, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEPadLayer::validate(&input_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), padding, PixelValue(), mode)) == expected, framework::LogLevel::ERRORS);

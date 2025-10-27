@@ -54,7 +54,7 @@ TEST_SUITE(L2NormalizeLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching shape input/output
                                              TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
@@ -72,7 +72,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
-                                           })),
+                                           }),
     framework::dataset::make("Axis",       {
                                             0,
                                             0,
@@ -81,8 +81,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             static_cast<int>(TensorShape::num_max_dimensions),
                                             3,
                                             -2,
-                                            0 })),
-    framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true })),
+                                            0 }),
+    framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true })
+    ),
     input_info, output_info, axis, expected)
 {
     bool is_valid = bool(NEL2NormalizeLayer::validate(&input_info.clone()->set_is_resizable(false),

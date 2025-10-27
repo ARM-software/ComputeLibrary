@@ -94,7 +94,7 @@ TEST_SUITE(DequantizationLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),      // Wrong input data type
                                                 TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Wrong output data type
                                                 TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::QASYMM8),   // Missmatching shapes
@@ -108,8 +108,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                 TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
-        })),
-        framework::dataset::make("Expected", { false, false, false, true, true, true })),
+        }),
+        framework::dataset::make("Expected", { false, false, false, true, true, true })
+        ),
         input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEDequantizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

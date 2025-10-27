@@ -47,7 +47,7 @@ TEST_SUITE(Transpose)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::U16), // Invalid shape
                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::U8),  // Wrong data type
                                             TensorInfo(TensorShape(20U, 16U), 1, DataType::U16),
@@ -57,8 +57,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                             TensorInfo(TensorShape(31U, 20U), 1, DataType::U16),
                                             TensorInfo(TensorShape(16U, 20U), 1, DataType::U16),
                                             TensorInfo(TensorShape(16U, 20U), 1, DataType::U32),
-                                           })),
-    framework::dataset::make("Expected", { false, false, true, true })),
+                                           }),
+    framework::dataset::make("Expected", { false, false, true, true })
+    ),
     a_info, output_info, expected)
 {
     // Lock tensors

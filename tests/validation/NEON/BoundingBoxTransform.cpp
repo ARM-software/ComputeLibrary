@@ -79,31 +79,33 @@ TEST_SUITE(BBoxTransform)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("BoxesInfo", { TensorInfo(TensorShape(4U, 128U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 128U), 1, DataType::F32), // Wrong number of box fields
                                                        TensorInfo(TensorShape(4U, 128U), 1, DataType::F16), // Wrong data type
                                                        TensorInfo(TensorShape(4U, 128U), 1, DataType::F32), // Wrong number of classes
                                                        TensorInfo(TensorShape(4U, 128U), 1, DataType::F32),  // Deltas and predicted boxes have different dimensions
-                                                       TensorInfo(TensorShape(4U, 128U), 1, DataType::F32)}),  // Scaling is zero
+                                                       TensorInfo(TensorShape(4U, 128U), 1, DataType::F32)}),
+               // Scaling is zero
                framework::dataset::make("PredBoxesInfo",{ TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(127U, 128U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
-                                                          TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)})),
+                                                          TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)}),
                framework::dataset::make("DeltasInfo", { TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(127U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)})),
+                                                        TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)}),
                framework::dataset::make("BoundingBoxTransofmInfo", { BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
-                                                                     BoundingBoxTransformInfo(800.f, 600.f, 0.f)})),
-               framework::dataset::make("Expected", { true, false, false, false, false, false})),
+                                                                     BoundingBoxTransformInfo(800.f, 600.f, 0.f)}),
+               framework::dataset::make("Expected", { true, false, false, false, false, false})
+               ),
                boxes_info, pred_boxes_info, deltas_info, bbox_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEBoundingBoxTransform::validate(&boxes_info.clone()->set_is_resizable(true), &pred_boxes_info.clone()->set_is_resizable(true), &deltas_info.clone()->set_is_resizable(true), bbox_info)) == expected, framework::LogLevel::ERRORS);

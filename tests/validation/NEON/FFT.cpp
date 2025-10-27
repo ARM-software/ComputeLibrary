@@ -74,7 +74,7 @@ TEST_SUITE(FFT1D)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32), // Mismatching data types
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32), // Mismatching shapes
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 3, DataType::F32), // Invalid channels
@@ -88,9 +88,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32),
                                                 TensorInfo(TensorShape(11U, 13U, 2U), 2, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 13U, 2U), 2, DataType::F32),
-        })),
-        framework::dataset::make("Axis", { 0, 0, 0, 2, 0, 0 })),
-        framework::dataset::make("Expected", { false, false, false, false, false, true })),
+        }),
+        framework::dataset::make("Axis", { 0, 0, 0, 2, 0, 0 }),
+        framework::dataset::make("Expected", { false, false, false, false, false, true })
+        ),
         input_info, output_info, axis, expected)
 {
     FFT1DInfo desc;
@@ -118,7 +119,7 @@ TEST_SUITE_END() // FFT1D
 TEST_SUITE(FFT2D)
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 25U, 2U), 2, DataType::F32), // Mismatching data types
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 2, DataType::F32), // Mismatching shapes
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 3, DataType::F32), // Invalid channels
@@ -130,8 +131,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 2, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 25U, 2U), 2, DataType::F32),
-        })),
-        framework::dataset::make("Expected", { false, false, false, false, true })),
+        }),
+        framework::dataset::make("Expected", { false, false, false, false, true })
+        ),
                input_info, output_info, expected)
 {
     const Status s = NEFFT2D::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), FFT2DInfo());

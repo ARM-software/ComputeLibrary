@@ -56,7 +56,7 @@ TEST_SUITE(MeanStdDevNormalizationLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data type input/output
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching shapes
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
@@ -64,8 +64,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { false, false, true })),
+                                                     }),
+               framework::dataset::make("Expected", { false, false, true })
+               ),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEMeanStdDevNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

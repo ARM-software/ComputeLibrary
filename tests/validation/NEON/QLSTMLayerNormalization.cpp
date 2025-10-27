@@ -42,6 +42,13 @@ namespace test
 {
 namespace validation
 {
+using namespace arm_compute::test::framework;
+using arm_compute::test::framework::DatasetMode;
+namespace dataset = arm_compute::test::framework::dataset;
+using dataset::make;
+using dataset::zip;
+using dataset::combine;
+using dataset::concat;
 namespace
 {
 constexpr uint32_t vector_size_byte = 16;
@@ -97,10 +104,9 @@ static const uint32_t    tensor_num_channel{ 1 };
 
 // *INDENT-OFF*
 // clang-format off
-
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
-    zip(zip(zip(
-        framework::dataset::make("InputInfo", {
+DATA_TEST_CASE(Validate, DatasetMode::ALL,
+    zip(
+        make("InputInfo", {
             TensorInfo(correct_input_shape, tensor_num_channel, DataType::F16), // input supports only QSYMM16
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // weight supports only QSYMM16
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // bias supports only S32
@@ -110,9 +116,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // input_shape[0] != weight_shape[0] should fail
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // weight_shape[0] != bias_shape[0] should fail
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // output shape mismatches with input shape
-            TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // output data type mismatches with input data type
+            TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt)  // output data type mismatches with input data type
         }),
-        framework::dataset::make("WeightInfo", {
+        make("WeightInfo", {
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
             TensorInfo(correct_weight_shape, tensor_num_channel, DataType::F16),
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
@@ -122,41 +128,38 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(TensorShape(14U), tensor_num_channel, correct_weight_dt),
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
-            TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
-        })
-    ),
-        framework::dataset::make("BiasInfo", {
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, DataType::QSYMM16),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
+            TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt)
+        }),
+        make("BiasInfo", {
+            TensorInfo(correct_bias_shape,  tensor_num_channel, correct_bias_dt),
+            TensorInfo(correct_bias_shape,  tensor_num_channel, correct_bias_dt),
+            TensorInfo(correct_bias_shape,  tensor_num_channel, DataType::QSYMM16),
+            TensorInfo(correct_bias_shape,  tensor_num_channel, correct_bias_dt),
+            TensorInfo(correct_bias_shape,  tensor_num_channel, correct_bias_dt),
             TensorInfo(TensorShape(15U, 2U), tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
-            TensorInfo(TensorShape(14U), tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
+            TensorInfo(correct_bias_shape,  tensor_num_channel, correct_bias_dt),
+            TensorInfo(TensorShape(14U),     tensor_num_channel, correct_bias_dt),
+            TensorInfo(correct_bias_shape,  tensor_num_channel, correct_bias_dt),
+            TensorInfo(correct_bias_shape,  tensor_num_channel, correct_bias_dt)
+        }),
+        make("OutputInfo", {
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
+            TensorInfo(TensorShape(15, 3),    tensor_num_channel, correct_output_dt),
+            TensorInfo(correct_output_shape, tensor_num_channel, DataType::S32)
         })
     ),
-        framework::dataset::make("OutputInfo", {
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(TensorShape(15, 3), tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, DataType::S32),
-        })
-    ),
-     input_info, weight_info, bias_info, output_info)
+    input_info, weight_info, bias_info, output_info)
 {
     const Status s = NEQLSTMLayerNormalization::validate(&input_info, &output_info, &weight_info, &bias_info);
-    ARM_COMPUTE_EXPECT(!bool(s), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!bool(s), LogLevel::ERRORS);
 }
-
 // clang-format on
 // *INDENT-ON*
 
@@ -184,12 +187,21 @@ TEST_SUITE(QSYMM16)
 
 constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
 
-#define QSYMM16_DATASET_ITER(num_input_batch, num_iter)                                                              \
-    combine(zip(zip(QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>("InputShape"), \
-                            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape")),             \
-                        QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),                   \
-                    framework::dataset::make("DataType", DataType::QSYMM16),                                        \
-            framework::dataset::make("WeightQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(8192) }))
+#define QSYMM16_DATASET_ITER(num_input_batch, num_iter)                                \
+    combine(                                                                           \
+        zip(                                                                           \
+            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>( \
+                "InputShape"),                                                         \
+            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>(               \
+                "WeightShape"),                                                        \
+            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>(               \
+                "BiasShape")                                                           \
+        ),                                                                              \
+        make("DataType", { DataType::QSYMM16 }),                                        \
+        make("WeightQuantizationInfo",                                                 \
+                                            { QuantizationInfo(1.f / 8192.f, 0),         \
+                                            QuantizationInfo(8192.f, 0) })             \
+    )
 
 #define QSYMM16_DATASET_1D \
     concat(concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1)), QSYMM16_DATASET_ITER(1, 2))

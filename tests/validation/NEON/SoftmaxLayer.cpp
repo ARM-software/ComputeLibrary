@@ -110,7 +110,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                    2,
                    -3,
                 }),
-    make("Expected", { false, false, false, true, true, true, false, false })),
+    make("Expected", { false, false, false, true, true, true, false, false })
+    ),
     input_info, output_info, beta, axis, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NESoftmaxLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), beta, axis)) == expected, framework::LogLevel::ERRORS);

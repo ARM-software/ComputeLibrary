@@ -51,7 +51,7 @@ TEST_SUITE(RNNLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::U8),      // Wrong data type
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Wrong input size
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),     // Wrong weights size
@@ -69,7 +69,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                        TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 32U), 1, DataType::F32),
-               })),
+               }),
                framework::dataset::make("RecurrentWeightsInfo", { TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
                                                                   TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
                                                                   TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
@@ -78,7 +78,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                                   TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
                                                                   TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
                                                                   TensorInfo(TensorShape(32U, 32U), 1, DataType::F32),
-               })),
+               }),
                framework::dataset::make("BiasInfo", { TensorInfo(TensorShape(11U), 1, DataType::F32),
                                                       TensorInfo(TensorShape(11U), 1, DataType::F32),
                                                       TensorInfo(TensorShape(11U), 1, DataType::F32),
@@ -87,7 +87,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                       TensorInfo(TensorShape(11U), 1, DataType::F32),
                                                       TensorInfo(TensorShape(11U), 1, DataType::F32),
                                                       TensorInfo(TensorShape(32U), 1, DataType::F32),
-               })),
+               }),
                framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
@@ -96,7 +96,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                         TensorInfo(TensorShape(11U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 32U), 1, DataType::F32),
-               })),
+               }),
                framework::dataset::make("HiddenStateInfo", { TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
                                                              TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
                                                              TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
@@ -105,7 +105,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                              TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
                                                              TensorInfo(TensorShape(11U, 13U, 2U), 1, DataType::F32),
                                                              TensorInfo(TensorShape(32U, 32U), 1, DataType::F32),
-               })),
+               }),
                framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -114,8 +114,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-               })),
-               framework::dataset::make("Expected", { false, false, false, false, false, false, false, true })),
+               }),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, true })
+               ),
                input_info, weights_info, recurrent_weights_info, bias_info, output_info, hidden_output_info, info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NERNNLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &recurrent_weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), &hidden_output_info.clone()->set_is_resizable(false), info)) == expected, framework::LogLevel::ERRORS);

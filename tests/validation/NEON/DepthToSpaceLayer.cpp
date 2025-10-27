@@ -49,21 +49,22 @@ using NEDepthToSpaceLayerFixture = DepthToSpaceLayerValidationFixture<Tensor, Ac
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 4U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(16U, 8U, 4U, 4U), 1, DataType::F32),   // block < 2
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Negative block shape
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 4U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                      }),
-               framework::dataset::make("BlockShape", { 2, 1, 2, 2, 2 })),
+               framework::dataset::make("BlockShape", { 2, 1, 2, 2, 2 }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 1U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 16U, 1U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 1U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, false, false, false, false})),
+                                                     }),
+               framework::dataset::make("Expected", { true, false, false, false, false})
+               ),
                input_info, block_shape, output_info, expected)
 {
     bool has_error = bool(NEDepthToSpaceLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), block_shape));

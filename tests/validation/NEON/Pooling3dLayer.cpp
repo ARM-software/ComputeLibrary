@@ -133,7 +133,7 @@ TEST_CASE(SimpleIntegerAvgPooling, framework::DatasetMode::ALL)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 27U, 13U, 4U, 3U), 1, DataType::F32, DataLayout::NDHWC),     // Mismatching data type
                                             TensorInfo(TensorShape(2U, 27U, 13U, 4U, 2U), 1, DataType::F32, DataLayout::NDHWC),     // Invalid pad/size combination
                                             TensorInfo(TensorShape(2U, 27U, 13U, 4U, 2U), 1, DataType::F32, DataLayout::NDHWC),     // Invalid pad/size combination
@@ -163,7 +163,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(5U, 6U, 6U, 2U, 3U),  1, DataType::F32, DataLayout::NDHWC),
                                             TensorInfo(TensorShape(5U, 6U, 6U, 2U, 2U),  1, DataType::F32, DataLayout::NDHWC),
                                             TensorInfo(TensorShape(5U, 6U, 6U, 2U, 3U),  1, DataType::F32, DataLayout::NDHWC),
-                                    })),
+                                    }),
     framework::dataset::make("PoolInfo",  { Pooling3dLayerInfo(PoolingType::AVG, 3, Size3D(1, 1, 1), Padding3D(0, 0, 0)),
                                             Pooling3dLayerInfo(PoolingType::AVG, 2, Size3D(1, 1, 1), Padding3D(2, 0, 0)),
                                             Pooling3dLayerInfo(PoolingType::AVG, 2, Size3D(1, 1, 1), Padding3D(0, 0, 0)),
@@ -179,8 +179,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             Pooling3dLayerInfo(PoolingType::AVG, 1, Size3D(2U, 2U, 2U), Padding3D(2, 2, 2), true),  // pool size is equal to the padding size
                                             Pooling3dLayerInfo(PoolingType::AVG, 1, Size3D(2U, 2U, 2U), Padding3D(2, 2, 2), false), // pool size is equal to the padding size
                                             Pooling3dLayerInfo(PoolingType::AVG, 3, Size3D(2U, 2U, 2U), Padding3D(2,1,2,2,1,2), false, false, DimensionRoundingType::CEIL), // CEIL with asymmetric Padding
-                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, true, false, false, false, false, true , false, true, false, false, false})),
+                                            }),
+    framework::dataset::make("Expected", { false, false, false, false, true, false, false, false, false, true , false, true, false, false, false})
+    ),
     input_info, output_info, pool_info, expected)
 {
     bool is_valid = bool(NEPooling3dLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info));

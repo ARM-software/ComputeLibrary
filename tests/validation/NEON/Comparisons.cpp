@@ -54,7 +54,7 @@ TEST_SUITE(Comparison)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching input types
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
@@ -64,13 +64,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-        })),
+        }),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-        })),
-        framework::dataset::make("Expected", { false, false, false, true})),
+        }),
+        framework::dataset::make("Expected", { false, false, false, true})
+        ),
         input1_info, input2_info, output_info, expected)
 {
     Status s = NEElementwiseComparison::validate(&input1_info.clone()->set_is_resizable(false),

@@ -46,7 +46,7 @@ TEST_SUITE(ReorgLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::S64),    // Wrong output tensor
                                                        TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),    // Wrong output tensor
@@ -58,9 +58,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(5U, 6U, 2, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(1U, 4U, 36U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(1U, 4U, 36U, 2U), 1, DataType::F16),
-                                                     })),
-               framework::dataset::make("Stride", { 2, 2, 4, 3 })),
-               framework::dataset::make("Expected", { false, true, false, true, false })),
+                                                     }),
+               framework::dataset::make("Stride", { 2, 2, 4, 3 }),
+               framework::dataset::make("Expected", { false, true, false, true, false })
+               ),
                input_info, output_info, stride, expected)
 {
     bool status = bool(NEReorgLayer::validate(&input_info, &output_info, stride));

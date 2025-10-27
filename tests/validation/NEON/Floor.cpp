@@ -48,7 +48,7 @@ TEST_SUITE(Floor)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),  // Wrong data type
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid data type combination
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
@@ -58,8 +58,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-        })),
-                                                          framework::dataset::make("Expected", { false, false, false, true })),
+        }),
+        framework::dataset::make("Expected", { false, false, false, true })
+                                                          ),
                input_info, output_info, expected)
 {
     const Status status = NEFloor::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false));

@@ -94,50 +94,52 @@ TEST_SUITE(GenerateProposals)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("scores", { TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F32),
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Mismatching types
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Wrong deltas (number of transformation non multiple of 4)
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Wrong anchors (number of values per roi != 5)
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Output tensor num_valid_proposals not scalar
-                                                    TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16)}), // num_valid_proposals not U32
+                                                    TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16)}),
+               // num_valid_proposals not U32
                framework::dataset::make("deltas",{ TensorInfo(TensorShape(100U, 100U, 36U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 36U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32),
-                                                   TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32)})),
+                                                   TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32)}),
                framework::dataset::make("anchors", { TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(5U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
-                                                     TensorInfo(TensorShape(4U, 9U), 1, DataType::F32)})),
+                                                     TensorInfo(TensorShape(4U, 9U), 1, DataType::F32)}),
                framework::dataset::make("proposals", { TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32)})),
+                                                       TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32)}),
                framework::dataset::make("scores_out", { TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32)})),
+                                                        TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32)}),
                framework::dataset::make("num_valid_proposals", { TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 10U), 1, DataType::U32),
-                                                                 TensorInfo(TensorShape(1U, 1U), 1, DataType::F16)})),
+                                                                 TensorInfo(TensorShape(1U, 1U), 1, DataType::F16)}),
                framework::dataset::make("generate_proposals_info", { GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
-                                                                     GenerateProposalsInfo(10.f, 10.f, 1.f)})),
-               framework::dataset::make("Expected", { true, false, false, false, false, false })),
+                                                                     GenerateProposalsInfo(10.f, 10.f, 1.f)}),
+               framework::dataset::make("Expected", { true, false, false, false, false, false })
+               ),
         scores, deltas, anchors, proposals, scores_out, num_valid_proposals, generate_proposals_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEGenerateProposalsLayer::validate(&scores.clone()->set_is_resizable(true),

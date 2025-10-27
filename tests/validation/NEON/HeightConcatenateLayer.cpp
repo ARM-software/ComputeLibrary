@@ -44,7 +44,7 @@ TEST_SUITE(HeightConcatenateLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo1", {  TensorInfo(TensorShape(23U, 15U, 5U), 1, DataType::F32), // Mismatching data type input/output
                                                   TensorInfo(TensorShape(22U, 27U, 5U), 1, DataType::F32), // Mismatching y dimension
                                                   TensorInfo(TensorShape(11U, 25U, 5U), 1, DataType::F32), // Mismatching total height
@@ -57,14 +57,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                   TensorInfo(TensorShape(11U, 26U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(16U, 25U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(35U, 10U, 5U), 1, DataType::F32)
-        })),
+        }),
         framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(23U, 30U, 5U), 1, DataType::F16),
                                                   TensorInfo(TensorShape(22U, 12U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(11U, 7U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(16U, 50U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(35U, 31U, 5U), 1, DataType::F32)
-        })),
-        framework::dataset::make("Expected", { false, false, false, true, true })),
+        }),
+        framework::dataset::make("Expected", { false, false, false, true, true })
+        ),
         input_info1, input_info2, output_info,expected)
 {
     std::vector<TensorInfo> inputs_vector_info;

@@ -151,7 +151,7 @@ TEST_CASE(ProperRoundingPolicyNonXReduction, framework::DatasetMode::ALL)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid output shape
                                                 TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32),// OK
@@ -164,10 +164,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                  TensorInfo(TensorShape(19U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(19U), 1, DataType::F32)
 
-        })),
-        framework::dataset::make("Axis", { Coordinates(4), Coordinates(0,2), Coordinates(2), Coordinates(3,2,0), Coordinates(3,2,0) })),
-        framework::dataset::make("Keep", { true, true, true, false, false })),
-        framework::dataset::make("Expected", { false, false, true, true, false })),
+        }),
+        framework::dataset::make("Axis", { Coordinates(4), Coordinates(0,2), Coordinates(2), Coordinates(3,2,0), Coordinates(3,2,0) }),
+        framework::dataset::make("Keep", { true, true, true, false, false }),
+        framework::dataset::make("Expected", { false, false, true, true, false })
+        ),
         input_info, output_info, axis, keep, expected)
 {
     const Status status = NEReduceMean::validate(&input_info.clone()->set_is_resizable(false), axis, keep, &output_info.clone()->set_is_resizable(false));

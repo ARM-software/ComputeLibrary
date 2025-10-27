@@ -111,7 +111,8 @@ make("OutputInfo",
     TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::U8),   // fails mismatching data types
 }),
 make("Axis", { -3, 1, -4, -3, 1 }),
-make("Expected", { true, true, false, false, false })),
+make("Expected", { true, true, false, false, false })
+),
 input_info, output_info, axis, expected)
 {
     std::vector<TensorInfo>    ti(input_info);

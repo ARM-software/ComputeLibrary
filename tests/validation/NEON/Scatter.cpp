@@ -139,7 +139,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::PRECOMMIT, zip(
                          ScatterInfo(ScatterFunction::Update, false),
                          ScatterInfo(ScatterFunction::Update, false),
     }),
-    make("Expected", { false, true, true, true, false, false, false, false, false, false })),
+    make("Expected", { false, true, true, true, false, false, false, false, false, false })
+    ),
     input_info, updates_info, indices_info, output_info, scatter_info, expected)
 {
     const Status status = NEScatter::validate(&input_info, &updates_info, &indices_info, &output_info, scatter_info);

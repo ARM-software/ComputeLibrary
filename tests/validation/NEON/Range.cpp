@@ -58,7 +58,7 @@ TEST_SUITE(Range)
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(27U), 1, DataType::U8),
@@ -78,7 +78,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                   2.0f,
                                                   10.0f,
                                                   10.0f
-                                                })),
+                                                }),
                framework::dataset::make("End",{ 100.0f,
                                                 15.0f,
                                                 2500.0f,
@@ -88,7 +88,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 10.0f,
                                                 100.0f,
                                                 100.0f
-                                              })),
+                                              }),
                framework::dataset::make("Step",{ 100.0f,
                                                  15.0f,
                                                  10.0f,
@@ -98,7 +98,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                  0.0f,
                                                  10.0f,
                                                  10.0f
-                                              })),
+                                              }),
                framework::dataset::make("Expected", { false, // 1-D tensor expected
                                                     false, // start == end
                                                     false, // output vector size insufficient
@@ -108,7 +108,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                     false, // step = 0
                                                     false, // invalid QASYMM8 datatype
                                                     true,
-                                                    })),
+                                                    })
+                                                    ),
                output_info, start, end, step, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NERange::validate(&output_info, start, end, step)) == expected, framework::LogLevel::ERRORS);

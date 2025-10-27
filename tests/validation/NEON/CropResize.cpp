@@ -50,7 +50,7 @@ using NECropResizeFixture = CropResizeFixture<Tensor, Accessor, NECropResize, T>
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid box_ind shape.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid output shape.
@@ -64,22 +64,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(3, 20), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("BoxIndInfo",{ TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(10), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 10U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(5U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, false, false, false, false, false})),
+                                                     }),
+               framework::dataset::make("Expected", { true, false, false, false, false, false})
+               ),
                input, boxes, box_ind, output, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NECropResize::validate(&input.clone()->set_data_layout(DataLayout::NHWC).set_is_resizable(false),

@@ -106,7 +106,7 @@ DATA_TEST_CASE(ValidateAllDataTypes, framework::DatasetMode::ALL,
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8), // Invalid axis datatype
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Invalid axis shape
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Invalid axis length (> 4)
@@ -122,7 +122,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(32U, 13U, 17U, 3U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(2U), 1, DataType::U8),
-        })),
+        }),
         make("AxisInfo", { TensorInfo(TensorShape(3U), 1, DataType::U8),
                                            TensorInfo(TensorShape(2U, 10U), 1, DataType::U32),
                                            TensorInfo(TensorShape(8U), 1, DataType::U32),
@@ -130,8 +130,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                            TensorInfo(TensorShape(2U), 1, DataType::U32),
                                            TensorInfo(TensorShape(2U), 1, DataType::U32),
                                            TensorInfo(TensorShape(2U), 1, DataType::U32),
-        })),
-        make("Expected", { false, false, false, false, false, true, true})),
+        }),
+        make("Expected", { false, false, false, false, false, true, true})
+        ),
         src_info, dst_info, axis_info, expected)
 {
     Status s = NEReverse::validate(&src_info.clone()->set_is_resizable(false),

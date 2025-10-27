@@ -95,7 +95,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8),
         }),
         make("TensorIsConst", {false, false, false, false, false , false, true, false, false, false}),
-        make("Expected", { false, false, false, false, true, true, false, true, true, false })),
+        make("Expected", { false, false, false, false, true, true, false, true, true, false })
+        ),
     a_info, b_info, output_info, are_tensors_const, expected)
 {
     TensorInfo a{a_info};
@@ -149,7 +150,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8),
         }),
         make("TensorIsConst", {false, false, false, false, false , false, true, false, false, false}),
-        make("Expected", { false, false, false, false, true, true, false, false, false, false })),
+        make("Expected", { false, false, false, false, true, true, false, false, false, false })
+        ),
     a_info, b_info, output_info, are_tensors_const, expected)
 {
     TensorInfo a{a_info};

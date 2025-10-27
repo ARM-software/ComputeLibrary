@@ -84,7 +84,7 @@ TEST_SUITE(DepthConvertLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U16),  // Invalid data type combination
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),  // Invalid data type combination
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),  // Mismatching shapes
@@ -95,7 +95,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
-                                                     })),
+                                                     }),
                framework::dataset::make("Policy",{ ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
@@ -103,10 +103,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
-                                                     })),
+                                                     }),
                framework::dataset::make("Shift",{ 0, 0, 0, 1, 1, 1, 8, 1,
-                                                     })),
-               framework::dataset::make("Expected", { false, false, false, false, true})),
+                                                     }),
+               framework::dataset::make("Expected", { false, false, false, false, true})
+               ),
                input_info, output_info, policy, shift, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEDepthConvertLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), policy, shift)) == expected, framework::LogLevel::ERRORS);

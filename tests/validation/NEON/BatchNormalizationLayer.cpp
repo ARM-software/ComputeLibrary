@@ -76,7 +76,7 @@ using NEBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixtur
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
@@ -88,20 +88,21 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("MVBGInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F16),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(5U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F32),
-                                                   })),
+                                                   }),
                framework::dataset::make("ActivationLayerInfo",{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 2.f, 6.f),
-                                                   })),
-               framework::dataset::make("Expected", { true, false, false, false, false})),
+                                                   }),
+               framework::dataset::make("Expected", { true, false, false, false, false})
+               ),
                input_info, output_info, mvbg_info, act_info, expected)
 {
     const auto &mean_info = mvbg_info;
@@ -189,7 +190,7 @@ using NEBatchNormalizationLayerFusionFixture = BatchNormalizationLayerFusionVali
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("Weights", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),      // Valid
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F16),    // Mismatching data types
@@ -199,8 +200,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                      TensorInfo(TensorShape(2U), 1, DataType::F16),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(5U), 1, DataType::F32),
-                                                   })),
-               framework::dataset::make("Expected", { true, false, false, false})),
+                                                   }),
+               framework::dataset::make("Expected", { true, false, false, false})
+               ),
                weights_info, mvbg_info, expected)
 {
     const auto &weights_in_info = weights_info;

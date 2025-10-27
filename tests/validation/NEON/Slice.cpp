@@ -45,15 +45,16 @@ TEST_SUITE(Slice)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 2U, 5U, 3U), 1, DataType::F32), // Invalid input shape
                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32),         // Negative begin
                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32),         // Big number of coordinates
                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32)
         }),
-        framework::dataset::make("Starts", { Coordinates(3, 1, 0), Coordinates(-3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0) })),
-                                                              framework::dataset::make("Ends", { Coordinates(13, 3, 0),  Coordinates(13, 3, 1), Coordinates(13, 3, 1, 1), Coordinates(13, 3, 1) })),
-                                                          framework::dataset::make("Expected", { false, false, false, true })),
+        framework::dataset::make("Starts", { Coordinates(3, 1, 0), Coordinates(-3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0) }),
+        framework::dataset::make("Ends", { Coordinates(13, 3, 0),  Coordinates(13, 3, 1), Coordinates(13, 3, 1, 1), Coordinates(13, 3, 1) }),
+        framework::dataset::make("Expected", { false, false, false, true })
+                                                          ),
                input_info, starts, ends, expected)
 {
     TensorInfo output_info;

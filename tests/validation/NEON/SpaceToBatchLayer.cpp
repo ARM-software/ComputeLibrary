@@ -49,7 +49,7 @@ using NESpaceToBatchLayerFixture = SpaceToBatchLayerValidationFixture<Tensor, Ac
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Wrong data type block shape
@@ -59,41 +59,43 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(2U), 1, DataType::S32),
-                                                     })),
+                                                     }),
                framework::dataset::make("PaddingsShapeInfo",{ TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, false, false, false})),
+                                                     }),
+               framework::dataset::make("Expected", { true, false, false, false})
+               ),
                input_info, block_shape_info, paddings_info, output_info, expected)
 {
     bool has_error = bool(NESpaceToBatchLayer::validate(&input_info.clone()->set_is_resizable(false), &block_shape_info.clone()->set_is_resizable(false), &paddings_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false)));
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
-DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Negative block shapes
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong paddings
                                                      }),
-               framework::dataset::make("BlockShapeX", { 2, 2, 2, 2, 2 })),
-               framework::dataset::make("BlockShapeY", { 2, 2, -2, 2, 2 })),
-               framework::dataset::make("PadLeft", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) })),
-               framework::dataset::make("PadRight", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) })),
+               framework::dataset::make("BlockShapeX", { 2, 2, 2, 2, 2 }),
+               framework::dataset::make("BlockShapeY", { 2, 2, -2, 2, 2 }),
+               framework::dataset::make("PadLeft", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
+               framework::dataset::make("PadRight", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, false, false, false, false})),
+                                                     }),
+               framework::dataset::make("Expected", { true, false, false, false, false})
+               ),
                input_info, block_shape_x, block_shape_y, padding_left, padding_right, output_info, expected)
 {
     bool has_error = bool(NESpaceToBatchLayer::validate(&input_info.clone()->set_is_resizable(false), block_shape_x, block_shape_y, padding_left, padding_right, &output_info.clone()->set_is_resizable(false)));

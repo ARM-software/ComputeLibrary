@@ -50,7 +50,7 @@ const auto unstack_dataset_small = datasets::Small3DShapes() * unstack_axis_data
 TEST_SUITE(NEON)
 TEST_SUITE(Unstack)
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                                       framework::dataset::make("InputInfo",
 {
     TensorInfo(TensorShape(1U, 9U, 8U), 1, DataType::U8),   // Passes, 1 slice on x axis
@@ -60,15 +60,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
     TensorInfo(TensorShape(13U, 7U, 5U), 1, DataType::S16), // fails, too few output slices
     TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::U8),   // fails mismatching data types
 }),
-framework::dataset::make("OutputInfo",
+                                                                      framework::dataset::make("OutputInfo",
 {
     std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::U8) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(2U, 3U), 1, DataType::U8) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(2U, 3U), 1, DataType::S32) },
 
     std::vector<TensorInfo>{ TensorInfo(TensorShape(7U, 5U), 1, DataType::S32), TensorInfo(TensorShape(7U, 5U), 1, DataType::S32), TensorInfo(TensorShape(7U, 5U), 1, DataType::S32) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(7U, 5U), 1, DataType::S16) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::S32) },
-})),
-framework::dataset::make("Axis", { -3, 3, -4, -3, 1, 1 })),
-framework::dataset::make("Num", { 1, 1, 1, 1, 0, 1 })),
-framework::dataset::make("Expected", { true, false, false, true, false, false })),
+}),
+                                                                      framework::dataset::make("Axis", { -3, 3, -4, -3, 1, 1 }),
+                                                                      framework::dataset::make("Num", { 1, 1, 1, 1, 0, 1 }),
+                                                                      framework::dataset::make("Expected", { true, false, false, true, false, false })
+),
 input_info, output_info, axis, num, expected)
 {
     std::vector<TensorInfo>    ti(output_info);

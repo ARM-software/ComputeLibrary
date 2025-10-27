@@ -43,7 +43,7 @@ using CpuCol2Im = NESynthetizeFunction<cpu::kernels::CpuCol2ImKernel>;
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::S64),    // Unsupported data type
                                                        TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),    // Mismatching data type
                                                        TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),    // Invalid output shape
@@ -53,10 +53,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("ConvolvedWidth", { 3, 3, 3, 3, 3 })),
-               framework::dataset::make("ConvolvedHeight", { 4, 4, 4, 4, 4 })),
-               framework::dataset::make("Expected", { false, false, false, true })),
+                                                     }),
+               framework::dataset::make("ConvolvedWidth", { 3, 3, 3, 3, 3 }),
+               framework::dataset::make("ConvolvedHeight", { 4, 4, 4, 4, 4 }),
+               framework::dataset::make("Expected", { false, false, false, true })
+               ),
                input_info, output_info, convolved_width, convolved_height, expected)
 {
     bool status = bool(CpuCol2Im::validate(&input_info, &output_info, Size2D(convolved_width, convolved_height)));

@@ -206,17 +206,18 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                make("LhsInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::S32), // Unsupported data type
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),
                                                      }),
                make("RhsInfo",{ TensorInfo(TensorShape(8U, 27U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(8U, 27U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                make("OutputInfo",{ TensorInfo(TensorShape(8U, 13U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(8U, 13U), 1, DataType::F32),
-                                                     })),
-               make("Expected", { false, true })),
+                                                     }),
+               make("Expected", { false, true })
+               ),
                lhs_info, rhs_info, output_info, expected)
 {
     constexpr float alpha = 1.0;
@@ -265,7 +266,8 @@ TEST_SUITE(TRANSPOSE_1XW)
 using CpuGemmTranspose1xW = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuGemmTranspose1xWKernel>;
 DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
                    make("N", { 1, 23, 63, 101 }),
-                   make("K", { 1, 47, 29, 27 })),
+                   make("K", { 1, 47, 29, 27 })
+                   ),
                n_value, k_value)
 {
     bool status = validate_zero_padding<CpuGemmTranspose1xW>(n_value, k_value);
@@ -306,7 +308,8 @@ using CpuGemmInterleave4x4 = NESynthetizeFunctionWithZeroConstantKernelBorder<cp
 
 DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
                    make("M", { 1, 23, 63, 101 }),
-                   make("K", { 1, 47, 29, 27 })),
+                   make("K", { 1, 47, 29, 27 })
+                   ),
                m_value, k_value)
 {
     bool status = validate_zero_padding<cpu::kernels::CpuGemmInterleave4x4Kernel>(m_value, k_value);
@@ -361,20 +364,22 @@ template <typename T>
 using NEGEMMAccumulateFixture = GEMMAccumulateValidationFixture<Tensor, Accessor, NEGEMM, T>;
 
 TEST_SUITE(Float)
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(make("In0", { TensorShape(21U, 13U),
+DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
+                                                                                                       make("In0", { TensorShape(21U, 13U),
                                                                                                        TensorShape(31U, 1U),
                                                                                                        TensorShape(31U, 1U),
                                                                                                        TensorShape(8U, 2U),
                                                                                                        TensorShape(38U, 12U),
                                                                                                        TensorShape(32U, 1U)
                                                                                                      }),
-                                                                     make("In1", { TensorShape(33U, 21U),
+                                                                                                       make("In1", { TensorShape(33U, 21U),
                                                                                                        TensorShape(23U, 31U),
                                                                                                        TensorShape(23U, 31U),
                                                                                                        TensorShape(16U, 8U),
                                                                                                        TensorShape(21U, 38U),
                                                                                                        TensorShape(17U, 32U)
-                                                                                                     })),
+                                                                                                     })
+                                                                                                     ),
                shape0, shape1)
 {
     bool status = validate_gemm_zero_padding(shape0, shape1);
@@ -382,14 +387,17 @@ DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(make("In0",
 }
 
 DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
-                                                                     zip(make("In0",{ TensorShape(21U, 13U) }),
+                                                                     zip(
+                                                                     make("In0",{ TensorShape(21U, 13U) }),
                                                                      make("In1", { TensorShape(33U, 21U) }),
-                                                                     make("Dst", { TensorShape(33U, 13U) })),
+                                                                     make("Dst", { TensorShape(33U, 13U) })
+                                                                     ),
                                                                      zip(
                                                                      make("alpha", { 1.0, 100.0, 1.0, 1.0 }),
                                                                      make("beta", { 0.0, 0.0, 1.0, 1.0 }),
                                                                      make("is_c_null", { false, false, false, true }),
-                                                                     make("Expected", { true, false, false, true }))),
+                                                                     make("Expected", { true, false, false, true })
+                                                                     )),
                shape_a, shape_b, shape_dst, alpha, beta, is_c_null, expected)
 {
     /* Accumulation test for GEMM kernels */

@@ -174,7 +174,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                             TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
                                             TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
                                            }),
-    make("Expected", { true, false, false, false, true, false })),
+    make("Expected", { true, false, false, false, true, false })
+    ),
     a_info, b_info, output_info, expected)
 {
     // Lock tensors
@@ -469,7 +470,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
         TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
     }),
-    make("Expected", { true, true, false })),
+    make("Expected", { true, true, false })
+    ),
     a_info, b_info, output_info, expected)
 {
     // Lock tensors

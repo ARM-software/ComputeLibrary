@@ -141,7 +141,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
         ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     }),
-    make("Expected", { false, false, false, false, false, false, false, false })),
+    make("Expected", { false, false, false, false, false, false, false, false })
+    ),
     input_info, input_weights_info, recurrent_weights_info, cell_bias_info,
         projection_bias_info, cell_state_info, output_info, scratch_info, info, expected)
 {

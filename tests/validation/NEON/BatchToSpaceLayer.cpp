@@ -49,7 +49,7 @@ using NEBatchToSpaceLayerFixture = BatchToSpaceLayerValidationFixture<Tensor, Ac
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Supported: blockx != blocky && blockx > blocky
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Supported: blockx != blocky && blocky > blockx
@@ -61,11 +61,11 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Supported: correct tensor shape with cropping
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Invalid tensor shape with cropping
                                                      }),
-               framework::dataset::make("BlockShapeX", { 2, 4, 2, 2, 2, 2, 2, 2, 2, 2 })),
-               framework::dataset::make("BlockShapeY", { 2, 2, 4, 2, -2, 2, 2, 2, 2, 2 })),
+               framework::dataset::make("BlockShapeX", { 2, 4, 2, 2, 2, 2, 2, 2, 2, 2 }),
+               framework::dataset::make("BlockShapeY", { 2, 2, 4, 2, -2, 2, 2, 2, 2, 2 }),
                framework::dataset::make("CropInfo", {
                 CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{3, 2, 1, 3}, CropInfo{3, 2, 1, 3}
-               })),
+               }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 16U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 32U, 2U, 2U), 1, DataType::F32),
@@ -76,8 +76,9 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(33U, 32U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27, 12U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 4U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, true, false})),
+                                                     }),
+               framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, true, false})
+               ),
                input_info, block_shape_x, block_shape_y, crop_info, output_info, expected)
 {
     bool has_error = bool(NEBatchToSpaceLayer::validate(&input_info.clone()->set_is_resizable(false), block_shape_x, block_shape_y, &output_info.clone()->set_is_resizable(false), crop_info));
