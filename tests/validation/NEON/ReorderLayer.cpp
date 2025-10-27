@@ -54,10 +54,14 @@ TEST_SUITE(FP32)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 DATA_TEST_CASE(ValidateReorderOHWIo8,
                framework::DatasetMode::ALL,
-               combine(zip(make("InShape", {TensorShape(10U, 9U), TensorShape(234U, 301U)}),
-                           make("OutShape", {TensorShape(10U, 16U), TensorShape(234U, 304U)})),
-                       zip(make("InputWeightFormat", {WeightFormat::OHWI}),
-                           make("OutputWeightFormat", {WeightFormat::OHWIo8}))),
+               combine(zip(
+                           make("InShape", {TensorShape(10U, 9U), TensorShape(234U, 301U)}),
+                           make("OutShape", {TensorShape(10U, 16U), TensorShape(234U, 304U)})
+                           ),
+                       zip(
+                           make("InputWeightFormat", {WeightFormat::OHWI}),
+                           make("OutputWeightFormat", {WeightFormat::OHWIo8})
+                           )),
                input_shape,
                output_shape,
                input_wf,

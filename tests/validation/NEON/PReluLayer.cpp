@@ -69,7 +69,7 @@ TEST_SUITE(PReluLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
@@ -81,14 +81,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, true, false, false, false})),
+                                                     }),
+               framework::dataset::make("Expected", { true, true, false, false, false})
+               ),
                input1_info, input2_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEPReluLayer::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

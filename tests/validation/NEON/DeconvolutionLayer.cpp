@@ -129,7 +129,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(DeconvolutionLayer)
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Mismatching data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Invalid weights shape
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),   // Non supported data type
@@ -149,7 +149,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                             TensorInfo(TensorShape(3U,3U,1U,1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U,1U,26U,88U), 1, DataType::F32),
                                             TensorInfo(TensorShape(2U,2U,1U,1U), 1, DataType::F32),    // Negative and asymmetric padding
-                                          })),
+                                          }),
     framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16),
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
@@ -159,7 +159,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(88U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
-                                          })),
+                                          }),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
@@ -169,7 +169,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                             TensorInfo(TensorShape(4U,4U,1U,1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U,78U,88U,1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(15U,15U,1U,1U), 1, DataType::F32),
-                                          })),
+                                          }),
     framework::dataset::make("PadStrideInfo", { PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
@@ -179,8 +179,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(2, 3, 3, 1),
                                                 PadStrideInfo(3, 3, 2, 0, 2, 0, arm_compute::DimensionRoundingType::FLOOR),
-                                           })),
-    framework::dataset::make("Expected", { false, false, false, false, false, true,true, false, false })),
+                                           }),
+    framework::dataset::make("Expected", { false, false, false, false, false, true,true, false, false })
+    ),
     input_info, weights_info, bias_info, output_info, pad_info, expected)
 {
     bool is_valid = bool(NEDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info));

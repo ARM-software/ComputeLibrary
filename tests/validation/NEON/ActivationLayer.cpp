@@ -162,7 +162,7 @@ TEST_CASE(ActivationAPI, framework::DatasetMode::ALL)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
@@ -170,12 +170,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                          })),
+                                          }),
     framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                  ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                  ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-                                               })),
-    framework::dataset::make("Expected", { false, true, false})),
+                                               }),
+    framework::dataset::make("Expected", { false, true, false})
+    ),
     input_info, output_info, act_info, expected)
 {
     bool is_valid = bool(NEActivationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), act_info));

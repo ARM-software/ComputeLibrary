@@ -79,7 +79,7 @@ TEST_SUITE(ReductionOperation)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo",          { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
                                                      TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
@@ -93,10 +93,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                      TensorInfo(TensorShape(1U, 64U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(1U, 64U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(1U, 64U), 1, DataType::F32)
-                                                   })),
-    framework::dataset::make("Axis",               { 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 0U, 0U })),
-    framework::dataset::make("KeepDims",           { true, true, true, true, true, false})),
-    framework::dataset::make("Expected",           { false, false, false, false, true, false })),
+                                                   }),
+    framework::dataset::make("Axis",               { 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 0U, 0U }),
+    framework::dataset::make("KeepDims",           { true, true, true, true, true, false}),
+    framework::dataset::make("Expected",           { false, false, false, false, true, false })
+    ),
     input_info, output_info, axis, keep_dims, expected)
 {
     bool is_valid = bool(NEReductionOperation::validate(&input_info.clone()->set_is_resizable(false),

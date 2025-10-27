@@ -53,7 +53,7 @@ TEST_SUITE(RoiPooling)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Successful test
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::QASYMM8), // Successful test (quantized)
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Incorrect rois type
@@ -72,7 +72,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                       TensorInfo(TensorShape(5, 10U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(4, 4U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
-                                                    })),
+                                                    }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
@@ -81,7 +81,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 5U, 3U, 4U), 1, DataType::F32),
-                                                     })),
+                                                     }),
                framework::dataset::make("PoolInfo", { ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
@@ -90,8 +90,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
-                                                      })),
-               framework::dataset::make("Expected", { true, true, false, false, false, false, false })),
+                                                      }),
+               framework::dataset::make("Expected", { true, true, false, false, false, false, false })
+               ),
                input_info, rois_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEROIPoolingLayer::validate(&input_info.clone()->set_is_resizable(true), &rois_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), pool_info)) == expected, framework::LogLevel::ERRORS);

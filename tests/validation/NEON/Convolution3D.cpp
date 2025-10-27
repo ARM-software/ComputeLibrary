@@ -58,18 +58,19 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
 });
 
-const auto data_precommit = combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+const auto data_precommit = combine(zip(
                                                                                     datasets::SmallDirectConv3DShapes(),
-                                                                                    framework::dataset::make("StrideX", { 1, 5, 8 })),
-                                                                                framework::dataset::make("StrideY", { 1, 2, 3 })),
-                                                                            framework::dataset::make("StrideZ", { 1, 2, 1 })),
-                                                                        framework::dataset::make("PadX", { 0, 1, 2 })),
-                                                                    framework::dataset::make("PadY", { 0, 2, 1 })),
-                                                                framework::dataset::make("PadZ", { 0, 3, 5 })),
-                                                            framework::dataset::make("KernelWidth", { 3, 5, 9 })),
-                                                        framework::dataset::make("KernelHeight", { 2, 1, 3 })),
-                                                    framework::dataset::make("KernelDepth", { 1, 2, 3 })),
-                                                framework::dataset::make("NumKernels", { 2, 3, 8 })),
+                                                                                    framework::dataset::make("StrideX", { 1, 5, 8 }),
+                                                                                    framework::dataset::make("StrideY", { 1, 2, 3 }),
+                                                                                    framework::dataset::make("StrideZ", { 1, 2, 1 }),
+                                                                                    framework::dataset::make("PadX", { 0, 1, 2 }),
+                                                                                    framework::dataset::make("PadY", { 0, 2, 1 }),
+                                                                                    framework::dataset::make("PadZ", { 0, 3, 5 }),
+                                                                                    framework::dataset::make("KernelWidth", { 3, 5, 9 }),
+                                                                                    framework::dataset::make("KernelHeight", { 2, 1, 3 }),
+                                                                                    framework::dataset::make("KernelDepth", { 1, 2, 3 }),
+                                                                                    framework::dataset::make("NumKernels", { 2, 3, 8 })
+                                                ),
                                             framework::dataset::make("HasBias", { true, false }),
                                     ActivationFunctionsDataset);
 } // namespace
@@ -79,7 +80,7 @@ TEST_SUITE(Convolution3D)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U, 4U), 1U, DataType::F32, DataLayout::NDHWC), // Mismatching data type input/weights
                                                 TensorInfo(TensorShape(27U, 13U, 2U, 4U), 1U, DataType::F32, DataLayout::NDHWC), // Mismatching input feature maps
                                                 TensorInfo(TensorShape(27U, 13U, 2U, 4U), 1U, DataType::F32, DataLayout::NDHWC), // Invalid weights dimensions
@@ -97,7 +98,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                  TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::F32),
                                                  TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::F32),
                                                  TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::U32),
-                                              })),
+                                              }),
         framework::dataset::make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1U, DataType::F32),
@@ -106,7 +107,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(4U, 2U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1U, DataType::F32),
-                                              })),
+                                              }),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::F32),
@@ -115,8 +116,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(26U, 11U, 4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::U32),
-                                              })),
-        framework::dataset::make("Expected", { false, false, false, false, false, false, false, false})),
+                                              }),
+        framework::dataset::make("Expected", { false, false, false, false, false, false, false, false})
+        ),
         input_info, weights_info, biases_info, output_info, expected)
 {
         const Conv3dInfo  conv3d_info(Size3D(1, 1, 1), Padding3D(0, 0, 0), ActivationLayerInfo(), Size3D(1U, 1U, 1U), DimensionRoundingType::FLOOR, false);
@@ -168,23 +170,24 @@ using NEDirectConvolution3DQuantizedFixture = DirectConvolution3DValidationQuant
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                       combine(zip(
                                                                                                                    framework::dataset::make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
                                                                                                                            TensorShape(15U, 7U, 11U, 7U),
                                                                                                                            TensorShape(19U, 5U, 16U, 4U),
                                                                                                                            TensorShape(13U, 5U, 17U, 2U)
                                                                                                                                                           }),
-                                                                                                                   framework::dataset::make("StrideX", { 1, 3, 2, 1 })),
-                                                                                                               framework::dataset::make("StrideY", { 2, 1, 3, 1 })),
-                                                                                                           framework::dataset::make("StrideZ", { 3, 2, 1, 1 })),
-                                                                                                       framework::dataset::make("PadX", { 0, 2, 1, 0 })),
-                                                                                                   framework::dataset::make("PadY", { 1, 0, 2, 0 })),
-                                                                                               framework::dataset::make("PadZ", { 2, 1, 0, 0 })),
-                                                                                           framework::dataset::make("KernelWidth", { 3, 7, 5, 1 })),
-                                                                                       framework::dataset::make("KernelHeight", { 5, 3, 7, 1 })),
-                                                                                   framework::dataset::make("KernelDepth", { 7, 5, 3, 1 })),
-                                                                               framework::dataset::make("NumKernels", { 5, 3, 1, 11 })),
-                                                                           framework::dataset::make("HasBias", { true, true, true, false })),
+                                                                                                                   framework::dataset::make("StrideX", { 1, 3, 2, 1 }),
+                                                                                                                   framework::dataset::make("StrideY", { 2, 1, 3, 1 }),
+                                                                                                                   framework::dataset::make("StrideZ", { 3, 2, 1, 1 }),
+                                                                                                                   framework::dataset::make("PadX", { 0, 2, 1, 0 }),
+                                                                                                                   framework::dataset::make("PadY", { 1, 0, 2, 0 }),
+                                                                                                                   framework::dataset::make("PadZ", { 2, 1, 0, 0 }),
+                                                                                                                   framework::dataset::make("KernelWidth", { 3, 7, 5, 1 }),
+                                                                                                                   framework::dataset::make("KernelHeight", { 5, 3, 7, 1 }),
+                                                                                                                   framework::dataset::make("KernelDepth", { 7, 5, 3, 1 }),
+                                                                                                                   framework::dataset::make("NumKernels", { 5, 3, 1, 11 }),
+                                                                                                                   framework::dataset::make("HasBias", { true, true, true, false })
+                                                                           ),
                                                                        framework::dataset::make("Activation", ActivationLayerInfo()),
                                                                framework::dataset::make("DataType", DataType::QASYMM8),
                                                        framework::dataset::make("DataLayout", DataLayout::NDHWC),
@@ -199,23 +202,24 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolution3DQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                       combine(zip(
                                                                                                                    framework::dataset::make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
                                                                                                                            TensorShape(15U, 7U, 11U, 7U),
                                                                                                                            TensorShape(19U, 5U, 16U, 4U),
                                                                                                                            TensorShape(13U, 5U, 17U, 2U)
                                                                                                                                                           }),
-                                                                                                                   framework::dataset::make("StrideX", { 1, 3, 2, 1 })),
-                                                                                                               framework::dataset::make("StrideY", { 2, 1, 3, 1 })),
-                                                                                                           framework::dataset::make("StrideZ", { 3, 2, 1, 1 })),
-                                                                                                       framework::dataset::make("PadX", { 0, 2, 1, 0 })),
-                                                                                                   framework::dataset::make("PadY", { 1, 0, 2, 0 })),
-                                                                                               framework::dataset::make("PadZ", { 2, 1, 0, 0 })),
-                                                                                           framework::dataset::make("KernelWidth", { 3, 7, 5, 1 })),
-                                                                                       framework::dataset::make("KernelHeight", { 5, 3, 7, 1 })),
-                                                                                   framework::dataset::make("KernelDepth", { 7, 5, 3, 1 })),
-                                                                               framework::dataset::make("NumKernels", { 5, 3, 1, 11 })),
-                                                                           framework::dataset::make("HasBias", { true, true, true, false })),
+                                                                                                                   framework::dataset::make("StrideX", { 1, 3, 2, 1 }),
+                                                                                                                   framework::dataset::make("StrideY", { 2, 1, 3, 1 }),
+                                                                                                                   framework::dataset::make("StrideZ", { 3, 2, 1, 1 }),
+                                                                                                                   framework::dataset::make("PadX", { 0, 2, 1, 0 }),
+                                                                                                                   framework::dataset::make("PadY", { 1, 0, 2, 0 }),
+                                                                                                                   framework::dataset::make("PadZ", { 2, 1, 0, 0 }),
+                                                                                                                   framework::dataset::make("KernelWidth", { 3, 7, 5, 1 }),
+                                                                                                                   framework::dataset::make("KernelHeight", { 5, 3, 7, 1 }),
+                                                                                                                   framework::dataset::make("KernelDepth", { 7, 5, 3, 1 }),
+                                                                                                                   framework::dataset::make("NumKernels", { 5, 3, 1, 11 }),
+                                                                                                                   framework::dataset::make("HasBias", { true, true, true, false })
+                                                                           ),
                                                                        framework::dataset::make("Activation", ActivationLayerInfo()),
                                                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
                                                        framework::dataset::make("DataLayout", DataLayout::NDHWC),

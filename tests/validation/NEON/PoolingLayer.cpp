@@ -82,12 +82,13 @@ const auto qasymm8_signed_out_qinfo_dataset = framework::dataset::make("OutputQu
 });
 
 // Cases where pooling region is completely outside the input tensor (excluding global pooling)
-const auto pool_outside_input_dataset = zip(zip(zip(zip(
+const auto pool_outside_input_dataset = zip(
                                                         framework::dataset::make("Shape", { TensorShape{ 2U, 2U, 1U }, TensorShape{ 2U, 2U, 4U }, TensorShape{ 3U, 5U, 2U }, TensorShape{ 10U, 20U, 3U } }),
-                                                        framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
-                                                    framework::dataset::make("PoolingSize", { Size2D{ 2, 2 }, Size2D{ 3, 3 }, Size2D{ 2, 2 }, Size2D{ 3, 6 } })),
-                                                framework::dataset::make("PadStride", { PadStrideInfo{ 1, 1, 2, 2 }, PadStrideInfo{ 1, 1, 4, 4 }, PadStrideInfo{ 1, 1, 3, 3 }, PadStrideInfo{ 1, 1, 2, 5 } })),
-                                            framework::dataset::make("ExcludePadding", { false, false, false, false }));
+                                                        framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG, PoolingType::L2, PoolingType::MAX }),
+                                                        framework::dataset::make("PoolingSize", { Size2D{ 2, 2 }, Size2D{ 3, 3 }, Size2D{ 2, 2 }, Size2D{ 3, 6 } }),
+                                                        framework::dataset::make("PadStride", { PadStrideInfo{ 1, 1, 2, 2 }, PadStrideInfo{ 1, 1, 4, 4 }, PadStrideInfo{ 1, 1, 3, 3 }, PadStrideInfo{ 1, 1, 2, 5 } }),
+                                                        framework::dataset::make("ExcludePadding", { false, false, false, false })
+                                            );
 } // namespace
 
 TEST_SUITE(NEON)
@@ -95,7 +96,7 @@ TEST_SUITE(PoolingLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Window shrink
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Invalid pad/size combination
@@ -120,7 +121,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(56, 56, 64,1), 1, DataType::F32, DataLayout::NHWC),
                                             TensorInfo(TensorShape(56, 51, 64,1), 1, DataType::F32, DataLayout::NHWC),
 
-                                           })),
+                                           }),
     framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
                                             PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
                                             PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 2, 0)),
@@ -133,8 +134,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             PoolingLayerInfo(PoolingType::MAX,3,DataLayout::NHWC,PadStrideInfo(2,2,1,1)),
                                             PoolingLayerInfo(PoolingType::MAX,3,DataLayout::NHWC,PadStrideInfo(2,2,1,1)),
 
-                                           })),
-    framework::dataset::make("Expected", { false, false, false, false, true, false, true, false, false, false, false})),
+                                           }),
+    framework::dataset::make("Expected", { false, false, false, false, true, false, true, false, false, false, false})
+    ),
     input_info, output_info, pool_info, expected)
 {
     bool is_valid = bool(NEPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info));

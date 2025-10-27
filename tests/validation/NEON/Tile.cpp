@@ -54,17 +54,19 @@ TEST_SUITE(Tile)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10, 10), 1, DataType::F32),
                                                 TensorInfo(TensorShape(10, 10), 1, DataType::F32),  // Mismatching shape
                                                 TensorInfo(TensorShape(10, 10), 1, DataType::F16), // Mismatching type
-                                                TensorInfo(TensorShape(10, 10), 1, DataType::F32)}), // Wrong multiples
+                                                TensorInfo(TensorShape(10, 10), 1, DataType::F32)}),
+        // Wrong multiples
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(10, 20), 1, DataType::F32),
                                                 TensorInfo(TensorShape(20, 20), 1, DataType::F32),
                                                 TensorInfo(TensorShape(20, 20), 1, DataType::F32),
-                                                TensorInfo(TensorShape(10, 20), 1, DataType::F32)})),
-        framework::dataset::make("Multiples",{ Multiples{1, 2}, Multiples{1, 2}, Multiples{0, 1} })),
-        framework::dataset::make("Expected", {true, false, false, false })),
+                                                TensorInfo(TensorShape(10, 20), 1, DataType::F32)}),
+        framework::dataset::make("Multiples",{ Multiples{1, 2}, Multiples{1, 2}, Multiples{0, 1} }),
+        framework::dataset::make("Expected", {true, false, false, false })
+        ),
         input_info, output_info, multiples, expected)
 {
     const Status status = NETile::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), multiples);

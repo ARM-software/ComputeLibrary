@@ -47,7 +47,7 @@ TEST_SUITE(ReshapeLayer)
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                               framework::dataset::make("InputInfo",
 {
     TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),
@@ -55,14 +55,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
     TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32), // mismatching dimensions
     TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F16), // mismatching types
 }),
-framework::dataset::make("OutputInfo",
+                                                              framework::dataset::make("OutputInfo",
 {
     TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 24U, 4U), 1, DataType::F32),
     TensorInfo(TensorShape(192U, 192U),  1, DataType::F32),
     TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
-})),
-framework::dataset::make("Expected", { true, true, false, false })),
+}),
+                                                              framework::dataset::make("Expected", { true, true, false, false })
+),
 input_info, output_info, expected)
 {
     // Create Fully Connected layer info

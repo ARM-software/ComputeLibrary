@@ -45,7 +45,7 @@ TEST_SUITE(FlattenLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
                                                        TensorInfo(TensorShape(4U, 5U, 4U), 1, DataType::F32),  // Mismatching shapes
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Valid
@@ -53,8 +53,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { false, false, true})),
+                                                     }),
+               framework::dataset::make("Expected", { false, false, true})
+               ),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEFlattenLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

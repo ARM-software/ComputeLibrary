@@ -49,7 +49,7 @@ TEST_SUITE(ConvertFullyConnectedWeights)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching data types
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),     // Valid
                                             TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching shapes
@@ -59,18 +59,19 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
-                                          })),
+                                          }),
     framework::dataset::make("OriginalInput", { TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
-                                               })),
+                                               }),
     framework::dataset::make("DataLayout", { DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::UNKNOWN,
-                                               })),
-    framework::dataset::make("Expected", { false, true, false, false})),
+                                               }),
+    framework::dataset::make("Expected", { false, true, false, false})
+    ),
     input_info, output_info, original_input_shape, data_layout, expected)
 {
     bool is_valid = bool(NEConvertFullyConnectedWeights::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), original_input_shape, data_layout));

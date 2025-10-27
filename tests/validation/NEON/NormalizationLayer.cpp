@@ -63,7 +63,7 @@ TEST_SUITE(NormalizationLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching data type input/output
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Even normalization
@@ -75,14 +75,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                          })),
+                                          }),
     framework::dataset::make("NormInfo",  { NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                             NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                             NormalizationLayerInfo(NormType::IN_MAP_1D, 4),
                                             NormalizationLayerInfo(NormType::IN_MAP_2D, 5),
                                             NormalizationLayerInfo(NormType::CROSS_MAP, 1),
-                                           })),
-    framework::dataset::make("Expected", { false, false, false, true, true })),
+                                           }),
+    framework::dataset::make("Expected", { false, false, false, true, true })
+    ),
     input_info, output_info, norm_info, expected)
 {
     bool is_valid = bool(NENormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), norm_info));

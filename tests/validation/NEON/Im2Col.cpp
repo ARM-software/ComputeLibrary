@@ -119,7 +119,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         TensorInfo(TensorShape(18U, 80U, 1U, 2U), 1, DataType::QASYMM8),
     }),
     make("HasBias", { true, true, true, false, false }),
-    make("Expected", { false, false, false, false, true })),
+    make("Expected", { false, false, false, false, true })
+    ),
     input_info, output_info, has_bias, expected)
 {
     bool status = bool(cpu::kernels::CpuIm2ColKernel::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));
@@ -137,7 +138,8 @@ DATA_TEST_CASE(ChannelPaddingNotSupportedInNCHW, framework::DatasetMode::ALL, zi
         TensorInfo(TensorShape(45U, 80U, 1U, 2U), 1, DataType::F32, DataLayout::UNKNOWN)
     }),
     make("ChannelPadRight", {3U, 3U}),
-    make("Expected", {false, true})),
+    make("Expected", {false, true})
+    ),
     input_info, output_info, channel_pad_right, expected)
 {
     const bool has_bias = false;

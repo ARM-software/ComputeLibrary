@@ -106,7 +106,7 @@ TEST_CASE(QSymm8_per_channel_validate_scales, framework::DatasetMode::ALL)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Wrong output data type
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),  // Wrong output data type
                                                        TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::F32),  // Missmatching shapes
@@ -126,8 +126,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QSYMM8_PER_CHANNEL),
-                                                     })),
-               framework::dataset::make("Expected", { false, false, false, true,false,false,false,false,false})),
+                                                     }),
+               framework::dataset::make("Expected", { false, false, false, true,false,false,false,false,false})
+               ),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEQuantizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

@@ -76,7 +76,7 @@ TEST_SUITE(Permute)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                 framework::dataset::make("InputInfo",{
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
@@ -104,7 +104,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                         TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32)
 
-                                                                                    })),
+                                                                                    }),
                                                 framework::dataset::make("PermutationVector", {
                                                                                                 PermutationVector(2U, 1U, 0U),
                                                                                                 PermutationVector(2U, 2U, 1U),
@@ -117,8 +117,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                                 PermutationVector(2U, 3U, 1U, 0U),
                                                                                                 PermutationVector(2U, 3U, 1U, 0U),
                                                                                                 PermutationVector(0U, 0U, 0U, 1000U)
-                                                                                    })),
-                                                framework::dataset::make("Expected", { true, false, false, false, true, true, false,true, false, true, false })),
+                                                                                    }),
+                                                framework::dataset::make("Expected", { true, false, false, false, true, true, false,true, false, true, false })
+                                                ),
                                             input_info, output_info, perm_vect, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEPermute::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), perm_vect)) == expected, framework::LogLevel::ERRORS);

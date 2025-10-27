@@ -69,7 +69,7 @@ TEST_SUITE(ArgMinMax)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid output shape
                                                 TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32),
@@ -79,10 +79,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                  TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::S32),
                                                  TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32)
-        })),
-        framework::dataset::make("Axis", { 4, 0, 2, 0 })),
-        framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::MEAN_SUM })),
-        framework::dataset::make("Expected", { false, false, true, false })),
+        }),
+        framework::dataset::make("Axis", { 4, 0, 2, 0 }),
+        framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::MEAN_SUM }),
+        framework::dataset::make("Expected", { false, false, true, false })
+        ),
         input_info, output_info, axis, operation, expected)
 {
     const Status status = NEArgMinMaxLayer::validate(&input_info.clone()->set_is_resizable(false), axis, &output_info.clone()->set_is_resizable(false), operation);

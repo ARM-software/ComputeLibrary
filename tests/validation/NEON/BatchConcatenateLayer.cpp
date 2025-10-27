@@ -44,7 +44,7 @@ TEST_SUITE(BatchConcatenateLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         framework::dataset::make("InputInfo1", {  TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32), // Mismatching data type input/output
                                                   TensorInfo(TensorShape(20U, 27U, 4U, 4U), 1, DataType::F32), // Mismatching x dimension
                                                   TensorInfo(TensorShape(23U, 26U, 4U, 3U), 1, DataType::F32), // Mismatching y dim
@@ -56,14 +56,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                   TensorInfo(TensorShape(23U, 27U, 4U, 4U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(23U, 27U, 3U, 3U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(16U, 27U, 3U, 6U), 1, DataType::F32)
-        })),
+        }),
         framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F16),
                                                   TensorInfo(TensorShape(23U, 12U, 4U, 4U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(23U, 27U, 4U, 4U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(23U, 20U, 4U, 3U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(16U, 27U, 3U, 12U), 1, DataType::F32)
-        })),
-        framework::dataset::make("Expected", { false, false, false, false, true })),
+        }),
+        framework::dataset::make("Expected", { false, false, false, false, true })
+        ),
         input_info1, input_info2, output_info,expected)
 {
     std::vector<TensorInfo> inputs_vector_info;

@@ -68,7 +68,7 @@ TEST_SUITE(DilatedConvolutionLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(
                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32),
                                                                                   TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32),
                                                                                   TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
@@ -78,23 +78,24 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                     TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
                                                                                     TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
                                                                                     TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16)
-                                          })),
+                                          }),
                                           framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(6U, 6U, 1U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32)
-                                          })),
+                                          }),
                                           framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
                                                                                  PadStrideInfo(1, 1, 0, 0),
                                                                                  PadStrideInfo(2, 1, 0, 0),
                                                                                  PadStrideInfo(3, 2, 1, 0)
-                                          })),
+                                          }),
                                           framework::dataset::make("Dilation", { Size2D(1U, 2U),
                                                                                  Size2D(2U, 1U),
                                                                                  Size2D(2U, 2U),
                                                                                  Size2D(3U, 3U)
-                                          })),
-                                          framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
+                                          }),
+                                          framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })
+                                          ),
                input_info, weights_info, output_info, conv_info, dilation, expected)
 {
     ConvolutionMethod is_valid = cpu::CpuConv2d::get_convolution_method(&input_info.clone()->set_is_resizable(false),

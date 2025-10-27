@@ -180,7 +180,8 @@ DATA_TEST_CASE(DequantFP32_SupportedTypes, framework::DatasetMode::ALL,
                    make("Expected", {
                       true,
                       false, false, false, false, false, false
-                   })),
+                   })
+                   ),
                in_dt, w_dt, b_dt, expected)
 {
     TensorInfo input_info   = TensorInfo(TensorShape(7, 7, 3), 1, in_dt);
@@ -231,7 +232,8 @@ DATA_TEST_CASE(SupportedTypes, framework::DatasetMode::ALL, zip(
                     true,
                     true,
                     false
-                })),
+                })
+                ),
 data_type_const, weights_data_type_const, expected_const)
 {
     TensorInfo input_info   = TensorInfo(TensorShape(3U, 3U, 1U), 1, data_type_const);
@@ -285,8 +287,9 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(
                                                                                  false,
                                                                                  false,
                                           }),
-                                           make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM,
-                                                                ConvolutionMethod::GEMM,ConvolutionMethod::GEMM })),
+                                          make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM,
+                                                                ConvolutionMethod::GEMM,ConvolutionMethod::GEMM })
+                                                                ),
                input_info, weights_info, output_info, conv_info, fast_math, expected)
 {
     ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
@@ -514,7 +517,7 @@ DATA_TEST_CASE(SupportedKernels, framework::DatasetMode::ALL, zip(
     TensorInfo(TensorShape(3U, 6U, 2U, 8U), 1, DataType::F16, DataLayout::NCHW),
 
 }),
-make("Expected",
+                   make("Expected",
 {
     // fp32
     true, true, true,    // 3x3, 1x3, 3x1
@@ -527,7 +530,8 @@ make("Expected",
     false, false, false, // 5x5, 1x5, 5x1
     false, false, false, // 7x7, 1x7, 7x1
     false, false, false, // random unsupported kernels
-})),
+})
+),
 weights_info_const, expected_const)
 {
     DataType   data_type   = weights_info_const.data_type();
@@ -829,7 +833,8 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(
     false, // case fp16 and fast_math False then disable Winograd
     true   // case fp16 and fast_math True then enable Winograd
 }),
-make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD })),
+                   make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD })
+),
 input_info, weights_info, output_info, conv_info, fast_math, expected)
 {
     if(CPUInfo::get().has_fp16())

@@ -52,16 +52,17 @@ using NEPriorBoxLayerFixture = PriorBoxLayerValidationFixture<Tensor, Accessor, 
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32)
                                                      }),
                framework::dataset::make("Input2Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32)
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(1200U, 2U), 1, DataType::F32)
-                                                     })),
+                                                     }),
                framework::dataset::make("PriorBoxInfo",{ PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>())
-                                                     })),
-               framework::dataset::make("Expected", { true})),
+                                                     }),
+               framework::dataset::make("Expected", { true})
+               ),
                input1_info, input2_info, output_info, info, expected)
 {
     bool has_error = bool(NEPriorBoxLayer::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), info));

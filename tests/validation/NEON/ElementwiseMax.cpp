@@ -74,7 +74,7 @@ using NEElementwiseMaxFixture = ElementwiseMaxValidationFixture<Tensor, Accessor
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S32),
@@ -90,7 +90,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(8U, 8U, 3U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(8U, 8U, 3U), 1, DataType::QASYMM8),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S32),
@@ -98,9 +98,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(8U, 8U, 3U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(8U, 8U, 3U), 1, DataType::QASYMM8_SIGNED),
-                                                     })),
-
-               framework::dataset::make("Expected", { true, true, true, false, false, true, false, false })),
+                                                     }),
+               framework::dataset::make("Expected", { true, true, true, false, false, true, false, false })
+               ),
                input1_info, input2_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEElementwiseMax::validate(

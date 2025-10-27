@@ -188,7 +188,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(PixelWiseMultiplication)
 
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //1 Ok
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //2 Ok
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),                 //3 Window shrink
@@ -218,7 +218,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
-                                                     })),
+                                                     }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
@@ -233,7 +233,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
-                                                     })),
+                                                     }),
                framework::dataset::make("Scale",{  scale_unity,
                                                    scale_unity,
                                                    scale_unity,
@@ -247,7 +247,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                    scale_unity,
                                                    scale_unity,
                                                    scale_unity,
-                                                   scale_255})),
+                                                   scale_255}),
                framework::dataset::make("OverflowPolicy",{
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
@@ -263,9 +263,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                    ConvertPolicy::SATURATE,
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::SATURATE,
-                                        })),
-
-               framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, true , false, false, true, false, false})),
+                                        }),
+               framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, true , false, false, true, false, false})
+               ),
                input1_info, input2_info, output_info, scale, policy, expected)
 {
     bool has_error = bool(NEPixelWiseMultiplication::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), scale, policy, RoundingPolicy::TO_ZERO));
