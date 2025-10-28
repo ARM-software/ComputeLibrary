@@ -264,6 +264,7 @@ Status validate_arguments(const ITensorInfo   *input,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Number of groups greater than one are not supported on Neon");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(channel_pad_right > 0 && input->data_layout() != DataLayout::NHWC,
                                     "Channel padding is not supported for data layouts other than NHWC");
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
 
     // Since there's no implicit padding added, check the total input spatial dimensions (with conv paddings) are big enough for the kernel dimensions
     const unsigned int width_idx   = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
@@ -272,13 +273,20 @@ Status validate_arguments(const ITensorInfo   *input,
     const unsigned     total_height = input->dimension(height_idx) + conv_info.pad_top() + conv_info.pad_bottom();
     ARM_COMPUTE_RETURN_ERROR_ON((total_width < kernel_dims.width) || (total_height < kernel_dims.height));
 
+    const TensorShape out_shape = compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false,
+                                                            num_groups, channel_pad_right);
+
     if (output->total_size() > 0)
     {
-        TensorInfo expected_output = output->clone()->set_tensor_shape(compute_im2col_conv_shape(
-            input, kernel_dims, conv_info, has_bias, dilation, false, num_groups, channel_pad_right));
+        TensorInfo expected_output = output->clone()->set_tensor_shape(out_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(out_shape, 1, input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

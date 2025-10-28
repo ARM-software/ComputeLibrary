@@ -121,6 +121,7 @@ Status validate_arguments_softmax(
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32, DataType::BFLOAT16);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&src);
 
     ARM_COMPUTE_RETURN_ERROR_ON(axis < 0 || axis > 3);
 
@@ -134,6 +135,7 @@ Status validate_arguments_softmax(
                                     : dst.quantization_info();
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst);
         ARM_COMPUTE_RETURN_ERROR_ON(dst.quantization_info() != output_quantization);
     }
 
@@ -148,6 +150,16 @@ Status validate_arguments_softmax(
         // We could potentially reduce tmp memory if we could predict or make an assumption
         // on the maximum number of threads that will run in parallel.
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &tmp);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&tmp);
+    }
+    else
+    {
+        if (is_quantized_asymmetric)
+        {
+            // tmp is used in quantized kernels and it hasn't been initialized
+            const auto &tmp_info = TensorInfo(src).set_data_type(DataType::F32).reset_padding();
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&tmp_info);
+        }
     }
 
     const auto *uk = CpuSoftmaxKernel::get_implementation(SoftmaxKernelDataTypeISASelectorData{

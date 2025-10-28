@@ -70,6 +70,7 @@ inline Status validate_arguments(const ITensorInfo *src1,
     ARM_COMPUTE_UNUSED(rounding_policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src1);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src1, src2);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::U8, DataType::QASYMM8,
                                                          DataType::QASYMM8_SIGNED, DataType::S16, DataType::S32,
                                                          DataType::QSYMM16, DataType::F16, DataType::F32);
@@ -86,9 +87,10 @@ inline Status validate_arguments(const ITensorInfo *src1,
                                         "ConvertPolicy cannot be WRAP if datatype is quantized");
     }
 
+    const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
     if (dst->total_size() > 0)
     {
-        const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0),
                                         "Wrong shape for dst");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
@@ -105,6 +107,11 @@ inline Status validate_arguments(const ITensorInfo *src1,
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->data_type() == DataType::S16 && dst->data_type() == DataType::S32 &&
                                             scale != 1.f,
                                         "Unsupported scale for QSYMM16 inputs and S32 dst");
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(out_shape, 1, dst->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     if (std::abs(scale - scale255_constant) < 0.00001f)
@@ -1822,6 +1829,7 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 2, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src2, 2, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src1, src2);
 
     const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
 
@@ -1830,9 +1838,15 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
     // Validate in case of configured dst
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 2, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0),
                                         "Wrong shape for dst");
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(out_shape, 2, src1->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

@@ -24,11 +24,13 @@
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -65,14 +67,21 @@ Status CpuGemmTranspose1xWKernel::validate(const ITensorInfo *src, const ITensor
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemmTranspose1xWKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use CPU FP16 instructions.
 
+    const TensorShape dst_shape = compute_transpose1xW_with_element_size_shape(*src);
     if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(),
-                                                           compute_transpose1xW_with_element_size_shape(*src));
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(dst_shape, 1, src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

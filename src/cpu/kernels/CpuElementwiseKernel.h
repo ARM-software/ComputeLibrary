@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_ELEMENTWISE_KERNEL_H
-#define ARM_COMPUTE_CPU_ELEMENTWISE_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUELEMENTWISEKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUELEMENTWISEKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
@@ -45,6 +45,9 @@ class CpuElementwiseKernel : public ICpuKernel<Derived>
 private:
     using ElementwiseKernelPtr =
         std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const Window &)>::type;
+
+protected:
+    bool _dynamic_shape_configure{false};
 
 public:
     CpuElementwiseKernel() = default;
@@ -229,4 +232,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_ELEMENTWISE_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUELEMENTWISEKERNEL_H

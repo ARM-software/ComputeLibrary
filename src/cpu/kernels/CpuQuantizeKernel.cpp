@@ -55,6 +55,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(dst->tensor_shape().total_size() == 0);
     if (src->data_type() == DataType::F32)
     {

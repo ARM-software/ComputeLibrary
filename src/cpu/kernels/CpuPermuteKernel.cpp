@@ -32,6 +32,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -81,12 +82,14 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 {
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_permutation_supported(perm), "PermutationVector not supported.");
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
 
     const TensorShape dst_shape = misc::shape_calculator::compute_permutation_output_shape(*src, perm);
 
     // Validate configured destination
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);

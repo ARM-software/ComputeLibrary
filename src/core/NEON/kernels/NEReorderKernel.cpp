@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/Scheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/arm_gemm/transform.hpp"
 
 #include <map>
@@ -250,6 +251,7 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(output->data_type() != DataType::F32 && output->data_type() != DataType::BFLOAT16);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, output);
 
     int  input_x_dim;
     int  input_k_dim;

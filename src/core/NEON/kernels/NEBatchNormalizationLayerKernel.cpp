@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,6 +111,7 @@ Status validate_arguments(const ITensorInfo  *input,
                           ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_UNUSED(epsilon);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, mean, var, beta, gamma);
 
     const auto *uk = get_implementation(BatchNormalizationSelectorData{input->data_type(), CPUInfo::get()});
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
@@ -127,6 +128,7 @@ Status validate_arguments(const ITensorInfo  *input,
 
     if (nullptr != output)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
