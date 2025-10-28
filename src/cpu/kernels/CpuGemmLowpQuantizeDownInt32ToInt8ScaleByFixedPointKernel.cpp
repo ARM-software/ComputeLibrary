@@ -34,6 +34,7 @@
 #include "arm_compute/core/Window.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/NEAsymm.h"
@@ -53,6 +54,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(min > max);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, bias);
 
     // Check biases if exist
     if (bias != nullptr)
@@ -64,6 +66,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *bias, const
 
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, src);
     }

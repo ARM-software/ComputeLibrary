@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -255,6 +255,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
 
     if (input->num_channels() == 1)
     {
@@ -274,6 +275,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         bool is_arg_min_max = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN);
         if (!is_arg_min_max)
         {

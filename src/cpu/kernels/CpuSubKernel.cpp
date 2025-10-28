@@ -92,6 +92,7 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
                                                          DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16,
                                                          DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &src1);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&src0, &src1);
 
     const auto can_use_fixedpoint    = sub_q8_neon_fixedpoint_possible(&src0, &src1, &dst);
     const auto can_use_sme2_add_impl = false;
@@ -114,6 +115,12 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
                                         "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst);
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(out_shape, 1, src0.data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
     return Status{};
 }

@@ -33,6 +33,7 @@
 #include "arm_compute/core/Window.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/NEAsymm.h"
@@ -826,6 +827,8 @@ Status validate_arguments(const ITensorInfo      *mm_result,
                           GEMMLowpOutputStageInfo output_stage)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(mm_result, bias, vector_sum_col, vector_sum_row);
+
     if (output->data_type() != DataType::QASYMM8)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(mm_result->dimension(0) > 1 && output_stage.gemmlowp_multipliers.size() > 1 &&
@@ -894,6 +897,7 @@ Status validate_arguments(const ITensorInfo      *mm_result,
 
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mm_result, output);
     }

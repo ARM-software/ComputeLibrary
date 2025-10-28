@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
@@ -52,6 +53,7 @@ namespace
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8,
                                                          DataType::QSYMM16);
@@ -59,8 +61,16 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     if (dst->tensor_shape().total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::F16, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+    }
+    else
+    {
+        // Assume worst-case if data type is not defined
+        const DataType dtype    = (dst->data_type() == DataType::UNKNOWN ? DataType::F32 : dst->data_type());
+        const auto     dst_info = TensorInfo(src->tensor_shape(), 1, dtype);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

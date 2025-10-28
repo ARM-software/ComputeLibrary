@@ -67,6 +67,7 @@ static const std::array<ActivationLayerInfo::ActivationFunction, 4> qsymm16_acti
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &activation_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8,
                                                          DataType::QSYMM16, DataType::F16, DataType::F32);
@@ -119,6 +120,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     // Checks performed when dst is configured
     if ((dst != nullptr) && (dst->total_size() != 0))
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }

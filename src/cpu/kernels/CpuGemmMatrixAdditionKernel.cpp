@@ -78,12 +78,14 @@ Status CpuGemmMatrixAdditionKernel::validate(const ITensorInfo *src, const ITens
                             "CpuGemmMatrixAdditionKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_UNUSED(beta);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
 
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }

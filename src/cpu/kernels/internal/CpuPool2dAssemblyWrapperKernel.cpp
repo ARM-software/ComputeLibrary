@@ -104,6 +104,7 @@ Status
 CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
 #ifndef __aarch64__
     ARM_COMPUTE_RETURN_ERROR_MSG("32-bit is not supported by assembly kernels");
 #endif /* __aarch64__ */
@@ -120,11 +121,13 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
         is_pool_region_entirely_outside_input(info),
         "Pooling region that is entirely outside input tensor is unsupported by assembly kernels");
 
+    const TensorShape dst_shape = compute_pool_shape(*src, info);
     if (dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
 
-        const TensorInfo out_info(compute_pool_shape(*src, info), 1, dst->data_type());
+        const TensorInfo out_info(dst_shape, 1, dst->data_type());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
         const auto src_qinfo = src->quantization_info().uniform();
         const auto dst_qinfo = dst->quantization_info().uniform();
@@ -150,6 +153,8 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
     }
     else
     {
+        const TensorInfo out_info(dst_shape, 1, src->data_type()); // use src dtype as they're same.
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&out_info);
         if (src->data_type() == DataType::QASYMM8)
         {
             // If dst is not configured, the quantization info are the same

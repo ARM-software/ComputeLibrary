@@ -223,6 +223,8 @@ Status CpuGemm::validate(const ITensorInfo *a,
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuGemm::validate");
     ARM_COMPUTE_UNUSED(alpha);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(a, b, c);
+
     // When using accumulation(in place summation), for now, the only supported values for alpha and beta are 1 respectively 0.
     // Do the appropriate checks before proceeding.
     if (gemm_info.accumulate())
@@ -244,6 +246,7 @@ Status CpuGemm::validate(const ITensorInfo *a,
     //   2. Moving this b_to_use check back into the non-optimized path
     TensorInfo pretransposed_b  = b->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*b));
     const ITensorInfo *b_to_use = gemm_info.pretranspose_B() ? &pretransposed_b : b;
+
     // TODO: COMPMID-6597 fix-start
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
@@ -305,6 +308,7 @@ Status CpuGemm::validate(const ITensorInfo *a,
 
     if (d->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(d);
         // For fixed format we are expecting some kind of blocked format for B/RHS so the dimension won't necessarily match the result matrix any more.
         ARM_COMPUTE_RETURN_ERROR_ON(!gemm_info.fixed_format() && b_to_use->dimension(0) != d->dimension(0));
         if (gemm_info.depth_output_gemm3d() != 0)
@@ -323,6 +327,15 @@ Status CpuGemm::validate(const ITensorInfo *a,
         {
             ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(1) != d->dimension(1));
         }
+        // TODO: Check dim3.
+    }
+    else
+    {
+        // In both depth_output_gemm3d and reinterpret_input_as_3d cases, total number of elements
+        // don't change. Thus, we equate a_dim1 = d_dim1 and a_dim2 = d_dim2 and a_dim3 = d_dim3.
+        const auto dst_shape = TensorShape(b_to_use->dimension(0), a->dimension(1), a->dimension(2), a->dimension(3));
+        const auto dst_info  = TensorInfo(dst_shape, 1, d->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
     // TODO: COMPMID-6597 fix-end
 
