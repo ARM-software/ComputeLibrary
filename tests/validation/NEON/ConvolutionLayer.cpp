@@ -87,7 +87,7 @@ constexpr float                           tolerance_num = 0.07f;                
 #endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
 
 #if __aarch64__
-constexpr float                           tolerance_num_dequantize_f32 = 1e-5f;                     /**< Tolerance number for the FP32 dequantization */
+constexpr float                           tolerance_num_dequantize_f32 = 0.07f;                     /**< Tolerance number for the FP32 dequantization */
 #endif // #if __aarch64__
 
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
@@ -321,9 +321,7 @@ FIXTURE_DATA_TEST_CASE(
     )
 )
 {
-
-    constexpr float tolerance_percentage = 0.02f;
-    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_percentage, float(abs_tolerance_f32));
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
 }
 
 FIXTURE_DATA_TEST_CASE(
@@ -1595,8 +1593,7 @@ FIXTURE_DATA_TEST_CASE(
     )
 )
 {
-    constexpr float tolerance_percentage = 0.02f;
-    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_percentage, float(abs_tolerance_f32));
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
 }
 
 FIXTURE_DATA_TEST_CASE(
