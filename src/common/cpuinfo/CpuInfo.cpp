@@ -354,8 +354,8 @@ CpuInfo CpuInfo::build()
 {
 #if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
     (defined(__arm__) || defined(__aarch64__))
-    const uint32_t hwcaps   = getauxval(AT_HWCAP);
-    const uint32_t hwcaps2  = getauxval(AT_HWCAP2);
+    const uint64_t hwcaps   = getauxval(AT_HWCAP);
+    const uint64_t hwcaps2  = getauxval(AT_HWCAP2);
     const uint32_t max_cpus = get_max_cpus();
 
     // Populate midr values
