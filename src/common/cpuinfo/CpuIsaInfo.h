@@ -64,7 +64,7 @@ struct CpuIsaInfo
  *
  * @return CpuIsaInfo A populated ISA feature structure
  */
-CpuIsaInfo init_cpu_isa_from_hwcaps(uint32_t hwcaps, uint32_t hwcaps2, uint32_t midr);
+CpuIsaInfo init_cpu_isa_from_hwcaps(uint64_t hwcaps, uint64_t hwcaps2, uint32_t midr);
 
 /** Identify ISA related information through register information
  *

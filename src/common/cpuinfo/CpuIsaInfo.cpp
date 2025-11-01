@@ -45,6 +45,7 @@
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_I8MM     (1 << 13)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_BF16     (1 << 14)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME      (1 << 23)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME2     (1UL << 37)
 
 namespace arm_compute
 {
@@ -58,14 +59,14 @@ inline bool is_feature_supported(uint64_t features, uint64_t feature_mask)
 }
 
 #if defined(__arm__)
-void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps2)
+void decode_hwcaps(CpuIsaInfo &isa, const uint64_t hwcaps, const uint64_t hwcaps2)
 {
     ARM_COMPUTE_UNUSED(hwcaps2);
     isa.fp16 = false;
     isa.neon = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_NEON);
 }
 #elif defined(__aarch64__)
-void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps2)
+void decode_hwcaps(CpuIsaInfo &isa, const uint64_t hwcaps, const uint64_t hwcaps2)
 {
     // High-level SIMD support
     isa.neon = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMD);
@@ -75,7 +76,7 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
 
     // Detection of SME from type HWCAP2 in the auxillary vector
     isa.sme  = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME);
-    isa.sme2 = isa.sme; // Needs to be set properly
+    isa.sme2 = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME2);
 
     // Data-type support
     isa.fp16 = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP | ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP);
@@ -89,7 +90,7 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
     isa.svef32mm = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEF32MM);
 }
 #else  /* defined(__aarch64__) */
-void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps2)
+void decode_hwcaps(CpuIsaInfo &isa, const uint64_t hwcaps, const uint64_t hwcaps2)
 {
     ARM_COMPUTE_UNUSED(isa, hwcaps, hwcaps2);
 }
@@ -143,7 +144,7 @@ void allowlisted_model_features(CpuIsaInfo &isa, CpuModel model)
 }
 } // namespace
 
-CpuIsaInfo init_cpu_isa_from_hwcaps(uint32_t hwcaps, uint32_t hwcaps2, uint32_t midr)
+CpuIsaInfo init_cpu_isa_from_hwcaps(uint64_t hwcaps, uint64_t hwcaps2, uint32_t midr)
 {
     CpuIsaInfo isa;
 
