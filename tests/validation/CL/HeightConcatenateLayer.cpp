@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(HeightConcatenateLayer)
 
@@ -49,18 +50,18 @@ using CLHeightConcatenateLayerFixture = ConcatenateLayerValidationFixture<CLTens
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLHeightConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                   make("DataType",
                                                                                                                            DataType::F16),
-                                                                                                                   framework::dataset::make("Axis", 1)))
+                                                                                                                   make("Axis", 1)))
 
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLHeightConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large2DShapes(), datasets::Small4DShapes()),
-                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                 make("DataType",
                                                                                                                          DataType::F16),
-                                                                                                                 framework::dataset::make("Axis", 1)))
+                                                                                                                 make("Axis", 1)))
 
 {
     // Validate output
@@ -70,17 +71,17 @@ TEST_SUITE_END()
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLHeightConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                    make("DataType",
                                                                                                                             DataType::F32),
-                                                                                                                    framework::dataset::make("Axis", 1)))
+                                                                                                                    make("Axis", 1)))
 
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLHeightConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLHeightConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), make("DataType",
                                                                                                                   DataType::F32),
-                                                                                                                  framework::dataset::make("Axis", 1)))
+                                                                                                                  make("Axis", 1)))
 
 {
     // Validate output
@@ -92,17 +93,17 @@ TEST_SUITE_END()
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLHeightConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                      make("DataType",
                                                                                                                               DataType::QASYMM8),
-                                                                                                                      framework::dataset::make("Axis", 1)))
+                                                                                                                      make("Axis", 1)))
 
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLHeightConcatenateLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLHeightConcatenateLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), make("DataType",
                                                                                                                     DataType::QASYMM8),
-                                                                                                                    framework::dataset::make("Axis", 1)))
+                                                                                                                    make("Axis", 1)))
 
 {
     // Validate output

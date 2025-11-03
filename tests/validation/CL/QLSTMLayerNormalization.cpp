@@ -39,6 +39,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(0); /**< Tolerance value for comparing reference's output against implementation's output for QSYMM16 data types */
@@ -94,7 +95,7 @@ static const uint32_t    tensor_num_channel{ 1 };
 // clang-format off
 
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
-    zip(framework::dataset::make("InputInfo", {
+    zip(make("InputInfo", {
             TensorInfo(correct_input_shape, tensor_num_channel, DataType::F16), // input supports only QSYMM16
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // weight supports only QSYMM16
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // bias supports only S32
@@ -104,7 +105,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // input_shape[0] != weight_shape[0] should fail
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // weight_shape[0] != bias_shape[0] should fail
         }),
-        framework::dataset::make("WeightInfo", {
+        make("WeightInfo", {
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
             TensorInfo(correct_weight_shape, tensor_num_channel, DataType::F16),
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
@@ -114,7 +115,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(TensorShape(14U), tensor_num_channel, correct_weight_dt),
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
         }),
-        framework::dataset::make("BiasInfo", {
+        make("BiasInfo", {
             TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
             TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
             TensorInfo(correct_bias_shape, tensor_num_channel, DataType::QSYMM16),
@@ -162,14 +163,14 @@ constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
     combine(zip(QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>("InputShape"), \
                             QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape"),             \
                         QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),                   \
-                    framework::dataset::make("DataType", DataType::QSYMM16),                                        \
-            framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(2) }))
+                    make("DataType", DataType::QSYMM16),                                                            \
+            make("InputQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(2) }))
 
 #define QSYMM16_DATASET_1D \
-    concat(concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1)), QSYMM16_DATASET_ITER(1, 2))
+    concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1), QSYMM16_DATASET_ITER(1, 2))
 
 #define QSYMM16_DATASET_2D \
-    concat(concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1)), QSYMM16_DATASET_ITER(3, 2))
+    concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1), QSYMM16_DATASET_ITER(3, 2))
 
 FIXTURE_DATA_TEST_CASE(RandomValue1D, CLQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_1D)
 {

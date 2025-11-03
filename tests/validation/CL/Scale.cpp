@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 using datasets::ScaleShapesBaseDataSet;
@@ -61,7 +62,7 @@ constexpr uint32_t num_elements_per_vector()
 }
 
 /** CNN data types */
-const auto ScaleDataTypes = framework::dataset::make("DataType",
+const auto ScaleDataTypes = make("DataType",
 {
     DataType::U8,
     DataType::S16,
@@ -70,7 +71,7 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
 });
 
 /** Quantization information data set */
-const auto QuantizationInfoSet = framework::dataset::make("QuantizationInfo",
+const auto QuantizationInfoSet = make("QuantizationInfo",
 {
     QuantizationInfo(0.5f, -1),
 });
@@ -206,7 +207,7 @@ using CLScaleMixedDataLayoutFixture = ScaleValidationFixture<CLTensor, CLAccesso
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-const auto f32_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<float>())), framework::dataset::make("DataType", DataType::F32));
+const auto f32_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<float>())), make("DataType", DataType::F32));
 FIXTURE_DATA_TEST_CASE(Run, CLScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -234,7 +235,7 @@ FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleFixture<float>, framework::Datase
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32, tolerance_f32_absolute);
 }
-const auto f32_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<float>())), framework::dataset::make("DataType", DataType::F32));
+const auto f32_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<float>())), make("DataType", DataType::F32));
 FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleFixture<float>, framework::DatasetMode::NIGHTLY, ASSEMBLE_DATASET(f32_nightly_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -255,7 +256,7 @@ FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners, CLScaleFixture<float>, framework:
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-const auto f16_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<half>())), framework::dataset::make("DataType", DataType::F16));
+const auto f16_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<half>())), make("DataType", DataType::F16));
 FIXTURE_DATA_TEST_CASE(Run, CLScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -274,7 +275,7 @@ FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleFixture<half>, framework::Dataset
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f16, 0.0f, abs_tolerance_f16);
 }
-const auto f16_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<half>())), framework::dataset::make("DataType", DataType::F16));
+const auto f16_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<half>())), make("DataType", DataType::F16));
 FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleFixture<half>, framework::DatasetMode::NIGHTLY, ASSEMBLE_DATASET(f16_nightly_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -298,7 +299,7 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-const auto u8_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::U8));
+const auto u8_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), make("DataType", DataType::U8));
 FIXTURE_DATA_TEST_CASE(Run, CLScaleFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(u8_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -317,7 +318,7 @@ FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleFixture<uint8_t>, framework::Data
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
-const auto u8_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::U8));
+const auto u8_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), make("DataType", DataType::U8));
 FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, ASSEMBLE_DATASET(u8_nightly_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -338,7 +339,7 @@ FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners, CLScaleFixture<uint8_t>, framewor
 }
 TEST_SUITE_END() // U8
 TEST_SUITE(S16)
-const auto s16_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<int16_t>())), framework::dataset::make("DataType", DataType::S16));
+const auto s16_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<int16_t>())), make("DataType", DataType::S16));
 FIXTURE_DATA_TEST_CASE(Run, CLScaleFixture<int16_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(s16_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -357,7 +358,7 @@ FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleFixture<int16_t>, framework::Data
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
 }
-const auto s16_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<int16_t>())), framework::dataset::make("DataType", DataType::S16));
+const auto s16_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<int16_t>())), make("DataType", DataType::S16));
 FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, ASSEMBLE_DATASET(s16_nightly_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -383,7 +384,7 @@ template <typename T>
 using CLScaleQuantizedFixture = ScaleValidationQuantizedFixture<CLTensor, CLAccessor, CLScale, T>;
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-const auto qasymm8_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto qasymm8_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), make("DataType", DataType::QASYMM8));
 FIXTURE_DATA_TEST_CASE(Run, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {
     //Create valid region
@@ -403,7 +404,7 @@ FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleQuantizedFixture<uint8_t>, framew
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
-const auto qasymm8_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto qasymm8_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), make("DataType", DataType::QASYMM8));
 FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, ASSEMBLE_QUANTIZED_DATASET(qasymm8_nightly_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {
     //Create valid region
@@ -425,7 +426,7 @@ FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners, CLScaleQuantizedFixture<uint8_t>,
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-const auto qasymm8_signed_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<int8_t>())), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+const auto qasymm8_signed_shape = combine((SCALE_PRECOMMIT_SHAPE_DATASET(num_elements_per_vector<int8_t>())), make("DataType", DataType::QASYMM8_SIGNED));
 FIXTURE_DATA_TEST_CASE(Run, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {
     //Create valid region
@@ -445,7 +446,7 @@ FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleQuantizedFixture<int8_t>, framewo
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
 }
-const auto qasymm8_signed_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<int8_t>())), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+const auto qasymm8_signed_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<int8_t>())), make("DataType", DataType::QASYMM8_SIGNED));
 FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_nightly_shape, ScaleSamplingPolicySet,
                        QuantizationInfoSet))
 {

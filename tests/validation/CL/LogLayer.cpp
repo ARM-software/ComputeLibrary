@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
@@ -52,13 +53,13 @@ using CLLogLayerFixture = LogValidationFixture<CLTensor, CLAccessor, CLLogLayer,
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLLogLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
                                                                                                      DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                    DataType::F16)))
 {
     // Validate output
@@ -67,13 +68,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<half>, framework::DatasetMode
 
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLLogLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
                                                                                                       DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                     DataType::F32)))
 {
     // Validate output

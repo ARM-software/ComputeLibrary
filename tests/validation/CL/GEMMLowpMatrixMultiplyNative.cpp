@@ -38,6 +38,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for CLGEMMMatrixMultiplyNativeKernel
@@ -59,42 +60,42 @@ namespace
  *  3: Non multiples of processor size in both dimensions
 */
 const auto m_n_values = zip(
-    framework::dataset::make("M", {1, 16, 37}),
-    framework::dataset::make("N", {1, 16, 51})
+    make("M", {1, 16, 37}),
+    make("N", {1, 16, 51})
     );
 
 /** M_W values to test */
-const auto m_w_values = framework::dataset::make("M_W", 5);
+const auto m_w_values = make("M_W", 5);
 
 /** M_H values to test */
-const auto m_h_values = framework::dataset::make("M_H", 7);
+const auto m_h_values = make("M_H", 7);
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", 51);
+const auto n_values = make("N", 51);
 
 /** K values to test */
-const auto k_values = framework::dataset::make("K", 23);
+const auto k_values = make("K", 23);
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", 1, 3);
+const auto b_values = make("batch_size", 1, 3);
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", {4, 6});
+const auto m0_values_precommit = make("M0", {4, 6});
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
+const auto n0_values_precommit = make("N0", { 4 });
 
 /** K0 values to test - Precommit */
-const auto k0_values_precommit = framework::dataset::make("K0", { 16 });
+const auto k0_values_precommit = make("K0", { 16 });
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", {1, 2, 7});
+const auto m0_values_nightly = make("M0", {1, 2, 7});
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 1, 2, 3, 4, 8 });
+const auto n0_values_nightly = make("N0", { 1, 2, 3, 4, 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 1, 2, 3, 4, 8, 16 });
+const auto k0_values_nightly = make("K0", { 1, 2, 3, 4, 8, 16 });
 } // namespace
 
 TEST_SUITE(CL)

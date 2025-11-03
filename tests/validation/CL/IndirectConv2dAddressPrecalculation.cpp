@@ -42,6 +42,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::opencl::kernels;
 
@@ -55,14 +56,14 @@ using CLIndirectConv2dAddressPrecalculationFixture = IndirectConv2dAddressPrecal
 
 namespace
 {
-const auto src_w_values  = framework::dataset::make("src_w", {91});
-const auto src_h_values  = framework::dataset::make("src_h", {103});
-const auto src_b_values  = framework::dataset::make("src_b", {1, 2});
-const auto wei_w_values  = framework::dataset::make("wei_w", {3, 5});
-const auto wei_h_values  = framework::dataset::make("wei_h", {1, 6});
-const auto pad_values    = framework::dataset::make("pad", {1, 2, 3});
-const auto stride_values = framework::dataset::make("stride", {1, 2});
-const auto m0_values     = framework::dataset::make("M0", { 1, 2, 4, 5, 7 });
+const auto src_w_values  = make("src_w", {91});
+const auto src_h_values  = make("src_h", {103});
+const auto src_b_values  = make("src_b", {1, 2});
+const auto wei_w_values  = make("wei_w", {3, 5});
+const auto wei_h_values  = make("wei_h", {1, 6});
+const auto pad_values    = make("pad", {1, 2, 3});
+const auto stride_values = make("stride", {1, 2});
+const auto m0_values     = make("M0", { 1, 2, 4, 5, 7 });
 } // namespace
 
 TEST_SUITE(CL)

@@ -37,6 +37,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(Col2Im)
 
@@ -101,11 +102,11 @@ using ClCol2ImFixture = Col2ImOpValidationFixture<CLTensor, CLAccessor, ClCol2Im
 FIXTURE_DATA_TEST_CASE(FP32,
                        ClCol2ImFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", { TensorShape(8U, 16U, 3U, 1U), TensorShape(17U, 16U, 3U, 1U), TensorShape(7U, 16U, 3U, 1U) }),
-                                                   framework::dataset::make("ConvolvedWidth", 4),
-                                               framework::dataset::make("ConvolvedHeight", 4),
-                                       framework::dataset::make("Groups", { 1, 3 }),
-                               framework::dataset::make("DataType", DataType::F32)))
+                       combine(make("InputShape", { TensorShape(8U, 16U, 3U, 1U), TensorShape(17U, 16U, 3U, 1U), TensorShape(7U, 16U, 3U, 1U) }),
+                                                   make("ConvolvedWidth", 4),
+                                               make("ConvolvedHeight", 4),
+                                       make("Groups", { 1, 3 }),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -126,11 +127,11 @@ FIXTURE_DATA_TEST_CASE(FP32,
 FIXTURE_DATA_TEST_CASE(F16,
                        ClCol2ImFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
-                                                   framework::dataset::make("ConvolvedWidth", 4),
-                                               framework::dataset::make("ConvolvedHeight", 4),
-                                       framework::dataset::make("Groups", 3),
-                               framework::dataset::make("DataType", DataType::F16)))
+                       combine(make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
+                                                   make("ConvolvedWidth", 4),
+                                               make("ConvolvedHeight", 4),
+                                       make("Groups", 3),
+                               make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -151,11 +152,11 @@ FIXTURE_DATA_TEST_CASE(F16,
 FIXTURE_DATA_TEST_CASE(QASYMM8,
                        ClCol2ImFixture<uint8_t>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
-                                                   framework::dataset::make("ConvolvedWidth", 4),
-                                               framework::dataset::make("ConvolvedHeight", 4),
-                                       framework::dataset::make("Groups", 3),
-                               framework::dataset::make("DataType", DataType::QASYMM8)))
+                       combine(make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
+                                                   make("ConvolvedWidth", 4),
+                                               make("ConvolvedHeight", 4),
+                                       make("Groups", 3),
+                               make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

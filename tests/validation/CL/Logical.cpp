@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(LogicalOr)
 TEST_SUITE(Validate)
@@ -163,7 +164,7 @@ TEST_SUITE_END() // Validate
 template <typename T>
 using CLLogicalNotFixture = LogicalNotValidationFixture<CLTensor, CLAccessor, CLLogicalNot, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogicalNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLLogicalNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                     DataType::U8)))
 {
     // Validate output

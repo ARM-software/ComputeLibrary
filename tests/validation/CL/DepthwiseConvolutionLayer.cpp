@@ -42,6 +42,7 @@ namespace test
 namespace validation
 {
 
+using framework::dataset::concat;
 using framework::dataset::make;
 
 namespace
@@ -199,7 +200,7 @@ TEST_SUITE(W3x3)
 TEST_SUITE(NCHW)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::ALL,
     combine(
-        framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+        concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                         datasets::SmallDepthwiseConvolutionLayerDataset3x3NCHW()),
         depth_multipliers,
         make("DataType", DataType::F16),
@@ -342,7 +343,7 @@ TEST_SUITE(FP32)
 TEST_SUITE(W3x3)
 TEST_SUITE(NCHW)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::ALL,
-                           combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                           combine(concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                                       datasets::SmallDepthwiseConvolutionLayerDataset3x3NCHW()),
                                                            depth_multipliers,
                                                    make("DataType",

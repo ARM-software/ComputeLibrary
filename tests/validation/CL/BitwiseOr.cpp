@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,13 +40,14 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(BitwiseOr)
 
 template <typename T>
 using CLBitwiseOrFixture = BitwiseOrValidationFixture<CLTensor, CLAccessor, CLBitwiseOr, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseOrFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseOrFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                    DataType::U8)))
 {
     // Validate output

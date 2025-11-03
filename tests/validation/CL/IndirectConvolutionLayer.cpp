@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<half>  tolerance_fp16(half(0.2));  /**< Tolerance for floating point tests */
@@ -48,7 +49,7 @@ constexpr float          abs_tolerance_f32(0.0001f); /**< Absolute tolerance for
 constexpr float          tolerance_num = 0.07f;      /**< Tolerance number */
 
 /** Activation function Dataset*/
-const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto ActivationFunctionsDataset = make("ActivationInfo",
 { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f) });
 } // namespace
 
@@ -170,34 +171,34 @@ using CLIndirectConvolutionLayerMixedDataLayoutFixture = DirectConvolutionValida
 TEST_SUITE(NHWC)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLIndirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-               combine(zip(framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+               combine(zip(make("InputShape", { TensorShape(27U, 13U, 23U),
                                                         TensorShape(19U, 5U, 16U, 4U),
                                                         TensorShape(13U, 5U, 17U, 2U),
                                                         TensorShape(32U, 37U, 13U) } ),
-               framework::dataset::make("StrideX", { 1, 3, 1, 1 }),
-               framework::dataset::make("StrideY", { 1, 3, 2, 1 }),
-               framework::dataset::make("PadX", { 1, 3, 0, 4 }),
-               framework::dataset::make("PadY", { 1, 3, 0, 4 }),
-               framework::dataset::make("KernelSize", { 3, 8, 1, 9 }),
-               framework::dataset::make("NumKernels", { 17, 3, 1, 19 })),
-               framework::dataset::make("DataType",  DataType::F16),
-               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) ),
-               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+               make("StrideX", { 1, 3, 1, 1 }),
+               make("StrideY", { 1, 3, 2, 1 }),
+               make("PadX", { 1, 3, 0, 4 }),
+               make("PadY", { 1, 3, 0, 4 }),
+               make("KernelSize", { 3, 8, 1, 9 }),
+               make("NumKernels", { 17, 3, 1, 19 })),
+               make("DataType",  DataType::F16),
+               make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) ),
+               make("DataLayout", DataLayout::NHWC)))
 {
     validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLIndirectConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-               combine(zip(framework::dataset::make("InputShape", { TensorShape(800U, 800U, 3U) } ),
-               framework::dataset::make("StrideX", { 1 }),
-               framework::dataset::make("StrideY", { 1 }),
-               framework::dataset::make("PadX", { 1 }),
-               framework::dataset::make("PadY", { 1 }),
-               framework::dataset::make("KernelSize", { 9 }),
-               framework::dataset::make("NumKernels", { 3 })),
-               framework::dataset::make("DataType",  DataType::F16),
-               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::IDENTITY) ),
-               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+               combine(zip(make("InputShape", { TensorShape(800U, 800U, 3U) } ),
+               make("StrideX", { 1 }),
+               make("StrideY", { 1 }),
+               make("PadX", { 1 }),
+               make("PadY", { 1 }),
+               make("KernelSize", { 9 }),
+               make("NumKernels", { 3 })),
+               make("DataType",  DataType::F16),
+               make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::IDENTITY) ),
+               make("DataLayout", DataLayout::NHWC)))
 {
     validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }
@@ -206,50 +207,50 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLIndirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-               combine(zip(framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+               combine(zip(make("InputShape", { TensorShape(27U, 13U, 23U),
                                                         TensorShape(19U, 5U, 16U, 4U),
                                                         TensorShape(13U, 5U, 17U, 2U),
                                                         TensorShape(32U, 37U, 13U) } ),
-               framework::dataset::make("StrideX", { 1, 3, 1, 1 }),
-               framework::dataset::make("StrideY", { 1, 3, 2, 1 }),
-               framework::dataset::make("PadX", { 1, 3, 0, 4 }),
-               framework::dataset::make("PadY", { 1, 3, 0, 4 }),
-               framework::dataset::make("KernelSize", { 3, 8, 1, 9 }),
-               framework::dataset::make("NumKernels", { 17, 3, 1, 19 })),
-               framework::dataset::make("DataType",  DataType::F32),
-               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) ),
-               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+               make("StrideX", { 1, 3, 1, 1 }),
+               make("StrideY", { 1, 3, 2, 1 }),
+               make("PadX", { 1, 3, 0, 4 }),
+               make("PadY", { 1, 3, 0, 4 }),
+               make("KernelSize", { 3, 8, 1, 9 }),
+               make("NumKernels", { 17, 3, 1, 19 })),
+               make("DataType",  DataType::F32),
+               make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) ),
+               make("DataLayout", DataLayout::NHWC)))
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLIndirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT,
-               combine(zip(framework::dataset::make("InputShape", { TensorShape(27U, 13U, 23U),
+               combine(zip(make("InputShape", { TensorShape(27U, 13U, 23U),
                                                         TensorShape(19U, 5U, 16U, 4U),
                                                         TensorShape(13U, 5U, 17U, 2U),
                                                         TensorShape(32U, 37U, 13U) } ),
-               framework::dataset::make("StrideX", { 1 }),
-               framework::dataset::make("StrideY", { 2 }),
-               framework::dataset::make("PadX", { 1 }),
-               framework::dataset::make("PadY", { 3 }),
-               framework::dataset::make("KernelSize", { 3 }),
-               framework::dataset::make("NumKernels", { 3 })),
-               framework::dataset::make("DataType",  DataType::F32),
-               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) ),
-               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+               make("StrideX", { 1 }),
+               make("StrideY", { 2 }),
+               make("PadX", { 1 }),
+               make("PadY", { 3 }),
+               make("KernelSize", { 3 }),
+               make("NumKernels", { 3 })),
+               make("DataType",  DataType::F32),
+               make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) ),
+               make("DataLayout", DataLayout::NHWC)))
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLIndirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-               combine(zip(framework::dataset::make("InputShape", { TensorShape(800U, 800U, 3U) } ),
-               framework::dataset::make("StrideX", { 1 }),
-               framework::dataset::make("StrideY", { 1 }),
-               framework::dataset::make("PadX", { 1 }),
-               framework::dataset::make("PadY", { 1 }),
-               framework::dataset::make("KernelSize", { 9 }),
-               framework::dataset::make("NumKernels", { 3 })),
-               framework::dataset::make("DataType",  DataType::F32),
-               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::IDENTITY) ),
-               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+               combine(zip(make("InputShape", { TensorShape(800U, 800U, 3U) } ),
+               make("StrideX", { 1 }),
+               make("StrideY", { 1 }),
+               make("PadX", { 1 }),
+               make("PadY", { 1 }),
+               make("KernelSize", { 9 }),
+               make("NumKernels", { 3 })),
+               make("DataType",  DataType::F32),
+               make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::IDENTITY) ),
+               make("DataLayout", DataLayout::NHWC)))
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
 }

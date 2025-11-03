@@ -41,6 +41,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 constexpr RelativeTolerance<float> tolerance_f16(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
@@ -56,28 +57,28 @@ using CLNormalizePlanarYUVLayerFixture = NormalizePlanarYUVLayerValidationFixtur
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),     // Window shrink
                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Unsupported data type
                         TensorInfo(TensorShape(32U, 16U, 8U), 1, DataType::F16),
                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),     // Mismatching mean and sd shapes
                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                         }),
-                    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                    make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                         TensorInfo(TensorShape(32U, 16U, 8U), 1, DataType::F16),
                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
                         TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
                         }),
-                framework::dataset::make("MSTDInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F16),
+                make("MSTDInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F16),
                     TensorInfo(TensorShape(2U), 1, DataType::F16),
                     TensorInfo(TensorShape(2U), 1, DataType::U8),
                     TensorInfo(TensorShape(8U), 1, DataType::F16),
                     TensorInfo(TensorShape(6U), 1, DataType::F16),
                     TensorInfo(TensorShape(2U), 1, DataType::F32),
                     }),
-                    framework::dataset::make("Expected", { false, false, false, true, false, false })),
+                    make("Expected", { false, false, false, true, false, false })),
                     input_info, output_info, msd_info, expected)
 {
     const auto &mean_info = msd_info;
@@ -91,8 +92,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F16),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                  make("DataType", DataType::F16),
+                                                                                                                  make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0);
@@ -101,8 +102,8 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                   make("DataType", DataType::F32),
+                                                                                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -116,9 +117,9 @@ using CLNormalizePlanarYUVLayerQuantizedFixture = NormalizePlanarYUVLayerValidat
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                       framework::dataset::make("DataType", DataType::QASYMM8),
-                       framework::dataset::make("DataLayout", { DataLayout::NHWC }),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+                       make("DataType", DataType::QASYMM8),
+                       make("DataLayout", { DataLayout::NHWC }),
+                       make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, 0);
@@ -126,9 +127,9 @@ FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<uint8_t
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW }),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+                       make("DataType", DataType::QASYMM8_SIGNED),
+                       make("DataLayout", { DataLayout::NCHW }),
+                       make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, 0);

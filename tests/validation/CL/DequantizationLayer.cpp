@@ -41,51 +41,52 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 const auto dataset_quant_f32 = combine(datasets::SmallShapes(), datasets::QuantizedTypes(),
-                                               framework::dataset::make("DataType", DataType::F32),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+                                               make("DataType", DataType::F32),
+                                       make("DataLayout", { DataLayout::NCHW }));
 const auto dataset_quant_f16 = combine(datasets::SmallShapes(), datasets::QuantizedTypes(),
-                                               framework::dataset::make("DataType", DataType::F16),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+                                               make("DataType", DataType::F16),
+                                       make("DataLayout", { DataLayout::NCHW }));
 const auto dataset_quant_per_channel_f32 = combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes(),
-                                                           framework::dataset::make("DataType", DataType::F32),
-                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+                                                           make("DataType", DataType::F32),
+                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
 const auto dataset_quant_per_channel_f16 = combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes(),
-                                                           framework::dataset::make("DataType", DataType::F16),
-                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+                                                           make("DataType", DataType::F16),
+                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
 const auto dataset_quant_nightly_f32 = combine(datasets::LargeShapes(), datasets::QuantizedTypes(),
-                                                       framework::dataset::make("DataType", DataType::F32),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+                                                       make("DataType", DataType::F32),
+                                               make("DataLayout", { DataLayout::NCHW }));
 const auto dataset_quant_nightly_f16 = combine(datasets::LargeShapes(), datasets::QuantizedTypes(),
-                                                       framework::dataset::make("DataType", DataType::F16),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+                                                       make("DataType", DataType::F16),
+                                               make("DataLayout", { DataLayout::NCHW }));
 const auto dataset_quant_per_channel_nightly_f32 = combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes(),
-                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+                                                                   make("DataType", DataType::F32),
+                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
 const auto dataset_quant_per_channel_nightly_f16 = combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes(),
-                                                                   framework::dataset::make("DataType", DataType::F16),
-                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+                                                                   make("DataType", DataType::F16),
+                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(DequantizationLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),      // Wrong input data type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),      // Wrong input data type
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Wrong output data type
                                                        TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::QASYMM8),   // Missmatching shapes
                                                        TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Valid
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Valid
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { false, false, false, true, true})),
+               make("Expected", { false, false, false, true, true})),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLDequantizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

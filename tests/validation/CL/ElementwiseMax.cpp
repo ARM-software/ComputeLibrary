@@ -41,38 +41,39 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
 RelativeTolerance<float> tolerance_fp16(0.001f);
 
 /** Input data sets **/
-const auto ElementwiseMaxU8Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType",
+const auto ElementwiseMaxU8Dataset = combine(make("DataType", DataType::U8), make("DataType", DataType::U8), make("DataType",
                                              DataType::U8));
-const auto ElementwiseMaxQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8),
-                                                  framework::dataset::make("DataType",
+const auto ElementwiseMaxQASYMM8Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8),
+                                                  make("DataType",
                                                                            DataType::QASYMM8));
-const auto ElementwiseMaxQASYMM8SignedDataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                                                        framework::dataset::make("DataType",
+const auto ElementwiseMaxQASYMM8SignedDataset = combine(make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::QASYMM8_SIGNED),
+                                                        make("DataType",
                                                                                  DataType::QASYMM8_SIGNED));
-const auto ElementwiseMaxQSYMM16Dataset = combine(framework::dataset::make("DataType", DataType::QSYMM16), framework::dataset::make("DataType", DataType::QSYMM16),
-                                                  framework::dataset::make("DataType",
+const auto ElementwiseMaxQSYMM16Dataset = combine(make("DataType", DataType::QSYMM16), make("DataType", DataType::QSYMM16),
+                                                  make("DataType",
                                                                            DataType::QSYMM16));
-const auto ElementwiseMaxS16Dataset = combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16),
-                                              framework::dataset::make("DataType", DataType::S16));
-const auto ElementwiseMaxFP16Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16),
-                                               framework::dataset::make("DataType", DataType::F16));
-const auto ElementwiseMaxFP32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32),
-                                               framework::dataset::make("DataType", DataType::F32));
-const auto EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto ElementwiseMaxS16Dataset = combine(make("DataType", { DataType::S16 }), make("DataType", DataType::S16),
+                                              make("DataType", DataType::S16));
+const auto ElementwiseMaxFP16Dataset = combine(make("DataType", DataType::F16), make("DataType", DataType::F16),
+                                               make("DataType", DataType::F16));
+const auto ElementwiseMaxFP32Dataset = combine(make("DataType", DataType::F32), make("DataType", DataType::F32),
+                                               make("DataType", DataType::F32));
+const auto EmptyActivationFunctionsDataset = make("ActivationInfo",
 { ActivationLayerInfo() });
-const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto ActivationFunctionsDataset = make("ActivationInfo",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
 });
-const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
-const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
+const auto InPlaceDataSet    = make("InPlace", { false, true });
+const auto OutOfPlaceDataSet = make("InPlace", { false });
 } // namespace
 
 TEST_SUITE(CL)
@@ -80,19 +81,19 @@ TEST_SUITE(ElementwiseMax)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                       }),
-               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+               make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("OutputInfo",{TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+               make("OutputInfo",{TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { true, false, false})),
+               make("Expected", { true, false, false})),
                input1_info, input2_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLElementwiseMax::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
@@ -130,9 +131,9 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                                                                                                                        ElementwiseMaxQASYMM8Dataset,
-                                                                                                                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                                                                                                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) }),
-                                                                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) }),
+                                                                                                                       make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                                                                                                       make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) }),
+                                                                                                                       make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) }),
                                                                                                                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -142,9 +143,9 @@ TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                                                                                                                       ElementwiseMaxQASYMM8SignedDataset,
-                                                                                                                      framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                                                                                                                      framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) }),
-                                                                                                                      framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) }),
+                                                                                                                      make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                                                                                                      make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) }),
+                                                                                                                      make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) }),
                                                                                                                       OutOfPlaceDataSet))
 {
     // Validate output
@@ -154,9 +155,9 @@ TEST_SUITE_END()
 TEST_SUITE(QSYMM16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                                                                                                                        ElementwiseMaxQSYMM16Dataset,
-                                                                                                                       framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
-                                                                                                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
-                                                                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) }),
+                                                                                                                       make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
+                                                                                                                       make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
+                                                                                                                       make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) }),
                                                                                                                        OutOfPlaceDataSet))
 {
     // Validate output

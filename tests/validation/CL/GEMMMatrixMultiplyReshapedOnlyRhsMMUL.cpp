@@ -37,6 +37,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::opencl::kernels;
 
 // Create function for ClGemmReshapeRhsMatrixKernel
@@ -59,48 +60,48 @@ RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.001f));
 constexpr float          abs_tolerance_f16(0.3f);
 
 /** Alpha values to test - Precommit */
-const auto a_values = framework::dataset::make("alpha", {1.0f, 0.75f} );
+const auto a_values = make("alpha", {1.0f, 0.75f} );
 
 /** Beta values to test - Precommit */
-const auto beta_values = framework::dataset::make("beta", {0.0f, -0.75f} );
+const auto beta_values = make("beta", {0.0f, -0.75f} );
 
 /** M values to test */
-const auto m_values = framework::dataset::make("M", {49});
+const auto m_values = make("M", {49});
 
 /** N values to test */
-const auto n_values              = framework::dataset::make("N", {257, 64, 48});
-const auto n_values_fp16         = framework::dataset::make("N", {79, 32, 80});
-const auto n_values_texture_fp16 = framework::dataset::make("N", {128, 96, 48});
+const auto n_values              = make("N", {257, 64, 48});
+const auto n_values_fp16         = make("N", {79, 32, 80});
+const auto n_values_texture_fp16 = make("N", {128, 96, 48});
 
 /** K values to test */
 /** The test case requires this to be multiple of 4*/
-const auto k_values = framework::dataset::make("K", {192});
-const auto k_values_fp16 = framework::dataset::make("K", {64});
+const auto k_values = make("K", {192});
+const auto k_values_fp16 = make("K", {64});
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", {1, 2});
+const auto b_values = make("batch_size", {1, 2});
 
 /** Activation values to test */
-const auto act_values = framework::dataset::make("Activation",
+const auto act_values = make("Activation",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU)
 });
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", { 1, 2, 4 });
-const auto m0_values_precommit_fp16 = framework::dataset::make("M0", { 1, 2, 3, 4, 8 });
+const auto m0_values_precommit = make("M0", { 1, 2, 4 });
+const auto m0_values_precommit_fp16 = make("M0", { 1, 2, 3, 4, 8 });
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit              = framework::dataset::make("N0", { 4, 8 });
-const auto n0_values_precommit_fp16         = framework::dataset::make("N0", { 2, 4, 8, 16 });
-const auto n0_values_precommit_texture_fp16 = framework::dataset::make("N0", { 4, 8 });
+const auto n0_values_precommit              = make("N0", { 4, 8 });
+const auto n0_values_precommit_fp16         = make("N0", { 2, 4, 8, 16 });
+const auto n0_values_precommit_texture_fp16 = make("N0", { 4, 8 });
 
 /** K0 values to test - Precommit */
-const auto k0_values_precommit = framework::dataset::make("K0", { 1 });
+const auto k0_values_precommit = make("K0", { 1 });
 
 /** Broadcast bias from vector to matrix */
-const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { false, true } );
+const auto broadcast_bias_values = make("broadcast_bias", { false, true } );
 
 } // namespace
 
@@ -116,8 +117,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<
                         m0_values_precommit,
                         n0_values_precommit,
                         k0_values_precommit,
-                        framework::dataset::make("ExportToCLImage", false),
-                        framework::dataset::make("DataType", DataType::F32),
+                        make("ExportToCLImage", false),
+                        make("DataType", DataType::F32),
                         a_values,
                         beta_values,
                         broadcast_bias_values,
@@ -146,8 +147,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<
                         m0_values_precommit_fp16,
                         n0_values_precommit_fp16,
                         k0_values_precommit,
-                        framework::dataset::make("ExportToCLImage", false),
-                        framework::dataset::make("DataType", DataType::F16),
+                        make("ExportToCLImage", false),
+                        make("DataType", DataType::F16),
                         a_values,
                         beta_values,
                         broadcast_bias_values,
@@ -176,8 +177,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<
                         m0_values_precommit,
                         n0_values_precommit,
                         k0_values_precommit,
-                        framework::dataset::make("ExportToCLImage", true),
-                        framework::dataset::make("DataType", DataType::F32),
+                        make("ExportToCLImage", true),
+                        make("DataType", DataType::F32),
                         a_values,
                         beta_values,
                         broadcast_bias_values,
@@ -206,8 +207,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture<
                         m0_values_precommit_fp16,
                         n0_values_precommit_texture_fp16,
                         k0_values_precommit,
-                        framework::dataset::make("ExportToCLImage", true),
-                        framework::dataset::make("DataType", DataType::F16),
+                        make("ExportToCLImage", true),
+                        make("DataType", DataType::F16),
                         a_values,
                         beta_values,
                         broadcast_bias_values,

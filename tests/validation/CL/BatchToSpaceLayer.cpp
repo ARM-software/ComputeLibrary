@@ -42,6 +42,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(BatchToSpaceLayer)
 
@@ -50,7 +51,7 @@ using CLBatchToSpaceLayerFixture = BatchToSpaceLayerValidationFixture<CLTensor, 
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
+DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Supported: blockx != blocky && blockx > blocky
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Supported: blockx != blocky && blocky > blockx
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),     // Invalid: Mismatching data types
@@ -61,12 +62,12 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(framework::datas
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Supported: correct tensor shape with cropping
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // Invalid tensor shape with cropping
                                                      }),
-               framework::dataset::make("BlockShapeX", { 2, 4, 2, 2, 2, 2, 2, 2, 2, 2 }),
-               framework::dataset::make("BlockShapeY", { 2, 2, 4, 2, -2, 2, 2, 2, 2, 2 }),
-               framework::dataset::make("CropInfo", {
+               make("BlockShapeX", { 2, 4, 2, 2, 2, 2, 2, 2, 2, 2 }),
+               make("BlockShapeY", { 2, 2, 4, 2, -2, 2, 2, 2, 2, 2 }),
+               make("CropInfo", {
                 CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{}, CropInfo{3, 2, 1, 3}, CropInfo{3, 2, 1, 3}
                }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 16U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 32U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F16),
@@ -77,7 +78,7 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(framework::datas
                                                        TensorInfo(TensorShape(27, 12U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 4U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, true, false})),
+               make("Expected", { true, true, true, false, false, false, false, false, true, false})),
                input_info, block_shape_x, block_shape_y, crop_info, output_info, expected)
 {
     bool has_error = bool(CLBatchToSpaceLayer::validate(&input_info.clone()->set_is_resizable(false), block_shape_x, block_shape_y, &output_info.clone()->set_is_resizable(false), crop_info));
@@ -88,26 +89,26 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(framework::datas
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchToSpaceLayerDataset(), make("DataType",
                                                                                                                        DataType::F32),
-                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallWithCropping, CLBatchToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), framework::dataset::make("DataType",
+                       combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), make("DataType",
                                                                                                                        DataType::F32),
-                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLBatchToSpaceLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLBatchToSpaceLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeBatchToSpaceLayerDataset(), make("DataType",
                                                                                                                      DataType::F32),
-                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                             make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -115,26 +116,26 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLBatchToSpaceLayerFixture<float>, framework::D
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchToSpaceLayerDataset(), make("DataType",
                                                                                                                       DataType::F16),
-                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                              make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallWithCropping, CLBatchToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), framework::dataset::make("DataType",
+                       combine(datasets::SmallBatchToSpaceLayerWithCroppingDataset(), make("DataType",
                                                                                                                        DataType::F16),
-                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLBatchToSpaceLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeBatchToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLBatchToSpaceLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeBatchToSpaceLayerDataset(), make("DataType",
                                                                                                                     DataType::F16),
-                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

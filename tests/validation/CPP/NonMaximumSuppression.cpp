@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,11 +40,14 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::combine;
+using framework::dataset::make;
+using framework::dataset::zip;
 namespace
 {
-const auto max_output_boxes_dataset  = framework::dataset::make("MaxOutputBoxes", 1, 10);
-const auto score_threshold_dataset   = framework::dataset::make("ScoreThreshold", { 0.1f, 0.5f, 0.f, 1.f });
-const auto iou_nms_threshold_dataset = framework::dataset::make("NMSThreshold", { 0.1f, 0.5f, 0.f, 1.f });
+const auto max_output_boxes_dataset  = make("MaxOutputBoxes", 1, 10);
+const auto score_threshold_dataset   = make("ScoreThreshold", { 0.1f, 0.5f, 0.f, 1.f });
+const auto iou_nms_threshold_dataset = make("NMSThreshold", { 0.1f, 0.5f, 0.f, 1.f });
 const auto NMSParametersSmall        = datasets::Small2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * iou_nms_threshold_dataset;
 const auto NMSParametersBig          = datasets::Large2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * iou_nms_threshold_dataset;
 
@@ -56,7 +59,7 @@ TEST_SUITE(NMS)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-                                                framework::dataset::make("BoundingBox",{
+                                                make("BoundingBox",{
                                                                                         TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(1U, 4U, 2U), 1, DataType::F32),    // invalid shape
                                                                                         TensorInfo(TensorShape(4U, 2U), 1, DataType::S32),    // invalid data type
@@ -68,7 +71,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                                                         TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
                                                                                     }),
-                                                framework::dataset::make("Scores", {
+                                                make("Scores", {
                                                                                         TensorInfo(TensorShape(100U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32), // invalid shape
                                                                                         TensorInfo(TensorShape(4U), 1, DataType::F32),
@@ -80,7 +83,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                                                         TensorInfo(TensorShape(100U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(100U), 1, DataType::F32),
                                                                                     })),
-                                                framework::dataset::make("Indices", {
+                                                make("Indices", {
                                                                                         TensorInfo(TensorShape(100U), 1, DataType::S32),
                                                                                         TensorInfo(TensorShape(100U), 1, DataType::S32),
                                                                                         TensorInfo(TensorShape(4U), 1, DataType::S32),
@@ -93,23 +96,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                                                         TensorInfo(TensorShape(100U), 1, DataType::S32),
 
                                                                                     })),
-                                                framework::dataset::make("max_output", {
+                                                make("max_output", {
                                                                                         10U, 2U,4U, 3U,66U, 1U,
                                                                                         0U, /* invalid, must be greater than 0 */
                                                                                         10000U, /* OK, clamped to indices' size */
                                                                                         100U,
                                                                                         10U,
                                                                                      })),
-                                                framework::dataset::make("score_threshold", {
+                                                make("score_threshold", {
                                                                                         0.1f, 0.4f, 0.2f,0.8f,0.3f, 0.01f, 0.5f, 0.45f,
                                                                                         -1.f, /* invalid value, must be in [0,1] */
                                                                                         0.5f,
                                                                                      })),
-                                                framework::dataset::make("nms_threshold", {
+                                                make("nms_threshold", {
                                                                                         0.3f, 0.7f, 0.1f,0.13f,0.2f, 0.97f, 0.76f, 0.87f, 0.1f,
                                                                                         10.f, /* invalid value, must be in [0,1]*/
                                                                                      })),
-                                                framework::dataset::make("Expected", {
+                                                make("Expected", {
                                                                                         true, false, false, false, true, false, false,true, false, false
                                                                                      })),
 

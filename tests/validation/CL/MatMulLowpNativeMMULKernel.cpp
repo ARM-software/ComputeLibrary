@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,11 +41,11 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_quant(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 }
-using framework::dataset::make;
 
 template <typename T>
 using CLMatMulLowpNativeMMULKernelFixture = MatMulKernelValidationFixture<T, ClMatMulLowpNativeMMULKernel, true /* use_mmul */>;
@@ -54,17 +54,17 @@ template <typename T>
 using CLMatMulLowpNativeMMULKernelWithBiasFixture = MatMulKernelWithBiasValidation<T, ClMatMulLowpNativeMMULKernel, true /* use_mmul */>;
 
 /** M0 values to test --precommit*/
-const auto m0_values_precommit = framework::dataset::make("M0", { 1, 3 });
+const auto m0_values_precommit = make("M0", { 1, 3 });
 
 /** N0 values to test --precommit*/
-const auto n0_values_precommit = framework::dataset::make("N0", { 2, 4 });
+const auto n0_values_precommit = make("N0", { 2, 4 });
 
 /** M0 values to test --nightly*/
-const auto m0_values_nightly_lhs_nt = framework::dataset::make("M0", { 2, 4, 5, 8 });
-const auto m0_values_nightly_lhs_t  = framework::dataset::make("M0", { 2, 4, 8 });
+const auto m0_values_nightly_lhs_nt = make("M0", { 2, 4, 5, 8 });
+const auto m0_values_nightly_lhs_t  = make("M0", { 2, 4, 8 });
 
 /** N0 values to test --nightly*/
-const auto n0_values_nightly = framework::dataset::make("N0", { 1, 3, 8, 16 });
+const auto n0_values_nightly = make("N0", { 1, 3, 8, 16 });
 
 TEST_SUITE(CL)
 TEST_SUITE(MatMulLowpNativeMMULKernel)

@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for ClGemmReshapeLhsMatrixKernel
@@ -69,64 +70,64 @@ namespace
  *  3: Non multiples of processor size in both dimensions
 */
 const auto m_n_values = zip(
-    framework::dataset::make("M", {1, 16, 37}),
-    framework::dataset::make("N", {1, 16, 51})
+    make("M", {1, 16, 37}),
+    make("N", {1, 16, 51})
     );
 
 /** M values to test */
-const auto m_values = framework::dataset::make("M", {1, 37});
+const auto m_values = make("M", {1, 37});
 
 /** M_W values to test */
-const auto m_w_values = framework::dataset::make("M_W", 5);
+const auto m_w_values = make("M_W", 5);
 
 /** M_H values to test */
-const auto m_h_values = framework::dataset::make("M_H", 7);
+const auto m_h_values = make("M_H", 7);
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", {1, 51});
+const auto n_values = make("N", {1, 51});
 
 /** K values to test */
-const auto k_values = framework::dataset::make("K", 23);
+const auto k_values = make("K", 23);
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", 1, 3);
+const auto b_values = make("batch_size", 1, 3);
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit_1 = framework::dataset::make("M0", { 4 });
-const auto m0_values_precommit_2 = framework::dataset::make("M0", { 6 });
+const auto m0_values_precommit_1 = make("M0", { 4 });
+const auto m0_values_precommit_2 = make("M0", { 6 });
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
+const auto n0_values_precommit = make("N0", { 4 });
 
 /** K0 values to test - Precommit */
-const auto k0_values_precommit = framework::dataset::make("K0", { 16 });
+const auto k0_values_precommit = make("K0", { 16 });
 
 /** V0 values to test - Precommit */
-const auto v0_values_precommit = framework::dataset::make("V0", 1, 3);
+const auto v0_values_precommit = make("V0", 1, 3);
 
 /** H0 values to test - Precommit */
-const auto h0_values_precommit = framework::dataset::make("H0", 1, 3);
+const auto h0_values_precommit = make("H0", 1, 3);
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", 2, 7);
+const auto m0_values_nightly = make("M0", 2, 7);
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8 });
+const auto n0_values_nightly = make("N0", { 2, 3, 4, 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8, 16 });
+const auto k0_values_nightly = make("K0", { 2, 3, 4, 8, 16 });
 
 /** V0 values to test - Nightly */
-const auto v0_values_nightly = framework::dataset::make("V0", 1, 4);
+const auto v0_values_nightly = make("V0", 1, 4);
 
 /** H0 values to test - Nightly */
-const auto h0_values_nightly = framework::dataset::make("H0", 1, 4);
+const auto h0_values_nightly = make("H0", 1, 4);
 
 /** Interleave values to test with LHS matrix */
-const auto i_values_lhs = framework::dataset::make("interleave_lhs", { true, false });
+const auto i_values_lhs = make("interleave_lhs", { true, false });
 
 /** Interleave values to test with RHS matrix */
-const auto i_values_rhs = framework::dataset::make("interleave_rhs", { true, false });
+const auto i_values_rhs = make("interleave_rhs", { true, false });
 } // namespace
 
 TEST_SUITE(CL)
@@ -146,7 +147,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyReshapedFixture, framew
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
+                                                                   make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -164,7 +165,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyReshapedFixture, framew
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
+                                                                   make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -183,7 +184,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, fr
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
+                                                                   make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -202,7 +203,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, fr
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
+                                                                   make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -221,7 +222,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyReshapedFixture, framew
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
+                                                                   make("DataType", { DataType::QASYMM8_SIGNED })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -239,7 +240,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, fr
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
+                                                                   make("DataType", { DataType::QASYMM8_SIGNED })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
