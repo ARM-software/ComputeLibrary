@@ -37,6 +37,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::opencl::kernels;
 
 // Create function for CLGEMMReshapeRHSMatrixKernel
@@ -62,36 +63,36 @@ namespace
 // clang-format off
 
 /** M values to test */
-const auto m_values = framework::dataset::make("M", {16, 49});
+const auto m_values = make("M", {16, 49});
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", {16, 259});
+const auto n_values = make("N", {16, 259});
 
 /** K values to test */
-const auto k_values = framework::dataset::make("K", {192});
+const auto k_values = make("K", {192});
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", {1, 2});
+const auto b_values = make("batch_size", {1, 2});
 
 /** M0 values to test - Precommit */
-const auto m0 = framework::dataset::make("M0", {1, 2, 4});
+const auto m0 = make("M0", {1, 2, 4});
 
 /** N0 values to test - Precommit */
-const auto n0 = framework::dataset::make("N0", { 1, 4, 8});
+const auto n0 = make("N0", { 1, 4, 8});
 
 /** K0 values to test - Precommit */
-const auto k0 = framework::dataset::make("K0", { 4 });
+const auto k0 = make("K0", { 4 });
 
 /** H0 values to test - Precommit */
-const auto h0 = framework::dataset::make("H0", 1);
+const auto h0 = make("H0", 1);
 
 /** Interleave values to test with RHS matrix */
-const auto i_values_rhs = framework::dataset::make("interleave_rhs", { false });
+const auto i_values_rhs = make("interleave_rhs", { false });
 
 /** Transpose values to test with RHS matrix */
-const auto t_values_rhs = framework::dataset::make("transpose_rhs", { true });
+const auto t_values_rhs = make("transpose_rhs", { true });
 
-const auto broadcast_bias = framework::dataset::make("broadcast_bias", {true, false});
+const auto broadcast_bias = make("broadcast_bias", {true, false});
 
 } // namespace
 
@@ -108,7 +109,7 @@ FIXTURE_DATA_TEST_CASE(Signed, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixtur
                                                                    h0,
                                                                    i_values_rhs,
                                                                    t_values_rhs,
-                    framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
+                    make("DataType", { DataType::QASYMM8_SIGNED })))
 {
     // Validate output
     if(arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
@@ -132,7 +133,7 @@ FIXTURE_DATA_TEST_CASE(Unsigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixt
                                                                    h0,
                                                                    i_values_rhs,
                                                                    t_values_rhs,
-                    framework::dataset::make("DataType", { DataType::QASYMM8})))
+                    make("DataType", { DataType::QASYMM8})))
 {
     // Validate output
     if(arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
@@ -157,7 +158,7 @@ FIXTURE_DATA_TEST_CASE(OutputStageSigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRH
                                                                    i_values_rhs,
                                                                    t_values_rhs,
                                                                    broadcast_bias,
-                    framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED})))
+                    make("DataType", { DataType::QASYMM8_SIGNED})))
 {
     // Validate output
     if(arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
@@ -182,7 +183,7 @@ FIXTURE_DATA_TEST_CASE(OutputStageUnsigned, CLGEMMLowpMatrixMultiplyReshapedOnly
                                                                    i_values_rhs,
                                                                    t_values_rhs,
                                                                    broadcast_bias,
-                    framework::dataset::make("DataType", { DataType::QASYMM8})))
+                    make("DataType", { DataType::QASYMM8})))
 {
     // Validate output
     if(arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))

@@ -41,10 +41,11 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 const auto configure_dataset = combine(datasets::SmallShapes(),
-                                       framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 }));
+                                       make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 }));
 
 const auto run_small_dataset = combine(datasets::ComparisonOperations(), datasets::SmallShapes());
 const auto run_large_dataset = combine(datasets::ComparisonOperations(), datasets::LargeShapes());
@@ -56,25 +57,25 @@ TEST_SUITE(Comparison)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching input types
                                                  TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+        make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+        make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
         }),
-        framework::dataset::make("Expected", { false, false, true, false, true})),
+        make("Expected", { false, false, true, false, true})),
         input1_info, input2_info, output_info, expected)
 {
     Status s = CLComparison::validate(&input1_info.clone()->set_is_resizable(false),
@@ -94,7 +95,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLComparisonFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(run_small_dataset, make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -102,7 +103,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLComparisonFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(run_large_dataset, make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -113,7 +114,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLComparisonFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(run_small_dataset, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -121,7 +122,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLComparisonFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(run_large_dataset, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -137,9 +138,9 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLComparisonQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+                       combine(run_small_dataset, make("DataType", DataType::QASYMM8),
+                                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                               make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

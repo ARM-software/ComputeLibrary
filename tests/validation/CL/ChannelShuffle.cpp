@@ -40,28 +40,29 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(ChannelShuffle)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Invalid num groups
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Invalid num groups
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
                                                        TensorInfo(TensorShape(4U, 5U, 4U), 1, DataType::F32),  // Mismatching shapes
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Num groups == channels
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // (channels % num_groups) != 0
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Valid
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("NumGroups",{ 1, 2, 2, 4, 3, 2,
+               make("NumGroups",{ 1, 2, 2, 4, 3, 2,
                                                      }),
-               framework::dataset::make("Expected", { false, false, false, false, false, true})),
+               make("Expected", { false, false, false, false, false, true})),
                input_info, output_info, num_groups, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLChannelShuffleLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), num_groups)) == expected, framework::LogLevel::ERRORS);
@@ -74,16 +75,16 @@ using CLChannelShuffleLayerFixture = ChannelShuffleLayerValidationFixture<CLTens
 
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::U8),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                   make("DataType", DataType::U8),
+                                                                                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                 make("DataType",
                                                                                                                          DataType::U8),
-                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                 make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -93,17 +94,17 @@ TEST_SUITE_END()
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(),
-                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                        make("DataType",
                                                                                                                                 DataType::F16),
-                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(),
-                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                      make("DataType",
                                                                                                                               DataType::F16),
-                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                              make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -112,17 +113,17 @@ TEST_SUITE_END()
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                 make("DataType",
                                                                                                                          DataType::F32),
-                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                 make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(),
-                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                       make("DataType",
                                                                                                                                DataType::F32),
-                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

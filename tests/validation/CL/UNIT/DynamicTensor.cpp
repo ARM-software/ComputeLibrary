@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+using framework::dataset::zip;
 namespace
 {
 constexpr AbsoluteTolerance<float> absolute_tolerance_float(0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
@@ -76,8 +78,8 @@ using CLDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<CLTe
  *  The memory manager should be able to update the inner structures and allocate the requested memory
  * */
 FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, CLDynamicTensorType3SingleFunction, framework::DatasetMode::ALL,
-                       framework::dataset::zip(framework::dataset::make("Level0Shape", { TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U) }),
-                                               framework::dataset::make("Level1Shape", { TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U) })))
+                       zip(make("Level0Shape", { TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U) }),
+                                               make("Level1Shape", { TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U) })))
 {
     ARM_COMPUTE_EXPECT(internal_l0.size() == internal_l1.size(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(cross_l0.size() == cross_l1.size(), framework::LogLevel::ERRORS);
@@ -116,12 +118,12 @@ using CLDynamicTensorType3ComplexFunction = DynamicTensorType3ComplexFunction<CL
  *  The memory manager should be able to update the inner structures and allocate the requested memory
  * */
 FIXTURE_DATA_TEST_CASE(DynamicTensorType3Complex, CLDynamicTensorType3ComplexFunction, framework::DatasetMode::ALL,
-                       framework::dataset::zip(framework::dataset::zip(framework::dataset::zip(framework::dataset::zip(
-                                                                                                   framework::dataset::make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 16U), TensorShape(64U, 64U, 16U) } }),
-                                                                                                   framework::dataset::make("WeightsManager", { TensorShape(3U, 3U, 16U, 5U) })),
-                                                                                               framework::dataset::make("BiasShape", { TensorShape(5U) })),
-                                                                       framework::dataset::make("OutputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 5U), TensorShape(64U, 64U, 5U) } })),
-                                               framework::dataset::make("PadStrideInfo", { PadStrideInfo(1U, 1U, 1U, 1U) })))
+                       zip(zip(zip(zip(
+                                                                                                   make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 16U), TensorShape(64U, 64U, 16U) } }),
+                                                                                                   make("WeightsManager", { TensorShape(3U, 3U, 16U, 5U) })),
+                                                                                               make("BiasShape", { TensorShape(5U) })),
+                                                                       make("OutputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 5U), TensorShape(64U, 64U, 5U) } })),
+                                               make("PadStrideInfo", { PadStrideInfo(1U, 1U, 1U, 1U) })))
 {
     for(unsigned int i = 0; i < num_iterations; ++i)
     {
@@ -136,7 +138,7 @@ using CLDynamicTensorType2PipelineFunction = DynamicTensorType2PipelineFunction<
  *  Create and manage the tensors needed to run a pipeline. After the function is executed, resize the input size and rerun.
  */
 FIXTURE_DATA_TEST_CASE(DynamicTensorType2Pipeline, CLDynamicTensorType2PipelineFunction, framework::DatasetMode::ALL,
-                       framework::dataset::make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }))
+                       make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }))
 {
 }
 

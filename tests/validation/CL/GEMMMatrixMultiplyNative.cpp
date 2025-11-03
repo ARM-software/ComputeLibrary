@@ -43,6 +43,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::opencl::kernels;
 
@@ -65,59 +66,59 @@ RelativeTolerance<float> rel_tolerance_f32(0.001f);
 constexpr float          abs_tolerance_f32(0.0001f);
 
 /** Alpha values to test - Precommit */
-const auto a_values = framework::dataset::make("alpha", {1.0f, -0.75f} );
+const auto a_values = make("alpha", {1.0f, -0.75f} );
 
 /** Beta values to test - Precommit */
-const auto beta_values = framework::dataset::make("beta", {-0.75f, 0.0f} );
+const auto beta_values = make("beta", {-0.75f, 0.0f} );
 
 /** M values to test */
-const auto m_values = framework::dataset::make("M", 37);
+const auto m_values = make("M", 37);
 
 /** M_W values to test */
-const auto m_w_values = framework::dataset::make("M_W", 5);
+const auto m_w_values = make("M_W", 5);
 
 /** M_H values to test */
-const auto m_h_values = framework::dataset::make("M_H", 7);
+const auto m_h_values = make("M_H", 7);
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", 51);
+const auto n_values = make("N", 51);
 
 /** K values to test */
-const auto k_values = framework::dataset::make("K", 23);
+const auto k_values = make("K", 23);
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", 1, 3);
+const auto b_values = make("batch_size", 1, 3);
 
 /** Activation values to test */
-const auto act_values = framework::dataset::make("Activation",
+const auto act_values = make("Activation",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU),
 });
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", { 4, 6 });
+const auto m0_values_precommit = make("M0", { 4, 6 });
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
+const auto n0_values_precommit = make("N0", { 4 });
 
 /** K0 values to test - Precommit */
-const auto k0_values_precommit = framework::dataset::make("K0", { 4 });
+const auto k0_values_precommit = make("K0", { 4 });
 
 /** H0 values to test - Precommit */
-const auto h0_values_precommit = framework::dataset::make("H0", 1, 3);
+const auto h0_values_precommit = make("H0", 1, 3);
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", 1, 8);
+const auto m0_values_nightly = make("M0", 1, 8);
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8 });
+const auto n0_values_nightly = make("N0", { 2, 3, 4, 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8 });
+const auto k0_values_nightly = make("K0", { 2, 3, 4, 8 });
 
 /** Broadcast bias from vector to matrix */
-const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { false, true } );
+const auto broadcast_bias_values = make("broadcast_bias", { false, true } );
 
 /** Boundary handling cases for testing partial/non-partial (full) block dimensions, resulting from different combinations
  * of M, M0, N and N0 values.
@@ -127,18 +128,18 @@ const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { 
  * parital blocks in X dimension.
  */
 const auto boundary_handling_cases = combine(// Large k to force potential out-of-bound reads on input0
-                                    framework::dataset::make("K", 315),
+                                    make("K", 315),
                                     // Batch size == 1 to force potential out-of-bound reads on input0
-                                    framework::dataset::make("batch_size", 1),
-                                    framework::dataset::make("M0", 4),
-                                    framework::dataset::make("N0", 4),
-                                    framework::dataset::make("K0", 4),
+                                    make("batch_size", 1),
+                                    make("M0", 4),
+                                    make("N0", 4),
+                                    make("K0", 4),
                                     // Only need to test F32 as F16 shares identical boundary handling logics
-                                    framework::dataset::make("DataType", DataType::F32),
-                                    framework::dataset::make("alpha", -0.75f ),
-                                    framework::dataset::make("beta", -0.35f ),
+                                    make("DataType", DataType::F32),
+                                    make("alpha", -0.75f ),
+                                    make("beta", -0.35f ),
                                     broadcast_bias_values,
-                                    framework::dataset::make("Activation", ActivationLayerInfo()));
+                                    make("Activation", ActivationLayerInfo()));
 
 /** Configuration test */
 void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value, unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, bool broadcast_bias, DataType data_type, const ActivationLayerInfo &act_info)
@@ -195,7 +196,7 @@ TEST_SUITE(FP32)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(m_values,
                                                                    n_values,
                                                                    k_values,
-                                                                   framework::dataset::make("batch_size", 1),
+                                                                   make("batch_size", 1),
                                                                    m0_values_precommit,
                                                                    n0_values_precommit,
                                                                    k0_values_precommit,
@@ -207,8 +208,8 @@ m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, broadcast_bias
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingPartialInXPartialInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(framework::dataset::make("M", 3),
-                        framework::dataset::make("N", 1),
+                combine(make("M", 3),
+                        make("N", 1),
                         boundary_handling_cases))
 {
     // Validate output
@@ -216,8 +217,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingPartialInXPartialInY, CLGEMMMatri
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingPartialInXFullInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(framework::dataset::make("M", 64),
-                        framework::dataset::make("N", 51),
+                combine(make("M", 64),
+                        make("N", 51),
                         boundary_handling_cases))
 {
     // Validate output
@@ -225,8 +226,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingPartialInXFullInY, CLGEMMMatrixMu
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingFullInXFullInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(framework::dataset::make("M", 64),
-                        framework::dataset::make("N", 32),
+                combine(make("M", 64),
+                        make("N", 32),
                         boundary_handling_cases))
 {
     // Validate output
@@ -234,8 +235,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingFullInXFullInY, CLGEMMMatrixMulti
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallBoundaryHandlingFullInXPartialInY, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(framework::dataset::make("M", 37),
-                        framework::dataset::make("N", 32),
+                combine(make("M", 37),
+                        make("N", 32),
                         boundary_handling_cases))
 {
     // Validate output
@@ -250,7 +251,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<float>, frame
                                                                    m0_values_precommit,
                                                                    n0_values_precommit,
                                                                    k0_values_precommit,
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values,
                                                                    beta_values,
                                                                    broadcast_bias_values,
@@ -268,7 +269,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<float>, frame
                                                                    m0_values_nightly,
                                                                    n0_values_nightly,
                                                                    k0_values_nightly,
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values,
                                                                    beta_values,
                                                                    broadcast_bias_values,
@@ -287,7 +288,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyNative3DFixture<float>, f
                                                                    m0_values_precommit,
                                                                    n0_values_precommit,
                                                                    k0_values_precommit,
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values,
                                                                    beta_values,
                                                                    act_values))
@@ -305,7 +306,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<float>, f
                                                                    m0_values_nightly,
                                                                    n0_values_nightly,
                                                                    k0_values_nightly,
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values,
                                                                    beta_values,
                                                                    act_values))

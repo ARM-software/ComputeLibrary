@@ -40,18 +40,19 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(Split)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid number of splits
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32)
         }),
-        framework::dataset::make("Axis", { 4, 2, 2 }),
-        framework::dataset::make("Splits", { 4, 5, 4 }),
-        framework::dataset::make("Expected", { false, false, true })),
+        make("Axis", { 4, 2, 2 }),
+        make("Splits", { 4, 5, 4 }),
+        make("Expected", { false, false, true })),
         input_info, axis, splits, expected)
 {
     std::vector<TensorInfo> outputs_info(splits);
@@ -65,16 +66,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(ValidateSplitShapes, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32),
+DATA_TEST_CASE(ValidateSplitShapes, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32)
         }),
-        framework::dataset::make("Axis", { 2, 2 }),
-        framework::dataset::make("Splits", { std::vector<TensorInfo>{TensorInfo(TensorShape(27U, 3U, 4U,  2U), 1, DataType::F32),
+        make("Axis", { 2, 2 }),
+        make("Splits", { std::vector<TensorInfo>{TensorInfo(TensorShape(27U, 3U, 4U,  2U), 1, DataType::F32),
                                                                      TensorInfo(TensorShape(27U, 3U, 4U,  2U), 1, DataType::F32),
                                                                      TensorInfo(TensorShape(27U, 3U, 8U,  2U), 1, DataType::F32)},
                                              std::vector<TensorInfo>{TensorInfo(TensorShape(27U, 3U, 3U,  2U), 1, DataType::F32),
                                                                      TensorInfo(TensorShape(27U, 3U, 13U, 2U), 1, DataType::F32)} }),
-        framework::dataset::make("Expected", { true, true })),
+        make("Expected", { true, true })),
         input_info, axis, splits, expected)
 {
     std::vector<ITensorInfo*> outputs_info_ptr;
@@ -100,7 +101,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSplitFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallSplitDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::SmallSplitDataset(), make("DataType", DataType::F16)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)
@@ -112,7 +113,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLSplitFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeSplitDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::LargeSplitDataset(), make("DataType", DataType::F16)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)
@@ -124,7 +125,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 FIXTURE_DATA_TEST_CASE(RunSmallSplitShapes,
                        CLSplitShapesFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallSplitShapesDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::SmallSplitShapesDataset(), make("DataType", DataType::F16)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)
@@ -138,7 +139,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSplitFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallSplitDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::SmallSplitDataset(), make("DataType", DataType::F32)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)
@@ -150,7 +151,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLSplitFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeSplitDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::LargeSplitDataset(), make("DataType", DataType::F32)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)
@@ -162,7 +163,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 FIXTURE_DATA_TEST_CASE(RunSmallSplitShapes,
                        CLSplitShapesFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallSplitShapesDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::SmallSplitShapesDataset(), make("DataType", DataType::F32)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)

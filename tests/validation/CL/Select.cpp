@@ -41,10 +41,11 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
-auto run_small_dataset = combine(datasets::SmallShapes(), framework::dataset::make("has_same_rank", { false, true }));
-auto run_large_dataset = combine(datasets::LargeShapes(), framework::dataset::make("has_same_rank", { false, true }));
+auto run_small_dataset = combine(datasets::SmallShapes(), make("has_same_rank", { false, true }));
+auto run_large_dataset = combine(datasets::LargeShapes(), make("has_same_rank", { false, true }));
 
 } // namespace
 TEST_SUITE(CL)
@@ -52,35 +53,35 @@ TEST_SUITE(Select)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("CInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8), // Invalid condition datatype
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("CInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8), // Invalid condition datatype
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Invalid output datatype
                                             TensorInfo(TensorShape(13U), 1, DataType::U8),          // Invalid c shape
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Mismatching shapes
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(2U), 1, DataType::U8),
         }),
-        framework::dataset::make("XInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+        make("XInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                            TensorInfo(TensorShape(32U, 10U, 2U), 1, DataType::F32),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("YInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+        make("YInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+        make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("Expected", { false, false, false, false, true, true})),
+        make("Expected", { false, false, false, false, true, true})),
         c_info, x_info, y_info, output_info, expected)
 {
     Status s = CLSelect::validate(&c_info.clone()->set_is_resizable(false),
@@ -100,7 +101,7 @@ TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(run_small_dataset, make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -109,9 +110,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunOneDim,
                        CLSelectFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(framework::dataset::make("Shape", TensorShape(1U, 16U)),
-                                       framework::dataset::make("has_same_rank", { false, true }),
-                               framework::dataset::make("DataType", DataType::F16)))
+                       combine(make("Shape", TensorShape(1U, 16U)),
+                                       make("has_same_rank", { false, true }),
+                               make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -120,7 +121,7 @@ FIXTURE_DATA_TEST_CASE(RunOneDim,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLSelectFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(run_large_dataset, make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -131,7 +132,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(run_small_dataset, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -140,9 +141,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunOneDim,
                        CLSelectFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(framework::dataset::make("Shape", TensorShape(1U, 16U)),
-                                       framework::dataset::make("has_same_rank", { false, true }),
-                               framework::dataset::make("DataType", DataType::F32)))
+                       combine(make("Shape", TensorShape(1U, 16U)),
+                                       make("has_same_rank", { false, true }),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -151,7 +152,7 @@ FIXTURE_DATA_TEST_CASE(RunOneDim,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLSelectFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(run_large_dataset, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -164,7 +165,7 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8)))
+                       combine(run_small_dataset, make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -173,9 +174,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunOneDim,
                        CLSelectFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(framework::dataset::make("Shape", TensorShape(1U, 16U)),
-                                       framework::dataset::make("has_same_rank", { false, true }),
-                               framework::dataset::make("DataType", DataType::QASYMM8)))
+                       combine(make("Shape", TensorShape(1U, 16U)),
+                                       make("has_same_rank", { false, true }),
+                               make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -184,7 +185,7 @@ FIXTURE_DATA_TEST_CASE(RunOneDim,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLSelectFixture<uint8_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::QASYMM8)))
+                       combine(run_large_dataset, make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

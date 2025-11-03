@@ -40,9 +40,10 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
-const auto PermuteVectors3 = framework::dataset::make("PermutationVector",
+const auto PermuteVectors3 = make("PermutationVector",
 {
     PermutationVector(2U, 0U, 1U),
     PermutationVector(1U, 2U, 0U),
@@ -51,7 +52,7 @@ const auto PermuteVectors3 = framework::dataset::make("PermutationVector",
     PermutationVector(1U, 0U, 2U),
     PermutationVector(2U, 1U, 0U),
 });
-const auto PermuteVectors4 = framework::dataset::make("PermutationVector",
+const auto PermuteVectors4 = make("PermutationVector",
 {
     PermutationVector(3U, 2U, 0U, 1U),
     PermutationVector(3U, 2U, 1U, 0U),
@@ -62,7 +63,7 @@ const auto PermuteVectors4 = framework::dataset::make("PermutationVector",
     PermutationVector(0U, 3U, 2U, 1U)
 });
 const auto PermuteVectors         = concat(PermuteVectors3, PermuteVectors4);
-const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteVectors;
+const auto PermuteParametersSmall = concat(datasets::Small2DShapes(), datasets::Small3DShapes(), datasets::Small4DShapes()) * PermuteVectors;
 const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteVectors;
 } // namespace
 TEST_SUITE(CL)
@@ -70,7 +71,7 @@ TEST_SUITE(Permute)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("InputInfo",{
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo",{
                 TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // valid
                 TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
                 TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
@@ -84,7 +85,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                 TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32)   // permutation not supported
 
         }),
-        framework::dataset::make("OutputInfo", {
+        make("OutputInfo", {
                 TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
                 TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
                 TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
@@ -98,7 +99,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                 TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32)
 
         }),
-        framework::dataset::make("PermutationVector", {
+        make("PermutationVector", {
                 PermutationVector(2U, 1U, 0U),
                 PermutationVector(2U, 2U, 1U),
                 PermutationVector(1U, 1U, 1U),
@@ -111,7 +112,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                 PermutationVector(2U, 3U, 1U, 0U),
                 PermutationVector(0U, 0U, 0U, 1000U)
         }),
-        framework::dataset::make("Expected", { true, false, false, false, true, true, false, true, false, true, false })),
+        make("Expected", { true, false, false, false, true, true, false, true, false, true, false })),
         input_info, output_info, perm_vect, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPermute::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), perm_vect)) == expected, framework::LogLevel::ERRORS);
@@ -126,14 +127,14 @@ using CLPermuteFixture = PermuteValidationFixture<CLTensor, CLAccessor, CLPermut
 
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U8))
+                       PermuteParametersSmall * make("DataType", DataType::U8))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U8))
+                       PermuteParametersLarge * make("DataType", DataType::U8))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -142,13 +143,13 @@ TEST_SUITE_END() // U8
 
 TEST_SUITE(U16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT,
-                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U16))
+                       PermuteParametersSmall * make("DataType", DataType::U16))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY,
-                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U16))
+                       PermuteParametersLarge * make("DataType", DataType::U16))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -157,13 +158,13 @@ TEST_SUITE_END() // U16
 
 TEST_SUITE(U32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT,
-                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U32))
+                       PermuteParametersSmall * make("DataType", DataType::U32))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY,
-                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U32))
+                       PermuteParametersLarge * make("DataType", DataType::U32))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

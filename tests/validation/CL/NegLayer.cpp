@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
@@ -51,7 +52,7 @@ template <typename T>
 using CLNegLayerFixture = NegValidationFixture<CLTensor, CLAccessor, CLNegLayer, T>;
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<int>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<int>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                     DataType::S32)))
 {
     // Validate output
@@ -61,13 +62,13 @@ TEST_SUITE_END()
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
                                                                                                      DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLNegLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLNegLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                    DataType::F16)))
 {
     // Validate output
@@ -76,13 +77,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLNegLayerFixture<half>, framework::DatasetMode
 
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
                                                                                                       DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLNegLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLNegLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                     DataType::F32)))
 {
     // Validate output

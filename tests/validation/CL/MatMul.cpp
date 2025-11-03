@@ -43,6 +43,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for fp32 data type */
@@ -70,7 +71,7 @@ template <typename T>
 using CLQuantizedMatMulActivationFixture = QuantizedMatMulValidationWithActivationFixture<CLTensor, CLAccessor, CLMatMul, GpuMatMulSettings, T>;
 
 /* The main act functions matmul (float) is expected to support */
-const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto ActivationFunctionsDataset = make("ActivationInfo",
 {
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -79,17 +80,17 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 });
 
 /* (Float datatype only) Larger activation functions dataset, used during some nightly tests. */
-const auto AllActivationsDataset = combine(datasets::ActivationFunctions(), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+const auto AllActivationsDataset = combine(datasets::ActivationFunctions(), make("AlphaBeta", { 0.5f, 1.f }));
 
 // Alpha beta values should be integer values
 // This is for testing purposes with quantized datatypes and is not a limitation of the kernel.
 // To properly remove this restriction, dst_qinfo should be auto-initialised with consideration for alpha beta values
 // The main act functions quantized matmul kernels are expected to support
-const auto ActivationFunctionsQuantizedDataset = concat(concat(concat(
-                                                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo()),
-                                                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 1.f))),
-                                                        framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 2.f, 1.f)));
+const auto ActivationFunctionsQuantizedDataset = concat(
+                                                        make("ActivationInfo", ActivationLayerInfo()),
+                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)),
+                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 1.f)),
+                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 2.f, 1.f)));
 
 TEST_SUITE(CL)
 TEST_SUITE(MatMul)
@@ -98,9 +99,9 @@ TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulActivationFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallMatMulDataset(),
-                                                                                                                        framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                        framework::dataset::make("TransposeB", { false, true }),
-                                                                                                                framework::dataset::make("DataType", DataType::F32),
+                                                                                                                        make("TransposeA", { false, true }),
+                                                                                                                        make("TransposeB", { false, true }),
+                                                                                                                make("DataType", DataType::F32),
                                                                                                         ActivationFunctionsDataset))
 {
     // Validate output
@@ -108,9 +109,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulActivationFixture<float>, framework::Da
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLMatMulActivationFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeMatMulDataset(),
-                                                                                                                    framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                    framework::dataset::make("TransposeB", { false, true }),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32),
+                                                                                                                    make("TransposeA", { false, true }),
+                                                                                                                    make("TransposeB", { false, true }),
+                                                                                                                    make("DataType", DataType::F32),
                                                                                                             ActivationFunctionsDataset))
 {
     // Validate output
@@ -118,9 +119,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMatMulActivationFixture<float>, framework::Da
 }
 
 FIXTURE_DATA_TEST_CASE(RunAllActivations, CLMatMulActivationAlphaBetaFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallerMatMulDataset(),
-                       framework::dataset::make("TransposeA", { false }),
-                       framework::dataset::make("TransposeB", { true }),
-                       framework::dataset::make("DataType", DataType::F32),
+                       make("TransposeA", { false }),
+                       make("TransposeB", { true }),
+                       make("DataType", DataType::F32),
                        AllActivationsDataset))
 {
     // Validate output
@@ -132,9 +133,9 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulActivationFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallMatMulDataset(),
-                                                                                                                       framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                       framework::dataset::make("TransposeB", { false, true }),
-                                                                                                               framework::dataset::make("DataType", DataType::F16),
+                                                                                                                       make("TransposeA", { false, true }),
+                                                                                                                       make("TransposeB", { false, true }),
+                                                                                                               make("DataType", DataType::F16),
                                                                                                        ActivationFunctionsDataset))
 {
     // Validate output
@@ -142,9 +143,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulActivationFixture<half>, framework::Dat
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLMatMulActivationFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeMatMulDataset(),
-                                                                                                                   framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                   framework::dataset::make("TransposeB", { false, true }),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                                                                   make("TransposeA", { false, true }),
+                                                                                                                   make("TransposeB", { false, true }),
+                                                                                                                   make("DataType", DataType::F16),
                                                                                                            ActivationFunctionsDataset))
 {
     // Validate output
@@ -158,28 +159,28 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLQuantizedMatMulFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallMatMulDataset(),
-                                                                                                                     framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                 framework::dataset::make("TransposeB", { false, true }),
-                                                                                                                 framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                     make("TransposeA", { false, true }),
+                                                                                                                 make("TransposeB", { false, true }),
+                                                                                                                 make("DataType", DataType::QASYMM8),
                                                                                                                  ActivationFunctionsQuantizedDataset,
-                                                                                                                 framework::dataset::make("NumberOfExtraRuns", { 0, 1 }),
-                                                                                                                 framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 50, 1) }),
-                                                                                                                 framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 30, -1) }),
-                                                                                                         framework::dataset::make("DstQInfo", { QuantizationInfo(1.f, 2) })))
+                                                                                                                 make("NumberOfExtraRuns", { 0, 1 }),
+                                                                                                                 make("LhsQInfo", { QuantizationInfo(1.f / 50, 1) }),
+                                                                                                                 make("RhsQInfo", { QuantizationInfo(1.f / 30, -1) }),
+                                                                                                         make("DstQInfo", { QuantizationInfo(1.f, 2) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLQuantizedMatMulFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeMatMulDataset(),
-        framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                     framework::dataset::make("TransposeB", { false, true }),
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8),
+        make("TransposeA", { false, true }),
+                                                                                                                     make("TransposeB", { false, true }),
+                                                                                                                     make("DataType", DataType::QASYMM8),
                                                                                                                      ActivationFunctionsQuantizedDataset,
-                                                                                                                     framework::dataset::make("NumberOfExtraRuns", { 0, 1 }),
-                                                                                                                     framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 100, 1) }),
-                                                                                                                     framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 200, -1) }),
-                                                                                                             framework::dataset::make("DstQInfo", { QuantizationInfo(1.f, 2) })))
+                                                                                                                     make("NumberOfExtraRuns", { 0, 1 }),
+                                                                                                                     make("LhsQInfo", { QuantizationInfo(1.f / 100, 1) }),
+                                                                                                                     make("RhsQInfo", { QuantizationInfo(1.f / 200, -1) }),
+                                                                                                             make("DstQInfo", { QuantizationInfo(1.f, 2) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
@@ -190,28 +191,28 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLQuantizedMatMulFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallMatMulDataset(),
-        framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                        framework::dataset::make("TransposeB", { false, true }),
-                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+        make("TransposeA", { false, true }),
+                                                                                                                        make("TransposeB", { false, true }),
+                                                                                                                        make("DataType", DataType::QASYMM8_SIGNED),
                                                                                                                         ActivationFunctionsQuantizedDataset,
-                                                                                                                        framework::dataset::make("NumberOfExtraRuns", { 0, 1 }),
-                                                                                                                        framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 50, 1) }),
-                                                                                                                framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 30, -1) }),
-                                                                                                        framework::dataset::make("DstQInfo", { QuantizationInfo(1.f, 2) })))
+                                                                                                                        make("NumberOfExtraRuns", { 0, 1 }),
+                                                                                                                        make("LhsQInfo", { QuantizationInfo(1.f / 50, 1) }),
+                                                                                                                make("RhsQInfo", { QuantizationInfo(1.f / 30, -1) }),
+                                                                                                        make("DstQInfo", { QuantizationInfo(1.f, 2) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLQuantizedMatMulFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeMatMulDataset(),
-                                                                                                                        framework::dataset::make("TransposeA", { false, true }),
-                                                                                                                    framework::dataset::make("TransposeB", { false, true }),
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                        make("TransposeA", { false, true }),
+                                                                                                                    make("TransposeB", { false, true }),
+                                                                                                                    make("DataType", DataType::QASYMM8_SIGNED),
                                                                                                                     ActivationFunctionsQuantizedDataset,
-                                                                                                                    framework::dataset::make("NumberOfExtraRuns", { 0, 1 }),
-                                                                                                                    framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 100, 1) }),
-                                                                                                                    framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 200, -1) }),
-                                                                                                            framework::dataset::make("DstQInfo", { QuantizationInfo(1.f, 50) })))
+                                                                                                                    make("NumberOfExtraRuns", { 0, 1 }),
+                                                                                                                    make("LhsQInfo", { QuantizationInfo(1.f / 100, 1) }),
+                                                                                                                    make("RhsQInfo", { QuantizationInfo(1.f / 200, -1) }),
+                                                                                                            make("DstQInfo", { QuantizationInfo(1.f, 50) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);

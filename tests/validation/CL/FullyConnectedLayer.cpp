@@ -80,9 +80,9 @@ const auto NoActivationFunctionsQuantizedDataset = make("ActivationInfo",
     ActivationLayerInfo()
 });
 
-const auto ActivationFunctionsQuantizedDataset = concat(concat(
+const auto ActivationFunctionsQuantizedDataset = concat(
                                                         make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)),
-                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f))),
+                                                        make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f)),
                                                         make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.75f, 0.25f)));
 } // namespace
 

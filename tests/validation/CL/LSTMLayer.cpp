@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2024 Arm Limited.
+ * Copyright (c) 2018-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,13 +37,13 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> tolerance_f32(0.001f);
 RelativeTolerance<half>  tolerance_f16(half(0.1));
 } // namespace
 
-using framework::dataset::make;
 
 TEST_SUITE(CL)
 TEST_SUITE(LSTMLayer)

@@ -45,30 +45,33 @@ namespace validation
 {
 namespace
 {
-auto shapes_1d_dft = framework::dataset::make("TensorShape", { TensorShape(33U),
-                                                               TensorShape(8U),
-                                                               TensorShape(23U, 7U),
-                                                               TensorShape(16U, 8U, 4U)
-                                                             });
+using framework::dataset::make;
+using framework::dataset::zip;
 
-auto shapes_2d_dft = framework::dataset::make("TensorShape", { TensorShape(33U, 14U),
-                                                               TensorShape(8U, 9U),
-                                                               TensorShape(23U, 7U, 3U),
-                                                               TensorShape(16U, 8U, 4U)
-                                                             });
+auto shapes_1d_dft = make("TensorShape", { TensorShape(33U),
+                                           TensorShape(8U),
+                                           TensorShape(23U, 7U),
+                                           TensorShape(16U, 8U, 4U)
+                                         });
 
-auto conv_dataset_dft = framework::dataset::zip(framework::dataset::zip(framework::dataset::make("InputShape", { TensorShape(8U, 7U, 3U, 2U),
-                                                                                                                 TensorShape(18U, 22U, 4U),
-                                                                                                                 TensorShape(32U, 48U, 8U)
-                                                                                                               }),
-                                                                        framework::dataset::make("WeightShape", { TensorShape(3U, 3U, 3U, 6U),
-                                                                                                                  TensorShape(5U, 5U, 4U, 3U),
-                                                                                                                  TensorShape(9U, 9U, 8U, 3U)
-                                                                                                                })),
-                                                framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 1, 1),
-                                                                                       PadStrideInfo(1, 1, 2, 2),
-                                                                                       PadStrideInfo(1, 1, 4, 4)
-                                                                                     }));
+auto shapes_2d_dft = make("TensorShape", { TensorShape(33U, 14U),
+                                           TensorShape(8U, 9U),
+                                           TensorShape(23U, 7U, 3U),
+                                           TensorShape(16U, 8U, 4U)
+                                         });
+
+auto conv_dataset_dft = zip(zip(make("InputShape", { TensorShape(8U, 7U, 3U, 2U),
+                                                     TensorShape(18U, 22U, 4U),
+                                                     TensorShape(32U, 48U, 8U)
+                                                   }),
+                             make("WeightShape", { TensorShape(3U, 3U, 3U, 6U),
+                                                   TensorShape(5U, 5U, 4U, 3U),
+                                                   TensorShape(9U, 9U, 8U, 3U)
+                                                 })),
+                       make("ConvInfo", { PadStrideInfo(1, 1, 1, 1),
+                                          PadStrideInfo(1, 1, 2, 2),
+                                          PadStrideInfo(1, 1, 4, 4)
+                                        }));
 } // namespace
 TEST_SUITE(CPP)
 TEST_SUITE(DFT)

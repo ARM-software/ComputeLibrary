@@ -40,7 +40,9 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::combine;
 using framework::dataset::make;
+using framework::dataset::zip;
 namespace
 {
 template <typename U, typename T>
@@ -56,24 +58,24 @@ TEST_SUITE(TopKV)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-        framework::dataset::make("PredictionsInfo", { TensorInfo(TensorShape(20, 10), 1, DataType::F32),
+        make("PredictionsInfo", { TensorInfo(TensorShape(20, 10), 1, DataType::F32),
                                                 TensorInfo(TensorShape(10, 20), 1, DataType::F16),  // Mismatching batch_size
                                                 TensorInfo(TensorShape(20, 10), 1, DataType::S8), // Unsupported data type
                                                 TensorInfo(TensorShape(10, 10, 10), 1, DataType::F32), // Wrong predictions dimensions
                                                 TensorInfo(TensorShape(20, 10), 1, DataType::F32)}), // Wrong output dimension
-        framework::dataset::make("TargetsInfo",{ TensorInfo(TensorShape(10), 1, DataType::U32),
+        make("TargetsInfo",{ TensorInfo(TensorShape(10), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10), 1, DataType::U32)})),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(10), 1, DataType::U8),
+        make("OutputInfo",{ TensorInfo(TensorShape(10), 1, DataType::U8),
                                                 TensorInfo(TensorShape(10), 1, DataType::U8),
                                                 TensorInfo(TensorShape(10), 1, DataType::U8),
                                                 TensorInfo(TensorShape(10), 1, DataType::U8),
                                                 TensorInfo(TensorShape(1), 1, DataType::U8)})),
 
-        framework::dataset::make("k",{ 0, 1, 2, 3, 4 })),
-        framework::dataset::make("Expected", {true, false, false, false, false })),
+        make("k",{ 0, 1, 2, 3, 4 })),
+        make("Expected", {true, false, false, false, false })),
         prediction_info, targets_info, output_info, k, expected)
 {
     const Status status = CPPTopKV::validate(&prediction_info.clone()->set_is_resizable(false),&targets_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), k);

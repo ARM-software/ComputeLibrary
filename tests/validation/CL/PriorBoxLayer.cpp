@@ -42,6 +42,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
@@ -55,19 +56,19 @@ using CLPriorBoxLayerFixture = PriorBoxLayerValidationFixture<CLTensor, CLAccess
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input1Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input1Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),    // Window shrink
                                                      }),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
+               make("Input2Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(1200U, 2U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(1200U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(1000U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("PriorBoxInfo",{ PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>()),
+               make("PriorBoxInfo",{ PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>()),
                                                          PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>()),
                                                      }),
-               framework::dataset::make("Expected", { true, false})),
+               make("Expected", { true, false})),
                input1_info, input2_info, output_info, info, expected)
 {
     bool has_error = bool(CLPriorBoxLayer::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), info));
@@ -79,15 +80,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallPriorBoxLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                   make("DataType", DataType::F32),
+                                                                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargePriorBoxLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32),
-                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                 make("DataType", DataType::F32),
+                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0);

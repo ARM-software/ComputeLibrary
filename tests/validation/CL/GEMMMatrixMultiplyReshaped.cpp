@@ -45,6 +45,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::opencl::kernels;
 
@@ -89,89 +90,89 @@ RelativeTolerance<float> rel_tolerance_f16(0.001f);
 constexpr float          abs_tolerance_f16(0.01f);
 
 /** M values to test */
-const auto m_values = framework::dataset::make("M", 17);
+const auto m_values = make("M", 17);
 
 /** M_W values to test */
-const auto m_w_values = framework::dataset::make("M_W", 5);
+const auto m_w_values = make("M_W", 5);
 
 /** M_H values to test */
-const auto m_h_values = framework::dataset::make("M_H", 7);
+const auto m_h_values = make("M_H", 7);
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", 21);
+const auto n_values = make("N", 21);
 
 /** K values to test */
-const auto k_values = framework::dataset::make("K", 13);
+const auto k_values = make("K", 13);
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", 2, 3);
+const auto b_values = make("batch_size", 2, 3);
 
 /** Activation values to test */
-const auto act_values = framework::dataset::make("Activation",
+const auto act_values = make("Activation",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU),
 });
 
 /** Alpha values to test - Precommit */
-const auto a_values_precommit = framework::dataset::make("alpha", {-0.75f} );
+const auto a_values_precommit = make("alpha", {-0.75f} );
 
 /** Beta values to test - Precommit */
-const auto beta_values_precommit = framework::dataset::make("beta", {-0.35f} );
+const auto beta_values_precommit = make("beta", {-0.35f} );
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", { 4 });
+const auto m0_values_precommit = make("M0", { 4 });
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
+const auto n0_values_precommit = make("N0", { 4 });
 
 /** K0 values to test - Precommit */
-const auto k0_values_precommit = framework::dataset::make("K0", { 4 });
+const auto k0_values_precommit = make("K0", { 4 });
 
 /** V0 values to test - Precommit */
-const auto v0_values_precommit = framework::dataset::make("V0", 1, 3);
+const auto v0_values_precommit = make("V0", 1, 3);
 
 /** H0 values to test - Precommit */
-const auto h0_values_precommit = framework::dataset::make("H0", 1, 3);
+const auto h0_values_precommit = make("H0", 1, 3);
 
 /** Alpha values to test - Nightly */
-const auto a_values_nightly = framework::dataset::make("alpha", {1.0f} );
+const auto a_values_nightly = make("alpha", {1.0f} );
 
 /** Beta values to test - Nightly */
-const auto beta_values_nightly = framework::dataset::make("beta", {1.0f} );
+const auto beta_values_nightly = make("beta", {1.0f} );
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", { 8 });
+const auto m0_values_nightly = make("M0", { 8 });
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 8 });
+const auto n0_values_nightly = make("N0", { 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 4 });
+const auto k0_values_nightly = make("K0", { 4 });
 
 /** N0 values to test with export to OpenCL image object - Nightly */
-const auto n0_export_to_cl_image_values_nightly = framework::dataset::make("N0", { 4, 8, 16 });
+const auto n0_export_to_cl_image_values_nightly = make("N0", { 4, 8, 16 });
 
 /** K0 values to test with export to OpenCL image object - Nightly */
-const auto k0_export_to_cl_image_values_nightly = framework::dataset::make("K0", { 4, 8, 16 });
+const auto k0_export_to_cl_image_values_nightly = make("K0", { 4, 8, 16 });
 
 /** V0 values to test - Nightly */
-const auto v0_values_nightly = framework::dataset::make("V0", 1, 3);
+const auto v0_values_nightly = make("V0", 1, 3);
 
 /** H0 values to test - Nightly */
-const auto h0_values_nightly = framework::dataset::make("H0", 1, 3);
+const auto h0_values_nightly = make("H0", 1, 3);
 
 /** Interleave values to test with LHS matrix */
-const auto i_values_lhs = framework::dataset::make("interleave_lhs", { true, false });
+const auto i_values_lhs = make("interleave_lhs", { true, false });
 
 /** Interleave values to test with RHS matrix */
-const auto i_values_rhs = framework::dataset::make("interleave_rhs", { true, false });
+const auto i_values_rhs = make("interleave_rhs", { true, false });
 
 /** Broadcast bias from vector to matrix */
-const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { false, true } );
+const auto broadcast_bias_values = make("broadcast_bias", { false, true } );
 
 /** LHS transposed values */
-const auto lhs_transpose_values = framework::dataset::make("lhs_transpose", { false, true } );
+const auto lhs_transpose_values = make("lhs_transpose", { false, true } );
 
 } // namespace
 
@@ -180,7 +181,7 @@ TEST_SUITE(GEMMMatrixMultiplyReshaped)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input0Info", { TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F32),      // OK
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input0Info", { TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F32),      // OK
                                                         TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK
                                                         TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::QASYMM8),  // Data type not supported
                                                         TensorInfo(TensorShape(10U, 5U, 2U), 1, DataType::F32),      // Incorrect dimension bias
@@ -190,7 +191,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                         TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK, RHS 4,4,2
 
                                                       }),
-               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
+               make("Input1Info",{ TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
@@ -200,7 +201,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                        TensorInfo(TensorShape(128U, 3U, 2U), 1, DataType::F16),
 
                       }),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(21U), 1, DataType::F32),
+               make("Input2Info", { TensorInfo(TensorShape(21U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(21U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(21U), 1, DataType::QASYMM8),
                                                         TensorInfo(TensorShape(21U), 1, DataType::F32),
@@ -210,7 +211,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                         TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
 
                                                       }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
@@ -220,7 +221,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
 
                            }),
-               framework::dataset::make("LHSMInfo",{
+               make("LHSMInfo",{
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
@@ -231,7 +232,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
 
                                 }),
-               framework::dataset::make("RHSMInfo",{
+               make("RHSMInfo",{
                                                           GEMMRHSMatrixInfo(4,4,1,true,true,false),
                                                           GEMMRHSMatrixInfo(4,4,1,true,true,false),
                                                           GEMMRHSMatrixInfo(4,4,1,true,true,false),
@@ -245,7 +246,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                            }),
 
 
-               framework::dataset::make("GEMMInfo",{
+               make("GEMMInfo",{
                                                             GEMMKernelInfo( 17 /**<M Number of LHS rows*/,
                                                                             21 /**<N Number of RHS columns*/,
                                                                             13 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
@@ -325,7 +326,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                                      0  /**< Offset to be added to each element of the matrix A */,
                                                                      0 /**< Offset to be added to each element of the matrix B */),
                                                     }),
-               framework::dataset::make("Expected", { true, true, false, false, false, true, true,true})),
+               make("Expected", { true, true, false, false, false, true, true,true})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
@@ -352,8 +353,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    broadcast_bias_values,
@@ -384,8 +385,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    broadcast_bias_values,
@@ -417,8 +418,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    lhs_transpose_values,
@@ -449,8 +450,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    lhs_transpose_values,
@@ -469,28 +470,28 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
 }
 
 TEST_SUITE(ExportToCLImage)
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // Incorrect k0
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // Incorrect n0
 
                                                       }),
-               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
+               make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(512U, 8U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(128U, 32U, 2U), 1, DataType::F32),
 
                       }),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F32),
+               make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
 
                                                       }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
@@ -498,7 +499,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
 
                            }),
-               framework::dataset::make("LHSMInfo",{
+               make("LHSMInfo",{
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 8, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
@@ -506,14 +507,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, false),
 
                                 }),
-               framework::dataset::make("RHSMInfo",{
+               make("RHSMInfo",{
                                                           GEMMRHSMatrixInfo(4, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 8, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(8, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 2, 1, true, false, true),
                                                           GEMMRHSMatrixInfo(2, 4, 1, true, false, true),
                            }),
-               framework::dataset::make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+               make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
                                                                     64 /**<N Number of RHS columns*/,
                                                                     64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
                                                              false /**< reinterpret the input as 3D */,
@@ -585,7 +586,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                              0  /**< Offset to be added to each element of the matrix A */,
                                                              0 /**< Offset to be added to each element of the matrix B */)
                                                     }),
-               framework::dataset::make("Expected", { true,
+               make("Expected", { true,
                                                       true,
                                                       true,
                                                       false,
@@ -613,8 +614,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    broadcast_bias_values,
@@ -646,8 +647,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    broadcast_bias_values,
@@ -679,8 +680,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    lhs_transpose_values,
@@ -711,8 +712,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F32),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    lhs_transpose_values,
@@ -747,8 +748,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    broadcast_bias_values,
@@ -779,8 +780,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    broadcast_bias_values,
@@ -812,8 +813,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    lhs_transpose_values,
@@ -844,8 +845,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    lhs_transpose_values,
@@ -864,28 +865,28 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
 }
 
 TEST_SUITE(ExportToCLImage)
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // Incorrect k0
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // Incorrect n0
 
                                                       }),
-               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
+               make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(512U, 8U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(128U, 32U, 2U), 1, DataType::F16),
 
                       }),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F16),
+               make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
 
                                                       }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+               make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
@@ -893,7 +894,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
 
                            }),
-               framework::dataset::make("LHSMInfo",{
+               make("LHSMInfo",{
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 8, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
@@ -901,14 +902,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, false),
 
                                 }),
-               framework::dataset::make("RHSMInfo",{
+               make("RHSMInfo",{
                                                           GEMMRHSMatrixInfo(4, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 8, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(8, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 2, 1, true, false, true),
                                                           GEMMRHSMatrixInfo(2, 4, 1, true, false, true),
                            }),
-               framework::dataset::make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+               make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
                                                                     64 /**<N Number of RHS columns*/,
                                                                     64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
                                                              false /**< reinterpret the input as 3D */,
@@ -980,7 +981,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::ma
                                                              0  /**< Offset to be added to each element of the matrix A */,
                                                              0 /**< Offset to be added to each element of the matrix B */)
                                                     }),
-               framework::dataset::make("Expected", { true,
+               make("Expected", { true,
                                                       true,
                                                       true,
                                                       false,
@@ -1008,8 +1009,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    broadcast_bias_values,
@@ -1041,8 +1042,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    broadcast_bias_values,
@@ -1074,8 +1075,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    lhs_transpose_values,
@@ -1106,8 +1107,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    lhs_transpose_values,
@@ -1142,8 +1143,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedMixedPrecisionFixtu
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    broadcast_bias_values,
@@ -1174,8 +1175,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedMixedPrecisionFixtu
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    broadcast_bias_values,
@@ -1207,8 +1208,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DMixedPrecisionF
                                                                    h0_values_precommit,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_precommit,
                                                                    beta_values_precommit,
                                                                    lhs_transpose_values,
@@ -1239,8 +1240,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DMixedPrecisionF
                                                                    h0_values_nightly,
                                                                    i_values_lhs,
                                                                    i_values_rhs,
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false),
-                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
                                                                    a_values_nightly,
                                                                    beta_values_nightly,
                                                                    lhs_transpose_values,

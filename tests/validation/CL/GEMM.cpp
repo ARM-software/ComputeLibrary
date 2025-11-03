@@ -53,7 +53,7 @@ RelativeTolerance<half_float::half> tolerance_f16(half(0.2)); /**< Tolerance val
 constexpr float                     tolerance_num = 0.02f;    /**< Tolerance number */
 
 /** CNN data types */
-const auto CNNDataTypes = framework::dataset::make("DataType",
+const auto CNNDataTypes = make("DataType",
 {
     DataType::F16,
     DataType::F32,
@@ -65,16 +65,16 @@ TEST_SUITE(GEMM)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(framework::dataset::make("LhsInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::S32), // Unsupported data type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("LhsInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::S32), // Unsupported data type
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("RhsInfo",{ TensorInfo(TensorShape(8U, 27U), 1, DataType::S32),
+               make("RhsInfo",{ TensorInfo(TensorShape(8U, 27U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(8U, 27U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(8U, 13U), 1, DataType::S32),
+               make("OutputInfo",{ TensorInfo(TensorShape(8U, 13U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(8U, 13U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { false, true })),
+               make("Expected", { false, true })),
                lhs_info, rhs_info, output_info, expected)
 {
     constexpr float alpha = 1.0;
@@ -122,15 +122,15 @@ using CLBatchedMatMulFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEM
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
-                                                                                                         framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                 framework::dataset::make("DataType", DataType::F16)))
+                                                                                                         make("ReshapeWeights", { true, false }),
+                                                                                                 make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
-                                                                                                       framework::dataset::make("ReshapeWeights", { true }),
-                                                                                               framework::dataset::make("DataType", DataType::F16)))
+                                                                                                       make("ReshapeWeights", { true }),
+                                                                                               make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -139,15 +139,15 @@ TEST_SUITE_END()
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
-                                                                                                          framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                  framework::dataset::make("DataType", DataType::F32)))
+                                                                                                          make("ReshapeWeights", { true, false }),
+                                                                                                  make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
-                                                                                                        framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                framework::dataset::make("DataType", DataType::F32)))
+                                                                                                        make("ReshapeWeights", { true, false }),
+                                                                                                make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
@@ -159,15 +159,15 @@ TEST_SUITE(INPUT_OUTPUT_3D)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMInputOutput3DFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMInputOutput3DDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                               framework::dataset::make("DataType", DataType::F32)))
+                                                                                                                       make("ReshapeWeights", { true, false }),
+                                                                                                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMInputOutput3DFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMInputOutput3DDataset(),
-                                                                                                                     framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                             framework::dataset::make("DataType", DataType::F32)))
+                                                                                                                     make("ReshapeWeights", { true, false }),
+                                                                                                             make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
@@ -176,15 +176,15 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMInputOutput3DFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMInputOutput3DDataset(),
-                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                              framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                      make("ReshapeWeights", { true, false }),
+                                                                                                              make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMInputOutput3DFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMInputOutput3DDataset(),
-                                                                                                                    framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                            framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                    make("ReshapeWeights", { true, false }),
+                                                                                                            make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -198,15 +198,15 @@ TEST_SUITE(OUTPUT_3D)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMOutput3DFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMOutput3DDataset(),
-                                                                                                                  framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                          framework::dataset::make("DataType", DataType::F32)))
+                                                                                                                  make("ReshapeWeights", { true, false }),
+                                                                                                          make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMOutput3DFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMOutput3DDataset(),
-                                                                                                                framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                        framework::dataset::make("DataType", DataType::F32)))
+                                                                                                                make("ReshapeWeights", { true, false }),
+                                                                                                        make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
@@ -215,15 +215,15 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMOutput3DFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMOutput3DDataset(),
-                                                                                                                 framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                         framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                 make("ReshapeWeights", { true, false }),
+                                                                                                         make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMOutput3DFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMOutput3DDataset(),
-                                                                                                               framework::dataset::make("ReshapeWeights", { true, false }),
-                                                                                                       framework::dataset::make("DataType", DataType::F16)))
+                                                                                                               make("ReshapeWeights", { true, false }),
+                                                                                                       make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -236,8 +236,8 @@ TEST_SUITE(BATCHED_MATMUL)
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchedMatMulDataset(),
-                                                                                                                   framework::dataset::make("ReshapeWeights", { false }),
-                                                                                                           framework::dataset::make("DataType", DataType::F32)))
+                                                                                                                   make("ReshapeWeights", { false }),
+                                                                                                           make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
@@ -246,8 +246,8 @@ TEST_SUITE_END()
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchedMatMulDataset(),
-                                                                                                                  framework::dataset::make("ReshapeWeights", { false }),
-                                                                                                          framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                  make("ReshapeWeights", { false }),
+                                                                                                          make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);

@@ -37,6 +37,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(Im2Col)
 
@@ -152,16 +153,16 @@ TEST_SUITE(NHWC)
 FIXTURE_DATA_TEST_CASE(W3x3,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape",
+                       combine(make("InputShape",
 {
     TensorShape(5U, 7U, 2U, 2U), TensorShape(4U, 6U, 3U, 2U), TensorShape(5U, 3U, 1U, 2U),
 }),
-framework::dataset::make("DataType", DataType::F32),
-framework::dataset::make("Kernel", Size2D(3, 3)),
-framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) }),
-framework::dataset::make("QInfo", QuantizationInfo()),
-framework::dataset::make("DataLayout", DataLayout::NHWC),
-framework::dataset::make("Groups", 1)))
+make("DataType", DataType::F32),
+make("Kernel", Size2D(3, 3)),
+make("PadStride", { PadStrideInfo(1, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) }),
+make("QInfo", QuantizationInfo()),
+make("DataLayout", DataLayout::NHWC),
+make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -181,16 +182,16 @@ framework::dataset::make("Groups", 1)))
 FIXTURE_DATA_TEST_CASE(W9x9,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape",
+                       combine(make("InputShape",
 {
     TensorShape(13U, 15U, 2U, 2U), TensorShape(15U, 12U, 3U, 2U), TensorShape(13U, 22U, 1U, 2U),
 }),
-framework::dataset::make("DataType", DataType::F32),
-framework::dataset::make("Kernel", Size2D(9, 9)),
-framework::dataset::make("PadStride", { PadStrideInfo(2, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) }),
-framework::dataset::make("QInfo", QuantizationInfo()),
-framework::dataset::make("DataLayout", DataLayout::NHWC),
-framework::dataset::make("Groups", 1)))
+make("DataType", DataType::F32),
+make("Kernel", Size2D(9, 9)),
+make("PadStride", { PadStrideInfo(2, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) }),
+make("QInfo", QuantizationInfo()),
+make("DataLayout", DataLayout::NHWC),
+make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -210,16 +211,16 @@ framework::dataset::make("Groups", 1)))
 FIXTURE_DATA_TEST_CASE(Generic,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape",
+                       combine(make("InputShape",
 {
     TensorShape(13U, 15U, 4U, 2U), TensorShape(15U, 12U, 7U, 1U), TensorShape(5U, 3U, 1U, 1U),
 }),
-framework::dataset::make("DataType", DataType::F32),
-framework::dataset::make("Kernel", Size2D(5, 3)),
-framework::dataset::make("PadStride", { PadStrideInfo(2, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) }),
-framework::dataset::make("QInfo", QuantizationInfo()),
-framework::dataset::make("DataLayout", DataLayout::NHWC),
-framework::dataset::make("Groups", 1)))
+make("DataType", DataType::F32),
+make("Kernel", Size2D(5, 3)),
+make("PadStride", { PadStrideInfo(2, 2, 1, 2), PadStrideInfo(1, 1, 0, 0) }),
+make("QInfo", QuantizationInfo()),
+make("DataLayout", DataLayout::NHWC),
+make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -242,13 +243,13 @@ TEST_SUITE(NCHW)
 FIXTURE_DATA_TEST_CASE(W1x1_Stride1_NoPad,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", { TensorShape(4U, 4U, 3U, 2U), TensorShape(5U, 4U, 3U, 2U), TensorShape(3U, 4U, 3U, 2U) }),
-                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                               framework::dataset::make("Kernel", Size2D(1, 1)),
-                                                       framework::dataset::make("PadStride", PadStrideInfo(1, 1, 0, 0)),
-                                               framework::dataset::make("QInfo", QuantizationInfo()),
-                                       framework::dataset::make("DataLayout", DataLayout::NCHW),
-                               framework::dataset::make("Groups", 1)))
+                       combine(make("InputShape", { TensorShape(4U, 4U, 3U, 2U), TensorShape(5U, 4U, 3U, 2U), TensorShape(3U, 4U, 3U, 2U) }),
+                                                                   make("DataType", DataType::F32),
+                                                               make("Kernel", Size2D(1, 1)),
+                                                       make("PadStride", PadStrideInfo(1, 1, 0, 0)),
+                                               make("QInfo", QuantizationInfo()),
+                                       make("DataLayout", DataLayout::NCHW),
+                               make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -265,13 +266,13 @@ FIXTURE_DATA_TEST_CASE(W1x1_Stride1_NoPad,
 FIXTURE_DATA_TEST_CASE(W3x3,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(4U, 4U, 3U, 2U)),
-                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                               framework::dataset::make("Kernel", Size2D(3, 3)),
-                                                       framework::dataset::make("PadStride", PadStrideInfo(1, 2, 1, 2)),
-                                               framework::dataset::make("QInfo", QuantizationInfo()),
-                                       framework::dataset::make("DataLayout", DataLayout::NCHW),
-                               framework::dataset::make("Groups", { 1, 3 })))
+                       combine(make("InputShape", TensorShape(4U, 4U, 3U, 2U)),
+                                                                   make("DataType", DataType::F32),
+                                                               make("Kernel", Size2D(3, 3)),
+                                                       make("PadStride", PadStrideInfo(1, 2, 1, 2)),
+                                               make("QInfo", QuantizationInfo()),
+                                       make("DataLayout", DataLayout::NCHW),
+                               make("Groups", { 1, 3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -288,13 +289,13 @@ FIXTURE_DATA_TEST_CASE(W3x3,
 FIXTURE_DATA_TEST_CASE(W5x5,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(7U, 4U, 3U, 2U)),
-                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                               framework::dataset::make("Kernel", Size2D(5, 5)),
-                                                       framework::dataset::make("PadStride", PadStrideInfo(2, 1, 2, 1)),
-                                               framework::dataset::make("QInfo", QuantizationInfo()),
-                                       framework::dataset::make("DataLayout", DataLayout::NCHW),
-                               framework::dataset::make("Groups", { 1, 3 })))
+                       combine(make("InputShape", TensorShape(7U, 4U, 3U, 2U)),
+                                                                   make("DataType", DataType::F32),
+                                                               make("Kernel", Size2D(5, 5)),
+                                                       make("PadStride", PadStrideInfo(2, 1, 2, 1)),
+                                               make("QInfo", QuantizationInfo()),
+                                       make("DataLayout", DataLayout::NCHW),
+                               make("Groups", { 1, 3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -313,13 +314,13 @@ FIXTURE_DATA_TEST_CASE(W5x5,
 FIXTURE_DATA_TEST_CASE(W11x11_NoPad,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", { TensorShape(11U, 11U, 2U, 2U), TensorShape(14U, 13U, 1U, 2U) }),
-                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                               framework::dataset::make("Kernel", Size2D(11, 11)),
-                                                       framework::dataset::make("PadStride", PadStrideInfo(1, 1, 0, 0)),
-                                               framework::dataset::make("QInfo", QuantizationInfo()),
-                                       framework::dataset::make("DataLayout", DataLayout::NCHW),
-                               framework::dataset::make("Groups", 1)))
+                       combine(make("InputShape", { TensorShape(11U, 11U, 2U, 2U), TensorShape(14U, 13U, 1U, 2U) }),
+                                                                   make("DataType", DataType::F32),
+                                                               make("Kernel", Size2D(11, 11)),
+                                                       make("PadStride", PadStrideInfo(1, 1, 0, 0)),
+                                               make("QInfo", QuantizationInfo()),
+                                       make("DataLayout", DataLayout::NCHW),
+                               make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -336,13 +337,13 @@ FIXTURE_DATA_TEST_CASE(W11x11_NoPad,
 FIXTURE_DATA_TEST_CASE(GenericZeroPad,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
-                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                               framework::dataset::make("Kernel", Size2D(3, 2)),
-                                                       framework::dataset::make("PadStride", PadStrideInfo(2, 1, 0, 0)),
-                                               framework::dataset::make("QInfo", QuantizationInfo()),
-                                       framework::dataset::make("DataLayout", DataLayout::NCHW),
-                               framework::dataset::make("Groups", { 1, 2 })))
+                       combine(make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   make("DataType", DataType::F32),
+                                                               make("Kernel", Size2D(3, 2)),
+                                                       make("PadStride", PadStrideInfo(2, 1, 0, 0)),
+                                               make("QInfo", QuantizationInfo()),
+                                       make("DataLayout", DataLayout::NCHW),
+                               make("Groups", { 1, 2 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -361,13 +362,13 @@ TEST_SUITE_END() // NCHW
 FIXTURE_DATA_TEST_CASE(Generic,
                        ClIm2ColFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(13U, 11U, 5U, 2U)),
-                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                               framework::dataset::make("Kernel", { Size2D(3, 2), Size2D(3, 5) }),
-                                                       framework::dataset::make("PadStride", PadStrideInfo(2, 1, 2, 1)),
-                                               framework::dataset::make("QInfo", QuantizationInfo()),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                               framework::dataset::make("Groups", 1)))
+                       combine(make("InputShape", TensorShape(13U, 11U, 5U, 2U)),
+                                                                   make("DataType", DataType::F32),
+                                                               make("Kernel", { Size2D(3, 2), Size2D(3, 5) }),
+                                                       make("PadStride", PadStrideInfo(2, 1, 2, 1)),
+                                               make("QInfo", QuantizationInfo()),
+                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                               make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -386,13 +387,13 @@ FIXTURE_DATA_TEST_CASE(Generic,
 FIXTURE_DATA_TEST_CASE(Quantized,
                        ClIm2ColFixture<uint8_t>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(13U, 11U, 11U, 2U)),
-                                                                   framework::dataset::make("DataType", DataType::QASYMM8),
-                                                               framework::dataset::make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) }),
-                                                       framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) }),
-                                               framework::dataset::make("QInfo", QuantizationInfo(0.5f, 10)),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                               framework::dataset::make("Groups", 1)))
+                       combine(make("InputShape", TensorShape(13U, 11U, 11U, 2U)),
+                                                                   make("DataType", DataType::QASYMM8),
+                                                               make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) }),
+                                                       make("PadStride", { PadStrideInfo(1, 2, 1, 1) }),
+                                               make("QInfo", QuantizationInfo(0.5f, 10)),
+                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                               make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -411,13 +412,13 @@ FIXTURE_DATA_TEST_CASE(Quantized,
 FIXTURE_DATA_TEST_CASE(FP16,
                        ClIm2ColFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("InputShape", TensorShape(13U, 11U, 11U, 2U)),
-                                                                   framework::dataset::make("DataType", DataType::F16),
-                                                               framework::dataset::make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) }),
-                                                       framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) }),
-                                               framework::dataset::make("QInfo", QuantizationInfo()),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                               framework::dataset::make("Groups", 1)))
+                       combine(make("InputShape", TensorShape(13U, 11U, 11U, 2U)),
+                                                                   make("DataType", DataType::F16),
+                                                               make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) }),
+                                                       make("PadStride", { PadStrideInfo(1, 2, 1, 1) }),
+                                               make("QInfo", QuantizationInfo()),
+                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                               make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for fp32 data type */
@@ -49,7 +50,6 @@ RelativeTolerance<int32_t> tolerance_int(0); /**< Tolerance value for comparing 
 template <typename T>
 using CLScatterLayerFixture = ScatterValidationFixture<CLTensor, CLAccessor, CLScatter, T>;
 
-using framework::dataset::make;
 
 TEST_SUITE(CL)
 TEST_SUITE(Scatter)
