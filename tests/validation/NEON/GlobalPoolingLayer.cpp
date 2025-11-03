@@ -41,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 /** Input data set for float data types */
@@ -58,9 +60,9 @@ using NEGlobalPoolingLayerFixture = GlobalPoolingLayerValidationFixture<Tensor, 
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, NEGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling, NEGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, make("DataType",
                                                                                                                   DataType::F32),
-                                                                                                                  framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                                  make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);

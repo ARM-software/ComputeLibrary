@@ -41,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 constexpr AbsoluteTolerance<float> absolute_tolerance_float(0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
@@ -70,8 +72,8 @@ using NEDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<Tens
  * */
 FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, NEDynamicTensorType3SingleFunction, framework::DatasetMode::ALL,
                        framework::dataset::zip(
-                                               framework::dataset::make("Level0Shape", { TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U) }),
-                                               framework::dataset::make("Level1Shape", { TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U) })
+                                               make("Level0Shape", { TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U) }),
+                                               make("Level1Shape", { TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U) })
                                                ))
 {
     if(input_l0.total_size() < input_l1.total_size())
@@ -96,11 +98,11 @@ using NEDynamicTensorType3ComplexFunction = DynamicTensorType3ComplexFunction<Te
 FIXTURE_DATA_TEST_CASE(DynamicTensorType3Complex, NEDynamicTensorType3ComplexFunction, framework::DatasetMode::ALL,
                        framework::dataset::zip(
                                                                                                    framework::dataset::zip(framework::dataset::zip(framework::dataset::zip(
-                                                                                                   framework::dataset::make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }),
-                                                                                                   framework::dataset::make("WeightsManager", { TensorShape(3U, 3U, 6U, 3U) })),
-                                                                                               framework::dataset::make("BiasShape", { TensorShape(3U) })),
-                                                                       framework::dataset::make("OutputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 3U), TensorShape(128U, 128U, 3U) } })),
-                                                                                                   framework::dataset::make("PadStrideInfo", { PadStrideInfo(1U, 1U, 1U, 1U) })
+                                                                                                   make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }),
+                                                                                                   make("WeightsManager", { TensorShape(3U, 3U, 6U, 3U) })),
+                                                                                               make("BiasShape", { TensorShape(3U) })),
+                                                                       make("OutputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 3U), TensorShape(128U, 128U, 3U) } })),
+                                                                                                   make("PadStrideInfo", { PadStrideInfo(1U, 1U, 1U, 1U) })
                                                ))
 {
     for(unsigned int i = 0; i < num_iterations; ++i)
@@ -116,7 +118,7 @@ using NEDynamicTensorType2PipelineFunction = DynamicTensorType2PipelineFunction<
  *  Create and manage the tensors needed to run a pipeline. After the function is executed, resize the input size and rerun.
  */
 FIXTURE_DATA_TEST_CASE(DynamicTensorType2Pipeline, NEDynamicTensorType2PipelineFunction, framework::DatasetMode::ALL,
-                       framework::dataset::make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }))
+                       make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }))
 {
 }
 TEST_SUITE_END() // DynamicTensor

@@ -40,24 +40,26 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
 AbsoluteTolerance<int>   tolerance_zero_s32(0); // Tolerance for S32 division
 
 /** Input data sets **/
-const auto ElementwiseDivisionS32Dataset = combine(framework::dataset::make("DataType", DataType::S32),
-                                                           framework::dataset::make("DataType", DataType::S32),
-                                                   framework::dataset::make("DataType", DataType::S32));
+const auto ElementwiseDivisionS32Dataset = combine(make("DataType", DataType::S32),
+                                                           make("DataType", DataType::S32),
+                                                   make("DataType", DataType::S32));
 #ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half> tolerance_fp16(static_cast<half>(0.01f));
-const auto              ElementwiseDivisionFP16Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16),
-                                                                 framework::dataset::make("DataType", DataType::F16));
+const auto              ElementwiseDivisionFP16Dataset = combine(make("DataType", DataType::F16), make("DataType", DataType::F16),
+                                                                 make("DataType", DataType::F16));
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-const auto ElementwiseDivisionFP32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32),
-                                                    framework::dataset::make("DataType", DataType::F32));
-const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
-const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
+const auto ElementwiseDivisionFP32Dataset = combine(make("DataType", DataType::F32), make("DataType", DataType::F32),
+                                                    make("DataType", DataType::F32));
+const auto InPlaceDataSet    = make("InPlace", { false, true });
+const auto OutOfPlaceDataSet = make("InPlace", { false });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -69,25 +71,25 @@ using NEElementwiseDivisionFixture = ArithmeticDivisionValidationFixture<Tensor,
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+               make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                       }),
-               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+               make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { true, true, true, false, false})
+               make("Expected", { true, true, true, false, false})
                ),
                input1_info, input2_info, output_info, expected)
 {

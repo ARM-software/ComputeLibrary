@@ -35,17 +35,18 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(NEON)
 TEST_SUITE(KernelSelection)
 
 DATA_TEST_CASE(KernelSelection_elementwise_unary, framework::DatasetMode::ALL, concat(
-                   combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                           framework::dataset::make("DataType", { DataType::F32,
+                   combine(make("CpuExt", std::string("NEON")),
+                           make("DataType", { DataType::F32,
                                                                   DataType::F16,
                                                                   DataType::S32
                                                                 })),
-                   combine(framework::dataset::make("CpuExt", std::string("SVE")),
-                           framework::dataset::make("DataType", { DataType::F32,
+                   combine(make("CpuExt", std::string("SVE")),
+                           make("DataType", { DataType::F32,
                                                                   DataType::F16,
                                                                   DataType::S32
                                                                 }))),
@@ -68,25 +69,26 @@ DATA_TEST_CASE(KernelSelection_elementwise_unary, framework::DatasetMode::ALL, c
     ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(KernelSelection_elementwise_arithmetic, framework::DatasetMode::ALL, concat(concat(
-                                                                                               combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                                                                                                       framework::dataset::make("DataType", { DataType::F32,
-                                                                                                               DataType::F16,
-                                                                                                               DataType::S32,
-                                                                                                               DataType::S16,
-                                                                                                               DataType::QASYMM8,
-                                                                                                               DataType::QASYMM8_SIGNED
-                                                                                                                                            })),
-                                                                                               combine(framework::dataset::make("CpuExt", std::string("SVE")),
-                                                                                                       framework::dataset::make("DataType", { DataType::F32,
-                                                                                                               DataType::F16,
-                                                                                                               DataType::S32,
-                                                                                                               DataType::S16
-                                                                                                                                            }))),
-                                                                                           combine(framework::dataset::make("CpuExt", std::string("SVE2")),
-                                                                                                   framework::dataset::make("DataType", { DataType::QASYMM8,
-                                                                                                           DataType::QASYMM8_SIGNED
-                                                                                                                                        }))),
+DATA_TEST_CASE(KernelSelection_elementwise_arithmetic, framework::DatasetMode::ALL, concat(
+                                                                                           combine(make("CpuExt", std::string("NEON")),
+                                                                                                   make("DataType", { DataType::F32,
+                                                                                                                      DataType::F16,
+                                                                                                                      DataType::S32,
+                                                                                                                      DataType::S16,
+                                                                                                                      DataType::QASYMM8,
+                                                                                                                      DataType::QASYMM8_SIGNED,
+            })),
+                                                                                           combine(make("CpuExt", std::string("SVE")),
+                                                                                                   make("DataType", { DataType::F32,
+                                                                                                                      DataType::F16,
+                                                                                                                      DataType::S32,
+                                                                                                                      DataType::S16,
+            })),
+                                                                                           combine(make("CpuExt", std::string("SVE2")),
+                                                                                                   make("DataType", { DataType::QASYMM8,
+                                                                                                                      DataType::QASYMM8_SIGNED,
+        }))),
+
                cpu_ext, data_type)
 {
     using namespace cpu::kernels;
@@ -109,27 +111,28 @@ DATA_TEST_CASE(KernelSelection_elementwise_arithmetic, framework::DatasetMode::A
     ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(KernelSelection_elementwise_comparison, framework::DatasetMode::ALL, concat(concat(
-                                                                                               combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                                                                                                       framework::dataset::make("DataType", { DataType::F32,
-                                                                                                               DataType::F16,
-                                                                                                               DataType::S32,
-                                                                                                               DataType::S16,
-                                                                                                               DataType::U8,
-                                                                                                               DataType::QASYMM8,
-                                                                                                               DataType::QASYMM8_SIGNED
-                                                                                                                                            })),
-                                                                                               combine(framework::dataset::make("CpuExt", std::string("SVE")),
-                                                                                                       framework::dataset::make("DataType", { DataType::F32,
-                                                                                                               DataType::F16,
-                                                                                                               DataType::S32,
-                                                                                                               DataType::S16,
-                                                                                                               DataType::U8
-                                                                                                                                            }))),
-                                                                                           combine(framework::dataset::make("CpuExt", std::string("SVE2")),
-                                                                                                   framework::dataset::make("DataType", { DataType::QASYMM8,
-                                                                                                           DataType::QASYMM8_SIGNED
-                                                                                                                                        }))),
+DATA_TEST_CASE(KernelSelection_elementwise_comparison, framework::DatasetMode::ALL, concat(
+                                                                                           combine(make("CpuExt", std::string("NEON")),
+                                                                                                   make("DataType", { DataType::F32,
+                                                                                                                      DataType::F16,
+                                                                                                                      DataType::S32,
+                                                                                                                      DataType::S16,
+                                                                                                                      DataType::U8,
+                                                                                                                      DataType::QASYMM8,
+                                                                                                                      DataType::QASYMM8_SIGNED,
+            })),
+                                                                                           combine(make("CpuExt", std::string("SVE")),
+                                                                                                   make("DataType", { DataType::F32,
+                                                                                                                      DataType::F16,
+                                                                                                                      DataType::S32,
+                                                                                                                      DataType::S16,
+                                                                                                                      DataType::U8,
+            })),
+                                                                                           combine(make("CpuExt", std::string("SVE2")),
+                                                                                                   make("DataType", { DataType::QASYMM8,
+                                                                                                                      DataType::QASYMM8_SIGNED,
+        }))),
+
                cpu_ext, data_type)
 {
     using namespace cpu::kernels;

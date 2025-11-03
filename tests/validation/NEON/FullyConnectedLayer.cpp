@@ -466,7 +466,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<uint8_t>,
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(
                            datasets::LargeFullyConnectedLayerDataset(),
                             FullyConnectedParameters,
-                           framework::dataset::make("DataType", DataType::QASYMM8),
+                           make("DataType", DataType::QASYMM8),
                        QuantizationData,
                        NoActivationFunctionDataset))
 {

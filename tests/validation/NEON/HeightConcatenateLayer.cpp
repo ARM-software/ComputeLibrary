@@ -39,32 +39,34 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(HeightConcatenateLayer)
 
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-        framework::dataset::make("InputInfo1", {  TensorInfo(TensorShape(23U, 15U, 5U), 1, DataType::F32), // Mismatching data type input/output
+        make("InputInfo1", {  TensorInfo(TensorShape(23U, 15U, 5U), 1, DataType::F32), // Mismatching data type input/output
                                                   TensorInfo(TensorShape(22U, 27U, 5U), 1, DataType::F32), // Mismatching y dimension
                                                   TensorInfo(TensorShape(11U, 25U, 5U), 1, DataType::F32), // Mismatching total height
                                                   TensorInfo(TensorShape(16U, 25U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(35U, 21U, 5U), 1, DataType::F32)
 
         }),
-        framework::dataset::make("InputInfo2", {  TensorInfo(TensorShape(23U, 15U, 4U), 1, DataType::F32),
+        make("InputInfo2", {  TensorInfo(TensorShape(23U, 15U, 4U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(22U, 127U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(11U, 26U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(16U, 25U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(35U, 10U, 5U), 1, DataType::F32)
         }),
-        framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(23U, 30U, 5U), 1, DataType::F16),
+        make("OutputInfo", {  TensorInfo(TensorShape(23U, 30U, 5U), 1, DataType::F16),
                                                   TensorInfo(TensorShape(22U, 12U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(11U, 7U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(16U, 50U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(35U, 31U, 5U), 1, DataType::F32)
         }),
-        framework::dataset::make("Expected", { false, false, false, true, true })
+        make("Expected", { false, false, false, true, true })
         ),
         input_info1, input_info2, output_info,expected)
 {
@@ -91,16 +93,16 @@ using NEHeightConcatenateLayerFixture = ConcatenateLayerValidationFixture<Tensor
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEHeightConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                    make("DataType",
                                                                                                                             DataType::F32),
-                                                                                                                    framework::dataset::make("Axis", 1)))
+                                                                                                                    make("Axis", 1)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEHeightConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEHeightConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), make("DataType",
                                                                                                                   DataType::F32),
-                                                                                                                  framework::dataset::make("Axis", 1)))
+                                                                                                                  make("Axis", 1)))
 
 {
     // Validate output
@@ -112,9 +114,9 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEHeightConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                      make("DataType",
                                                                                                                               DataType::QASYMM8),
-                                                                                                                      framework::dataset::make("Axis", 1)))
+                                                                                                                      make("Axis", 1)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -123,9 +125,9 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEHeightConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                     make("DataType",
                                                                                                                              DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("Axis", 1)))
+                                                                                                                     make("Axis", 1)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

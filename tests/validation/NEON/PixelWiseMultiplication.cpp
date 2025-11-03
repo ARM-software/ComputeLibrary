@@ -55,27 +55,27 @@ constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value fo
 constexpr AbsoluteTolerance<float> tolerance_qsymm16(1); /**< Tolerance value for comparing reference's output against implementation's output for 16-bit quantized symmetric data types */
 
 const auto PixelWiseMultiplicationQSYMM16QuantDataset = combine(
-                                                                    framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) }),
-                                                                    framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) }),
-                                                                framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) }));
+                                                                    make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) }),
+                                                                    make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) }),
+                                                                make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) }));
 
 const auto PixelWiseMultiplicationQASYMM8QuantDataset = combine(
-                                                                    framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 32768.f, 0) }),
-                                                                    framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) }),
-                                                                framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 32768.f, 0) }));
+                                                                    make("Src0QInfo", { QuantizationInfo(5.f / 32768.f, 0) }),
+                                                                    make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) }),
+                                                                make("OutQInfo", { QuantizationInfo(1.f / 32768.f, 0) }));
 
 const auto PixelWiseMultiplicationQASYMM8QuantInPlaceDataset = combine(
-                                                                           framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 32768.f, 10) }),
-                                                                           framework::dataset::make("Src1QInfo", { QuantizationInfo(5.f / 32768.f, 10) }),
-                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 10) }));
+                                                                           make("Src0QInfo", { QuantizationInfo(5.f / 32768.f, 10) }),
+                                                                           make("Src1QInfo", { QuantizationInfo(5.f / 32768.f, 10) }),
+                                                                       make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 10) }));
 
 const auto PixelWiseMultiplicationPolicySTNUDataset = combine(
-                                                          framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
-                                                          framework::dataset::make("RoundingPolicy", { RoundingPolicy::TO_NEAREST_UP }));
+                                                          make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                          make("RoundingPolicy", { RoundingPolicy::TO_NEAREST_UP }));
 
 const auto PixelWiseMultiplicationPolicySTZDataset = combine(
-                                                         framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
-                                                         framework::dataset::make("RoundingPolicy", { RoundingPolicy::TO_ZERO }));
+                                                         make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                         make("RoundingPolicy", { RoundingPolicy::TO_ZERO }));
 
 /** Tests for in-place computation
  * With current interface storing TensorInfo with quantization information
@@ -88,8 +88,8 @@ const auto PixelWiseMultiplicationPolicySTZDataset = combine(
  * expected to have either different quantization information, data type
  * or different shape we are not testing in-place computation.
  */
-const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
-const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
+const auto InPlaceDataSet    = make("InPlace", { false, true });
+const auto OutOfPlaceDataSet = make("InPlace", { false });
 
 #define DEFAULT_VALIDATE validate(Accessor(_target), _reference);
 #define VALIDATE(TYPE, TOLERANCE) validate(Accessor(_target), _reference, AbsoluteTolerance<TYPE>(TOLERANCE), 0.f);
@@ -100,12 +100,12 @@ const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
     FIXTURE_DATA_TEST_CASE(TEST_NAME, NEPixelWiseMultiplication##FIXTURE, framework::DatasetMode::MODE,                        \
                            combine(                                            \
                            datasets::SHAPES,                                                                              \
-                           framework::dataset::make("DataType1", DataType::DT1),                                         \
-                           framework::dataset::make("DataType2", DataType::DT2),                                         \
-                           framework::dataset::make("DataType3", DataType::DT3),                                         \
-                           framework::dataset::make("Scale", std::move(SCALE)),                                          \
+                           make("DataType1", DataType::DT1),                                         \
+                           make("DataType2", DataType::DT2),                                         \
+                           make("DataType3", DataType::DT3),                                         \
+                           make("Scale", std::move(SCALE)),                                          \
                            datasets::ConvertPolicies(),                                                                  \
-                           framework::dataset::make("RoundingPolicy", RoundingPolicy::RP),                               \
+                           make("RoundingPolicy", RoundingPolicy::RP),                               \
                            (INPLACE_DATASET)))                                                                            \
     {                                                                                                                     \
         if((DataType::DT1 != DataType::F16 &&                                                                             \
@@ -189,7 +189,7 @@ TEST_SUITE(PixelWiseMultiplication)
 
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //1 Ok
+               make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //1 Ok
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //2 Ok
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),                 //3 Window shrink
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //4 Invalid scale
@@ -204,7 +204,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),     //13 Quantized cannot do WRAP
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),                //14 S32 does not support scale255
                                                       }),
-               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+               make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
@@ -219,7 +219,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
+               make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
@@ -234,7 +234,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                      }),
-               framework::dataset::make("Scale",{  scale_unity,
+               make("Scale",{  scale_unity,
                                                    scale_unity,
                                                    scale_unity,
                                                    -1.f,
@@ -248,7 +248,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                    scale_unity,
                                                    scale_unity,
                                                    scale_255}),
-               framework::dataset::make("OverflowPolicy",{
+               make("OverflowPolicy",{
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
@@ -264,7 +264,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::SATURATE,
                                         }),
-               framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, true , false, false, true, false, false})
+               make("Expected", { true, true, true, false, false, false, false, false, true , false, false, true, false, false})
                ),
                input1_info, input2_info, output_info, scale, policy, expected)
 {
@@ -340,10 +340,10 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8_SIGNED)
 TEST_SUITE(ScaleUnity)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                     framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("DataTypeOut", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                     make("DataTypeIn1", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("DataTypeIn2", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("DataTypeOut", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("Scale", { scale_unity }),
                                                                                                                      PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                      PixelWiseMultiplicationQASYMM8QuantDataset,
                                                                                                                      OutOfPlaceDataSet))
@@ -353,10 +353,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8SignedFixture, 
 }
 #ifdef ARM_COMPUTE_ENABLE_SME2
 FIXTURE_DATA_TEST_CASE(RunSMEMul, NEPixelWiseMultiplicationQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(datasets::SMEMulShapes(),
-                                                                                                                     framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("DataTypeOut", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                     make("DataTypeIn1", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("DataTypeIn2", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("DataTypeOut", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("Scale", { scale_unity }),
                                                                                                                      PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                      PixelWiseMultiplicationQASYMM8QuantDataset,
                                                                                                                      OutOfPlaceDataSet))
@@ -366,10 +366,10 @@ FIXTURE_DATA_TEST_CASE(RunSMEMul, NEPixelWiseMultiplicationQASYMM8SignedFixture,
 }
 #endif // ARM_COMPUTE_ENABLE_SME2
 FIXTURE_DATA_TEST_CASE(RunSmallInPlace, NEPixelWiseMultiplicationQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                       framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED),
-                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED),
-                       framework::dataset::make("DataTypeOut", DataType::QASYMM8_SIGNED),
-                       framework::dataset::make("Scale", { scale_unity }),
+                       make("DataTypeIn1", DataType::QASYMM8_SIGNED),
+                       make("DataTypeIn2", DataType::QASYMM8_SIGNED),
+                       make("DataTypeOut", DataType::QASYMM8_SIGNED),
+                       make("Scale", { scale_unity }),
                        PixelWiseMultiplicationPolicySTZDataset,
                        PixelWiseMultiplicationQASYMM8QuantInPlaceDataset,
                        InPlaceDataSet))
@@ -380,10 +380,10 @@ FIXTURE_DATA_TEST_CASE(RunSmallInPlace, NEPixelWiseMultiplicationQASYMM8SignedFi
 TEST_SUITE(Broadcast)
 #ifdef ARM_COMPUTE_ENABLE_SME2
 FIXTURE_DATA_TEST_CASE(RunSMEMul, NEPixelWiseMultiplicationBroadcastQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(datasets::SMEMulShapesBroadcast(),
-                                                                                                                     framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("DataTypeOut", DataType::QASYMM8_SIGNED),
-                                                                                                                     framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                     make("DataTypeIn1", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("DataTypeIn2", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("DataTypeOut", DataType::QASYMM8_SIGNED),
+                                                                                                                     make("Scale", { scale_unity }),
                                                                                                                      PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                      PixelWiseMultiplicationQASYMM8QuantDataset,
                                                                                                                      OutOfPlaceDataSet))
@@ -399,10 +399,10 @@ TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QASYMM8)
 TEST_SUITE(Scale255)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("DataTypeOut", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("Scale", { scale_255 }),
+                                                                                                                       make("DataTypeIn1", DataType::QASYMM8),
+                                                                                                                       make("DataTypeIn2", DataType::QASYMM8),
+                                                                                                                       make("DataTypeOut", DataType::QASYMM8),
+                                                                                                                       make("Scale", { scale_255 }),
                                                                                                                        PixelWiseMultiplicationPolicySTNUDataset,
                                                                                                                        PixelWiseMultiplicationQASYMM8QuantDataset,
                                                                                                                OutOfPlaceDataSet))
@@ -413,10 +413,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framew
 TEST_SUITE_END() // Scale255
 TEST_SUITE(ScaleUnity)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("DataTypeOut", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                       make("DataTypeIn1", DataType::QASYMM8),
+                                                                                                                       make("DataTypeIn2", DataType::QASYMM8),
+                                                                                                                       make("DataTypeOut", DataType::QASYMM8),
+                                                                                                                       make("Scale", { scale_unity }),
                                                                                                                        PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                        PixelWiseMultiplicationQASYMM8QuantDataset,
                                                                                                                OutOfPlaceDataSet))
@@ -427,10 +427,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framew
 TEST_SUITE_END() // ScaleUnity
 TEST_SUITE(ScaleOther)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("DataTypeOut", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("Scale", { scale_other }),
+                                                                                                                       make("DataTypeIn1", DataType::QASYMM8),
+                                                                                                                       make("DataTypeIn2", DataType::QASYMM8),
+                                                                                                                       make("DataTypeOut", DataType::QASYMM8),
+                                                                                                                       make("Scale", { scale_other }),
                                                                                                                        PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                        PixelWiseMultiplicationQASYMM8QuantDataset,
                                                                                                                OutOfPlaceDataSet))
@@ -442,10 +442,10 @@ TEST_SUITE_END() // ScaleOther
 TEST_SUITE(Broadcast)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastQASYMM8Fixture, framework::DatasetMode::ALL,
                        combine(datasets::SmallShapesBroadcast(),
-                                                                               framework::dataset::make("DataTypeIn1", DataType::QASYMM8),
-                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8),
-                                                               framework::dataset::make("DataTypeOut", DataType::QASYMM8),
-                                                       framework::dataset::make("Scale", { scale_other }),
+                                                                               make("DataTypeIn1", DataType::QASYMM8),
+                                                                       make("DataTypeIn2", DataType::QASYMM8),
+                                                               make("DataTypeOut", DataType::QASYMM8),
+                                                       make("Scale", { scale_other }),
                                                PixelWiseMultiplicationPolicySTZDataset,
                                        PixelWiseMultiplicationQASYMM8QuantDataset,
                                OutOfPlaceDataSet))
@@ -455,10 +455,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastQASYMM8Fixtur
 }
 FIXTURE_DATA_TEST_CASE(RunTinyInPlace, NEPixelWiseMultiplicationBroadcastQASYMM8Fixture, framework::DatasetMode::ALL,
                        combine(datasets::TinyShapesBroadcastInplace(),
-                                                                               framework::dataset::make("DataTypeIn1", DataType::QASYMM8),
-                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8),
-                                                               framework::dataset::make("DataTypeOut", DataType::QASYMM8),
-                                                       framework::dataset::make("Scale", { scale_other }),
+                                                                               make("DataTypeIn1", DataType::QASYMM8),
+                                                                       make("DataTypeIn2", DataType::QASYMM8),
+                                                               make("DataTypeOut", DataType::QASYMM8),
+                                                       make("Scale", { scale_other }),
                                                PixelWiseMultiplicationPolicySTZDataset,
                                        PixelWiseMultiplicationQASYMM8QuantInPlaceDataset,
                                InPlaceDataSet))
@@ -471,10 +471,10 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QSYMM16)
 TEST_SUITE(Scale255)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("DataTypeOut", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("Scale", { scale_255 }),
+                                                                                                                       make("DataTypeIn1", DataType::QSYMM16),
+                                                                                                                       make("DataTypeIn2", DataType::QSYMM16),
+                                                                                                                       make("DataTypeOut", DataType::QSYMM16),
+                                                                                                                       make("Scale", { scale_255 }),
                                                                                                                        PixelWiseMultiplicationPolicySTNUDataset,
                                                                                                                        PixelWiseMultiplicationQSYMM16QuantDataset,
                                                                                                                OutOfPlaceDataSet))
@@ -485,10 +485,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framew
 TEST_SUITE_END() // Scale255
 TEST_SUITE(ScaleUnity)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("DataTypeOut", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                       make("DataTypeIn1", DataType::QSYMM16),
+                                                                                                                       make("DataTypeIn2", DataType::QSYMM16),
+                                                                                                                       make("DataTypeOut", DataType::QSYMM16),
+                                                                                                                       make("Scale", { scale_unity }),
                                                                                                                        PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                        PixelWiseMultiplicationQSYMM16QuantDataset,
                                                                                                                OutOfPlaceDataSet))
@@ -499,10 +499,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framew
 TEST_SUITE_END() // ScaleUnity
 TEST_SUITE(ScaleOther)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("DataTypeOut", DataType::QSYMM16),
-                                                                                                                       framework::dataset::make("Scale", { scale_other }),
+                                                                                                                       make("DataTypeIn1", DataType::QSYMM16),
+                                                                                                                       make("DataTypeIn2", DataType::QSYMM16),
+                                                                                                                       make("DataTypeOut", DataType::QSYMM16),
+                                                                                                                       make("Scale", { scale_other }),
                                                                                                                        PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                        PixelWiseMultiplicationQSYMM16QuantDataset,
                                                                                                                OutOfPlaceDataSet))
@@ -531,10 +531,10 @@ TEST_SUITE_END() // NonXBroadcast
 TEST_SUITE_END() // QSYMM16
 TEST_SUITE(QSYMM16toS32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16ToS32Fixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                                    framework::dataset::make("DataTypeIn1", DataType::QSYMM16),
-                                                                                                                    framework::dataset::make("DataTypeIn2", DataType::QSYMM16),
-                                                                                                                    framework::dataset::make("DataTypeOut", DataType::S32),
-                                                                                                                    framework::dataset::make("Scale", { scale_unity }),
+                                                                                                                    make("DataTypeIn1", DataType::QSYMM16),
+                                                                                                                    make("DataTypeIn2", DataType::QSYMM16),
+                                                                                                                    make("DataTypeOut", DataType::S32),
+                                                                                                                    make("Scale", { scale_unity }),
                                                                                                                     PixelWiseMultiplicationPolicySTZDataset,
                                                                                                                     PixelWiseMultiplicationQSYMM16QuantDataset,
                                                                                                                     OutOfPlaceDataSet))
@@ -563,12 +563,12 @@ TEST_SUITE_END() // Quantized
 TEST_SUITE(U8U8toS16)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationU8U8ToS16Fixture, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::U8),
-                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::U8),
-                                                                                                                       framework::dataset::make("DataTypeOut", DataType::S16),
-                                                                                                                       framework::dataset::make("Scale", { scale_255 }),
+                                                                                                                       make("DataTypeIn1", DataType::U8),
+                                                                                                                       make("DataTypeIn2", DataType::U8),
+                                                                                                                       make("DataTypeOut", DataType::S16),
+                                                                                                                       make("Scale", { scale_255 }),
                                                                                                                        datasets::ConvertPolicies(),
-                                                                                                                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_UP),
+                                                                                                                       make("RoundingPolicy", RoundingPolicy::TO_NEAREST_UP),
                                                                                                                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -578,12 +578,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationU8U8ToS16Fixture, fram
 TEST_SUITE(NonXBroadcast)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastU8U8ToS16Fixture, framework::DatasetMode::PRECOMMIT,
     combine(datasets::SmallShapesNonXBroadcast(),
-        framework::dataset::make("DataTypeIn1", DataType::U8),
-        framework::dataset::make("DataTypeIn2", DataType::U8),
-        framework::dataset::make("DataTypeOut", DataType::S16),
-        framework::dataset::make("Scale", { scale_255 }),
+        make("DataTypeIn1", DataType::U8),
+        make("DataTypeIn2", DataType::U8),
+        make("DataTypeOut", DataType::S16),
+        make("Scale", { scale_255 }),
         datasets::ConvertPolicies(),
-        framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_UP),
+        make("RoundingPolicy", RoundingPolicy::TO_NEAREST_UP),
         OutOfPlaceDataSet))
 {
     // Validate output
@@ -592,13 +592,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationBroadcastU8U8ToS16Fixt
 TEST_SUITE_END() // NonXBroadcast
 
 FIXTURE_DATA_TEST_CASE(RunSmall1, NEPixelWiseMultiplicationU8U8ToS16Fixture, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                        framework::dataset::make("DataTypeIn1", DataType::U8),
-                                                                                                                        framework::dataset::make("DataTypeIn2", DataType::U8),
-                                                                                                                        framework::dataset::make("DataTypeOut", DataType::S16),
-                                                                                                                        framework::dataset::make("Scale", { scale_other }),
+                                                                                                                        make("DataTypeIn1", DataType::U8),
+                                                                                                                        make("DataTypeIn2", DataType::U8),
+                                                                                                                        make("DataTypeOut", DataType::S16),
+                                                                                                                        make("Scale", { scale_other }),
                                                                                                                         datasets::ConvertPolicies(),
-                                                                                                                        framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_ZERO),
-                                                                                                                        framework::dataset::make("InPlace", { false })))
+                                                                                                                        make("RoundingPolicy", RoundingPolicy::TO_ZERO),
+                                                                                                                        make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -680,7 +680,7 @@ PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS32Fixture<int32_t>
 TEST_SUITE_END() // ScaleOther
 
 TEST_SUITE(Broadcast)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<int32_t>, ALL, SmallShapesBroadcast(), S32, S32, S32, scale_unity, TO_ZERO, framework::dataset::make("InPlace", { false }),
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<int32_t>, ALL, SmallShapesBroadcast(), S32, S32, S32, scale_unity, TO_ZERO, make("InPlace", { false }),
                                                  WRAP_VALIDATE(int32_t, 1))
 TEST_SUITE_END() // Broadcast
 
@@ -713,7 +713,7 @@ TEST_SUITE_END() // ScaleOther
 TEST_SUITE_END() // F32toF32
 
 TEST_SUITE(Broadcast)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<float>, ALL, SmallShapesBroadcast(), F32, F32, F32, scale_255, TO_NEAREST_UP, framework::dataset::make("InPlace", { false }),
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<float>, ALL, SmallShapesBroadcast(), F32, F32, F32, scale_255, TO_NEAREST_UP, make("InPlace", { false }),
                                                  VALIDATE(float, 1.f))
 TEST_SUITE_END() // Broadcast
 

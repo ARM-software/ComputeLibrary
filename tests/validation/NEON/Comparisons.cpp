@@ -41,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 const auto run_small_dataset           = combine(datasets::ComparisonOperations(), datasets::SmallShapes());
@@ -55,22 +57,22 @@ TEST_SUITE(Comparison)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-        framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
+        make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid output type
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching input types
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+        make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+        make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
         }),
-        framework::dataset::make("Expected", { false, false, false, true})
+        make("Expected", { false, false, false, true})
         ),
         input1_info, input2_info, output_info, expected)
 {
@@ -90,7 +92,7 @@ TEST_SUITE(Bool)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::U8)))
+                       combine(run_small_dataset, make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -103,7 +105,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(run_small_dataset, make("DataType", DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -119,7 +121,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEComparisonFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(run_large_dataset, make("DataType", DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -139,7 +141,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(run_small_dataset, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -147,7 +149,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEComparisonFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(run_large_dataset, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -165,9 +167,9 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+                       combine(run_small_dataset, make("DataType", DataType::QASYMM8),
+                                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                               make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -177,9 +179,9 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
                        NEComparisonQuantizedBroadcastFixture<int8_t>,
                        framework::DatasetMode::ALL,
-                       combine(run_small_broadcast_dataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
+                       combine(run_small_broadcast_dataset, make("DataType", DataType::QASYMM8_SIGNED),
+                                       make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
+                               make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -188,9 +190,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonQuantizedFixture<int8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
+                       combine(run_small_dataset, make("DataType", DataType::QASYMM8_SIGNED),
+                                       make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
+                               make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);

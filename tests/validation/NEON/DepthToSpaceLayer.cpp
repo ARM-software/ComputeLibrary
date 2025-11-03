@@ -41,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(DepthToSpaceLayer)
 
@@ -50,20 +52,20 @@ using NEDepthToSpaceLayerFixture = DepthToSpaceLayerValidationFixture<Tensor, Ac
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 4U, 4U), 1, DataType::F32),
+               make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 4U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(16U, 8U, 4U, 4U), 1, DataType::F32),   // block < 2
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Negative block shape
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 4U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                      }),
-               framework::dataset::make("BlockShape", { 2, 1, 2, 2, 2 }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 1U, 4U), 1, DataType::F32),
+               make("BlockShape", { 2, 1, 2, 2, 2 }),
+               make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 1U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 16U, 1U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 1U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { true, false, false, false, false})
+               make("Expected", { true, false, false, false, false})
                ),
                input_info, block_shape, output_info, expected)
 {
@@ -75,16 +77,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthToSpaceLayerDataset(), make("DataType",
                                                                                                                        DataType::F32),
-                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthToSpaceLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthToSpaceLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthToSpaceLayerDataset(), make("DataType",
                                                                                                                      DataType::F32),
-                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                             make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -92,16 +94,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthToSpaceLayerFixture<float>, framework::D
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthToSpaceLayerDataset(), make("DataType",
                                                                                                                       DataType::F16),
-                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                              make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthToSpaceLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthToSpaceLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthToSpaceLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthToSpaceLayerDataset(), make("DataType",
                                                                                                                     DataType::F16),
-                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);

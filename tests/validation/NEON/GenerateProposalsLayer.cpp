@@ -42,6 +42,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 using NEComputeAllAnchors = NESynthetizeFunction<NEComputeAllAnchorsKernel>;
@@ -77,7 +79,7 @@ inline void fill_tensor(Accessor &&tensor, const std::vector<T> &v)
     }
 }
 
-const auto ComputeAllInfoDataset = framework::dataset::make("ComputeAllInfo",
+const auto ComputeAllInfoDataset = make("ComputeAllInfo",
 {
     ComputeAnchorsInfo(10U, 10U, 1. / 16.f),
     ComputeAnchorsInfo(100U, 1U, 1. / 2.f),
@@ -95,50 +97,50 @@ TEST_SUITE(GenerateProposals)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("scores", { TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F32),
+               make("scores", { TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F32),
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Mismatching types
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Wrong deltas (number of transformation non multiple of 4)
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Wrong anchors (number of values per roi != 5)
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16), // Output tensor num_valid_proposals not scalar
                                                     TensorInfo(TensorShape(100U, 100U, 9U), 1, DataType::F16)}),
                // num_valid_proposals not U32
-               framework::dataset::make("deltas",{ TensorInfo(TensorShape(100U, 100U, 36U), 1, DataType::F32),
+               make("deltas",{ TensorInfo(TensorShape(100U, 100U, 36U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 36U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32),
                                                    TensorInfo(TensorShape(100U, 100U, 38U), 1, DataType::F32)}),
-               framework::dataset::make("anchors", { TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
+               make("anchors", { TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(5U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(4U, 9U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(4U, 9U), 1, DataType::F32)}),
-               framework::dataset::make("proposals", { TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
+               make("proposals", { TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 100U*100U*9U), 1, DataType::F32)}),
-               framework::dataset::make("scores_out", { TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
+               make("scores_out", { TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(100U*100U*9U), 1, DataType::F32)}),
-               framework::dataset::make("num_valid_proposals", { TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
+               make("num_valid_proposals", { TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 1U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 10U), 1, DataType::U32),
                                                                  TensorInfo(TensorShape(1U, 1U), 1, DataType::F16)}),
-               framework::dataset::make("generate_proposals_info", { GenerateProposalsInfo(10.f, 10.f, 1.f),
+               make("generate_proposals_info", { GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f),
                                                                      GenerateProposalsInfo(10.f, 10.f, 1.f)}),
-               framework::dataset::make("Expected", { true, false, false, false, false, false })
+               make("Expected", { true, false, false, false, false, false })
                ),
         scores, deltas, anchors, proposals, scores_out, num_valid_proposals, generate_proposals_info, expected)
 {
@@ -158,7 +160,7 @@ using NEComputeAllAnchorsFixture = ComputeAllAnchorsFixture<Tensor, Accessor, NE
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-DATA_TEST_CASE(IntegrationTestCaseAllAnchors, framework::DatasetMode::ALL, framework::dataset::make("DataType", { DataType::F32 }),
+DATA_TEST_CASE(IntegrationTestCaseAllAnchors, framework::DatasetMode::ALL, make("DataType", { DataType::F32 }),
                data_type)
 {
     const int values_per_roi = 4;
@@ -223,8 +225,8 @@ DATA_TEST_CASE(IntegrationTestCaseAllAnchors, framework::DatasetMode::ALL, frame
     validate(Accessor(all_anchors), anchors_expected);
 }
 
-DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL, combine(framework::dataset::make("DataType", { DataType::F32 }),
-                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL, combine(make("DataType", { DataType::F32 }),
+                                                                                          make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                data_type, data_layout)
 {
     const int values_per_roi = 4;
@@ -381,7 +383,7 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
 }
 
 FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, NEComputeAllAnchorsFixture<float>, framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset, framework::dataset::make("DataType", { DataType::F32 })))
+                       combine(make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset, make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -390,7 +392,7 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, NEComputeAllAnchorsFixture<half>, framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset, framework::dataset::make("DataType", { DataType::F16 })))
+                       combine(make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset, make("DataType", { DataType::F16 })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -414,9 +416,9 @@ using NEComputeAllAnchorsQuantizedFixture = ComputeAllAnchorsQuantizedFixture<Te
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, NEComputeAllAnchorsQuantizedFixture<int16_t>, framework::DatasetMode::ALL,
-                       combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset,
-                                       framework::dataset::make("DataType", { DataType::QSYMM16 }),
-                               framework::dataset::make("QuantInfo", { QuantizationInfo(0.125f, 0) })))
+                       combine(make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset,
+                                       make("DataType", { DataType::QSYMM16 }),
+                               make("QuantInfo", { QuantizationInfo(0.125f, 0) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qsymm16);

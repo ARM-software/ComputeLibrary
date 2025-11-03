@@ -42,13 +42,15 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);     /**< Tolerance for floating point tests */
 const AbsoluteTolerance<half>      tolerance_fp16(half(0.1f)); /**< Tolerance for 16-bit floating point tests */
 constexpr AbsoluteTolerance<float> tolerance_quant(1);         /**< Tolerance for quantized tests */
 
-const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto ActivationFunctionsDataset = make("ActivationInfo",
 {
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -59,30 +61,30 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 });
 
 // QASYMM8 test quantizations
-const auto qasymm8_input1_qinfo_set = framework::dataset::make("Input1QInfo", { QuantizationInfo(0.1, 10) }); // Representable Range: [-1, 24.5]
-const auto qasymm8_input2_qinfo_set = framework::dataset::make("Input2QInfo", { QuantizationInfo(0.2, 60) }); // Representable Range: [-12, 39]
-const auto qasymm8_bn_mul_qinfo_set = framework::dataset::make("BnMulInfo", { QuantizationInfo(0.001, 55) }); // Representable Range: [-0.11, 0.2]
-const auto qasymm8_bn_add_qinfo_set = framework::dataset::make("BnAddInfo", { QuantizationInfo(0.02, 20) });  // Representable Range: [-0.4, 4.7]
+const auto qasymm8_input1_qinfo_set = make("Input1QInfo", { QuantizationInfo(0.1, 10) }); // Representable Range: [-1, 24.5]
+const auto qasymm8_input2_qinfo_set = make("Input2QInfo", { QuantizationInfo(0.2, 60) }); // Representable Range: [-12, 39]
+const auto qasymm8_bn_mul_qinfo_set = make("BnMulInfo", { QuantizationInfo(0.001, 55) }); // Representable Range: [-0.11, 0.2]
+const auto qasymm8_bn_add_qinfo_set = make("BnAddInfo", { QuantizationInfo(0.02, 20) });  // Representable Range: [-0.4, 4.7]
 
 // Representable Range: [-9.36, 51.84], Expected F32 range: [-13, 63.5], leaving some space for saturation
-const auto qasymm8_add_output_qinfo_set = framework::dataset::make("AddOutputInfo", { QuantizationInfo(0.24, 39) });
+const auto qasymm8_add_output_qinfo_set = make("AddOutputInfo", { QuantizationInfo(0.24, 39) });
 
 // Representable Range: [-4.8, 10.5], Expected FP32 range: [-6.985, 12.7], leaving some space for saturation
 // This range also makes sense with the activation boundaries above, i.e. [-2, 8] for LU_BOUNDED_RELU and [0, 6] for BOUNDED_RELU
-const auto qasymm8_final_output_qinfo_set = framework::dataset::make("FinalOutputInfo", { QuantizationInfo(0.06, 80) });
+const auto qasymm8_final_output_qinfo_set = make("FinalOutputInfo", { QuantizationInfo(0.06, 80) });
 
 // QASYMM8_SIGNED test quantizations
-const auto qasymm8_signed_input1_qinfo_set = framework::dataset::make("Input1QInfo", { QuantizationInfo(0.1, 10) });  // Representable Range: [-13.8, 11.7]
-const auto qasymm8_signed_input2_qinfo_set = framework::dataset::make("Input2QInfo", { QuantizationInfo(0.2, -60) }); // Representable Range: [-13.6, 39.4]
-const auto qasymm8_signed_bn_mul_qinfo_set = framework::dataset::make("BnMulInfo", { QuantizationInfo(0.001, 55) });  // Representable Range: [-0.183, 0.072]
-const auto qasymm8_signed_bn_add_qinfo_set = framework::dataset::make("BnAddInfo", { QuantizationInfo(0.4, -120) });  // Representable Range: [-0.32, 9.08]
+const auto qasymm8_signed_input1_qinfo_set = make("Input1QInfo", { QuantizationInfo(0.1, 10) });  // Representable Range: [-13.8, 11.7]
+const auto qasymm8_signed_input2_qinfo_set = make("Input2QInfo", { QuantizationInfo(0.2, -60) }); // Representable Range: [-13.6, 39.4]
+const auto qasymm8_signed_bn_mul_qinfo_set = make("BnMulInfo", { QuantizationInfo(0.001, 55) });  // Representable Range: [-0.183, 0.072]
+const auto qasymm8_signed_bn_add_qinfo_set = make("BnAddInfo", { QuantizationInfo(0.4, -120) });  // Representable Range: [-0.32, 9.08]
 
 // Representable Range: [-21.36, 39.84], Expected F32 range: [-27.4, 51.1], leaving some space for saturation
-const auto qasymm8_signed_add_output_qinfo_set = framework::dataset::make("AddOutputInfo", { QuantizationInfo(0.24, -39) });
+const auto qasymm8_signed_add_output_qinfo_set = make("AddOutputInfo", { QuantizationInfo(0.24, -39) });
 
 // Representable Range: [-4.8, 10.5], Expected FP32 range: [-9.6713, 14.0942], leaving some space for saturation
 // This range also makes sense with the activation boundaries above, i.e. [-2, 8] for LU_BOUNDED_RELU and [0, 6] for BOUNDED_RELU
-const auto qasymm8_signed_final_output_qinfo_set = framework::dataset::make("FinalOutputInfo", { QuantizationInfo(0.06, -48) });
+const auto qasymm8_signed_final_output_qinfo_set = make("FinalOutputInfo", { QuantizationInfo(0.06, -48) });
 
 } // namespace
 
@@ -99,7 +101,7 @@ TEST_SUITE(Float)
 
 TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32),
+                                                                                                                    make("DataType", DataType::F32),
                                                                                                             ActivationFunctionsDataset))
 {
     // Validate outputs
@@ -109,15 +111,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<float>, framework::Data
 
 // This test is to stress the case when there is no intermediate output required (i.e. nullptr)
 FIXTURE_DATA_TEST_CASE(RunSmallWithoutIntermOutput, NEAddMulAddFloatFixtureWoIntermOut<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::F32),
-                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })))
+                       make("DataType", DataType::F32),
+                       make("ActivationInfo", { ActivationLayerInfo() })))
 {
     // Validate outputs
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F32),
+                                                                                                                  make("DataType", DataType::F32),
                                                                                                           ActivationFunctionsDataset))
 {
     // Validate outputs
@@ -130,7 +132,7 @@ TEST_SUITE_END() // F32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16),
+                                                                                                                   make("DataType", DataType::F16),
                                                                                                            ActivationFunctionsDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -146,7 +148,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulAddFloatFixture<half>, framework::Datas
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulAddFloatFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F16),
+                                                                                                                 make("DataType", DataType::F16),
                                                                                                          ActivationFunctionsDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -176,7 +178,7 @@ TEST_SUITE(Quantized)
 
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                       make("DataType", DataType::QASYMM8),
                                                                                                                        ActivationFunctionsDataset,
                                                                                                                        qasymm8_input1_qinfo_set,
                                                                                                                        qasymm8_input2_qinfo_set,
@@ -191,7 +193,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<uint8_t>, framework::D
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                                                                     make("DataType", DataType::QASYMM8),
                                                                                                                      ActivationFunctionsDataset,
                                                                                                                      qasymm8_input1_qinfo_set,
                                                                                                                      qasymm8_input2_qinfo_set,
@@ -208,7 +210,7 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                      make("DataType", DataType::QASYMM8_SIGNED),
                                                                                                                       ActivationFunctionsDataset,
                                                                                                                       qasymm8_signed_input1_qinfo_set,
                                                                                                                       qasymm8_signed_input2_qinfo_set,
@@ -223,7 +225,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAddMulQuantizedFixture<int8_t>, framework::Da
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEAddMulQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                                                                    make("DataType", DataType::QASYMM8_SIGNED),
                                                                                                                     ActivationFunctionsDataset,
                                                                                                                     qasymm8_signed_input1_qinfo_set,
                                                                                                                     qasymm8_signed_input2_qinfo_set,

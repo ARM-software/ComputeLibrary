@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 /** Tolerance for float operations */
@@ -55,7 +57,7 @@ TEST_SUITE(L2NormalizeLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-    framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
+    make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching shape input/output
                                              TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
@@ -64,7 +66,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            }),
-    framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
+    make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
                                              TensorInfo(TensorShape(256U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16),
@@ -73,7 +75,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            }),
-    framework::dataset::make("Axis",       {
+    make("Axis",       {
                                             0,
                                             0,
                                             0,
@@ -82,7 +84,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                             3,
                                             -2,
                                             0 }),
-    framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true })
+    make("Expected",   { false, false, false, false, true, true, true, true })
     ),
     input_info, output_info, axis, expected)
 {
@@ -99,18 +101,18 @@ using NEL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<Tensor, Acce
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       framework::dataset::make("Axis", { -1, 0, 1, 2 }),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       make("Axis", { -1, 0, 1, 2 }),
+                               make("Epsilon", { 1e-6 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       framework::dataset::make("Axis", { -1, 0, 2 }),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       make("Axis", { -1, 0, 2 }),
+                               make("Epsilon", { 1e-6 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -120,9 +122,9 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       framework::dataset::make("Axis", { -1, 0, 1, 2 }),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       make("Axis", { -1, 0, 1, 2 }),
+                               make("Epsilon", { 1e-6 })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -137,9 +139,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<half>, framework::Dat
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       framework::dataset::make("Axis", { -1, 0, 2 }),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                       make("Axis", { -1, 0, 2 }),
+                               make("Epsilon", { 1e-6 })))
 {
     if(CPUInfo::get().has_fp16())
     {

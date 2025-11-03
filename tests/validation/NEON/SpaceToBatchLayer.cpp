@@ -41,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(SpaceToBatchLayer)
 
@@ -50,27 +52,27 @@ using NESpaceToBatchLayerFixture = SpaceToBatchLayerValidationFixture<Tensor, Ac
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
+               make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Wrong data type block shape
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U, 4U), 1, DataType::F32),    // Wrong tensor shape
                                                      }),
-               framework::dataset::make("BlockShapeInfo",{ TensorInfo(TensorShape(2U), 1, DataType::S32),
+               make("BlockShapeInfo",{ TensorInfo(TensorShape(2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(2U), 1, DataType::S32),
                                                      }),
-               framework::dataset::make("PaddingsShapeInfo",{ TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
+               make("PaddingsShapeInfo",{ TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { true, false, false, false})
+               make("Expected", { true, false, false, false})
                ),
                input_info, block_shape_info, paddings_info, output_info, expected)
 {
@@ -78,23 +80,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
 DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
+               make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Negative block shapes
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong paddings
                                                      }),
-               framework::dataset::make("BlockShapeX", { 2, 2, 2, 2, 2 }),
-               framework::dataset::make("BlockShapeY", { 2, 2, -2, 2, 2 }),
-               framework::dataset::make("PadLeft", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
-               framework::dataset::make("PadRight", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
+               make("BlockShapeX", { 2, 2, 2, 2, 2 }),
+               make("BlockShapeY", { 2, 2, -2, 2, 2 }),
+               make("PadLeft", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
+               make("PadRight", { Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(0, 0), Size2D(3, 11) }),
+               make("OutputInfo",{ TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { true, false, false, false, false})
+               make("Expected", { true, false, false, false, false})
                ),
                input_info, block_shape_x, block_shape_y, padding_left, padding_right, output_info, expected)
 {
@@ -106,16 +108,16 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(), make("DataType",
                                                                                                                     DataType::F32),
-                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(), make("DataType",
                                                                                                                   DataType::F32),
-                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                          make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -124,15 +126,15 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16),
-                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                   make("DataType", DataType::F16),
+                                                                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F16),
-                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                 make("DataType", DataType::F16),
+                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -146,17 +148,17 @@ using NESpaceToBatchLayerQuantizedFixture = SpaceToBatchLayerValidationQuantized
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Small, NESpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { 1.f / 255.f, 9.f })))
+                                                                                                                       make("DataType", DataType::QASYMM8),
+                                                                                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                                                                                                       make("QuantizationInfo", { 1.f / 255.f, 9.f })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(Large, NESpaceToBatchLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(),
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                     framework::dataset::make("QuantizationInfo", { 1.f / 255.f, 9.f })))
+                                                                                                                     make("DataType", DataType::QASYMM8),
+                                                                                                                     make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+                                                                                                                     make("QuantizationInfo", { 1.f / 255.f, 9.f })))
 {
     // Validate output
     validate(Accessor(_target), _reference);

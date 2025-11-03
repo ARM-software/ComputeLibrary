@@ -204,10 +204,10 @@ constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
     )
 
 #define QSYMM16_DATASET_1D \
-    concat(concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1)), QSYMM16_DATASET_ITER(1, 2))
+    concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1), QSYMM16_DATASET_ITER(1, 2))
 
 #define QSYMM16_DATASET_2D \
-    concat(concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1)), QSYMM16_DATASET_ITER(3, 2))
+    concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1), QSYMM16_DATASET_ITER(3, 2))
 
 FIXTURE_DATA_TEST_CASE(RandomValue1D, NEQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_1D)
 {

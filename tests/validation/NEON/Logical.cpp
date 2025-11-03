@@ -37,6 +37,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 
 TEST_SUITE(LogicalAnd)
@@ -78,7 +80,7 @@ TEST_SUITE(LogicalNot)
 template <typename T>
 using NELogicalNotFixture = LogicalNotValidationFixture<Tensor, Accessor, NELogicalNot, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogicalNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogicalNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                     DataType::U8)))
 {
     // Validate output

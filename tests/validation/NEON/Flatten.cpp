@@ -40,21 +40,23 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(FlattenLayer)
 
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
+               make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
                                                        TensorInfo(TensorShape(4U, 5U, 4U), 1, DataType::F32),  // Mismatching shapes
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Valid
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { false, false, true})
+               make("Expected", { false, false, true})
                ),
                input_info, output_info, expected)
 {
@@ -69,13 +71,13 @@ using NEFlattenLayerFixture = FlattenLayerValidationFixture<Tensor, Accessor, NE
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<float>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                    framework::dataset::make("DataType", DataType::F32)))
+                                                                                                    make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                        framework::dataset::make("DataType", DataType::F32)))
+                                                                                                        make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -85,7 +87,7 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<half>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                   framework::dataset::make("DataType", DataType::F16)))
+                                                                                                   make("DataType", DataType::F16)))
 {
     // Only validate if the cpu architecture supports FP16.
     if(CPUInfo::get().has_fp16())
@@ -100,7 +102,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<half>, framework::Dataset
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                       framework::dataset::make("DataType", DataType::F16)))
+                                                                                                       make("DataType", DataType::F16)))
 {
     // Validate output
     if(CPUInfo::get().has_fp16())

@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
@@ -66,7 +68,7 @@ using NEAbsLayerQuantizedFixture = AbsQuantizedValidationFixture<Tensor, Accesso
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
                                                                                                      DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -80,7 +82,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerFixture<half>, framework::DatasetMode
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                    DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -99,14 +101,14 @@ TEST_SUITE_END() // FP16
 #endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                 DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                     DataType::F32)))
 {
     // Validate output
@@ -117,14 +119,14 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                   DataType::S32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsLayerFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsLayerFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                       DataType::S32)))
 {
     // Validate output
@@ -137,9 +139,9 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.2, -3) }),
-                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.5, 10) })))
+                       make("DataType", DataType::QASYMM8),
+                       make("InputQInfo", { QuantizationInfo(0.2, -3) }),
+                       make("OutputQInfo", { QuantizationInfo(0.5, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -149,9 +151,9 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.075, 6) }),
-                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.1, -7) })))
+                       make("DataType", DataType::QASYMM8_SIGNED),
+                       make("InputQInfo", { QuantizationInfo(0.075, 6) }),
+                       make("OutputQInfo", { QuantizationInfo(0.1, -7) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
