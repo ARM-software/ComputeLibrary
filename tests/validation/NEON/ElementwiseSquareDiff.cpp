@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
@@ -48,28 +50,28 @@ RelativeTolerance<float> tolerance_fp16(0.01f);
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 /** Input data sets **/
-const auto ElementwiseSquaredDiffQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8),
-                                                          framework::dataset::make("DataType",
+const auto ElementwiseSquaredDiffQASYMM8Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8),
+                                                          make("DataType",
                                                                                    DataType::QASYMM8));
 
-const auto ElementwiseSquaredDiffQASYMM8SignedDataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                                                                framework::dataset::make("DataType",
+const auto ElementwiseSquaredDiffQASYMM8SignedDataset = combine(make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::QASYMM8_SIGNED),
+                                                                make("DataType",
                                                                                          DataType::QASYMM8_SIGNED));
 
 /** Input data sets **/
-const auto ElementwiseSquaredDiffS32Dataset = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::S32),
-                                                      framework::dataset::make("DataType",
+const auto ElementwiseSquaredDiffS32Dataset = combine(make("DataType", DataType::S32), make("DataType", DataType::S32),
+                                                      make("DataType",
                                                                                DataType::S32));
-const auto ElementwiseSquaredDiffS16Dataset = combine(framework::dataset::make("DataType", { DataType::S16 }), framework::dataset::make("DataType", DataType::S16),
-                                                      framework::dataset::make("DataType", DataType::S16));
+const auto ElementwiseSquaredDiffS16Dataset = combine(make("DataType", { DataType::S16 }), make("DataType", DataType::S16),
+                                                      make("DataType", DataType::S16));
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const auto ElementwiseSquaredDiffFP16Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16),
-                                                       framework::dataset::make("DataType", DataType::F16));
+const auto ElementwiseSquaredDiffFP16Dataset = combine(make("DataType", DataType::F16), make("DataType", DataType::F16),
+                                                       make("DataType", DataType::F16));
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-const auto ElementwiseSquaredDiffFP32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32),
-                                                       framework::dataset::make("DataType", DataType::F32));
-const auto InPlaceDataSet    = framework::dataset::make("InPlace", { false, true });
-const auto OutOfPlaceDataSet = framework::dataset::make("InPlace", { false });
+const auto ElementwiseSquaredDiffFP32Dataset = combine(make("DataType", DataType::F32), make("DataType", DataType::F32),
+                                                       make("DataType", DataType::F32));
+const auto InPlaceDataSet    = make("InPlace", { false, true });
+const auto OutOfPlaceDataSet = make("InPlace", { false });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -81,28 +83,28 @@ using NEElementwiseSquaredDiffFixture = ElementwiseSquaredDiffValidationFixture<
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+               make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),      // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                         TensorInfo(TensorShape(1U, 1U, 2U), 1, DataType::QASYMM8_SIGNED),     // Mismatching types
                                                       }),
-               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+               make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(1U, 1U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(1U, 1U, 2U), 1, DataType::QASYMM8, QuantizationInfo(0.3f,1)),
                                                      }),
-               framework::dataset::make("Expected", { true, true, true, false, false, false})
+               make("Expected", { true, true, true, false, false, false})
                ),
                input1_info, input2_info, output_info, expected)
 {
@@ -136,9 +138,9 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                        ElementwiseSquaredDiffQASYMM8Dataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }),
+                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                       make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
+                       make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }),
                        OutOfPlaceDataSet))
 {
     // Validate output
@@ -150,9 +152,9 @@ using NEElementwiseSquaredDiffQuantizedBroadcastFixture = ElementwiseSquaredDiff
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseSquaredDiffQuantizedBroadcastFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallShapesBroadcast(),
                                                                ElementwiseSquaredDiffQASYMM8Dataset,
-                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }),
+                                                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                               make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
+                                       make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }),
                                OutOfPlaceDataSet))
 {
     // Validate output
@@ -161,9 +163,9 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseSquaredDiffQuantizedBroad
 FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEElementwiseSquaredDiffQuantizedBroadcastFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(datasets::TinyShapesBroadcastInplace(),
                                                                ElementwiseSquaredDiffQASYMM8Dataset,
-                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                               make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
+                                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
                                InPlaceDataSet))
 {
     // Validate output
@@ -174,9 +176,9 @@ TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                        ElementwiseSquaredDiffQASYMM8SignedDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f, 5) }),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(.5f, 5) }),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(.2f, 5) }),
+                       make("QuantizationInfo", { QuantizationInfo(1.f, 5) }),
+                       make("QuantizationInfo", { QuantizationInfo(.5f, 5) }),
+                       make("QuantizationInfo", { QuantizationInfo(.2f, 5) }),
                        OutOfPlaceDataSet))
 {
     // Validate output

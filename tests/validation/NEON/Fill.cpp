@@ -38,6 +38,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(Fill)
 
@@ -45,7 +47,7 @@ template <typename T>
 using NEFillFixture = FillFixture<Tensor, Accessor, NEFill, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -53,7 +55,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint8_t>, framework::DatasetMode:
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::S8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -61,7 +63,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int8_t>, framework::DatasetMode::
 TEST_SUITE_END() // S8
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::QASYMM8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -69,7 +71,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint8_t>, framework::DatasetMode:
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -77,7 +79,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint16_t>, framework::DatasetMode
 TEST_SUITE_END() // U16
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -85,7 +87,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int16_t>, framework::DatasetMode:
 TEST_SUITE_END() // S16
 
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -93,7 +95,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<half>, framework::DatasetMode::AL
 TEST_SUITE_END() // F16
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::U32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -101,7 +103,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<uint32_t>, framework::DatasetMode
 TEST_SUITE_END() // U32
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::S32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::S32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -109,7 +111,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<int32_t>, framework::DatasetMode:
 TEST_SUITE_END() // S32
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFillFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

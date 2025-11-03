@@ -40,10 +40,12 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
-const auto unstack_axis_dataset  = framework::dataset::make("Axis", -3, 3);
-const auto unstack_num_dataset   = framework::dataset::make("Num", 1, 3); // The length of the dimension axis
+const auto unstack_axis_dataset  = make("Axis", -3, 3);
+const auto unstack_num_dataset   = make("Num", 1, 3); // The length of the dimension axis
 const auto unstack_dataset_small = datasets::Small3DShapes() * unstack_axis_dataset * unstack_num_dataset;
 } //namespace
 
@@ -51,7 +53,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(Unstack)
 
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-                                                                      framework::dataset::make("InputInfo",
+                                                                      make("InputInfo",
 {
     TensorInfo(TensorShape(1U, 9U, 8U), 1, DataType::U8),   // Passes, 1 slice on x axis
     TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::U8),   // fails because axis > input's rank
@@ -60,15 +62,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     TensorInfo(TensorShape(13U, 7U, 5U), 1, DataType::S16), // fails, too few output slices
     TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::U8),   // fails mismatching data types
 }),
-                                                                      framework::dataset::make("OutputInfo",
+                                                                      make("OutputInfo",
 {
     std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::U8) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(2U, 3U), 1, DataType::U8) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(2U, 3U), 1, DataType::S32) },
 
     std::vector<TensorInfo>{ TensorInfo(TensorShape(7U, 5U), 1, DataType::S32), TensorInfo(TensorShape(7U, 5U), 1, DataType::S32), TensorInfo(TensorShape(7U, 5U), 1, DataType::S32) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(7U, 5U), 1, DataType::S16) }, std::vector<TensorInfo>{ TensorInfo(TensorShape(9U, 8U), 1, DataType::S32) },
 }),
-                                                                      framework::dataset::make("Axis", { -3, 3, -4, -3, 1, 1 }),
-                                                                      framework::dataset::make("Num", { 1, 1, 1, 1, 0, 1 }),
-                                                                      framework::dataset::make("Expected", { true, false, false, true, false, false })
+                                                                      make("Axis", { -3, 3, -4, -3, 1, 1 }),
+                                                                      make("Num", { 1, 1, 1, 1, 0, 1 }),
+                                                                      make("Expected", { true, false, false, true, false, false })
 ),
 input_info, output_info, axis, num, expected)
 {
@@ -85,7 +87,7 @@ template <typename T>
 using NEUnstackFixture = UnstackValidationFixture<Tensor, ITensor, Accessor, NEUnstack, T>;
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<float>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * framework::dataset::make("DataType", { DataType::F32 }))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<float>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * make("DataType", { DataType::F32 }))
 {
     ARM_COMPUTE_ERROR_ON(_target.size() != _reference.size());
     // Validate output
@@ -98,7 +100,7 @@ TEST_SUITE_END() // F32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<half>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * framework::dataset::make("DataType", { DataType::F16 }))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<half>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * make("DataType", { DataType::F16 }))
 {
     ARM_COMPUTE_ERROR_ON(_target.size() != _reference.size());
 
@@ -120,7 +122,7 @@ TEST_SUITE_END() // F16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(Quantized)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * framework::dataset::make("DataType", { DataType::QASYMM8 }))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEUnstackFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, unstack_dataset_small * make("DataType", { DataType::QASYMM8 }))
 {
     ARM_COMPUTE_ERROR_ON(_target.size() != _reference.size());
     // Validate output

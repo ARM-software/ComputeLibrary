@@ -36,6 +36,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 AbsoluteTolerance<float> absolute_tolerance_f32(0.001f);
@@ -59,19 +61,19 @@ const auto shape_conv_values_precommit = concat(datasets::Small4DShapes(), datas
 const auto shape_conv_values_nightly = concat(datasets::Large4DShapes(), datasets::Large3DShapes());
 
 /** Data layout to test */
-const auto data_layout_values = framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW });
+const auto data_layout_values = make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW });
 
 /** In-place flags to test */
-const auto in_place_values = framework::dataset::make("InPlace", { true, false });
+const auto in_place_values = make("InPlace", { true, false });
 
 /** With bias flags to test */
-const auto with_bias_values = framework::dataset::make("WithBias", { true, false });
+const auto with_bias_values = make("WithBias", { true, false });
 
 /** With gamma flags to test */
-const auto with_gamma_values = framework::dataset::make("WithGamma", { true, false });
+const auto with_gamma_values = make("WithGamma", { true, false });
 
 /** With beta flags to test */
-const auto with_beta_values = framework::dataset::make("WithBeta", { true, false });
+const auto with_beta_values = make("WithBeta", { true, false });
 
 TEST_SUITE(NEON)
 TEST_SUITE(FuseBatchNormalization)
@@ -81,7 +83,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<float>, framework::DatasetMode::PRECOMMIT,
                                         combine(
                                                         shape_conv_values_precommit,
-                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        make("DataType", { DataType::F32 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,
@@ -96,7 +98,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<float>, fra
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationConvFixture<float>, framework::DatasetMode::NIGHTLY,
                                         combine(
                                                         shape_conv_values_nightly,
-                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        make("DataType", { DataType::F32 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,
@@ -113,7 +115,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::PRECOMMIT,
                                         combine(
                                                         shape_conv_values_precommit,
-                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        make("DataType", { DataType::F16 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,
@@ -136,7 +138,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationConvFixture<half>, fram
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationConvFixture<half>, framework::DatasetMode::NIGHTLY,
                                         combine(
                                                         shape_conv_values_nightly,
-                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        make("DataType", { DataType::F16 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,
@@ -165,7 +167,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::PRECOMMIT,
                                         combine(
                                                         datasets::Small3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        make("DataType", { DataType::F32 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,
@@ -180,7 +182,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<float>, fram
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::NIGHTLY,
                                         combine(
                                                         datasets::Large3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F32 }),
+                                                        make("DataType", { DataType::F32 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,
@@ -198,7 +200,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::PRECOMMIT,
                                         combine(
                                                         datasets::Small3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        make("DataType", { DataType::F16 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,
@@ -221,7 +223,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFuseBatchNormalizationDWCFixture<half>, frame
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::NIGHTLY,
                                         combine(
                                                         datasets::Large3DShapes(),
-                                                        framework::dataset::make("DataType", { DataType::F16 }),
+                                                        make("DataType", { DataType::F16 }),
                                                         data_layout_values,
                                                         in_place_values,
                                                         with_bias_values,

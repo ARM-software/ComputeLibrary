@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 RelativeTolerance<float> relative_tolerance_f32(0.01f);
@@ -54,7 +56,7 @@ TEST_SUITE(RoiPooling)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Successful test
+               make("InputInfo", { TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Successful test
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::QASYMM8), // Successful test (quantized)
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Incorrect rois type
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Mismatching data type input/output
@@ -64,7 +66,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Mismatching height and width input/output
 
                                                      }),
-               framework::dataset::make("RoisInfo", { TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
+               make("RoisInfo", { TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::F16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
@@ -73,7 +75,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                       TensorInfo(TensorShape(4, 4U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
                                                     }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F16),
@@ -82,7 +84,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 5U, 3U, 4U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("PoolInfo", { ROIPoolingLayerInfo(7U, 7U, 1./8),
+               make("PoolInfo", { ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
@@ -91,7 +93,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       }),
-               framework::dataset::make("Expected", { true, true, false, false, false, false, false })
+               make("Expected", { true, true, false, false, false, false, false })
                ),
                input_info, rois_info, output_info, pool_info, expected)
 {
@@ -105,8 +107,8 @@ using NEROIPoolingLayerFloatFixture = ROIPoolingLayerFixture<Tensor, Accessor, N
 TEST_SUITE(Float)
 FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayerFloat, NEROIPoolingLayerFloatFixture, framework::DatasetMode::ALL,
                        framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
-                                                                               framework::dataset::make("DataType", { DataType::F32 })),
-                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                                                               make("DataType", { DataType::F32 })),
+                                                   make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
@@ -123,10 +125,10 @@ TEST_SUITE(QASYMM8)
 
 FIXTURE_DATA_TEST_CASE(Small, NEROIPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                                       framework::dataset::make("DataType", { DataType::QASYMM8 }),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }),
-                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
-                               framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+                                                       make("DataType", { DataType::QASYMM8 }),
+                                               make("DataLayout", { DataLayout::NCHW }),
+                                       make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
+                               make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);

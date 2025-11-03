@@ -41,22 +41,24 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(StridedSlice)
 
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 2U, 5U, 3U), 1, DataType::F32), // Invalid input shape
+        make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 2U, 5U, 3U), 1, DataType::F32), // Invalid input shape
                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32),         // Zero stride
                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32),         // Big number of coordinates
                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32),         // Invalid Coords/Strides
                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32)
         }),
-        framework::dataset::make("Starts", { Coordinates(3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0) }),
-        framework::dataset::make("Ends", { Coordinates(13, 3, 0),  Coordinates(13, 3, 1), Coordinates(13, 3, 1, 1), Coordinates(13, -1, 1), Coordinates(13, 3, 1) }),
-        framework::dataset::make("Strides", { BiStrides(2, 1, 1),  BiStrides(2, 0, 1), BiStrides(2, 1, 1), BiStrides(2, -1, 1), BiStrides(2, 1, 1) }),
-        framework::dataset::make("Expected", { false, false, false, false, true })
+        make("Starts", { Coordinates(3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0), Coordinates(3, 1, 0) }),
+        make("Ends", { Coordinates(13, 3, 0),  Coordinates(13, 3, 1), Coordinates(13, 3, 1, 1), Coordinates(13, -1, 1), Coordinates(13, 3, 1) }),
+        make("Strides", { BiStrides(2, 1, 1),  BiStrides(2, 0, 1), BiStrides(2, 1, 1), BiStrides(2, -1, 1), BiStrides(2, 1, 1) }),
+        make("Expected", { false, false, false, false, true })
                                                           ),
                input_info, starts, ends, strides, expected)
 {
@@ -75,7 +77,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEStridedSliceFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallStridedSliceDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::SmallStridedSliceDataset(), make("DataType", DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -91,7 +93,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEStridedSliceFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeStridedSliceDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::LargeStridedSliceDataset(), make("DataType", DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -110,7 +112,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEStridedSliceFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallStridedSliceDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::SmallStridedSliceDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -119,7 +121,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEStridedSliceFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeStridedSliceDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::LargeStridedSliceDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

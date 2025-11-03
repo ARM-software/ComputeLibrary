@@ -41,20 +41,22 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(PoolingLayer)
 
 template <typename T>
 using NEMaxUnpoolingLayerFixture = MaxUnpoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, NEMaxUnpoolingLayer, T>;
 
-const auto PoolingLayerIndicesDatasetFPSmall = combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2) }),
-                                                       framework::dataset::make("PadStride", { PadStrideInfo(2, 2, 0, 0), PadStrideInfo(2, 1, 0, 0) }));
+const auto PoolingLayerIndicesDatasetFPSmall = combine(make("PoolType", { PoolingType::MAX }), make("PoolingSize", { Size2D(2, 2) }),
+                                                       make("PadStride", { PadStrideInfo(2, 2, 0, 0), PadStrideInfo(2, 1, 0, 0) }));
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
+                                                                                                                   make("DataType", DataType::F32),
+                                                                                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                   ))
 {
@@ -65,8 +67,8 @@ TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                  framework::dataset::make("DataType", DataType::F16),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
+                                                                                                                  make("DataType", DataType::F16),
+                                                                                                                  make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                  ))
 {
@@ -89,8 +91,8 @@ TEST_SUITE_END() // Float
 TEST_SUITE(KernelSelection)
 
 DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
-               combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                       framework::dataset::make("DataType", { DataType::F32,
+               combine(make("CpuExt", std::string("NEON")),
+                       make("DataType", { DataType::F32,
                                                               DataType::F16,
                                                               DataType::QASYMM8,
                                                               DataType::QASYMM8_SIGNED

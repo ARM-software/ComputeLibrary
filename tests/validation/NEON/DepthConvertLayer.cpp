@@ -41,36 +41,38 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 /** Input data sets **/
-const auto DepthConvertLayerQASYMM8toF16Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F16));
-const auto DepthConvertLayerQASYMM8toF32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F32));
-const auto DepthConvertLayerQASYMM8toS32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::S32));
-const auto DepthConvertLayerU8toU16Dataset      = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U16));
-const auto DepthConvertLayerU8toS16Dataset      = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S16));
-const auto DepthConvertLayerU8toS32Dataset      = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S32));
-const auto DepthConvertLayerU8toF16Dataset      = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::F16));
-const auto DepthConvertLayerU8toF32Dataset      = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::F32));
-const auto DepthConvertLayerU16toU8Dataset      = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U8));
-const auto DepthConvertLayerU16toU32Dataset     = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U32));
-const auto DepthConvertLayerS16toU8Dataset      = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8));
-const auto DepthConvertLayerS16toS32Dataset     = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::S32));
-const auto DepthConvertLayerF16toU8Dataset      = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::U8));
-const auto DepthConvertLayerF16toF32Dataset     = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F32));
-const auto DepthConvertLayerF16toS32Dataset     = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::S32));
-const auto DepthConvertLayerF32toF16Dataset     = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F16));
-const auto DepthConvertLayerF32toS32Dataset     = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::S32));
-const auto DepthConvertLayerF32toU8Dataset      = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::U8));
+const auto DepthConvertLayerQASYMM8toF16Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::F16));
+const auto DepthConvertLayerQASYMM8toF32Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::F32));
+const auto DepthConvertLayerQASYMM8toS32Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::S32));
+const auto DepthConvertLayerU8toU16Dataset      = combine(make("DataType", DataType::U8), make("DataType", DataType::U16));
+const auto DepthConvertLayerU8toS16Dataset      = combine(make("DataType", DataType::U8), make("DataType", DataType::S16));
+const auto DepthConvertLayerU8toS32Dataset      = combine(make("DataType", DataType::U8), make("DataType", DataType::S32));
+const auto DepthConvertLayerU8toF16Dataset      = combine(make("DataType", DataType::U8), make("DataType", DataType::F16));
+const auto DepthConvertLayerU8toF32Dataset      = combine(make("DataType", DataType::U8), make("DataType", DataType::F32));
+const auto DepthConvertLayerU16toU8Dataset      = combine(make("DataType", DataType::U16), make("DataType", DataType::U8));
+const auto DepthConvertLayerU16toU32Dataset     = combine(make("DataType", DataType::U16), make("DataType", DataType::U32));
+const auto DepthConvertLayerS16toU8Dataset      = combine(make("DataType", DataType::S16), make("DataType", DataType::U8));
+const auto DepthConvertLayerS16toS32Dataset     = combine(make("DataType", DataType::S16), make("DataType", DataType::S32));
+const auto DepthConvertLayerF16toU8Dataset      = combine(make("DataType", DataType::F16), make("DataType", DataType::U8));
+const auto DepthConvertLayerF16toF32Dataset     = combine(make("DataType", DataType::F16), make("DataType", DataType::F32));
+const auto DepthConvertLayerF16toS32Dataset     = combine(make("DataType", DataType::F16), make("DataType", DataType::S32));
+const auto DepthConvertLayerF32toF16Dataset     = combine(make("DataType", DataType::F32), make("DataType", DataType::F16));
+const auto DepthConvertLayerF32toS32Dataset     = combine(make("DataType", DataType::F32), make("DataType", DataType::S32));
+const auto DepthConvertLayerF32toU8Dataset      = combine(make("DataType", DataType::F32), make("DataType", DataType::U8));
 
-const auto DepthConvertLayerS32toF32Dataset     = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F32));
-const auto DepthConvertLayerS32toQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::QASYMM8));
-const auto DepthConvertLayerS32toF16Dataset     = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F16));
-const auto DepthConvertLayerS32toU8Dataset      = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::U8));
+const auto DepthConvertLayerS32toF32Dataset     = combine(make("DataType", DataType::S32), make("DataType", DataType::F32));
+const auto DepthConvertLayerS32toQASYMM8Dataset = combine(make("DataType", DataType::S32), make("DataType", DataType::QASYMM8));
+const auto DepthConvertLayerS32toF16Dataset     = combine(make("DataType", DataType::S32), make("DataType", DataType::F16));
+const auto DepthConvertLayerS32toU8Dataset      = combine(make("DataType", DataType::S32), make("DataType", DataType::U8));
 
-const auto DepthConvertLayerF16toQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::QASYMM8));
-const auto DepthConvertLayerF32toQASYMM8Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8));
-const auto DepthConvertLayerZeroShiftDataset    = framework::dataset::make("Shift", 0);
+const auto DepthConvertLayerF16toQASYMM8Dataset = combine(make("DataType", DataType::F16), make("DataType", DataType::QASYMM8));
+const auto DepthConvertLayerF32toQASYMM8Dataset = combine(make("DataType", DataType::F32), make("DataType", DataType::QASYMM8));
+const auto DepthConvertLayerZeroShiftDataset    = make("Shift", 0);
 
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 constexpr AbsoluteTolerance<int32_t> tolerance_one_int32(1);
@@ -85,18 +87,18 @@ TEST_SUITE(DepthConvertLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U16),  // Invalid data type combination
+               make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U16),  // Invalid data type combination
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),  // Invalid data type combination
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),  // Mismatching shapes
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),  // Invalid shift
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),  // Valid
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                      }),
-               framework::dataset::make("Policy",{ ConvertPolicy::WRAP,
+               make("Policy",{ ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
@@ -104,9 +106,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                    ConvertPolicy::WRAP,
                                                    ConvertPolicy::WRAP,
                                                      }),
-               framework::dataset::make("Shift",{ 0, 0, 0, 1, 1, 1, 8, 1,
+               make("Shift",{ 0, 0, 0, 1, 1, 1, 8, 1,
                                                      }),
-               framework::dataset::make("Expected", { false, false, false, false, true})
+               make("Expected", { false, false, false, false, true})
                ),
                input_info, output_info, policy, shift, expected)
 {
@@ -141,18 +143,18 @@ using NEDepthConvertLayerQuantizedToS32Fixture = DepthConvertLayerValidationQuan
 TEST_SUITE(QASYMM8_to_F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerQuantizedToF32Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                        DepthConvertLayerQASYMM8toF32Dataset,
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                        DepthConvertLayerZeroShiftDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerQuantizedToF32Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
                        DepthConvertLayerQASYMM8toF32Dataset,
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                        DepthConvertLayerZeroShiftDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -162,18 +164,18 @@ TEST_SUITE_END() // QASYMM8_to_F32
 TEST_SUITE(QASYMM8_to_S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerQuantizedToS32Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                        DepthConvertLayerQASYMM8toS32Dataset,
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                        DepthConvertLayerZeroShiftDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerQuantizedToS32Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
                        DepthConvertLayerQASYMM8toS32Dataset,
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                        DepthConvertLayerZeroShiftDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -182,7 +184,7 @@ TEST_SUITE_END() // QASYMM8_to_S32
 
 TEST_SUITE(U8_to_U16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerU8toU16Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -190,7 +192,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU16Fixture<uint8_t>, frame
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerU8toU16Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -200,7 +202,7 @@ TEST_SUITE_END() // U8_to_U16
 
 TEST_SUITE(U8_to_S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerU8toS16Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -208,7 +210,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS16Fixture<uint8_t>, frame
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerU8toS16Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -217,7 +219,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS16Fixture<uint8_t>, frame
 TEST_SUITE_END() // U8_to_S16
 TEST_SUITE(U8_to_S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerU8toS32Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -225,7 +227,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<uint8_t>, frame
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS32Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerU8toS32Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -235,7 +237,7 @@ TEST_SUITE_END() // U8_to_S32
 
 TEST_SUITE(U8_to_F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerU8toF32Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -243,7 +245,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<uint8_t>, frame
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF32Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerU8toF32Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -254,7 +256,7 @@ TEST_SUITE_END() // U8_to_F32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(U8_to_F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerU8toF16Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -270,7 +272,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<uint8_t>, frame
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerU8toF16Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -289,14 +291,14 @@ TEST_SUITE_END() // U8_to_F36
 
 TEST_SUITE(U16_to_U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerU16toU8Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU8Fixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerU16toU8Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -306,14 +308,14 @@ TEST_SUITE_END() // U16_to_U8
 
 TEST_SUITE(U16_to_U32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU32Fixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerU16toU32Dataset,
-                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                       make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                        DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU32Fixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerU16toU32Dataset,
-                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                     make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                      DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -323,14 +325,14 @@ TEST_SUITE_END() // U16_to_U32
 
 TEST_SUITE(S16_to_U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerS16toU8Dataset,
-                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                     make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                      DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU8Fixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerS16toU8Dataset,
-                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                   make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                    DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -340,14 +342,14 @@ TEST_SUITE_END() // S16_to_U8
 
 TEST_SUITE(S16_to_S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerS16toS32Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS32Fixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerS16toS32Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -359,9 +361,9 @@ TEST_SUITE_END() // S16_to_S32
 TEST_SUITE(F16_to_QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToQASYMM8Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                                                                                                                        DepthConvertLayerF16toQASYMM8Dataset,
-                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                                                                                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                                                                                                                        DepthConvertLayerZeroShiftDataset,
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                                                                                                                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -376,9 +378,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToQASYMM8Fixture<half>, fram
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToQASYMM8Fixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
                                                                                                                      DepthConvertLayerF16toQASYMM8Dataset,
-                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                                                                                     make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                                                                                                                      DepthConvertLayerZeroShiftDataset,
-                                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                                                                                                                     make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -395,7 +397,7 @@ TEST_SUITE_END() // F16_to_QASYMM8
 
 TEST_SUITE(F16_to_U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerF16toU8Dataset,
-                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                  make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                   DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -410,7 +412,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<half>, framework
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU8Fixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerF16toU8Dataset,
-                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                        make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                 DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -428,7 +430,7 @@ TEST_SUITE_END() // F16_to_U8
 
 TEST_SUITE(F16_to_F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerF16toF32Dataset,
-                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                   make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                    DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -443,7 +445,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<half>, framewor
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF32Fixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerF16toF32Dataset,
-                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                 make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                  DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -461,7 +463,7 @@ TEST_SUITE_END() // F16_to_F32
 
 TEST_SUITE(F16_to_S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerF16toS32Dataset,
-                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                   make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                    DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -476,7 +478,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<half>, framewor
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS32Fixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerF16toS32Dataset,
-                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                 make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                  DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -496,9 +498,9 @@ TEST_SUITE_END() // F16_to_S32
 TEST_SUITE(QASYMM8_to_F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerQuantizedToF16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                        DepthConvertLayerQASYMM8toF16Dataset,
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                        DepthConvertLayerZeroShiftDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -513,9 +515,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerQuantizedToF16Fixture<uint8_
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerQuantizedToF16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
                        DepthConvertLayerQASYMM8toF16Dataset,
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                        DepthConvertLayerZeroShiftDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -532,7 +534,7 @@ TEST_SUITE_END() // QASYMM8_to_F16
 
 TEST_SUITE(F32_to_F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerF32toF16Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -547,7 +549,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<float>, framewo
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF16Fixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerF32toF16Dataset,
-                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                  make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                   DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -565,7 +567,7 @@ TEST_SUITE_END() // F32_to_F16
 
 TEST_SUITE(S32_to_F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerS32toF16Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -580,7 +582,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF16Fixture<int32_t>, frame
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF16Fixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerS32toF16Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     if(CPUInfo::get().has_fp16())
@@ -600,14 +602,14 @@ TEST_SUITE_END() // S32_to_F16
 
 TEST_SUITE(F32_to_S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToS32Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerF32toS32Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_one_int32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS32Fixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerF32toS32Dataset,
-                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                  make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                   DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -617,14 +619,14 @@ TEST_SUITE_END() // F32_to_S32
 
 TEST_SUITE(F32_to_U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerF32toU8Dataset,
-                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                   make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                    DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_one_int32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU8Fixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerF32toU8Dataset,
-                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                 make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                  DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -635,18 +637,18 @@ TEST_SUITE_END() // F32_to_U8
 TEST_SUITE(F32_to_QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToQASYMM8Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                                                                                                                         DepthConvertLayerF32toQASYMM8Dataset,
-                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                                                                                        make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                                                                                                                         DepthConvertLayerZeroShiftDataset,
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                                                                                                                        make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToQASYMM8Fixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
                                                                                                                       DepthConvertLayerF32toQASYMM8Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                                                                                                                       DepthConvertLayerZeroShiftDataset,
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                                                                                                                      make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -655,14 +657,14 @@ TEST_SUITE_END() // F32_to_QASYMM8
 
 TEST_SUITE(S32_to_F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerS32toF32Dataset,
-                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                       DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF32Fixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerS32toF32Dataset,
-                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                    make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                     DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
@@ -673,18 +675,18 @@ TEST_SUITE_END() // S32_to_F32
 TEST_SUITE(S32_to_QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToQASYMM8Fixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
                        DepthConvertLayerS32toQASYMM8Dataset,
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                        DepthConvertLayerZeroShiftDataset,
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToQASYMM8Fixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
                                                                                                                         DepthConvertLayerS32toQASYMM8Dataset,
-                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                                                                                        make("ConvertPolicy", { ConvertPolicy::SATURATE }),
                                                                                                                         DepthConvertLayerZeroShiftDataset,
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                                                                                                                        make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -693,14 +695,14 @@ TEST_SUITE_END() // S32_to_QASYMM8
 
 TEST_SUITE(S32_to_U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToU8Fixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), DepthConvertLayerS32toU8Dataset,
-                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                     make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                      DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToU8Fixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), DepthConvertLayerS32toU8Dataset,
-                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
+                                                                                                                   make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                                                                                                                    DepthConvertLayerZeroShiftDataset))
 {
     // Validate output

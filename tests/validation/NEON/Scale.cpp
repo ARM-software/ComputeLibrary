@@ -36,6 +36,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 using datasets::ScaleShapesBaseDataSet;
@@ -58,19 +60,19 @@ constexpr uint32_t num_elements_per_vector()
 }
 
 /** Quantization information data set */
-const auto QuantizationInfoSet = framework::dataset::make("QuantizationInfo",
+const auto QuantizationInfoSet = make("QuantizationInfo",
 {
     QuantizationInfo(0.5f, -10),
 });
 
 /** Quantization information data set */
-const auto InputQuantizationInfoSet = framework::dataset::make("InputQuantizationInfo",
+const auto InputQuantizationInfoSet = make("InputQuantizationInfo",
 {
     QuantizationInfo(0.5f, -10),
 });
 
 /** Quantization information data set */
-const auto OutputQuantizationInfoSet = framework::dataset::make("OutputQuantizationInfo",
+const auto OutputQuantizationInfoSet = make("OutputQuantizationInfo",
 {
     QuantizationInfo(0.2f, 20),
 });
@@ -258,10 +260,10 @@ TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
 TEST_SUITE_END() // Validate
 
 DATA_TEST_CASE(CheckNoPadding, framework::DatasetMode::ALL, combine(datasets::Medium4DShapes(),
-                                                                                            framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 }),
-                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::BILINEAR, InterpolationPolicy::NEAREST_NEIGHBOR }),
-                                                                            framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT }),
-                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
+                                                                                            make("DataType", { DataType::F32, DataType::QASYMM8 }),
+                                                                                    make("InterpolationPolicy", { InterpolationPolicy::BILINEAR, InterpolationPolicy::NEAREST_NEIGHBOR }),
+                                                                            make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT }),
+                                                                    make("DataLayout", { DataLayout::NHWC, DataLayout::NCHW })),
                shape, data_type, interpolation_policy, sampling_policy, data_layout)
 {
     constexpr auto  default_border_mode = BorderMode::CONSTANT;
@@ -292,10 +294,10 @@ DATA_TEST_CASE(CheckNoPadding, framework::DatasetMode::ALL, combine(datasets::Me
 }
 
 DATA_TEST_CASE(CheckNoPaddingInterpAREA, framework::DatasetMode::ALL, combine(datasets::Medium4DShapes(),
-                                                                                                      framework::dataset::make("DataType", { DataType::U8 }),
-                                                                                              framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::AREA }),
-                                                                                      framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT }),
-                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                      make("DataType", { DataType::U8 }),
+                                                                                              make("InterpolationPolicy", { InterpolationPolicy::AREA }),
+                                                                                      make("SamplingPolicy", { SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT }),
+                                                                              make("DataLayout", { DataLayout::NCHW })),
                shape, data_type, interpolation_policy, sampling_policy, data_layout)
 {
     constexpr auto  default_border_mode = BorderMode::CONSTANT;
@@ -339,8 +341,8 @@ using NEScaleQuantizedMixedDataLayoutFixture = ScaleValidationQuantizedFixture<T
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-const auto f32_shape      = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<float>())), framework::dataset::make("DataType", DataType::F32));
-const auto f32_shape_nhwc = combine(datasets::Small3DShapes(), framework::dataset::make("DataType", DataType::F32));
+const auto f32_shape      = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<float>())), make("DataType", DataType::F32));
+const auto f32_shape_nhwc = combine(datasets::Small3DShapes(), make("DataType", DataType::F32));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -398,8 +400,8 @@ FIXTURE_DATA_TEST_CASE(RunMediumAlignCornersNHWC, NEScaleFixture<float>, framewo
 TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-const auto f16_shape      = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<half>())), framework::dataset::make("DataType", DataType::F16));
-const auto f16_shape_nhwc = combine(datasets::Small3DShapes(), framework::dataset::make("DataType", DataType::F16));
+const auto f16_shape      = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<half>())), make("DataType", DataType::F16));
+const auto f16_shape_nhwc = combine(datasets::Small3DShapes(), make("DataType", DataType::F16));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape, ScaleSamplingPolicySet))
 {
     if(CPUInfo::get().has_fp16())
@@ -491,7 +493,7 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-const auto u8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::U8));
+const auto u8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), make("DataType", DataType::U8));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(u8_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -512,7 +514,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<uint8_t>, framework:
 }
 TEST_SUITE_END() // U8
 TEST_SUITE(S8)
-const auto s8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int8_t>())), framework::dataset::make("DataType", DataType::S8));
+const auto s8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int8_t>())), make("DataType", DataType::S8));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_S8_DATASET(s8_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -533,7 +535,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<int8_t>, framework::
 }
 TEST_SUITE_END() // S8
 TEST_SUITE(S16)
-const auto s16_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int16_t>())), framework::dataset::make("DataType", DataType::S16));
+const auto s16_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int16_t>())), make("DataType", DataType::S16));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(s16_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
@@ -557,7 +559,7 @@ TEST_SUITE_END() // Integer
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-const auto qasymm8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto qasymm8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), make("DataType", DataType::QASYMM8));
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {
     //Create valid region
@@ -599,7 +601,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleQuantizedFixture<uint8_t>, f
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-const auto                          qasymm8_signed_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int8_t>())), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+const auto                          qasymm8_signed_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int8_t>())), make("DataType", DataType::QASYMM8_SIGNED));
 constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_signed{ 1 };
 FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {

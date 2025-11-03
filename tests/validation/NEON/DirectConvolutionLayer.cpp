@@ -55,40 +55,40 @@ constexpr float                           tolerance_num = 0.07f;                
 #endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
 
 /** Direct convolution data set.for FP32 */
-const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX", { 0, 1 }),framework::dataset::make("PadY", { 0, 1 }),
-                                                        framework::dataset::make("KernelSize", 3)),
-                                        combine(framework::dataset::make("PadX", { 0, 2 }),framework::dataset::make("PadY", { 0, 2 }),
-                                                        framework::dataset::make("KernelSize", 3))),
-                                 combine(framework::dataset::make("PadX", { 0, 3 }),framework::dataset::make("PadY", { 0, 3 }),
-                                                 framework::dataset::make("KernelSize", 5)));
+const auto data_pad_f32 = concat(combine(make("PadX", { 0, 1 }),make("PadY", { 0, 1 }),
+                                         make("KernelSize", 3)),
+                                 combine(make("PadX", { 0, 2 }),make("PadY", { 0, 2 }),
+                                         make("KernelSize", 3)),
+                                 combine(make("PadX", { 0, 3 }),make("PadY", { 0, 3 }),
+                                         make("KernelSize", 5)));
 
 /** Direct convolution data set.for FP16 */
-const auto data_pad_f16 = concat(combine(framework::dataset::make("PadX", { 0, 1 }),framework::dataset::make("PadY", { 0, 1 }),
-                                                 framework::dataset::make("KernelSize", 3)),
-                                 combine(framework::dataset::make("PadX", { 0 }),framework::dataset::make("PadY", { 0 }),
-                                                 framework::dataset::make("KernelSize", 1)));
+const auto data_pad_f16 = concat(combine(make("PadX", { 0, 1 }),make("PadY", { 0, 1 }),
+                                                 make("KernelSize", 3)),
+                                 combine(make("PadX", { 0 }),make("PadY", { 0 }),
+                                                 make("KernelSize", 1)));
 
-const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),framework::dataset::make("StrideX", { 1, 2, 3, 4 }),framework::dataset::make("StrideY", { 1, 2, 3, 4 }),
+const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),make("StrideX", { 1, 2, 3, 4 }),make("StrideY", { 1, 2, 3, 4 }),
                                               data_pad_f32);
 
-const auto data_f16 = combine(datasets::SmallDirectConvolutionShapes(),framework::dataset::make("StrideX", { 1, 2, 3 }),framework::dataset::make("StrideY", { 1, 2, 3 }),
+const auto data_f16 = combine(datasets::SmallDirectConvolutionShapes(),make("StrideX", { 1, 2, 3 }),make("StrideY", { 1, 2, 3 }),
                                               data_pad_f16);
 
-const auto data_prec = combine(datasets::SmallDirectConvolutionShapes(),framework::dataset::make("StrideX", { 1 }),framework::dataset::make("StrideY", { 1 }),framework::dataset::make("PadX", { 1 }),framework::dataset::make("PadY", { 1 }),
-                                                               framework::dataset::make("KernelSize", 3));
+const auto data_prec = combine(datasets::SmallDirectConvolutionShapes(),make("StrideX", { 1 }),make("StrideY", { 1 }),make("PadX", { 1 }),make("PadY", { 1 }),
+                                                               make("KernelSize", 3));
 
-const auto data9x9 = combine(datasets::SmallDirectConvolutionShapes(),framework::dataset::make("StrideX", { 1, 2, 3 }),framework::dataset::make("StrideY", { 1, 2, 3 }),framework::dataset::make("PadX", { 0, 2 }),framework::dataset::make("PadY", { 0, 3 }),
-                                                             framework::dataset::make("KernelSize", 9));
+const auto data9x9 = combine(datasets::SmallDirectConvolutionShapes(),make("StrideX", { 1, 2, 3 }),make("StrideY", { 1, 2, 3 }),make("PadX", { 0, 2 }),make("PadY", { 0, 3 }),
+                                                             make("KernelSize", 9));
 
-const auto data8x8 = combine(datasets::SmallDirectConvolutionShapes(),framework::dataset::make("StrideX", { 1, 2, 3 }),framework::dataset::make("StrideY", { 1, 2, 3 }),framework::dataset::make("PadX", { 0 }),framework::dataset::make("PadY", { 0 }),
-                                                             framework::dataset::make("KernelSize", 8));
+const auto data8x8 = combine(datasets::SmallDirectConvolutionShapes(),make("StrideX", { 1, 2, 3 }),make("StrideY", { 1, 2, 3 }),make("PadX", { 0 }),make("PadY", { 0 }),
+                                                             make("KernelSize", 8));
 
-const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4, 5 }));
-const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4, 5 }));
+const auto data_f32_nightly = combine(data_f32, make("NumKernels", { 1, 4, 5 }));
+const auto data_f16_nightly = combine(data_f16, make("NumKernels", { 1, 4, 5 }));
 
-const auto data_precommit    = combine(data_prec, framework::dataset::make("NumKernels", { 1 }));
-const auto data_precommit9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 4 }));
-const auto data_precommit8x8 = combine(data8x8, framework::dataset::make("NumKernels", { 4 }));
+const auto data_precommit    = combine(data_prec, make("NumKernels", { 1 }));
+const auto data_precommit9x9 = combine(data9x9, make("NumKernels", { 4 }));
+const auto data_precommit8x8 = combine(data8x8, make("NumKernels", { 4 }));
 
 /* The following tests is from real use-case that made DirectConvolution
  * overflows in terms of its tensor indexing. This test case is using
@@ -101,11 +101,11 @@ const auto data_precommit8x8 = combine(data8x8, framework::dataset::make("NumKer
  */
 constexpr AbsoluteTolerance<float> usecase_tolerance_fp32(0.05f);
 
-const auto data_nightly_usecase = combine(framework::dataset::make("InputShape", { TensorShape{ 3U, 800U, 800U } }),framework::dataset::make("StrideX", { 1 }),framework::dataset::make("StrideY", { 1 }),framework::dataset::make("PadX", { 4 }),framework::dataset::make("PadY", { 4 }),framework::dataset::make("KernelSize", 9),
-                                                                                  framework::dataset::make("NumKernels", { 16 }));
+const auto data_nightly_usecase = combine(make("InputShape", { TensorShape{ 3U, 800U, 800U } }),make("StrideX", { 1 }),make("StrideY", { 1 }),make("PadX", { 4 }),make("PadY", { 4 }),make("KernelSize", 9),
+                                                                                  make("NumKernels", { 16 }));
 
 /** Activation function Dataset*/
-const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+const auto ActivationFunctionsDataset = make("ActivationInfo",
 {
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
@@ -161,7 +161,7 @@ TEST_CASE(NoBias, framework::DatasetMode::PRECOMMIT)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid: Mismatching data type input/weights
+        make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid: Mismatching data type input/weights
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid: Mismatching input feature maps
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported kernel width
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported non-rectangular weights dimensions
@@ -171,7 +171,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported biases dimensions
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid output size
                                               }),
-        framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16),
+        make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16),
                                                  TensorInfo(TensorShape(3U, 3U, 3U, 4U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(9U, 9U, 2U, 4U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(5U, 3U, 2U, 4U), 1, DataType::F32),
@@ -181,7 +181,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                  TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
                                               }),
-        framework::dataset::make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1, DataType::F32),
+        make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1, DataType::F32),
@@ -191,7 +191,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                 TensorInfo(TensorShape(4U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1, DataType::F32),
                                               }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+        make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
@@ -201,7 +201,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(26U, 11U, 4U), 1, DataType::F32),
                                               }),
-        framework::dataset::make("ConvInfo",  { PadStrideInfo(1, 1, 0, 0),
+        make("ConvInfo",  { PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
@@ -211,7 +211,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
                                                }),
-        framework::dataset::make("ActivationInfo",
+        make("ActivationInfo",
 {
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -223,7 +223,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
 }),
-        framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false })
+        make("Expected", { false, false, false, false, false, false, false, false, false })
         ),
         input_info, weights_info, biases_info, output_info, conv_info, act_info, expected)
 {
@@ -234,9 +234,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 // *INDENT-ON*
 
 DATA_TEST_CASE(NoPaddingNHWCKernel, framework::DatasetMode::ALL, combine(data_precommit,
-                                                                                         framework::dataset::make("DataType", DataType::F32),
+                                                                                         make("DataType", DataType::F32),
                                                                                  ActivationFunctionsDataset,
-                                                                         framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                         make("DataLayout", { DataLayout::NHWC })),
 
                shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, act_info, data_layout)
 {
@@ -319,52 +319,52 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit, make("DataType",
                                                                                                                     DataType::F32),
                                                                                                                     ActivationFunctionsDataset,
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                    make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit,
-                       framework::dataset::make("DataType", DataType::F32),
+                       make("DataType", DataType::F32),
                        ActivationFunctionsDataset,
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall8x8, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit8x8, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall8x8, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit8x8, make("DataType",
                                                                                                                        DataType::F32),
                                                                                                                        ActivationFunctionsDataset,
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall9x9, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit9x9, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall9x9, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(data_precommit9x9, make("DataType",
                                                                                                                        DataType::F32),
                                                                                                                        ActivationFunctionsDataset,
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+                                                                                                                       make("DataLayout", { DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(data_f32_nightly, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(data_f32_nightly, make("DataType",
                                                                                                                   DataType::F32),
                                                                                                                   ActivationFunctionsDataset,
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                  make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeUsecase, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(data_nightly_usecase, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLargeUsecase, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(data_nightly_usecase, make("DataType",
                        DataType::F32),
-                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo() }),
-                       framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+                       make("ActivationInfo", { ActivationLayerInfo() }),
+                       make("DataLayout", { DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, usecase_tolerance_fp32);

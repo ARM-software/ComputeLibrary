@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_JOIN
-#define ARM_COMPUTE_TEST_DATASET_JOIN
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_JOINDATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_JOINDATASET_H
 
 #include "Dataset.h"
 
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 namespace arm_compute
@@ -161,8 +162,19 @@ JoinDataset<T, U> concat(T &&dataset1, U &&dataset2)
 {
     return JoinDataset<T, U>(std::forward<T>(dataset1), std::forward<U>(dataset2));
 }
+
+template <typename T, typename U, typename V, typename... Rest>
+auto concat(T &&dataset1, U &&dataset2, V &&dataset3, Rest &&... rest)
+    -> decltype(concat(concat(std::forward<T>(dataset1), std::forward<U>(dataset2)),
+                       std::forward<V>(dataset3),
+                       std::forward<Rest>(rest)...))
+{
+    return concat(concat(std::forward<T>(dataset1), std::forward<U>(dataset2)),
+                  std::forward<V>(dataset3),
+                  std::forward<Rest>(rest)...);
+}
 } // namespace dataset
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_JOIN */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_JOINDATASET_H

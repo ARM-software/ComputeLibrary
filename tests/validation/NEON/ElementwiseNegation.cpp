@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
@@ -67,8 +69,8 @@ TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENegLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                             framework::dataset::make("DataType", DataType::F16),
-                                                                                                     framework::dataset::make("InPlace", { true, false })))
+                                                                                                             make("DataType", DataType::F16),
+                                                                                                     make("InPlace", { true, false })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -82,8 +84,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NENegLayerFixture<half>, framework::DatasetMode
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NENegLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                           framework::dataset::make("DataType", DataType::F16),
-                                                                                                   framework::dataset::make("InPlace", { false })))
+                                                                                                           make("DataType", DataType::F16),
+                                                                                                   make("InPlace", { false })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -102,16 +104,16 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENegLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                        framework::dataset::make("DataType", DataType::F32),
-                                                                                                framework::dataset::make("InPlace", { true, false })))
+                                                                                                        make("DataType", DataType::F32),
+                                                                                                make("InPlace", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NENegLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                            framework::dataset::make("DataType", DataType::F32),
-                                                                                                    framework::dataset::make("InPlace", { false })))
+                                                                                                            make("DataType", DataType::F32),
+                                                                                                    make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -122,16 +124,16 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Integer)
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENegLayerFixture<int32_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                                                          framework::dataset::make("DataType", DataType::S32),
-                                                                                                  framework::dataset::make("InPlace", { true, false })))
+                                                                                                          make("DataType", DataType::S32),
+                                                                                                  make("InPlace", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NENegLayerFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                              framework::dataset::make("DataType", DataType::S32),
-                                                                                                      framework::dataset::make("InPlace", { false })))
+                                                                                                              make("DataType", DataType::S32),
+                                                                                                      make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -143,9 +145,9 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENegLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.2, -3) }),
-                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.5, 10) })))
+                       make("DataType", DataType::QASYMM8),
+                       make("InputQInfo", { QuantizationInfo(0.2, -3) }),
+                       make("OutputQInfo", { QuantizationInfo(0.5, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -155,9 +157,9 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENegLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.075, 6) }),
-                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.1, -7) })))
+                       make("DataType", DataType::QASYMM8_SIGNED),
+                       make("InputQInfo", { QuantizationInfo(0.075, 6) }),
+                       make("OutputQInfo", { QuantizationInfo(0.1, -7) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);

@@ -41,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 /** Tolerance for float operations */
@@ -57,15 +59,15 @@ TEST_SUITE(MeanStdDevNormalizationLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data type input/output
+               make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data type input/output
                                                        TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching shapes
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
+               make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("Expected", { false, false, true })
+               make("Expected", { false, false, true })
                ),
                input_info, output_info, expected)
 {
@@ -81,9 +83,9 @@ TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::F16),
-                       framework::dataset::make("InPlace", { false, true }),
-                       framework::dataset::make("Epsilon", { 1e-3 })))
+                       make("DataType", DataType::F16),
+                       make("InPlace", { false, true }),
+                       make("Epsilon", { 1e-3 })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -97,9 +99,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, fr
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DMeanStdDevNormalizationShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::F16),
-                                                                                                                       framework::dataset::make("InPlace", { false, true }),
-                                                                                                                       framework::dataset::make("Epsilon", { 1e-8 })))
+                                                                                                                       make("DataType", DataType::F16),
+                                                                                                                       make("InPlace", { false, true }),
+                                                                                                                       make("Epsilon", { 1e-8 })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -117,17 +119,17 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::F32),
-                       framework::dataset::make("InPlace", { false, true }),
-                       framework::dataset::make("Epsilon", { 1e-7 })))
+                       make("DataType", DataType::F32),
+                       make("InPlace", { false, true }),
+                       make("Epsilon", { 1e-7 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DMeanStdDevNormalizationShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::F32),
-                                                                                                                        framework::dataset::make("InPlace", { false, true }),
-                                                                                                                        framework::dataset::make("Epsilon", { 1e-8 })))
+                                                                                                                        make("DataType", DataType::F32),
+                                                                                                                        make("InPlace", { false, true }),
+                                                                                                                        make("Epsilon", { 1e-8 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -139,9 +141,9 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8),
-                       framework::dataset::make("InPlace", { false, true }),
-                       framework::dataset::make("Epsilon", { 1e-7 })))
+                       make("DataType", DataType::QASYMM8),
+                       make("InPlace", { false, true }),
+                       make("Epsilon", { 1e-7 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);

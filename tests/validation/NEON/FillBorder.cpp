@@ -36,24 +36,26 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(FillBorder)
 
 // *INDENT-OFF*
 // clang-format off
-const auto PaddingSizesDataset = concat(concat(
-                                 framework::dataset::make("PaddingSize", PaddingSize{ 0 }),
-                                 framework::dataset::make("PaddingSize", PaddingSize{ 1, 0, 1, 2 })),
-                                 framework::dataset::make("PaddingSize", PaddingSize{ 10 }));
+const auto PaddingSizesDataset = concat(
+                                 make("PaddingSize", PaddingSize{ 0 }),
+                                 make("PaddingSize", PaddingSize{ 1, 0, 1, 2 }),
+                                 make("PaddingSize", PaddingSize{ 10 }));
 
-const auto BorderSizesDataset  = framework::dataset::make("BorderSize", 0, 6);
+const auto BorderSizesDataset  = make("BorderSize", 0, 6);
 
 DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(
                datasets::SmallShapes(),
                datasets::BorderModes(),
                BorderSizesDataset,
                PaddingSizesDataset,
-               framework::dataset::make("DataType", DataType::U8)),
+               make("DataType", DataType::U8)),
                shape, border_mode, size, padding, data_type)
 // clang-format on
 // *INDENT-ON*

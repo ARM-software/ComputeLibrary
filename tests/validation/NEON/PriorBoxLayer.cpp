@@ -39,6 +39,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
@@ -53,15 +55,15 @@ using NEPriorBoxLayerFixture = PriorBoxLayerValidationFixture<Tensor, Accessor, 
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32)
+               make("Input1Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32)
                                                      }),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32)
+               make("Input2Info", { TensorInfo(TensorShape(10U, 10U, 2U), 1, DataType::F32)
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(1200U, 2U), 1, DataType::F32)
+               make("OutputInfo",{ TensorInfo(TensorShape(1200U, 2U), 1, DataType::F32)
                                                      }),
-               framework::dataset::make("PriorBoxInfo",{ PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>())
+               make("PriorBoxInfo",{ PriorBoxLayerInfo(std::vector<float>(1), std::vector<float>(1), 0, true, true, std::vector<float>(1), std::vector<float>(1), Coordinates2D{8, 8}, std::array<float, 2>())
                                                      }),
-               framework::dataset::make("Expected", { true})
+               make("Expected", { true})
                ),
                input1_info, input2_info, output_info, info, expected)
 {
@@ -74,15 +76,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallPriorBoxLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32),
-                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                   make("DataType", DataType::F32),
+                                                                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, 0);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargePriorBoxLayerDataset(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32),
-                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                 make("DataType", DataType::F32),
+                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, 0);

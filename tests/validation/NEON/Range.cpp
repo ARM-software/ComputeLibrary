@@ -40,16 +40,18 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 constexpr RelativeTolerance<float> tolerance(0.01f);
 constexpr AbsoluteTolerance<float> abs_tolerance(0.02f);
 
-const auto start_dataset          = framework::dataset::make("Start", { float(3), float(-17), float(16) });
-const auto unsigned_start_dataset = framework::dataset::make("Start", { float(3), float(16) });
-const auto float_step_dataset     = framework::dataset::make("Step", { float(1), float(-0.2f), float(0.2), float(12.2), float(-12.2), float(-1.2), float(-3), float(3) });
-const auto step_dataset           = framework::dataset::make("Step", { float(1), float(12), float(-12), float(-1), float(-3), float(3) });
-const auto unsigned_step_dataset  = framework::dataset::make("Step", { float(1), float(12), float(3) });
+const auto start_dataset          = make("Start", { float(3), float(-17), float(16) });
+const auto unsigned_start_dataset = make("Start", { float(3), float(16) });
+const auto float_step_dataset     = make("Step", { float(1), float(-0.2f), float(0.2), float(12.2), float(-12.2), float(-1.2), float(-3), float(3) });
+const auto step_dataset           = make("Step", { float(1), float(12), float(-12), float(-1), float(-3), float(3) });
+const auto unsigned_step_dataset  = make("Step", { float(1), float(12), float(3) });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -59,7 +61,7 @@ TEST_SUITE(Range)
 // clang-format off
 
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+               make("OutputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(27U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U), 1, DataType::U8),
@@ -69,7 +71,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                         TensorInfo(TensorShape(10U), 1, DataType::QASYMM8),
                                                         TensorInfo(TensorShape(10U), 1, DataType::U8),
                                                       }),
-               framework::dataset::make("Start",{ 0.0f,
+               make("Start",{ 0.0f,
                                                   15.0f,
                                                   1500.0f,
                                                   100.0f,
@@ -79,7 +81,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                   10.0f,
                                                   10.0f
                                                 }),
-               framework::dataset::make("End",{ 100.0f,
+               make("End",{ 100.0f,
                                                 15.0f,
                                                 2500.0f,
                                                 -1000.0f,
@@ -89,7 +91,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                 100.0f,
                                                 100.0f
                                               }),
-               framework::dataset::make("Step",{ 100.0f,
+               make("Step",{ 100.0f,
                                                  15.0f,
                                                  10.0f,
                                                  100.0f,
@@ -99,7 +101,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                  10.0f,
                                                  10.0f
                                               }),
-               framework::dataset::make("Expected", { false, // 1-D tensor expected
+               make("Expected", { false, // 1-D tensor expected
                                                     false, // start == end
                                                     false, // output vector size insufficient
                                                     false, // sign of step incorrect
@@ -122,10 +124,10 @@ using NERangeFixture = RangeFixture<Tensor, Accessor, NERange, T>;
 
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                                 framework::dataset::make("DataType", DataType::U8),
+                                                                                                                 make("DataType", DataType::U8),
                                                                                                                  unsigned_start_dataset,
                                                                                                              unsigned_step_dataset,
-                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
+                                                                                                     make("QuantizationInfo", { QuantizationInfo() })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance, 0.f, abs_tolerance);
@@ -134,10 +136,10 @@ TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                                 framework::dataset::make("DataType", DataType::S16),
+                                                                                                                 make("DataType", DataType::S16),
                                                                                                                  start_dataset,
                                                                                                              step_dataset,
-                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
+                                                                                                     make("QuantizationInfo", { QuantizationInfo() })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance, 0.f, abs_tolerance);
@@ -148,10 +150,10 @@ TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<half>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                              framework::dataset::make("DataType", DataType::F16),
+                                                                                                              make("DataType", DataType::F16),
                                                                                                               start_dataset,
                                                                                                           float_step_dataset,
-                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
+                                                                                                  make("QuantizationInfo", { QuantizationInfo() })))
 {
     if(CPUInfo::get().has_fp16())
     {
@@ -169,10 +171,10 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<float>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                               framework::dataset::make("DataType", DataType::F32),
+                                                                                                               make("DataType", DataType::F32),
                                                                                                                start_dataset,
                                                                                                            float_step_dataset,
-                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo() })))
+                                                                                                   make("QuantizationInfo", { QuantizationInfo() })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance, 0.f, abs_tolerance);

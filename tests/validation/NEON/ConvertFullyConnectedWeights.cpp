@@ -39,9 +39,11 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
-auto params = combine(framework::dataset::make("WeightsWidth", { 16, 32, 64 }), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+auto params = combine(make("WeightsWidth", { 16, 32, 64 }), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -50,27 +52,27 @@ TEST_SUITE(ConvertFullyConnectedWeights)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching data types
+    make("InputInfo", { TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching data types
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),     // Valid
                                             TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching shapes
                                             TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Wrong DataLayout
                                           }),
-    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 42U), 1, DataType::F16),
+    make("OutputInfo",{ TensorInfo(TensorShape(27U, 42U), 1, DataType::F16),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                           }),
-    framework::dataset::make("OriginalInput", { TensorShape(7U, 3U, 2U),
+    make("OriginalInput", { TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                }),
-    framework::dataset::make("DataLayout", { DataLayout::NCHW,
+    make("DataLayout", { DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::UNKNOWN,
                                                }),
-    framework::dataset::make("Expected", { false, true, false, false})
+    make("Expected", { false, true, false, false})
     ),
     input_info, output_info, original_input_shape, data_layout, expected)
 {
@@ -84,13 +86,13 @@ template <typename T>
 using NEConvertFullyConnectedWeightsFixture = ConvertFullyConnectedWeightsValidationFixture<Tensor, Accessor, NEConvertFullyConnectedWeights, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, make("DataType",
                                                                                                                     DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, make("DataType",
                                                                                                                         DataType::F32)))
 {
     // Validate output
@@ -100,7 +102,7 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, make("DataType",
                                                                                                                    DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -114,7 +116,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<half>, fr
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params, make("DataType",
                                                                                                                        DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -132,14 +134,14 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), params, make("DataType",
                                                                                                                       DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), params,
-                       framework::dataset::make("DataType",
+                       make("DataType",
                                                 DataType::QASYMM8)))
 {
     // Validate output

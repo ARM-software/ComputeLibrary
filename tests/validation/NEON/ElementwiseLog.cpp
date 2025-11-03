@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
@@ -68,7 +70,7 @@ using NELogLayerQuantizedFixture = LogQuantizedValidationFixture<Tensor, Accesso
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
                                                                                                      DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -82,7 +84,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerFixture<half>, framework::DatasetMode
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NELogLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NELogLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                    DataType::F16)))
 {
     if(CPUInfo::get().has_fp16())
@@ -101,14 +103,14 @@ TEST_SUITE_END() // FP16
 #endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                 DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NELogLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NELogLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
                                                                                                     DataType::F32)))
 {
     // Validate output
@@ -121,9 +123,9 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(10.5, 0), QuantizationInfo(0.5, -10)  }),
-                       framework::dataset::make("OutputQInfo", { QuantizationInfo(5, 10) })))
+                       make("DataType", DataType::QASYMM8),
+                       make("InputQInfo", { QuantizationInfo(10.5, 0), QuantizationInfo(0.5, -10)  }),
+                       make("OutputQInfo", { QuantizationInfo(5, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -133,9 +135,9 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(
                        datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.75, -128) }),
-                       framework::dataset::make("OutputQInfo", { QuantizationInfo(12.5, -2) })))
+                       make("DataType", DataType::QASYMM8_SIGNED),
+                       make("InputQInfo", { QuantizationInfo(0.75, -128) }),
+                       make("OutputQInfo", { QuantizationInfo(12.5, -2) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);

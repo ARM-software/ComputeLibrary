@@ -40,13 +40,15 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(BitwiseOr)
 
 template <typename T>
 using NEBitwiseOrFixture = BitwiseOrValidationFixture<Tensor, Accessor, NEBitwiseOr, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBitwiseOrFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBitwiseOrFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
                                                                                                    DataType::U8)))
 {
     // Validate output
