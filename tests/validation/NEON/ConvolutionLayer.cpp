@@ -1014,7 +1014,8 @@ FIXTURE_DATA_TEST_CASE(UC2_2_CpuGemmConv2d_FastMath,
                        combine(make("DataType", {DataType::F32}),
                                make("QueryWeightFormat", {arm_compute::WeightFormat::OHWIo8i4_bf16})))
 {
-    if (Scheduler::get().cpu_info().has_bf16() && (arm_gemm::utils::get_vector_length<float>() == 8))
+    if (Scheduler::get().cpu_info().has_bf16() && Scheduler::get().cpu_info().has_sve() &&
+        (arm_gemm::utils::get_vector_length<float>() == 8))
     {
         ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT_EQUAL(_computed_weight_format, arm_compute::WeightFormat::OHWIo8i4_bf16,
@@ -1032,7 +1033,8 @@ FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer_FastMath,
                        combine(make("DataType", {DataType::F32}),
                                make("QueryWeightFormat", {arm_compute::WeightFormat::OHWIo8i4_bf16})))
 {
-    if (Scheduler::get().cpu_info().has_bf16() && (arm_gemm::utils::get_vector_length<float>() == 8))
+    if (Scheduler::get().cpu_info().has_bf16() && Scheduler::get().cpu_info().has_sve() &&
+        (arm_gemm::utils::get_vector_length<float>() == 8))
     {
         ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo8i4_bf16,
