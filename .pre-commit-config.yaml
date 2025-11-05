@@ -101,10 +101,6 @@ repos:
     hooks:
       - id: clang-format
         files: .*\.(cpp|h|hpp|hh|cc|inl|c)$
-        exclude: |
-            (?x)^(
-              tests/.*
-            )$
         stages: [pre-commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
