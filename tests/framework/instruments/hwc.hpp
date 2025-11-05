@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_HWC
-#define ARM_COMPUTE_TEST_HWC
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_HWC_HPP
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_HWC_HPP
 
 #include "hwc_names.hpp"
-
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -58,7 +57,7 @@ union uk_header
 };
 
 #define BASE_GPU_NUM_TEXTURE_FEATURES_REGISTERS 3
-#define BASE_MAX_COHERENT_GROUPS 16
+#define BASE_MAX_COHERENT_GROUPS                16
 
 struct mali_base_gpu_core_props
 {
@@ -164,33 +163,33 @@ struct kbase_uk_gpuprops
     mali_base_gpu_props props;
 };
 
-#define KBASE_GPUPROP_VALUE_SIZE_U8 (0x0)
+#define KBASE_GPUPROP_VALUE_SIZE_U8  (0x0)
 #define KBASE_GPUPROP_VALUE_SIZE_U16 (0x1)
 #define KBASE_GPUPROP_VALUE_SIZE_U32 (0x2)
 #define KBASE_GPUPROP_VALUE_SIZE_U64 (0x3)
 
-#define KBASE_GPUPROP_PRODUCT_ID 1
+#define KBASE_GPUPROP_PRODUCT_ID     1
 #define KBASE_GPUPROP_MINOR_REVISION 3
 #define KBASE_GPUPROP_MAJOR_REVISION 4
 
-#define KBASE_GPUPROP_COHERENCY_NUM_GROUPS 61
+#define KBASE_GPUPROP_COHERENCY_NUM_GROUPS      61
 #define KBASE_GPUPROP_COHERENCY_NUM_CORE_GROUPS 62
-#define KBASE_GPUPROP_COHERENCY_GROUP_0 64
-#define KBASE_GPUPROP_COHERENCY_GROUP_1 65
-#define KBASE_GPUPROP_COHERENCY_GROUP_2 66
-#define KBASE_GPUPROP_COHERENCY_GROUP_3 67
-#define KBASE_GPUPROP_COHERENCY_GROUP_4 68
-#define KBASE_GPUPROP_COHERENCY_GROUP_5 69
-#define KBASE_GPUPROP_COHERENCY_GROUP_6 70
-#define KBASE_GPUPROP_COHERENCY_GROUP_7 71
-#define KBASE_GPUPROP_COHERENCY_GROUP_8 72
-#define KBASE_GPUPROP_COHERENCY_GROUP_9 73
-#define KBASE_GPUPROP_COHERENCY_GROUP_10 74
-#define KBASE_GPUPROP_COHERENCY_GROUP_11 75
-#define KBASE_GPUPROP_COHERENCY_GROUP_12 76
-#define KBASE_GPUPROP_COHERENCY_GROUP_13 77
-#define KBASE_GPUPROP_COHERENCY_GROUP_14 78
-#define KBASE_GPUPROP_COHERENCY_GROUP_15 79
+#define KBASE_GPUPROP_COHERENCY_GROUP_0         64
+#define KBASE_GPUPROP_COHERENCY_GROUP_1         65
+#define KBASE_GPUPROP_COHERENCY_GROUP_2         66
+#define KBASE_GPUPROP_COHERENCY_GROUP_3         67
+#define KBASE_GPUPROP_COHERENCY_GROUP_4         68
+#define KBASE_GPUPROP_COHERENCY_GROUP_5         69
+#define KBASE_GPUPROP_COHERENCY_GROUP_6         70
+#define KBASE_GPUPROP_COHERENCY_GROUP_7         71
+#define KBASE_GPUPROP_COHERENCY_GROUP_8         72
+#define KBASE_GPUPROP_COHERENCY_GROUP_9         73
+#define KBASE_GPUPROP_COHERENCY_GROUP_10        74
+#define KBASE_GPUPROP_COHERENCY_GROUP_11        75
+#define KBASE_GPUPROP_COHERENCY_GROUP_12        76
+#define KBASE_GPUPROP_COHERENCY_GROUP_13        77
+#define KBASE_GPUPROP_COHERENCY_GROUP_14        78
+#define KBASE_GPUPROP_COHERENCY_GROUP_15        79
 
 struct gpu_props
 {
@@ -207,17 +206,14 @@ static const struct
     uint32_t type;
     size_t   offset;
     int      size;
-} gpu_property_mapping[] =
-{
-#define PROP(name, member)                                        \
-    {                                                             \
-        KBASE_GPUPROP_##name, offsetof(struct gpu_props, member), \
-        sizeof(((struct gpu_props *)0)->member)               \
+} gpu_property_mapping[] = {
+#define PROP(name, member)                                                                                \
+    {                                                                                                     \
+        KBASE_GPUPROP_##name, offsetof(struct gpu_props, member), sizeof(((struct gpu_props *)0)->member) \
     }
-#define PROP2(name, member, off)                                        \
-    {                                                                   \
-        KBASE_GPUPROP_##name, offsetof(struct gpu_props, member) + off, \
-        sizeof(((struct gpu_props *)0)->member)                     \
+#define PROP2(name, member, off)                                                                                \
+    {                                                                                                           \
+        KBASE_GPUPROP_##name, offsetof(struct gpu_props, member) + off, sizeof(((struct gpu_props *)0)->member) \
     }
     PROP(PRODUCT_ID, product_id),
     PROP(MINOR_REVISION, minor_revision),
@@ -242,8 +238,7 @@ static const struct
     PROP2(COHERENCY_GROUP_15, core_mask, 15),
 #undef PROP
 #undef PROP2
-    { 0, 0, 0 }
-};
+    {0, 0, 0}};
 
 struct kbase_hwcnt_reader_metadata
 {
@@ -289,7 +284,7 @@ struct kbase_ioctl_get_gpuprops
     uint32_t      flags;
 };
 
-#define KBASE_IOCTL_TYPE 0x80
+#define KBASE_IOCTL_TYPE         0x80
 #define KBASE_IOCTL_GET_GPUPROPS MALI_IOW(KBASE_IOCTL_TYPE, 3, struct kbase_ioctl_get_gpuprops)
 
 /** IOCTL parameters to set flags */
@@ -373,7 +368,7 @@ enum
 
 /** Write a single byte into the pipe to interrupt the reader thread */
 typedef char poll_data_t;
-}
+} // namespace
 
 template <typename T>
 static inline int mali_ioctl(int fd, T &arg)
@@ -381,9 +376,9 @@ static inline int mali_ioctl(int fd, T &arg)
     auto     *hdr = &arg.header;
     const int cmd = _IOC(_IOC_READ | _IOC_WRITE, LINUX_UK_BASE_MAGIC, hdr->id, sizeof(T));
 
-    if(ioctl(fd, cmd, &arg))
+    if (ioctl(fd, cmd, &arg))
         return -1;
-    if(hdr->ret)
+    if (hdr->ret)
         return -1;
 
     return 0;
@@ -392,4 +387,4 @@ static inline int mali_ioctl(int fd, T &arg)
 
 #endif /* DOXYGEN_SKIP_THIS */
 
-#endif /* ARM_COMPUTE_TEST_HWC */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_HWC_HPP

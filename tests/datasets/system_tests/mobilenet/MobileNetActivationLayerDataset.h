@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MOBILENET_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_MOBILENET_ACTIVATION_LAYER_DATASET
-
-#include "tests/framework/datasets/Datasets.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETACTIVATIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETACTIVATIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/framework/datasets/Datasets.h"
 
 namespace arm_compute
 {
@@ -35,19 +35,21 @@ namespace test
 {
 namespace datasets
 {
-class MobileNetActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
+class MobileNetActivationLayerDataset final
+    : public framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>,
+                                                         framework::dataset::SingletonDataset<ActivationLayerInfo>>
 {
 public:
     MobileNetActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", {
-            TensorShape(112U, 112U, 32U), TensorShape(112U, 112U, 64U), TensorShape(56U, 56U, 64U), TensorShape(56U, 56U, 128U),
-            TensorShape(28U, 28U, 128U), TensorShape(28U, 28U, 256U), TensorShape(14U, 14U, 256U), TensorShape(14U, 14U, 512U),
-            TensorShape(7U, 7U, 512U), TensorShape(7U, 7U, 1024U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f))
-    }
+        : CartesianProductDataset{
+              framework::dataset::make("Shape",
+                                       {TensorShape(112U, 112U, 32U), TensorShape(112U, 112U, 64U),
+                                        TensorShape(56U, 56U, 64U), TensorShape(56U, 56U, 128U),
+                                        TensorShape(28U, 28U, 128U), TensorShape(28U, 28U, 256U),
+                                        TensorShape(14U, 14U, 256U), TensorShape(14U, 14U, 512U),
+                                        TensorShape(7U, 7U, 512U), TensorShape(7U, 7U, 1024U)}),
+              framework::dataset::make(
+                  "Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f))}
     {
     }
     MobileNetActivationLayerDataset(MobileNetActivationLayerDataset &&) = default;
@@ -56,4 +58,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MOBILENET_ACTIVATION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETACTIVATIONLAYERDATASET_H

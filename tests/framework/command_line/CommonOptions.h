@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_COMMONOPTIONS
-#define ARM_COMPUTE_TEST_COMMONOPTIONS
-
-#include "../instruments/Instruments.h"
+#ifndef ACL_TESTS_FRAMEWORK_COMMAND_LINE_COMMONOPTIONS_H
+#define ACL_TESTS_FRAMEWORK_COMMAND_LINE_COMMONOPTIONS_H
 
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
 
+#include "../instruments/Instruments.h"
 #include <memory>
 
 namespace arm_compute
@@ -88,4 +87,4 @@ public:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_COMMONOPTIONS */
+#endif // ACL_TESTS_FRAMEWORK_COMMAND_LINE_COMMONOPTIONS_H

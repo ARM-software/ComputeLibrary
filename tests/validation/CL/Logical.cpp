@@ -27,14 +27,15 @@
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/LogicalFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace
 {
@@ -44,7 +45,7 @@ const auto correct_shape = TensorShape(1, 2, 3, 4); // target shape to check aga
 const auto wrong_shape   = TensorShape(1, 2, 2, 4); // wrong shape to check validate logic
 const auto correct_dt    = DataType::U8;            // correct data type to check against
 const auto wrong_dt      = DataType::F32;           // wrong data type to check validate logic
-}
+} // namespace
 
 namespace arm_compute
 {
@@ -64,9 +65,9 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 
 TEST_CASE(WrongDataType, framework::DatasetMode::ALL)
 {
-    TensorInfo in1{ correct_shape, 1, correct_dt };
-    TensorInfo in2{ correct_shape, 1, wrong_dt };
-    TensorInfo out{ correct_shape, 1, correct_dt };
+    TensorInfo in1{correct_shape, 1, correct_dt};
+    TensorInfo in2{correct_shape, 1, wrong_dt};
+    TensorInfo out{correct_shape, 1, correct_dt};
 
     Status s = CLLogicalOr::validate(&in1, &in2, &out);
     ARM_COMPUTE_EXPECT((bool)s == false, framework::LogLevel::ERRORS);
@@ -75,13 +76,19 @@ TEST_SUITE_END() // Validate
 template <typename T>
 using CLLogicalOrFixture = LogicalOrValidationFixture<CLTensor, CLAccessor, CLLogicalOr, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogicalOrFixture<uint8_t>, framework::DatasetMode::ALL, zip(datasets::SmallShapes(), datasets::SmallShapes()))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLLogicalOrFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       zip(datasets::SmallShapes(), datasets::SmallShapes()))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLLogicalOrFixture<uint8_t>, framework::DatasetMode::ALL, datasets::SmallShapesBroadcast())
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
+                       CLLogicalOrFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       datasets::SmallShapesBroadcast())
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -98,9 +105,9 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 
 TEST_CASE(WrongDataType, framework::DatasetMode::ALL)
 {
-    TensorInfo in1{ correct_shape, 1, correct_dt };
-    TensorInfo in2{ correct_shape, 1, wrong_dt };
-    TensorInfo out{ correct_shape, 1, correct_dt };
+    TensorInfo in1{correct_shape, 1, correct_dt};
+    TensorInfo in2{correct_shape, 1, wrong_dt};
+    TensorInfo out{correct_shape, 1, correct_dt};
 
     Status s = CLLogicalAnd::validate(&in1, &in2, &out);
     ARM_COMPUTE_EXPECT((bool)s == false, framework::LogLevel::ERRORS);
@@ -109,13 +116,19 @@ TEST_SUITE_END() // Validate
 template <typename T>
 using CLLogicalAndFixture = LogicalAndValidationFixture<CLTensor, CLAccessor, CLLogicalAnd, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogicalAndFixture<uint8_t>, framework::DatasetMode::ALL, zip(datasets::SmallShapes(), datasets::SmallShapes()))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLLogicalAndFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       zip(datasets::SmallShapes(), datasets::SmallShapes()))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLLogicalAndFixture<uint8_t>, framework::DatasetMode::ALL, datasets::SmallShapesBroadcast())
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
+                       CLLogicalAndFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       datasets::SmallShapesBroadcast())
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -132,20 +145,20 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 
 TEST_CASE(WrongDataType, framework::DatasetMode::ALL)
 {
-    TensorInfo in{ correct_shape, 1, correct_dt };
-    TensorInfo out{ correct_shape, 1, wrong_dt };
+    TensorInfo in{correct_shape, 1, correct_dt};
+    TensorInfo out{correct_shape, 1, wrong_dt};
 
     Status s = CLLogicalNot::validate(&in, &out);
     ARM_COMPUTE_EXPECT((bool)s == false, framework::LogLevel::ERRORS);
 
-    in  = TensorInfo{ correct_shape, 1, wrong_dt };
-    out = TensorInfo{ correct_shape, 1, correct_dt };
+    in  = TensorInfo{correct_shape, 1, wrong_dt};
+    out = TensorInfo{correct_shape, 1, correct_dt};
 
     s = CLLogicalNot::validate(&in, &out);
     ARM_COMPUTE_EXPECT((bool)s == false, framework::LogLevel::ERRORS);
 
-    in  = TensorInfo{ correct_shape, 1, wrong_dt };
-    out = TensorInfo{ correct_shape, 1, wrong_dt };
+    in  = TensorInfo{correct_shape, 1, wrong_dt};
+    out = TensorInfo{correct_shape, 1, wrong_dt};
 
     s = CLLogicalNot::validate(&in, &out);
     ARM_COMPUTE_EXPECT((bool)s == false, framework::LogLevel::ERRORS);
@@ -153,8 +166,8 @@ TEST_CASE(WrongDataType, framework::DatasetMode::ALL)
 
 TEST_CASE(WrongShape, framework::DatasetMode::ALL)
 {
-    TensorInfo in{ correct_shape, 1, correct_dt };
-    TensorInfo out{ wrong_shape, 1, correct_dt };
+    TensorInfo in{correct_shape, 1, correct_dt};
+    TensorInfo out{wrong_shape, 1, correct_dt};
 
     Status s = CLLogicalNot::validate(&in, &out);
     ARM_COMPUTE_EXPECT((bool)s == false, framework::LogLevel::ERRORS);
@@ -164,8 +177,10 @@ TEST_SUITE_END() // Validate
 template <typename T>
 using CLLogicalNotFixture = LogicalNotValidationFixture<CLTensor, CLAccessor, CLLogicalNot, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogicalNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                    DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLLogicalNotFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

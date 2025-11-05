@@ -26,16 +26,17 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -52,11 +53,13 @@ using CLGEMMMatrixMultiplyNative = CLSynthetizeOperator<ClGemmMatrixMultiplyNati
 
 // Fixture for CLGEMMMatrixMultiplyNative
 template <typename T>
-using CLGEMMMatrixMultiplyNativeFixture = GEMMMatrixMultiplyNativeValidationFixture<CLTensor, CLAccessor, T, CLGEMMMatrixMultiplyNative>;
+using CLGEMMMatrixMultiplyNativeFixture =
+    GEMMMatrixMultiplyNativeValidationFixture<CLTensor, CLAccessor, T, CLGEMMMatrixMultiplyNative>;
 
 // Fixture for CLGEMMMatrixMultiplyNative3D
 template <typename T>
-using CLGEMMMatrixMultiplyNative3DFixture = GEMMMatrixMultiplyNative3DValidationFixture<CLTensor, CLAccessor, T, CLGEMMMatrixMultiplyNative>;
+using CLGEMMMatrixMultiplyNative3DFixture =
+    GEMMMatrixMultiplyNative3DValidationFixture<CLTensor, CLAccessor, T, CLGEMMMatrixMultiplyNative>;
 
 namespace
 {

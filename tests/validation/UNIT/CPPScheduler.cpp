@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 
 #include "arm_compute/core/CPP/ICPPKernel.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 
@@ -34,16 +35,16 @@ using namespace arm_compute::test;
 
 namespace
 {
-class TestException: public std::exception
+class TestException : public std::exception
 {
 public:
-    const char* what() const noexcept override
+    const char *what() const noexcept override
     {
         return "Expected test exception";
     }
 };
 
-class TestKernel: public ICPPKernel
+class TestKernel : public ICPPKernel
 {
 public:
     TestKernel()
@@ -53,7 +54,7 @@ public:
         configure(window);
     }
 
-    const char* name() const override
+    const char *name() const override
     {
         return "TestKernel";
     }
@@ -62,25 +63,24 @@ public:
     {
         throw TestException();
     }
-
 };
-}
+} // namespace
 
 TEST_SUITE(UNIT)
 TEST_SUITE(CPPScheduler)
 #if defined(ARM_COMPUTE_CPP_SCHEDULER) && !defined(BARE_METAL)
 TEST_CASE(RethrowException, framework::DatasetMode::ALL)
 {
-    CPPScheduler scheduler;
+    CPPScheduler        scheduler;
     CPPScheduler::Hints hints(0);
-    TestKernel kernel;
+    TestKernel          kernel;
 
     scheduler.set_num_threads(2);
     try
     {
         scheduler.schedule(&kernel, hints);
     }
-    catch(const TestException&)
+    catch (const TestException &)
     {
         return;
     }

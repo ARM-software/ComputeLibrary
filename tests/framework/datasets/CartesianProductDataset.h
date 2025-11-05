@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2023 Arm Limited.
+ * Copyright (c) 2017-2018, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_CARTESIAN_PRODUCT
-#define ARM_COMPUTE_TEST_DATASET_CARTESIAN_PRODUCT
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_CARTESIANPRODUCTDATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_CARTESIANPRODUCTDATASET_H
 
 #include "Dataset.h"
-
 #include <string>
 #include <tuple>
 #include <utility>
@@ -59,8 +58,7 @@ public:
      * @param[in] dataset2 Second dataset.
      */
     CartesianProductDataset(T &&dataset1, U &&dataset2)
-        : _dataset1{ std::forward<T>(dataset1) },
-          _dataset2{ std::forward<U>(dataset2) }
+        : _dataset1{std::forward<T>(dataset1)}, _dataset2{std::forward<U>(dataset2)}
     {
     }
 
@@ -79,9 +77,7 @@ public:
          * @param[in] dataset2 Dataset 2.
          */
         iterator(const T_noref *dataset1, const U_noref *dataset2)
-            : _iter1{ dataset1->begin() },
-              _dataset2{ dataset2 },
-              _iter2{ dataset2->begin() }
+            : _iter1{dataset1->begin()}, _dataset2{dataset2}, _iter2{dataset2->begin()}
         {
         }
 
@@ -123,7 +119,7 @@ public:
         {
             ++_second_pos;
 
-            if(_second_pos < _dataset2->size())
+            if (_second_pos < _dataset2->size())
             {
                 ++_iter2;
             }
@@ -142,8 +138,8 @@ public:
         iter1_type     _iter1;
         const U_noref *_dataset2;
         iter2_type     _iter2;
-        int            _first_pos{ 0 };
-        int            _second_pos{ 0 };
+        int            _first_pos{0};
+        int            _second_pos{0};
     };
 
     /** Iterator pointing at the begin of the dataset.
@@ -191,7 +187,8 @@ CartesianProductDataset<T, U> combine(T &&dataset1, U &&dataset2)
  * @return A grid dataset.
  */
 template <typename T1, typename T2, typename... Ts>
-auto combine(T1 &&dataset1, T2 &&dataset2, Ts &&... datasets) -> decltype(combine(std::forward<T1>(dataset1), combine(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...)))
+auto combine(T1 &&dataset1, T2 &&dataset2, Ts &&...datasets)
+    -> decltype(combine(std::forward<T1>(dataset1), combine(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...)))
 {
     return combine(std::forward<T1>(dataset1), combine(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...));
 }
@@ -204,8 +201,7 @@ auto combine(T1 &&dataset1, T2 &&dataset2, Ts &&... datasets) -> decltype(combin
  * @return A grid dataset.
  */
 template <typename T, typename U>
-CartesianProductDataset<T, U>
-operator*(T &&dataset1, U &&dataset2)
+CartesianProductDataset<T, U> operator*(T &&dataset1, U &&dataset2)
 {
     return CartesianProductDataset<T, U>(std::forward<T>(dataset1), std::forward<U>(dataset2));
 }
@@ -214,4 +210,4 @@ operator*(T &&dataset1, U &&dataset2)
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_CARTESIAN_PRODUCT */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_CARTESIANPRODUCTDATASET_H

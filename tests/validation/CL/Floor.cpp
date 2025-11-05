@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLFloor.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/FloorFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -70,12 +71,18 @@ using CLFloorFixture = FloorValidationFixture<CLTensor, CLAccessor, CLFloor, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFloorFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFloorFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFloorFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLFloorFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -83,12 +90,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFloorFixture<half>, framework::DatasetMode::N
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFloorFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFloorFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFloorFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLFloorFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

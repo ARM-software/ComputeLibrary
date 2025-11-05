@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CONVOLUTION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_CONVOLUTION_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_CONVOLUTIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_CONVOLUTIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -48,12 +48,12 @@ public:
                  std::vector<TensorShape>::const_iterator   dst_it,
                  std::vector<PadStrideInfo>::const_iterator infos_it,
                  std::vector<Size2D>::const_iterator        dilation_it)
-            : _src_it{ std::move(src_it) },
-              _weights_it{ std::move(weights_it) },
-              _biases_it{ std::move(biases_it) },
-              _dst_it{ std::move(dst_it) },
-              _infos_it{ std::move(infos_it) },
-              _dilation_it{ std::move(dilation_it) }
+            : _src_it{std::move(src_it)},
+              _weights_it{std::move(weights_it)},
+              _biases_it{std::move(biases_it)},
+              _dst_it{std::move(dst_it)},
+              _infos_it{std::move(infos_it)},
+              _dilation_it{std::move(dilation_it)}
         {
         }
 
@@ -97,15 +97,24 @@ public:
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _bias_shapes.begin(), _dst_shapes.begin(), _infos.begin(), _dilations.begin());
+        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _bias_shapes.begin(), _dst_shapes.begin(),
+                        _infos.begin(), _dilations.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_bias_shapes.size(), std::min(_dst_shapes.size(), std::min(_infos.size(), _dilations.size())))));
+        return std::min(_src_shapes.size(),
+                        std::min(_weight_shapes.size(),
+                                 std::min(_bias_shapes.size(),
+                                          std::min(_dst_shapes.size(), std::min(_infos.size(), _dilations.size())))));
     }
 
-    void add_config(TensorShape src, TensorShape weights, TensorShape biases, TensorShape dst, PadStrideInfo info, Size2D dilation = Size2D(1U, 1U))
+    void add_config(TensorShape   src,
+                    TensorShape   weights,
+                    TensorShape   biases,
+                    TensorShape   dst,
+                    PadStrideInfo info,
+                    Size2D        dilation = Size2D(1U, 1U))
     {
         _src_shapes.emplace_back(std::move(src));
         _weight_shapes.emplace_back(std::move(weights));
@@ -130,4 +139,4 @@ private:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CONVOLUTION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_CONVOLUTIONLAYERDATASET_H

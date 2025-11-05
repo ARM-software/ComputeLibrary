@@ -26,15 +26,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLReverse.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
-#include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/DatatypeDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ReverseFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -50,12 +51,12 @@ auto run_large_dataset = combine(datasets::LargeShapes(), datasets::Tiny1DShapes
 
 void validate_data_types(DataType input_dtype, DataType output_dtype, DataType axis_dtype)
 {
-    const auto input = TensorInfo(TensorShape(16U, 16U, 5U), 1, input_dtype);
-    const auto axis = TensorInfo(TensorShape(1U), 1, axis_dtype);
-    auto output = TensorInfo(TensorShape(16U, 16U, 5U), 1, output_dtype);
+    const auto input  = TensorInfo(TensorShape(16U, 16U, 5U), 1, input_dtype);
+    const auto axis   = TensorInfo(TensorShape(1U), 1, axis_dtype);
+    auto       output = TensorInfo(TensorShape(16U, 16U, 5U), 1, output_dtype);
 
-    const Status status = (CLReverse::validate(&input, &output, &axis, false /* use_inverted_axis */));
-    const bool is_valid = static_cast<bool>(status);
+    const Status status   = (CLReverse::validate(&input, &output, &axis, false /* use_inverted_axis */));
+    const bool   is_valid = static_cast<bool>(status);
 
     static const auto supported_dtypes = {
         DataType::QSYMM8,
@@ -82,14 +83,14 @@ void validate_data_types(DataType input_dtype, DataType output_dtype, DataType a
 #endif // __aarch64__
     };
 
-    static std::vector<std::tuple<DataType,DataType,DataType>> supports = {};
-    for(DataType dtype : supported_dtypes)
+    static std::vector<std::tuple<DataType, DataType, DataType>> supports = {};
+    for (DataType dtype : supported_dtypes)
     {
         supports.push_back(std::make_tuple(dtype, dtype, DataType::S32));
         supports.push_back(std::make_tuple(dtype, dtype, DataType::U32));
     }
 
-    const auto config = std::make_tuple(input_dtype, output_dtype, axis_dtype);
+    const auto config   = std::make_tuple(input_dtype, output_dtype, axis_dtype);
     const bool expected = (std::find(supports.begin(), supports.end(), config) != supports.end());
 
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
@@ -100,12 +101,14 @@ TEST_SUITE(CL)
 TEST_SUITE(Reverse)
 
 /// @note: Do not modify. Validating all data types is pretty fast.
-DATA_TEST_CASE(ValidateAllDataTypes, framework::DatasetMode::ALL,
-    combine(
-        datasets::AllDataTypes("InputDataType"),
-        datasets::AllDataTypes("OutputDataType"),
-        datasets::AllDataTypes("AxisDataType")),
-        input_dtype, output_dtype, axis_dtype)
+DATA_TEST_CASE(ValidateAllDataTypes,
+               framework::DatasetMode::ALL,
+               combine(datasets::AllDataTypes("InputDataType"),
+                       datasets::AllDataTypes("OutputDataType"),
+                       datasets::AllDataTypes("AxisDataType")),
+               input_dtype,
+               output_dtype,
+               axis_dtype)
 {
     validate_data_types(input_dtype, output_dtype, axis_dtype);
 }
@@ -155,11 +158,10 @@ TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           run_small_dataset,
-                           make("DataType", DataType::F16),
-                           make("use_negative_axis", { true, false }),
-                           make("use_inverted_axis", { true, false })))
+                       combine(run_small_dataset,
+                               make("DataType", DataType::F16),
+                               make("use_negative_axis", {true, false}),
+                               make("use_inverted_axis", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -168,11 +170,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLReverseFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(
-                           run_large_dataset,
-                           make("DataType", DataType::F16),
-                           make("use_negative_axis", { true, false }),
-                           make("use_inverted_axis", { true, false })))
+                       combine(run_large_dataset,
+                               make("DataType", DataType::F16),
+                               make("use_negative_axis", {true, false}),
+                               make("use_inverted_axis", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -183,11 +184,10 @@ TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           run_small_dataset,
-                           make("DataType", DataType::F32),
-                           make("use_negative_axis", { true, false }),
-                           make("use_inverted_axis", { true, false })))
+                       combine(run_small_dataset,
+                               make("DataType", DataType::F32),
+                               make("use_negative_axis", {true, false}),
+                               make("use_inverted_axis", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -196,11 +196,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLReverseFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(
-                           run_large_dataset,
-                           make("DataType", DataType::F32),
-                           make("use_negative_axis", { true, false }),
-                           make("use_inverted_axis", { true, false })))
+                       combine(run_large_dataset,
+                               make("DataType", DataType::F32),
+                               make("use_negative_axis", {true, false}),
+                               make("use_inverted_axis", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -212,17 +211,16 @@ TEST_SUITE(FP64)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<float64_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           run_small_dataset,
-                           make("DataType", DataType::F64),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(run_small_dataset,
+                               make("DataType", DataType::F64),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // F64
-#endif // __aarch64__
+#endif           // __aarch64__
 
 TEST_SUITE_END() // Float
 
@@ -231,12 +229,11 @@ TEST_SUITE(Int32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<int32_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::S32}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+                               make("AxisShape", TensorShape(2U)),
+                               make("DataType", {DataType::S32}),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -248,29 +245,27 @@ TEST_SUITE(SizeT)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<size_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::SIZET}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+                               make("AxisShape", TensorShape(2U)),
+                               make("DataType", {DataType::SIZET}),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // SizeT
-#endif // __x86_64__
+#endif           // __x86_64__
 
 TEST_SUITE(UInt32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<uint32_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::U32}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+                               make("AxisShape", TensorShape(2U)),
+                               make("DataType", {DataType::U32}),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -282,12 +277,11 @@ TEST_SUITE(Int64)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<int64_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::S64}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+                               make("AxisShape", TensorShape(2U)),
+                               make("DataType", {DataType::S64}),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -298,29 +292,27 @@ TEST_SUITE(UInt64)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<uint64_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::S64}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+                               make("AxisShape", TensorShape(2U)),
+                               make("DataType", {DataType::S64}),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // UInt64
-#endif // __aarch64__
+#endif           // __aarch64__
 
 TEST_SUITE(Int16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<int16_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::S16, DataType::QSYMM16}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+                               make("AxisShape", TensorShape(2U)),
+                               make("DataType", {DataType::S16, DataType::QSYMM16}),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -331,12 +323,11 @@ TEST_SUITE(UInt16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<uint16_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::U16, DataType::QASYMM16}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                       combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+                               make("AxisShape", TensorShape(2U)),
+                               make("DataType", {DataType::U16, DataType::QASYMM16}),
+                               make("use_negative_axis", {false}),
+                               make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -347,11 +338,10 @@ TEST_SUITE(UInt8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLReverseFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           run_small_dataset,
-                           make("DataType", {DataType::QASYMM8, DataType::U8}),
-                           make("use_negative_axis", { true, false }),
-                           make("use_inverted_axis", { true, false })))
+                       combine(run_small_dataset,
+                               make("DataType", {DataType::QASYMM8, DataType::U8}),
+                               make("use_negative_axis", {true, false}),
+                               make("use_inverted_axis", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -360,11 +350,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLReverseFixture<uint8_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(
-                           run_large_dataset,
-                           make("DataType", DataType::QASYMM8),
-                           make("use_negative_axis", { true, false }),
-                           make("use_inverted_axis", { true, false })))
+                       combine(run_large_dataset,
+                               make("DataType", DataType::QASYMM8),
+                               make("use_negative_axis", {true, false}),
+                               make("use_inverted_axis", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -372,16 +361,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 TEST_SUITE_END() // UInt8
 
 TEST_SUITE(Int8)
-FIXTURE_DATA_TEST_CASE(RunSmall,
-                       CLReverseFixture<int8_t>,
-                       framework::DatasetMode::PRECOMMIT,
-                       combine(
-                           make("InOutShape", TensorShape(18U, 5U, 5U)),
-                           make("AxisShape", TensorShape(2U)),
-                           make("DataType", {DataType::QASYMM8_SIGNED, DataType::S8,
-                                DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL}),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    CLReverseFixture<int8_t>,
+    framework::DatasetMode::PRECOMMIT,
+    combine(make("InOutShape", TensorShape(18U, 5U, 5U)),
+            make("AxisShape", TensorShape(2U)),
+            make("DataType", {DataType::QASYMM8_SIGNED, DataType::S8, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL}),
+            make("use_negative_axis", {false}),
+            make("use_inverted_axis", {false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

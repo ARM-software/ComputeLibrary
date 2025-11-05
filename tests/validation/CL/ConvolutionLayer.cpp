@@ -27,16 +27,17 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
 #include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/datasets/TinyConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -53,43 +54,39 @@ public:
     SmallConvolutionLayerDatasetCases()
     {
         // 1D Kernel
-        add_config(TensorShape(1U, 130U, 2000U), TensorShape(1U, 1U, 2000U, 2000U), TensorShape(2000U), TensorShape(1U, 130U, 2000U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(1U, 130U, 2000U), TensorShape(1U, 1U, 2000U, 2000U), TensorShape(2000U),
+                   TensorShape(1U, 130U, 2000U), PadStrideInfo(1, 1, 0, 0));
     }
 };
 
-RelativeTolerance<float>            tolerance_f32(0.1f);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1);                 /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
+RelativeTolerance<float> tolerance_f32(
+    0.1f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> tolerance_f16(half_float::half(
+    0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float>  tolerance_qasymm8(
+     1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr float tolerance_num = 0.07f; /**< Tolerance number */
 
 /** CNN data types */
 const auto CNNDataTypes = make("DataType",
-{
-    DataType::F16,
-             DataType::F32,
-             DataType::QASYMM8,
-             DataType::QASYMM8_SIGNED,
-});
+                               {
+                                   DataType::F16,
+                                   DataType::F32,
+                                   DataType::QASYMM8,
+                                   DataType::QASYMM8_SIGNED,
+                               });
 
 /** Grouped CNN data types */
-const auto GroupedCNNDataTypes = make("DataType",
-{
-    DataType::F16,
-             DataType::F32
-});
+const auto GroupedCNNDataTypes = make("DataType", {DataType::F16, DataType::F32});
 
-const auto ActivationFunctionsDataset      = make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-                        ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-                        ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
-                        ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
-const auto ActivationFunctionsSmallDataset = make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-                        ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
+const auto ActivationFunctionsDataset =
+    make("ActivationInfo",
+         {ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
+          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)});
+const auto ActivationFunctionsSmallDataset =
+    make("ActivationInfo",
+         {ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)});
 } // namespace
 
 TEST_SUITE(CL)
@@ -188,16 +185,23 @@ TEST_SUITE(GEMMConvolutionLayer)
 template <typename T>
 using CLGEMMConvolutionLayerFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 template <typename T>
-using CLGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, true>;
+using CLGEMMConvolutionLayerMixedDataLayoutFixture =
+    ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, true>;
 template <typename T>
-using CLConvolutionValidationWithPaddingFixture = ConvolutionValidationWithPaddingFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+using CLConvolutionValidationWithPaddingFixture =
+    ConvolutionValidationWithPaddingFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                   make("ReshapeWeights", { true }), make("DataType", DataType::F16), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                           ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMConvolutionLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -206,35 +210,44 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                    make("ReshapeWeights", { true }), make("DataType", DataType::F32), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                            ActivationFunctionsSmallDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
-}
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::ALL,
-                       combine(make("Input", TensorShape(23U, 27U, 5U)),
-                                                                                           make("Weights", TensorShape(3U, 3U, 5U, 2U)),
-                                                                                       make("Bias", TensorShape(2U)),
-                                                                               make("Output", TensorShape(11U, 25U, 2U)),
-                                                                       make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
-                                                               make("Dilation", Size2D(1, 1)),
-                                                       make("ReshapeWeights", { true }),
-                                               make("DataType", DataType::F32),
-                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMConvolutionLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
                                ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallWithPadding, CLConvolutionValidationWithPaddingFixture<float>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout,
+                       CLGEMMConvolutionLayerMixedDataLayoutFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(make("Input", TensorShape(23U, 27U, 5U)),
+                               make("Weights", TensorShape(3U, 3U, 5U, 2U)),
+                               make("Bias", TensorShape(2U)),
+                               make("Output", TensorShape(11U, 25U, 2U)),
+                               make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
+                               make("Dilation", Size2D(1, 1)),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               ActivationFunctionsSmallDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallWithPadding,
+                       CLConvolutionValidationWithPaddingFixture<float>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallConvolutionLayerPrePaddingDataset(),
-                                                               make("ReshapeWeights", { true }),
-                                                       make("DataType", DataType::F32),
-                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("ActivationInfo", { ActivationLayerInfo() }),
-make("PrePadLayer", { PaddingList({ { 1, 1 }, { 1, 1 } }) })))
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("ActivationInfo", {ActivationLayerInfo()}),
+                               make("PrePadLayer", {PaddingList({{1, 1}, {1, 1}})})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -244,20 +257,23 @@ TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
 template <typename T>
-using CLGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+using CLGEMMConvolutionLayerQuantizedFixture =
+    ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 template <typename T>
-using CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture = ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, true>;
+using CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture =
+    ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, true>;
 template <typename T>
-using CLGEMMConvolutionLayerQuantizedPerChannelFixture = ConvolutionValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, int8_t>;
+using CLGEMMConvolutionLayerQuantizedPerChannelFixture =
+    ConvolutionValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, int8_t>;
 
 TEST_SUITE(Quantized)
 
 const auto QuantizationData = make("QuantizationInfo",
-{
-    QuantizationInfo(0.5f, 10),
-    QuantizationInfo(0.3f, 3),
-    QuantizationInfo(1.1f, 10),
-});
+                                   {
+                                       QuantizationInfo(0.5f, 10),
+                                       QuantizationInfo(0.3f, 3),
+                                       QuantizationInfo(1.1f, 10),
+                                   });
 
 /// @note: Every asymmetric quantized test has a version with or without activation because the quantization info given
 /// is ignored when there is no activation. Instead of using the same quantization information for all the tensors, the
@@ -268,182 +284,197 @@ const auto NoActivation = make("ActivationInfo", ActivationLayerInfo());
 
 const auto IgnoredQuantizationInfo = make("IgnoredQuantizationInfo", QuantizationInfo());
 
-const auto QuantizedActivationFunctionsSmallDataset = make("ActivationInfo",
-{
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
-});
+const auto QuantizedActivationFunctionsSmallDataset =
+    make("ActivationInfo", {ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)});
 
 TEST_SUITE(QASYMM8)
 
-FIXTURE_DATA_TEST_CASE(RunSmallCases, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-    combine(SmallConvolutionLayerDatasetCases(),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        IgnoredQuantizationInfo,
-        NoActivation))
+FIXTURE_DATA_TEST_CASE(RunSmallCases,
+                       CLGEMMConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(SmallConvolutionLayerDatasetCases(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               IgnoredQuantizationInfo,
+                               NoActivation))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallCasesWithActivation, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-    combine(SmallConvolutionLayerDatasetCases(),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        QuantizationData,
-        QuantizedActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmallCasesWithActivation,
+                       CLGEMMConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(SmallConvolutionLayerDatasetCases(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               QuantizationData,
+                               QuantizedActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-    combine(datasets::SmallConvolutionLayerDataset(),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        IgnoredQuantizationInfo,
-        NoActivation))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               IgnoredQuantizationInfo,
+                               NoActivation))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallWithActivation, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-    combine(datasets::SmallConvolutionLayerDataset(),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        QuantizationData,
-        QuantizedActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmallWithActivation,
+                       CLGEMMConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               QuantizationData,
+                               QuantizedActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::ALL,
-    combine(
-        make("Input", TensorShape(23U, 27U, 5U)),
-        make("Weights", TensorShape(3U, 3U, 5U, 2U)),
-        make("Bias", TensorShape(2U)),
-        make("Output", TensorShape(11U, 25U, 2U)),
-        make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
-        make("Dilation", Size2D(1, 1)),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        IgnoredQuantizationInfo,
-        NoActivation))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout,
+                       CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(make("Input", TensorShape(23U, 27U, 5U)),
+                               make("Weights", TensorShape(3U, 3U, 5U, 2U)),
+                               make("Bias", TensorShape(2U)),
+                               make("Output", TensorShape(11U, 25U, 2U)),
+                               make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
+                               make("Dilation", Size2D(1, 1)),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               IgnoredQuantizationInfo,
+                               NoActivation))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation, CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::ALL,
-    combine(
-        make("Input", TensorShape(23U, 27U, 5U)),
-        make("Weights", TensorShape(3U, 3U, 5U, 2U)),
-        make("Bias", TensorShape(2U)),
-        make("Output", TensorShape(11U, 25U, 2U)),
-        make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
-        make("Dilation", Size2D(1, 1)),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        QuantizationData,
-        QuantizedActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation,
+                       CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(make("Input", TensorShape(23U, 27U, 5U)),
+                               make("Weights", TensorShape(3U, 3U, 5U, 2U)),
+                               make("Bias", TensorShape(2U)),
+                               make("Output", TensorShape(11U, 25U, 2U)),
+                               make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
+                               make("Dilation", Size2D(1, 1)),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               QuantizationData,
+                               QuantizedActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-    combine(datasets::SmallConvolutionLayerDataset(),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8_SIGNED),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        IgnoredQuantizationInfo,
-        NoActivation))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMConvolutionLayerQuantizedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               IgnoredQuantizationInfo,
+                               NoActivation))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallWithActivation, CLGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-    combine(datasets::SmallConvolutionLayerDataset(),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8_SIGNED),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        QuantizationData,
-        QuantizedActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmallWithActivation,
+                       CLGEMMConvolutionLayerQuantizedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               QuantizationData,
+                               QuantizedActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL,
-    combine(
-        make("Input", TensorShape(23U, 27U, 5U)),
-        make("Weights", TensorShape(3U, 3U, 5U, 2U)),
-        make("Bias", TensorShape(2U)),
-        make("Output", TensorShape(11U, 25U, 2U)),
-        make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
-        make("Dilation", Size2D(1, 1)),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8_SIGNED),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        IgnoredQuantizationInfo,
-        NoActivation))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout,
+                       CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(make("Input", TensorShape(23U, 27U, 5U)),
+                               make("Weights", TensorShape(3U, 3U, 5U, 2U)),
+                               make("Bias", TensorShape(2U)),
+                               make("Output", TensorShape(11U, 25U, 2U)),
+                               make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
+                               make("Dilation", Size2D(1, 1)),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               IgnoredQuantizationInfo,
+                               NoActivation))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation, CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL,
-    combine(
-        make("Input", TensorShape(23U, 27U, 5U)),
-        make("Weights", TensorShape(3U, 3U, 5U, 2U)),
-        make("Bias", TensorShape(2U)),
-        make("Output", TensorShape(11U, 25U, 2U)),
-        make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
-        make("Dilation", Size2D(1, 1)),
-        make("ReshapeWeights", { true }),
-        make("DataType", DataType::QASYMM8_SIGNED),
-        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-        QuantizationData,
-        QuantizedActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayoutWithActivation,
+                       CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(make("Input", TensorShape(23U, 27U, 5U)),
+                               make("Weights", TensorShape(3U, 3U, 5U, 2U)),
+                               make("Bias", TensorShape(2U)),
+                               make("Output", TensorShape(11U, 25U, 2U)),
+                               make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0)),
+                               make("Dilation", Size2D(1, 1)),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               QuantizationData,
+                               QuantizedActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QSYMM8_PER_CHANNEL)
-const auto QuantizedActivationFunctionsSmallPerChannelDataset = make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
-});
+const auto QuantizedActivationFunctionsSmallPerChannelDataset =
+    make("ActivationInfo",
+         {ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)});
 
-
-FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLGEMMConvolutionLayerQuantizedPerChannelFixture<int8_t>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmallSigned,
+                       CLGEMMConvolutionLayerQuantizedPerChannelFixture<int8_t>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallConvolutionLayerDataset(),
-                                                                       make("ReshapeWeights", { true }),
-                                                               make("DataType", { DataType::QASYMM8_SIGNED }),
-                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                               QuantizationData,
-                                       QuantizedActivationFunctionsSmallPerChannelDataset,
-                               make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+                               make("ReshapeWeights", {true}),
+                               make("DataType", {DataType::QASYMM8_SIGNED}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               QuantizationData,
+                               QuantizedActivationFunctionsSmallPerChannelDataset,
+                               make("WeightsDataType", {DataType::QSYMM8_PER_CHANNEL})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallConvolutionLayerDataset(),
-                                                                       make("ReshapeWeights", { true }),
-                                                               make("DataType", { DataType::QASYMM8 }),
-                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                               QuantizationData,
-                                       QuantizedActivationFunctionsSmallPerChannelDataset,
-                               make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+                               make("ReshapeWeights", {true}),
+                               make("DataType", {DataType::QASYMM8}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               QuantizationData,
+                               QuantizedActivationFunctionsSmallPerChannelDataset,
+                               make("WeightsDataType", {DataType::QSYMM8_PER_CHANNEL})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -454,26 +485,34 @@ TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // GEMMConvolutionLayer
 
 template <typename T>
-using CLGEMMGroupedConvolutionLayerFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+using CLGEMMGroupedConvolutionLayerFixture =
+    ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 
 TEST_SUITE(GroupedGEMMConvolutionLayer)
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallGroupedConvolutionLayerDataset(),
-                                                                                                                   make("ReshapeWeights", { true }), make("DataType", DataType::F32), make("DataLayout", { DataLayout::NCHW }),
-                                                                                                                   ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMGroupedConvolutionLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallGroupedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLGEMMGroupedConvolutionLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeGroupedConvolutionLayerDataset(),
-                                                       make("ReshapeWeights", { true }),
-                                               make("DataType", DataType::F32),
-                                       make("DataLayout", { DataLayout::NCHW }),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW}),
                                ActivationFunctionsDataset))
 {
     // Validate output
@@ -483,19 +522,26 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallGroupedConvolutionLayerDataset(),
-                                                                                                                  make("ReshapeWeights", { true }), make("DataType", DataType::F16), make("DataLayout", { DataLayout::NCHW }),
-                                                                                                                  ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMGroupedConvolutionLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallGroupedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLGEMMGroupedConvolutionLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeGroupedConvolutionLayerDataset(),
-                                                       make("ReshapeWeights", { true }),
-                                               make("DataType", DataType::F16),
-                                       make("DataLayout", { DataLayout::NCHW }),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW}),
                                ActivationFunctionsDataset))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ALEXNET_CONVOLUTION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_ALEXNET_CONVOLUTION_LAYER_DATASET
-
-#include "tests/datasets/ConvolutionLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETCONVOLUTIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETCONVOLUTIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/ConvolutionLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -42,9 +41,12 @@ class AlexNetWinogradLayerDataset final : public ConvolutionLayerDataset
 public:
     AlexNetWinogradLayerDataset()
     {
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 192U), TensorShape(192U), TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 128U), TensorShape(128U), TensorShape(13U, 13U, 128U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U),
+                   TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 192U), TensorShape(192U),
+                   TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 128U), TensorShape(128U),
+                   TensorShape(13U, 13U, 128U), PadStrideInfo(1, 1, 1, 1));
     }
 };
 
@@ -53,11 +55,16 @@ class AlexNetConvolutionLayerDataset final : public ConvolutionLayerDataset
 public:
     AlexNetConvolutionLayerDataset()
     {
-        add_config(TensorShape(227U, 227U, 3U), TensorShape(11U, 11U, 3U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U), PadStrideInfo(4, 4, 0, 0));
-        add_config(TensorShape(27U, 27U, 48U), TensorShape(5U, 5U, 48U, 128U), TensorShape(128U), TensorShape(27U, 27U, 128U), PadStrideInfo(1, 1, 2, 2));
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 192U), TensorShape(192U), TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 128U), TensorShape(128U), TensorShape(13U, 13U, 128U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(227U, 227U, 3U), TensorShape(11U, 11U, 3U, 96U), TensorShape(96U),
+                   TensorShape(55U, 55U, 96U), PadStrideInfo(4, 4, 0, 0));
+        add_config(TensorShape(27U, 27U, 48U), TensorShape(5U, 5U, 48U, 128U), TensorShape(128U),
+                   TensorShape(27U, 27U, 128U), PadStrideInfo(1, 1, 2, 2));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U),
+                   TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 192U), TensorShape(192U),
+                   TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 128U), TensorShape(128U),
+                   TensorShape(13U, 13U, 128U), PadStrideInfo(1, 1, 1, 1));
     }
 };
 
@@ -66,13 +73,17 @@ class AlexNetDirectConvolutionLayerDataset final : public ConvolutionLayerDatase
 public:
     AlexNetDirectConvolutionLayerDataset()
     {
-        add_config(TensorShape(27U, 27U, 48U), TensorShape(5U, 5U, 48U, 128U), TensorShape(128U), TensorShape(27U, 27U, 128U), PadStrideInfo(1, 1, 2, 2));
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 192U), TensorShape(192U), TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 128U), TensorShape(128U), TensorShape(13U, 13U, 128U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(27U, 27U, 48U), TensorShape(5U, 5U, 48U, 128U), TensorShape(128U),
+                   TensorShape(27U, 27U, 128U), PadStrideInfo(1, 1, 2, 2));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U),
+                   TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 192U), TensorShape(192U),
+                   TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 128U), TensorShape(128U),
+                   TensorShape(13U, 13U, 128U), PadStrideInfo(1, 1, 1, 1));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ALEXNET_CONVOLUTION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETCONVOLUTIONLAYERDATASET_H

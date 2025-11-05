@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,14 +26,15 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
+
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/ScaleFixture.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/SamplingPolicyDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -44,18 +45,24 @@ namespace benchmark
 {
 namespace
 {
-const auto interpolation_types = framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR });
+const auto interpolation_types = framework::dataset::make(
+    "InterpolationPolicy", {InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR});
 } // namespace
 
 using CLScaleFixture = ScaleFixture<CLTensor, CLScale, CLAccessor>;
 
 TEST_SUITE(CL)
 TEST_SUITE(Scale)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                                     interpolation_types),
-                                                                                                             datasets::BorderModes()),
-                                                                                                     datasets::SamplingPolicies()));
+REGISTER_FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    CLScaleFixture,
+    framework::DatasetMode::PRECOMMIT,
+    combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
+                                            framework::dataset::make("DataType", {DataType::F16, DataType::F32})),
+                                    framework::dataset::make("DataLayout", {DataLayout::NCHW})),
+                            interpolation_types),
+                    datasets::BorderModes()),
+            datasets::SamplingPolicies()));
 TEST_SUITE_END() // Scale
 TEST_SUITE_END() // CL
 } // namespace benchmark

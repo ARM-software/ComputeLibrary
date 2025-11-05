@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, 2022-2023 Arm Limited.
+ * Copyright (c) 2018-2019, 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -39,65 +40,72 @@ namespace reference
 template <typename T>
 SimpleTensor<T> gather(const SimpleTensor<T> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis)
 {
-    const TensorShape dst_shape   = arm_compute::misc::shape_calculator::compute_gather_shape(src.shape(), indices.shape(), actual_axis);
-    SimpleTensor<T>   dst(dst_shape, src.data_type());
+    const TensorShape dst_shape =
+        arm_compute::misc::shape_calculator::compute_gather_shape(src.shape(), indices.shape(), actual_axis);
+    SimpleTensor<T> dst(dst_shape, src.data_type());
 
-    const auto        src_ptr     = static_cast<const T *>(src.data());
-    const auto        indices_ptr = static_cast<const uint32_t *>(indices.data());
-    const auto        dst_ptr     = static_cast<T *>(dst.data());
+    const auto src_ptr     = static_cast<const T *>(src.data());
+    const auto indices_ptr = static_cast<const uint32_t *>(indices.data());
+    const auto dst_ptr     = static_cast<T *>(dst.data());
 
     const uint32_t index_limit = src.shape()[actual_axis];
 
     Window win;
     win.use_tensor_dimensions(dst_shape);
 
-    execute_window_loop(win, [&](const Coordinates &dst_coords) {
-        const auto dst_addr = coords2index(dst.shape(), dst_coords);
+    execute_window_loop(win,
+                        [&](const Coordinates &dst_coords)
+                        {
+                            const auto dst_addr = coords2index(dst.shape(), dst_coords);
 
-        // Calculate the coordinates of the index value.
-        Coordinates idx_coords;
+                            // Calculate the coordinates of the index value.
+                            Coordinates idx_coords;
 
-        for(size_t i = 0; i < indices.shape().num_dimensions(); ++i)
-        {
-            idx_coords.set(i, dst_coords[i + actual_axis]);
-        }
+                            for (size_t i = 0; i < indices.shape().num_dimensions(); ++i)
+                            {
+                                idx_coords.set(i, dst_coords[i + actual_axis]);
+                            }
 
-        const auto index = indices_ptr[coords2index(indices.shape(), idx_coords)];
+                            const auto index = indices_ptr[coords2index(indices.shape(), idx_coords)];
 
-        if(index < index_limit)
-        {
-            // Calculate the coordinates of the source data.
-            Coordinates src_coords;
+                            if (index < index_limit)
+                            {
+                                // Calculate the coordinates of the source data.
+                                Coordinates src_coords;
 
-            for(size_t i = 0; i < actual_axis; ++i)
-            {
-                src_coords.set(i, dst_coords[i]);
-            }
+                                for (size_t i = 0; i < actual_axis; ++i)
+                                {
+                                    src_coords.set(i, dst_coords[i]);
+                                }
 
-            src_coords.set(actual_axis, index);
+                                src_coords.set(actual_axis, index);
 
-            for(size_t i = actual_axis + 1; i < src.shape().num_dimensions(); ++i)
-            {
-                src_coords.set(i, dst_coords[i + indices.shape().num_dimensions() - 1]);
-            }
+                                for (size_t i = actual_axis + 1; i < src.shape().num_dimensions(); ++i)
+                                {
+                                    src_coords.set(i, dst_coords[i + indices.shape().num_dimensions() - 1]);
+                                }
 
-            // Copy the data.
-            const auto src_addr = coords2index(src.shape(), src_coords);
-            dst_ptr[dst_addr] = src_ptr[src_addr];
-        }
-        else
-        {
-            dst_ptr[dst_addr] = 0;
-        }
-    });
+                                // Copy the data.
+                                const auto src_addr = coords2index(src.shape(), src_coords);
+                                dst_ptr[dst_addr]   = src_ptr[src_addr];
+                            }
+                            else
+                            {
+                                dst_ptr[dst_addr] = 0;
+                            }
+                        });
 
     return dst;
 }
 
-template SimpleTensor<float> gather(const SimpleTensor<float> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
-template SimpleTensor<half> gather(const SimpleTensor<half> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
-template SimpleTensor<uint16_t> gather(const SimpleTensor<uint16_t> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
-template SimpleTensor<uint8_t> gather(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
+template SimpleTensor<float>
+gather(const SimpleTensor<float> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
+template SimpleTensor<half>
+gather(const SimpleTensor<half> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
+template SimpleTensor<uint16_t>
+gather(const SimpleTensor<uint16_t> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
+template SimpleTensor<uint8_t>
+gather(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint32_t> &indices, uint32_t actual_axis);
 } // namespace reference
 } // namespace validation
 } // namespace test

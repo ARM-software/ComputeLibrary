@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+
 #include "support/AclRequires.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
@@ -58,9 +59,21 @@ inline bool is_valid_pixel(int i, int min, int max)
 }
 
 // Evaluate the weights against an element in a given tensor.
-template < typename T, typename TB, typename TACC, typename std::enable_if < validation::is_floating_point<T>::value &&validation::is_floating_point<TB>::value, int >::type = 0 >
-T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const Size3D &dilation, int batch,
-                   int z_start, int y_start, int x_start, int ch_out, UniformQuantizationInfo oq_info)
+template <typename T,
+          typename TB,
+          typename TACC,
+          typename std::enable_if<validation::is_floating_point<T>::value && validation::is_floating_point<TB>::value,
+                                  int>::type = 0>
+T calculate_conv3d(const SimpleTensor<T>  &src,
+                   const SimpleTensor<T>  &weights,
+                   const SimpleTensor<TB> &bias,
+                   const Size3D           &dilation,
+                   int                     batch,
+                   int                     z_start,
+                   int                     y_start,
+                   int                     x_start,
+                   int                     ch_out,
+                   UniformQuantizationInfo oq_info)
 {
     ARM_COMPUTE_UNUSED(oq_info);
 
@@ -74,13 +87,13 @@ T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, c
     const unsigned int src_depth    = src.shape()[depth_dim];
 
     TACC total(0);
-    for(unsigned int weight_d = 0; weight_d < weights_depth; ++weight_d)
+    for (unsigned int weight_d = 0; weight_d < weights_depth; ++weight_d)
     {
         const int idx_z = z_start + dilation.depth * weight_d;
-        for(unsigned int weight_y = 0; weight_y < weights_height; ++weight_y)
+        for (unsigned int weight_y = 0; weight_y < weights_height; ++weight_y)
         {
             const int idx_y = y_start + dilation.height * weight_y;
-            for(unsigned int weight_x = 0; weight_x < weights_width; ++weight_x)
+            for (unsigned int weight_x = 0; weight_x < weights_width; ++weight_x)
             {
                 const int idx_x = x_start + dilation.width * weight_x;
 
@@ -89,20 +102,21 @@ T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, c
                 const bool is_y_valid       = is_valid_pixel(idx_y, 0, src_height);
                 const bool is_z_valid       = is_valid_pixel(idx_z, 0, src_depth);
                 const bool is_invalid_pixel = !(is_x_valid && is_y_valid && is_z_valid);
-                if(is_invalid_pixel)
+                if (is_invalid_pixel)
                 {
                     continue;
                 }
 
-                for(unsigned int ch_in = 0; ch_in < src_channels; ++ch_in)
+                for (unsigned int ch_in = 0; ch_in < src_channels; ++ch_in)
                 {
                     const T *in_ptr = src.data();
                     const T *w_ptr  = weights.data();
 
-                    const int in_offset     = coord2index(src.shape(), Coordinates{ ch_in, idx_x, idx_y, idx_z, batch });
-                    const int weight_offset = coord2index(weights.shape(), Coordinates{ ch_out, ch_in, weight_x, weight_y, weight_d });
-                    T         input_value   = in_ptr[in_offset];
-                    T         weight_value  = w_ptr[weight_offset];
+                    const int in_offset = coord2index(src.shape(), Coordinates{ch_in, idx_x, idx_y, idx_z, batch});
+                    const int weight_offset =
+                        coord2index(weights.shape(), Coordinates{ch_out, ch_in, weight_x, weight_y, weight_d});
+                    T input_value  = in_ptr[in_offset];
+                    T weight_value = w_ptr[weight_offset];
                     total += (input_value * weight_value);
                 }
             }
@@ -115,9 +129,20 @@ T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, c
     return static_cast<T>(total) + bias_value;
 }
 
-template < typename T, typename TB, typename TACC, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
-T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const Size3D &dilation, int batch,
-                   int z_start, int y_start, int x_start, int ch_out, UniformQuantizationInfo oq_info)
+template <typename T,
+          typename TB,
+          typename TACC,
+          ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value)>
+T calculate_conv3d(const SimpleTensor<T>  &src,
+                   const SimpleTensor<T>  &weights,
+                   const SimpleTensor<TB> &bias,
+                   const Size3D           &dilation,
+                   int                     batch,
+                   int                     z_start,
+                   int                     y_start,
+                   int                     x_start,
+                   int                     ch_out,
+                   UniformQuantizationInfo oq_info)
 {
     const unsigned int weights_width  = weights.shape()[weights_width_dim];
     const unsigned int weights_height = weights.shape()[weights_height_dim];
@@ -144,13 +169,13 @@ T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, c
     arm_compute::quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
     TACC total(0);
-    for(unsigned int weight_d = 0; weight_d < weights_depth; ++weight_d)
+    for (unsigned int weight_d = 0; weight_d < weights_depth; ++weight_d)
     {
         const int idx_z = z_start + dilation.depth * weight_d;
-        for(unsigned int weight_y = 0; weight_y < weights_height; ++weight_y)
+        for (unsigned int weight_y = 0; weight_y < weights_height; ++weight_y)
         {
             const int idx_y = y_start + dilation.height * weight_y;
-            for(unsigned int weight_x = 0; weight_x < weights_width; ++weight_x)
+            for (unsigned int weight_x = 0; weight_x < weights_width; ++weight_x)
             {
                 const int idx_x = x_start + dilation.width * weight_x;
 
@@ -159,20 +184,21 @@ T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, c
                 const bool is_y_valid       = is_valid_pixel(idx_y, 0, src_height);
                 const bool is_z_valid       = is_valid_pixel(idx_z, 0, src_depth);
                 const bool is_invalid_pixel = !(is_x_valid && is_y_valid && is_z_valid);
-                if(is_invalid_pixel)
+                if (is_invalid_pixel)
                 {
                     continue;
                 }
 
-                for(unsigned int ch_in = 0; ch_in < src_channels; ++ch_in)
+                for (unsigned int ch_in = 0; ch_in < src_channels; ++ch_in)
                 {
                     const T *in_ptr = src.data();
                     const T *w_ptr  = weights.data();
 
-                    const int in_offset     = coord2index(src.shape(), Coordinates{ ch_in, idx_x, idx_y, idx_z, batch });
-                    const int weight_offset = coord2index(weights.shape(), Coordinates{ ch_out, ch_in, weight_x, weight_y, weight_d });
-                    T         input_value   = in_ptr[in_offset];
-                    T         weight_value  = w_ptr[weight_offset];
+                    const int in_offset = coord2index(src.shape(), Coordinates{ch_in, idx_x, idx_y, idx_z, batch});
+                    const int weight_offset =
+                        coord2index(weights.shape(), Coordinates{ch_out, ch_in, weight_x, weight_y, weight_d});
+                    T input_value  = in_ptr[in_offset];
+                    T weight_value = w_ptr[weight_offset];
                     total += ((input_value + input_offset) * (weight_value + weights_offset));
                 }
             }
@@ -185,12 +211,17 @@ T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, c
     total += bias_value;
 
     return validation::quantize_down_scale_by_fixedpoint(total, output_multiplier, output_shift, output_offset,
-                                                         std::numeric_limits<T>::lowest(), std::numeric_limits<T>::max());
+                                                         std::numeric_limits<T>::lowest(),
+                                                         std::numeric_limits<T>::max());
 }
 } // namespace
 
 template <typename T, typename TB, typename TACC = T>
-SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst, const Conv3dInfo &conv3d_info)
+SimpleTensor<T> conv3d(const SimpleTensor<T>  &src,
+                       const SimpleTensor<T>  &weights,
+                       const SimpleTensor<TB> &bias,
+                       SimpleTensor<T>        &dst,
+                       const Conv3dInfo       &conv3d_info)
 {
     // Compute reference
     const unsigned int batch_size     = src.shape()[batch_dim];
@@ -207,7 +238,8 @@ SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weight
     const size_t       stride_y       = conv3d_info.stride.y();
     const size_t       stride_z       = conv3d_info.stride.z();
 
-    const TensorShape dst_shape = arm_compute::misc::shape_calculator::compute_conv3d_shape(src.shape(), weights.shape(), conv3d_info);
+    const TensorShape dst_shape =
+        arm_compute::misc::shape_calculator::compute_conv3d_shape(src.shape(), weights.shape(), conv3d_info);
 
     ARM_COMPUTE_UNUSED(src_channels, weights_out_ch, dst_channels, dst_shape, weights_CHin_dim);
     // Number of batches of source and destination tensors must match.
@@ -221,23 +253,26 @@ SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weight
     // Compare given dst tensor shape with expected shape.
     ARM_COMPUTE_ERROR_ON(dst.shape() != dst_shape);
 
-    for(unsigned int batch = 0; batch < batch_size; ++batch)
+    for (unsigned int batch = 0; batch < batch_size; ++batch)
     {
-        for(unsigned int z_out = 0; z_out < dst_depth; ++z_out)
+        for (unsigned int z_out = 0; z_out < dst_depth; ++z_out)
         {
             const int z_start = (z_out * stride_z) - pad_front;
-            for(unsigned int y_out = 0; y_out < dst_height; ++y_out)
+            for (unsigned int y_out = 0; y_out < dst_height; ++y_out)
             {
                 const int y_start = (y_out * stride_y) - pad_top;
-                for(unsigned int x_out = 0; x_out < dst_width; ++x_out)
+                for (unsigned int x_out = 0; x_out < dst_width; ++x_out)
                 {
                     const int x_start = (x_out * stride_x) - pad_left;
-                    for(unsigned int ch_out = 0; ch_out < dst_channels; ++ch_out)
+                    for (unsigned int ch_out = 0; ch_out < dst_channels; ++ch_out)
                     {
                         T *out_ptr = dst.data();
 
-                        const int out_offset = coord2index(dst.shape(), Coordinates{ ch_out, x_out, y_out, z_out, batch });
-                        out_ptr[out_offset]  = calculate_conv3d<T, TB, TACC>(src, weights, bias, conv3d_info.dilation, batch, z_start, y_start, x_start, ch_out, dst.quantization_info().uniform());
+                        const int out_offset =
+                            coord2index(dst.shape(), Coordinates{ch_out, x_out, y_out, z_out, batch});
+                        out_ptr[out_offset] =
+                            calculate_conv3d<T, TB, TACC>(src, weights, bias, conv3d_info.dilation, batch, z_start,
+                                                          y_start, x_start, ch_out, dst.quantization_info().uniform());
                     }
                 }
             }
@@ -246,14 +281,26 @@ SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weight
     return dst;
 }
 
-template SimpleTensor<float> conv3d<float, float, float>(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, SimpleTensor<float> &dst,
-                                    const Conv3dInfo &conv3d_info);
-template SimpleTensor<half> conv3d<half, half, float>(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, SimpleTensor<half> &dst,
-                                   const Conv3dInfo &conv3d_info);
-template SimpleTensor<uint8_t> conv3d<uint8_t, int32_t, int32_t>(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<uint8_t> &dst,
-                                      const Conv3dInfo &conv3d_info);
-template SimpleTensor<int8_t> conv3d<int8_t, int32_t, int32_t>(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<int8_t> &dst,
-                                     const Conv3dInfo &conv3d_info);
+template SimpleTensor<float>   conv3d<float, float, float>(const SimpleTensor<float> &src,
+                                                         const SimpleTensor<float> &weights,
+                                                         const SimpleTensor<float> &bias,
+                                                         SimpleTensor<float>       &dst,
+                                                         const Conv3dInfo          &conv3d_info);
+template SimpleTensor<half>    conv3d<half, half, float>(const SimpleTensor<half> &src,
+                                                      const SimpleTensor<half> &weights,
+                                                      const SimpleTensor<half> &bias,
+                                                      SimpleTensor<half>       &dst,
+                                                      const Conv3dInfo         &conv3d_info);
+template SimpleTensor<uint8_t> conv3d<uint8_t, int32_t, int32_t>(const SimpleTensor<uint8_t> &src,
+                                                                 const SimpleTensor<uint8_t> &weights,
+                                                                 const SimpleTensor<int32_t> &bias,
+                                                                 SimpleTensor<uint8_t>       &dst,
+                                                                 const Conv3dInfo            &conv3d_info);
+template SimpleTensor<int8_t>  conv3d<int8_t, int32_t, int32_t>(const SimpleTensor<int8_t>  &src,
+                                                               const SimpleTensor<int8_t>  &weights,
+                                                               const SimpleTensor<int32_t> &bias,
+                                                               SimpleTensor<int8_t>        &dst,
+                                                               const Conv3dInfo            &conv3d_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

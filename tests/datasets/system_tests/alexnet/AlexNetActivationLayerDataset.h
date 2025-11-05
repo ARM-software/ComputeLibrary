@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET
-
-#include "tests/framework/datasets/Datasets.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETACTIVATIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETACTIVATIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -37,16 +36,17 @@ namespace test
 {
 namespace datasets
 {
-class AlexNetActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
+class AlexNetActivationLayerDataset final
+    : public framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>,
+                                                         framework::dataset::SingletonDataset<ActivationLayerInfo>>
 {
 public:
     AlexNetActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", { TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U), TensorShape(13U, 13U, 384U), TensorShape(13U, 13U, 256U), TensorShape(4096U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
+        : CartesianProductDataset{
+              framework::dataset::make("Shape",
+                                       {TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U),
+                                        TensorShape(13U, 13U, 384U), TensorShape(13U, 13U, 256U), TensorShape(4096U)}),
+              framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))}
     {
     }
     AlexNetActivationLayerDataset(AlexNetActivationLayerDataset &&) = default;
@@ -55,4 +55,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETACTIVATIONLAYERDATASET_H

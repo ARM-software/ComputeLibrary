@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020,2024 Arm Limited.
+ * Copyright (c) 2018-2020,2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,48 +46,44 @@ CommonOptions::CommonOptions(CommandLineParser &parser)
       log_level(),
       throw_errors(parser.add_option<ToggleOption>("throw-errors")),
 #if !defined(_WIN64)
-     color_output(parser.add_option<ToggleOption>("color-output", isatty(STDOUT_FILENO))), // Only enable colors by default if we're running in a terminal
-#else // !defined(_WIN64)
-     color_output(parser.add_option<ToggleOption>("color-output", 0)),
-#endif // !defined(_WIN64)
+      color_output(parser.add_option<ToggleOption>(
+          "color-output", isatty(STDOUT_FILENO))), // Only enable colors by default if we're running in a terminal
+#else                                              // !defined(_WIN64)
+      color_output(parser.add_option<ToggleOption>("color-output", 0)),
+#endif                                             // !defined(_WIN64)
       pretty_console(parser.add_option<ToggleOption>("pretty-console", false)),
       json_file(parser.add_option<SimpleOption<std::string>>("json-file")),
       pretty_file(parser.add_option<SimpleOption<std::string>>("pretty-file")),
       log_streams()
 {
     Framework                       &framework = Framework::get();
-    std::set<InstrumentsDescription> allowed_instruments
-    {
+    std::set<InstrumentsDescription> allowed_instruments{
         std::pair<InstrumentType, ScaleFactor>(InstrumentType::ALL, ScaleFactor::NONE),
         std::pair<InstrumentType, ScaleFactor>(InstrumentType::NONE, ScaleFactor::NONE),
     };
 
-    for(const auto &type : framework.available_instruments())
+    for (const auto &type : framework.available_instruments())
     {
         allowed_instruments.insert(type);
     }
 
-    std::set<LogFormat> supported_log_formats
-    {
+    std::set<LogFormat> supported_log_formats{
         LogFormat::NONE,
         LogFormat::PRETTY,
         LogFormat::JSON,
     };
 
-    std::set<LogLevel> supported_log_levels
-    {
-        LogLevel::NONE,
-        LogLevel::CONFIG,
-        LogLevel::TESTS,
-        LogLevel::ERRORS,
-        LogLevel::DEBUG,
-        LogLevel::MEASUREMENTS,
-        LogLevel::ALL,
+    std::set<LogLevel> supported_log_levels{
+        LogLevel::NONE,  LogLevel::CONFIG,       LogLevel::TESTS, LogLevel::ERRORS,
+        LogLevel::DEBUG, LogLevel::MEASUREMENTS, LogLevel::ALL,
     };
 
-    instruments = parser.add_option<EnumListOption<InstrumentsDescription>>("instruments", allowed_instruments, std::initializer_list<InstrumentsDescription> { std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE) });
-    log_format  = parser.add_option<EnumOption<LogFormat>>("log-format", supported_log_formats, LogFormat::PRETTY);
-    log_level   = parser.add_option<EnumOption<LogLevel>>("log-level", supported_log_levels, LogLevel::ALL);
+    instruments = parser.add_option<EnumListOption<InstrumentsDescription>>(
+        "instruments", allowed_instruments,
+        std::initializer_list<InstrumentsDescription>{
+            std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE)});
+    log_format = parser.add_option<EnumOption<LogFormat>>("log-format", supported_log_formats, LogFormat::PRETTY);
+    log_level  = parser.add_option<EnumOption<LogLevel>>("log-level", supported_log_levels, LogLevel::ALL);
 
     help->set_help("Show this help message");
     instruments->set_help("Set the profiling instruments to use");
@@ -105,7 +101,7 @@ std::vector<std::unique_ptr<Printer>> CommonOptions::create_printers()
 {
     std::vector<std::unique_ptr<Printer>> printers;
 
-    if(pretty_console->value() && (log_file->is_set() || log_format->value() != LogFormat::PRETTY))
+    if (pretty_console->value() && (log_file->is_set() || log_format->value() != LogFormat::PRETTY))
     {
         auto pretty_printer = std::make_unique<PrettyPrinter>();
         pretty_printer->set_color_output(color_output->value());
@@ -113,7 +109,7 @@ std::vector<std::unique_ptr<Printer>> CommonOptions::create_printers()
     }
 
     std::unique_ptr<Printer> printer;
-    switch(log_format->value())
+    switch (log_format->value())
     {
         case LogFormat::JSON:
             printer = std::make_unique<JSONPrinter>();
@@ -129,28 +125,28 @@ std::vector<std::unique_ptr<Printer>> CommonOptions::create_printers()
             break;
     }
 
-    if(log_file->is_set())
+    if (log_file->is_set())
     {
         log_streams.push_back(std::make_shared<std::ofstream>(log_file->value()));
-        if(printer != nullptr)
+        if (printer != nullptr)
         {
             printer->set_stream(*log_streams.back().get());
         }
     }
 
-    if(printer != nullptr)
+    if (printer != nullptr)
     {
         printers.push_back(std::move(printer));
     }
 
-    if(json_file->is_set())
+    if (json_file->is_set())
     {
         printers.push_back(std::make_unique<JSONPrinter>());
         log_streams.push_back(std::make_shared<std::ofstream>(json_file->value()));
         printers.back()->set_stream(*log_streams.back().get());
     }
 
-    if(pretty_file->is_set())
+    if (pretty_file->is_set())
     {
         printers.push_back(std::make_unique<PrettyPrinter>());
         log_streams.push_back(std::make_shared<std::ofstream>(pretty_file->value()));

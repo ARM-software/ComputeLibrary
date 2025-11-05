@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ConvertPolicyDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ArithmeticOperationsFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -45,15 +46,13 @@ using framework::dataset::make;
 namespace
 {
 /** Input data sets **/
-const auto EmptyActivationFunctionsDataset = make("ActivationInfo",
-{ ActivationLayerInfo() });
-const auto ActivationFunctionsDataset = make("ActivationInfo",
-{
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
-});
-const auto InPlaceDataSet    = make("InPlace", { false, true });
-const auto OutOfPlaceDataSet = make("InPlace", { false });
+const auto EmptyActivationFunctionsDataset = make("ActivationInfo", {ActivationLayerInfo()});
+const auto ActivationFunctionsDataset =
+    make("ActivationInfo",
+         {ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
+          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)});
+const auto InPlaceDataSet    = make("InPlace", {false, true});
+const auto OutOfPlaceDataSet = make("InPlace", {false});
 } // namespace
 
 TEST_SUITE(CL)
@@ -84,44 +83,47 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input1Info", { T
 TEST_SUITE(InPlaceValidate)
 TEST_CASE(SingleTensor, framework::DatasetMode::ALL)
 {
-    const auto random_shape       = TensorShape{ 9, 9 };
-    const auto single_tensor_info = TensorInfo{ random_shape, 1, DataType::F32 };
+    const auto random_shape       = TensorShape{9, 9};
+    const auto single_tensor_info = TensorInfo{random_shape, 1, DataType::F32};
 
-    Status result = CLArithmeticSubtraction::validate(&single_tensor_info, &single_tensor_info, &single_tensor_info, ConvertPolicy::WRAP);
+    Status result = CLArithmeticSubtraction::validate(&single_tensor_info, &single_tensor_info, &single_tensor_info,
+                                                      ConvertPolicy::WRAP);
     ARM_COMPUTE_EXPECT(bool(result) == true, framework::LogLevel::ERRORS);
 }
 
 TEST_CASE(ValidBroadCast, framework::DatasetMode::ALL)
 {
-    const auto larger_shape  = TensorShape{ 27U, 13U, 2U };
-    const auto smaller_shape = TensorShape{ 1U, 13U, 2U };
+    const auto larger_shape  = TensorShape{27U, 13U, 2U};
+    const auto smaller_shape = TensorShape{1U, 13U, 2U};
 
-    const auto larger_tensor_info  = TensorInfo{ larger_shape, 1, DataType::F32 };
-    const auto smaller_tensor_info = TensorInfo{ smaller_shape, 1, DataType::F32 };
+    const auto larger_tensor_info  = TensorInfo{larger_shape, 1, DataType::F32};
+    const auto smaller_tensor_info = TensorInfo{smaller_shape, 1, DataType::F32};
 
-    Status result = CLArithmeticSubtraction::validate(&larger_tensor_info, &smaller_tensor_info, &larger_tensor_info, ConvertPolicy::WRAP);
+    Status result = CLArithmeticSubtraction::validate(&larger_tensor_info, &smaller_tensor_info, &larger_tensor_info,
+                                                      ConvertPolicy::WRAP);
     ARM_COMPUTE_EXPECT(bool(result) == true, framework::LogLevel::ERRORS);
 }
 
 TEST_CASE(InvalidBroadcastOutput, framework::DatasetMode::ALL)
 {
-    const auto larger_shape  = TensorShape{ 27U, 13U, 2U };
-    const auto smaller_shape = TensorShape{ 1U, 13U, 2U };
+    const auto larger_shape  = TensorShape{27U, 13U, 2U};
+    const auto smaller_shape = TensorShape{1U, 13U, 2U};
 
-    const auto larger_tensor_info  = TensorInfo{ larger_shape, 1, DataType::F32 };
-    const auto smaller_tensor_info = TensorInfo{ smaller_shape, 1, DataType::F32 };
+    const auto larger_tensor_info  = TensorInfo{larger_shape, 1, DataType::F32};
+    const auto smaller_tensor_info = TensorInfo{smaller_shape, 1, DataType::F32};
 
-    Status result = CLArithmeticSubtraction::validate(&larger_tensor_info, &smaller_tensor_info, &smaller_tensor_info, ConvertPolicy::WRAP);
+    Status result = CLArithmeticSubtraction::validate(&larger_tensor_info, &smaller_tensor_info, &smaller_tensor_info,
+                                                      ConvertPolicy::WRAP);
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
 TEST_CASE(InvalidBroadcastBoth, framework::DatasetMode::ALL)
 {
-    const auto shape0 = TensorShape{ 9U, 9U };
-    const auto shape1 = TensorShape{ 9U, 1U, 2U };
+    const auto shape0 = TensorShape{9U, 9U};
+    const auto shape1 = TensorShape{9U, 1U, 2U};
 
-    const auto info0 = TensorInfo{ shape0, 1, DataType::F32 };
-    const auto info1 = TensorInfo{ shape1, 1, DataType::F32 };
+    const auto info0 = TensorInfo{shape0, 1, DataType::F32};
+    const auto info1 = TensorInfo{shape1, 1, DataType::F32};
 
     Status result{};
 
@@ -134,14 +136,18 @@ TEST_CASE(InvalidBroadcastBoth, framework::DatasetMode::ALL)
 TEST_SUITE_END() // InPlaceValidate
 
 template <typename T>
-using CLArithmeticSubtractionFixture = ArithmeticSubtractionValidationFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
+using CLArithmeticSubtractionFixture =
+    ArithmeticSubtractionValidationFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                                       DataType::U8),
-                                                                                                                       make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                                                                                                               OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLArithmeticSubtractionFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::U8),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -149,19 +155,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<uint8_t>, framew
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                                     DataType::S16),
-                                                                                                                     make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                                                                                                                     OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLArithmeticSubtractionFixture<int16_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::S16),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticSubtractionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
-                                                                                                                   DataType::S16),
-                                                                                                                   make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                                                                                                                   OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLArithmeticSubtractionFixture<int16_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::S16),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -170,54 +182,68 @@ TEST_SUITE_END() // S16
 TEST_SUITE_END() // Integer
 
 template <typename T>
-using CLArithmeticSubtractionQuantizedFixture = ArithmeticSubtractionValidationQuantizedFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
+using CLArithmeticSubtractionQuantizedFixture =
+    ArithmeticSubtractionValidationQuantizedFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                       make("DataType", DataType::QASYMM8),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
-                       make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                       make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) }),
-                       make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) }),
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLArithmeticSubtractionQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::QASYMM8),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE}),
+                               make("Src0QInfo", {QuantizationInfo(5.f / 255.f, 20)}),
+                               make("Src1QInfo", {QuantizationInfo(2.f / 255.f, 10)}),
+                               make("OutQInfo", {QuantizationInfo(1.f / 255.f, 5)}),
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunTinyInPlace, CLArithmeticSubtractionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::TinyShapes(),
-                       make("DataType", DataType::QASYMM8),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
-                       make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                       make("Src1QInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                       make("OutQInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                       InPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunTinyInPlace,
+                       CLArithmeticSubtractionQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::TinyShapes(),
+                               make("DataType", DataType::QASYMM8),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE}),
+                               make("Src0QInfo", {QuantizationInfo(5.f / 255.f, 20)}),
+                               make("Src1QInfo", {QuantizationInfo(5.f / 255.f, 20)}),
+                               make("OutQInfo", {QuantizationInfo(5.f / 255.f, 20)}),
+                               InPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                       make("DataType", DataType::QASYMM8_SIGNED),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
-                       make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 10) }),
-                       make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) }),
-                       make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) }),
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLArithmeticSubtractionQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE}),
+                               make("Src0QInfo", {QuantizationInfo(5.f / 255.f, 10)}),
+                               make("Src1QInfo", {QuantizationInfo(2.f / 255.f, 10)}),
+                               make("OutQInfo", {QuantizationInfo(1.f / 255.f, 5)}),
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QSYMM16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                       make("DataType", DataType::QSYMM16),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE }),
-                       make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
-                       make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) }),
-                       make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) }),
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    CLArithmeticSubtractionQuantizedFixture<int16_t>,
+    framework::DatasetMode::PRECOMMIT,
+    combine(datasets::SmallShapes(),
+            make("DataType", DataType::QSYMM16),
+            make("ConvertPolicy", {ConvertPolicy::SATURATE}),
+            make("Src0QInfo", {QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0)}),
+            make("Src1QInfo", {QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0)}),
+            make("OutQInfo", {QuantizationInfo(5.f / 32768.f, 0)}),
+            OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -226,24 +252,31 @@ TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
 
 template <typename T>
-using CLArithmeticSubtractionFloatFixture = ArithmeticSubtractionValidationFloatFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
+using CLArithmeticSubtractionFloatFixture =
+    ArithmeticSubtractionValidationFloatFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFloatFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                                 DataType::F16),
-                                                                                                                 make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                                                                                                                 EmptyActivationFunctionsDataset,
-                                                                                                                 OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLArithmeticSubtractionFloatFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::F16),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               EmptyActivationFunctionsDataset,
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticSubtractionFloatFixture<half>, framework::DatasetMode::ALL, combine(datasets::TinyShapes(),
-                       make("DataType", DataType::F16),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                       ActivationFunctionsDataset,
-                       InPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunWithActivation,
+                       CLArithmeticSubtractionFloatFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::TinyShapes(),
+                               make("DataType", DataType::F16),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               ActivationFunctionsDataset,
+                               InPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -251,72 +284,93 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticSubtractionFloatFixture<ha
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                        make("DataType", DataType::F32),
-                                                                                                                        make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                                                                                                                        EmptyActivationFunctionsDataset,
-                                                                                                                        OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLArithmeticSubtractionFloatFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::F32),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               EmptyActivationFunctionsDataset,
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticSubtractionFloatFixture<float>, framework::DatasetMode::ALL, combine(datasets::TinyShapes(),
-                       make("DataType", DataType::F32),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                       ActivationFunctionsDataset,
-                       InPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunWithActivation,
+                       CLArithmeticSubtractionFloatFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::TinyShapes(),
+                               make("DataType", DataType::F32),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               ActivationFunctionsDataset,
+                               InPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticSubtractionFloatFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(),
-                                                                                                                      make("DataType", DataType::F32),
-                                                                                                                      make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                                                                                                                      EmptyActivationFunctionsDataset,
-                                                                                                                      OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLArithmeticSubtractionFloatFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::F32),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               EmptyActivationFunctionsDataset,
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 template <typename T>
-using CLArithmeticSubtractionBroadcastFloatFixture = ArithmeticSubtractionBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
+using CLArithmeticSubtractionBroadcastFloatFixture =
+    ArithmeticSubtractionBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticSubtractionBroadcastFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
-                       make("DataType", DataType::F32),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                       EmptyActivationFunctionsDataset,
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
+                       CLArithmeticSubtractionBroadcastFloatFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapesBroadcast(),
+                               make("DataType", DataType::F32),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               EmptyActivationFunctionsDataset,
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInplace, CLArithmeticSubtractionBroadcastFloatFixture<float>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInplace,
+                       CLArithmeticSubtractionBroadcastFloatFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
                        combine(datasets::TinyShapesBroadcastInplace(),
-                                                       make("DataType", DataType::F32),
-                                               make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                                       EmptyActivationFunctionsDataset,
+                               make("DataType", DataType::F32),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               EmptyActivationFunctionsDataset,
                                InPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLArithmeticSubtractionBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(datasets::TinyShapesBroadcast(),
-                       make("DataType", DataType::F32),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                       ActivationFunctionsDataset,
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast,
+                       CLArithmeticSubtractionBroadcastFloatFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::TinyShapesBroadcast(),
+                               make("DataType", DataType::F32),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               ActivationFunctionsDataset,
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLArithmeticSubtractionBroadcastFloatFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
-                       make("DataType", DataType::F32),
-                       make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                       EmptyActivationFunctionsDataset,
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast,
+                       CLArithmeticSubtractionBroadcastFloatFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapesBroadcast(),
+                               make("DataType", DataType::F32),
+                               make("ConvertPolicy", {ConvertPolicy::SATURATE, ConvertPolicy::WRAP}),
+                               EmptyActivationFunctionsDataset,
+                               OutOfPlaceDataSet))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -56,7 +56,10 @@ DATA_TEST_CASE(Construction, framework::DatasetMode::ALL, zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(SetEmpty, framework::DatasetMode::ALL, framework::dataset::make("Dimension", { 0U, 1U, 2U, 3U, 4U, 5U }), dimension)
+DATA_TEST_CASE(SetEmpty,
+               framework::DatasetMode::ALL,
+               framework::dataset::make("Dimension", {0U, 1U, 2U, 3U, 4U, 5U}),
+               dimension)
 {
     TensorShape shape;
 

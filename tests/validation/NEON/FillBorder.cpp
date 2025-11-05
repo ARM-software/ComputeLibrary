@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "tests/Globals.h"
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -60,7 +60,7 @@ DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(
 // clang-format on
 // *INDENT-ON*
 {
-    BorderSize border_size{ static_cast<unsigned int>(size) };
+    BorderSize border_size{static_cast<unsigned int>(size)};
 
     std::mt19937                            generator(library->seed());
     std::uniform_int_distribution<uint32_t> distribution_u8(0, 255);
@@ -79,7 +79,7 @@ DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(
     validate(src.info()->padding(), padding);
 
     // Fill tensor with constant value
-    std::uniform_int_distribution<uint32_t> distribution{ tensor_value, tensor_value };
+    std::uniform_int_distribution<uint32_t> distribution{tensor_value, tensor_value};
     library->fill(Accessor(src), distribution, 0);
 
     // Create and configure kernel

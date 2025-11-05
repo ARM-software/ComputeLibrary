@@ -23,15 +23,14 @@
  */
 #include "ConvolutionLayer.h"
 
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+
+#include "tests/framework/Asserts.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Convolution3d.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
-
-#include "tests/framework/Asserts.h"
-
-#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
@@ -41,9 +40,14 @@ namespace validation
 {
 namespace reference
 {
-template <typename TI, typename TW, typename TB, typename TO= TI>
-SimpleTensor<TO> convolution_layer_nchw(const SimpleTensor<TI> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, SimpleTensor<TO> &dst, const PadStrideInfo &info,
-                                       const Size2D &dilation, unsigned int num_groups)
+template <typename TI, typename TW, typename TB, typename TO = TI>
+SimpleTensor<TO> convolution_layer_nchw(const SimpleTensor<TI> &src,
+                                        const SimpleTensor<TW> &weights,
+                                        const SimpleTensor<TB> &bias,
+                                        SimpleTensor<TO>       &dst,
+                                        const PadStrideInfo    &info,
+                                        const Size2D           &dilation,
+                                        unsigned int            num_groups)
 {
     ARM_COMPUTE_ERROR_ON((src.shape()[2] / num_groups) != weights.shape()[2]);
 
@@ -70,36 +74,39 @@ SimpleTensor<TO> convolution_layer_nchw(const SimpleTensor<TI> &src, const Simpl
     const int end_yi      = output_wh.second * stride_yi;
     const int num_batches = src.shape().total_size() / (width_in * height_in * depth_in);
 
-#if defined(_OPENMP) && !( defined(__arm__) && defined(__ANDROID__))
-    #pragma omp parallel for collapse(5)
+#if defined(_OPENMP) && !(defined(__arm__) && defined(__ANDROID__))
+#pragma omp parallel for collapse(5)
 #endif /* _OPENMP */
-    for(int r = 0; r < num_batches; ++r)
+    for (int r = 0; r < num_batches; ++r)
     {
-        for(int yi = start_yi; yi < start_yi + end_yi; yi += stride_yi)
+        for (int yi = start_yi; yi < start_yi + end_yi; yi += stride_yi)
         {
-            for(int xi = start_xi; xi < start_xi + end_xi; xi += stride_xi)
+            for (int xi = start_xi; xi < start_xi + end_xi; xi += stride_xi)
             {
-                for(int group = 0; group < static_cast<int>(num_groups); ++group)
+                for (int group = 0; group < static_cast<int>(num_groups); ++group)
                 {
-                    for(int ofm = 0; ofm < static_cast<int>(depth_out / num_groups); ++ofm)
+                    for (int ofm = 0; ofm < static_cast<int>(depth_out / num_groups); ++ofm)
                     {
                         // Compute input and output offsets
-                        const int offset_in  = r * width_in * height_in * depth_in + (group * (depth_in / num_groups) * width_in * height_in);
+                        const int offset_in = r * width_in * height_in * depth_in +
+                                              (group * (depth_in / num_groups) * width_in * height_in);
                         const int xo         = (xi - start_xi) / stride_xi;
                         const int yo         = (yi - start_yi) / stride_yi;
-                        const int offset_out = xo + yo * width_out + ((ofm + group * (depth_out / num_groups)) * width_out * height_out) + (r * width_out * height_out * depth_out);
-                        const int offset_w   = (ofm + group * (depth_out / num_groups)) * width_weights * height_weights * depth_weights;
-                        const int offset_b   = (ofm + group * (depth_out / num_groups));
+                        const int offset_out = xo + yo * width_out +
+                                               ((ofm + group * (depth_out / num_groups)) * width_out * height_out) +
+                                               (r * width_out * height_out * depth_out);
+                        const int offset_w =
+                            (ofm + group * (depth_out / num_groups)) * width_weights * height_weights * depth_weights;
+                        const int offset_b = (ofm + group * (depth_out / num_groups));
 
                         ARM_COMPUTE_ASSERT(xo < width_out);
                         ARM_COMPUTE_ASSERT(yo < height_out);
 
                         // Compute 3D convolution
-                        convolution_3d::detail::convolution3d<TI,TW,TB,TO>(src, weights, bias, dst,
-                                                              offset_in, offset_w, offset_b, offset_out,
-                                                              xi, yi,
-                                                              width_in, height_in, (depth_in / num_groups),
-                                                              width_weights, height_weights, dilation.x(), dilation.y(), ofm);
+                        convolution_3d::detail::convolution3d<TI, TW, TB, TO>(
+                            src, weights, bias, dst, offset_in, offset_w, offset_b, offset_out, xi, yi, width_in,
+                            height_in, (depth_in / num_groups), width_weights, height_weights, dilation.x(),
+                            dilation.y(), ofm);
                     }
                 }
             }
@@ -108,65 +115,94 @@ SimpleTensor<TO> convolution_layer_nchw(const SimpleTensor<TI> &src, const Simpl
     return dst;
 }
 template <typename TI, typename TW, typename TB, typename TO>
-SimpleTensor<TO> convolution_layer(const SimpleTensor<TI> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
-                                  const Size2D &dilation, unsigned int num_groups, QuantizationInfo out_quant_info)
+SimpleTensor<TO> convolution_layer(const SimpleTensor<TI> &src,
+                                   const SimpleTensor<TW> &weights,
+                                   const SimpleTensor<TB> &bias,
+                                   const TensorShape      &output_shape,
+                                   const PadStrideInfo    &info,
+                                   const Size2D           &dilation,
+                                   unsigned int            num_groups,
+                                   QuantizationInfo        out_quant_info)
 {
-
-    DataType dst_dt = src.data_type();
+    DataType         dst_dt    = src.data_type();
     QuantizationInfo dst_qinfo = out_quant_info;
 
     // For float output we override both
     if (std::is_same<TO, float>::value)
     {
-        dst_dt   = DataType::F32;
+        dst_dt    = DataType::F32;
         dst_qinfo = QuantizationInfo(); // no quantization for F32
     }
 
-    SimpleTensor<TO> dst{ output_shape, dst_dt, 1, dst_qinfo };
+    SimpleTensor<TO> dst{output_shape, dst_dt, 1, dst_qinfo};
 
-    return convolution_layer_nchw<TI,TW,TB,TO>(src, weights, bias, dst, info, dilation, num_groups);
+    return convolution_layer_nchw<TI, TW, TB, TO>(src, weights, bias, dst, info, dilation, num_groups);
 }
 
 // Dequantize i8+i8->F32
-template SimpleTensor<float> convolution_layer<int8_t,int8_t,float,float>(const SimpleTensor<int8_t> &src,
-                                                                              const SimpleTensor<int8_t> &weights, const SimpleTensor<float> &bias,
-                                                                              const TensorShape &output_shape,const PadStrideInfo &info, const Size2D &dilation,
-                                                                              unsigned int num_groups, QuantizationInfo out_quant_info);
+template SimpleTensor<float> convolution_layer<int8_t, int8_t, float, float>(const SimpleTensor<int8_t> &src,
+                                                                             const SimpleTensor<int8_t> &weights,
+                                                                             const SimpleTensor<float>  &bias,
+                                                                             const TensorShape          &output_shape,
+                                                                             const PadStrideInfo        &info,
+                                                                             const Size2D               &dilation,
+                                                                             unsigned int                num_groups,
+                                                                             QuantizationInfo out_quant_info);
 // Dequantize u8+u8->F32
-template SimpleTensor<float> convolution_layer<uint8_t,uint8_t,float,float>(const SimpleTensor<uint8_t> &src,
-                                                                              const SimpleTensor<uint8_t> &weights, const SimpleTensor<float> &bias,
-                                                                              const TensorShape &output_shape,const PadStrideInfo &info, const Size2D &dilation,
-                                                                              unsigned int num_groups, QuantizationInfo out_quant_info);
+template SimpleTensor<float> convolution_layer<uint8_t, uint8_t, float, float>(const SimpleTensor<uint8_t> &src,
+                                                                               const SimpleTensor<uint8_t> &weights,
+                                                                               const SimpleTensor<float>   &bias,
+                                                                               const TensorShape   &output_shape,
+                                                                               const PadStrideInfo &info,
+                                                                               const Size2D        &dilation,
+                                                                               unsigned int         num_groups,
+                                                                               QuantizationInfo     out_quant_info);
 
+template SimpleTensor<float> convolution_layer<float, float, float, float>(const SimpleTensor<float> &src,
+                                                                           const SimpleTensor<float> &weights,
+                                                                           const SimpleTensor<float> &bias,
+                                                                           const TensorShape         &output_shape,
+                                                                           const PadStrideInfo       &info,
+                                                                           const Size2D              &dilation,
+                                                                           unsigned int               num_groups,
+                                                                           QuantizationInfo           out_quant_info);
 
+template SimpleTensor<half> convolution_layer<half, half, half, half>(const SimpleTensor<half> &src,
+                                                                      const SimpleTensor<half> &weights,
+                                                                      const SimpleTensor<half> &bias,
+                                                                      const TensorShape        &output_shape,
+                                                                      const PadStrideInfo      &info,
+                                                                      const Size2D             &dilation,
+                                                                      unsigned int              num_groups,
+                                                                      QuantizationInfo          out_quant_info);
 
-template SimpleTensor<float> convolution_layer<float, float, float, float>( const SimpleTensor<float> &src,
-                                                                            const SimpleTensor<float> &weights, const SimpleTensor<float> &bias,
-                                                                            const TensorShape &output_shape,
-                                                                            const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups,
-                                                                            QuantizationInfo out_quant_info);
+template SimpleTensor<uint8_t>
+convolution_layer<uint8_t, uint8_t, int32_t, uint8_t>(const SimpleTensor<uint8_t> &src,
+                                                      const SimpleTensor<uint8_t> &weights,
+                                                      const SimpleTensor<int32_t> &bias,
+                                                      const TensorShape           &output_shape,
+                                                      const PadStrideInfo         &info,
+                                                      const Size2D                &dilation,
+                                                      unsigned int                 num_groups,
+                                                      QuantizationInfo             out_quant_info);
 
-template SimpleTensor<half> convolution_layer<half,half,half,half>( const SimpleTensor<half> &src, const SimpleTensor<half> &weights,
-                                                                    const SimpleTensor<half> &bias, const TensorShape &output_shape,
-                                                                    const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups,
-                                                                    QuantizationInfo out_quant_info);
+template SimpleTensor<uint8_t> convolution_layer<uint8_t, int8_t, int32_t, uint8_t>(const SimpleTensor<uint8_t> &src,
+                                                                                    const SimpleTensor<int8_t> &weights,
+                                                                                    const SimpleTensor<int32_t> &bias,
+                                                                                    const TensorShape   &output_shape,
+                                                                                    const PadStrideInfo &info,
+                                                                                    const Size2D        &dilation,
+                                                                                    unsigned int         num_groups,
+                                                                                    QuantizationInfo out_quant_info);
 
-template SimpleTensor<uint8_t> convolution_layer<uint8_t,uint8_t,int32_t,uint8_t>(  const SimpleTensor<uint8_t> &src,
-                                                                                    const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias,
-                                                                                    const TensorShape &output_shape,
-                                                                                    const PadStrideInfo &info, const Size2D &dilation,
-                                                                                    unsigned int num_groups, QuantizationInfo out_quant_info);
-
-template SimpleTensor<uint8_t> convolution_layer<uint8_t,int8_t,int32_t,uint8_t> ( const SimpleTensor<uint8_t> &src,
-                                                                                    const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias,
-                                                                                    const TensorShape &output_shape,
-                                                                                    const PadStrideInfo &info, const Size2D &dilation,
-                                                                                    unsigned int num_groups, QuantizationInfo out_quant_info);
-
-template SimpleTensor<int8_t> convolution_layer<int8_t,int8_t,int32_t,int8_t>(const SimpleTensor<int8_t> &src,
-                                                                              const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias,
-                                                                              const TensorShape &output_shape,const PadStrideInfo &info, const Size2D &dilation,
-                                                                              unsigned int num_groups, QuantizationInfo out_quant_info);
+template SimpleTensor<int8_t> convolution_layer<int8_t, int8_t, int32_t, int8_t>(const SimpleTensor<int8_t>  &src,
+                                                                                 const SimpleTensor<int8_t>  &weights,
+                                                                                 const SimpleTensor<int32_t> &bias,
+                                                                                 const TensorShape   &output_shape,
+                                                                                 const PadStrideInfo &info,
+                                                                                 const Size2D        &dilation,
+                                                                                 unsigned int         num_groups,
+                                                                                 QuantizationInfo     out_quant_info);
 
 } // namespace reference
 } // namespace validation

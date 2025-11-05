@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/ContextFixture.h"
-
 #include "src/cpu/CpuContext.h"
+#include "tests/validation/fixtures/UNIT/ContextFixture.h"
 
 namespace arm_compute
 {
@@ -74,9 +73,15 @@ TEST_CASE(CreateContextWithInvalidOptions, framework::DatasetMode::ALL)
     ARM_COMPUTE_ASSERT(ctx == nullptr);
 }
 
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidContext, DestroyInvalidContextFixture<AclTarget::AclCpu>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCApi, SimpleContextCApiFixture<AclTarget::AclCpu>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCppApi, SimpleContextCppApiFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidContext,
+                             DestroyInvalidContextFixture<AclTarget::AclCpu>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCApi,
+                             SimpleContextCApiFixture<AclTarget::AclCpu>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCppApi,
+                             SimpleContextCppApiFixture<acl::Target::Cpu>,
+                             framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(MultipleContexts, MultipleContextsFixture<AclTarget::AclCpu>, framework::DatasetMode::ALL)
 
 /** Test-case for CpuCapabilities

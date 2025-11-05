@@ -26,14 +26,15 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/TransposeFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -70,14 +71,20 @@ template <typename T>
 using CLTransposeFixture = TransposeValidationFixture<CLTensor, CLAccessor, CLTranspose, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLTransposeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
-                                                                                                         make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLTransposeFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLTransposeFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
-                                                                                                       make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLTransposeFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -94,14 +101,20 @@ FIXTURE_DATA_TEST_CASE(RunLargeHighDimensional,
 TEST_SUITE_END() // U8
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLTransposeFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
-                                                                                                          make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLTransposeFixture<uint16_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                               make("DataType", DataType::U16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLTransposeFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
-                                                                                                        make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLTransposeFixture<uint16_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                               make("DataType", DataType::U16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -109,10 +122,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLTransposeFixture<uint16_t>, framework::Datase
 TEST_SUITE_END() // U16
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLTransposeFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(concat(make("Shape", { TensorShape{ 1U, 5U }, TensorShape{ 4U, 5U }, TensorShape{ 3, 12 } }),
-                                                                                                                        datasets::Small1DShapes(),
-                                                                                                                        datasets::Small2DShapes()),
-                                                                                                         make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLTransposeFixture<uint32_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(make("Shape", {TensorShape{1U, 5U}, TensorShape{4U, 5U}, TensorShape{3, 12}}),
+                                      datasets::Small1DShapes(),
+                                      datasets::Small2DShapes()),
+                               make("DataType", DataType::U32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -126,8 +142,11 @@ FIXTURE_DATA_TEST_CASE(RunSmallHighDimensional,
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLTransposeFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
-                                                                                                        make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLTransposeFixture<uint32_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                               make("DataType", DataType::U32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

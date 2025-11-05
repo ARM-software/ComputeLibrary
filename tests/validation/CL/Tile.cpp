@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLTile.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/TileFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -42,14 +43,9 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-const auto MultiplesDataset = make("Multiples", { Multiples{ 3 },
-                                                                      Multiples{ 7 },
-                                                                      Multiples{ 2, 2 },
-                                                                      Multiples{ 1, 1, 3, 4 },
-                                                                      Multiples{ 2, 1, 2, 2 },
-                                                                      Multiples{ 2, 1, 3 },
-                                                                      Multiples{ 2, 2, 2 }
-                                                                    });
+const auto MultiplesDataset = make("Multiples",
+                                   {Multiples{3}, Multiples{7}, Multiples{2, 2}, Multiples{1, 1, 3, 4},
+                                    Multiples{2, 1, 2, 2}, Multiples{2, 1, 3}, Multiples{2, 2, 2}});
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(Tile)
@@ -79,13 +75,18 @@ using CLTileFixture = TileValidationFixture<CLTensor, CLAccessor, CLTile, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLTileFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType", DataType::F16),
-                                                                                                 MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLTileFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16), MultiplesDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLTileFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType", DataType::F16), MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLTileFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16), MultiplesDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -93,14 +94,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLTileFixture<half>, framework::DatasetMode::NI
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLTileFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType", DataType::F32),
-                                                                                                  MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLTileFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32), MultiplesDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLTileFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType", DataType::F32),
-                                                                                                MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLTileFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32), MultiplesDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -110,10 +115,10 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLTileFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           datasets::SmallShapes(), make("DataType", { DataType::S8 }),
-                           MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLTileFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", {DataType::S8}), MultiplesDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -123,10 +128,10 @@ TEST_SUITE_END() // Integer
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLTileFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           datasets::SmallShapes(), make("DataType", { DataType::QASYMM8 }),
-                           MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLTileFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", {DataType::QASYMM8}), MultiplesDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

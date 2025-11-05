@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "tests/validation/Helpers.h"
+
 #include "arm_compute/core/CPP/CPPTypes.h"
 
-#include "tests/validation/Helpers.h"
 #include "tests/framework/Asserts.h"
 
 #include <algorithm>
@@ -41,11 +42,11 @@ template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
-    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+    SimpleTensor<float>            dst{src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout()};
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = dequantize_qasymm8(src[i], quantization_info);
     }
@@ -56,12 +57,12 @@ template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<int8_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
-    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+    SimpleTensor<float>            dst{src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout()};
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = dequantize_qasymm8_signed(src[i], quantization_info);
     }
@@ -72,12 +73,12 @@ template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
-    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+    SimpleTensor<float>            dst{src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout()};
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = dequantize_qasymm16(src[i], quantization_info);
     }
@@ -87,13 +88,13 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src)
 template <>
 SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
 {
-    SimpleTensor<uint8_t>          dst{ src.shape(), DataType::QASYMM8, 1, quantization_info };
+    SimpleTensor<uint8_t>          dst{src.shape(), DataType::QASYMM8, 1, quantization_info};
     const UniformQuantizationInfo &qinfo = quantization_info.uniform();
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantize_qasymm8(src[i], qinfo);
     }
@@ -103,13 +104,13 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
 template <>
 SimpleTensor<int8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
 {
-    SimpleTensor<int8_t>           dst{ src.shape(), DataType::QASYMM8_SIGNED, 1, quantization_info };
+    SimpleTensor<int8_t>           dst{src.shape(), DataType::QASYMM8_SIGNED, 1, quantization_info};
     const UniformQuantizationInfo &qinfo = quantization_info.uniform();
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantize_qasymm8_signed(src[i], qinfo);
     }
@@ -119,13 +120,13 @@ SimpleTensor<int8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const
 template <>
 SimpleTensor<uint16_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
 {
-    SimpleTensor<uint16_t>         dst{ src.shape(), DataType::QASYMM16, 1, quantization_info };
+    SimpleTensor<uint16_t>         dst{src.shape(), DataType::QASYMM16, 1, quantization_info};
     const UniformQuantizationInfo &qinfo = quantization_info.uniform();
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantize_qasymm16(src[i], qinfo);
     }
@@ -135,13 +136,13 @@ SimpleTensor<uint16_t> convert_to_asymmetric(const SimpleTensor<float> &src, con
 template <>
 SimpleTensor<int16_t> convert_to_symmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
 {
-    SimpleTensor<int16_t>          dst{ src.shape(), DataType::QSYMM16, 1, quantization_info };
+    SimpleTensor<int16_t>          dst{src.shape(), DataType::QSYMM16, 1, quantization_info};
     const UniformQuantizationInfo &qinfo = quantization_info.uniform();
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantize_qsymm16(src[i], qinfo);
     }
@@ -152,12 +153,12 @@ template <>
 SimpleTensor<float> convert_from_symmetric(const SimpleTensor<int16_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
-    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+    SimpleTensor<float>            dst{src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout()};
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = dequantize_qsymm16(src[i], quantization_info);
     }
@@ -176,14 +177,14 @@ void matrix_multiply(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleT
     const int K = b.shape()[1];
 
 #if defined(_OPENMP)
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
-    for(int y = 0; y < M; ++y)
+    for (int y = 0; y < M; ++y)
     {
-        for(int x = 0; x < N; ++x)
+        for (int x = 0; x < N; ++x)
         {
             float acc = 0.0f;
-            for(int k = 0; k < K; ++k)
+            for (int k = 0; k < K; ++k)
             {
                 acc += a[y * K + k] * b[x + k * N];
             }
@@ -202,11 +203,11 @@ void transpose_matrix(const SimpleTensor<T> &in, SimpleTensor<T> &out)
     const int height = in.shape()[1];
 
 #if defined(_OPENMP)
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; ++x)
+        for (int x = 0; x < width; ++x)
         {
             const T val = in[x + y * width];
 
@@ -227,9 +228,9 @@ void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinate
     std::fill(tile.data() + 0, (tile.data() + (w_tile * h_tile)), static_cast<T>(0));
 
     // Check if with the dimensions greater than 2 we could have out-of-bound reads
-    for(size_t d = 2; d < Coordinates::num_max_dimensions; ++d)
+    for (size_t d = 2; d < Coordinates::num_max_dimensions; ++d)
     {
-        if(coord[d] < 0 || coord[d] >= static_cast<int>(in.shape()[d]))
+        if (coord[d] < 0 || coord[d] >= static_cast<int>(in.shape()[d]))
         {
             ARM_COMPUTE_ERROR("coord[d] < 0 || coord[d] >= in.shape()[d] with d >= 2");
         }
@@ -265,7 +266,7 @@ void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinate
     roi_ptr += x_tile_start;
     roi_ptr += (y_tile_start * tile.shape()[0]);
 
-    for(int y = y_in_start; y < y_in_end; ++y)
+    for (int y = y_in_start; y < y_in_end; ++y)
     {
         // Copy per row
         std::copy(in_ptr, in_ptr + n, roi_ptr);
@@ -283,9 +284,9 @@ void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &sh
     ARM_COMPUTE_ERROR_ON(shape.num_dimensions() > 2);
 
     // Check if with the dimensions greater than 2 we could have out-of-bound reads
-    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    for (size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
     {
-        if(anchor[d] < 0 || ((anchor[d] + shape[d]) > in.shape()[d]))
+        if (anchor[d] < 0 || ((anchor[d] + shape[d]) > in.shape()[d]))
         {
             ARM_COMPUTE_ERROR("anchor[d] < 0 || (anchor[d] + shape[d]) > in.shape()[d]");
         }
@@ -296,7 +297,7 @@ void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &sh
 
     const unsigned int n = in.shape()[0];
 
-    for(unsigned int y = 0; y < shape[1]; ++y)
+    for (unsigned int y = 0; y < shape[1]; ++y)
     {
         std::fill(in_ptr, in_ptr + shape[0], 0);
         in_ptr += n;
@@ -309,7 +310,7 @@ std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, flo
 
     const int min_bound = quantize_qasymm8(min, quant_info.uniform());
     const int max_bound = quantize_qasymm8(max, quant_info.uniform());
-    return std::pair<int, int> { min_bound, max_bound };
+    return std::pair<int, int>{min_bound, max_bound};
 }
 
 std::pair<int, int> get_quantized_qasymm8_signed_bounds(const QuantizationInfo &quant_info, float min, float max)
@@ -318,21 +319,22 @@ std::pair<int, int> get_quantized_qasymm8_signed_bounds(const QuantizationInfo &
 
     const int min_bound = quantize_qasymm8_signed(min, quant_info.uniform());
     const int max_bound = quantize_qasymm8_signed(max, quant_info.uniform());
-    return std::pair<int, int> { min_bound, max_bound };
+    return std::pair<int, int>{min_bound, max_bound};
 }
 
-std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id)
+std::pair<int, int>
+get_symm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id)
 {
     ARM_COMPUTE_ERROR_ON_MSG(min > max, "min must be lower equal than max");
 
     const int min_bound = quantize_qsymm8_per_channel(min, quant_info, channel_id);
     const int max_bound = quantize_qsymm8_per_channel(max, quant_info, channel_id);
-    return std::pair<int, int> { min_bound, max_bound };
+    return std::pair<int, int>{min_bound, max_bound};
 }
 
 void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout, bool only_right_pad)
 {
-    if(data_layout == DataLayout::NHWC)
+    if (data_layout == DataLayout::NHWC)
     {
         constexpr unsigned int lower = 1U;
         constexpr unsigned int upper = 16U;
@@ -340,7 +342,7 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
         std::uniform_int_distribution<unsigned int> distribution(lower, upper);
         size_t                                      seed_offset = 0;
 
-        for(ITensor *tensor : tensors)
+        for (ITensor *tensor : tensors)
         {
             ARM_COMPUTE_ERROR_ON(!tensor->info()->is_resizable());
 
@@ -356,11 +358,11 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
 
 QuantizationHint suggest_conv_dst_q_info_and_bias(const QuantizationInfo &in_q_info,
                                                   const QuantizationInfo &weight_q_info,
-                                                  int32_t height,
-                                                  int32_t width,
-                                                  int32_t channels,
-                                                  DataType data_type,
-                                                  float bias_fraction)
+                                                  int32_t                 height,
+                                                  int32_t                 width,
+                                                  int32_t                 channels,
+                                                  DataType                data_type,
+                                                  float                   bias_fraction)
 {
     /**  Quantization Setup of convolution
      *
@@ -385,13 +387,17 @@ QuantizationHint suggest_conv_dst_q_info_and_bias(const QuantizationInfo &in_q_i
      *  neglected for brevity.
      */
 
-    return suggest_mac_dst_q_info_and_bias(in_q_info, weight_q_info, height * width * channels, data_type, bias_fraction);
+    return suggest_mac_dst_q_info_and_bias(in_q_info, weight_q_info, height * width * channels, data_type,
+                                           bias_fraction);
 }
 
 QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
                                                     const QuantizationInfo &rhs_q_info,
-                                                    int32_t m, int32_t n, int32_t k, DataType data_type,
-                                                    float bias_fraction)
+                                                    int32_t                 m,
+                                                    int32_t                 n,
+                                                    int32_t                 k,
+                                                    DataType                data_type,
+                                                    float                   bias_fraction)
 {
     ARM_COMPUTE_UNUSED(m, n);
 
@@ -427,15 +433,21 @@ QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_
     return suggest_mac_dst_q_info_and_bias(lhs_q_info, rhs_q_info, k, data_type, bias_fraction);
 }
 
-QuantizationHint suggest_mac_dst_q_info_and_bias(
-    const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int32_t K, DataType data_type, float bias_fraction, int num_sd)
+QuantizationHint suggest_mac_dst_q_info_and_bias(const QuantizationInfo &a_q_info,
+                                                 const QuantizationInfo &b_q_info,
+                                                 int32_t                 K,
+                                                 DataType                data_type,
+                                                 float                   bias_fraction,
+                                                 int                     num_sd)
 {
     QuantizationInfo c_q_info;
 
     ARM_COMPUTE_ASSERT(data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED);
 
-    const int32_t t_max = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::max() : std::numeric_limits<int8_t>::max());
-    const int32_t t_min = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::min() : std::numeric_limits<int8_t>::min());
+    const int32_t t_max = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::max()
+                                                                              : std::numeric_limits<int8_t>::max());
+    const int32_t t_min = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::min()
+                                                                              : std::numeric_limits<int8_t>::min());
 
     /**  Quantization Setup of multiply-accummulate
      *
@@ -570,14 +582,14 @@ QuantizationHint suggest_mac_dst_q_info_and_bias(
 
     c_q_info = QuantizationInfo(scale_out, offset_out);
 
-    return { c_q_info, min_bias, max_bias };
+    return {c_q_info, min_bias, max_bias};
 }
 
-template<DataType data_type>
+template <DataType data_type>
 bool config_has_dtype(const std::initializer_list<DataType> &types)
 {
     bool dtype_exists = false;
-    for(DataType type : types)
+    for (DataType type : types)
     {
         dtype_exists |= (type == data_type);
     }
@@ -586,20 +598,20 @@ bool config_has_dtype(const std::initializer_list<DataType> &types)
 
 bool cpu_supports_dtypes(const std::initializer_list<DataType> &types)
 {
-    const bool cpu_has_bf16 = CPUInfo::get().has_bf16();
-    const bool cpu_has_fp16 = CPUInfo::get().has_fp16();
+    const bool cpu_has_bf16    = CPUInfo::get().has_bf16();
+    const bool cpu_has_fp16    = CPUInfo::get().has_fp16();
     const bool config_has_fp16 = config_has_dtype<DataType::F16>(types);
     const bool config_has_bf16 = config_has_dtype<DataType::BFLOAT16>(types);
 
 #ifndef ARM_COMPUTE_ENABLE_FP16
     const bool fp16_enabled = false;
-#else // ARM_COMPUTE_ENABLE_FP16
+#else  // ARM_COMPUTE_ENABLE_FP16
     const bool fp16_enabled = true;
 #endif // ARM_COMPUTE_ENABLE_FP16
 
 #ifndef ARM_COMPUTE_ENABLE_BF16
     const bool bf16_enabled = false;
-#else // ARM_COMPUTE_ENABLE_BF16
+#else  // ARM_COMPUTE_ENABLE_BF16
     const bool bf16_enabled = true;
 #endif // ARM_COMPUTE_ENABLE_BF16
 

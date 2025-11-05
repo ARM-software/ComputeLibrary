@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace reference
 template <typename T>
 SimpleTensor<T> instance_normalization(const SimpleTensor<T> &src, float gamma, float beta, float epsilon)
 {
-    SimpleTensor<T> dst{ src.shape(), src.data_type() };
+    SimpleTensor<T> dst{src.shape(), src.data_type()};
 
     //NCHW
     const size_t w_size = src.shape()[0];
@@ -47,18 +47,18 @@ SimpleTensor<T> instance_normalization(const SimpleTensor<T> &src, float gamma, 
     const size_t c_size = src.shape()[2];
     const size_t n_size = src.shape()[3];
 #if defined(_OPENMP)
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
-    for(size_t n_i = 0; n_i < n_size; ++n_i)
+    for (size_t n_i = 0; n_i < n_size; ++n_i)
     {
-        for(size_t c_i = 0; c_i < c_size; ++c_i)
+        for (size_t c_i = 0; c_i < c_size; ++c_i)
         {
             float sum_h_w    = 0;
             float sum_sq_h_w = 0;
 
-            for(size_t h_i = 0; h_i < h_size; ++h_i)
+            for (size_t h_i = 0; h_i < h_size; ++h_i)
             {
-                for(size_t w_i = 0; w_i < w_size; ++w_i)
+                for (size_t w_i = 0; w_i < w_size; ++w_i)
                 {
                     float val = src[coord2index(src.shape(), Coordinates(w_i, h_i, c_i, n_i))];
                     sum_h_w += val;
@@ -72,9 +72,9 @@ SimpleTensor<T> instance_normalization(const SimpleTensor<T> &src, float gamma, 
             ;
 
             //Apply mean
-            for(size_t h_i = 0; h_i < h_size; ++h_i)
+            for (size_t h_i = 0; h_i < h_size; ++h_i)
             {
-                for(size_t w_i = 0; w_i < w_size; ++w_i)
+                for (size_t w_i = 0; w_i < w_size; ++w_i)
                 {
                     //Compute output
                     size_t index = coord2index(src.shape(), Coordinates(w_i, h_i, c_i, n_i));
@@ -86,8 +86,10 @@ SimpleTensor<T> instance_normalization(const SimpleTensor<T> &src, float gamma, 
     return dst;
 }
 
-template SimpleTensor<float> instance_normalization(const SimpleTensor<float> &src, float gamma, float beta, float epsilon);
-template SimpleTensor<half> instance_normalization(const SimpleTensor<half> &src, float gamma, float beta, float epsilon);
+template SimpleTensor<float>
+instance_normalization(const SimpleTensor<float> &src, float gamma, float beta, float epsilon);
+template SimpleTensor<half>
+instance_normalization(const SimpleTensor<half> &src, float gamma, float beta, float epsilon);
 } // namespace reference
 } // namespace validation
 } // namespace test

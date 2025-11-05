@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_BATCH_TO_SPACE_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_BATCH_TO_SPACE_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_BATCHTOSPACELAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_BATCHTOSPACELAYERFIXTURE_H
 
 #include "arm_compute/core/Helpers.h"
-#include "tests/Globals.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
 #include "tests/validation/reference/BatchToSpaceLayer.h"
 
 namespace arm_compute
@@ -40,7 +41,12 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class BatchToSpaceLayerValidationFixture : public framework::Fixture
 {
 public:
-    void setup(const TensorShape &input_shape, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &output_shape, DataType data_type, DataLayout data_layout)
+    void setup(const TensorShape          &input_shape,
+               const std::vector<int32_t> &block_shape,
+               const CropInfo             &crop_info,
+               const TensorShape          &output_shape,
+               DataType                    data_type,
+               DataLayout                  data_layout)
     {
         _target    = compute_target(input_shape, block_shape, crop_info, output_shape, data_type, data_layout);
         _reference = compute_reference(input_shape, block_shape, crop_info, output_shape, data_type);
@@ -50,17 +56,24 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(-1.0f), T(1.0f) };
+        DistributionType distribution{T(-1.0f), T(1.0f)};
         library->fill(tensor, distribution, i);
     }
-    TensorType compute_target(TensorShape input_shape, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, TensorShape output_shape,
-                              DataType data_type, DataLayout data_layout)
+    TensorType compute_target(TensorShape                 input_shape,
+                              const std::vector<int32_t> &block_shape,
+                              const CropInfo             &crop_info,
+                              TensorShape                 output_shape,
+                              DataType                    data_type,
+                              DataLayout                  data_layout)
     {
         ARM_COMPUTE_ERROR_ON(block_shape.size() != 2U); // Only support batch to 2D space (x, y) for now
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(output_shape, PermutationVector(2U, 0U, 1U));
@@ -92,12 +105,15 @@ protected:
         return output;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const std::vector<int32_t> &block_shape,
-                                      const CropInfo &crop_info, const TensorShape &output_shape, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape          &input_shape,
+                                      const std::vector<int32_t> &block_shape,
+                                      const CropInfo             &crop_info,
+                                      const TensorShape          &output_shape,
+                                      DataType                    data_type)
     {
         ARM_COMPUTE_ERROR_ON(block_shape.size() != 2U); // Only support batch to 2D space (x, y) for now
         // Create reference
-        SimpleTensor<T> input{ input_shape, data_type };
+        SimpleTensor<T> input{input_shape, data_type};
 
         // Fill reference
         fill(input, 0);
@@ -113,4 +129,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_BATCH_TO_SPACE_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_BATCHTOSPACELAYERFIXTURE_H

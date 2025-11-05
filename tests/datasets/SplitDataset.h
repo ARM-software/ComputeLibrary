@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SPLIT_DATASET
-#define ARM_COMPUTE_TEST_SPLIT_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SPLITDATASET_H
+#define ACL_TESTS_DATASETS_SPLITDATASET_H
 
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -44,9 +44,9 @@ public:
         iterator(std::vector<TensorShape>::const_iterator  tensor_shapes_it,
                  std::vector<unsigned int>::const_iterator axis_values_it,
                  std::vector<unsigned int>::const_iterator splits_values_it)
-            : _tensor_shapes_it{ std::move(tensor_shapes_it) },
-              _axis_values_it{ std::move(axis_values_it) },
-              _splits_values_it{ std::move(splits_values_it) }
+            : _tensor_shapes_it{std::move(tensor_shapes_it)},
+              _axis_values_it{std::move(axis_values_it)},
+              _splits_values_it{std::move(splits_values_it)}
         {
         }
 
@@ -139,9 +139,9 @@ public:
         iterator(std::vector<TensorShape>::const_iterator              tensor_shapes_it,
                  std::vector<unsigned int>::const_iterator             axis_values_it,
                  std::vector<std::vector<TensorShape>>::const_iterator split_shapes_values_it)
-            : _tensor_shapes_it{ std::move(tensor_shapes_it) },
-              _axis_values_it{ std::move(axis_values_it) },
-              _split_shapes_values_it{ std::move(split_shapes_values_it) }
+            : _tensor_shapes_it{std::move(tensor_shapes_it)},
+              _axis_values_it{std::move(axis_values_it)},
+              _split_shapes_values_it{std::move(split_shapes_values_it)}
         {
         }
 
@@ -205,14 +205,13 @@ class SmallSplitShapesDataset final : public SplitShapesDataset
 public:
     SmallSplitShapesDataset()
     {
-        add_config(TensorShape(27U, 3U, 16U, 2U), 2U, std::vector<TensorShape> { TensorShape(27U, 3U, 4U, 2U),
-                                                                                 TensorShape(27U, 3U, 4U, 2U),
-                                                                                 TensorShape(27U, 3U, 8U, 2U)
-                                                                               });
+        add_config(TensorShape(27U, 3U, 16U, 2U), 2U,
+                   std::vector<TensorShape>{TensorShape(27U, 3U, 4U, 2U), TensorShape(27U, 3U, 4U, 2U),
+                                            TensorShape(27U, 3U, 8U, 2U)});
     }
 };
 
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SPLIT_DATASET */
+#endif // ACL_TESTS_DATASETS_SPLITDATASET_H

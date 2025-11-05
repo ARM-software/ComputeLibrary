@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017,2021 Arm Limited.
+ * Copyright (c) 2017,2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PRETTYPRINTER
-#define ARM_COMPUTE_TEST_PRETTYPRINTER
+#ifndef ACL_TESTS_FRAMEWORK_PRINTERS_PRETTYPRINTER_H
+#define ACL_TESTS_FRAMEWORK_PRINTERS_PRETTYPRINTER_H
 
 #include "Printer.h"
 
@@ -63,10 +63,10 @@ private:
     std::string begin_color(const std::string &color) const;
     std::string end_color() const;
 
-    bool _color_output{ true };
+    bool _color_output{true};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_PRETTYPRINTER */
+#endif // ACL_TESTS_FRAMEWORK_PRINTERS_PRETTYPRINTER_H

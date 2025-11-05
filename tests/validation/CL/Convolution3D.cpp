@@ -24,11 +24,12 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConv3D.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/DirectConvolution3DFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -228,28 +229,28 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DFixture<float>, framework:
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(zip(make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
-                                                                                                                           TensorShape(15U, 7U, 11U, 7U),
-                                                                                                                           TensorShape(19U, 5U, 16U, 4U),
-                                                                                                                           TensorShape(13U, 5U, 17U, 2U)
-                                                                                                                                                          }),
-                                                                                                                   make("StrideX", { 1, 3, 2, 1 }),
-                                                                                                               make("StrideY", { 2, 1, 3, 1 }),
-                                                                                                           make("StrideZ", { 3, 2, 1, 1 }),
-                                                                                                       make("PadX", { 0, 2, 1, 0 }),
-                                                                                                   make("PadY", { 1, 0, 2, 0 }),
-                                                                                               make("PadZ", { 2, 1, 0, 0 }),
-                                                                                           make("KernelWidth", { 3, 7, 5, 1 }),
-                                                                                       make("KernelHeight", { 5, 3, 7, 1 }),
-                                                                                   make("KernelDepth", { 7, 5, 3, 1 }),
-                                                                               make("NumKernels", { 5, 3, 1, 11 }),
-                                                                           make("HasBias", { true, true, true, false })),
-                                                                       make("Activation", ActivationLayerInfo()),
-                                                               make("DataType", DataType::QASYMM8),
-                                                       make("DataLayout", DataLayout::NDHWC),
-                                               make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10)),
-                                       make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20)),
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLDirectConvolution3DQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(zip(make("InputShape",
+                                        {TensorShape(7U, 5U, 3U, 13U, 3U), TensorShape(15U, 7U, 11U, 7U),
+                                         TensorShape(19U, 5U, 16U, 4U), TensorShape(13U, 5U, 17U, 2U)}),
+                                   make("StrideX", {1, 3, 2, 1}),
+                                   make("StrideY", {2, 1, 3, 1}),
+                                   make("StrideZ", {3, 2, 1, 1}),
+                                   make("PadX", {0, 2, 1, 0}),
+                                   make("PadY", {1, 0, 2, 0}),
+                                   make("PadZ", {2, 1, 0, 0}),
+                                   make("KernelWidth", {3, 7, 5, 1}),
+                                   make("KernelHeight", {5, 3, 7, 1}),
+                                   make("KernelDepth", {7, 5, 3, 1}),
+                                   make("NumKernels", {5, 3, 1, 11}),
+                                   make("HasBias", {true, true, true, false})),
+                               make("Activation", ActivationLayerInfo()),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", DataLayout::NDHWC),
+                               make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10)),
+                               make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20)),
                                make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
 {
     validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);
@@ -258,28 +259,28 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DQuantizedFixture<uint8_t>,
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(zip(make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
-                                                                                                                           TensorShape(15U, 7U, 11U, 7U),
-                                                                                                                           TensorShape(19U, 5U, 16U, 4U),
-                                                                                                                           TensorShape(13U, 5U, 17U, 2U)
-                                                                                                                                                          }),
-                                                                                                                   make("StrideX", { 1, 3, 2, 1 }),
-                                                                                                               make("StrideY", { 2, 1, 3, 1 }),
-                                                                                                           make("StrideZ", { 3, 2, 1, 1 }),
-                                                                                                       make("PadX", { 0, 2, 1, 0 }),
-                                                                                                   make("PadY", { 1, 0, 2, 0 }),
-                                                                                               make("PadZ", { 2, 1, 0, 0 }),
-                                                                                           make("KernelWidth", { 3, 7, 5, 1 }),
-                                                                                       make("KernelHeight", { 5, 3, 7, 1 }),
-                                                                                   make("KernelDepth", { 7, 5, 3, 1 }),
-                                                                               make("NumKernels", { 5, 3, 1, 11 }),
-                                                                           make("HasBias", { true, true, true, false })),
-                                                                       make("Activation", ActivationLayerInfo()),
-                                                               make("DataType", DataType::QASYMM8_SIGNED),
-                                                       make("DataLayout", DataLayout::NDHWC),
-                                               make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10)),
-                                       make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20)),
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLDirectConvolution3DQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(zip(make("InputShape",
+                                        {TensorShape(7U, 5U, 3U, 13U, 3U), TensorShape(15U, 7U, 11U, 7U),
+                                         TensorShape(19U, 5U, 16U, 4U), TensorShape(13U, 5U, 17U, 2U)}),
+                                   make("StrideX", {1, 3, 2, 1}),
+                                   make("StrideY", {2, 1, 3, 1}),
+                                   make("StrideZ", {3, 2, 1, 1}),
+                                   make("PadX", {0, 2, 1, 0}),
+                                   make("PadY", {1, 0, 2, 0}),
+                                   make("PadZ", {2, 1, 0, 0}),
+                                   make("KernelWidth", {3, 7, 5, 1}),
+                                   make("KernelHeight", {5, 3, 7, 1}),
+                                   make("KernelDepth", {7, 5, 3, 1}),
+                                   make("NumKernels", {5, 3, 1, 11}),
+                                   make("HasBias", {true, true, true, false})),
+                               make("Activation", ActivationLayerInfo()),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("DataLayout", DataLayout::NDHWC),
+                               make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10)),
+                               make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20)),
                                make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
 {
     validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);

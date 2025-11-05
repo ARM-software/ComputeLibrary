@@ -25,16 +25,17 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GEMMReshapeLHSMatrixFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -47,14 +48,17 @@ using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::opencl::kernels;
 
 // Initialize the output tensor with zero and fill the border with zero
-using CLGEMMReshapeLHSMatrix = CLSynthetizeOperatorInitOutputWithZeroAndWithZeroConstantBorder<ClGemmReshapeLhsMatrixKernel, 16>;
+using CLGEMMReshapeLHSMatrix =
+    CLSynthetizeOperatorInitOutputWithZeroAndWithZeroConstantBorder<ClGemmReshapeLhsMatrixKernel, 16>;
 
 template <typename T>
-using CLGEMMReshapeLHSMatrixFixture = GEMMReshapeLHSMatrixValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeLHSMatrix, T, false>;
+using CLGEMMReshapeLHSMatrixFixture =
+    GEMMReshapeLHSMatrixValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeLHSMatrix, T, false>;
 
 // Fixture to use when the input has to be reinterpreted as 3D
 template <typename T>
-using CLGEMMReshapeLHSMatrix3DFixture = GEMMReshapeLHSMatrixValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeLHSMatrix, T, true>;
+using CLGEMMReshapeLHSMatrix3DFixture =
+    GEMMReshapeLHSMatrixValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeLHSMatrix, T, true>;
 
 // *INDENT-OFF*
 // clang-format off

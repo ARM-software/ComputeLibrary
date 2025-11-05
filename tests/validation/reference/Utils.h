@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_VALIDATION_UTILS_H
-#define ARM_COMPUTE_TEST_VALIDATION_UTILS_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_UTILS_H
+#define ACL_TESTS_VALIDATION_REFERENCE_UTILS_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/Globals.h"
 #include "tests/Types.h"
 
@@ -70,9 +71,9 @@ T tensor_elem_at(const SimpleTensor<T> &src, Coordinates coord, BorderMode borde
     const int depth  = src.shape().z();
 
     // If coordinates beyond range of tensor's width or height
-    if(x < 0 || y < 0 || z < 0 || x >= width || y >= height || z >= depth)
+    if (x < 0 || y < 0 || z < 0 || x >= width || y >= height || z >= depth)
     {
-        if(border_mode == BorderMode::REPLICATE)
+        if (border_mode == BorderMode::REPLICATE)
         {
             coord.set(0, std::max(0, std::min(x, width - 1)));
             coord.set(1, std::max(0, std::min(y, height - 1)));
@@ -89,7 +90,8 @@ T tensor_elem_at(const SimpleTensor<T> &src, Coordinates coord, BorderMode borde
 #pragma GCC diagnostic pop
 
 template <typename T>
-T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value);
+T bilinear_policy(
+    const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value);
 
 /* Apply 2D spatial filter on a single element of @p in at coordinates @p coord
  *
@@ -99,15 +101,21 @@ T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn,
  * - SATURATE convert policy assumed
  */
 template <typename T, typename U, typename V>
-void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<T> &src, SimpleTensor<U> &dst, const TensorShape &filter_shape, const V *filter_itr, double scale, BorderMode border_mode,
-                             T constant_border_value = T(0))
+void apply_2d_spatial_filter(Coordinates            coord,
+                             const SimpleTensor<T> &src,
+                             SimpleTensor<U>       &dst,
+                             const TensorShape     &filter_shape,
+                             const V               *filter_itr,
+                             double                 scale,
+                             BorderMode             border_mode,
+                             T                      constant_border_value = T(0))
 {
     double    val = 0.;
     const int x   = coord.x();
     const int y   = coord.y();
-    for(int j = y - static_cast<int>(filter_shape[1] / 2); j <= y + static_cast<int>(filter_shape[1] / 2); ++j)
+    for (int j = y - static_cast<int>(filter_shape[1] / 2); j <= y + static_cast<int>(filter_shape[1] / 2); ++j)
     {
-        for(int i = x - static_cast<int>(filter_shape[0] / 2); i <= x + static_cast<int>(filter_shape[0] / 2); ++i)
+        for (int i = x - static_cast<int>(filter_shape[0] / 2); i <= x + static_cast<int>(filter_shape[0] / 2); ++i)
         {
             coord.set(0, i);
             coord.set(1, j);
@@ -126,4 +134,4 @@ bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_VALIDATION_UTILS_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_UTILS_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,9 @@
  */
 #include "BatchNormalizationLayer.h"
 
-#include "ActivationLayer.h"
-
 #include "tests/validation/Helpers.h"
+
+#include "ActivationLayer.h"
 
 namespace arm_compute
 {
@@ -37,8 +37,13 @@ namespace reference
 {
 // Batch Normalization Layer for floating point type
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type *>
-SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon,
-                                          ActivationLayerInfo act_info)
+SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src,
+                                          const SimpleTensor<T> &mean,
+                                          const SimpleTensor<T> &var,
+                                          const SimpleTensor<T> &beta,
+                                          const SimpleTensor<T> &gamma,
+                                          float                  epsilon,
+                                          ActivationLayerInfo    act_info)
 {
     SimpleTensor<T> result(src.shape(), src.data_type());
 
@@ -47,15 +52,15 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
     const auto depth      = static_cast<int>(src.shape()[2]);
     const int  upper_dims = src.shape().total_size() / (cols * rows * depth);
 #if defined(_OPENMP)
-    #pragma omp parallel for schedule(dynamic, 1) collapse(4)
+#pragma omp parallel for schedule(dynamic, 1) collapse(4)
 #endif /* _OPENMP */
-    for(int r = 0; r < upper_dims; ++r)
+    for (int r = 0; r < upper_dims; ++r)
     {
-        for(int i = 0; i < depth; ++i)
+        for (int i = 0; i < depth; ++i)
         {
-            for(int k = 0; k < rows; ++k)
+            for (int k = 0; k < rows; ++k)
             {
-                for(int l = 0; l < cols; ++l)
+                for (int l = 0; l < cols; ++l)
                 {
                     const int   pos         = l + k * cols + i * rows * cols + r * cols * rows * depth;
                     const float denominator = sqrt(var[i] + epsilon);
@@ -67,18 +72,27 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
         }
     }
 
-    if(act_info.enabled())
+    if (act_info.enabled())
     {
         result = activation_layer(result, act_info);
     }
 
     return result;
 }
-template SimpleTensor<float> batch_normalization_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &mean, const SimpleTensor<float> &var, const SimpleTensor<float> &beta,
-                                                       const SimpleTensor<float> &gamma, float epsilon, ActivationLayerInfo act_info);
-template SimpleTensor<half> batch_normalization_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &mean, const SimpleTensor<half> &var,
-                                                      const SimpleTensor<half> &beta,
-                                                      const SimpleTensor<half> &gamma, float epsilon, ActivationLayerInfo act_info);
+template SimpleTensor<float> batch_normalization_layer(const SimpleTensor<float> &src,
+                                                       const SimpleTensor<float> &mean,
+                                                       const SimpleTensor<float> &var,
+                                                       const SimpleTensor<float> &beta,
+                                                       const SimpleTensor<float> &gamma,
+                                                       float                      epsilon,
+                                                       ActivationLayerInfo        act_info);
+template SimpleTensor<half>  batch_normalization_layer(const SimpleTensor<half> &src,
+                                                       const SimpleTensor<half> &mean,
+                                                       const SimpleTensor<half> &var,
+                                                       const SimpleTensor<half> &beta,
+                                                       const SimpleTensor<half> &gamma,
+                                                       float                     epsilon,
+                                                       ActivationLayerInfo       act_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

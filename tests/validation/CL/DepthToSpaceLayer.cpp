@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLDepthToSpaceLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/DepthToSpaceDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/DepthToSpaceLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -74,16 +75,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { Te
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthToSpaceLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthToSpaceLayerDataset(), make("DataType",
-                                                                                                                       DataType::F32),
-                                                                                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLDepthToSpaceLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallDepthToSpaceLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthToSpaceLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthToSpaceLayerDataset(), make("DataType",
-                                                                                                                     DataType::F32),
-                                                                                                             make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLDepthToSpaceLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeDepthToSpaceLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -91,16 +98,22 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthToSpaceLayerFixture<float>, framework::D
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthToSpaceLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthToSpaceLayerDataset(), make("DataType",
-                                                                                                                      DataType::F16),
-                                                                                                              make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLDepthToSpaceLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallDepthToSpaceLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthToSpaceLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthToSpaceLayerDataset(), make("DataType",
-                                                                                                                    DataType::F16),
-                                                                                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLDepthToSpaceLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeDepthToSpaceLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

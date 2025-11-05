@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "AbsoluteDifference.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -41,20 +42,24 @@ SimpleTensor<T> absolute_difference(const SimpleTensor<T> &src1, const SimpleTen
 
     using intermediate_type = typename common_promoted_signed_type<T>::intermediate_type;
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src1.num_elements(); ++i)
+    for (int i = 0; i < src1.num_elements(); ++i)
     {
-        intermediate_type val = std::abs(static_cast<intermediate_type>(src1[i]) - static_cast<intermediate_type>(src2[i]));
-        result[i]             = saturate_cast<T>(val);
+        intermediate_type val =
+            std::abs(static_cast<intermediate_type>(src1[i]) - static_cast<intermediate_type>(src2[i]));
+        result[i] = saturate_cast<T>(val);
     }
 
     return result;
 }
 
-template SimpleTensor<uint8_t> absolute_difference(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type);
-template SimpleTensor<int16_t> absolute_difference(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, DataType dst_data_type);
-template SimpleTensor<int8_t> absolute_difference(const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, DataType dst_data_type);
+template SimpleTensor<uint8_t>
+absolute_difference(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type);
+template SimpleTensor<int16_t>
+absolute_difference(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, DataType dst_data_type);
+template SimpleTensor<int8_t>
+absolute_difference(const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, DataType dst_data_type);
 } // namespace reference
 } // namespace validation
 } // namespace test

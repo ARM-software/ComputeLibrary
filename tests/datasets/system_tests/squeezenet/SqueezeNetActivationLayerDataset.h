@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SQUEEZENET_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_SQUEEZENET_ACTIVATION_LAYER_DATASET
-
-#include "tests/framework/datasets/Datasets.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_SQUEEZENET_SQUEEZENETACTIVATIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_SQUEEZENET_SQUEEZENETACTIVATIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -37,35 +36,36 @@ namespace test
 {
 namespace datasets
 {
-class SqueezeNetActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
+class SqueezeNetActivationLayerDataset final
+    : public framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>,
+                                                         framework::dataset::SingletonDataset<ActivationLayerInfo>>
 {
 public:
     SqueezeNetActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", { // relu_conv1
-            TensorShape(111U, 111U, 64U),
-            // fire2/relu_squeeze1x1, fire3/relu_squeeze1x1
-            TensorShape(55U, 55U, 16U),
-            // fire2/relu_expand1x1, fire2/relu_expand3x3, fire3/relu_expand1x1, fire3/relu_expand3x3
-            TensorShape(55U, 55U, 64U),
-            // fire4/relu_squeeze1x1, fire5/relu_squeeze1x1
-            TensorShape(27U, 27U, 32U),
-            // fire4/relu_expand1x1, fire4/relu_expand3x3, fire5/relu_expand1x1, fire5/relu_expand3x3
-            TensorShape(27U, 27U, 128U),
-            // fire6/relu_squeeze1x1, fire7/relu_squeeze1x1
-            TensorShape(13U, 13U, 48U),
-            // fire6/relu_expand1x1, fire6/relu_expand3x3, fire7/relu_expand1x1, fire7/relu_expand3x3
-            TensorShape(13U, 13U, 192U),
-            // fire8/relu_squeeze1x1, fire9/relu_squeeze1x1
-            TensorShape(13U, 13U, 64U),
-            // fire8/relu_expand1x1, fire8/relu_expand3x3, fire9/relu_expand1x1, fire9/relu_expand3x3
-            TensorShape(13U, 13U, 256U),
-            // relu_conv10
-            TensorShape(13U, 13U, 1000U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
+        : CartesianProductDataset{
+              framework::dataset::make(
+                  "Shape",
+                  {// relu_conv1
+                   TensorShape(111U, 111U, 64U),
+                   // fire2/relu_squeeze1x1, fire3/relu_squeeze1x1
+                   TensorShape(55U, 55U, 16U),
+                   // fire2/relu_expand1x1, fire2/relu_expand3x3, fire3/relu_expand1x1, fire3/relu_expand3x3
+                   TensorShape(55U, 55U, 64U),
+                   // fire4/relu_squeeze1x1, fire5/relu_squeeze1x1
+                   TensorShape(27U, 27U, 32U),
+                   // fire4/relu_expand1x1, fire4/relu_expand3x3, fire5/relu_expand1x1, fire5/relu_expand3x3
+                   TensorShape(27U, 27U, 128U),
+                   // fire6/relu_squeeze1x1, fire7/relu_squeeze1x1
+                   TensorShape(13U, 13U, 48U),
+                   // fire6/relu_expand1x1, fire6/relu_expand3x3, fire7/relu_expand1x1, fire7/relu_expand3x3
+                   TensorShape(13U, 13U, 192U),
+                   // fire8/relu_squeeze1x1, fire9/relu_squeeze1x1
+                   TensorShape(13U, 13U, 64U),
+                   // fire8/relu_expand1x1, fire8/relu_expand3x3, fire9/relu_expand1x1, fire9/relu_expand3x3
+                   TensorShape(13U, 13U, 256U),
+                   // relu_conv10
+                   TensorShape(13U, 13U, 1000U)}),
+              framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))}
     {
     }
     SqueezeNetActivationLayerDataset(SqueezeNetActivationLayerDataset &&) = default;
@@ -74,4 +74,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SQUEEZENET_ACTIVATION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_SQUEEZENET_SQUEEZENETACTIVATIONLAYERDATASET_H

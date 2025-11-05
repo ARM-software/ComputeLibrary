@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NELSTMLayer.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/LSTMLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/LSTMLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -167,14 +168,15 @@ template <typename T>
 using NELSTMLayerFixture = LSTMLayerValidationFixture<Tensor, Accessor, NELSTMLayer, LSTMParams<ITensor>, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<float>, framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallLSTMLayerDataset(),
-        make("DataType", DataType::F32),
-        make("ProjectionOpt", { true, false }),
-        make("PeepholeOpt", { true, false }),
-        make("UseLayerNorm", { true, false }),
-        make("UseMemoryManager", { true, false })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NELSTMLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallLSTMLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("ProjectionOpt", {true, false}),
+                               make("PeepholeOpt", {true, false}),
+                               make("UseLayerNorm", {true, false}),
+                               make("UseMemoryManager", {true, false})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -184,16 +186,17 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<half>, framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallLSTMLayerDataset(),
-        make("DataType", DataType::F16),
-        make("ProjectionOpt", { true, false }),
-        make("PeepholeOpt", { true, false }),
-        make("UseLayerNorm", { true, false }),
-        make("UseMemoryManager", { true, false })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NELSTMLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallLSTMLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("ProjectionOpt", {true, false}),
+                               make("PeepholeOpt", {true, false}),
+                               make("UseLayerNorm", {true, false}),
+                               make("UseMemoryManager", {true, false})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);

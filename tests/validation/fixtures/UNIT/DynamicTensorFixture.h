@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_DYNAMIC_TENSOR
-#define ARM_COMPUTE_TEST_UNIT_DYNAMIC_TENSOR
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNIT_DYNAMICTENSORFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNIT_DYNAMICTENSORFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/NormalizationLayer.h"
@@ -41,18 +42,14 @@ namespace test
 {
 namespace validation
 {
-template <typename AllocatorType,
-          typename LifetimeMgrType,
-          typename PoolMgrType,
-          typename MemoryMgrType>
+template <typename AllocatorType, typename LifetimeMgrType, typename PoolMgrType, typename MemoryMgrType>
 struct MemoryManagementService
 {
 public:
     using LftMgrType = LifetimeMgrType;
 
 public:
-    MemoryManagementService()
-        : allocator(), lifetime_mgr(nullptr), pool_mgr(nullptr), mm(nullptr), mg(), num_pools(0)
+    MemoryManagementService() : allocator(), lifetime_mgr(nullptr), pool_mgr(nullptr), mm(nullptr), mg(), num_pools(0)
     {
         lifetime_mgr = std::make_shared<LifetimeMgrType>();
         pool_mgr     = std::make_shared<PoolMgrType>();
@@ -77,7 +74,7 @@ public:
         ARM_COMPUTE_ASSERT(mm->pool_manager() != nullptr);
         ARM_COMPUTE_ASSERT(mm->lifetime_manager() != nullptr);
 
-        if(validate_finalized)
+        if (validate_finalized)
         {
             ARM_COMPUTE_ASSERT(mm->lifetime_manager()->are_all_finalized());
         }
@@ -96,8 +93,7 @@ template <typename MemoryMgrType, typename FuncType, typename ITensorType>
 class SimpleFunctionWrapper
 {
 public:
-    SimpleFunctionWrapper(std::shared_ptr<MemoryMgrType> mm)
-        : _func(mm)
+    SimpleFunctionWrapper(std::shared_ptr<MemoryMgrType> mm) : _func(mm)
     {
     }
     void configure(ITensorType *src, ITensorType *dst)
@@ -250,7 +246,11 @@ class DynamicTensorType3ComplexFunction : public framework::Fixture
     using T = float;
 
 public:
-    void setup(std::vector<TensorShape> input_shapes, TensorShape weights_shape, TensorShape bias_shape, std::vector<TensorShape> output_shapes, PadStrideInfo info)
+    void setup(std::vector<TensorShape> input_shapes,
+               TensorShape              weights_shape,
+               TensorShape              bias_shape,
+               std::vector<TensorShape> output_shapes,
+               PadStrideInfo            info)
     {
         num_iterations = input_shapes.size();
         _data_type     = DataType::F32;
@@ -278,7 +278,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F32:
             {
@@ -291,10 +291,14 @@ protected:
         }
     }
 
-    TensorType run_target(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape,
-                          PadStrideInfo info, WeightsInfo weights_info)
+    TensorType run_target(TensorShape   input_shape,
+                          TensorShape   weights_shape,
+                          TensorShape   bias_shape,
+                          TensorShape   output_shape,
+                          PadStrideInfo info,
+                          WeightsInfo   weights_info)
     {
-        if(_data_layout == DataLayout::NHWC)
+        if (_data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(weights_shape, PermutationVector(2U, 0U, 1U));
@@ -340,12 +344,16 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> run_reference(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info)
+    SimpleTensor<T> run_reference(TensorShape   input_shape,
+                                  TensorShape   weights_shape,
+                                  TensorShape   bias_shape,
+                                  TensorShape   output_shape,
+                                  PadStrideInfo info)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, _data_type, 1 };
-        SimpleTensor<T> weights{ weights_shape, _data_type, 1 };
-        SimpleTensor<T> bias{ bias_shape, _data_type, 1 };
+        SimpleTensor<T> src{input_shape, _data_type, 1};
+        SimpleTensor<T> weights{weights_shape, _data_type, 1};
+        SimpleTensor<T> bias{bias_shape, _data_type, 1};
 
         // Fill reference
         fill(src, 0);
@@ -356,13 +364,13 @@ protected:
     }
 
 public:
-    unsigned int    num_iterations{ 0 };
+    unsigned int    num_iterations{0};
     SimpleTensor<T> dst_ref{};
     TensorType      dst_target{};
 
 private:
-    DataType                             _data_type{ DataType::UNKNOWN };
-    DataLayout                           _data_layout{ DataLayout::UNKNOWN };
+    DataType                             _data_type{DataType::UNKNOWN};
+    DataLayout                           _data_layout{DataLayout::UNKNOWN};
     PadStrideInfo                        _info{};
     std::vector<TensorShape>             _input_shapes{};
     std::vector<TensorShape>             _output_shapes{};
@@ -401,7 +409,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F32:
             {
@@ -420,19 +428,19 @@ protected:
         const unsigned int num_tensors   = num_functions + 1;
         const unsigned int num_resizes   = _input_shapes.size();
 
-        for(unsigned int i = 0; i < num_functions; ++i)
+        for (unsigned int i = 0; i < num_functions; ++i)
         {
             _functions.emplace_back(std::make_unique<ComplexFunctionType>(_ms.mm));
         }
 
-        for(unsigned int i = 0; i < num_resizes; ++i)
+        for (unsigned int i = 0; i < num_resizes; ++i)
         {
             TensorShape   input_shape   = _input_shapes[i];
             TensorShape   weights_shape = TensorShape(3U, 3U, input_shape[2], input_shape[2]);
             TensorShape   output_shape  = input_shape;
             PadStrideInfo info(1U, 1U, 1U, 1U);
 
-            if(_data_layout == DataLayout::NHWC)
+            if (_data_layout == DataLayout::NHWC)
             {
                 permute(input_shape, PermutationVector(2U, 0U, 1U));
                 permute(weights_shape, PermutationVector(2U, 0U, 1U));
@@ -449,7 +457,7 @@ protected:
             weights_info.set_data_layout(_data_layout);
 
             tensors[0].allocator()->init(tensor_info);
-            for(unsigned int f = 0; f < num_functions; ++f)
+            for (unsigned int f = 0; f < num_functions; ++f)
             {
                 tensors[f + 1].allocator()->init(tensor_info);
                 ws[f].allocator()->init(weights_info);
@@ -468,7 +476,7 @@ protected:
             _ms.mg.acquire();
 
             // Run pipeline
-            for(unsigned int f = 0; f < num_functions; ++f)
+            for (unsigned int f = 0; f < num_functions; ++f)
             {
                 _functions[f]->run();
             }
@@ -479,8 +487,8 @@ protected:
     }
 
 private:
-    DataType                                          _data_type{ DataType::UNKNOWN };
-    DataLayout                                        _data_layout{ DataLayout::UNKNOWN };
+    DataType                                          _data_type{DataType::UNKNOWN};
+    DataLayout                                        _data_layout{DataLayout::UNKNOWN};
     std::vector<TensorShape>                          _input_shapes{};
     MemoryManagementServiceType                       _ms{};
     std::vector<std::unique_ptr<ComplexFunctionType>> _functions{};
@@ -488,4 +496,4 @@ private:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_DYNAMIC_TENSOR */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNIT_DYNAMICTENSORFIXTURE_H

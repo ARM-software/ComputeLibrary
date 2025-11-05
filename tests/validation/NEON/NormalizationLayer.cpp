@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/NormalizationTypesDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/NormalizationLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -52,12 +53,15 @@ constexpr AbsoluteTolerance<float> tolerance_f16(0.1f);
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 
 /** Input data set. */
-const auto NormalizationDataset = combine(datasets::SmallShapes(), datasets::NormalizationTypes(), make("NormalizationSize", 3, 9, 2),
-                                                  make("Beta", { 0.5f, 1.f, 2.f }),
-                                          make("IsScaled", { true }));
-const auto NormalizationDatasetFP32 = combine(datasets::NormalizationTypes(), make("NormalizationSize", 3, 9, 2),
-                                                      make("Beta", { 0.5f, 1.f, 2.f }),
-                                              make("IsScaled", { true, false }));
+const auto NormalizationDataset     = combine(datasets::SmallShapes(),
+                                              datasets::NormalizationTypes(),
+                                              make("NormalizationSize", 3, 9, 2),
+                                              make("Beta", {0.5f, 1.f, 2.f}),
+                                              make("IsScaled", {true}));
+const auto NormalizationDatasetFP32 = combine(datasets::NormalizationTypes(),
+                                              make("NormalizationSize", 3, 9, 2),
+                                              make("Beta", {0.5f, 1.f, 2.f}),
+                                              make("IsScaled", {true, false}));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -100,11 +104,14 @@ using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Acces
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::ALL, combine(NormalizationDataset,
-                                                                                                                 make("DataType", DataType::F16),
-                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NENormalizationLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(NormalizationDataset,
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);
@@ -119,16 +126,24 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), NormalizationDatasetFP32,
-                                                                                                                        make("DataType", DataType::F32),
-                                                                                                                make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NENormalizationLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               NormalizationDatasetFP32,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), NormalizationDatasetFP32,
-                                                                                                                      make("DataType", DataType::F32),
-                                                                                                              make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NENormalizationLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               NormalizationDatasetFP32,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);

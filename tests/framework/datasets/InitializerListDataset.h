@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_LIST
-#define ARM_COMPUTE_TEST_DATASET_LIST
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_INITIALIZERLISTDATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_INITIALIZERLISTDATASET_H
 
-#include "Dataset.h"
 #include "utils/TypePrinter.h"
 
+#include "Dataset.h"
 #include <initializer_list>
 #include <string>
 #include <tuple>
@@ -55,7 +55,7 @@ public:
      * @param[in] list Values for the dataset.
      */
     InitializerListDataset(std::string name, std::initializer_list<T> &&list)
-        : NamedDataset{ std::move(name) }, _data(std::forward<std::initializer_list<T>>(list))
+        : NamedDataset{std::move(name)}, _data(std::forward<std::initializer_list<T>>(list))
     {
     }
 
@@ -73,8 +73,7 @@ public:
          * @param[in] name     Name of the dataset.
          * @param[in] iterator Iterator of the dataset values.
          */
-        iterator(std::string name, data_const_iterator iterator)
-            : _name{ name }, _iterator{ iterator }
+        iterator(std::string name, data_const_iterator iterator) : _name{name}, _iterator{iterator}
         {
         }
 
@@ -149,4 +148,4 @@ InitializerListDataset<T> make(std::string name, std::initializer_list<T> &&list
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_LIST */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_INITIALIZERLISTDATASET_H

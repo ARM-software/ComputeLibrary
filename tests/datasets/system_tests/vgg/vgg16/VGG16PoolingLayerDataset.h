@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_VGG16_POOLING_LAYER_DATASET
-#define ARM_COMPUTE_TEST_VGG16_POOLING_LAYER_DATASET
-
-#include "tests/datasets/PoolingLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_VGG_VGG16_VGG16POOLINGLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_VGG_VGG16_VGG16POOLINGLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/PoolingLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -43,18 +42,23 @@ public:
     VGG16PoolingLayerDataset()
     {
         // pool1
-        add_config(TensorShape(224U, 224U, 64U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(224U, 224U, 64U),
+                   PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool2
-        add_config(TensorShape(112U, 112U, 128U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(112U, 112U, 128U),
+                   PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool3
-        add_config(TensorShape(56U, 56U, 256U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(56U, 56U, 256U),
+                   PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool4
-        add_config(TensorShape(28U, 28U, 512U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(28U, 28U, 512U),
+                   PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool5
-        add_config(TensorShape(14U, 14U, 512U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(14U, 14U, 512U),
+                   PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_VGG16_POOLING_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_VGG_VGG16_VGG16POOLINGLAYERDATASET_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H
-#define ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H
+#ifndef ACL_TESTS_INSTRUMENTS_HELPERS_H
+#define ACL_TESTS_INSTRUMENTS_HELPERS_H
 
 #include "arm_compute/runtime/RuntimeContext.h"
+
 #include "tests/framework/instruments/Instruments.h"
 
 namespace arm_compute
@@ -57,7 +58,7 @@ public:
     // Overridden inherited methods
     void intercept_scheduler(std::unique_ptr<IScheduler> interceptor)
     {
-        if(interceptor != nullptr)
+        if (interceptor != nullptr)
         {
             _interceptor      = std::move(interceptor);
             _scheduler_to_use = _interceptor.get();
@@ -83,4 +84,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H */
+#endif // ACL_TESTS_INSTRUMENTS_HELPERS_H

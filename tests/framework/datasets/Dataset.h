@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET
-#define ARM_COMPUTE_TEST_DATASET
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_DATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_DATASET_H
 
 #include <string>
 #include <utility>
@@ -60,8 +60,7 @@ protected:
      *
      * @param[in] name Description of the values.
      */
-    explicit NamedDataset(std::string name)
-        : _name{ std::move(name) }
+    explicit NamedDataset(std::string name) : _name{std::move(name)}
     {
     }
 
@@ -88,4 +87,4 @@ protected:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_DATASET_H

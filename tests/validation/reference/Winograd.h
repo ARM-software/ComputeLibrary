@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_WINOGRAD_H
-#define ARM_COMPUTE_TEST_WINOGRAD_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_WINOGRAD_H
+#define ACL_TESTS_VALIDATION_REFERENCE_WINOGRAD_H
 
 #include "arm_compute/core/TensorShape.h"
 
@@ -45,15 +45,21 @@ enum class WinogradTransformType
 };
 
 template <typename T>
-SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+SimpleTensor<T>
+winograd_input_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
 
 template <typename T>
-SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in,
+                                          const TensorShape     &output_shape,
+                                          const WinogradInfo    &winograd_info);
 
 template <typename T>
-SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const SimpleTensor<T> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in,
+                                          const SimpleTensor<T> &b,
+                                          const TensorShape     &output_shape,
+                                          const WinogradInfo    &winograd_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_WINOGRAD_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_WINOGRAD_H

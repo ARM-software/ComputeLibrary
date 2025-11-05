@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TYPE_READER_H
-#define ARM_COMPUTE_TEST_TYPE_READER_H
+#ifndef ACL_TESTS_TYPEREADER_H
+#define ACL_TESTS_TYPEREADER_H
 
 #include "arm_compute/core/Types.h"
 
@@ -45,20 +45,17 @@ inline ::std::istream &operator>>(::std::istream &is, BorderMode &mode)
 
     is >> value;
 
-    std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c)
-    {
-        return std::toupper(c);
-    });
+    std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) { return std::toupper(c); });
 
-    if(value == "UNDEFINED")
+    if (value == "UNDEFINED")
     {
         mode = BorderMode::UNDEFINED;
     }
-    else if(value == "CONSTANT")
+    else if (value == "CONSTANT")
     {
         mode = BorderMode::CONSTANT;
     }
-    else if(value == "REPLICATE")
+    else if (value == "REPLICATE")
     {
         mode = BorderMode::REPLICATE;
     }
@@ -70,4 +67,4 @@ inline ::std::istream &operator>>(::std::istream &is, BorderMode &mode)
     return is;
 }
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TYPE_READER_H */
+#endif // ACL_TESTS_TYPEREADER_H

@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/DatatypeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/DequantizationLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -46,48 +47,58 @@ using framework::dataset::make;
 namespace
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const auto data_types = make("DataType", { DataType::F16, DataType::F32 });
+const auto data_types = make("DataType", {DataType::F16, DataType::F32});
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
-const auto data_types = make("DataType", { DataType::F32 });
+const auto data_types = make("DataType", {DataType::F32});
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-const auto dataset_quant_f32 = combine(datasets::SmallShapes(), datasets::QuantizedTypes(),
-                                       make("DataType", DataType::F32),
-                                       make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_f16 = combine(datasets::SmallShapes(), datasets::QuantizedTypes(),
-                                       make("DataType", DataType::F16),
-                                       make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_asymm_signed_f32 = combine(datasets::SmallShapes(),
-                                                    make("QuantizedTypes", { DataType::QASYMM8_SIGNED }),
-                                                    make("DataType", DataType::F32),
-                                                    make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_asymm_signed_f16 = combine(datasets::SmallShapes(),
-                                                    make("QuantizedTypes", { DataType::QASYMM8_SIGNED }),
-                                                    make("DataType", DataType::F16),
-                                                    make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_per_channel_f32 = combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes(),
-                                                   make("DataType", DataType::F32),
-                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
-const auto dataset_quant_per_channel_f16 = combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes(),
-                                                   make("DataType", DataType::F16),
-                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
-const auto dataset_quant_nightly_f32 = combine(datasets::LargeShapes(), datasets::QuantizedTypes(),
-                                               make("DataType", DataType::F32),
-                                               make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_nightly_f16 = combine(datasets::LargeShapes(), datasets::QuantizedTypes(),
-                                               make("DataType", DataType::F16),
-                                               make("DataLayout", { DataLayout::NCHW }));
-const auto dataset_quant_per_channel_nightly_f32 = combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes(),
+const auto dataset_quant_f32                     = combine(datasets::SmallShapes(),
+                                                           datasets::QuantizedTypes(),
                                                            make("DataType", DataType::F32),
-                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
-const auto dataset_quant_per_channel_nightly_f16 = combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes(),
-                                                                   make("DataType", DataType::F16),
-                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+                                                           make("DataLayout", {DataLayout::NCHW}));
+const auto dataset_quant_f16                     = combine(datasets::SmallShapes(),
+                                                           datasets::QuantizedTypes(),
+                                                           make("DataType", DataType::F16),
+                                                           make("DataLayout", {DataLayout::NCHW}));
+const auto dataset_quant_asymm_signed_f32        = combine(datasets::SmallShapes(),
+                                                           make("QuantizedTypes", {DataType::QASYMM8_SIGNED}),
+                                                           make("DataType", DataType::F32),
+                                                           make("DataLayout", {DataLayout::NCHW}));
+const auto dataset_quant_asymm_signed_f16        = combine(datasets::SmallShapes(),
+                                                           make("QuantizedTypes", {DataType::QASYMM8_SIGNED}),
+                                                           make("DataType", DataType::F16),
+                                                           make("DataLayout", {DataLayout::NCHW}));
+const auto dataset_quant_per_channel_f32         = combine(datasets::SmallShapes(),
+                                                           datasets::QuantizedPerChannelTypes(),
+                                                           make("DataType", DataType::F32),
+                                                           make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}));
+const auto dataset_quant_per_channel_f16         = combine(datasets::SmallShapes(),
+                                                           datasets::QuantizedPerChannelTypes(),
+                                                           make("DataType", DataType::F16),
+                                                           make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}));
+const auto dataset_quant_nightly_f32             = combine(datasets::LargeShapes(),
+                                                           datasets::QuantizedTypes(),
+                                                           make("DataType", DataType::F32),
+                                                           make("DataLayout", {DataLayout::NCHW}));
+const auto dataset_quant_nightly_f16             = combine(datasets::LargeShapes(),
+                                                           datasets::QuantizedTypes(),
+                                                           make("DataType", DataType::F16),
+                                                           make("DataLayout", {DataLayout::NCHW}));
+const auto dataset_quant_per_channel_nightly_f32 = combine(datasets::LargeShapes(),
+                                                           datasets::QuantizedPerChannelTypes(),
+                                                           make("DataType", DataType::F32),
+                                                           make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}));
+const auto dataset_quant_per_channel_nightly_f16 = combine(datasets::LargeShapes(),
+                                                           datasets::QuantizedPerChannelTypes(),
+                                                           make("DataType", DataType::F16),
+                                                           make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}));
 
-const auto dataset_precommit_f16 = concat(dataset_quant_f16, dataset_quant_per_channel_f16, dataset_quant_asymm_signed_f16);
-const auto dataset_precommit_f32 = concat(dataset_quant_f32, dataset_quant_per_channel_f32, dataset_quant_asymm_signed_f32);
-const auto dataset_nightly_f16   = concat(dataset_quant_f16, dataset_quant_per_channel_f16);
-const auto dataset_nightly_f32   = concat(dataset_quant_f32, dataset_quant_per_channel_f32);
+const auto dataset_precommit_f16 =
+    concat(dataset_quant_f16, dataset_quant_per_channel_f16, dataset_quant_asymm_signed_f16);
+const auto dataset_precommit_f32 =
+    concat(dataset_quant_f32, dataset_quant_per_channel_f32, dataset_quant_asymm_signed_f32);
+const auto dataset_nightly_f16 = concat(dataset_quant_f16, dataset_quant_per_channel_f16);
+const auto dataset_nightly_f32 = concat(dataset_quant_f32, dataset_quant_per_channel_f32);
 
 } // namespace
 
@@ -125,9 +136,12 @@ using NEDequantizationLayerFixture = DequantizationValidationFixture<Tensor, Acc
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, dataset_precommit_f16)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEDequantizationLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       dataset_precommit_f16)
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -138,9 +152,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<half>, framework::
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, dataset_nightly_f16)
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEDequantizationLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       dataset_nightly_f16)
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -155,12 +172,18 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, dataset_precommit_f32)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEDequantizationLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       dataset_precommit_f32)
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, dataset_nightly_f32)
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEDequantizationLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       dataset_nightly_f32)
 {
     // Validate output
     validate(Accessor(_target), _reference);

@@ -25,16 +25,17 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClIndirectConv2dAddressPrecalculationKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/IndirectConv2dAddressPrecalculationFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -48,7 +49,8 @@ using namespace arm_compute::opencl::kernels;
 
 using CLIndirectConv2dAddressPrecalculation = CLSynthetizeOperator<ClIndirectConv2dAddressPrecalculationKernel>;
 
-using CLIndirectConv2dAddressPrecalculationFixture = IndirectConv2dAddressPrecalculationValidationFixture<CLTensor, CLAccessor, CLIndirectConv2dAddressPrecalculation>;
+using CLIndirectConv2dAddressPrecalculationFixture =
+    IndirectConv2dAddressPrecalculationValidationFixture<CLTensor, CLAccessor, CLIndirectConv2dAddressPrecalculation>;
 
 // *INDENT-OFF*
 // clang-format off

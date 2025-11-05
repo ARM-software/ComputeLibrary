@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,17 +22,18 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_TEST_DROPOUT_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_DROPOUT_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DROPOUTLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DROPOUTLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 
 #include <random>
 
@@ -102,4 +103,4 @@ protected:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_DROPOUT_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DROPOUTLAYERFIXTURE_H

@@ -51,29 +51,48 @@ TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuMeanStdDevNormalization)
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
-               make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data type input/output
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching shapes
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                     }),
-               make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
-                                                     }),
-               make("Expected", { false, false, true })),
-               input_info, output_info, expected)
+DATA_TEST_CASE(Validate,
+               framework::DatasetMode::ALL,
+               zip(make("InputInfo",
+                        {
+                            TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching data type input/output
+                            TensorInfo(TensorShape(27U, 13U), 1, DataType::F32), // Mismatching shapes
+                            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+                        }),
+                   make("OutputInfo",
+                        {
+                            TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
+                            TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+                            TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+                        }),
+                   make("Expected", {false, false, true})),
+               input_info,
+               output_info,
+               expected)
 {
-    ARM_COMPUTE_EXPECT(bool(experimental::op::CpuMeanStdDevNormalization::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(
+        bool(experimental::op::CpuMeanStdDevNormalization::validate(
+            &input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected,
+        framework::LogLevel::ERRORS);
 }
 
 template <typename T>
-using CpuMeanStdDevNormalizationFixture = CpuMeanStdDevNormalizationValidationFixture<Tensor, Accessor, experimental::op::CpuMeanStdDevNormalization, T>;
+using CpuMeanStdDevNormalizationFixture =
+    CpuMeanStdDevNormalizationValidationFixture<Tensor, Accessor, experimental::op::CpuMeanStdDevNormalization, T>;
 
 template <typename T>
-using CpuMeanStdDevNormalizationFloatThreadSafeFixture = CpuMeanStdDevNormalizationFloatThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuMeanStdDevNormalization, T>;
+using CpuMeanStdDevNormalizationFloatThreadSafeFixture =
+    CpuMeanStdDevNormalizationFloatThreadSafeValidationFixture<Tensor,
+                                                               Accessor,
+                                                               experimental::op::CpuMeanStdDevNormalization,
+                                                               T>;
 
 template <typename T>
-using CpuMeanStdDevNormalizationQuantizedThreadSafeFixture = CpuMeanStdDevNormalizationQuantizedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuMeanStdDevNormalization, T>;
+using CpuMeanStdDevNormalizationQuantizedThreadSafeFixture =
+    CpuMeanStdDevNormalizationQuantizedThreadSafeValidationFixture<Tensor,
+                                                                   Accessor,
+                                                                   experimental::op::CpuMeanStdDevNormalization,
+                                                                   T>;
 
 TEST_SUITE(SmokeTest)
 FIXTURE_DATA_TEST_CASE(SmokeTest,
@@ -85,7 +104,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
                                make("DataType", DataType::F32)))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_f32);
     }
@@ -105,7 +124,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                                make("DataType", DataType::F32)))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_f32);
     }
@@ -123,10 +142,10 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                                make("Epsilon", {1e-7}),
                                make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i], tolerance_f16);
         }
@@ -138,7 +157,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // Float
 
@@ -156,7 +175,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                                make("QuantizationInfo", {QuantizationInfo(0.5f, 10)})))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_qasymm8);
     }
@@ -166,7 +185,7 @@ TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // ThreadSafety
-#endif // #ifndef BARE_METAL
+#endif           // #ifndef BARE_METAL
 
 TEST_SUITE_END() // CpuMeanStdDevNormalization
 TEST_SUITE_END() // OPERATORS

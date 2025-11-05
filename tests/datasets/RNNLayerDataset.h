@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_RNN_LAYER_DATASET
-#define ARM_COMPUTE_TEST_RNN_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_RNNLAYERDATASET_H
+#define ACL_TESTS_DATASETS_RNNLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -48,12 +48,12 @@ public:
                  std::vector<TensorShape>::const_iterator         biases_it,
                  std::vector<TensorShape>::const_iterator         dst_it,
                  std::vector<ActivationLayerInfo>::const_iterator infos_it)
-            : _src_it{ std::move(src_it) },
-              _weights_it{ std::move(weights_it) },
-              _recurrent_weights_it{ std::move(recurrent_weights_it) },
-              _biases_it{ std::move(biases_it) },
-              _dst_it{ std::move(dst_it) },
-              _infos_it{ std::move(infos_it) }
+            : _src_it{std::move(src_it)},
+              _weights_it{std::move(weights_it)},
+              _recurrent_weights_it{std::move(recurrent_weights_it)},
+              _biases_it{std::move(biases_it)},
+              _dst_it{std::move(dst_it)},
+              _infos_it{std::move(infos_it)}
         {
         }
 
@@ -95,15 +95,24 @@ public:
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _recurrent_weight_shapes.begin(), _bias_shapes.begin(), _dst_shapes.begin(), _infos.begin());
+        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _recurrent_weight_shapes.begin(),
+                        _bias_shapes.begin(), _dst_shapes.begin(), _infos.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_recurrent_weight_shapes.size(), std::min(_bias_shapes.size(), std::min(_dst_shapes.size(), _infos.size())))));
+        return std::min(_src_shapes.size(),
+                        std::min(_weight_shapes.size(),
+                                 std::min(_recurrent_weight_shapes.size(),
+                                          std::min(_bias_shapes.size(), std::min(_dst_shapes.size(), _infos.size())))));
     }
 
-    void add_config(TensorShape src, TensorShape weights, TensorShape recurrent_weights, TensorShape biases, TensorShape dst, ActivationLayerInfo info)
+    void add_config(TensorShape         src,
+                    TensorShape         weights,
+                    TensorShape         recurrent_weights,
+                    TensorShape         biases,
+                    TensorShape         dst,
+                    ActivationLayerInfo info)
     {
         _src_shapes.emplace_back(std::move(src));
         _weight_shapes.emplace_back(std::move(weights));
@@ -131,11 +140,12 @@ class SmallRNNLayerDataset final : public RNNLayerDataset
 public:
     SmallRNNLayerDataset()
     {
-        add_config(TensorShape(128U, 16U), TensorShape(128U, 32U), TensorShape(32U, 32U), TensorShape(32U), TensorShape(32U, 16U), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        add_config(TensorShape(128U, 16U), TensorShape(128U, 32U), TensorShape(32U, 32U), TensorShape(32U),
+                   TensorShape(32U, 16U), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
     }
 };
 
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_RNN_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_RNNLAYERDATASET_H

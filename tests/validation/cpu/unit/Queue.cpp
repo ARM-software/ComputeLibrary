@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/QueueFixture.h"
-
 #include "src/cpu/CpuQueue.h"
+#include "tests/validation/fixtures/UNIT/QueueFixture.h"
 
 namespace arm_compute
 {
@@ -35,9 +34,15 @@ TEST_SUITE(CPU)
 TEST_SUITE(UNIT)
 TEST_SUITE(Queue)
 
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueueWithInvalidContext, CreateQueueWithInvalidContextFixture, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueuerWithInvalidOptions, CreateQueuerWithInvalidOptionsFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidQueue, DestroyInvalidQueueFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueueWithInvalidContext,
+                             CreateQueueWithInvalidContextFixture,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueuerWithInvalidOptions,
+                             CreateQueuerWithInvalidOptionsFixture<acl::Target::Cpu>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidQueue,
+                             DestroyInvalidQueueFixture<acl::Target::Cpu>,
+                             framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(SimpleQueue, SimpleQueueFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
 
 TEST_SUITE_END() // Queue

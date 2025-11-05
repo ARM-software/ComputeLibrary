@@ -34,10 +34,11 @@ namespace validation
 namespace reference
 {
 template <typename Tin, typename Tout>
-SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+SimpleTensor<Tout>
+quantization_layer(const SimpleTensor<Tin> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
 {
     // Create reference
-    SimpleTensor<Tout> dst{ src.shape(), output_data_type, 1, quantization_info };
+    SimpleTensor<Tout> dst{src.shape(), output_data_type, 1, quantization_info};
 
     const UniformQuantizationInfo qinfo = quantization_info.uniform();
 
@@ -47,32 +48,32 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
     constexpr auto rounding_policy = RoundingPolicy::TO_ZERO;
 #endif // __aarch64__
 
-    switch(output_data_type)
+    switch (output_data_type)
     {
         case DataType::QSYMM8_PER_CHANNEL:
 #if defined(_OPENMP)
-            #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-            for(int i = 0; i < src.num_elements(); ++i)
+            for (int i = 0; i < src.num_elements(); ++i)
             {
                 const Coordinates coord = index2coord(dst.shape(), i);
-                dst[i] =  quantize_qsymm8_per_channel( src[i], quantization_info, coord.z(),rounding_policy);
+                dst[i] = quantize_qsymm8_per_channel(src[i], quantization_info, coord.z(), rounding_policy);
             }
             break;
         case DataType::QASYMM8:
 #if defined(_OPENMP)
-            #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-            for(int i = 0; i < src.num_elements(); ++i)
+            for (int i = 0; i < src.num_elements(); ++i)
             {
                 dst[i] = quantize_qasymm8((src[i]), qinfo, rounding_policy);
             }
             break;
         case DataType::QASYMM8_SIGNED:
 #if defined(_OPENMP)
-            #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-            for(int i = 0; i < src.num_elements(); ++i)
+            for (int i = 0; i < src.num_elements(); ++i)
             {
 #ifdef __aarch64__
                 dst[i] = quantize_qasymm8_signed((src[i]), qinfo, RoundingPolicy::TO_NEAREST_EVEN);
@@ -83,9 +84,9 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
             break;
         case DataType::QASYMM16:
 #if defined(_OPENMP)
-            #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-            for(int i = 0; i < src.num_elements(); ++i)
+            for (int i = 0; i < src.num_elements(); ++i)
             {
                 dst[i] = quantize_qasymm16((src[i]), qinfo, rounding_policy);
             }
@@ -97,46 +98,65 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
 }
 
 template <>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<uint8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<uint8_t> &src,
+                                         DataType                     output_data_type,
+                                         const QuantizationInfo      &quantization_info)
 {
     SimpleTensor<float> src_tmp = convert_from_asymmetric<uint8_t>(src);
     return quantization_layer<float, uint8_t>(src_tmp, output_data_type, quantization_info);
 }
 
 template <>
-SimpleTensor<int8_t> quantization_layer(const SimpleTensor<uint8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+SimpleTensor<int8_t> quantization_layer(const SimpleTensor<uint8_t> &src,
+                                        DataType                     output_data_type,
+                                        const QuantizationInfo      &quantization_info)
 {
     SimpleTensor<float> src_tmp = convert_from_asymmetric<uint8_t>(src);
     return quantization_layer<float, int8_t>(src_tmp, output_data_type, quantization_info);
 }
 
 template <>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<int8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<int8_t> &src,
+                                         DataType                    output_data_type,
+                                         const QuantizationInfo     &quantization_info)
 {
     SimpleTensor<float> src_tmp = convert_from_asymmetric<int8_t>(src);
     return quantization_layer<float, uint8_t>(src_tmp, output_data_type, quantization_info);
 }
 
 template <>
-SimpleTensor<int8_t> quantization_layer(const SimpleTensor<int8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+SimpleTensor<int8_t> quantization_layer(const SimpleTensor<int8_t> &src,
+                                        DataType                    output_data_type,
+                                        const QuantizationInfo     &quantization_info)
 {
     SimpleTensor<float> src_tmp = convert_from_asymmetric<int8_t>(src);
     return quantization_layer<float, int8_t>(src_tmp, output_data_type, quantization_info);
 }
 
 template <>
-SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<uint8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<uint8_t> &src,
+                                          DataType                     output_data_type,
+                                          const QuantizationInfo      &quantization_info)
 {
     SimpleTensor<float> src_tmp = convert_from_asymmetric<uint8_t>(src);
     return quantization_layer<float, uint16_t>(src_tmp, output_data_type, quantization_info);
 }
 
-template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<int8_t>
+quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<float> &src,
+                                                 DataType                   output_data_type,
+                                                 const QuantizationInfo    &quantization_info);
+template SimpleTensor<uint8_t>
+quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src,
+                                                  DataType                   output_data_type,
+                                                  const QuantizationInfo    &quantization_info);
+template SimpleTensor<uint16_t>
+quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<float> &src,
+                                                   DataType                   output_data_type,
+                                                   const QuantizationInfo    &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

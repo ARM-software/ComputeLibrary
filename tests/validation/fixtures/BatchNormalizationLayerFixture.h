@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/BatchNormalizationLayer.h"
 
@@ -44,9 +45,16 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class BatchNormalizationLayerValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
+    void setup(TensorShape         shape0,
+               TensorShape         shape1,
+               float               epsilon,
+               bool                use_beta,
+               bool                use_gamma,
+               ActivationLayerInfo act_info,
+               DataType            dt,
+               DataLayout          data_layout)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             dt == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -63,18 +71,21 @@ protected:
     template <typename U>
     void fill(U &&src_tensor, U &&mean_tensor, U &&var_tensor, U &&beta_tensor, U &&gamma_tensor)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
         const T          min_bound = T(-1.f);
         const T          max_bound = T(1.f);
-        DistributionType distribution{ min_bound, max_bound };
-        DistributionType distribution_var{ T(0.f), max_bound };
+        DistributionType distribution{min_bound, max_bound};
+        DistributionType distribution_var{T(0.f), max_bound};
 
         library->fill(src_tensor, distribution, 0);
         library->fill(mean_tensor, distribution, 1);
         library->fill(var_tensor, distribution_var, 0);
-        if(_use_beta)
+        if (_use_beta)
         {
             library->fill(beta_tensor, distribution, 3);
         }
@@ -83,7 +94,7 @@ protected:
             // Fill with default value 0.f
             library->fill_tensor_value(beta_tensor, T(0.f));
         }
-        if(_use_gamma)
+        if (_use_gamma)
         {
             library->fill(gamma_tensor, distribution, 4);
         }
@@ -94,9 +105,14 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
+    TensorType compute_target(TensorShape         shape0,
+                              const TensorShape  &shape1,
+                              float               epsilon,
+                              ActivationLayerInfo act_info,
+                              DataType            dt,
+                              DataLayout          data_layout)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape0, PermutationVector(2U, 0U, 1U));
         }
@@ -111,8 +127,8 @@ protected:
 
         // Create and configure function
         FunctionType norm;
-        TensorType *beta_ptr  = _use_beta ? &beta : nullptr;
-        TensorType *gamma_ptr = _use_gamma ? &gamma : nullptr;
+        TensorType  *beta_ptr  = _use_beta ? &beta : nullptr;
+        TensorType  *gamma_ptr = _use_gamma ? &gamma : nullptr;
         norm.configure(&src, &dst, &mean, &var, beta_ptr, gamma_ptr, epsilon, act_info);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
@@ -146,14 +162,15 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt)
+    SimpleTensor<T> compute_reference(
+        const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt)
     {
         // Create reference
-        SimpleTensor<T> ref_src{ shape0, dt, 1 };
-        SimpleTensor<T> ref_mean{ shape1, dt, 1 };
-        SimpleTensor<T> ref_var{ shape1, dt, 1 };
-        SimpleTensor<T> ref_beta{ shape1, dt, 1 };
-        SimpleTensor<T> ref_gamma{ shape1, dt, 1 };
+        SimpleTensor<T> ref_src{shape0, dt, 1};
+        SimpleTensor<T> ref_mean{shape1, dt, 1};
+        SimpleTensor<T> ref_var{shape1, dt, 1};
+        SimpleTensor<T> ref_beta{shape1, dt, 1};
+        SimpleTensor<T> ref_gamma{shape1, dt, 1};
 
         // Fill reference
         fill(ref_src, ref_mean, ref_var, ref_beta, ref_gamma);

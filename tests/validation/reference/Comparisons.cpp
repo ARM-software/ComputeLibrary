@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "Comparisons.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -40,7 +41,7 @@ template <typename T>
 uint8_t compare_op(ComparisonOperation op, T src1, T src2)
 {
     uint8_t result = 0;
-    switch(op)
+    switch (op)
     {
         case ComparisonOperation::Equal:
             result = static_cast<uint8_t>(src1 == src2);
@@ -71,8 +72,12 @@ struct BroadcastUnroll
 {
     template <typename T>
     static void unroll(ComparisonOperation    op,
-                       const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<uint8_t> &dst,
-                       Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
+                       const SimpleTensor<T> &src1,
+                       const SimpleTensor<T> &src2,
+                       SimpleTensor<uint8_t> &dst,
+                       Coordinates           &id_src1,
+                       Coordinates           &id_src2,
+                       Coordinates           &id_dst)
     {
         const bool src1_is_broadcast = (src1.shape()[dim - 1] != dst.shape()[dim - 1]);
         const bool src2_is_broadcast = (src2.shape()[dim - 1] != dst.shape()[dim - 1]);
@@ -81,11 +86,11 @@ struct BroadcastUnroll
         id_src2.set(dim - 1, 0);
         id_dst.set(dim - 1, 0);
 #if defined(_OPENMP)
-        #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-        for(size_t i = 0; i < dst.shape()[dim - 1]; ++i)
+        for (size_t i = 0; i < dst.shape()[dim - 1]; ++i)
         {
-            BroadcastUnroll < dim - 1 >::unroll(op, src1, src2, dst, id_src1, id_src2, id_dst);
+            BroadcastUnroll<dim - 1>::unroll(op, src1, src2, dst, id_src1, id_src2, id_dst);
 
             id_src1[dim - 1] += !src1_is_broadcast;
             id_src2[dim - 1] += !src2_is_broadcast;
@@ -99,10 +104,15 @@ struct BroadcastUnroll<0>
 {
     template <typename T>
     static void unroll(ComparisonOperation    op,
-                       const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<uint8_t> &dst,
-                       Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
+                       const SimpleTensor<T> &src1,
+                       const SimpleTensor<T> &src2,
+                       SimpleTensor<uint8_t> &dst,
+                       Coordinates           &id_src1,
+                       Coordinates           &id_src2,
+                       Coordinates           &id_dst)
     {
-        dst[coord2index(dst.shape(), id_dst)] = compare_op(op, src1[coord2index(src1.shape(), id_src1)], src2[coord2index(src2.shape(), id_src2)]);
+        dst[coord2index(dst.shape(), id_dst)] =
+            compare_op(op, src1[coord2index(src1.shape(), id_src1)], src2[coord2index(src2.shape(), id_src2)]);
     }
 };
 } // namespace
@@ -120,7 +130,8 @@ SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<T> &src
 }
 
 template <>
-SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2)
+SimpleTensor<uint8_t>
+compare(ComparisonOperation op, const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2)
 {
     SimpleTensor<uint8_t> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), DataType::U8);
 
@@ -128,7 +139,7 @@ SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<uint8_t
     Coordinates id_src2{};
     Coordinates id_dst{};
 
-    if(src1.data_type() == DataType::QASYMM8)
+    if (src1.data_type() == DataType::QASYMM8)
     {
         SimpleTensor<float> src1_tmp = convert_from_asymmetric(src1);
         SimpleTensor<float> src2_tmp = convert_from_asymmetric(src2);
@@ -143,7 +154,8 @@ SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<uint8_t
 }
 
 template <>
-SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2)
+SimpleTensor<uint8_t>
+compare(ComparisonOperation op, const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2)
 {
     SimpleTensor<uint8_t> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), DataType::U8);
 
@@ -151,7 +163,7 @@ SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<int8_t>
     Coordinates id_src2{};
     Coordinates id_dst{};
 
-    if(src1.data_type() == DataType::QASYMM8_SIGNED)
+    if (src1.data_type() == DataType::QASYMM8_SIGNED)
     {
         SimpleTensor<float> src1_tmp = convert_from_asymmetric(src1);
         SimpleTensor<float> src2_tmp = convert_from_asymmetric(src2);
@@ -165,8 +177,10 @@ SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<int8_t>
     return dst;
 }
 
-template SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<half> &src1, const SimpleTensor<half> &src2);
-template SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<float> &src1, const SimpleTensor<float> &src2);
+template SimpleTensor<uint8_t>
+compare(ComparisonOperation op, const SimpleTensor<half> &src1, const SimpleTensor<half> &src2);
+template SimpleTensor<uint8_t>
+compare(ComparisonOperation op, const SimpleTensor<float> &src1, const SimpleTensor<float> &src2);
 
 } // namespace reference
 } // namespace validation

@@ -23,14 +23,15 @@
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
 #include "tests/datasets/ROIDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
 #include "tests/validation/fixtures/ROIPoolingLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {

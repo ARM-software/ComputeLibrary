@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H
-#define ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_SPACETOBATCH_H
+#define ACL_TESTS_VALIDATION_REFERENCE_SPACETOBATCH_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,9 +36,12 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape);
+SimpleTensor<T> space_to_batch(const SimpleTensor<T>       &src,
+                               const SimpleTensor<int32_t> &block_shape,
+                               const SimpleTensor<int32_t> &paddings,
+                               const TensorShape           &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_SPACETOBATCH_H

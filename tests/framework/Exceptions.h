@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_EXCEPTIONS
-#define ARM_COMPUTE_TEST_EXCEPTIONS
+#ifndef ACL_TESTS_FRAMEWORK_EXCEPTIONS_H
+#define ACL_TESTS_FRAMEWORK_EXCEPTIONS_H
 
 #include <istream>
 #include <ostream>
@@ -58,10 +58,10 @@ enum class LogLevel
     ALL,
 };
 
-LogLevel log_level_from_name(const std::string &name);
+LogLevel        log_level_from_name(const std::string &name);
 ::std::istream &operator>>(::std::istream &stream, LogLevel &level);
 ::std::ostream &operator<<(::std::ostream &stream, LogLevel level);
-std::string to_string(LogLevel level);
+std::string     to_string(LogLevel level);
 
 /** Error class for when some external assets are missing */
 class FileNotFound : public std::runtime_error
@@ -101,7 +101,7 @@ public:
     const char *what() const noexcept override;
 
 private:
-    LogLevel    _level{ LogLevel::ERRORS };
+    LogLevel    _level{LogLevel::ERRORS};
     std::string _msg{};
     std::string _context{};
     std::string _combined{};
@@ -109,4 +109,4 @@ private:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_EXCEPTIONS */
+#endif // ACL_TESTS_FRAMEWORK_EXCEPTIONS_H

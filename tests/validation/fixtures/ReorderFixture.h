@@ -26,13 +26,14 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/Reorder.h"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 
 namespace arm_compute
 {
@@ -45,25 +46,40 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReorderValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape output_shape, WeightFormat input_wf, WeightFormat output_wf, DataType input_data_type, DataType output_data_type, bool transpose)
+    void setup(TensorShape  input_shape,
+               TensorShape  output_shape,
+               WeightFormat input_wf,
+               WeightFormat output_wf,
+               DataType     input_data_type,
+               DataType     output_data_type,
+               bool         transpose)
     {
         FunctionType reorder;
-        TensorInfo input_tensor_info(input_shape, 1, input_data_type);
-        TensorInfo output_tensor_info(output_shape, 1, output_data_type);
-        if (reorder.validate(&input_tensor_info, &output_tensor_info, input_wf, output_wf, transpose /* transpose */)) {
-            _target    = compute_target(input_shape, output_shape, input_wf, output_wf, input_data_type, output_data_type, transpose);
-            _reference = compute_reference(input_shape, output_shape, output_wf, input_data_type, output_data_type, transpose);
+        TensorInfo   input_tensor_info(input_shape, 1, input_data_type);
+        TensorInfo   output_tensor_info(output_shape, 1, output_data_type);
+        if (reorder.validate(&input_tensor_info, &output_tensor_info, input_wf, output_wf, transpose /* transpose */))
+        {
+            _target = compute_target(input_shape, output_shape, input_wf, output_wf, input_data_type, output_data_type,
+                                     transpose);
+            _reference =
+                compute_reference(input_shape, output_shape, output_wf, input_data_type, output_data_type, transpose);
         }
     }
 
-    protected:
+protected:
     template <typename U>
     void fill(U &&tensor)
     {
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, WeightFormat input_wf, WeightFormat output_wf, DataType input_data_type, DataType output_data_type, bool transpose)
+    TensorType compute_target(const TensorShape &input_shape,
+                              const TensorShape &output_shape,
+                              WeightFormat       input_wf,
+                              WeightFormat       output_wf,
+                              DataType           input_data_type,
+                              DataType           output_data_type,
+                              bool               transpose)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(input_shape, input_data_type);
@@ -93,10 +109,15 @@ public:
         return dst;
     }
 
-    SimpleTensor<TOut> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, WeightFormat output_wf, DataType input_data_type, DataType output_data_type, bool transpose)
+    SimpleTensor<TOut> compute_reference(const TensorShape &input_shape,
+                                         const TensorShape &output_shape,
+                                         WeightFormat       output_wf,
+                                         DataType           input_data_type,
+                                         DataType           output_data_type,
+                                         bool               transpose)
     {
         // Create reference
-        SimpleTensor<TIn> src{ input_shape, input_data_type };
+        SimpleTensor<TIn> src{input_shape, input_data_type};
 
         // Fill reference
         fill(src);
@@ -104,7 +125,7 @@ public:
         return reference::reorder_layer<TOut, TIn>(src, output_shape, output_wf, output_data_type, transpose);
     }
 
-    TensorType      _target{};
+    TensorType         _target{};
     SimpleTensor<TOut> _reference{};
 };
 /** [ReorderLayer fixture] **/

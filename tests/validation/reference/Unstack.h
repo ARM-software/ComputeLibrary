@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNSTACK_H
-#define ARM_COMPUTE_TEST_UNSTACK_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_UNSTACK_H
+#define ACL_TESTS_VALIDATION_REFERENCE_UNSTACK_H
 
 #include "tests/SimpleTensor.h"
 
@@ -37,10 +37,11 @@ namespace validation
 namespace reference
 {
 template <typename T>
-std::vector<SimpleTensor<T>> unstack(const SimpleTensor<T> &input_tensor, std::vector<SimpleTensor<T>> &output_tensors, int axis);
+std::vector<SimpleTensor<T>>
+unstack(const SimpleTensor<T> &input_tensor, std::vector<SimpleTensor<T>> &output_tensors, int axis);
 
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNSTACK_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_UNSTACK_H

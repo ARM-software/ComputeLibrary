@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FUSEBATCHNORMALIZATION_H
-#define ARM_COMPUTE_TEST_FUSEBATCHNORMALIZATION_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_FUSEBATCHNORMALIZATION_H
+#define ACL_TESTS_VALIDATION_REFERENCE_FUSEBATCHNORMALIZATION_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,16 +36,29 @@ namespace validation
 namespace reference
 {
 template <typename T>
-void fuse_batch_normalization_dwc_layer(const SimpleTensor<T> &w, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, SimpleTensor<T> &w_fused, SimpleTensor<T> &b_fused, const SimpleTensor<T> &b,
-                                        const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon);
+void fuse_batch_normalization_dwc_layer(const SimpleTensor<T> &w,
+                                        const SimpleTensor<T> &mean,
+                                        const SimpleTensor<T> &var,
+                                        SimpleTensor<T>       &w_fused,
+                                        SimpleTensor<T>       &b_fused,
+                                        const SimpleTensor<T> &b,
+                                        const SimpleTensor<T> &beta,
+                                        const SimpleTensor<T> &gamma,
+                                        float                  epsilon);
 
 template <typename T>
-void fuse_batch_normalization_conv_layer(const SimpleTensor<T> &w, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, SimpleTensor<T> &w_fused, SimpleTensor<T> &b_fused,
+void fuse_batch_normalization_conv_layer(const SimpleTensor<T> &w,
+                                         const SimpleTensor<T> &mean,
+                                         const SimpleTensor<T> &var,
+                                         SimpleTensor<T>       &w_fused,
+                                         SimpleTensor<T>       &b_fused,
                                          const SimpleTensor<T> &b,
-                                         const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon);
+                                         const SimpleTensor<T> &beta,
+                                         const SimpleTensor<T> &gamma,
+                                         float                  epsilon);
 
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif // ARM_COMPUTE_TEST_FUSEBATCHNORMALIZATION_H
+#endif // ACL_TESTS_VALIDATION_REFERENCE_FUSEBATCHNORMALIZATION_H

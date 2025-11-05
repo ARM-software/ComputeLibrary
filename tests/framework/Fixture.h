@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FIXTURE
-#define ARM_COMPUTE_TEST_FIXTURE
+#ifndef ACL_TESTS_FRAMEWORK_FIXTURE_H
+#define ACL_TESTS_FRAMEWORK_FIXTURE_H
 
 namespace arm_compute
 {
@@ -45,13 +45,13 @@ public:
      *
      * The function is called before the test case is executed.
      */
-    void setup() {};
+    void setup(){};
 
     /** Teardown function.
      *
      * The function is called after the test case finished.
      */
-    void teardown() {};
+    void teardown(){};
 
 protected:
     Fixture()          = default;
@@ -60,4 +60,4 @@ protected:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FIXTURE */
+#endif // ACL_TESTS_FRAMEWORK_FIXTURE_H

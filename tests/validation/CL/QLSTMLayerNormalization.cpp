@@ -24,14 +24,14 @@
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/validation/fixtures/QLSTMLayerNormalizationFixture.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/QLSTMLayerNormalizationFixture.h"
 
 namespace arm_compute
 {
@@ -42,8 +42,9 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-constexpr AbsoluteTolerance<int16_t> tolerance_s16(0); /**< Tolerance value for comparing reference's output against implementation's output for QSYMM16 data types */
-constexpr uint32_t                   vector_size_byte = 16;
+constexpr AbsoluteTolerance<int16_t> tolerance_s16(
+    0); /**< Tolerance value for comparing reference's output against implementation's output for QSYMM16 data types */
+constexpr uint32_t vector_size_byte = 16;
 
 using test::datasets::ShapeDataset;
 using CLQLSTMLayerNormalization = CLSynthetizeFunction<CLQLSTMLayerNormalizationKernel>;
@@ -57,11 +58,8 @@ class QLSTMLayerNormShapeDataSet : public ShapeDataset
 public:
     QLSTMLayerNormShapeDataSet(std::string name)
         : ShapeDataset(name,
-    {
-        TensorShape{ boundary_minus_one, num_batches },
-                     TensorShape{ boundary, num_batches },
-                     TensorShape{ boundary_plus_one, num_batches }
-    })
+                       {TensorShape{boundary_minus_one, num_batches}, TensorShape{boundary, num_batches},
+                        TensorShape{boundary_plus_one, num_batches}})
     {
     }
 };
@@ -71,11 +69,7 @@ class QLSTMLayerNormShapeDataSet<num_elements_per_iter, num_batches, 0> : public
 {
 public:
     QLSTMLayerNormShapeDataSet(std::string name)
-        : ShapeDataset(name,
-    {
-        TensorShape{ 1, num_batches },
-                     TensorShape{ 2, num_batches }
-    })
+        : ShapeDataset(name, {TensorShape{1, num_batches}, TensorShape{2, num_batches}})
     {
     }
 };
@@ -83,13 +77,13 @@ public:
 TEST_SUITE(CL)
 TEST_SUITE(QLSTMLayerNormalization)
 
-static const TensorShape correct_input_shape{ TensorShape(15U, 2U) };
-static const TensorShape correct_weight_shape{ TensorShape(15U) };
-static const TensorShape correct_bias_shape{ TensorShape(15U) };
-static const DataType    correct_input_dt{ DataType::QSYMM16 };
-static const DataType    correct_weight_dt{ DataType::QSYMM16 };
-static const DataType    correct_bias_dt{ DataType::S32 };
-static const uint32_t    tensor_num_channel{ 1 };
+static const TensorShape correct_input_shape{TensorShape(15U, 2U)};
+static const TensorShape correct_weight_shape{TensorShape(15U)};
+static const TensorShape correct_bias_shape{TensorShape(15U)};
+static const DataType    correct_input_dt{DataType::QSYMM16};
+static const DataType    correct_weight_dt{DataType::QSYMM16};
+static const DataType    correct_bias_dt{DataType::S32};
+static const uint32_t    tensor_num_channel{1};
 
 // *INDENT-OFF*
 // clang-format off
@@ -136,7 +130,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
 // *INDENT-ON*
 
 template <typename T>
-using CLQLSTMLayerNormalizationFixture = QLSTMLayerNormalizationValidationFixture<CLTensor, CLAccessor, CLQLSTMLayerNormalization, T>;
+using CLQLSTMLayerNormalizationFixture =
+    QLSTMLayerNormalizationValidationFixture<CLTensor, CLAccessor, CLQLSTMLayerNormalization, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QSYMM16)
@@ -159,26 +154,30 @@ TEST_SUITE(QSYMM16)
 
 constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
 
-#define QSYMM16_DATASET_ITER(num_input_batch, num_iter)                                                              \
+#define QSYMM16_DATASET_ITER(num_input_batch, num_iter)                                                  \
     combine(zip(QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>("InputShape"), \
-                            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape"),             \
-                        QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),                   \
-                    make("DataType", DataType::QSYMM16),                                                            \
-            make("InputQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(2) }))
+                QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape"),              \
+                QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),               \
+            make("DataType", DataType::QSYMM16),                                                         \
+            make("InputQuantizationInfo", {QuantizationInfo(1. / 8192), QuantizationInfo(2)}))
 
-#define QSYMM16_DATASET_1D \
-    concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1), QSYMM16_DATASET_ITER(1, 2))
+#define QSYMM16_DATASET_1D concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1), QSYMM16_DATASET_ITER(1, 2))
 
-#define QSYMM16_DATASET_2D \
-    concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1), QSYMM16_DATASET_ITER(3, 2))
+#define QSYMM16_DATASET_2D concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1), QSYMM16_DATASET_ITER(3, 2))
 
-FIXTURE_DATA_TEST_CASE(RandomValue1D, CLQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_1D)
+FIXTURE_DATA_TEST_CASE(RandomValue1D,
+                       CLQLSTMLayerNormalizationFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       QSYMM16_DATASET_1D)
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_s16);
 }
 
-FIXTURE_DATA_TEST_CASE(RandomValue2D, CLQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_2D)
+FIXTURE_DATA_TEST_CASE(RandomValue2D,
+                       CLQLSTMLayerNormalizationFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       QSYMM16_DATASET_2D)
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_s16);

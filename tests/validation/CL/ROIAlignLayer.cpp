@@ -23,14 +23,15 @@
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
 #include "tests/datasets/ROIDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
 #include "tests/validation/fixtures/ROIAlignLayerFixture.h"
+#include "tests/validation/Validation.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -109,20 +110,24 @@ using CLROIAlignLayerHalfFixture  = ROIAlignLayerFixture<CLTensor, CLAccessor, C
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerFloatFixture, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small,
+                       CLROIAlignLayerFloatFixture,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                       make("DataType", { DataType::F32 }),
-                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                               make("DataType", {DataType::F32}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerHalfFixture, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small,
+                       CLROIAlignLayerHalfFixture,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                       make("DataType", { DataType::F16 }),
-                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                               make("DataType", {DataType::F16}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f16, .02f, absolute_tolerance_f16);
@@ -131,28 +136,33 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
 template <typename T>
-using CLROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<CLTensor, CLAccessor, CLROIAlignLayer, T, uint16_t>;
+using CLROIAlignLayerQuantizedFixture =
+    ROIAlignLayerQuantizedFixture<CLTensor, CLAccessor, CLROIAlignLayer, T, uint16_t>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small,
+                       CLROIAlignLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                                       make("DataType", { DataType::QASYMM8 }),
-                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
-                               make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+                               make("DataType", {DataType::QASYMM8}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InputQuantizationInfo", {QuantizationInfo(1.f / 255.f, 127)}),
+                               make("OutputQuantizationInfo", {QuantizationInfo(2.f / 255.f, 120)})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small,
+                       CLROIAlignLayerQuantizedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                                       make("DataType", { DataType::QASYMM8_SIGNED }),
-                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 65) }),
-                               make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 20) })))
+                               make("DataType", {DataType::QASYMM8_SIGNED}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InputQuantizationInfo", {QuantizationInfo(1.f / 255.f, 65)}),
+                               make("OutputQuantizationInfo", {QuantizationInfo(2.f / 255.f, 20)})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);

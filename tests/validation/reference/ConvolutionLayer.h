@@ -35,9 +35,15 @@ namespace validation
 {
 namespace reference
 {
-template <typename TI, typename TW, typename TB, typename TO=TI>
-SimpleTensor<TO> convolution_layer(const SimpleTensor<TI> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
-                                  const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, QuantizationInfo out_quant_info = QuantizationInfo());
+template <typename TI, typename TW, typename TB, typename TO = TI>
+SimpleTensor<TO> convolution_layer(const SimpleTensor<TI> &src,
+                                   const SimpleTensor<TW> &weights,
+                                   const SimpleTensor<TB> &bias,
+                                   const TensorShape      &output_shape,
+                                   const PadStrideInfo    &info,
+                                   const Size2D           &dilation       = Size2D(1U, 1U),
+                                   unsigned int            num_groups     = 1,
+                                   QuantizationInfo        out_quant_info = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test

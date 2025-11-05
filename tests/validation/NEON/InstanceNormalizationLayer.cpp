@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/InstanceNormalizationLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -96,14 +97,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 // *INDENT-ON*
 
 template <typename T>
-using NEInstanceNormalizationLayerFixture = InstanceNormalizationLayerValidationFixture<Tensor, Accessor, NEInstanceNormalizationLayer, T>;
+using NEInstanceNormalizationLayerFixture =
+    InstanceNormalizationLayerValidationFixture<Tensor, Accessor, NEInstanceNormalizationLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEInstanceNormalizationLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
                        combine(datasets::Small4DShapes(),
-                                               make("DataType", DataType::F32),
-                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                               make("InPlace", { false, true })))
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InPlace", {false, true})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -113,13 +117,15 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEInstanceNormalizationLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallShapes(),
-                                               make("DataType", DataType::F16),
-                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                               make("InPlace", { false, true })))
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InPlace", {false, true})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);

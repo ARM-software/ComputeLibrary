@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,17 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PRIOR_BOX_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_PRIOR_BOX_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_PRIORBOXLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_PRIORBOXLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/PriorBoxLayer.h"
 
@@ -56,9 +57,13 @@ public:
     }
 
 protected:
-    TensorType compute_target(TensorShape input_shape, TensorShape output_shape, PriorBoxLayerInfo info, DataType data_type, DataLayout data_layout)
+    TensorType compute_target(TensorShape       input_shape,
+                              TensorShape       output_shape,
+                              PriorBoxLayerInfo info,
+                              DataType          data_type,
+                              DataLayout        data_layout)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
         }
@@ -91,11 +96,14 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, PriorBoxLayerInfo info, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape,
+                                      const TensorShape &output_shape,
+                                      PriorBoxLayerInfo  info,
+                                      DataType           data_type)
     {
         // Create reference
-        SimpleTensor<T> input1{ input_shape, data_type, 1 };
-        SimpleTensor<T> input2{ input_shape, data_type, 1 };
+        SimpleTensor<T> input1{input_shape, data_type, 1};
+        SimpleTensor<T> input2{input_shape, data_type, 1};
 
         return reference::prior_box_layer(input1, input2, info, output_shape);
     }
@@ -107,4 +115,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PRIOR_BOX_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_PRIORBOXLAYERFIXTURE_H

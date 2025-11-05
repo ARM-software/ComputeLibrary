@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/NonMaxSuppressionFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -46,10 +47,12 @@ using framework::dataset::zip;
 namespace
 {
 const auto max_output_boxes_dataset  = make("MaxOutputBoxes", 1, 10);
-const auto score_threshold_dataset   = make("ScoreThreshold", { 0.1f, 0.5f, 0.f, 1.f });
-const auto iou_nms_threshold_dataset = make("NMSThreshold", { 0.1f, 0.5f, 0.f, 1.f });
-const auto NMSParametersSmall        = datasets::Small2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * iou_nms_threshold_dataset;
-const auto NMSParametersBig          = datasets::Large2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * iou_nms_threshold_dataset;
+const auto score_threshold_dataset   = make("ScoreThreshold", {0.1f, 0.5f, 0.f, 1.f});
+const auto iou_nms_threshold_dataset = make("NMSThreshold", {0.1f, 0.5f, 0.f, 1.f});
+const auto NMSParametersSmall        = datasets::Small2DNonMaxSuppressionShapes() * max_output_boxes_dataset *
+                                score_threshold_dataset * iou_nms_threshold_dataset;
+const auto NMSParametersBig = datasets::Large2DNonMaxSuppressionShapes() * max_output_boxes_dataset *
+                              score_threshold_dataset * iou_nms_threshold_dataset;
 
 } // namespace
 

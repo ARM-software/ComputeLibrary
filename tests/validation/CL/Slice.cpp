@@ -29,10 +29,10 @@
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/SliceOperationsDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/SliceOperationsFixtures.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {

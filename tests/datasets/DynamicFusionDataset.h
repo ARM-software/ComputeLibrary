@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_DATASETS_DYNAMICFUSIONDATASET
-#define TESTS_DATASETS_DYNAMICFUSIONDATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_DYNAMICFUSIONDATASET_H
+#define ACL_TESTS_DATASETS_DYNAMICFUSIONDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -45,9 +45,7 @@ public:
         iterator(std::vector<TensorShape>::const_iterator shape0_it,
                  std::vector<TensorShape>::const_iterator shape1_it,
                  std::vector<TensorShape>::const_iterator shape2_it)
-            : _shape0_it{ std::move(shape0_it) },
-              _shape1_it{ std::move(shape1_it) },
-              _shape2_it{ std::move(shape2_it) }
+            : _shape0_it{std::move(shape0_it)}, _shape1_it{std::move(shape1_it)}, _shape2_it{std::move(shape2_it)}
         {
         }
 
@@ -113,14 +111,16 @@ class DynamicFusionElementwiseBinaryTwoOpsSmallShapes final : public DynamicFusi
 public:
     DynamicFusionElementwiseBinaryTwoOpsSmallShapes()
     {
-        add_config(TensorShape{ 9U, 9U, 5U }, TensorShape{ 9U, 9U, 5U }, TensorShape{ 9U, 9U, 5U });
-        add_config(TensorShape{ 9U, 9U, 5U }, TensorShape{ 1U, 1U, 1U } /* Broadcast in X, Y, Z*/, TensorShape{ 9U, 9U, 5U });
-        add_config(TensorShape{ 27U, 13U, 2U }, TensorShape{ 27U, 1U, 1U } /* Broadcast in Y and Z*/, TensorShape{ 27U, 13U, 2U });
-        add_config(TensorShape{ 27U, 13U, 2U }, TensorShape{ 27U, 13U, 2U }, TensorShape{ 27U, 1U, 1U } /* Broadcast in Y and Z*/);
+        add_config(TensorShape{9U, 9U, 5U}, TensorShape{9U, 9U, 5U}, TensorShape{9U, 9U, 5U});
+        add_config(TensorShape{9U, 9U, 5U}, TensorShape{1U, 1U, 1U} /* Broadcast in X, Y, Z*/, TensorShape{9U, 9U, 5U});
+        add_config(TensorShape{27U, 13U, 2U}, TensorShape{27U, 1U, 1U} /* Broadcast in Y and Z*/,
+                   TensorShape{27U, 13U, 2U});
+        add_config(TensorShape{27U, 13U, 2U}, TensorShape{27U, 13U, 2U},
+                   TensorShape{27U, 1U, 1U} /* Broadcast in Y and Z*/);
     }
 };
 
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* TESTS_DATASETS_DYNAMICFUSIONDATASET */
+#endif // ACL_TESTS_DATASETS_DYNAMICFUSIONDATASET_H

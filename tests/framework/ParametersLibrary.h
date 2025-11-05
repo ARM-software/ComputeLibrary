@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PARAMETERS_LIBRARY_H
-#define ARM_COMPUTE_TEST_PARAMETERS_LIBRARY_H
+#ifndef ACL_TESTS_FRAMEWORK_PARAMETERSLIBRARY_H
+#define ACL_TESTS_FRAMEWORK_PARAMETERSLIBRARY_H
 
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -91,10 +91,10 @@ public:
     }
 
 private:
-    std::unique_ptr<IRuntimeContext> _cpu_ctx{ nullptr };
-    std::unique_ptr<IRuntimeContext> _cl_ctx{ nullptr };
-    std::unique_ptr<IRuntimeContext> _gc_ctx{ nullptr };
+    std::unique_ptr<IRuntimeContext> _cpu_ctx{nullptr};
+    std::unique_ptr<IRuntimeContext> _cl_ctx{nullptr};
+    std::unique_ptr<IRuntimeContext> _gc_ctx{nullptr};
 };
 } // namespace test
 } // namespace arm_compute
-#endif //ARM_COMPUTE_TEST_PARAMETERS_LIBRARY_H
+#endif // ACL_TESTS_FRAMEWORK_PARAMETERSLIBRARY_H

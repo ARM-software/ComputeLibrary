@@ -69,7 +69,7 @@ template SimpleTensor<float>    permute(const SimpleTensor<float> &src, Permutat
 template SimpleTensor<half>     permute(const SimpleTensor<half> &src, PermutationVector perm);
 template SimpleTensor<bfloat16> permute(const SimpleTensor<bfloat16> &src, PermutationVector perm);
 #ifdef ARM_COMPUTE_ENABLE_FP16
-template SimpleTensor<float16_t>    permute(const SimpleTensor<float16_t> &src, PermutationVector perm);
+template SimpleTensor<float16_t> permute(const SimpleTensor<float16_t> &src, PermutationVector perm);
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace reference
 } // namespace validation

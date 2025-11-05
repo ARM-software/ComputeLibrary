@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/SelectFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,8 +44,8 @@ using framework::dataset::make;
 
 namespace
 {
-auto run_small_dataset = combine(datasets::SmallShapes(), make("has_same_rank", { false, true }));
-auto run_large_dataset = combine(datasets::LargeShapes(), make("has_same_rank", { false, true }));
+auto run_small_dataset = combine(datasets::SmallShapes(), make("has_same_rank", {false, true}));
+auto run_large_dataset = combine(datasets::LargeShapes(), make("has_same_rank", {false, true}));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -106,7 +107,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        framework::DatasetMode::PRECOMMIT,
                        combine(run_small_dataset, make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         validate(Accessor(_target), _reference);
     }
@@ -122,7 +123,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        framework::DatasetMode::NIGHTLY,
                        combine(run_large_dataset, make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         validate(Accessor(_target), _reference);
     }

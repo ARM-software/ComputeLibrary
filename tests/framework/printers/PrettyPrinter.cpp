@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019,2021 Arm Limited.
+ * Copyright (c) 2017-2019,2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 #include "../Framework.h"
 #include "../instruments/InstrumentsStats.h"
 #include "../instruments/Measurement.h"
-
 #include <algorithm>
 
 namespace arm_compute
@@ -37,7 +36,7 @@ namespace framework
 {
 std::string PrettyPrinter::begin_color(const std::string &color) const
 {
-    if(!_color_output)
+    if (!_color_output)
     {
         return "";
     }
@@ -47,7 +46,7 @@ std::string PrettyPrinter::begin_color(const std::string &color) const
 
 std::string PrettyPrinter::end_color() const
 {
-    if(!_color_output)
+    if (!_color_output)
     {
         return "";
     }
@@ -111,7 +110,7 @@ void PrettyPrinter::print_error(const std::exception &error, bool expected)
 
 void PrettyPrinter::print_list_tests(const std::vector<TestInfo> &infos)
 {
-    for(auto const &info : infos)
+    for (auto const &info : infos)
     {
         *_stream << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
     }
@@ -124,7 +123,7 @@ void PrettyPrinter::print_profiler_header(const std::string &header_data)
 
 void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
-    for(const auto &instrument : measurements)
+    for (const auto &instrument : measurements)
     {
         *_stream << begin_color("3") << "  " << instrument.first << ":";
 
@@ -132,7 +131,7 @@ void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurem
 
         *_stream << "    ";
         *_stream << "AVG=" << stats.mean() << " " << stats.max().unit();
-        if(instrument.second.size() > 1)
+        if (instrument.second.size() > 1)
         {
             *_stream << ", STDDEV=" << arithmetic_to_string(stats.relative_standard_deviation(), 2) << " %";
             *_stream << ", MIN=" << stats.min();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/gpu/cl/kernels/ClCastKernel.h"
 #include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.h"
@@ -50,17 +51,15 @@
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"
 #include "tests/SimpleTensor.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/reference/GEMM.h"
 #include "tests/validation/reference/GEMMLowp.h"
-
-#include "utils/TypePrinter.h"
-#include "utils/Utils.h"
+#include "tests/validation/Validation.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
+#include "utils/TypePrinter.h"
+#include "utils/Utils.h"
 
 #include "ValidateExample.h"
-
 #include <cstdlib>
 
 using namespace arm_compute;
@@ -68,11 +67,14 @@ using namespace utils;
 using namespace arm_compute::test;
 using namespace arm_compute::test::validation;
 
-constexpr float                     abs_tolerance_f32(0.0001f); /**< F32 Absolute tolerance value for comparing reference's output against implementation's output for
+constexpr float abs_tolerance_f32(
+    0.0001f); /**< F32 Absolute tolerance value for comparing reference's output against implementation's output for
                                                                * floating point data types in case using relative tolerance fails because of small values */
-RelativeTolerance<float>            tolerance_f32(0.001f);      /**< F32 Tolerance value for comparing reference's output against implementation's output for floating point data types */
-RelativeTolerance<half_float::half> tolerance_f16(half(0.2));   /**< F16 Tolerance value for comparing reference's output against implementation's output for floating point data types */
-constexpr float                     tolerance_num_f16 = 0.02f;  /**< F16 Tolerance number */
+RelativeTolerance<float> tolerance_f32(
+    0.001f); /**< F32 Tolerance value for comparing reference's output against implementation's output for floating point data types */
+RelativeTolerance<half_float::half> tolerance_f16(half(
+    0.2)); /**< F16 Tolerance value for comparing reference's output against implementation's output for floating point data types */
+constexpr float                     tolerance_num_f16 = 0.02f; /**< F16 Tolerance number */
 
 namespace
 {
@@ -97,8 +99,7 @@ public:
           data_type()
     {
         // Setup data type
-        const std::set<arm_compute::DataType> supported_data_types
-        {
+        const std::set<arm_compute::DataType> supported_data_types{
             DataType::F16,
             DataType::F32,
             DataType::QASYMM8,
@@ -166,7 +167,7 @@ public:
 
         // Print help
         const bool print_help = gemm_options.help->is_set() ? gemm_options.help->value() : false;
-        if(print_help)
+        if (print_help)
         {
             parser.print_help(argv[0]);
             return false;
@@ -179,7 +180,7 @@ public:
         const bool is_quantized = is_data_type_quantized(data_type);
 
         // Calculate re-quantization parameters
-        if(is_quantized)
+        if (is_quantized)
         {
             float multiplier = scale_src0 * scale_src1 / scale_dst;
             quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift);
@@ -192,7 +193,7 @@ public:
         init_sgemm_output(dst, src0, src1, data_type);
 
         // Configure function
-        if(is_quantized)
+        if (is_quantized)
         {
             src0.info()->set_quantization_info(QuantizationInfo(scale_src0, offset_src0));
             src1.info()->set_quantization_info(QuantizationInfo(scale_src1, offset_src1));
@@ -239,7 +240,7 @@ public:
         std::cout << "N : " << support::cpp11::to_string(N) << "\n";
         std::cout << "K : " << support::cpp11::to_string(K) << "\n";
         std::cout << "B : " << support::cpp11::to_string(B) << "\n";
-        if(data_type == DataType::QASYMM8)
+        if (data_type == DataType::QASYMM8)
         {
             std::cout << "Scale_Src0 : " << support::cpp11::to_string(scale_src0) << "\n";
             std::cout << "Offset_Src0 : " << support::cpp11::to_string(offset_src0) << "\n";
@@ -258,13 +259,13 @@ public:
 
     void do_validate() override
     {
-        switch(data_type)
+        switch (data_type)
         {
             case DataType::F16:
             {
-                SimpleTensor<half> ref_src0 = { TensorShape(K, M, B), data_type, 1 };
-                SimpleTensor<half> ref_src1 = { TensorShape(N, K, B), data_type, 1 };
-                SimpleTensor<half> ref_src2 = { TensorShape(N, M, B), data_type, 1 };
+                SimpleTensor<half> ref_src0 = {TensorShape(K, M, B), data_type, 1};
+                SimpleTensor<half> ref_src1 = {TensorShape(N, K, B), data_type, 1};
+                SimpleTensor<half> ref_src2 = {TensorShape(N, M, B), data_type, 1};
 
                 fill(ref_src0, 0);
                 fill(ref_src1, 1);
@@ -276,9 +277,9 @@ public:
             }
             case DataType::F32:
             {
-                SimpleTensor<float> ref_src0 = { TensorShape(K, M, B), data_type, 1 };
-                SimpleTensor<float> ref_src1 = { TensorShape(N, K, B), data_type, 1 };
-                SimpleTensor<float> ref_src2 = { TensorShape(N, M, B), data_type, 1 };
+                SimpleTensor<float> ref_src0 = {TensorShape(K, M, B), data_type, 1};
+                SimpleTensor<float> ref_src1 = {TensorShape(N, K, B), data_type, 1};
+                SimpleTensor<float> ref_src2 = {TensorShape(N, M, B), data_type, 1};
 
                 fill(ref_src0, 0);
                 fill(ref_src1, 1);
@@ -290,29 +291,32 @@ public:
             }
             case DataType::QASYMM8:
             {
-                SimpleTensor<uint8_t> ref_src0{ TensorShape(K, M, B), data_type, 1 };
-                SimpleTensor<uint8_t> ref_src1{ TensorShape(N, K, B), data_type, 1 };
+                SimpleTensor<uint8_t> ref_src0{TensorShape(K, M, B), data_type, 1};
+                SimpleTensor<uint8_t> ref_src1{TensorShape(N, K, B), data_type, 1};
                 SimpleTensor<uint8_t> ref_dst;
 
                 // Fill reference
                 fill(ref_src0, 0);
                 fill(ref_src1, 1);
 
-                SimpleTensor<int32_t> ref_tmp_dst = reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(ref_src0, ref_src1, TensorShape(N, M, B), offset_src0, offset_src1);
+                SimpleTensor<int32_t> ref_tmp_dst = reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(
+                    ref_src0, ref_src1, TensorShape(N, M, B), offset_src0, offset_src1);
 
-                const std::vector<int32_t> dst_multiplier_vec = { dst_multiplier };
-                const std::vector<int32_t> dst_shift_vec      = { dst_shift };
+                const std::vector<int32_t> dst_multiplier_vec = {dst_multiplier};
+                const std::vector<int32_t> dst_shift_vec      = {dst_shift};
 
-                if(add_bias)
+                if (add_bias)
                 {
-                    SimpleTensor<int32_t> biases{ TensorShape(N), DataType::S32, 1 };
+                    SimpleTensor<int32_t> biases{TensorShape(N), DataType::S32, 1};
                     // Fill bias
                     fill(biases, 3);
-                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(ref_tmp_dst, biases, dst_multiplier_vec, dst_shift_vec, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(
+                        ref_tmp_dst, biases, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 else
                 {
-                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(ref_tmp_dst, dst_multiplier_vec, dst_shift_vec, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(
+                        ref_tmp_dst, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 validate(CLAccessor(dst), ref_dst);
                 break;
@@ -324,7 +328,7 @@ public:
     void do_run() override
     {
         // Execute the function
-        if(data_type == DataType::QASYMM8)
+        if (data_type == DataType::QASYMM8)
         {
             // Run gemmlowp
             mm_gemmlowp.run();
@@ -345,11 +349,11 @@ private:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -400,13 +404,13 @@ private:
     CLGEMMLowpMatrixMultiplyCore mm_gemmlowp{};
     CLGEMMLowpOutputStage        mm_gemmlowp_output_stage{};
 
-    size_t   M{ 7 }, N{ 3 }, K{ 5 }, B{ 1 };
-    DataType data_type{ DataType::F32 };
-    float    alpha{ 1.0 }, beta{ 0.0 };
-    int      offset_src0{ 10 }, offset_src1{ 10 }, offset_dst{ 10 };
-    float    scale_src0{ 1.0f / 255 }, scale_src1{ 1.0f / 255 }, scale_dst{ 1.0f / 255 };
-    int32_t  dst_multiplier{ 0 }, dst_shift{ 0 };
-    bool     add_bias{ true };
+    size_t   M{7}, N{3}, K{5}, B{1};
+    DataType data_type{DataType::F32};
+    float    alpha{1.0}, beta{0.0};
+    int      offset_src0{10}, offset_src1{10}, offset_dst{10};
+    float    scale_src0{1.0f / 255}, scale_src1{1.0f / 255}, scale_dst{1.0f / 255};
+    int32_t  dst_multiplier{0}, dst_shift{0};
+    bool     add_bias{true};
 };
 
 /** Main program for gemm test

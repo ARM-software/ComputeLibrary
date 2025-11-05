@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ReductionOperationFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -51,20 +52,18 @@ RelativeTolerance<float> rel_tolerance_f16(0.2f);
 /** Tolerance for quantized operations */
 RelativeTolerance<float> tolerance_qasymm8(1);
 
-const auto ReductionOperationsSumProdMean = make("ReductionOperationsSumProdMean",
-{
-    ReductionOperation::SUM,
-    ReductionOperation::PROD,
-    ReductionOperation::MEAN_SUM
+const auto ReductionOperationsSumProdMean =
+    make("ReductionOperationsSumProdMean",
+         {ReductionOperation::SUM, ReductionOperation::PROD, ReductionOperation::MEAN_SUM
 
-});
+         });
 const auto ReductionOperationsMinMax = make("ReductionMinMax",
-{
-    ReductionOperation::MIN,
-    ReductionOperation::MAX,
-});
+                                            {
+                                                ReductionOperation::MIN,
+                                                ReductionOperation::MAX,
+                                            });
 
-const auto KeepDimensions = make("KeepDims", { true, false });
+const auto KeepDimensions = make("KeepDims", {true, false});
 } // namespace
 
 TEST_SUITE(CL)
@@ -109,18 +108,25 @@ using CLReductionOperationFixture = ReductionOperationFixture<CLTensor, CLAccess
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall4D, CLReductionOperationFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::Small4DShapes(), make("DataType", DataType::F16), make("Axis", { 0, 1, 2, 3 }),
-                                       concat(ReductionOperationsSumProdMean,
-                                              ReductionOperationsMinMax),
+FIXTURE_DATA_TEST_CASE(RunSmall4D,
+                       CLReductionOperationFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", DataType::F16),
+                               make("Axis", {0, 1, 2, 3}),
+                               concat(ReductionOperationsSumProdMean, ReductionOperationsMinMax),
                                KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeShapes(), make("DataType", DataType::F16), make("Axis", { 0, 1, 2, 3 }), concat(ReductionOperationsSumProdMean,
-                                       ReductionOperationsMinMax),
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLReductionOperationFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::F16),
+                               make("Axis", {0, 1, 2, 3}),
+                               concat(ReductionOperationsSumProdMean, ReductionOperationsMinMax),
                                KeepDimensions))
 {
     // Validate output
@@ -128,18 +134,25 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::D
 }
 TEST_SUITE_END() // F16
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall4D, CLReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::Small4DShapes(), make("DataType", DataType::F32), make("Axis", { 0, 1, 2, 3 }),
-                                       concat(ReductionOperationsSumProdMean,
-                                              ReductionOperationsMinMax),
+FIXTURE_DATA_TEST_CASE(RunSmall4D,
+                       CLReductionOperationFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", DataType::F32),
+                               make("Axis", {0, 1, 2, 3}),
+                               concat(ReductionOperationsSumProdMean, ReductionOperationsMinMax),
                                KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeShapes(), make("DataType", DataType::F32), make("Axis", { 0, 1, 2, 3 }), concat(ReductionOperationsSumProdMean,
-                                       ReductionOperationsMinMax),
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLReductionOperationFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::F32),
+                               make("Axis", {0, 1, 2, 3}),
+                               concat(ReductionOperationsSumProdMean, ReductionOperationsMinMax),
                                KeepDimensions))
 {
     // Validate output
@@ -149,23 +162,32 @@ TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
 
 template <typename T>
-using CLReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<CLTensor, CLAccessor, CLReductionOperation, T>;
+using CLReductionOperationQuantizedFixture =
+    ReductionOperationQuantizedFixture<CLTensor, CLAccessor, CLReductionOperation, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(datasets::Small4DShapes(), make("DataType", DataType::QASYMM8), make("Axis", { 0, 1, 2, 3 }),
-                                               ReductionOperationsSumProdMean,
-                                       make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReductionOperationQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", DataType::QASYMM8),
+                               make("Axis", {0, 1, 2, 3}),
+                               ReductionOperationsSumProdMean,
+                               make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
                                KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallMinMax, CLReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(datasets::Small4DShapes(), make("DataType", DataType::QASYMM8), make("Axis", { 0, 1, 2, 3 }),
-                                               ReductionOperationsMinMax,
-                                       make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
+FIXTURE_DATA_TEST_CASE(RunSmallMinMax,
+                       CLReductionOperationQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", DataType::QASYMM8),
+                               make("Axis", {0, 1, 2, 3}),
+                               ReductionOperationsMinMax,
+                               make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
                                KeepDimensions))
 {
     // Validate output
@@ -173,19 +195,27 @@ FIXTURE_DATA_TEST_CASE(RunSmallMinMax, CLReductionOperationQuantizedFixture<uint
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(datasets::Small4DShapes(), make("DataType", DataType::QASYMM8_SIGNED), make("Axis", { 0, 1, 2, 3 }),
-                                               ReductionOperationsSumProdMean,
-                                       make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReductionOperationQuantizedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("Axis", {0, 1, 2, 3}),
+                               ReductionOperationsSumProdMean,
+                               make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
                                KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallMinMax, CLReductionOperationQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(datasets::Small4DShapes(), make("DataType", DataType::QASYMM8_SIGNED), make("Axis", { 0, 1, 2, 3 }),
-                                               ReductionOperationsMinMax,
-                                       make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
+FIXTURE_DATA_TEST_CASE(RunSmallMinMax,
+                       CLReductionOperationQuantizedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("Axis", {0, 1, 2, 3}),
+                               ReductionOperationsMinMax,
+                               make("QuantizationInfo", QuantizationInfo(1.f / 64, 2)),
                                KeepDimensions))
 {
     // Validate output

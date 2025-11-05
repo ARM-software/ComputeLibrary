@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,11 +29,12 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/FlattenLayer.h"
 
 #include <random>
@@ -52,7 +53,7 @@ class FlattenLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -71,10 +72,13 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(-1.0f), T(1.0f) };
+        DistributionType distribution{T(-1.0f), T(1.0f)};
         library->fill(tensor, distribution, 0);
     }
 
@@ -110,7 +114,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &shape_flatten, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1 };
+        SimpleTensor<T> src{shape, data_type, 1};
 
         // Fill reference
         fill(src);

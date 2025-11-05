@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEBitwiseXor.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/BitwiseXorFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -48,8 +49,10 @@ TEST_SUITE(BitwiseXor)
 template <typename T>
 using NEBitwiseXorFixture = BitwiseXorValidationFixture<Tensor, Accessor, NEBitwiseXor, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBitwiseXorFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                    DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEBitwiseXorFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/GPUTarget.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 namespace arm_compute
 {
 namespace test
@@ -64,13 +65,16 @@ TEST_CASE(GetGPUTargetFromName, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G615") == GPUTarget::G615, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G720") == GPUTarget::G720, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G620") == GPUTarget::G620, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G10000") == GPUTarget::FIFTHGEN, framework::LogLevel::ERRORS); // Unknown Gpu
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G10000") == GPUTarget::FIFTHGEN,
+                       framework::LogLevel::ERRORS); // Unknown Gpu
 }
 
 TEST_CASE(GPUTargetIsIn, framework::DatasetMode::ALL)
 {
-    ARM_COMPUTE_EXPECT(!gpu_target_is_in(GPUTarget::G71, GPUTarget::T600, GPUTarget::T800, GPUTarget::G72), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(gpu_target_is_in(GPUTarget::G71, GPUTarget::T600, GPUTarget::T800, GPUTarget::G71), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!gpu_target_is_in(GPUTarget::G71, GPUTarget::T600, GPUTarget::T800, GPUTarget::G72),
+                       framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(gpu_target_is_in(GPUTarget::G71, GPUTarget::T600, GPUTarget::T800, GPUTarget::G71),
+                       framework::LogLevel::ERRORS);
 }
 TEST_SUITE_END() // CLHelpers
 TEST_SUITE_END() // UNIT

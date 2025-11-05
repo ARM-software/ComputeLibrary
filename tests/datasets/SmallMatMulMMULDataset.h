@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef ACL_TESTS_DATASETS_SMALLMATMULMMULDATASET
-#define ACL_TESTS_DATASETS_SMALLMATMULMMULDATASET
+#ifndef ACL_TESTS_DATASETS_SMALLMATMULMMULDATASET_H
+#define ACL_TESTS_DATASETS_SMALLMATMULMMULDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/datasets/MatMulDataset.h"
 
 namespace arm_compute
@@ -63,4 +64,4 @@ public:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ACL_TESTS_DATASETS_SMALLMATMULMMULDATASET */
+#endif // ACL_TESTS_DATASETS_SMALLMATMULMMULDATASET_H

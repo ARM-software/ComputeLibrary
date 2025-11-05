@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,17 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMMRESHAPERHSMATRIX_FIXTURE
-#define ARM_COMPUTE_TEST_GEMMRESHAPERHSMATRIX_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_GEMMRESHAPERHSMATRIXFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_GEMMRESHAPERHSMATRIXFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/GEMMReshapeRHSMatrix.h"
 #include "tests/validation/reference/Utils.h"
@@ -50,7 +51,14 @@ template <typename TensorType, typename AccessorType, typename OperatorType, typ
 class GEMMReshapeRHSMatrixValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_in, unsigned int batch_size, DataType data_type, unsigned int n0, unsigned int k0, unsigned int h0, bool interleave, bool transpose)
+    void setup(TensorShape  shape_in,
+               unsigned int batch_size,
+               DataType     data_type,
+               unsigned int n0,
+               unsigned int k0,
+               unsigned int h0,
+               bool         interleave,
+               bool         transpose)
     {
         GEMMRHSMatrixInfo rhs_info;
         rhs_info.n0         = n0;
@@ -60,9 +68,7 @@ public:
         rhs_info.transpose  = transpose;
 
         // Set the tensor shape
-        const TensorShape shape_src(shape_in[0],
-                                    shape_in[1],
-                                    batch_size);
+        const TensorShape shape_src(shape_in[0], shape_in[1], batch_size);
 
         _target    = compute_target(shape_src, data_type, rhs_info);
         _reference = compute_reference(shape_src, data_type, rhs_info);
@@ -89,7 +95,7 @@ protected:
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
 
-        add_padding_x({ &src, &dst });
+        add_padding_x({&src, &dst});
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -102,16 +108,17 @@ protected:
         fill(AccessorType(src));
 
         // Compute GEMM RHS matrix reshape function
-        ITensorPack tensors = { { ACL_SRC, &src }, { ACL_DST, &dst } };
+        ITensorPack tensors = {{ACL_SRC, &src}, {ACL_DST, &dst}};
         gemm_rhs_reshape.run(tensors);
 
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, DataType data_type, const GEMMRHSMatrixInfo &rhs_info)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &input_shape, DataType data_type, const GEMMRHSMatrixInfo &rhs_info)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1 };
+        SimpleTensor<T> src{input_shape, data_type, 1};
 
         // Fill reference
         fill(src);
@@ -127,4 +134,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMMRESHAPERHSMATRIX_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_GEMMRESHAPERHSMATRIXFIXTURE_H

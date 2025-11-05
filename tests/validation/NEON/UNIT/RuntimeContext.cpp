@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,13 +26,14 @@
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/SchedulerFactory.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/Utils.h"
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/reference/ActivationLayer.h"
+#include "tests/validation/Validation.h"
 
 #include <memory>
 #include <random>
@@ -48,15 +49,15 @@ namespace validation
 {
 TEST_SUITE(NEON)
 TEST_SUITE(UNIT)
-#if defined(ARM_COMPUTE_OPENMP_SCHEDULER) && !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
-    (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)
+#if defined(ARM_COMPUTE_OPENMP_SCHEDULER) && !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && \
+    !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)
 TEST_CASE(CpuCapacity, framework::DatasetMode::ALL)
 {
-    CPUInfo& ci =  arm_compute::Scheduler::get().cpu_info();
+    CPUInfo       &ci                 = arm_compute::Scheduler::get().cpu_info();
     const uint32_t nonlittle_num_cpus = ci.get_cpu_num_excluding_little();
-    const uint32_t num_threads = arm_compute::Scheduler::get().num_threads();
+    const uint32_t num_threads        = arm_compute::Scheduler::get().num_threads();
 
-    ARM_COMPUTE_EXPECT(num_threads<=nonlittle_num_cpus , framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(num_threads <= nonlittle_num_cpus, framework::LogLevel::ERRORS);
 }
 #endif /* defined(ARM_COMPUTE_OPENMP_SCHEDULER) && !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
     (defined(__arm__) || defined(__aarch64__)) && defined(__ANDROID__)*/
@@ -98,7 +99,8 @@ TEST_CASE(Scheduler, framework::DatasetMode::ALL)
 
     float min_bound = 0;
     float max_bound = 0;
-    std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<float>(ActivationLayerInfo::ActivationFunction::LINEAR, DataType::F32);
+    std::tie(min_bound, max_bound) =
+        get_activation_layer_test_bounds<float>(ActivationLayerInfo::ActivationFunction::LINEAR, DataType::F32);
     std::uniform_real_distribution<> distribution(min_bound, max_bound);
     library->fill(Accessor(src), distribution, 0);
 
@@ -146,7 +148,8 @@ TEST_CASE(MultipleThreadedScheduller, framework::DatasetMode::ALL)
 
     float min_bound = 0;
     float max_bound = 0;
-    std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<float>(ActivationLayerInfo::ActivationFunction::LINEAR, DataType::F32);
+    std::tie(min_bound, max_bound) =
+        get_activation_layer_test_bounds<float>(ActivationLayerInfo::ActivationFunction::LINEAR, DataType::F32);
     std::uniform_real_distribution<> distribution(min_bound, max_bound);
     library->fill(Accessor(src_t0), distribution, 0);
     library->fill(Accessor(src_t1), distribution, 0);
@@ -161,12 +164,14 @@ TEST_CASE(MultipleThreadedScheduller, framework::DatasetMode::ALL)
     window.use_tensor_dimensions(dst_t0.info()->tensor_shape());
     Iterator t0_it(&dst_t0, window);
     Iterator t1_it(&dst_t1, window);
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        const bool match = (*reinterpret_cast<float *>(t0_it.ptr()) == *reinterpret_cast<float *>(t1_it.ptr()));
-        ARM_COMPUTE_EXPECT(match, framework::LogLevel::ERRORS);
-    },
-    t0_it, t1_it);
+    execute_window_loop(
+        window,
+        [&](const Coordinates &)
+        {
+            const bool match = (*reinterpret_cast<float *>(t0_it.ptr()) == *reinterpret_cast<float *>(t1_it.ptr()));
+            ARM_COMPUTE_EXPECT(match, framework::LogLevel::ERRORS);
+        },
+        t0_it, t1_it);
 }
 #endif // !defined(BARE_METAL)
 

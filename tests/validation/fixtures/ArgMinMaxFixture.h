@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,12 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ReductionOperation.h"
 
@@ -46,9 +47,14 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArgMinMaxValidationBaseFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType input_type, DataType output_type, int axis, ReductionOperation op, QuantizationInfo q_info)
+    void setup(TensorShape        shape,
+               DataType           input_type,
+               DataType           output_type,
+               int                axis,
+               ReductionOperation op,
+               QuantizationInfo   q_info)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             input_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -62,11 +68,11 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, 0);
                 break;
             }
@@ -92,7 +98,8 @@ protected:
             }
             case DataType::QASYMM8_SIGNED:
             {
-                std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::pair<int, int> bounds =
+                    get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                 std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
 
                 library->fill(tensor, distribution, 0);
@@ -103,7 +110,12 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape &src_shape, DataType input_type, DataType output_type, int axis, ReductionOperation op, QuantizationInfo q_info)
+    TensorType compute_target(TensorShape       &src_shape,
+                              DataType           input_type,
+                              DataType           output_type,
+                              int                axis,
+                              ReductionOperation op,
+                              QuantizationInfo   q_info)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(src_shape, input_type, 1, q_info);
@@ -137,15 +149,21 @@ protected:
         return arm_compute::misc::shape_calculator::compute_reduced_shape(src_shape, axis, false);
     }
 
-    SimpleTensor<T2> compute_reference(TensorShape &src_shape, DataType input_type, DataType output_type, int axis, ReductionOperation op, QuantizationInfo q_info)
+    SimpleTensor<T2> compute_reference(TensorShape       &src_shape,
+                                       DataType           input_type,
+                                       DataType           output_type,
+                                       int                axis,
+                                       ReductionOperation op,
+                                       QuantizationInfo   q_info)
     {
         // Create reference
-        SimpleTensor<T1> src{ src_shape, input_type, 1, q_info };
+        SimpleTensor<T1> src{src_shape, input_type, 1, q_info};
 
         // Fill reference
         fill(src);
 
-        return reference::reduction_operation<T1, T2>(src, compute_output_shape(src_shape, axis), axis, op, output_type);
+        return reference::reduction_operation<T1, T2>(src, compute_output_shape(src_shape, axis), axis, op,
+                                                      output_type);
     }
 
     TensorType       _target{};
@@ -153,12 +171,19 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class ArgMinMaxValidationQuantizedFixture : public ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
+class ArgMinMaxValidationQuantizedFixture
+    : public ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
 {
 public:
-    void setup(const TensorShape &shape, DataType input_type, DataType output_type, int axis, ReductionOperation op, QuantizationInfo quantization_info)
+    void setup(const TensorShape &shape,
+               DataType           input_type,
+               DataType           output_type,
+               int                axis,
+               ReductionOperation op,
+               QuantizationInfo   quantization_info)
     {
-        ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, input_type, output_type, axis, op, quantization_info);
+        ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(
+            shape, input_type, output_type, axis, op, quantization_info);
     }
 };
 
@@ -168,7 +193,8 @@ class ArgMinMaxValidationFixture : public ArgMinMaxValidationBaseFixture<TensorT
 public:
     void setup(const TensorShape &shape, DataType input_type, DataType output_type, int axis, ReductionOperation op)
     {
-        ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, input_type, output_type, axis, op, QuantizationInfo());
+        ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(
+            shape, input_type, output_type, axis, op, QuantizationInfo());
     }
 };
 } // namespace validation

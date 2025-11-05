@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2020, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "Reverse.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -42,7 +43,7 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<int32_t> 
     ARM_COMPUTE_ERROR_ON(axis.shape().x() > 4);
 
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), src.num_channels(), src.quantization_info() };
+    SimpleTensor<T> dst{src.shape(), src.data_type(), src.num_channels(), src.quantization_info()};
 
     const unsigned int width   = src.shape()[0];
     const unsigned int height  = src.shape()[1];
@@ -51,25 +52,25 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<int32_t> 
 
     const int rank = src.shape().num_dimensions();
 
-    std::array<bool, 4> to_reverse = { { false, false, false, false } };
-    for(int i = 0; i < axis.num_elements(); ++i)
+    std::array<bool, 4> to_reverse = {{false, false, false, false}};
+    for (int i = 0; i < axis.num_elements(); ++i)
     {
         int axis_i = axis[i];
 
         // The values of axis tensor must be between [-rank, rank-1].
-        if((axis_i < -rank) || (axis_i >= rank))
+        if ((axis_i < -rank) || (axis_i >= rank))
         {
             ARM_COMPUTE_ERROR("the values of the axis tensor must be within [-rank, rank-1].");
         }
 
         // In case of negative axis value i.e targeted axis(i) = rank + axis(i)
-        if(axis_i < 0)
+        if (axis_i < 0)
         {
             axis_i = rank + axis_i;
         }
 
         // Reverse ACL axis indices convention i.e. (inverted)axis = (tensor_rank - 1) - axis
-        if(use_inverted_axis)
+        if (use_inverted_axis)
         {
             axis_i = (rank - 1) - axis_i;
         }
@@ -80,9 +81,9 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<int32_t> 
     const uint32_t num_elements = src.num_elements();
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(uint32_t i = 0; i < num_elements; ++i)
+    for (uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates  src_coord = index2coord(src.shape(), i);
         const unsigned int dst_x     = to_reverse[0] ? width - src_coord[0] - 1 : src_coord[0];
@@ -96,19 +97,30 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<int32_t> 
     return dst;
 }
 
-template SimpleTensor<uint8_t> reverse(const SimpleTensor<uint8_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<int8_t> reverse(const SimpleTensor<int8_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<int16_t> reverse(const SimpleTensor<int16_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<int32_t> reverse(const SimpleTensor<int32_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<uint16_t> reverse(const SimpleTensor<uint16_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<uint32_t> reverse(const SimpleTensor<uint32_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<half> reverse(const SimpleTensor<half> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<float> reverse(const SimpleTensor<float> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<uint8_t>
+reverse(const SimpleTensor<uint8_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<int8_t>
+reverse(const SimpleTensor<int8_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<int16_t>
+reverse(const SimpleTensor<int16_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<int32_t>
+reverse(const SimpleTensor<int32_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<uint16_t>
+reverse(const SimpleTensor<uint16_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<uint32_t>
+reverse(const SimpleTensor<uint32_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<half>
+reverse(const SimpleTensor<half> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<float>
+reverse(const SimpleTensor<float> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
 
 #ifdef __aarch64__
-template SimpleTensor<int64_t> reverse(const SimpleTensor<int64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<uint64_t> reverse(const SimpleTensor<uint64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
-template SimpleTensor<float64_t> reverse(const SimpleTensor<float64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<int64_t>
+reverse(const SimpleTensor<int64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<uint64_t>
+reverse(const SimpleTensor<uint64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
+template SimpleTensor<float64_t>
+reverse(const SimpleTensor<float64_t> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis);
 #endif // __aarch64__
 
 } // namespace reference

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CROP_RESIZE_H
-#define ARM_COMPUTE_TEST_CROP_RESIZE_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_CROPRESIZE_H
+#define ACL_TESTS_VALIDATION_REFERENCE_CROPRESIZE_H
 
 #include "tests/SimpleTensor.h"
 
@@ -35,10 +35,14 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<float> crop_and_resize(const SimpleTensor<T> &src, const SimpleTensor<float> &boxes, SimpleTensor<int32_t> box_ind,
-                                    Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value);
+SimpleTensor<float> crop_and_resize(const SimpleTensor<T>     &src,
+                                    const SimpleTensor<float> &boxes,
+                                    SimpleTensor<int32_t>      box_ind,
+                                    Coordinates2D              crop_size,
+                                    InterpolationPolicy        method,
+                                    float                      extrapolation_value);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CROP_RESIZE_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_CROPRESIZE_H

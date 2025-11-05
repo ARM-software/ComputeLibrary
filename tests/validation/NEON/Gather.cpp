@@ -26,15 +26,15 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/GatherDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GatherFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -103,7 +103,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 template <typename T>
 using NEGatherFixture = GatherFixture<Tensor, Accessor, NEGather, T>;
 
-const auto gather_small_shapes = arm_compute::test::framework::dataset::concat(datasets::SmallGatherDataset(), datasets::SmallGatherMultiDimIndicesDataset());
+const auto gather_small_shapes = arm_compute::test::framework::dataset::concat(
+    datasets::SmallGatherDataset(), datasets::SmallGatherMultiDimIndicesDataset());
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

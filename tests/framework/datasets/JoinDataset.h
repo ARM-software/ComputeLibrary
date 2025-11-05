@@ -25,7 +25,6 @@
 #define ACL_TESTS_FRAMEWORK_DATASETS_JOINDATASET_H
 
 #include "Dataset.h"
-
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -59,9 +58,7 @@ public:
      * @param[in] dataset1 First dataset.
      * @param[in] dataset2 Second dataset.
      */
-    JoinDataset(T &&dataset1, U &&dataset2)
-        : _dataset1{ std::forward<T>(dataset1) },
-          _dataset2{ std::forward<U>(dataset2) }
+    JoinDataset(T &&dataset1, U &&dataset2) : _dataset1{std::forward<T>(dataset1)}, _dataset2{std::forward<U>(dataset2)}
     {
     }
 
@@ -80,7 +77,7 @@ public:
          * @param[in] dataset2 Dataset 2.
          */
         iterator(const T_noref *dataset1, const U_noref *dataset2)
-            : _iter1{ dataset1->begin() }, _iter2{ dataset2->begin() }, _first_size{ dataset1->size() }
+            : _iter1{dataset1->begin()}, _iter2{dataset2->begin()}, _first_size{dataset1->size()}
         {
         }
 
@@ -108,7 +105,7 @@ public:
          */
         iterator &operator++()
         {
-            if(_first_size > 0)
+            if (_first_size > 0)
             {
                 --_first_size;
                 ++_iter1;
@@ -164,13 +161,12 @@ JoinDataset<T, U> concat(T &&dataset1, U &&dataset2)
 }
 
 template <typename T, typename U, typename V, typename... Rest>
-auto concat(T &&dataset1, U &&dataset2, V &&dataset3, Rest &&... rest)
+auto concat(T &&dataset1, U &&dataset2, V &&dataset3, Rest &&...rest)
     -> decltype(concat(concat(std::forward<T>(dataset1), std::forward<U>(dataset2)),
                        std::forward<V>(dataset3),
                        std::forward<Rest>(rest)...))
 {
-    return concat(concat(std::forward<T>(dataset1), std::forward<U>(dataset2)),
-                  std::forward<V>(dataset3),
+    return concat(concat(std::forward<T>(dataset1), std::forward<U>(dataset2)), std::forward<V>(dataset3),
                   std::forward<Rest>(rest)...);
 }
 } // namespace dataset

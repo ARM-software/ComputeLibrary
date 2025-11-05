@@ -23,15 +23,15 @@
  */
 #include "arm_compute/runtime/Allocator.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
-#include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
 #include "arm_compute/runtime/PoolManager.h"
 
-#include "tests/NEON/Accessor.h"
-#include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/DatasetModes.h"
 #include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/Utils.h"
 #include "tests/validation/Validation.h"
 
 #include <vector>
@@ -52,11 +52,8 @@ inline void fill_tensor(Tensor &tensor, const std::vector<T> &v)
     Window      window;
     window.use_tensor_dimensions(t_shape);
     Iterator out(&tensor, window);
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        *reinterpret_cast<T *>(out.ptr()) = v[coord2index(t_shape, id)];
-    },
-    out);
+    execute_window_loop(
+        window, [&](const Coordinates &id) { *reinterpret_cast<T *>(out.ptr()) = v[coord2index(t_shape, id)]; }, out);
 }
 
 template <typename T>

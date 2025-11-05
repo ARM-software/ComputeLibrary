@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,14 +43,14 @@ SimpleTensor<T> copy(const SimpleTensor<T> &src, const TensorShape &output_shape
     return dst;
 }
 
-template SimpleTensor<uint8_t> copy(const SimpleTensor<uint8_t> &src, const TensorShape &output_shape);
-template SimpleTensor<int8_t> copy(const SimpleTensor<int8_t> &src, const TensorShape &output_shape);
+template SimpleTensor<uint8_t>  copy(const SimpleTensor<uint8_t> &src, const TensorShape &output_shape);
+template SimpleTensor<int8_t>   copy(const SimpleTensor<int8_t> &src, const TensorShape &output_shape);
 template SimpleTensor<uint16_t> copy(const SimpleTensor<uint16_t> &src, const TensorShape &output_shape);
-template SimpleTensor<int16_t> copy(const SimpleTensor<int16_t> &src, const TensorShape &output_shape);
+template SimpleTensor<int16_t>  copy(const SimpleTensor<int16_t> &src, const TensorShape &output_shape);
 template SimpleTensor<uint32_t> copy(const SimpleTensor<uint32_t> &src, const TensorShape &output_shape);
-template SimpleTensor<int32_t> copy(const SimpleTensor<int32_t> &src, const TensorShape &output_shape);
-template SimpleTensor<half> copy(const SimpleTensor<half> &src, const TensorShape &output_shape);
-template SimpleTensor<float> copy(const SimpleTensor<float> &src, const TensorShape &output_shape);
+template SimpleTensor<int32_t>  copy(const SimpleTensor<int32_t> &src, const TensorShape &output_shape);
+template SimpleTensor<half>     copy(const SimpleTensor<half> &src, const TensorShape &output_shape);
+template SimpleTensor<float>    copy(const SimpleTensor<float> &src, const TensorShape &output_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

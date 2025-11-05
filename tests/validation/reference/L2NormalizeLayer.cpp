@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 #include "L2NormalizeLayer.h"
-#include "ReductionOperation.h"
 
 #include "tests/validation/Helpers.h"
 
+#include "ReductionOperation.h"
 #include <algorithm>
 #include <cmath>
 
@@ -51,39 +51,39 @@ template <typename T>
 SimpleTensor<T> l2_normalize(const SimpleTensor<T> &src, unsigned int axis, float epsilon)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type() };
+    SimpleTensor<T> dst{src.shape(), src.data_type()};
 
     // Reduce across given axis
-    SimpleTensor<T> sum = reduction_operation<T, T>(src, get_output_shape(src.shape(), axis), axis, ReductionOperation::SUM_SQUARE);
+    SimpleTensor<T> sum =
+        reduction_operation<T, T>(src, get_output_shape(src.shape(), axis), axis, ReductionOperation::SUM_SQUARE);
 
     // Compute reference
     const int upper_dims     = src.shape().total_size_upper(axis + 1);
     const int lower_dims     = src.shape().total_size_lower(axis + 1);
     const int lower_dims_sum = sum.shape().total_size_lower(axis + 1);
 
-    for(int du = 0; du < upper_dims; ++du)
+    for (int du = 0; du < upper_dims; ++du)
     {
         const T *src_row_ptr = src.data() + du * lower_dims;
         T       *dst_row_ptr = dst.data() + du * lower_dims;
-        switch(axis)
+        switch (axis)
         {
             case 0:
             {
                 const int elems               = src.shape()[0];
                 const T   normalization_value = sqrt(std::max(sum[du], static_cast<T>(epsilon)));
-                std::transform(src_row_ptr, src_row_ptr + elems, dst_row_ptr, [normalization_value](T val)
-                {
-                    return val / normalization_value;
-                });
+                std::transform(src_row_ptr, src_row_ptr + elems, dst_row_ptr,
+                               [normalization_value](T val) { return val / normalization_value; });
             }
             break;
             case 1:
             case 2:
             {
-                for(int ld = 0; ld < lower_dims; ++ld)
+                for (int ld = 0; ld < lower_dims; ++ld)
                 {
-                    const T normalization_value = sqrt(std::max(sum[ld % lower_dims_sum + du * lower_dims_sum], static_cast<T>(epsilon)));
-                    dst_row_ptr[ld]             = src_row_ptr[ld] / normalization_value;
+                    const T normalization_value =
+                        sqrt(std::max(sum[ld % lower_dims_sum + du * lower_dims_sum], static_cast<T>(epsilon)));
+                    dst_row_ptr[ld] = src_row_ptr[ld] / normalization_value;
                 }
             }
             break;
@@ -96,7 +96,7 @@ SimpleTensor<T> l2_normalize(const SimpleTensor<T> &src, unsigned int axis, floa
 }
 
 template SimpleTensor<float> l2_normalize(const SimpleTensor<float> &src, unsigned int axis, float epsilon);
-template SimpleTensor<half> l2_normalize(const SimpleTensor<half> &src, unsigned int axis, float epsilon);
+template SimpleTensor<half>  l2_normalize(const SimpleTensor<half> &src, unsigned int axis, float epsilon);
 } // namespace reference
 } // namespace validation
 } // namespace test

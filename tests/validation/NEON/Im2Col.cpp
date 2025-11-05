@@ -22,15 +22,16 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+
 #include "src/cpu/kernels/CpuIm2ColKernel.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/NEON/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/NEON/Helper.h"
 #include "tests/validation/fixtures/Im2ColFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,58 +44,39 @@ namespace
 
 using framework::dataset::make;
 
-const auto im2col_shapes = make("Shape",
-    {
-        TensorShape{ 11U, 11U, 11U },
-        TensorShape{ 16U, 16U, 16U },
-        TensorShape{ 27U, 13U, 7U },
-        TensorShape{ 31U, 27U, 17U, 2U },
-        TensorShape{ 27U, 13U, 5U, 4U },
-        TensorShape{ 11U, 11U, 5U, 5U }
-    }
-);
+const auto im2col_shapes =
+    make("Shape",
+         {TensorShape{11U, 11U, 11U}, TensorShape{16U, 16U, 16U}, TensorShape{27U, 13U, 7U},
+          TensorShape{31U, 27U, 17U, 2U}, TensorShape{27U, 13U, 5U, 4U}, TensorShape{11U, 11U, 5U, 5U}});
 
-const auto conv_filter_sizes = make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U), Size2D(5U, 5U), Size2D(7U, 7U) });
+const auto conv_filter_sizes =
+    make("KernelDims", {Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U), Size2D(5U, 5U), Size2D(7U, 7U)});
 
 const auto conv_args = combine(
     conv_filter_sizes,
-    make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(2U, 2U, 0U, 2U) }),
+    make("PadStride", {PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(2U, 2U, 0U, 2U)}),
     make("QuantizationInfo", QuantizationInfo(0.5f, 10)),
-    make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-    make("NumGroups", { 1 })
-);
+    make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+    make("NumGroups", {1}));
 
-const auto conv_filter_sizes_small = make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U) });
+const auto conv_filter_sizes_small = make("KernelDims", {Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U)});
 
-const auto conv_args_small_core = combine(
-    conv_filter_sizes_small,
-    make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U) }),
-    make("QuantizationInfo", QuantizationInfo(0.5f, 10))
-);
+const auto conv_args_small_core =
+    combine(conv_filter_sizes_small,
+            make("PadStride", {PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U)}),
+            make("QuantizationInfo", QuantizationInfo(0.5f, 10)));
 
-const auto conv_args_small_nhwc = combine(
-    conv_args_small_core,
-    make("DataLayout", { DataLayout::NHWC }),
-    make("NumGroups", { 1 })
-);
+const auto conv_args_small_nhwc =
+    combine(conv_args_small_core, make("DataLayout", {DataLayout::NHWC}), make("NumGroups", {1}));
 
-const auto conv_args_small_nchw = combine(
-    conv_args_small_core,
-    make("DataLayout", { DataLayout::NCHW }),
-    make("NumGroups", { 1 })
-);
+const auto conv_args_small_nchw =
+    combine(conv_args_small_core, make("DataLayout", {DataLayout::NCHW}), make("NumGroups", {1}));
 
-const auto conv_args_small = concat(
-    conv_args_small_nhwc,
-    conv_args_small_nchw
-);
+const auto conv_args_small = concat(conv_args_small_nhwc, conv_args_small_nchw);
 
 // Channel padding logic is data type agnostic, therefore it's tested
 // on a subset of the data types, including the major use case, Bf16.
-const auto conv_args_small_channel_padding = combine(
-    conv_args_small_nhwc,
-    make("ChannelPadRight", {3})
-);
+const auto conv_args_small_channel_padding = combine(conv_args_small_nhwc, make("ChannelPadRight", {3}));
 
 } // namespace
 TEST_SUITE(NEON)
@@ -128,26 +110,27 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 }
 // clang-format on
 
-DATA_TEST_CASE(ChannelPaddingNotSupportedInNCHW, framework::DatasetMode::ALL, zip(
-    make("InputInfo", {
-        TensorInfo(TensorShape(10U, 12U, 2U, 2U), 1, DataType::F32, DataLayout::NCHW),
-        TensorInfo(TensorShape(2U, 12U, 10U, 2U), 1, DataType::F32, DataLayout::NHWC)
-    }),
-    make("OutputInfo", {
-        TensorInfo(TensorShape(45U, 80U, 1U, 2U), 1, DataType::F32, DataLayout::UNKNOWN),
-        TensorInfo(TensorShape(45U, 80U, 1U, 2U), 1, DataType::F32, DataLayout::UNKNOWN)
-    }),
-    make("ChannelPadRight", {3U, 3U}),
-    make("Expected", {false, true})
-    ),
-    input_info, output_info, channel_pad_right, expected)
+DATA_TEST_CASE(ChannelPaddingNotSupportedInNCHW,
+               framework::DatasetMode::ALL,
+               zip(make("InputInfo",
+                        {TensorInfo(TensorShape(10U, 12U, 2U, 2U), 1, DataType::F32, DataLayout::NCHW),
+                         TensorInfo(TensorShape(2U, 12U, 10U, 2U), 1, DataType::F32, DataLayout::NHWC)}),
+                   make("OutputInfo",
+                        {TensorInfo(TensorShape(45U, 80U, 1U, 2U), 1, DataType::F32, DataLayout::UNKNOWN),
+                         TensorInfo(TensorShape(45U, 80U, 1U, 2U), 1, DataType::F32, DataLayout::UNKNOWN)}),
+                   make("ChannelPadRight", {3U, 3U}),
+                   make("Expected", {false, true})),
+               input_info,
+               output_info,
+               channel_pad_right,
+               expected)
 {
-    const bool has_bias = false;
-    const auto dilation = Size2D(1U, 1U);
+    const bool         has_bias   = false;
+    const auto         dilation   = Size2D(1U, 1U);
     const unsigned int num_groups = 1U;
 
-    const Status status = cpu::kernels::CpuIm2ColKernel::validate(&input_info, &output_info, Size2D(3U, 3U),
-        PadStrideInfo(), has_bias, dilation, num_groups, channel_pad_right);
+    const Status status = cpu::kernels::CpuIm2ColKernel::validate(
+        &input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias, dilation, num_groups, channel_pad_right);
 
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
@@ -160,22 +143,20 @@ using CpuIm2ColWithChannelPadFixture = Im2ColOpValidationWithChannelPadFixture<T
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<float>, framework::DatasetMode::PRECOMMIT,
-    combine(
-        im2col_shapes,
-        make("DataType", DataType::F32),
-        conv_args_small)
-    )
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuIm2ColFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(im2col_shapes, make("DataType", DataType::F32), conv_args_small))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<float>, framework::DatasetMode::NIGHTLY,
-    combine(
-        concat(im2col_shapes, datasets::LargeShapes()),
-        make("DataType", DataType::F32),
-        conv_args)
-    )
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CpuIm2ColFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(im2col_shapes, datasets::LargeShapes()),
+                               make("DataType", DataType::F32),
+                               conv_args))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -184,14 +165,12 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_BF16
 TEST_SUITE(BF16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<bfloat16>, framework::DatasetMode::PRECOMMIT,
-    combine(
-        im2col_shapes,
-        make("DataType", DataType::BFLOAT16),
-        conv_args_small
-    ))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuIm2ColFixture<bfloat16>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(im2col_shapes, make("DataType", DataType::BFLOAT16), conv_args_small))
 {
-    if(CPUInfo::get().has_bf16())
+    if (CPUInfo::get().has_bf16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -202,14 +181,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<bfloat16>, framework::DatasetM
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunSmallWithChannelPadding, CpuIm2ColWithChannelPadFixture<bfloat16>, framework::DatasetMode::PRECOMMIT,
-    combine(
-        im2col_shapes,
-        make("DataType", DataType::BFLOAT16),
-        conv_args_small_channel_padding
-    ))
+FIXTURE_DATA_TEST_CASE(RunSmallWithChannelPadding,
+                       CpuIm2ColWithChannelPadFixture<bfloat16>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(im2col_shapes, make("DataType", DataType::BFLOAT16), conv_args_small_channel_padding))
 {
-    if(CPUInfo::get().has_bf16())
+    if (CPUInfo::get().has_bf16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -221,19 +198,17 @@ FIXTURE_DATA_TEST_CASE(RunSmallWithChannelPadding, CpuIm2ColWithChannelPadFixtur
     }
 }
 TEST_SUITE_END() // BF16
-#endif // ARM_COMPUTE_ENABLE_BF16
+#endif           // ARM_COMPUTE_ENABLE_BF16
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<half>, framework::DatasetMode::PRECOMMIT,
-    combine(
-        im2col_shapes,
-        make("DataType", DataType::F16),
-        conv_args_small)
-    )
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuIm2ColFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(im2col_shapes, make("DataType", DataType::F16), conv_args_small))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -244,14 +219,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<half>, framework::DatasetMode:
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<half>, framework::DatasetMode::NIGHTLY,
-    combine(
-        concat(im2col_shapes, datasets::LargeShapes()),
-        make("DataType", DataType::F16),
-        conv_args)
-    )
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CpuIm2ColFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(im2col_shapes, datasets::LargeShapes()),
+                               make("DataType", DataType::F16),
+                               conv_args))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -269,32 +244,28 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuIm2ColFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-    combine(
-        im2col_shapes,
-        make("DataType", DataType::QASYMM8),
-        conv_args_small)
-    )
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuIm2ColFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(im2col_shapes, make("DataType", DataType::QASYMM8), conv_args_small))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallWithChannelPadding, CpuIm2ColWithChannelPadFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-    combine(
-        im2col_shapes,
-        make("DataType", DataType::QASYMM8),
-        conv_args_small_channel_padding)
-    )
+FIXTURE_DATA_TEST_CASE(RunSmallWithChannelPadding,
+                       CpuIm2ColWithChannelPadFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(im2col_shapes, make("DataType", DataType::QASYMM8), conv_args_small_channel_padding))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CpuIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-    combine(
-        concat(im2col_shapes, datasets::LargeShapes()),
-        make("DataType", DataType::QASYMM8),
-        conv_args)
-    )
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CpuIm2ColFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(im2col_shapes, datasets::LargeShapes()),
+                               make("DataType", DataType::QASYMM8),
+                               conv_args))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -317,7 +288,8 @@ TEST_CASE(PaddedChannelNHWC, framework::DatasetMode::PRECOMMIT)
     // Calculate destination shape
     TensorInfo src_info(src_shape, 1, data_type);
     src_info.set_data_layout(data_layout);
-    const TensorShape dst_shape = compute_im2col_conv_shape(&src_info, spatial_kernel, conv_info, has_bias, Size2D(1U, 1U), false, num_groups);
+    const TensorShape dst_shape =
+        compute_im2col_conv_shape(&src_info, spatial_kernel, conv_info, has_bias, Size2D(1U, 1U), false, num_groups);
 
     // Compute target
     Tensor src_target = create_tensor<Tensor>(src_shape, data_type, 1, qinfo, data_layout);
@@ -344,17 +316,13 @@ TEST_CASE(PaddedChannelNHWC, framework::DatasetMode::PRECOMMIT)
     // Fill target source
     library->fill_tensor_uniform(Accessor(src_target), 0);
 
-    ITensorPack pack =
-    {
-        { TensorType::ACL_SRC, &src_target },
-        { TensorType::ACL_DST, &dst_target }
-    };
+    ITensorPack pack = {{TensorType::ACL_SRC, &src_target}, {TensorType::ACL_DST, &dst_target}};
     // Run target function
     im2col_func.run(pack);
 
     // Calculate Reference
-    SimpleTensor<float> src_ref{ src_shape, data_type, 1, qinfo, data_layout };
-    SimpleTensor<float> dst_ref{ dst_shape, data_type, 1, qinfo, DataLayout::NCHW };
+    SimpleTensor<float> src_ref{src_shape, data_type, 1, qinfo, data_layout};
+    SimpleTensor<float> dst_ref{dst_shape, data_type, 1, qinfo, DataLayout::NCHW};
 
     // Fill reference source
     library->fill_tensor_uniform(src_ref, 0);

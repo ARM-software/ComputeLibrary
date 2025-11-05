@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_H
-#define ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_BATCHNORMALIZATIONLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_BATCHNORMALIZATIONLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,10 +36,15 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
-SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon,
-                                          ActivationLayerInfo act_info);
+SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src,
+                                          const SimpleTensor<T> &mean,
+                                          const SimpleTensor<T> &var,
+                                          const SimpleTensor<T> &beta,
+                                          const SimpleTensor<T> &gamma,
+                                          float                  epsilon,
+                                          ActivationLayerInfo    act_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_BATCHNORMALIZATIONLAYER_H

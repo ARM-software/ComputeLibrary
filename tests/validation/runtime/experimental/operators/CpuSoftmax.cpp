@@ -23,19 +23,20 @@
  */
 
 #include "arm_compute/runtime/experimental/operators/CpuSoftmax.h"
-#include "arm_compute/core/Types.h"
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CpuSoftmaxFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {

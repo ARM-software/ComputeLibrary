@@ -197,10 +197,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::F32),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-})))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -213,10 +211,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::F32),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-})))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -229,10 +225,8 @@ FIXTURE_DATA_TEST_CASE(RunHighDimensions,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::F32),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-})))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -246,11 +240,9 @@ FIXTURE_DATA_TEST_CASE(RunStressDynamicTensors,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::F32),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-}),
-make("NumberOfRuns", 5)))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)}),
+                               make("NumberOfRuns", 5)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -332,12 +324,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::F16),
                                make("ActivationInfo",
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)})))
 {
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-})))
-{
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_fp16);
@@ -356,12 +346,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::F16),
                                make("ActivationInfo",
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)})))
 {
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-})))
-{
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_fp16);
@@ -380,13 +368,11 @@ FIXTURE_DATA_TEST_CASE(RunStressDynamicTensors,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::F16),
                                make("ActivationInfo",
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)}),
+                               make("NumberOfRuns", 5)))
 {
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-}),
-make("NumberOfRuns", 5)))
-{
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_fp16);
@@ -415,14 +401,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::QASYMM8),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-}),
-make("NumberOfExtraRuns", {0, 1}),
-make("LhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
-make("RhsQInfo", {QuantizationInfo(1.f / 30, -1)}),
-make("OutQInfo", {QuantizationInfo(1.f, 2)})))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)}),
+                               make("NumberOfExtraRuns", {0, 1}),
+                               make("LhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
+                               make("RhsQInfo", {QuantizationInfo(1.f / 30, -1)}),
+                               make("OutQInfo", {QuantizationInfo(1.f, 2)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -436,14 +420,12 @@ FIXTURE_DATA_TEST_CASE(RunSmallExtraActivation,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::QASYMM8),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-}),
-make("NumberOfExtraRuns", {0, 1}),
-make("LhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
-make("RhsQInfo", {QuantizationInfo(1.f / 30, -1)}),
-make("OutQInfo", {QuantizationInfo(1.f, 2)})))
+                                    {ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)}),
+                               make("NumberOfExtraRuns", {0, 1}),
+                               make("LhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
+                               make("RhsQInfo", {QuantizationInfo(1.f / 30, -1)}),
+                               make("OutQInfo", {QuantizationInfo(1.f, 2)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -457,14 +439,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::QASYMM8),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-}),
-make("NumberOfExtraRuns", {0, 1}),
-make("LhsQInfo", {QuantizationInfo(1.f / 100, 1)}),
-make("RhsQInfo", {QuantizationInfo(1.f / 200, -1)}),
-make("OutQInfo", {QuantizationInfo(1.f, 2)})))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)}),
+                               make("NumberOfExtraRuns", {0, 1}),
+                               make("LhsQInfo", {QuantizationInfo(1.f / 100, 1)}),
+                               make("RhsQInfo", {QuantizationInfo(1.f / 200, -1)}),
+                               make("OutQInfo", {QuantizationInfo(1.f, 2)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -482,14 +462,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::QASYMM8_SIGNED),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-}),
-make("NumberOfExtraRuns", {0, 1}),
-make("LhsQInfo", {QuantizationInfo(1.f / 40, -2)}),
-make("RhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
-make("OutQInfo", {QuantizationInfo(1.f, 1)})))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)}),
+                               make("NumberOfExtraRuns", {0, 1}),
+                               make("LhsQInfo", {QuantizationInfo(1.f / 40, -2)}),
+                               make("RhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
+                               make("OutQInfo", {QuantizationInfo(1.f, 1)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
@@ -503,14 +481,12 @@ FIXTURE_DATA_TEST_CASE(RunSmallExtraActivation,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::QASYMM8_SIGNED),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-}),
-make("NumberOfExtraRuns", {0, 1}),
-make("LhsQInfo", {QuantizationInfo(1.f / 40, -2)}),
-make("RhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
-make("OutQInfo", {QuantizationInfo(1.f, 1)})))
+                                    {ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)}),
+                               make("NumberOfExtraRuns", {0, 1}),
+                               make("LhsQInfo", {QuantizationInfo(1.f / 40, -2)}),
+                               make("RhsQInfo", {QuantizationInfo(1.f / 50, 1)}),
+                               make("OutQInfo", {QuantizationInfo(1.f, 1)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
@@ -524,14 +500,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                                make("TransposeB", {false, true}),
                                make("DataType", DataType::QASYMM8_SIGNED),
                                make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
-}),
-make("NumberOfExtraRuns", {0, 1}),
-make("LhsQInfo", {QuantizationInfo(1.f / 150, -2)}),
-make("RhsQInfo", {QuantizationInfo(1.f / 250, 1)}),
-make("OutQInfo", {QuantizationInfo(1.f, 1)})))
+                                    {ActivationLayerInfo(),
+                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)}),
+                               make("NumberOfExtraRuns", {0, 1}),
+                               make("LhsQInfo", {QuantizationInfo(1.f / 150, -2)}),
+                               make("RhsQInfo", {QuantizationInfo(1.f / 250, 1)}),
+                               make("OutQInfo", {QuantizationInfo(1.f, 1)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);

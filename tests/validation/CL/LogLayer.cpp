@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ElementwiseUnaryFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -53,14 +54,18 @@ using CLLogLayerFixture = LogValidationFixture<CLTensor, CLAccessor, CLLogLayer,
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                     DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLLogLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
-                                                                                                   DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLLogLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16);
@@ -68,14 +73,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<half>, framework::DatasetMode
 
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLogLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                      DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLLogLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLLogLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
-                                                                                                    DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLLogLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

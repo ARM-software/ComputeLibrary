@@ -23,12 +23,13 @@
  */
 #include "arm_compute/runtime/CL/functions/CLCast.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
+
 #include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsMMULKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/GEMMLowpFixture.h"
 
 namespace arm_compute
@@ -44,18 +45,34 @@ using namespace arm_compute::opencl::kernels;
 using CLGEMMReshapeRHSMatrix = CLSynthetizeOperator<opencl::kernels::ClGemmReshapeRhsMatrixKernel>;
 
 // Create function for CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
-using CLGEMMLowpMatrixMultiplyReshapedOnlyRHS = CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsMMULKernel>;
+using CLGEMMLowpMatrixMultiplyReshapedOnlyRHS =
+    CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsMMULKernel>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyReshapedOnlyRHS
 using CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixture =
-    GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS>;
+    GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULValidationFixture<CLTensor,
+                                                               CLAccessor,
+                                                               CLGEMMReshapeRHSMatrix,
+                                                               CLGEMMLowpMatrixMultiplyReshapedOnlyRHS>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyReshapedOnlyRHS
 using CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageFixtureSigned =
-    GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageValidationFixture<int8_t, CLTensor, CLAccessor, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS, CLReductionOperation, CLCast>;
+    GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageValidationFixture<int8_t,
+                                                                          CLTensor,
+                                                                          CLAccessor,
+                                                                          CLGEMMReshapeRHSMatrix,
+                                                                          CLGEMMLowpMatrixMultiplyReshapedOnlyRHS,
+                                                                          CLReductionOperation,
+                                                                          CLCast>;
 
 using CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageFixtureUnsigned =
-    GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageValidationFixture<uint8_t, CLTensor, CLAccessor, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS, CLReductionOperation, CLCast>;
+    GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageValidationFixture<uint8_t,
+                                                                          CLTensor,
+                                                                          CLAccessor,
+                                                                          CLGEMMReshapeRHSMatrix,
+                                                                          CLGEMMLowpMatrixMultiplyReshapedOnlyRHS,
+                                                                          CLReductionOperation,
+                                                                          CLCast>;
 
 namespace
 {

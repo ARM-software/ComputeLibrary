@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "ChannelShuffle.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -39,7 +40,7 @@ template <typename T>
 SimpleTensor<T> channel_shuffle(const SimpleTensor<T> &src, int num_groups)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), src.num_channels(), src.quantization_info() };
+    SimpleTensor<T> dst{src.shape(), src.data_type(), src.num_channels(), src.quantization_info()};
 
     const int M                 = src.shape()[0];
     const int N                 = src.shape()[1];
@@ -51,21 +52,19 @@ SimpleTensor<T> channel_shuffle(const SimpleTensor<T> &src, int num_groups)
     const T *src_ref = src.data();
     T       *dst_ref = dst.data();
 #if defined(_OPENMP)
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
-    for(int n = 0; n < batches; ++n)
+    for (int n = 0; n < batches; ++n)
     {
-        for(int g = 0; g < num_groups; ++g)
+        for (int g = 0; g < num_groups; ++g)
         {
             // Gather the group g block (of size channels_in_group * MxN) from output channels
             // g + 0 * G, g + 1 * G, g + 2 * G, g + G * (K - 1) etc.
             const T *src_ptr = src_ref + g * channels_in_group * MxN + n * num_channels * MxN;
             T       *dst_ptr = dst_ref + g * MxN + n * num_channels * MxN;
-            for(int i = 0; i < channels_in_group; ++i)
+            for (int i = 0; i < channels_in_group; ++i)
             {
-                std::copy(src_ptr + i * MxN,
-                          src_ptr + (i + 1) * MxN,
-                          dst_ptr + i * num_groups * MxN);
+                std::copy(src_ptr + i * MxN, src_ptr + (i + 1) * MxN, dst_ptr + i * num_groups * MxN);
             }
         }
     }
@@ -73,11 +72,11 @@ SimpleTensor<T> channel_shuffle(const SimpleTensor<T> &src, int num_groups)
     return dst;
 }
 
-template SimpleTensor<uint8_t> channel_shuffle(const SimpleTensor<uint8_t> &src, int num_groups);
+template SimpleTensor<uint8_t>  channel_shuffle(const SimpleTensor<uint8_t> &src, int num_groups);
 template SimpleTensor<uint16_t> channel_shuffle(const SimpleTensor<uint16_t> &src, int num_groups);
 template SimpleTensor<uint32_t> channel_shuffle(const SimpleTensor<uint32_t> &src, int num_groups);
-template SimpleTensor<half> channel_shuffle(const SimpleTensor<half> &src, int num_groups);
-template SimpleTensor<float> channel_shuffle(const SimpleTensor<float> &src, int num_groups);
+template SimpleTensor<half>     channel_shuffle(const SimpleTensor<half> &src, int num_groups);
+template SimpleTensor<float>    channel_shuffle(const SimpleTensor<float> &src, int num_groups);
 } // namespace reference
 } // namespace validation
 } // namespace test

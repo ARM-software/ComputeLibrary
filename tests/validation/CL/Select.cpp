@@ -26,14 +26,15 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLSelect.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/SelectFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -44,8 +45,8 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-auto run_small_dataset = combine(datasets::SmallShapes(), make("has_same_rank", { false, true }));
-auto run_large_dataset = combine(datasets::LargeShapes(), make("has_same_rank", { false, true }));
+auto run_small_dataset = combine(datasets::SmallShapes(), make("has_same_rank", {false, true}));
+auto run_large_dataset = combine(datasets::LargeShapes(), make("has_same_rank", {false, true}));
 
 } // namespace
 TEST_SUITE(CL)
@@ -111,7 +112,7 @@ FIXTURE_DATA_TEST_CASE(RunOneDim,
                        CLSelectFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(make("Shape", TensorShape(1U, 16U)),
-                                       make("has_same_rank", { false, true }),
+                               make("has_same_rank", {false, true}),
                                make("DataType", DataType::F16)))
 {
     // Validate output
@@ -142,7 +143,7 @@ FIXTURE_DATA_TEST_CASE(RunOneDim,
                        CLSelectFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(make("Shape", TensorShape(1U, 16U)),
-                                       make("has_same_rank", { false, true }),
+                               make("has_same_rank", {false, true}),
                                make("DataType", DataType::F32)))
 {
     // Validate output
@@ -175,7 +176,7 @@ FIXTURE_DATA_TEST_CASE(RunOneDim,
                        CLSelectFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(make("Shape", TensorShape(1U, 16U)),
-                                       make("has_same_rank", { false, true }),
+                               make("has_same_rank", {false, true}),
                                make("DataType", DataType::QASYMM8)))
 {
     // Validate output

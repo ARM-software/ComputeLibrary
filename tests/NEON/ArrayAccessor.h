@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ARRAYACCESSOR_H
-#define ARM_COMPUTE_TEST_ARRAYACCESSOR_H
+#ifndef ACL_TESTS_NEON_ARRAYACCESSOR_H
+#define ACL_TESTS_NEON_ARRAYACCESSOR_H
 
 #include "arm_compute/runtime/Array.h"
+
 #include "tests/IArrayAccessor.h"
 
 namespace arm_compute
@@ -40,8 +41,7 @@ public:
      *
      * @param[in, out] array To be accessed array.
      */
-    ArrayAccessor(Array<T> &array)
-        : _array{ array }
+    ArrayAccessor(Array<T> &array) : _array{array}
     {
     }
 
@@ -81,4 +81,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARRAYACCESSOR_H */
+#endif // ACL_TESTS_NEON_ARRAYACCESSOR_H

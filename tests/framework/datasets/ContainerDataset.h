@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_CONTAINER
-#define ARM_COMPUTE_TEST_DATASET_CONTAINER
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_CONTAINERDATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_CONTAINERDATASET_H
 
-#include "Dataset.h"
 #include "support/StringSupport.h"
 
+#include "Dataset.h"
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -68,7 +68,7 @@ public:
      * @param[in] container Values for the dataset.
      */
     ContainerDataset(std::string name, T &&container)
-        : NamedDataset{ std::move(name) }, _container(std::forward<T>(container))
+        : NamedDataset{std::move(name)}, _container(std::forward<T>(container))
     {
     }
 
@@ -88,8 +88,7 @@ public:
          * @param[in] name     Description of the values.
          * @param[in] iterator Iterator for the values.
          */
-        iterator(std::string name, container_const_iterator iterator)
-            : _name{ name }, _iterator{ iterator }
+        iterator(std::string name, container_const_iterator iterator) : _name{name}, _iterator{iterator}
         {
         }
 
@@ -165,4 +164,4 @@ typename std::enable_if<is_container<T>::value, ContainerDataset<T>>::type make(
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_CONTAINER */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_CONTAINERDATASET_H

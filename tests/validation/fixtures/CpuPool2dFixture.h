@@ -25,7 +25,7 @@
 #define ACL_TESTS_VALIDATION_FIXTURES_CPUPOOL2DFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"  // required for PoolingLayerInfo
+#include "arm_compute/core/Types.h" // required for PoolingLayerInfo
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
 

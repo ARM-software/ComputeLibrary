@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLFuseBatchNormalization.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
 #include "tests/validation/fixtures/FuseBatchNormalizationFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -44,9 +45,11 @@ AbsoluteTolerance<float> absolute_tolerance_f16(0.2f);
 } // namespace
 
 template <typename T>
-using CLFuseBatchNormalizationConvFixture = FuseBatchNormalizationFixture<CLTensor, CLAccessor, CLFuseBatchNormalization, 4, T>;
+using CLFuseBatchNormalizationConvFixture =
+    FuseBatchNormalizationFixture<CLTensor, CLAccessor, CLFuseBatchNormalization, 4, T>;
 template <typename T>
-using CLFuseBatchNormalizationDWCFixture = FuseBatchNormalizationFixture<CLTensor, CLAccessor, CLFuseBatchNormalization, 3, T>;
+using CLFuseBatchNormalizationDWCFixture =
+    FuseBatchNormalizationFixture<CLTensor, CLAccessor, CLFuseBatchNormalization, 3, T>;
 
 // *INDENT-OFF*
 // clang-format off

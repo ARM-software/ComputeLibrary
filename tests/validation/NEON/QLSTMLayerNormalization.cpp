@@ -24,17 +24,18 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/PaddingCalculator.h"
-#include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/fixtures/QLSTMLayerNormalizationFixture.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/QLSTMLayerNormalizationFixture.h"
 
 namespace arm_compute
 {
@@ -45,10 +46,10 @@ namespace validation
 using namespace arm_compute::test::framework;
 using arm_compute::test::framework::DatasetMode;
 namespace dataset = arm_compute::test::framework::dataset;
-using dataset::make;
-using dataset::zip;
 using dataset::combine;
 using dataset::concat;
+using dataset::make;
+using dataset::zip;
 namespace
 {
 constexpr uint32_t vector_size_byte = 16;
@@ -66,11 +67,8 @@ class QLSTMLayerNormShapeDataSet : public ShapeDataset
 public:
     QLSTMLayerNormShapeDataSet(std::string name)
         : ShapeDataset(name,
-    {
-        TensorShape{ boundary_minus_one, num_batches },
-                     TensorShape{ boundary, num_batches },
-                     TensorShape{ boundary_plus_one, num_batches }
-    })
+                       {TensorShape{boundary_minus_one, num_batches}, TensorShape{boundary, num_batches},
+                        TensorShape{boundary_plus_one, num_batches}})
     {
     }
 };
@@ -80,11 +78,7 @@ class QLSTMLayerNormShapeDataSet<num_elements_per_iter, num_batches, 0> : public
 {
 public:
     QLSTMLayerNormShapeDataSet(std::string name)
-        : ShapeDataset(name,
-    {
-        TensorShape{ 1, num_batches },
-                     TensorShape{ 2, num_batches }
-    })
+        : ShapeDataset(name, {TensorShape{1, num_batches}, TensorShape{2, num_batches}})
     {
     }
 };
@@ -92,15 +86,15 @@ public:
 TEST_SUITE(NEON)
 TEST_SUITE(QLSTMLayerNormalization)
 
-static const TensorShape correct_input_shape{ TensorShape(15U, 2U) };
-static const TensorShape correct_weight_shape{ TensorShape(15U) };
-static const TensorShape correct_bias_shape{ TensorShape(15U) };
-static const TensorShape correct_output_shape{ correct_input_shape };
-static const DataType    correct_input_dt{ DataType::QSYMM16 };
-static const DataType    correct_weight_dt{ DataType::QSYMM16 };
-static const DataType    correct_bias_dt{ DataType::S32 };
-static const DataType    correct_output_dt{ correct_input_dt };
-static const uint32_t    tensor_num_channel{ 1 };
+static const TensorShape correct_input_shape{TensorShape(15U, 2U)};
+static const TensorShape correct_weight_shape{TensorShape(15U)};
+static const TensorShape correct_bias_shape{TensorShape(15U)};
+static const TensorShape correct_output_shape{correct_input_shape};
+static const DataType    correct_input_dt{DataType::QSYMM16};
+static const DataType    correct_weight_dt{DataType::QSYMM16};
+static const DataType    correct_bias_dt{DataType::S32};
+static const DataType    correct_output_dt{correct_input_dt};
+static const uint32_t    tensor_num_channel{1};
 
 // *INDENT-OFF*
 // clang-format off
@@ -164,7 +158,8 @@ DATA_TEST_CASE(Validate, DatasetMode::ALL,
 // *INDENT-ON*
 
 template <typename T>
-using NEQLSTMLayerNormalizationFixture = QLSTMLayerNormalizationValidationFixture<Tensor, Accessor, NEQLSTMLayerNormalization, T>;
+using NEQLSTMLayerNormalizationFixture =
+    QLSTMLayerNormalizationValidationFixture<Tensor, Accessor, NEQLSTMLayerNormalization, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QSYMM16)
@@ -187,35 +182,30 @@ TEST_SUITE(QSYMM16)
 
 constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
 
-#define QSYMM16_DATASET_ITER(num_input_batch, num_iter)                                \
-    combine(                                                                           \
-        zip(                                                                           \
-            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>( \
-                "InputShape"),                                                         \
-            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>(               \
-                "WeightShape"),                                                        \
-            QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>(               \
-                "BiasShape")                                                           \
-        ),                                                                              \
-        make("DataType", { DataType::QSYMM16 }),                                        \
-        make("WeightQuantizationInfo",                                                 \
-                                            { QuantizationInfo(1.f / 8192.f, 0),         \
-                                            QuantizationInfo(8192.f, 0) })             \
-    )
+#define QSYMM16_DATASET_ITER(num_input_batch, num_iter)                                                  \
+    combine(zip(QLSTMLayerNormShapeDataSet<qsymm16_per_vector, num_input_batch, num_iter>("InputShape"), \
+                QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape"),              \
+                QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),               \
+            make("DataType", {DataType::QSYMM16}),                                                       \
+            make("WeightQuantizationInfo", {QuantizationInfo(1.f / 8192.f, 0), QuantizationInfo(8192.f, 0)}))
 
-#define QSYMM16_DATASET_1D \
-    concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1), QSYMM16_DATASET_ITER(1, 2))
+#define QSYMM16_DATASET_1D concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1), QSYMM16_DATASET_ITER(1, 2))
 
-#define QSYMM16_DATASET_2D \
-    concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1), QSYMM16_DATASET_ITER(3, 2))
+#define QSYMM16_DATASET_2D concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1), QSYMM16_DATASET_ITER(3, 2))
 
-FIXTURE_DATA_TEST_CASE(RandomValue1D, NEQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_1D)
+FIXTURE_DATA_TEST_CASE(RandomValue1D,
+                       NEQLSTMLayerNormalizationFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       QSYMM16_DATASET_1D)
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RandomValue2D, NEQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_2D)
+FIXTURE_DATA_TEST_CASE(RandomValue2D,
+                       NEQLSTMLayerNormalizationFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       QSYMM16_DATASET_2D)
 {
     // Validate output
     validate(Accessor(_target), _reference);

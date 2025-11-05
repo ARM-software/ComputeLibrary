@@ -28,6 +28,7 @@
 #include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -71,8 +72,9 @@ float tolerance_num(DataType data_type, ActivationLayerInfo::ActivationFunction 
  *
  * @return Output quantization info
  */
-QuantizationInfo calculate_output_quantization_info(DataType data_type,
-    const ActivationLayerInfo &act_info, const QuantizationInfo &default_qinfo);
+QuantizationInfo calculate_output_quantization_info(DataType                   data_type,
+                                                    const ActivationLayerInfo &act_info,
+                                                    const QuantizationInfo    &default_qinfo);
 
 /** This function will return a vector filled with the following values that can
  *  represent two partitions derived from equivalent partitioning.
@@ -85,7 +87,7 @@ QuantizationInfo calculate_output_quantization_info(DataType data_type,
  *
  * @return A vector of values of type T
  */
-template<typename T>
+template <typename T>
 std::vector<T> get_boundary_values(DataType data_type, T min, T max);
 
 /** Define absolute tolerance of the activation layer for qasymm8.

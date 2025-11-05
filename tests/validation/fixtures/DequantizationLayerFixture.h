@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/DequantizationLayer.h"
 
@@ -49,7 +50,7 @@ class DequantizationValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             (src_data_type == DataType::F16 || dst_datatype == DataType::F16) && !CPUInfo::get().has_fp16())
         {
             return;
@@ -69,7 +70,7 @@ protected:
 
     TensorType compute_target(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
@@ -103,11 +104,11 @@ protected:
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType src_data_type)
     {
-        switch(src_data_type)
+        switch (src_data_type)
         {
             case DataType::QASYMM8:
             {
-                SimpleTensor<uint8_t> src{ shape, src_data_type, 1, _quantization_info };
+                SimpleTensor<uint8_t> src{shape, src_data_type, 1, _quantization_info};
                 fill(src);
                 return reference::dequantization_layer<T>(src);
             }
@@ -115,13 +116,13 @@ protected:
             case DataType::QSYMM8_PER_CHANNEL:
             case DataType::QSYMM8:
             {
-                SimpleTensor<int8_t> src{ shape, src_data_type, 1, _quantization_info };
+                SimpleTensor<int8_t> src{shape, src_data_type, 1, _quantization_info};
                 fill(src);
                 return reference::dequantization_layer<T>(src);
             }
             case DataType::QSYMM16:
             {
-                SimpleTensor<int16_t> src{ shape, src_data_type, 1, _quantization_info };
+                SimpleTensor<int16_t> src{shape, src_data_type, 1, _quantization_info};
                 fill(src);
                 return reference::dequantization_layer<T>(src);
             }
@@ -138,7 +139,7 @@ protected:
         std::uniform_int_distribution<> distribution_offset_q8(1, 127);
         std::uniform_int_distribution<> distribution_scale_q16(1, 32768);
 
-        switch(data_type)
+        switch (data_type)
         {
             case DataType::QSYMM16:
                 return QuantizationInfo(1.f / distribution_scale_q16(gen));
@@ -147,7 +148,7 @@ protected:
             case DataType::QSYMM8_PER_CHANNEL:
             {
                 std::vector<float> scale(num_channels);
-                for(int32_t i = 0; i < num_channels; ++i)
+                for (int32_t i = 0; i < num_channels; ++i)
                 {
                     scale[i] = 1.f / distribution_offset_q8(gen);
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_NON_MAX_SUPPRESSION_FIXTURE
-#define ARM_COMPUTE_TEST_NON_MAX_SUPPRESSION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_NONMAXSUPPRESSIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_NONMAXSUPPRESSIONFIXTURE_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/NonMaxSuppression.h"
 
 namespace arm_compute
@@ -52,8 +53,10 @@ public:
         ARM_COMPUTE_ERROR_ON(input_shape.num_dimensions() != 2);
         const TensorShape output_shape(max_output_size);
         const TensorShape scores_shape(input_shape[1]);
-        _target    = compute_target(input_shape, scores_shape, output_shape, max_output_size, score_threshold, nms_threshold);
-        _reference = compute_reference(input_shape, scores_shape, output_shape, max_output_size, score_threshold, nms_threshold);
+        _target =
+            compute_target(input_shape, scores_shape, output_shape, max_output_size, score_threshold, nms_threshold);
+        _reference =
+            compute_reference(input_shape, scores_shape, output_shape, max_output_size, score_threshold, nms_threshold);
     }
 
 protected:
@@ -64,8 +67,12 @@ protected:
         library->fill_boxes(tensor, distribution, i);
     }
 
-    TensorType compute_target(const TensorShape input_shape, const TensorShape scores_shape, const TensorShape output_shape,
-                              unsigned int max_output_size, float score_threshold, float nms_threshold)
+    TensorType compute_target(const TensorShape input_shape,
+                              const TensorShape scores_shape,
+                              const TensorShape output_shape,
+                              unsigned int      max_output_size,
+                              float             score_threshold,
+                              float             nms_threshold)
     {
         // Create tensors
         TensorType bboxes  = create_tensor<TensorType>(input_shape, DataType::F32);
@@ -98,13 +105,17 @@ protected:
         return indices;
     }
 
-    SimpleTensor<int> compute_reference(const TensorShape input_shape, const TensorShape scores_shape, const TensorShape output_shape,
-                                        unsigned int max_output_size, float score_threshold, float nms_threshold)
+    SimpleTensor<int> compute_reference(const TensorShape input_shape,
+                                        const TensorShape scores_shape,
+                                        const TensorShape output_shape,
+                                        unsigned int      max_output_size,
+                                        float             score_threshold,
+                                        float             nms_threshold)
     {
         // Create reference
-        SimpleTensor<float> bboxes{ input_shape, DataType::F32 };
-        SimpleTensor<float> scores{ scores_shape, DataType::F32 };
-        SimpleTensor<int>   indices{ output_shape, DataType::S32 };
+        SimpleTensor<float> bboxes{input_shape, DataType::F32};
+        SimpleTensor<float> scores{scores_shape, DataType::F32};
+        SimpleTensor<int>   indices{output_shape, DataType::S32};
 
         // Fill reference
         fill(bboxes, 0, 0.f, 1.f);
@@ -120,4 +131,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NON_MAX_SUPPRESSION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_NONMAXSUPPRESSIONFIXTURE_H

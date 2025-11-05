@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_MEMORY_MANAGER
-#define ARM_COMPUTE_TEST_UNIT_MEMORY_MANAGER
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNIT_MEMORYMANAGERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNIT_MEMORYMANAGERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/FullyConnectedLayer.h"
 #include "tests/validation/reference/SoftmaxLayer.h"
@@ -120,11 +121,11 @@ protected:
     SimpleTensor<T> compute_reference()
     {
         // Create reference
-        SimpleTensor<T> w1{ TensorShape(128U, 128U), DataType::F32 };
-        SimpleTensor<T> b1{ TensorShape(128U), DataType::F32 };
-        SimpleTensor<T> w2{ TensorShape(128U, 24U), DataType::F32 };
-        SimpleTensor<T> b2{ TensorShape(24U), DataType::F32 };
-        SimpleTensor<T> src{ TensorShape(128U), DataType::F32 };
+        SimpleTensor<T> w1{TensorShape(128U, 128U), DataType::F32};
+        SimpleTensor<T> b1{TensorShape(128U), DataType::F32};
+        SimpleTensor<T> w2{TensorShape(128U, 24U), DataType::F32};
+        SimpleTensor<T> b2{TensorShape(24U), DataType::F32};
+        SimpleTensor<T> src{TensorShape(128U), DataType::F32};
 
         // Fill reference
         fill(src, 0);
@@ -221,18 +222,33 @@ protected:
         fc_layer_2.run();
 
         // Update tensor shapes (2nd iteration)
-        auto src_padding     = src.allocator()->info().padding();
-        auto fc1_padding     = fc1.allocator()->info().padding();
-        auto dst_padding     = dst.allocator()->info().padding();
-        int  diff            = _max_batches - _cur_batches;
-        auto new_src_padding = PaddingSize(src_padding.top, src_padding.right, src_padding.bottom + diff, src_padding.left);
-        auto new_fc1_padding = PaddingSize(fc1_padding.top, fc1_padding.right, fc1_padding.bottom + diff, fc1_padding.left);
-        auto new_dst_padding = PaddingSize(dst_padding.top, dst_padding.right, dst_padding.bottom + diff, dst_padding.left);
-        src.allocator()->info().set_tensor_shape(TensorShape(128U, _cur_batches)).set_is_resizable(true).extend_padding(new_src_padding);
+        auto src_padding = src.allocator()->info().padding();
+        auto fc1_padding = fc1.allocator()->info().padding();
+        auto dst_padding = dst.allocator()->info().padding();
+        int  diff        = _max_batches - _cur_batches;
+        auto new_src_padding =
+            PaddingSize(src_padding.top, src_padding.right, src_padding.bottom + diff, src_padding.left);
+        auto new_fc1_padding =
+            PaddingSize(fc1_padding.top, fc1_padding.right, fc1_padding.bottom + diff, fc1_padding.left);
+        auto new_dst_padding =
+            PaddingSize(dst_padding.top, dst_padding.right, dst_padding.bottom + diff, dst_padding.left);
+        src.allocator()
+            ->info()
+            .set_tensor_shape(TensorShape(128U, _cur_batches))
+            .set_is_resizable(true)
+            .extend_padding(new_src_padding);
         src.allocator()->info().set_is_resizable(false);
-        fc1.allocator()->info().set_tensor_shape(TensorShape(128U, _cur_batches)).set_is_resizable(true).extend_padding(new_fc1_padding);
+        fc1.allocator()
+            ->info()
+            .set_tensor_shape(TensorShape(128U, _cur_batches))
+            .set_is_resizable(true)
+            .extend_padding(new_fc1_padding);
         fc1.allocator()->info().set_is_resizable(false);
-        dst.allocator()->info().set_tensor_shape(TensorShape(24U, _cur_batches)).set_is_resizable(true).extend_padding(new_dst_padding);
+        dst.allocator()
+            ->info()
+            .set_tensor_shape(TensorShape(24U, _cur_batches))
+            .set_is_resizable(true)
+            .extend_padding(new_dst_padding);
         dst.allocator()->info().set_is_resizable(false);
 
         // Configure FC info
@@ -256,11 +272,11 @@ protected:
     SimpleTensor<T> compute_reference()
     {
         // Create reference
-        SimpleTensor<T> w1{ TensorShape(128U, 128U), DataType::F32 };
-        SimpleTensor<T> b1{ TensorShape(128U), DataType::F32 };
-        SimpleTensor<T> w2{ TensorShape(128U, 24U), DataType::F32 };
-        SimpleTensor<T> b2{ TensorShape(24U), DataType::F32 };
-        SimpleTensor<T> src{ TensorShape(128U, _cur_batches), DataType::F32 };
+        SimpleTensor<T> w1{TensorShape(128U, 128U), DataType::F32};
+        SimpleTensor<T> b1{TensorShape(128U), DataType::F32};
+        SimpleTensor<T> w2{TensorShape(128U, 24U), DataType::F32};
+        SimpleTensor<T> b2{TensorShape(24U), DataType::F32};
+        SimpleTensor<T> src{TensorShape(128U, _cur_batches), DataType::F32};
 
         // Fill reference
         fill(src, 5);
@@ -287,7 +303,11 @@ protected:
  * Runs a fully connected convolution layer followed by a softmax layer then reconfigures with different batch size and reruns
  * Shapes of the reconfigure step are smaller that the initial configured step
  */
-template <typename TensorType, typename AccessorType, typename AllocatorType, typename FullyConnectedFunction, typename SoftmaxFunction>
+template <typename TensorType,
+          typename AccessorType,
+          typename AllocatorType,
+          typename FullyConnectedFunction,
+          typename SoftmaxFunction>
 class BlobMemoryManagerReconfigure2TestCaseFixture : public framework::Fixture
 {
     using T = float;
@@ -360,12 +380,17 @@ protected:
         fc_info.retain_internal_weights = true;
 
         // Run rest iterations
-        for(int i = _max_batches; i >= static_cast<int>(_cur_batches); --i)
+        for (int i = _max_batches; i >= static_cast<int>(_cur_batches); --i)
         {
-            int  diff           = _max_batches - i;
-            auto new_fc_padding = PaddingSize(fc_padding.top, fc_padding.right, fc_padding.bottom + diff, fc_padding.left);
+            int  diff = _max_batches - i;
+            auto new_fc_padding =
+                PaddingSize(fc_padding.top, fc_padding.right, fc_padding.bottom + diff, fc_padding.left);
             src.allocator()->info().set_tensor_shape(TensorShape(1U, 1U, 112U, i));
-            fc.allocator()->info().set_tensor_shape(TensorShape(8U, i)).set_is_resizable(true).extend_padding(new_fc_padding);
+            fc.allocator()
+                ->info()
+                .set_tensor_shape(TensorShape(8U, i))
+                .set_is_resizable(true)
+                .extend_padding(new_fc_padding);
             fc.allocator()->info().set_is_resizable(false);
             dst.allocator()->info().set_tensor_shape(TensorShape(8U, i));
 
@@ -387,9 +412,9 @@ protected:
     SimpleTensor<T> compute_reference()
     {
         // Create reference
-        SimpleTensor<T> w{ TensorShape(112U, 8U), DataType::F32 };
-        SimpleTensor<T> b{ TensorShape(8U), DataType::F32 };
-        SimpleTensor<T> src{ TensorShape(1U, 1U, 112U, _cur_batches), DataType::F32 };
+        SimpleTensor<T> w{TensorShape(112U, 8U), DataType::F32};
+        SimpleTensor<T> b{TensorShape(8U), DataType::F32};
+        SimpleTensor<T> src{TensorShape(1U, 1U, 112U, _cur_batches), DataType::F32};
 
         // Fill reference
         fill(src, 3);
@@ -410,4 +435,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_MEMORY_MANAGER */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNIT_MEMORYMANAGERFIXTURE_H

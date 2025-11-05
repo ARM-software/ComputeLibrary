@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ComparisonOperationsDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ComparisonFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -107,7 +108,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        framework::DatasetMode::PRECOMMIT,
                        combine(run_small_dataset, make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -123,7 +124,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        framework::DatasetMode::NIGHTLY,
                        combine(run_large_dataset, make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -160,16 +161,18 @@ TEST_SUITE_END() // Float
 template <typename T>
 using NEComparisonQuantizedFixture = ComparisonValidationQuantizedFixture<Tensor, Accessor, NEElementwiseComparison, T>;
 template <typename T>
-using NEComparisonQuantizedBroadcastFixture = ComparisonQuantizedBroadcastValidationFixture<Tensor, Accessor, NEElementwiseComparison, T>;
+using NEComparisonQuantizedBroadcastFixture =
+    ComparisonQuantizedBroadcastValidationFixture<Tensor, Accessor, NEElementwiseComparison, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, make("DataType", DataType::QASYMM8),
-                                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                               make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+                       combine(run_small_dataset,
+                               make("DataType", DataType::QASYMM8),
+                               make("QuantizationInfo", {QuantizationInfo(5.f / 255.f, 20)}),
+                               make("QuantizationInfo", {QuantizationInfo(2.f / 255.f, 10)})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -179,9 +182,10 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
                        NEComparisonQuantizedBroadcastFixture<int8_t>,
                        framework::DatasetMode::ALL,
-                       combine(run_small_broadcast_dataset, make("DataType", DataType::QASYMM8_SIGNED),
-                                       make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
-                               make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
+                       combine(run_small_broadcast_dataset,
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("QuantizationInfo", {QuantizationInfo(0.1, -30)}),
+                               make("QuantizationInfo", {QuantizationInfo(0.3f, 2)})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -190,9 +194,10 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEComparisonQuantizedFixture<int8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, make("DataType", DataType::QASYMM8_SIGNED),
-                                       make("QuantizationInfo", { QuantizationInfo(0.1, -30) }),
-                               make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
+                       combine(run_small_dataset,
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("QuantizationInfo", {QuantizationInfo(0.1, -30)}),
+                               make("QuantizationInfo", {QuantizationInfo(0.3f, 2)})))
 {
     // Validate output
     validate(Accessor(_target), _reference);

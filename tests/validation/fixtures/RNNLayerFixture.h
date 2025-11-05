@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,9 @@
 #ifndef ACL_TESTS_VALIDATION_FIXTURES_RNNLAYERFIXTURE_H
 #define ACL_TESTS_VALIDATION_FIXTURES_RNNLAYERFIXTURE_H
 
-#include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ArithmeticOperations.h"
 #include "tests/validation/reference/FullyConnectedLayer.h"
@@ -42,32 +42,47 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RNNLayerValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape recurrent_weights_shape, TensorShape bias_shape, TensorShape output_shape, ActivationLayerInfo info,
-               DataType data_type)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         recurrent_weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               ActivationLayerInfo info,
+               DataType            data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
 
-        _target    = compute_target(input_shape, weights_shape, recurrent_weights_shape, bias_shape, output_shape, info, data_type);
-        _reference = compute_reference(input_shape, weights_shape, recurrent_weights_shape, bias_shape, output_shape, info, data_type);
+        _target    = compute_target(input_shape, weights_shape, recurrent_weights_shape, bias_shape, output_shape, info,
+                                    data_type);
+        _reference = compute_reference(input_shape, weights_shape, recurrent_weights_shape, bias_shape, output_shape,
+                                       info, data_type);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(-1.0f), T(1.0f) };
+        DistributionType distribution{T(-1.0f), T(1.0f)};
         library->fill(tensor, distribution, i);
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &recurrent_weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                              ActivationLayerInfo info, DataType data_type)
+    TensorType compute_target(const TensorShape  &input_shape,
+                              const TensorShape  &weights_shape,
+                              const TensorShape  &recurrent_weights_shape,
+                              const TensorShape  &bias_shape,
+                              const TensorShape  &output_shape,
+                              ActivationLayerInfo info,
+                              DataType            data_type)
     {
         // Create tensors
         TensorType input             = create_tensor<TensorType>(input_shape, data_type);
@@ -116,15 +131,20 @@ protected:
         return output;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &recurrent_weights_shape, const TensorShape &bias_shape,
-                                      const TensorShape &output_shape, ActivationLayerInfo info, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape  &input_shape,
+                                      const TensorShape  &weights_shape,
+                                      const TensorShape  &recurrent_weights_shape,
+                                      const TensorShape  &bias_shape,
+                                      const TensorShape  &output_shape,
+                                      ActivationLayerInfo info,
+                                      DataType            data_type)
     {
         // Create reference
-        SimpleTensor<T> input{ input_shape, data_type };
-        SimpleTensor<T> weights{ weights_shape, data_type };
-        SimpleTensor<T> recurrent_weights{ recurrent_weights_shape, data_type };
-        SimpleTensor<T> bias{ bias_shape, data_type };
-        SimpleTensor<T> hidden_state{ output_shape, data_type };
+        SimpleTensor<T> input{input_shape, data_type};
+        SimpleTensor<T> weights{weights_shape, data_type};
+        SimpleTensor<T> recurrent_weights{recurrent_weights_shape, data_type};
+        SimpleTensor<T> bias{bias_shape, data_type};
+        SimpleTensor<T> hidden_state{output_shape, data_type};
 
         // Fill reference
         fill(input, 0);
@@ -137,10 +157,11 @@ protected:
         out_shape.set(1, output_shape.y());
 
         // Compute reference
-        SimpleTensor<T> out_w{ out_shape, data_type };
+        SimpleTensor<T> out_w{out_shape, data_type};
         SimpleTensor<T> fully_connected = reference::fully_connected_layer(input, weights, bias, out_shape);
         SimpleTensor<T> gemm            = reference::gemm(hidden_state, recurrent_weights, out_w, 1.f, 0.f);
-        SimpleTensor<T> add_res         = reference::arithmetic_operation(reference::ArithmeticOperation::ADD, fully_connected, gemm, data_type, ConvertPolicy::SATURATE);
+        SimpleTensor<T> add_res = reference::arithmetic_operation(reference::ArithmeticOperation::ADD, fully_connected,
+                                                                  gemm, data_type, ConvertPolicy::SATURATE);
         return reference::activation_layer(add_res, info);
     }
 

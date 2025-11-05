@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,14 +26,13 @@
 
 #include "DatasetModes.h"
 #include "Exceptions.h"
+#include "instruments/Instruments.h"
+#include "printers/Printer.h"
 #include "Profiler.h"
 #include "TestCase.h"
 #include "TestCaseFactory.h"
 #include "TestResult.h"
 #include "Utils.h"
-#include "instruments/Instruments.h"
-#include "printers/Printer.h"
-
 #include <algorithm>
 #include <chrono>
 #include <map>
@@ -56,17 +55,18 @@ class TestFilter;
 /** Framework configuration structure */
 struct FrameworkConfig
 {
-    std::vector<framework::InstrumentsDescription> instruments{};               /**< Instrument types that will be used for benchmarking. */
-    std::string                                    name_filter{};               /**< Regular expression to filter tests by name. Only matching tests will be executed. */
-    std::string                                    id_filter{};                 /**< String to match selected test ids. Only matching tests will be executed. */
-    DatasetMode                                    mode{ DatasetMode::ALL };    /**< Dataset mode. */
-    int                                            num_iterations{ 1 };         /**< Number of iterations per test. */
-    float                                          cooldown_sec{ -1.f };        /**< Delay between tests in seconds. */
-    LogLevel                                       log_level{ LogLevel::NONE }; /**< Verbosity of the output. */
-    bool                                           configure_only{ false };     /**< Only configure kernels */
-    bool                                           print_rerun_cmd{ false };    /**< Print the command to rerun the failed testcase */
-    unsigned int                                   seed{ 0 };                   /**< The seed that is used to fill tensors with random values.*/
-    bool                                           print_iterations{false};     /**< Print the time taken by each iteration.*/
+    std::vector<framework::InstrumentsDescription>
+                instruments{}; /**< Instrument types that will be used for benchmarking. */
+    std::string name_filter{}; /**< Regular expression to filter tests by name. Only matching tests will be executed. */
+    std::string id_filter{};   /**< String to match selected test ids. Only matching tests will be executed. */
+    DatasetMode mode{DatasetMode::ALL};    /**< Dataset mode. */
+    int         num_iterations{1};         /**< Number of iterations per test. */
+    float       cooldown_sec{-1.f};        /**< Delay between tests in seconds. */
+    LogLevel    log_level{LogLevel::NONE}; /**< Verbosity of the output. */
+    bool        configure_only{false};     /**< Only configure kernels */
+    bool        print_rerun_cmd{false};    /**< Print the command to rerun the failed testcase */
+    unsigned int seed{0};                  /**< The seed that is used to fill tensors with random values.*/
+    bool         print_iterations{false};  /**< Print the time taken by each iteration.*/
 };
 
 /** Information about a test case.
@@ -152,7 +152,8 @@ public:
      * @param[in] data        Data that will be used as input to the test.
      */
     template <typename T, typename D>
-    void add_data_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status, std::string description, D &&data);
+    void add_data_test_case(
+        std::string test_name, DatasetMode mode, TestCaseFactory::Status status, std::string description, D &&data);
 
     /** Add info string for the next expectation/assertion.
      *
@@ -353,10 +354,10 @@ private:
     Framework();
     ~Framework() = default;
 
-    Framework(const Framework &) = delete;
+    Framework(const Framework &)            = delete;
     Framework &operator=(const Framework &) = delete;
 
-    TestResult::Status run_test(const TestInfo &info, TestCaseFactory &test_factory);
+    TestResult::Status                run_test(const TestInfo &info, TestCaseFactory &test_factory);
     std::map<TestResult::Status, int> count_test_results() const;
 
     /** Returns the current test suite name.
@@ -375,45 +376,49 @@ private:
 
     std::vector<std::string>                      _test_suite_name{};
     std::vector<std::unique_ptr<TestCaseFactory>> _test_factories{};
-    std::map<TestInfo, TestResult> _test_results{};
-    int                    _num_iterations{ 1 };
-    float                  _cooldown_sec{ -1.f };
-    bool                   _throw_errors{ false };
-    bool                   _stop_on_error{ false };
-    bool                   _error_on_missing_assets{ false };
-    std::vector<Printer *> _printers{};
-    bool                   _configure_only{ false };
-    bool                   _new_fixture_call{ false };
-    bool                   _print_rerun_cmd{ false };
-    unsigned int           _seed{ 0 };
-    PrepareFunc            _prepare_function{};
-    bool                   _print_iterations{false};
+    std::map<TestInfo, TestResult>                _test_results{};
+    int                                           _num_iterations{1};
+    float                                         _cooldown_sec{-1.f};
+    bool                                          _throw_errors{false};
+    bool                                          _stop_on_error{false};
+    bool                                          _error_on_missing_assets{false};
+    std::vector<Printer *>                        _printers{};
+    bool                                          _configure_only{false};
+    bool                                          _new_fixture_call{false};
+    bool                                          _print_rerun_cmd{false};
+    unsigned int                                  _seed{0};
+    PrepareFunc                                   _prepare_function{};
+    bool                                          _print_iterations{false};
 
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentsDescription, create_function *> _available_instruments{};
 
-    std::set<framework::InstrumentsDescription> _instruments{ std::pair<InstrumentType, ScaleFactor>(InstrumentType::NONE, ScaleFactor::NONE) };
-    std::unique_ptr<TestFilter>                 _test_filter;
-    LogLevel                                    _log_level{ LogLevel::ALL };
-    const TestInfo                             *_current_test_info{ nullptr };
-    TestResult                                 *_current_test_result{ nullptr };
-    std::vector<std::string>                    _test_info{};
+    std::set<framework::InstrumentsDescription> _instruments{
+        std::pair<InstrumentType, ScaleFactor>(InstrumentType::NONE, ScaleFactor::NONE)};
+    std::unique_ptr<TestFilter> _test_filter;
+    LogLevel                    _log_level{LogLevel::ALL};
+    const TestInfo             *_current_test_info{nullptr};
+    TestResult                 *_current_test_result{nullptr};
+    std::vector<std::string>    _test_info{};
 };
 
 template <typename T>
 inline void Framework::add_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status)
 {
-    _test_factories.emplace_back(std::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name), mode, status));
+    _test_factories.emplace_back(
+        std::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name), mode, status));
 }
 
 template <typename T, typename D>
-inline void Framework::add_data_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status, std::string description, D &&data)
+inline void Framework::add_data_test_case(
+    std::string test_name, DatasetMode mode, TestCaseFactory::Status status, std::string description, D &&data)
 {
     // WORKAROUND for GCC 4.9
     // The function should get *it which is tuple but that seems to trigger a
     // bug in the compiler.
-    auto tmp = std::unique_ptr<DataTestCaseFactory<T, decltype(*std::declval<D>())>>(new DataTestCaseFactory<T, decltype(*std::declval<D>())>(current_suite_name(), std::move(test_name), mode, status,
-                                                                                     std::move(description), *data));
+    auto tmp = std::unique_ptr<DataTestCaseFactory<T, decltype(*std::declval<D>())>>(
+        new DataTestCaseFactory<T, decltype(*std::declval<D>())>(current_suite_name(), std::move(test_name), mode,
+                                                                 status, std::move(description), *data));
     _test_factories.emplace_back(std::move(tmp));
 }
 } // namespace framework

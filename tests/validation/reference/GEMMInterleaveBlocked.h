@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "GEMM.h"
+
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVEBLOCKED_H
+#define ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVEBLOCKED_H
 
 #include "arm_compute/core/Types.h"
+
+#include "GEMM.h"
 
 namespace arm_compute
 {
@@ -39,7 +43,7 @@ T safe_read(const SimpleTensor<T> &t, int y, int x)
     const int stride = t.shape().x();
     const int M      = t.shape().y();
     const int N      = t.shape().x();
-    if((y < M) && (x < N))
+    if ((y < M) && (x < N))
     {
         return t[y * stride + x];
     }
@@ -47,20 +51,21 @@ T safe_read(const SimpleTensor<T> &t, int y, int x)
 }
 
 template <typename T>
-SimpleTensor<T> gemm_interleave_blocked(const SimpleTensor<T> &in, SimpleTensor<T> &out, int int_by, int block, bool transposed)
+SimpleTensor<T>
+gemm_interleave_blocked(const SimpleTensor<T> &in, SimpleTensor<T> &out, int int_by, int block, bool transposed)
 {
     const int M = out.shape().y();
     const int N = out.shape().x();
-    for(int y = 0; y < M; y++)
+    for (int y = 0; y < M; y++)
     {
         T *out_ptr = &out[y * N];
-        for(int x = 0; x < (N / int_by); x += block)
+        for (int x = 0; x < (N / int_by); x += block)
         {
-            for(int z = 0; z < int_by; z++)
+            for (int z = 0; z < int_by; z++)
             {
-                for(int a = 0; (out_ptr <= &out[y * N + (N - 1)]) && a < block; a++)
+                for (int a = 0; (out_ptr <= &out[y * N + (N - 1)]) && a < block; a++)
                 {
-                    if(!transposed)
+                    if (!transposed)
                         *out_ptr++ = safe_read(in, (y * int_by) + z, x + a);
                     else
                     {
@@ -74,8 +79,11 @@ SimpleTensor<T> gemm_interleave_blocked(const SimpleTensor<T> &in, SimpleTensor<
     return out;
 }
 
-template SimpleTensor<uint8_t> gemm_interleave_blocked(const SimpleTensor<uint8_t> &in, SimpleTensor<uint8_t> &out, int int_by, int block, bool transposed);
+template SimpleTensor<uint8_t> gemm_interleave_blocked(
+    const SimpleTensor<uint8_t> &in, SimpleTensor<uint8_t> &out, int int_by, int block, bool transposed);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVEBLOCKED_H

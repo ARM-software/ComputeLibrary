@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ namespace framework
 void sleep_in_seconds(float seconds)
 {
     // Early return on non-positive input
-    if(seconds <= 0.f)
+    if (seconds <= 0.f)
     {
         return;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2023 Arm Limited.
+ * Copyright (c) 2018, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,10 @@
  */
 #include "BatchToSpaceLayer.h"
 
-#include "arm_compute/core/Validate.h"
-#include "tests/validation/Helpers.h"
-
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
+#include "tests/validation/Helpers.h"
 namespace arm_compute
 {
 namespace test
@@ -37,11 +37,15 @@ namespace reference
 {
 // Batch to Space
 template <typename T>
-SimpleTensor<T> batch_to_space(const SimpleTensor<T> &src, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &dst_shape)
+SimpleTensor<T> batch_to_space(const SimpleTensor<T>      &src,
+                               const std::vector<int32_t> &block_shape,
+                               const CropInfo             &crop_info,
+                               const TensorShape          &dst_shape)
 {
     ARM_COMPUTE_ERROR_ON(block_shape[0] < 1);
     ARM_COMPUTE_ERROR_ON(block_shape[1] < 1);
-    const auto expected_dst_shape = misc::shape_calculator::compute_batch_to_space_shape(DataLayout::NCHW, src.shape(), block_shape[0], block_shape[1], crop_info);
+    const auto expected_dst_shape = misc::shape_calculator::compute_batch_to_space_shape(
+        DataLayout::NCHW, src.shape(), block_shape[0], block_shape[1], crop_info);
     ARM_COMPUTE_ERROR_ON(arm_compute::detail::have_different_dimensions(expected_dst_shape, dst_shape, 0));
     ARM_COMPUTE_UNUSED(expected_dst_shape);
 
@@ -52,21 +56,23 @@ SimpleTensor<T> batch_to_space(const SimpleTensor<T> &src, const std::vector<int
     const auto      z_out      = static_cast<int>(dst_shape[2]);
     const auto      batch_out  = static_cast<int>(dst_shape[3]);
 
-    for(int batch = 0; batch < batch_out; ++batch)
+    for (int batch = 0; batch < batch_out; ++batch)
     {
-        for(int z = 0; z < z_out; ++z)
+        for (int z = 0; z < z_out; ++z)
         {
-            for(int y = 0; y < height_out; ++y)
+            for (int y = 0; y < height_out; ++y)
             {
-                for(int x = 0; x < width_out; ++x)
+                for (int x = 0; x < width_out; ++x)
                 {
-                    const int x_c      = x + crop_info.left;
-                    const int y_c      = y + crop_info.top;
-                    const int in_batch = batch + ((x_c % block_shape[0]) + (y_c % block_shape[1]) * (block_shape[0])) * dst_shape[3];
-                    const int in_x     = x_c / block_shape[0];
-                    const int in_y     = y_c / block_shape[1];
-                    const int in_pos   = in_x + src.shape()[0] * in_y + z * src.shape()[0] * src.shape()[1] + in_batch * src.shape()[0] * src.shape()[1] * src.shape()[2];
-                    result[out_pos]    = src[in_pos];
+                    const int x_c = x + crop_info.left;
+                    const int y_c = y + crop_info.top;
+                    const int in_batch =
+                        batch + ((x_c % block_shape[0]) + (y_c % block_shape[1]) * (block_shape[0])) * dst_shape[3];
+                    const int in_x   = x_c / block_shape[0];
+                    const int in_y   = y_c / block_shape[1];
+                    const int in_pos = in_x + src.shape()[0] * in_y + z * src.shape()[0] * src.shape()[1] +
+                                       in_batch * src.shape()[0] * src.shape()[1] * src.shape()[2];
+                    result[out_pos] = src[in_pos];
                     ++out_pos;
                 }
             }
@@ -75,8 +81,14 @@ SimpleTensor<T> batch_to_space(const SimpleTensor<T> &src, const std::vector<int
 
     return result;
 }
-template SimpleTensor<float> batch_to_space(const SimpleTensor<float> &src, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &dst_shape);
-template SimpleTensor<half> batch_to_space(const SimpleTensor<half> &src, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &dst_shape);
+template SimpleTensor<float> batch_to_space(const SimpleTensor<float>  &src,
+                                            const std::vector<int32_t> &block_shape,
+                                            const CropInfo             &crop_info,
+                                            const TensorShape          &dst_shape);
+template SimpleTensor<half>  batch_to_space(const SimpleTensor<half>   &src,
+                                            const std::vector<int32_t> &block_shape,
+                                            const CropInfo             &crop_info,
+                                            const TensorShape          &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

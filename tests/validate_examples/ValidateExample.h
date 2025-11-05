@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef VALIDATE_EXAMPLE_H
-#define VALIDATE_EXAMPLE_H
+#ifndef ACL_TESTS_VALIDATE_EXAMPLES_VALIDATEEXAMPLE_H
+#define ACL_TESTS_VALIDATE_EXAMPLES_VALIDATEEXAMPLE_H
 
 #include "utils/Utils.h"
 namespace arm_compute
@@ -54,14 +54,14 @@ public:
         return true;
     };
     /** Run the example. */
-    virtual void do_run() {};
+    virtual void do_run(){};
     /** Run reference implementation and validate against the target output
      */
     virtual void do_validate()
     {
     }
     /** Teardown the example. */
-    virtual void do_teardown() {};
+    virtual void do_teardown(){};
     /** Print the example parameters
      *
      * @param[in,out] printer Printer to use to print the parameters
@@ -84,4 +84,4 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
 
 } // namespace utils
 } // namespace arm_compute
-#endif /* VALIDATE_EXAMPLE_H */
+#endif // ACL_TESTS_VALIDATE_EXAMPLES_VALIDATEEXAMPLE_H

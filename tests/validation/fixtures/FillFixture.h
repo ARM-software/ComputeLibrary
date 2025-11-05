@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2023 Arm Limited.
+ * Copyright (c) 2019, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FILL_FIXTURE
-#define ARM_COMPUTE_TEST_FILL_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_FILLFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_FILLFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 
 namespace arm_compute
 {
@@ -44,7 +45,7 @@ class FillFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, DataType data_type)
     {
-        _target = compute_target(input_shape, data_type);
+        _target    = compute_target(input_shape, data_type);
         _reference = compute_reference(input_shape, data_type);
     }
 
@@ -62,7 +63,7 @@ protected:
 
         // Create and configure function
         FunctionType fill;
-        const T constant_value {1};
+        const T      constant_value{1};
         fill.configure(&input, constant_value);
 
         // Compute function with a distinct, second value
@@ -74,11 +75,11 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> input{ input_shape, data_type };
+        SimpleTensor<T> input{input_shape, data_type};
 
         // Fill tensor
-        const T constant_value {1};
-        for(int i = 0; i < input.num_elements(); ++i)
+        const T constant_value{1};
+        for (int i = 0; i < input.num_elements(); ++i)
         {
             input[i] = constant_value;
         }
@@ -92,4 +93,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FILL_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_FILLFIXTURE_H

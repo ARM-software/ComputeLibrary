@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLRNNLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/RNNLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/RNNLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,9 +41,12 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-RelativeTolerance<float> tolerance_f32(0.001f);        /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
-RelativeTolerance<half>  rel_tolerance_f16(half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
-constexpr float          abs_tolerance_f16(0.02f);     /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+RelativeTolerance<float> tolerance_f32(
+    0.001f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
+RelativeTolerance<half> rel_tolerance_f16(half(
+    0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+constexpr float         abs_tolerance_f16(
+            0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
 } // namespace
 
 TEST_SUITE(CL)
@@ -118,7 +122,10 @@ template <typename T>
 using CLRNNLayerFixture = RNNLayerValidationFixture<CLTensor, CLAccessor, CLRNNLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRNNLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRNNLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -126,7 +133,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLRNNLayerFixture<float>, framework::DatasetMod
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRNNLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRNNLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);

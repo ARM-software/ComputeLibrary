@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,19 +24,20 @@
 #include "utils/Utils.h"
 
 #define BENCHMARK_EXAMPLES
+#include "arm_compute/core/Version.h"
+#include "arm_compute/runtime/CL/CLHelpers.h"
+#include "arm_compute/runtime/Scheduler.h"
+
+#include "tests/AssetsLibrary.h"
+#include "tests/framework/command_line/CommonOptions.h"
+#include "tests/framework/Framework.h"
+#include "tests/framework/instruments/Instruments.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "utils/command_line/CommandLineParser.h"
 #include "utils/Utils.cpp"
 
 #include "ValidateExample.h"
-#include "arm_compute/runtime/CL/CLHelpers.h"
-#include "arm_compute/runtime/Scheduler.h"
-#include "arm_compute/core/Version.h"
-#include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/framework/Framework.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/command_line/CommonOptions.h"
-#include "tests/framework/instruments/Instruments.h"
-#include "utils/command_line/CommandLineParser.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -65,7 +66,7 @@ namespace
 std::string command_line(int argc, char **argv)
 {
     std::stringstream ss;
-    for(int i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++)
     {
         ss << argv[i] << " ";
     }
@@ -84,16 +85,16 @@ public:
     }
     void do_run() override
     {
-        if(_is_setup)
+        if (_is_setup)
         {
             g_example->do_run();
         }
     }
     void do_teardown() override
     {
-        if(_is_setup)
+        if (_is_setup)
         {
-            if(validate)
+            if (validate)
             {
                 g_example->do_validate();
             }
@@ -103,7 +104,7 @@ public:
     }
 
 private:
-    bool _is_setup{ false };
+    bool _is_setup{false};
 };
 
 } // namespace
@@ -122,7 +123,7 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
 
     parser.parse(argc, argv);
 
-    if(options.help->is_set() && options.help->value())
+    if (options.help->is_set() && options.help->value())
     {
         parser.print_help(argv[0]);
         return 0;
@@ -132,7 +133,7 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
     g_example                                                 = std::move(example);
     g_example_argv.clear();
     g_example_argv.emplace_back(argv[0]);
-    for(auto &arg : example_args->value())
+    for (auto &arg : example_args->value())
     {
         g_example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
     }
@@ -140,21 +141,21 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
     library       = std::make_unique<AssetsLibrary>("." /* Only using random values */, seed->value());
     fixed_library = std::make_unique<AssetsLibrary>(".", fixed_seed);
 
-    if(options.log_level->value() > framework::LogLevel::NONE)
+    if (options.log_level->value() > framework::LogLevel::NONE)
     {
-        for(auto &p : printers)
+        for (auto &p : printers)
         {
             p->print_global_header();
         }
     }
 
 #ifdef ARM_COMPUTE_CL
-    if(opencl_is_available())
+    if (opencl_is_available())
     {
         CLBackendType backend_type = CLBackendType::Native;
-        for(auto &arg : example_args->value())
+        for (auto &arg : example_args->value())
         {
-            if(arg.find("--target=clvk") != std::string::npos)
+            if (arg.find("--target=clvk") != std::string::npos)
             {
                 backend_type = CLBackendType::Clvk;
                 break;
@@ -166,15 +167,15 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
     }
 #endif /* ARM_COMPUTE_CL */
 
-    if(options.log_level->value() >= framework::LogLevel::CONFIG)
+    if (options.log_level->value() >= framework::LogLevel::CONFIG)
     {
-        for(auto &p : printers)
+        for (auto &p : printers)
         {
             p->print_entry("Version", build_information());
             p->print_entry("CommandLine", command_line(argc, argv));
             p->print_entry("Seed", support::cpp11::to_string(seed->value()));
 #ifdef ARM_COMPUTE_CL
-            if(opencl_is_available())
+            if (opencl_is_available())
             {
                 p->print_entry("CL_DEVICE_VERSION", CLKernelLibrary::get().get_device_version());
             }
@@ -195,27 +196,29 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
     fconfig.log_level      = options.log_level->value();
     framework.init(fconfig);
 
-    for(auto &p : printers)
+    for (auto &p : printers)
     {
         framework.add_printer(p.get());
     }
 
     framework.set_throw_errors(options.throw_errors->value());
-    arm_compute::test::framework::detail::TestSuiteRegistrar suite{ "Examples" };
-    if(validate->value() != 0)
+    arm_compute::test::framework::detail::TestSuiteRegistrar suite{"Examples"};
+    if (validate->value() != 0)
     {
-        framework.add_test_case<ExampleTest<true>>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+        framework.add_test_case<ExampleTest<true>>(basename(argv[0]), framework::DatasetMode::ALL,
+                                                   arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
     }
     else
     {
-        framework.add_test_case<ExampleTest<false>>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+        framework.add_test_case<ExampleTest<false>>(basename(argv[0]), framework::DatasetMode::ALL,
+                                                    arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
     }
 
     //func(argc, argv);
     bool success = framework.run();
-    if(options.log_level->value() > framework::LogLevel::NONE)
+    if (options.log_level->value() > framework::LogLevel::NONE)
     {
-        for(auto &p : printers)
+        for (auto &p : printers)
         {
             p->print_global_footer();
         }

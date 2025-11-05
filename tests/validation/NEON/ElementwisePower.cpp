@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ElementwiseOperationsFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -48,13 +49,13 @@ RelativeTolerance<float> tolerance_fp32(0.001f);
 /** Input data sets **/
 #ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half> tolerance_fp16(static_cast<half>(0.01f));
-const auto              ElementwisePowerFP16Dataset = combine(make("DataType", DataType::F16), make("DataType", DataType::F16),
-                                                              make("DataType", DataType::F16));
+const auto              ElementwisePowerFP16Dataset =
+    combine(make("DataType", DataType::F16), make("DataType", DataType::F16), make("DataType", DataType::F16));
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-const auto ElementwisePowerFP32Dataset = combine(make("DataType", DataType::F32), make("DataType", DataType::F32),
-                                                 make("DataType", DataType::F32));
-const auto InPlaceDataSet    = make("InPlace", { false, true });
-const auto OutOfPlaceDataSet = make("InPlace", { false });
+const auto ElementwisePowerFP32Dataset =
+    combine(make("DataType", DataType::F32), make("DataType", DataType::F32), make("DataType", DataType::F32));
+const auto InPlaceDataSet    = make("InPlace", {false, true});
+const auto OutOfPlaceDataSet = make("InPlace", {false});
 } // namespace
 
 TEST_SUITE(NEON)
@@ -96,10 +97,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwisePowerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwisePowerFP16Dataset,
-                                                                                                       InPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEElementwisePowerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), ElementwisePowerFP16Dataset, InPlaceDataSet))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_fp16, 0.01);
@@ -115,40 +118,48 @@ TEST_SUITE_END() // F16
 
 TEST_SUITE(F32)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwisePowerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwisePowerFP32Dataset,
-                                                                                                        InPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEElementwisePowerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), ElementwisePowerFP32Dataset, InPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwisePowerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwisePowerFP32Dataset,
-                                                                                                            InPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEElementwisePowerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), ElementwisePowerFP32Dataset, InPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
 }
 
 template <typename T>
-using NEElementwisePowerBroadcastFixture = ElementwisePowerBroadcastValidationFixture<Tensor, Accessor, NEElementwisePower, T>;
+using NEElementwisePowerBroadcastFixture =
+    ElementwisePowerBroadcastValidationFixture<Tensor, Accessor, NEElementwisePower, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
-                       ElementwisePowerFP32Dataset,
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
+                       NEElementwisePowerBroadcastFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapesBroadcast(), ElementwisePowerFP32Dataset, OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::TinyShapesBroadcastInplace(),
-                       ElementwisePowerFP32Dataset,
-                       InPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunTinyBroadcastInPlace,
+                       NEElementwisePowerBroadcastFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::TinyShapesBroadcastInplace(), ElementwisePowerFP32Dataset, InPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEElementwisePowerBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
-                       ElementwisePowerFP32Dataset,
-                       OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast,
+                       NEElementwisePowerBroadcastFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapesBroadcast(), ElementwisePowerFP32Dataset, OutOfPlaceDataSet))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);

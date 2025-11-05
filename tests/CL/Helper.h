@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CL_HELPER_H
-#define ARM_COMPUTE_TEST_CL_HELPER_H
+#ifndef ACL_TESTS_CL_HELPER_H
+#define ACL_TESTS_CL_HELPER_H
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLFill.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/IFunction.h"
+
+#include "src/core/CL/ICLKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/gpu/cl/IClOperator.h"
 #include "src/gpu/cl/operators/ClFill.h"
-
-#include "src/core/CL/ICLKernel.h"
 #include "support/Cast.h"
 
 #include <memory>
@@ -51,7 +51,7 @@ public:
      * @param[in] args Configuration arguments.
      */
     template <typename... Args>
-    void configure(Args &&... args)
+    void configure(Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->configure(CLKernelLibrary::get().get_compile_context(), std::forward<Args>(args)...);
@@ -63,7 +63,7 @@ public:
      * @param[in] args       Configuration arguments.
      */
     template <typename... Args>
-    void configure(GPUTarget gpu_target, Args &&... args)
+    void configure(GPUTarget gpu_target, Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->set_target(gpu_target);
@@ -75,7 +75,7 @@ public:
      * @param[in] args Configuration arguments.
      */
     template <typename... Args>
-    static Status validate(Args &&... args)
+    static Status validate(Args &&...args)
     {
         return K::validate(std::forward<Args>(args)...);
     }
@@ -93,7 +93,7 @@ public:
      * @param[in] args   Rest of the configuration arguments.
      */
     template <typename T, typename... Args>
-    void configure(T first, T second, Args &&... args)
+    void configure(T first, T second, Args &&...args)
     {
         auto cctx = CLKernelLibrary::get().get_compile_context();
         auto k    = std::make_unique<K>();
@@ -109,7 +109,7 @@ public:
     {
         ARM_COMPUTE_ERROR_ON_MSG(!_kernel, "The CL kernel or function isn't configured");
 
-        ITensorPack fill_pack = { { ACL_SRC, tensors.get_tensor(TensorType::ACL_DST) } };
+        ITensorPack fill_pack = {{ACL_SRC, tensors.get_tensor(TensorType::ACL_DST)}};
         _fill.run(fill_pack);
         CLScheduler::get().enqueue_op(_border_handler, tensors);
         CLScheduler::get().enqueue_op(*_kernel, tensors);
@@ -131,7 +131,7 @@ public:
      * @param[in] args Configuration arguments.
      */
     template <typename... Args>
-    void configure(Args &&... args)
+    void configure(Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->configure(std::forward<Args>(args)...);
@@ -143,7 +143,7 @@ public:
      * @param[in] args       Configuration arguments.
      */
     template <typename... Args>
-    void configure(GPUTarget gpu_target, Args &&... args)
+    void configure(GPUTarget gpu_target, Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->set_target(gpu_target);
@@ -155,7 +155,7 @@ public:
      * @param[in] args Configuration arguments.
      */
     template <typename... Args>
-    static Status validate(Args &&... args)
+    static Status validate(Args &&...args)
     {
         return K::validate(std::forward<Args>(args)...);
     }
@@ -172,7 +172,7 @@ public:
      * @param[in] args  Rest of the configuration arguments.
      */
     template <typename T, typename... Args>
-    void configure(T first, Args &&... args)
+    void configure(T first, Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
@@ -193,7 +193,7 @@ public:
      * @param[in] args   Rest of the configuration arguments.
      */
     template <typename T, typename... Args>
-    void configure(T first, T second, Args &&... args)
+    void configure(T first, T second, Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->set_target(CLScheduler::get().target());
@@ -230,14 +230,15 @@ public:
      * @param[in] args  Rest of the configuration arguments.
      */
     template <typename T, typename... Args>
-    void configure(T first, Args &&... args)
+    void configure(T first, Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->configure(CLKernelLibrary::get().get_compile_context(), first, std::forward<Args>(args)...);
         _kernel = std::move(k);
 
         auto b = std::make_unique<CLFillBorderKernel>();
-        b->configure(CLKernelLibrary::get().get_compile_context(), first, BorderSize(_kernel->border_size()), BorderMode::CONSTANT, PixelValue());
+        b->configure(CLKernelLibrary::get().get_compile_context(), first, BorderSize(_kernel->border_size()),
+                     BorderMode::CONSTANT, PixelValue());
         _border_handler = std::move(b);
     }
 
@@ -248,9 +249,9 @@ public:
     }
 
 private:
-    std::unique_ptr<ICLKernel> _border_handler{ nullptr }; /**< Kernel to handle  borders */
-    std::unique_ptr<ICLKernel> _kernel{};                  /**< Kernel to run */
+    std::unique_ptr<ICLKernel> _border_handler{nullptr}; /**< Kernel to handle  borders */
+    std::unique_ptr<ICLKernel> _kernel{};                /**< Kernel to run */
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CL_HELPER_H */
+#endif // ACL_TESTS_CL_HELPER_H

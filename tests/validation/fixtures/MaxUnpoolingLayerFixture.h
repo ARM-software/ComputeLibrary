@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2020-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,13 +28,15 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/MaxUnpoolingLayer.h"
 #include "tests/validation/reference/PoolingLayer.h"
+
 #include <random>
 namespace arm_compute
 {
@@ -42,13 +44,17 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename PoolingFunctionType, typename MaxUnpoolingFunctionType, typename T>
+template <typename TensorType,
+          typename AccessorType,
+          typename PoolingFunctionType,
+          typename MaxUnpoolingFunctionType,
+          typename T>
 class MaxUnpoolingLayerValidationGenericFixture : public framework::Fixture
 {
 public:
     void setup(TensorShape shape, PoolingLayerInfo pool_info, DataType data_type, DataLayout data_layout)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -56,11 +62,11 @@ public:
 
         std::mt19937                    gen(library->seed());
         std::uniform_int_distribution<> offset_dis(0, 20);
-        const float                     scale     = data_type == DataType::QASYMM8_SIGNED ? 1.f / 127.f : 1.f / 255.f;
-        const int                       scale_in  = data_type == DataType::QASYMM8_SIGNED ? -offset_dis(gen) : offset_dis(gen);
-        const int                       scale_out = data_type == DataType::QASYMM8_SIGNED ? -offset_dis(gen) : offset_dis(gen);
-        const QuantizationInfo          input_qinfo(scale, scale_in);
-        const QuantizationInfo          output_qinfo(scale, scale_out);
+        const float                     scale = data_type == DataType::QASYMM8_SIGNED ? 1.f / 127.f : 1.f / 255.f;
+        const int              scale_in  = data_type == DataType::QASYMM8_SIGNED ? -offset_dis(gen) : offset_dis(gen);
+        const int              scale_out = data_type == DataType::QASYMM8_SIGNED ? -offset_dis(gen) : offset_dis(gen);
+        const QuantizationInfo input_qinfo(scale, scale_in);
+        const QuantizationInfo output_qinfo(scale, scale_out);
         _pool_info = pool_info;
         _target    = compute_target(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo);
         _reference = compute_reference(shape, pool_info, data_type, input_qinfo, output_qinfo);
@@ -70,14 +76,14 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::F32)
+        if (tensor.data_type() == DataType::F32)
         {
             std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
             library->fill(tensor, distribution, 0);
         }
-        else if(tensor.data_type() == DataType::F16)
+        else if (tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
             library->fill(tensor, distribution, 0);
         }
         else // data type is quantized_asymmetric
@@ -86,12 +92,15 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape input_shape, PoolingLayerInfo pool_info,
-                              DataType data_type, DataLayout data_layout,
-                              QuantizationInfo input_qinfo, QuantizationInfo output_qinfo)
+    TensorType compute_target(TensorShape      input_shape,
+                              PoolingLayerInfo pool_info,
+                              DataType         data_type,
+                              DataLayout       data_layout,
+                              QuantizationInfo input_qinfo,
+                              QuantizationInfo output_qinfo)
     {
         // Change shape in case of NHWC.
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
         }
@@ -135,8 +144,11 @@ protected:
         return unpooled;
     }
 
-    SimpleTensor<T> compute_reference(TensorShape input_shape, PoolingLayerInfo info, DataType data_type,
-                                      QuantizationInfo input_qinfo, QuantizationInfo output_qinfo)
+    SimpleTensor<T> compute_reference(TensorShape      input_shape,
+                                      PoolingLayerInfo info,
+                                      DataType         data_type,
+                                      QuantizationInfo input_qinfo,
+                                      QuantizationInfo output_qinfo)
     {
         SimpleTensor<T>        src(input_shape, data_type, 1, input_qinfo);
         SimpleTensor<uint32_t> indices{};
@@ -152,13 +164,19 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename F1, typename F2, typename T>
-class MaxUnpoolingLayerValidationFixture : public MaxUnpoolingLayerValidationGenericFixture<TensorType, AccessorType, F1, F2, T>
+class MaxUnpoolingLayerValidationFixture
+    : public MaxUnpoolingLayerValidationGenericFixture<TensorType, AccessorType, F1, F2, T>
 {
 public:
-    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, DataType data_type, DataLayout data_layout)
+    void setup(TensorShape   shape,
+               PoolingType   pool_type,
+               Size2D        pool_size,
+               PadStrideInfo pad_stride_info,
+               DataType      data_type,
+               DataLayout    data_layout)
     {
-        MaxUnpoolingLayerValidationGenericFixture<TensorType, AccessorType, F1, F2, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, true),
-                                                                                              data_type, data_layout);
+        MaxUnpoolingLayerValidationGenericFixture<TensorType, AccessorType, F1, F2, T>::setup(
+            shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, true), data_type, data_layout);
     }
 };
 

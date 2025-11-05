@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ReshapeLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ReshapeLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -79,7 +80,10 @@ using CLReshapeLayerFixture = ReshapeLayerValidationFixture<CLTensor, CLAccessor
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -87,8 +91,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<float>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType",
-                                                                                                   DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -98,7 +104,11 @@ TEST_SUITE_END()
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", { DataType::U8, DataType::QASYMM8 })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(),
+                               make("DataType", {DataType::U8, DataType::QASYMM8})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -106,7 +116,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -114,7 +127,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<int8_t>, framework::Datas
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ComputeAllAnchors.h"
 
@@ -46,7 +47,7 @@ class ComputeAllAnchorsGenericFixture : public framework::Fixture
 public:
     void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type, QuantizationInfo qinfo)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -63,7 +64,8 @@ protected:
         library->fill_tensor_uniform(tensor, 0, T(0), T(100));
     }
 
-    TensorType compute_target(size_t num_anchors, DataType data_type, const ComputeAnchorsInfo &info, QuantizationInfo qinfo)
+    TensorType
+    compute_target(size_t num_anchors, DataType data_type, const ComputeAnchorsInfo &info, QuantizationInfo qinfo)
     {
         // Create tensors
         TensorShape anchors_shape(4, num_anchors);
@@ -91,10 +93,8 @@ protected:
         return all_anchors;
     }
 
-    SimpleTensor<T> compute_reference(size_t                    num_anchors,
-                                      DataType                  data_type,
-                                      const ComputeAnchorsInfo &info,
-                                      QuantizationInfo          qinfo)
+    SimpleTensor<T>
+    compute_reference(size_t num_anchors, DataType data_type, const ComputeAnchorsInfo &info, QuantizationInfo qinfo)
     {
         // Create reference tensor
         SimpleTensor<T> anchors(TensorShape(4, num_anchors), data_type, 1, qinfo);
@@ -114,17 +114,20 @@ class ComputeAllAnchorsFixture : public ComputeAllAnchorsGenericFixture<TensorTy
 public:
     void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type)
     {
-        ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type, QuantizationInfo());
+        ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type,
+                                                                                          QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ComputeAllAnchorsQuantizedFixture : public ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ComputeAllAnchorsQuantizedFixture
+    : public ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type, QuantizationInfo qinfo)
     {
-        ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type, qinfo);
+        ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type,
+                                                                                          qinfo);
     }
 };
 } // namespace validation

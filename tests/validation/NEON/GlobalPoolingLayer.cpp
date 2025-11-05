@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/PoolingTypesDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/PoolingLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -49,7 +50,8 @@ namespace
 const auto GlobalPoolingLayerDataset = combine(datasets::GlobalPoolingShapes(), datasets::PoolingTypes());
 
 /** Input data set for quantized data types */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 types */
+constexpr AbsoluteTolerance<float> tolerance_f32(
+    0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 types */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -60,9 +62,12 @@ using NEGlobalPoolingLayerFixture = GlobalPoolingLayerValidationFixture<Tensor, 
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, NEGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, make("DataType",
-                                                                                                                  DataType::F32),
-                                                                                                                  make("DataLayout", DataLayout::NCHW)))
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling,
+                       NEGlobalPoolingLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(GlobalPoolingLayerDataset,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);

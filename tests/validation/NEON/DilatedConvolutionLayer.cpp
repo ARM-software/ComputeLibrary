@@ -26,15 +26,16 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "src/cpu/operators/CpuConv2d.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/DilatedConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -46,23 +47,27 @@ using framework::dataset::make;
 
 namespace
 {
-const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+const AbsoluteTolerance<float> tolerance_f32(
+    0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const AbsoluteTolerance<float>            abs_tolerance_f16(0.3f);                   /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr float                           tolerance_num_f16 = 0.07f;                 /**< Tolerance number for FP16 */
-#endif                                                                               /* ARM_COMPUTE_ENABLE_FP16 */
-constexpr AbsoluteTolerance<int32_t> tolerance_qasymm8(1);                           /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+const AbsoluteTolerance<float> abs_tolerance_f16(
+    0.3f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(
+    0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr float                           tolerance_num_f16 = 0.07f; /**< Tolerance number for FP16 */
+#endif                                                               /* ARM_COMPUTE_ENABLE_FP16 */
+constexpr AbsoluteTolerance<int32_t> tolerance_qasymm8(
+    1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** CNN data types */
 const auto CNNDataTypes = make("DataType",
-{
+                               {
 #ifdef ARM_COMPUTE_ENABLE_FP16
-    DataType::F16,
+                                   DataType::F16,
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-    DataType::F32,
-    DataType::QASYMM8,
-});
+                                   DataType::F32,
+                                   DataType::QASYMM8,
+                               });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -118,13 +123,16 @@ using NEGEMMDilatedConvolutionLayerFixture = ConvolutionValidationFixture<Tensor
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                                                                                        make("ReshapeWeights", { true }),
-                                                                                                                        make("DataType", DataType::F16),
-                                                                                                                        make("DataLayout", { DataLayout::NCHW }),
-                                                                                                                        make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEGEMMDilatedConvolutionLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
@@ -135,13 +143,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, fra
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                      make("ReshapeWeights", { true }),
-                                                                                                                      make("DataType", DataType::F16),
-                                                                                                                      make("DataLayout", { DataLayout::NCHW }),
-                                                                                                                      make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEGEMMDilatedConvolutionLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
@@ -156,20 +167,26 @@ TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                       make("ReshapeWeights", { true }),
-                       make("DataType", DataType::F32),
-                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                       make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEGEMMDilatedConvolutionLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                       make("ReshapeWeights", { true }),
-                                                                                                                       make("DataType", DataType::F32),
-                                                                                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                       make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEGEMMDilatedConvolutionLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -178,7 +195,8 @@ TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
 template <typename T>
-using NEGEMMDilatedConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
+using NEGEMMDilatedConvolutionLayerQuantizedFixture =
+    ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Quantized)
 /// @note: Every asymmetric quantized test where there's no fused activation will have its quantization info ignored
@@ -187,23 +205,27 @@ TEST_SUITE(Quantized)
 /// When we can also support dynamic quantization with the presence of activation, we can remove the explicit
 /// quantization info.
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                               make("ReshapeWeights", { true }),
-                                                       make("DataType", DataType::QASYMM8),
-                                               make("DataLayout", { DataLayout::NCHW }),
-                                       make("IgnoredQuantizationInfo", { QuantizationInfo() }),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               make("IgnoredQuantizationInfo", {QuantizationInfo()}),
                                make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                               make("ReshapeWeights", { true }),
-                                                       make("DataType", DataType::QASYMM8),
-                                               make("DataLayout", { DataLayout::NCHW }),
-                                       make("IgnoredQuantizationInfo", { QuantizationInfo() }),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               make("IgnoredQuantizationInfo", {QuantizationInfo()}),
                                make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output

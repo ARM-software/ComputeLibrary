@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ void Profiler::add(std::unique_ptr<Instrument> instrument)
 
 void Profiler::test_start()
 {
-    for(auto &instrument : _instruments)
+    for (auto &instrument : _instruments)
     {
         instrument->test_start();
     }
@@ -47,7 +47,7 @@ void Profiler::test_start()
 
 void Profiler::start()
 {
-    for(auto &instrument : _instruments)
+    for (auto &instrument : _instruments)
     {
         instrument->start();
     }
@@ -55,21 +55,24 @@ void Profiler::start()
 
 void Profiler::stop(int32_t iteration)
 {
-    for(auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
+    for (auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
     {
         (*instrument)->stop();
     }
-    for(const auto &instrument : _instruments)
+    for (const auto &instrument : _instruments)
     {
-        for(const auto &measurement : instrument->measurements())
+        for (const auto &measurement : instrument->measurements())
         {
-            if(iteration < 0) // do not append "Iteration-X" prefix, we do not wish to print the figures for the invidivual iterations
+            if (iteration <
+                0) // do not append "Iteration-X" prefix, we do not wish to print the figures for the invidivual iterations
             {
                 _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
             }
             else
             {
-                _measurements["Iteration-" +  std::to_string(iteration) + "     " +  instrument->id() + "/" + measurement.first].push_back(measurement.second);
+                _measurements["Iteration-" + std::to_string(iteration) + "     " + instrument->id() + "/" +
+                              measurement.first]
+                    .push_back(measurement.second);
             }
         }
     }
@@ -77,14 +80,14 @@ void Profiler::stop(int32_t iteration)
 
 void Profiler::test_stop()
 {
-    for(auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
+    for (auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
     {
         (*instrument)->test_stop();
     }
 
-    for(const auto &instrument : _instruments)
+    for (const auto &instrument : _instruments)
     {
-        for(const auto &measurement : instrument->test_measurements())
+        for (const auto &measurement : instrument->test_measurements())
         {
             _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SIMPLE_TENSOR_ACCESSOR_H
-#define ARM_COMPUTE_TEST_SIMPLE_TENSOR_ACCESSOR_H
+#ifndef ACL_TESTS_SIMPLETENSORACCESSOR_H
+#define ACL_TESTS_SIMPLETENSORACCESSOR_H
+
+#include "tests/IAccessor.h"
 
 #include "SimpleTensor.h"
-#include "tests/IAccessor.h"
 
 namespace arm_compute
 {
@@ -73,16 +74,15 @@ public:
     int              num_elements() const override;
     PaddingSize      padding() const override;
     QuantizationInfo quantization_info() const override;
-    const void *operator()(const Coordinates &coord) const override;
-    void *operator()(const Coordinates &coord) override;
+    const void      *operator()(const Coordinates &coord) const override;
+    void            *operator()(const Coordinates &coord) override;
 
 private:
     SimpleTensor<T> &_tensor;
 };
 
 template <typename T>
-inline SimpleTensorAccessor<T>::SimpleTensorAccessor(SimpleTensor<T> &tensor)
-    : _tensor{ tensor }
+inline SimpleTensorAccessor<T>::SimpleTensorAccessor(SimpleTensor<T> &tensor) : _tensor{tensor}
 {
 }
 
@@ -171,4 +171,4 @@ inline void *SimpleTensorAccessor<T>::operator()(const Coordinates &coord)
 }
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SIMPLE_TENSOR_ACCESSOR_H */
+#endif // ACL_TESTS_SIMPLETENSORACCESSOR_H

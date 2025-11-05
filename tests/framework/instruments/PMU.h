@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PMU
-#define ARM_COMPUTE_TEST_PMU
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_PMU_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_PMU_H
 
 #include "arm_compute/core/Error.h"
 
@@ -84,7 +84,7 @@ public:
 
 private:
     perf_event_attr _perf_config;
-    long            _fd{ -1 };
+    long            _fd{-1};
 };
 
 template <typename T>
@@ -93,7 +93,7 @@ T PMU::get_value() const
     T             value{};
     const ssize_t result = read(_fd, &value, sizeof(T));
 
-    if(result == -1)
+    if (result == -1)
     {
         ARM_COMPUTE_ERROR_VAR("Can't get PMU counter value: %d", errno);
     }
@@ -103,4 +103,4 @@ T PMU::get_value() const
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PMU */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_PMU_H

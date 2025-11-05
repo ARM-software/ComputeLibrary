@@ -24,14 +24,15 @@
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
+
 #include "src/graph/mutators/MutatorUtils.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
 #include "tests/validation/fixtures/PadLayerFixture.h"
+#include "tests/validation/Validation.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -44,22 +45,13 @@ using framework::dataset::make;
 namespace
 {
 const auto PaddingSizesDataset3D = make("PaddingSize",
-{
-    PaddingList{ { 0, 0 } },
-    PaddingList{ { 1, 1 } },
-    PaddingList{ { 33, 33 } },
-    PaddingList{ { 1, 1 }, { 5, 5 } },
-    PaddingList{ { 1, 1 }, { 1, 1 }, { 5, 5 } },
-    PaddingList{ { 0, 0 }, { 1, 0 }, { 0, 1 } },
-    PaddingList{ { 0, 0 }, { 0, 0 }, { 0, 0 } }
-});
-const auto PaddingSizesDataset4D = make("PaddingSize",
-{
-    PaddingList{ { 1, 1 }, { 1, 0 }, { 1, 1 }, { 0, 0 } },
-    PaddingList{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 1, 1 } },
-    PaddingList{ { 0, 1 }, { 1, 0 }, { 2, 2 }, { 1, 0 } },
-    PaddingList{ { 1, 1 }, { 1, 1 }, { 1, 1 }, { 3, 3 } }
-});
+                                        {PaddingList{{0, 0}}, PaddingList{{1, 1}}, PaddingList{{33, 33}},
+                                         PaddingList{{1, 1}, {5, 5}}, PaddingList{{1, 1}, {1, 1}, {5, 5}},
+                                         PaddingList{{0, 0}, {1, 0}, {0, 1}}, PaddingList{{0, 0}, {0, 0}, {0, 0}}});
+const auto PaddingSizesDataset4D =
+    make("PaddingSize",
+         {PaddingList{{1, 1}, {1, 0}, {1, 1}, {0, 0}}, PaddingList{{0, 0}, {0, 0}, {0, 0}, {1, 1}},
+          PaddingList{{0, 1}, {1, 0}, {2, 2}, {1, 0}}, PaddingList{{1, 1}, {1, 1}, {1, 1}, {3, 3}}});
 } // namespace
 
 TEST_SUITE(CL)
@@ -177,23 +169,37 @@ using CLPaddingFixture = PaddingFixture<CLTensor, CLAccessor, CLPadLayer, T>;
 TEST_SUITE(Float)
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<float>, framework::DatasetMode::ALL,
-                       combine(datasets::Small3DShapes(), make("DataType", { DataType::F32 }), PaddingSizesDataset3D,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPaddingFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small3DShapes(),
+                               make("DataType", {DataType::F32}),
+                               PaddingSizesDataset3D,
+                               make("PaddingMode",
+                                    {PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall4D, CLPaddingFixture<float>, framework::DatasetMode::ALL,
-                       combine(datasets::Small4DShapes(), make("DataType", { DataType::F32 }), PaddingSizesDataset4D,
-                               make("PaddingMode", { PaddingMode::CONSTANT })))
+FIXTURE_DATA_TEST_CASE(RunSmall4D,
+                       CLPaddingFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", {DataType::F32}),
+                               PaddingSizesDataset4D,
+                               make("PaddingMode", {PaddingMode::CONSTANT})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::Large3DShapes(), make("DataType", { DataType::F32 }), PaddingSizesDataset3D,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLPaddingFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(),
+                               make("DataType", {DataType::F32}),
+                               PaddingSizesDataset3D,
+                               make("PaddingMode",
+                                    {PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -201,9 +207,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<float>, framework::DatasetMode
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::Large3DShapes(), make("DataType", { DataType::F16 }), PaddingSizesDataset3D,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLPaddingFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(),
+                               make("DataType", {DataType::F16}),
+                               PaddingSizesDataset3D,
+                               make("PaddingMode", {PaddingMode::CONSTANT, PaddingMode::REFLECT})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -213,23 +223,35 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::Small3DShapes(), make("DataType", { DataType::QASYMM8 }), PaddingSizesDataset3D,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPaddingFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::Small3DShapes(),
+                               make("DataType", {DataType::QASYMM8}),
+                               PaddingSizesDataset3D,
+                               make("PaddingMode", {PaddingMode::CONSTANT, PaddingMode::REFLECT})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall4D, CLPaddingFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::Small4DShapes(), make("DataType", { DataType::QASYMM8 }), PaddingSizesDataset4D,
-                               make("PaddingMode", { PaddingMode::CONSTANT })))
+FIXTURE_DATA_TEST_CASE(RunSmall4D,
+                       CLPaddingFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", {DataType::QASYMM8}),
+                               PaddingSizesDataset4D,
+                               make("PaddingMode", {PaddingMode::CONSTANT})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::Large3DShapes(), make("DataType", { DataType::QASYMM8 }), PaddingSizesDataset3D,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLPaddingFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(),
+                               make("DataType", {DataType::QASYMM8}),
+                               PaddingSizesDataset3D,
+                               make("PaddingMode", {PaddingMode::CONSTANT, PaddingMode::REFLECT})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -237,9 +259,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<uint8_t>, framework::DatasetMo
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::Small3DShapes(), make("DataType", { DataType::QASYMM8_SIGNED }), PaddingSizesDataset3D,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPaddingFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::Small3DShapes(),
+                               make("DataType", {DataType::QASYMM8_SIGNED}),
+                               PaddingSizesDataset3D,
+                               make("PaddingMode", {PaddingMode::CONSTANT, PaddingMode::REFLECT})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

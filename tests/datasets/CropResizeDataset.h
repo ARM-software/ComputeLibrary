@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CROP_RESIZE_DATASET
-#define ARM_COMPUTE_TEST_CROP_RESIZE_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_CROPRESIZEDATASET_H
+#define ACL_TESTS_DATASETS_CROPRESIZEDATASET_H
 
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -46,11 +46,11 @@ public:
                  std::vector<Coordinates2D>::const_iterator       crop_size_values_it,
                  std::vector<InterpolationPolicy>::const_iterator method_values_it,
                  std::vector<float>::const_iterator               extrapolation_values_it)
-            : _src_shapes_it{ std::move(src_shapes_it) },
-              _boxes_shapes_it{ std::move(boxes_shapes_it) },
-              _crop_size_values_it{ std::move(crop_size_values_it) },
-              _method_values_it{ std::move(method_values_it) },
-              _extrapolation_values_it{ std::move(extrapolation_values_it) }
+            : _src_shapes_it{std::move(src_shapes_it)},
+              _boxes_shapes_it{std::move(boxes_shapes_it)},
+              _crop_size_values_it{std::move(crop_size_values_it)},
+              _method_values_it{std::move(method_values_it)},
+              _extrapolation_values_it{std::move(extrapolation_values_it)}
         {
         }
 
@@ -67,7 +67,8 @@ public:
 
         CropResizeDataset::type operator*() const
         {
-            return std::make_tuple(*_src_shapes_it, *_boxes_shapes_it, *_crop_size_values_it, *_method_values_it, *_extrapolation_values_it);
+            return std::make_tuple(*_src_shapes_it, *_boxes_shapes_it, *_crop_size_values_it, *_method_values_it,
+                                   *_extrapolation_values_it);
         }
 
         iterator &operator++()
@@ -90,15 +91,23 @@ public:
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _boxes_shapes.begin(), _crop_size_values.begin(), _method_values.begin(), _extrapolation_values.begin());
+        return iterator(_src_shapes.begin(), _boxes_shapes.begin(), _crop_size_values.begin(), _method_values.begin(),
+                        _extrapolation_values.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_boxes_shapes.size(), std::min(_crop_size_values.size(), std::min(_method_values.size(), _extrapolation_values.size()))));
+        return std::min(
+            _src_shapes.size(),
+            std::min(_boxes_shapes.size(), std::min(_crop_size_values.size(),
+                                                    std::min(_method_values.size(), _extrapolation_values.size()))));
     }
 
-    void add_config(TensorShape src_shape, TensorShape boxes_shape, Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value)
+    void add_config(TensorShape         src_shape,
+                    TensorShape         boxes_shape,
+                    Coordinates2D       crop_size,
+                    InterpolationPolicy method,
+                    float               extrapolation_value)
     {
         _src_shapes.emplace_back(std::move(src_shape));
         _boxes_shapes.emplace_back(std::move(boxes_shape));
@@ -124,18 +133,24 @@ class SmallCropResizeDataset final : public CropResizeDataset
 public:
     SmallCropResizeDataset()
     {
-        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{ 2, 2 }, InterpolationPolicy::BILINEAR, 100);
-        add_config(TensorShape(3U, 5U, 5U), TensorShape(4, 5), Coordinates2D{ 2, 2 }, InterpolationPolicy::BILINEAR, 100);
-        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{ 10, 10 }, InterpolationPolicy::BILINEAR, 100);
-        add_config(TensorShape(15U, 30U, 30U, 10U), TensorShape(4, 20), Coordinates2D{ 10, 10 }, InterpolationPolicy::BILINEAR, 100);
+        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{2, 2}, InterpolationPolicy::BILINEAR, 100);
+        add_config(TensorShape(3U, 5U, 5U), TensorShape(4, 5), Coordinates2D{2, 2}, InterpolationPolicy::BILINEAR, 100);
+        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{10, 10}, InterpolationPolicy::BILINEAR,
+                   100);
+        add_config(TensorShape(15U, 30U, 30U, 10U), TensorShape(4, 20), Coordinates2D{10, 10},
+                   InterpolationPolicy::BILINEAR, 100);
 
-        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{ 2, 2 }, InterpolationPolicy::NEAREST_NEIGHBOR, 100);
-        add_config(TensorShape(3U, 5U, 5U), TensorShape(4, 5), Coordinates2D{ 2, 2 }, InterpolationPolicy::NEAREST_NEIGHBOR, 100);
-        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{ 10, 10 }, InterpolationPolicy::NEAREST_NEIGHBOR, 100);
-        add_config(TensorShape(15U, 30U, 30U, 10U), TensorShape(4, 20), Coordinates2D{ 10, 10 }, InterpolationPolicy::NEAREST_NEIGHBOR, 100);
+        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{2, 2},
+                   InterpolationPolicy::NEAREST_NEIGHBOR, 100);
+        add_config(TensorShape(3U, 5U, 5U), TensorShape(4, 5), Coordinates2D{2, 2},
+                   InterpolationPolicy::NEAREST_NEIGHBOR, 100);
+        add_config(TensorShape(1U, 5U, 5U), TensorShape(4, 5), Coordinates2D{10, 10},
+                   InterpolationPolicy::NEAREST_NEIGHBOR, 100);
+        add_config(TensorShape(15U, 30U, 30U, 10U), TensorShape(4, 20), Coordinates2D{10, 10},
+                   InterpolationPolicy::NEAREST_NEIGHBOR, 100);
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CROP_RESIZE_DATASET */
+#endif // ACL_TESTS_DATASETS_CROPRESIZEDATASET_H

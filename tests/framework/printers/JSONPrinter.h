@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017,2021 Arm Limited.
+ * Copyright (c) 2017,2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_JSONPRINTER
-#define ARM_COMPUTE_TEST_JSONPRINTER
+#ifndef ACL_TESTS_FRAMEWORK_PRINTERS_JSONPRINTER_H
+#define ACL_TESTS_FRAMEWORK_PRINTERS_JSONPRINTER_H
 
 #include "Printer.h"
-
 #include <list>
 
 namespace arm_compute
@@ -64,11 +63,11 @@ private:
     std::list<std::string> _errors{};
     std::list<std::string> _expected_errors{};
 
-    bool _first_entry{ true };
-    bool _first_test{ true };
-    bool _first_test_entry{ true };
+    bool _first_entry{true};
+    bool _first_test{true};
+    bool _first_test_entry{true};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_JSONPRINTER */
+#endif // ACL_TESTS_FRAMEWORK_PRINTERS_JSONPRINTER_H

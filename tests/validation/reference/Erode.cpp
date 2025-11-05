@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,9 @@
  */
 #include "Erode.h"
 
-#include "Utils.h"
 #include "tests/validation/Helpers.h"
 
+#include "Utils.h"
 #include <algorithm>
 #include <array>
 
@@ -53,18 +53,18 @@ SimpleTensor<T> erode(const SimpleTensor<T> &src, BorderMode border_mode, T cons
 
     const uint32_t num_elements = src.num_elements();
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(uint32_t i = 0; i < num_elements; ++i)
+    for (uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates coord = index2coord(src.shape(), i);
         const int   x     = coord.x();
         const int   y     = coord.y();
 
-        std::array<T, 9> neighbours = { { 0 } };
-        for(int row = y - 1, j = 0; row <= y + 1; ++row)
+        std::array<T, 9> neighbours = {{0}};
+        for (int row = y - 1, j = 0; row <= y + 1; ++row)
         {
-            for(int col = x - 1; col <= x + 1; ++col, ++j)
+            for (int col = x - 1; col <= x + 1; ++col, ++j)
             {
                 coord.set(0, col);
                 coord.set(1, row);
@@ -78,7 +78,8 @@ SimpleTensor<T> erode(const SimpleTensor<T> &src, BorderMode border_mode, T cons
     return dst;
 }
 
-template SimpleTensor<uint8_t> erode(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value);
+template SimpleTensor<uint8_t>
+erode(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value);
 } // namespace reference
 } // namespace validation
 } // namespace test

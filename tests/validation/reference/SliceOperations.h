@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SLICE_OPERATIONS_H
-#define ARM_COMPUTE_TEST_SLICE_OPERATIONS_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_SLICEOPERATIONS_H
+#define ACL_TESTS_VALIDATION_REFERENCE_SLICEOPERATIONS_H
 
 #include "tests/SimpleTensor.h"
 
@@ -39,10 +39,14 @@ SimpleTensor<T> slice(const SimpleTensor<T> &src, Coordinates starts, Coordinate
 
 template <typename T>
 SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
-                              Coordinates starts, Coordinates ends, BiStrides strides,
-                              int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
+                              Coordinates            starts,
+                              Coordinates            ends,
+                              BiStrides              strides,
+                              int32_t                begin_mask,
+                              int32_t                end_mask,
+                              int32_t                shrink_axis_mask);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SLICE_OPERATIONS_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_SLICEOPERATIONS_H

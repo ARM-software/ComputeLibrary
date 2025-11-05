@@ -26,16 +26,16 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/ParametersLibrary.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/helpers/ActivationHelpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
-#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
@@ -47,12 +47,15 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ActivationValidationGenericFixture : public framework::Fixture
 {
 public:
-
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function,
-            float alpha_beta, DataType data_type, QuantizationInfo quantization_info,
-            bool padding_after_configure)
+    void setup(TensorShape                             shape,
+               bool                                    in_place,
+               ActivationLayerInfo::ActivationFunction function,
+               float                                   alpha_beta,
+               DataType                                data_type,
+               QuantizationInfo                        quantization_info,
+               bool                                    padding_after_configure)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -75,12 +78,13 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(is_data_type_float(_data_type))
+        if (is_data_type_float(_data_type))
         {
-            float min_bound = 0;
-            float max_bound = 0;
+            float min_bound                = 0;
+            float max_bound                = 0;
             std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type);
-            library->fill_static_values(tensor, helper::get_boundary_values(_data_type, static_cast<T>(min_bound), static_cast<T>(max_bound)));
+            library->fill_static_values(
+                tensor, helper::get_boundary_values(_data_type, static_cast<T>(min_bound), static_cast<T>(max_bound)));
         }
         else
         {
@@ -104,7 +108,7 @@ protected:
 
         act_layer.configure(&src, dst_ptr, info);
 
-        if(_padding_after_configure)
+        if (_padding_after_configure)
         {
             add_padding_x({&src, &dst});
         }
@@ -116,7 +120,7 @@ protected:
         src.allocator()->allocate();
         ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
 
-        if(!_in_place)
+        if (!_in_place)
         {
             dst.allocator()->allocate();
             ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
@@ -128,7 +132,7 @@ protected:
         // Compute function
         act_layer.run();
 
-        if(_in_place)
+        if (_in_place)
         {
             return src;
         }
@@ -141,7 +145,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, _data_type, 1, _input_quantization_info };
+        SimpleTensor<T> src{shape, _data_type, 1, _input_quantization_info};
 
         // Fill reference
         fill(src);
@@ -164,7 +168,11 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ActivationValidationFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type)
+    void setup(TensorShape                             shape,
+               bool                                    in_place,
+               ActivationLayerInfo::ActivationFunction function,
+               float                                   alpha_beta,
+               DataType                                data_type)
     {
         ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
             shape, in_place, function, alpha_beta, data_type, QuantizationInfo(), false /* padding_after_configure */);
@@ -172,10 +180,15 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ActivationWithPaddingValidationFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ActivationWithPaddingValidationFixture
+    : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type)
+    void setup(TensorShape                             shape,
+               bool                                    in_place,
+               ActivationLayerInfo::ActivationFunction function,
+               float                                   alpha_beta,
+               DataType                                data_type)
     {
         ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
             shape, in_place, function, alpha_beta, data_type, QuantizationInfo(), true /* padding_after_configure */);
@@ -183,10 +196,16 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ActivationValidationQuantizedFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ActivationValidationQuantizedFixture
+    : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape                             shape,
+               bool                                    in_place,
+               ActivationLayerInfo::ActivationFunction function,
+               float                                   alpha_beta,
+               DataType                                data_type,
+               QuantizationInfo                        quantization_info)
     {
         ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
             shape, in_place, function, alpha_beta, data_type, quantization_info, false /* padding_after_configure */);
@@ -194,10 +213,16 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ActivationWithPaddingValidationQuantizedFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ActivationWithPaddingValidationQuantizedFixture
+    : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape                             shape,
+               bool                                    in_place,
+               ActivationLayerInfo::ActivationFunction function,
+               float                                   alpha_beta,
+               DataType                                data_type,
+               QuantizationInfo                        quantization_info)
     {
         ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
             shape, in_place, function, alpha_beta, data_type, quantization_info, true /* padding_after_configure */);

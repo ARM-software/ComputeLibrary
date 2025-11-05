@@ -26,13 +26,13 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/CropResizeDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CropResizeFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -100,10 +100,11 @@ TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<half>,
                        framework::DatasetMode::ALL,
-                       combine(datasets::SmallCropResizeDataset(),make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::F16)))
+                       combine(datasets::SmallCropResizeDataset(),
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -121,8 +122,9 @@ TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<float>,
                        framework::DatasetMode::ALL,
-                       combine(datasets::SmallCropResizeDataset(),make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::F32)))
+                       combine(datasets::SmallCropResizeDataset(),
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -134,8 +136,9 @@ TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<uint8_t>,
                        framework::DatasetMode::ALL,
-                       combine(datasets::SmallCropResizeDataset(),make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::U8)))
+                       combine(datasets::SmallCropResizeDataset(),
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -146,8 +149,9 @@ TEST_SUITE(U16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<uint16_t>,
                        framework::DatasetMode::ALL,
-                       combine(datasets::SmallCropResizeDataset(),make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::U16)))
+                       combine(datasets::SmallCropResizeDataset(),
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -158,8 +162,9 @@ TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<int16_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallCropResizeDataset(),make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::S16)))
+                       combine(datasets::SmallCropResizeDataset(),
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -170,8 +175,9 @@ TEST_SUITE(U32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<uint32_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallCropResizeDataset(),make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::U32)))
+                       combine(datasets::SmallCropResizeDataset(),
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -182,8 +188,9 @@ TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<int32_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallCropResizeDataset(),make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::S32)))
+                       combine(datasets::SmallCropResizeDataset(),
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::S32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);

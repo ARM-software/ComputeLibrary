@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/reference/ArithmeticOperations.h"
 
 namespace arm_compute
@@ -36,8 +37,12 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T>
-gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta, bool fast_math)
+SimpleTensor<T> gemm(const SimpleTensor<T> &a,
+                     const SimpleTensor<T> &b,
+                     const SimpleTensor<T> &c,
+                     float                  alpha,
+                     float                  beta,
+                     bool                   fast_math)
 {
     // Create reference
     SimpleTensor<T> dst{c.shape(), c.data_type(), 1};
@@ -54,12 +59,12 @@ gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &
 
     const int b_stride_z =
         b.shape().num_dimensions() > 2
-        ? N * K
-        : 0; // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
+            ? N * K
+            : 0; // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
     int b_stride_w =
         b.shape().num_dimensions() > 3
-        ? K * N * D
-        : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+            ? K * N * D
+            : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
 
     // Note: There are 3 gemm types: batched-gemm, multi-gemm, and batched of multi-gemms. The third dimension of tensor b is overloaded when tensor b has exactly 3 dimensions:
     // it can be either number of batches or multis. Batched-GEMM computation is detected only when the third dimension of "a" and "c" tensors is 1 and the number of dimensions is 4
@@ -76,7 +81,7 @@ gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &
     const int c_stride_w = N * M * D;
 
 #if defined(_OPENMP) && !(defined(__arm__) && defined(__ANDROID__))
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
     for (int w = 0; w < W; ++w)
     {
@@ -94,9 +99,13 @@ gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &
 
                     for (int k = 0; k < K; ++k)
                     {
-                        if (fast_math) {
-                            acc += to_bf_precision(a[base_addr_a + k + row * K]) * to_bf_precision(b[base_addr_b + col + k * N]);
-                        } else {
+                        if (fast_math)
+                        {
+                            acc += to_bf_precision(a[base_addr_a + k + row * K]) *
+                                   to_bf_precision(b[base_addr_b + col + k * N]);
+                        }
+                        else
+                        {
                             acc += a[base_addr_a + k + row * K] * b[base_addr_b + col + k * N];
                         }
                     }
@@ -131,12 +140,12 @@ SimpleTensor<Tout> gemm_mixed_precision(
 
     const int b_stride_z =
         b.shape().num_dimensions() > 2
-        ? N * K
-        : 0; // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
+            ? N * K
+            : 0; // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
     int b_stride_w =
         b.shape().num_dimensions() > 3
-        ? K * N * D
-        : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+            ? K * N * D
+            : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
 
     // Note: There are 3 gemm types: batched-gemm, multi-gemm, and batched of multi-gemms. The third dimension of tensor b is overloaded when tensor b has exactly 3 dimensions:
     // it can be either number of batches or multis. Batched-GEMM computation is detected only when the third dimension of "a" and "c" tensors is 1 and the number of dimensions is 4
@@ -153,7 +162,7 @@ SimpleTensor<Tout> gemm_mixed_precision(
     const int c_stride_w = N * M * D;
 
 #if defined(_OPENMP) && !(defined(__arm__) && defined(__ANDROID__))
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
     for (int w = 0; w < W; ++w)
     {
@@ -186,22 +195,55 @@ SimpleTensor<Tout> gemm_mixed_precision(
 }
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-void gemm_accumulate(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta, SimpleTensor<T> &dst)
+void gemm_accumulate(const SimpleTensor<T> &a,
+                     const SimpleTensor<T> &b,
+                     const SimpleTensor<T> &c,
+                     float                  alpha,
+                     float                  beta,
+                     SimpleTensor<T>       &dst)
 {
     // Compute reference
     SimpleTensor<T> dst_gemm = gemm(a, b, c, alpha, beta);
-    reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, dst, dst_gemm, dst, ConvertPolicy::SATURATE);
+    reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, dst, dst_gemm, dst,
+                                       ConvertPolicy::SATURATE);
 }
 
-template SimpleTensor<bfloat16> gemm(const SimpleTensor<bfloat16> &a, const SimpleTensor<bfloat16> &b, const SimpleTensor<bfloat16> &c, float alpha, float beta, bool fast_math=false);
-template SimpleTensor<float> gemm(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta, bool fast_math=false);
-template SimpleTensor<half> gemm(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta, bool fast_math=false);
+template SimpleTensor<bfloat16> gemm(const SimpleTensor<bfloat16> &a,
+                                     const SimpleTensor<bfloat16> &b,
+                                     const SimpleTensor<bfloat16> &c,
+                                     float                         alpha,
+                                     float                         beta,
+                                     bool                          fast_math = false);
+template SimpleTensor<float>    gemm(const SimpleTensor<float> &a,
+                                     const SimpleTensor<float> &b,
+                                     const SimpleTensor<float> &c,
+                                     float                      alpha,
+                                     float                      beta,
+                                     bool                       fast_math = false);
+template SimpleTensor<half>     gemm(const SimpleTensor<half> &a,
+                                     const SimpleTensor<half> &b,
+                                     const SimpleTensor<half> &c,
+                                     float                     alpha,
+                                     float                     beta,
+                                     bool                      fast_math = false);
 
-template void gemm_accumulate(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta, SimpleTensor<float> &dst);
-template void gemm_accumulate(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta, SimpleTensor<half> &dst);
+template void gemm_accumulate(const SimpleTensor<float> &a,
+                              const SimpleTensor<float> &b,
+                              const SimpleTensor<float> &c,
+                              float                      alpha,
+                              float                      beta,
+                              SimpleTensor<float>       &dst);
+template void gemm_accumulate(const SimpleTensor<half> &a,
+                              const SimpleTensor<half> &b,
+                              const SimpleTensor<half> &c,
+                              float                     alpha,
+                              float                     beta,
+                              SimpleTensor<half>       &dst);
 
-template SimpleTensor<float> gemm_mixed_precision<half>(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
-template SimpleTensor<half> gemm_mixed_precision(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
+template SimpleTensor<float> gemm_mixed_precision<half>(
+    const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
+template SimpleTensor<half> gemm_mixed_precision(
+    const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
 
 } // namespace reference
 } // namespace validation

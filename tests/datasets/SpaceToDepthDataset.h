@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_DATASET
-#define ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SPACETODEPTHDATASET_H
+#define ACL_TESTS_DATASETS_SPACETODEPTHDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -45,9 +45,7 @@ public:
         iterator(std::vector<TensorShape>::const_iterator src_it,
                  std::vector<TensorShape>::const_iterator dst_it,
                  std::vector<int>::const_iterator         block_shape_it)
-            : _src_it{ std::move(src_it) },
-              _dst_it{ std::move(dst_it) },
-              _block_shape_it{ std::move(block_shape_it) }
+            : _src_it{std::move(src_it)}, _dst_it{std::move(dst_it)}, _block_shape_it{std::move(block_shape_it)}
         {
         }
 
@@ -132,4 +130,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SPACETODEPTHDATASET_H

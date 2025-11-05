@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_NON_LINEAR_FILTER_FUNCTION_DATASET_H
-#define ARM_COMPUTE_TEST_NON_LINEAR_FILTER_FUNCTION_DATASET_H
+#ifndef ACL_TESTS_DATASETS_NONLINEARFILTERFUNCTIONDATASET_H
+#define ACL_TESTS_DATASETS_NONLINEARFILTERFUNCTIONDATASET_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/framework/datasets/ContainerDataset.h"
 
 #include <vector>
@@ -39,16 +40,13 @@ class NonLinearFilterFunctions final : public framework::dataset::ContainerDatas
 {
 public:
     NonLinearFilterFunctions()
-        : ContainerDataset("NonLinearFilterFunction",
-    {
-        NonLinearFilterFunction::MEDIAN,
-                                NonLinearFilterFunction::MIN,
-                                NonLinearFilterFunction::MAX
-    })
+        : ContainerDataset(
+              "NonLinearFilterFunction",
+              {NonLinearFilterFunction::MEDIAN, NonLinearFilterFunction::MIN, NonLinearFilterFunction::MAX})
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NON_LINEAR_FILTER_FUNCTION_DATASET_H */
+#endif // ACL_TESTS_DATASETS_NONLINEARFILTERFUNCTIONDATASET_H

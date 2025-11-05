@@ -23,15 +23,16 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLReorgLayer.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ReorgLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ReorgLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -71,17 +72,23 @@ template <typename T>
 using CLReorgLayerFixture = ReorgLayerValidationFixture<CLTensor, CLAccessor, CLReorgLayer, T>;
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReorgLayerFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallReorgLayerDataset(), make("DataType",
-                                                                                                                  DataType::S32),
-                                                                                                          make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReorgLayerFixture<int32_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallReorgLayerDataset(),
+                               make("DataType", DataType::S32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeReorgLayerDataset(), make("DataType",
-                                                                                                                DataType::S32),
-                                                                                                        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLReorgLayerFixture<int32_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeReorgLayerDataset(),
+                               make("DataType", DataType::S32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -89,17 +96,23 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int32_t>, framework::Datase
 TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReorgLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallReorgLayerDataset(), make("DataType",
-                                                                                                                  DataType::S16),
-                                                                                                          make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReorgLayerFixture<int16_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallReorgLayerDataset(),
+                               make("DataType", DataType::S16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeReorgLayerDataset(), make("DataType",
-                                                                                                                DataType::S16),
-                                                                                                        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLReorgLayerFixture<int16_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeReorgLayerDataset(),
+                               make("DataType", DataType::S16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -107,16 +120,23 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int16_t>, framework::Datase
 TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReorgLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallReorgLayerDataset(), make("DataType",
-                                                                                                                 DataType::S8),
-                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReorgLayerFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallReorgLayerDataset(),
+                               make("DataType", DataType::S8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeReorgLayerDataset(), make("DataType", DataType::S8),
-                                                                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLReorgLayerFixture<int8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeReorgLayerDataset(),
+                               make("DataType", DataType::S8),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

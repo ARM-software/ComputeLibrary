@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H
-#define ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_COLORCONVERTHELPER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_COLORCONVERTHELPER_H
 
 #include "Utils.h"
 
@@ -53,17 +53,18 @@ constexpr float rgb2u8_green_coef = 0.7152f;
 constexpr float rgb2u8_blue_coef  = 0.0722f;
 
 template <typename T>
-inline void store_rgb_from_src(const SimpleTensor<T> src, SimpleTensor<T> &rvec, SimpleTensor<T> &gvec, SimpleTensor<T> &bvec)
+inline void
+store_rgb_from_src(const SimpleTensor<T> src, SimpleTensor<T> &rvec, SimpleTensor<T> &gvec, SimpleTensor<T> &bvec)
 {
     int width  = src.shape().x();
     int height = src.shape().y();
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; ++x)
+        for (int x = 0; x < width; ++x)
         {
-            const Coordinates src_coord{ x, y };
-            const Coordinates vec_coord{ x, y };
+            const Coordinates src_coord{x, y};
+            const Coordinates vec_coord{x, y};
 
             const auto *src_pixel  = reinterpret_cast<const T *>(src(src_coord));
             auto       *rvec_pixel = reinterpret_cast<T *>(rvec(vec_coord));
@@ -78,21 +79,27 @@ inline void store_rgb_from_src(const SimpleTensor<T> src, SimpleTensor<T> &rvec,
 }
 
 template <typename T>
-inline void rgb_to_yuv_calculation(const SimpleTensor<T> rvec, const SimpleTensor<T> gvec, const SimpleTensor<T> bvec, SimpleTensor<T> &yvec, SimpleTensor<T> &uvec_top, SimpleTensor<T> &uvec_bottom,
-                                   SimpleTensor<T> &vvec_top, SimpleTensor<T> &vvec_bottom)
+inline void rgb_to_yuv_calculation(const SimpleTensor<T> rvec,
+                                   const SimpleTensor<T> gvec,
+                                   const SimpleTensor<T> bvec,
+                                   SimpleTensor<T>      &yvec,
+                                   SimpleTensor<T>      &uvec_top,
+                                   SimpleTensor<T>      &uvec_bottom,
+                                   SimpleTensor<T>      &vvec_top,
+                                   SimpleTensor<T>      &vvec_bottom)
 {
     int width  = rvec.shape().x();
     int height = rvec.shape().y();
 
     int         uvec_coord_x = 0;
     int         uvec_coord_y = 0;
-    Coordinates uvec_coord{ uvec_coord_x, uvec_coord_y };
+    Coordinates uvec_coord{uvec_coord_x, uvec_coord_y};
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; x += 2)
+        for (int x = 0; x < width; x += 2)
         {
-            Coordinates coord{ x, y };
+            Coordinates coord{x, y};
             auto       *yvec_pixel        = reinterpret_cast<T *>(yvec(coord));
             auto       *uvec_top_pixel    = reinterpret_cast<T *>(uvec_top(uvec_coord));
             auto       *uvec_bottom_pixel = reinterpret_cast<T *>(uvec_bottom(uvec_coord));
@@ -126,7 +133,7 @@ inline void rgb_to_yuv_calculation(const SimpleTensor<T> rvec, const SimpleTenso
 inline float compute_rgb_value(int y_value, int v_value, int u_value, unsigned char channel_idx)
 {
     float result = 0.f;
-    switch(channel_idx)
+    switch (channel_idx)
     {
         case 0:
         {
@@ -156,35 +163,36 @@ inline float compute_rgb_value(int y_value, int v_value, int u_value, unsigned c
 }
 
 template <typename T>
-inline void yuyv_to_rgb_calculation(const SimpleTensor<T> yvec, const SimpleTensor<T> vvec, const SimpleTensor<T> yyvec, const SimpleTensor<T> uvec, SimpleTensor<T> &dst)
+inline void yuyv_to_rgb_calculation(const SimpleTensor<T> yvec,
+                                    const SimpleTensor<T> vvec,
+                                    const SimpleTensor<T> yyvec,
+                                    const SimpleTensor<T> uvec,
+                                    SimpleTensor<T>      &dst)
 {
     const int dst_width  = dst.shape().x();
     const int dst_height = dst.shape().y();
-    for(int y = 0; y < dst_height; ++y)
+    for (int y = 0; y < dst_height; ++y)
     {
         int x_coord = 0;
-        for(int x = 0; x < dst_width; x += 2, ++x_coord)
+        for (int x = 0; x < dst_width; x += 2, ++x_coord)
         {
-            const Coordinates dst_coord{ x, y };
+            const Coordinates dst_coord{x, y};
             auto             *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
             const T           border_value(0);
-            const int         yvec_val  = validation::tensor_elem_at(yvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
-            const int         vvec_val  = validation::tensor_elem_at(vvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
-            const int         yyvec_val = validation::tensor_elem_at(yyvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
-            const int         uvec_val  = validation::tensor_elem_at(uvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
+            const int yvec_val  = validation::tensor_elem_at(yvec, {x_coord, y}, BorderMode::CONSTANT, border_value);
+            const int vvec_val  = validation::tensor_elem_at(vvec, {x_coord, y}, BorderMode::CONSTANT, border_value);
+            const int yyvec_val = validation::tensor_elem_at(yyvec, {x_coord, y}, BorderMode::CONSTANT, border_value);
+            const int uvec_val  = validation::tensor_elem_at(uvec, {x_coord, y}, BorderMode::CONSTANT, border_value);
             //Compute first RGB value using Y plane
-            for(int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
+            for (int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
             {
                 const float channel_value = compute_rgb_value(yvec_val, vvec_val, uvec_val, channel_idx);
                 dst_pixel[channel_idx]    = channel_value;
             }
             //Compute second RGB value using YY plane
-            const Coordinates dst_coord2
-            {
-                x + 1, y
-            };
+            const Coordinates dst_coord2{x + 1, y};
             dst_pixel = reinterpret_cast<T *>(dst(dst_coord2));
-            for(int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
+            for (int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
             {
                 const float channel_value = compute_rgb_value(yyvec_val, vvec_val, uvec_val, channel_idx);
                 dst_pixel[channel_idx]    = channel_value;
@@ -196,21 +204,21 @@ inline void yuyv_to_rgb_calculation(const SimpleTensor<T> yvec, const SimpleTens
 template <typename T>
 inline void colorconvert_rgb_to_rgbx(const SimpleTensor<T> src, SimpleTensor<T> &dst)
 {
-    for(int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
+    for (int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
     {
         const int width  = dst.shape().x();
         const int height = dst.shape().y();
 
-        for(int y = 0; y < height; ++y)
+        for (int y = 0; y < height; ++y)
         {
-            for(int x = 0; x < width; ++x)
+            for (int x = 0; x < width; ++x)
             {
-                const Coordinates src_coord{ x, y };
-                const Coordinates dst_coord{ x, y };
+                const Coordinates src_coord{x, y};
+                const Coordinates dst_coord{x, y};
 
                 const auto *src_pixel = reinterpret_cast<const T *>(src(src_coord));
                 auto       *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
-                if(channel_idx == 3)
+                if (channel_idx == 3)
                 {
                     dst_pixel[channel_idx] = 255;
                     continue;
@@ -228,17 +236,18 @@ inline void colorconvert_rgb_to_u8(const SimpleTensor<T> src, SimpleTensor<T> &d
     const int width  = dst.shape().x();
     const int height = dst.shape().y();
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; ++x)
+        for (int x = 0; x < width; ++x)
         {
-            const Coordinates src_coord{ x, y };
-            const Coordinates dst_coord{ x, y };
+            const Coordinates src_coord{x, y};
+            const Coordinates dst_coord{x, y};
 
             const auto *src_pixel = reinterpret_cast<const T *>(src(src_coord));
             auto       *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
 
-            const float result = rgb2u8_red_coef * src_pixel[0] + rgb2u8_green_coef * src_pixel[1] + rgb2u8_blue_coef * src_pixel[2];
+            const float result =
+                rgb2u8_red_coef * src_pixel[0] + rgb2u8_green_coef * src_pixel[1] + rgb2u8_blue_coef * src_pixel[2];
 
             dst_pixel[0] = utility::clamp<float>(result, 0, 255);
         }
@@ -248,17 +257,17 @@ inline void colorconvert_rgb_to_u8(const SimpleTensor<T> src, SimpleTensor<T> &d
 template <typename T>
 inline void colorconvert_rgbx_to_rgb(const SimpleTensor<T> src, SimpleTensor<T> &dst)
 {
-    for(int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
+    for (int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
     {
         const int width  = dst.shape().x();
         const int height = dst.shape().y();
 
-        for(int y = 0; y < height; ++y)
+        for (int y = 0; y < height; ++y)
         {
-            for(int x = 0; x < width; ++x)
+            for (int x = 0; x < width; ++x)
             {
-                const Coordinates src_coord{ x, y };
-                const Coordinates dst_coord{ x, y };
+                const Coordinates src_coord{x, y};
+                const Coordinates dst_coord{x, y};
 
                 const auto *src_pixel = reinterpret_cast<const T *>(src(src_coord));
                 auto       *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
@@ -272,23 +281,23 @@ inline void colorconvert_rgbx_to_rgb(const SimpleTensor<T> src, SimpleTensor<T> 
 template <typename T>
 inline void colorconvert_yuyv_to_rgb(const SimpleTensor<T> src, const Format format, SimpleTensor<T> &dst)
 {
-    SimpleTensor<T> yvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
-    SimpleTensor<T> uvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
-    SimpleTensor<T> yyvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
-    SimpleTensor<T> vvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
+    SimpleTensor<T> yvec(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
+    SimpleTensor<T> uvec(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
+    SimpleTensor<T> yyvec(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
+    SimpleTensor<T> vvec(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
 
     const int step_x = (Format::YUYV422 == format || Format::UYVY422 == format) ? 2 : 1;
     const int offset = (Format::YUYV422 == format) ? 0 : 1;
 
-    Coordinates elem_coord{ 0, 0 };
+    Coordinates elem_coord{0, 0};
     const int   width  = yvec.shape().x();
     const int   height = yvec.shape().y();
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; ++x)
+        for (int x = 0; x < width; ++x)
         {
-            const Coordinates src_coord{ x * step_x, y };
+            const Coordinates src_coord{x * step_x, y};
             const auto       *src_pixel   = reinterpret_cast<const T *>(src(src_coord));
             auto             *yvec_pixel  = reinterpret_cast<T *>(yvec(elem_coord));
             auto             *uvec_pixel  = reinterpret_cast<T *>(uvec(elem_coord));
@@ -308,20 +317,20 @@ inline void colorconvert_yuyv_to_rgb(const SimpleTensor<T> src, const Format for
 template <typename T>
 inline void colorconvert_iyuv_to_rgb(const std::vector<SimpleTensor<T>> &tensor_planes, SimpleTensor<T> &dst)
 {
-    SimpleTensor<T> yvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
-    SimpleTensor<T> uvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
-    SimpleTensor<T> yyvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
-    SimpleTensor<T> vvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
+    SimpleTensor<T> yvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
+    SimpleTensor<T> uvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
+    SimpleTensor<T> yyvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
+    SimpleTensor<T> vvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
 
-    Coordinates elem_coord{ 0, 0 };
+    Coordinates elem_coord{0, 0};
     const int   yvec_width  = yvec.shape().x();
     const int   yvec_height = yvec.shape().y();
 
-    for(int y = 0; y < yvec_height; ++y)
+    for (int y = 0; y < yvec_height; ++y)
     {
-        for(int x = 0; x < yvec_width; ++x)
+        for (int x = 0; x < yvec_width; ++x)
         {
-            const Coordinates src_coord{ x, y };
+            const Coordinates src_coord{x, y};
             const auto       *src_pixel   = reinterpret_cast<const T *>(tensor_planes[0](src_coord));
             auto             *yvec_pixel  = reinterpret_cast<T *>(yvec(elem_coord));
             auto             *yyvec_pixel = reinterpret_cast<T *>(yyvec(elem_coord));
@@ -334,13 +343,13 @@ inline void colorconvert_iyuv_to_rgb(const std::vector<SimpleTensor<T>> &tensor_
     const int uvec_width  = uvec.shape().x();
     const int uvec_height = uvec.shape().y();
 
-    Coordinates top_elem_coord{ 0, 0 };
-    Coordinates bottom_elem_coord{ 0, 1 };
-    for(int y = 0; y < uvec_height; y += 2)
+    Coordinates top_elem_coord{0, 0};
+    Coordinates bottom_elem_coord{0, 1};
+    for (int y = 0; y < uvec_height; y += 2)
     {
-        for(int x = 0; x < uvec_width; ++x)
+        for (int x = 0; x < uvec_width; ++x)
         {
-            const Coordinates src_coord{ x, y / 2 };
+            const Coordinates src_coord{x, y / 2};
             const auto       *u_pixel        = reinterpret_cast<const T *>(tensor_planes[1](src_coord));
             const auto       *v_pixel        = reinterpret_cast<const T *>(tensor_planes[2](src_coord));
             auto             *uvec_pixel_top = reinterpret_cast<T *>(uvec(top_elem_coord));
@@ -361,24 +370,25 @@ inline void colorconvert_iyuv_to_rgb(const std::vector<SimpleTensor<T>> &tensor_
 }
 
 template <typename T>
-inline void colorconvert_nv12_to_rgb(const Format format, const std::vector<SimpleTensor<T>> &tensor_planes, SimpleTensor<T> &dst)
+inline void
+colorconvert_nv12_to_rgb(const Format format, const std::vector<SimpleTensor<T>> &tensor_planes, SimpleTensor<T> &dst)
 {
-    SimpleTensor<T> yvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
-    SimpleTensor<T> uvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
-    SimpleTensor<T> yyvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
-    SimpleTensor<T> vvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
+    SimpleTensor<T> yvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
+    SimpleTensor<T> uvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
+    SimpleTensor<T> yyvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
+    SimpleTensor<T> vvec(TensorShape{tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y()}, Format::U8);
 
     const int offset = (Format::NV12 == format) ? 0 : 1;
 
-    Coordinates elem_coord{ 0, 0 };
+    Coordinates elem_coord{0, 0};
     const int   yvec_width  = yvec.shape().x();
     const int   yvec_height = yvec.shape().y();
 
-    for(int y = 0; y < yvec_height; ++y)
+    for (int y = 0; y < yvec_height; ++y)
     {
-        for(int x = 0; x < yvec_width; ++x)
+        for (int x = 0; x < yvec_width; ++x)
         {
-            const Coordinates src_coord{ x, y };
+            const Coordinates src_coord{x, y};
             const auto       *src_pixel   = reinterpret_cast<const T *>(tensor_planes[0](src_coord));
             auto             *yvec_pixel  = reinterpret_cast<T *>(yvec(elem_coord));
             auto             *yyvec_pixel = reinterpret_cast<T *>(yyvec(elem_coord));
@@ -391,13 +401,13 @@ inline void colorconvert_nv12_to_rgb(const Format format, const std::vector<Simp
     const int uvec_width  = uvec.shape().x();
     const int uvec_height = uvec.shape().y();
 
-    Coordinates top_elem_coord{ 0, 0 };
-    Coordinates bottom_elem_coord{ 0, 1 };
-    for(int y = 0; y < uvec_height; y += 2)
+    Coordinates top_elem_coord{0, 0};
+    Coordinates bottom_elem_coord{0, 1};
+    for (int y = 0; y < uvec_height; y += 2)
     {
-        for(int x = 0; x < uvec_width; ++x)
+        for (int x = 0; x < uvec_width; ++x)
         {
-            const Coordinates src_coord{ x, y / 2 };
+            const Coordinates src_coord{x, y / 2};
             const auto       *src_pixel      = reinterpret_cast<const T *>(tensor_planes[1](src_coord));
             auto             *uvec_pixel_top = reinterpret_cast<T *>(uvec(top_elem_coord));
             auto             *vvec_pixel_top = reinterpret_cast<T *>(vvec(top_elem_coord));
@@ -419,43 +429,45 @@ inline void colorconvert_nv12_to_rgb(const Format format, const std::vector<Simp
 template <typename T>
 inline void colorconvert_rgb_to_nv12(const SimpleTensor<T> src, std::vector<SimpleTensor<T>> &dst)
 {
-    SimpleTensor<T> rvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> gvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> bvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> yvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
+    SimpleTensor<T> rvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> gvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> bvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> yvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
 
     int vec_shape_x = src.shape().x() * src.shape().y();
 
-    SimpleTensor<T> uvec_top(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> uvec_bottom(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> vvec_top(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> vvec_bottom(TensorShape{ vec_shape_x, 1U }, Format::U8);
+    SimpleTensor<T> uvec_top(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> uvec_bottom(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> vvec_top(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> vvec_bottom(TensorShape{vec_shape_x, 1U}, Format::U8);
 
     store_rgb_from_src(src, rvec, gvec, bvec);
     rgb_to_yuv_calculation(rvec, gvec, bvec, dst[0], uvec_top, uvec_bottom, vvec_top, vvec_bottom);
 
-    SimpleTensor<T> utmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
-    SimpleTensor<T> vtmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
+    SimpleTensor<T> utmp(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
+    SimpleTensor<T> vtmp(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
 
     uint32_t utmp_width  = utmp.shape().x();
     uint32_t utmp_height = utmp.shape().y();
 
     uint32_t    uvec_coord_x = 0;
     uint32_t    uvec_coord_y = 0;
-    Coordinates uvec_coord{ uvec_coord_x, uvec_coord_y };
-    for(uint32_t y = 0; y < utmp_height; y++)
+    Coordinates uvec_coord{uvec_coord_x, uvec_coord_y};
+    for (uint32_t y = 0; y < utmp_height; y++)
     {
-        for(uint32_t x = 0; x < utmp_width; x++)
+        for (uint32_t x = 0; x < utmp_width; x++)
         {
-            Coordinates coord{ x, y };
+            Coordinates coord{x, y};
             auto       *utmp_pixel = reinterpret_cast<T *>(utmp(coord));
             auto       *vtmp_pixel = reinterpret_cast<T *>(vtmp(coord));
 
             T   border_value(0);
-            int uvec_top_val    = validation::tensor_elem_at(uvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
-            int uvec_bottom_val = validation::tensor_elem_at(uvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
-            int vvec_top_val    = validation::tensor_elem_at(vvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
-            int vvec_bottom_val = validation::tensor_elem_at(vvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
+            int uvec_top_val = validation::tensor_elem_at(uvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
+            int uvec_bottom_val =
+                validation::tensor_elem_at(uvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
+            int vvec_top_val = validation::tensor_elem_at(vvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
+            int vvec_bottom_val =
+                validation::tensor_elem_at(vvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
 
             utmp_pixel[0] = std::ceil(float(uvec_top_val + uvec_bottom_val) / 2);
             vtmp_pixel[0] = std::ceil(float(vvec_top_val + vvec_bottom_val) / 2);
@@ -470,32 +482,34 @@ inline void colorconvert_rgb_to_nv12(const SimpleTensor<T> src, std::vector<Simp
     uint32_t utmp_coord_x = 0;
     uint32_t utmp_coord_y = 0;
 
-    for(uint32_t y = 0; y < second_plane_y; y++)
+    for (uint32_t y = 0; y < second_plane_y; y++)
     {
-        for(uint32_t x = 0; x < second_plane_x; x++)
+        for (uint32_t x = 0; x < second_plane_x; x++)
         {
-            Coordinates coord{ x, y };
-            Coordinates utmp_top_coord{ utmp_coord_x, utmp_coord_y };
-            Coordinates utmp_bottom_coord{ utmp_coord_x, utmp_coord_y + 1 };
+            Coordinates coord{x, y};
+            Coordinates utmp_top_coord{utmp_coord_x, utmp_coord_y};
+            Coordinates utmp_bottom_coord{utmp_coord_x, utmp_coord_y + 1};
 
             auto *dst_pixel = reinterpret_cast<T *>(dst[1](coord));
 
             T   border_value(0);
-            int utmp_top_val    = validation::tensor_elem_at(utmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
-            int utmp_bottom_val = validation::tensor_elem_at(utmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
+            int utmp_top_val = validation::tensor_elem_at(utmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
+            int utmp_bottom_val =
+                validation::tensor_elem_at(utmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
 
             int result   = (utmp_top_val + utmp_bottom_val) / 2;
             dst_pixel[0] = result;
 
-            int vtmp_top_val    = validation::tensor_elem_at(vtmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
-            int vtmp_bottom_val = validation::tensor_elem_at(vtmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
+            int vtmp_top_val = validation::tensor_elem_at(vtmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
+            int vtmp_bottom_val =
+                validation::tensor_elem_at(vtmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
 
             result       = (vtmp_top_val + vtmp_bottom_val) / 2;
             dst_pixel[1] = result;
 
             utmp_coord_x++;
 
-            if(utmp_coord_x >= utmp_width)
+            if (utmp_coord_x >= utmp_width)
             {
                 utmp_coord_x = 0;
                 utmp_coord_y += 2;
@@ -507,42 +521,44 @@ inline void colorconvert_rgb_to_nv12(const SimpleTensor<T> src, std::vector<Simp
 template <typename T>
 inline void colorconvert_rgb_to_iyuv(const SimpleTensor<T> src, std::vector<SimpleTensor<T>> &dst)
 {
-    SimpleTensor<T> rvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> gvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> bvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> yvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
+    SimpleTensor<T> rvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> gvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> bvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> yvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
 
     int vec_shape_x = src.shape().x() * src.shape().y();
 
-    SimpleTensor<T> uvec_top(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> uvec_bottom(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> vvec_top(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> vvec_bottom(TensorShape{ vec_shape_x, 1U }, Format::U8);
+    SimpleTensor<T> uvec_top(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> uvec_bottom(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> vvec_top(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> vvec_bottom(TensorShape{vec_shape_x, 1U}, Format::U8);
 
     store_rgb_from_src(src, rvec, gvec, bvec);
     rgb_to_yuv_calculation(rvec, gvec, bvec, dst[0], uvec_top, uvec_bottom, vvec_top, vvec_bottom);
 
-    SimpleTensor<T> utmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
-    SimpleTensor<T> vtmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
+    SimpleTensor<T> utmp(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
+    SimpleTensor<T> vtmp(TensorShape{src.shape().x() / 2, src.shape().y()}, Format::U8);
     uint32_t        utmp_width  = utmp.shape().x();
     uint32_t        utmp_height = utmp.shape().y();
 
     uint32_t    uvec_coord_x = 0;
     uint32_t    uvec_coord_y = 0;
-    Coordinates uvec_coord{ uvec_coord_x, uvec_coord_y };
-    for(uint32_t y = 0; y < utmp_height; y++)
+    Coordinates uvec_coord{uvec_coord_x, uvec_coord_y};
+    for (uint32_t y = 0; y < utmp_height; y++)
     {
-        for(uint32_t x = 0; x < utmp_width; x++)
+        for (uint32_t x = 0; x < utmp_width; x++)
         {
-            Coordinates coord{ x, y };
+            Coordinates coord{x, y};
             auto       *utmp_pixel = reinterpret_cast<T *>(utmp(coord));
             auto       *vtmp_pixel = reinterpret_cast<T *>(vtmp(coord));
 
             T   border_value(0);
-            int uvec_top_val    = validation::tensor_elem_at(uvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
-            int uvec_bottom_val = validation::tensor_elem_at(uvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
-            int vvec_top_val    = validation::tensor_elem_at(vvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
-            int vvec_bottom_val = validation::tensor_elem_at(vvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
+            int uvec_top_val = validation::tensor_elem_at(uvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
+            int uvec_bottom_val =
+                validation::tensor_elem_at(uvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
+            int vvec_top_val = validation::tensor_elem_at(vvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
+            int vvec_bottom_val =
+                validation::tensor_elem_at(vvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
 
             utmp_pixel[0] = std::ceil(float(uvec_top_val + uvec_bottom_val) / 2);
             vtmp_pixel[0] = std::ceil(float(vvec_top_val + vvec_bottom_val) / 2);
@@ -557,33 +573,35 @@ inline void colorconvert_rgb_to_iyuv(const SimpleTensor<T> src, std::vector<Simp
     uint32_t utmp_coord_x = 0;
     uint32_t utmp_coord_y = 0;
 
-    for(uint32_t y = 0; y < second_plane_y; y++)
+    for (uint32_t y = 0; y < second_plane_y; y++)
     {
-        for(uint32_t x = 0; x < second_plane_x; x++)
+        for (uint32_t x = 0; x < second_plane_x; x++)
         {
-            Coordinates coord{ x, y };
-            Coordinates utmp_top_coord{ utmp_coord_x, utmp_coord_y };
-            Coordinates utmp_bottom_coord{ utmp_coord_x, utmp_coord_y + 1 };
+            Coordinates coord{x, y};
+            Coordinates utmp_top_coord{utmp_coord_x, utmp_coord_y};
+            Coordinates utmp_bottom_coord{utmp_coord_x, utmp_coord_y + 1};
 
             auto *u_pixel = reinterpret_cast<T *>(dst[1](coord));
             auto *v_pixel = reinterpret_cast<T *>(dst[2](coord));
 
             T   border_value(0);
-            int utmp_top_val    = validation::tensor_elem_at(utmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
-            int utmp_bottom_val = validation::tensor_elem_at(utmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
+            int utmp_top_val = validation::tensor_elem_at(utmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
+            int utmp_bottom_val =
+                validation::tensor_elem_at(utmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
 
             int result = (utmp_top_val + utmp_bottom_val) / 2;
             u_pixel[0] = result;
 
-            int vtmp_top_val    = validation::tensor_elem_at(vtmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
-            int vtmp_bottom_val = validation::tensor_elem_at(vtmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
+            int vtmp_top_val = validation::tensor_elem_at(vtmp, utmp_top_coord, BorderMode::CONSTANT, border_value);
+            int vtmp_bottom_val =
+                validation::tensor_elem_at(vtmp, utmp_bottom_coord, BorderMode::CONSTANT, border_value);
 
             result     = (vtmp_top_val + vtmp_bottom_val) / 2;
             v_pixel[0] = result;
 
             utmp_coord_x++;
 
-            if(utmp_coord_x >= utmp_width)
+            if (utmp_coord_x >= utmp_width)
             {
                 utmp_coord_x = 0;
                 utmp_coord_y += 2;
@@ -595,17 +613,17 @@ inline void colorconvert_rgb_to_iyuv(const SimpleTensor<T> src, std::vector<Simp
 template <typename T>
 inline void colorconvert_rgb_to_yuv4(const SimpleTensor<T> src, std::vector<SimpleTensor<T>> &dst)
 {
-    SimpleTensor<T> rvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> gvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> bvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
-    SimpleTensor<T> yvec(TensorShape{ dst[0].shape().x(), dst[0].shape().y() }, Format::U8);
+    SimpleTensor<T> rvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> gvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> bvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
+    SimpleTensor<T> yvec(TensorShape{dst[0].shape().x(), dst[0].shape().y()}, Format::U8);
 
     int vec_shape_x = src.shape().x() * src.shape().y();
 
-    SimpleTensor<T> uvec_top(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> uvec_bottom(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> vvec_top(TensorShape{ vec_shape_x, 1U }, Format::U8);
-    SimpleTensor<T> vvec_bottom(TensorShape{ vec_shape_x, 1U }, Format::U8);
+    SimpleTensor<T> uvec_top(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> uvec_bottom(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> vvec_top(TensorShape{vec_shape_x, 1U}, Format::U8);
+    SimpleTensor<T> vvec_bottom(TensorShape{vec_shape_x, 1U}, Format::U8);
 
     int width  = src.shape().x();
     int height = src.shape().y();
@@ -614,24 +632,26 @@ inline void colorconvert_rgb_to_yuv4(const SimpleTensor<T> src, std::vector<Simp
 
     rgb_to_yuv_calculation(rvec, gvec, bvec, dst[0], uvec_top, uvec_bottom, vvec_top, vvec_bottom);
 
-    Coordinates uvec_coord{ 0, 0 };
-    for(int y = 0; y < height; y++)
+    Coordinates uvec_coord{0, 0};
+    for (int y = 0; y < height; y++)
     {
-        for(int x = 0; x < width; x += 2)
+        for (int x = 0; x < width; x += 2)
         {
-            Coordinates coord{ x, y };
+            Coordinates coord{x, y};
             auto       *plane_1_pixel = reinterpret_cast<T *>(dst[1](coord));
             auto       *plane_2_pixel = reinterpret_cast<T *>(dst[2](coord));
 
             T   border_value(0);
-            int uvec_top_val    = validation::tensor_elem_at(uvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
-            int uvec_bottom_val = validation::tensor_elem_at(uvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
+            int uvec_top_val = validation::tensor_elem_at(uvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
+            int uvec_bottom_val =
+                validation::tensor_elem_at(uvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
 
             plane_1_pixel[0] = uvec_top_val;
             plane_1_pixel[1] = uvec_bottom_val;
 
-            int vvec_top_val    = validation::tensor_elem_at(vvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
-            int vvec_bottom_val = validation::tensor_elem_at(vvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
+            int vvec_top_val = validation::tensor_elem_at(vvec_top, uvec_coord, BorderMode::CONSTANT, border_value);
+            int vvec_bottom_val =
+                validation::tensor_elem_at(vvec_bottom, uvec_coord, BorderMode::CONSTANT, border_value);
 
             plane_2_pixel[0] = vvec_top_val;
             plane_2_pixel[1] = vvec_bottom_val;
@@ -644,20 +664,20 @@ inline void colorconvert_rgb_to_yuv4(const SimpleTensor<T> src, std::vector<Simp
 template <typename T>
 inline void colorconvert_yuyv_to_nv12(const SimpleTensor<T> src, const Format format, std::vector<SimpleTensor<T>> &dst)
 {
-    SimpleTensor<T> uvvec_top(TensorShape{ dst[0].shape().x(), dst[0].shape().y() / 2 }, Format::U8);
-    SimpleTensor<T> uvvec_bottom(TensorShape{ dst[0].shape().x(), dst[0].shape().y() / 2 }, Format::U8);
+    SimpleTensor<T> uvvec_top(TensorShape{dst[0].shape().x(), dst[0].shape().y() / 2}, Format::U8);
+    SimpleTensor<T> uvvec_bottom(TensorShape{dst[0].shape().x(), dst[0].shape().y() / 2}, Format::U8);
 
     const int offset = (Format::YUYV422 == format) ? 0 : 1;
 
     int width  = dst[0].shape().x();
     int height = dst[0].shape().y();
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            const Coordinates dst_coord{ x, y };
-            const Coordinates uv_coord{ x, y / 2 };
+            const Coordinates dst_coord{x, y};
+            const Coordinates uv_coord{x, y / 2};
 
             const auto *src_pixel          = reinterpret_cast<const T *>(src(dst_coord));
             auto       *y_pixel            = reinterpret_cast<T *>(dst[0](dst_coord));
@@ -666,7 +686,7 @@ inline void colorconvert_yuyv_to_nv12(const SimpleTensor<T> src, const Format fo
 
             y_pixel[0] = src_pixel[0 + offset];
 
-            if(y % 2 == 0)
+            if (y % 2 == 0)
             {
                 uvvec_top_pixel[0] = src_pixel[1 - offset];
             }
@@ -683,12 +703,12 @@ inline void colorconvert_yuyv_to_nv12(const SimpleTensor<T> src, const Format fo
     int uv_coord_x = 0;
     int uv_coord_y = 0;
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            const Coordinates dst_coord{ x, y };
-            const Coordinates uv_coord{ uv_coord_x, uv_coord_y };
+            const Coordinates dst_coord{x, y};
+            const Coordinates uv_coord{uv_coord_x, uv_coord_y};
 
             auto       *uv_pixel           = reinterpret_cast<T *>(dst[1](dst_coord));
             const auto *uvvec_top_pixel    = reinterpret_cast<T *>(uvvec_top(uv_coord));
@@ -706,20 +726,20 @@ inline void colorconvert_yuyv_to_nv12(const SimpleTensor<T> src, const Format fo
 template <typename T>
 inline void colorconvert_yuyv_to_iyuv(const SimpleTensor<T> src, const Format format, std::vector<SimpleTensor<T>> &dst)
 {
-    SimpleTensor<T> uvvec_top(TensorShape{ dst[0].shape().x(), dst[0].shape().y() / 2 }, Format::U8);
-    SimpleTensor<T> uvvec_bottom(TensorShape{ dst[0].shape().x(), dst[0].shape().y() / 2 }, Format::U8);
+    SimpleTensor<T> uvvec_top(TensorShape{dst[0].shape().x(), dst[0].shape().y() / 2}, Format::U8);
+    SimpleTensor<T> uvvec_bottom(TensorShape{dst[0].shape().x(), dst[0].shape().y() / 2}, Format::U8);
 
     const int offset = (Format::YUYV422 == format) ? 0 : 1;
 
     int width  = dst[0].shape().x();
     int height = dst[0].shape().y();
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            const Coordinates dst_coord{ x, y };
-            const Coordinates uv_coord{ x, y / 2 };
+            const Coordinates dst_coord{x, y};
+            const Coordinates uv_coord{x, y / 2};
 
             const auto *src_pixel          = reinterpret_cast<const T *>(src(dst_coord));
             auto       *y_pixel            = reinterpret_cast<T *>(dst[0](dst_coord));
@@ -728,7 +748,7 @@ inline void colorconvert_yuyv_to_iyuv(const SimpleTensor<T> src, const Format fo
 
             y_pixel[0] = src_pixel[0 + offset];
 
-            if(y % 2 == 0)
+            if (y % 2 == 0)
             {
                 uvvec_top_pixel[0] = src_pixel[1 - offset];
             }
@@ -745,12 +765,12 @@ inline void colorconvert_yuyv_to_iyuv(const SimpleTensor<T> src, const Format fo
     int uv_coord_x = 0;
     int uv_coord_y = 0;
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            const Coordinates dst_coord{ x, y };
-            const Coordinates uv_coord{ uv_coord_x, uv_coord_y };
+            const Coordinates dst_coord{x, y};
+            const Coordinates uv_coord{uv_coord_x, uv_coord_y};
 
             auto       *u_pixel            = reinterpret_cast<T *>(dst[1](dst_coord));
             auto       *v_pixel            = reinterpret_cast<T *>(dst[2](dst_coord));
@@ -774,11 +794,11 @@ inline void nv_to_iyuv(const SimpleTensor<T> src, const Format src_format, Simpl
 
     const int offset = (Format::NV12 == src_format) ? 1 : 0;
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            const Coordinates src_coord{ x, y };
+            const Coordinates src_coord{x, y};
             const auto       *src_pixel = reinterpret_cast<const T *>(src(src_coord));
             auto             *u_pixel   = reinterpret_cast<T *>(nv1(src_coord));
             auto             *v_pixel   = reinterpret_cast<T *>(nv2(src_coord));
@@ -797,12 +817,12 @@ inline void nv_to_yuv4(const SimpleTensor<T> src, const Format src_format, Simpl
 
     const int offset = (Format::NV12 == src_format) ? 1 : 0;
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            const Coordinates src_coord{ x, y };
-            Coordinates       dst_coord{ x * 2, y * 2 };
+            const Coordinates src_coord{x, y};
+            Coordinates       dst_coord{x * 2, y * 2};
             const auto       *src_pixel = reinterpret_cast<const T *>(src(src_coord));
             auto             *u_pixel   = reinterpret_cast<T *>(nv1(dst_coord));
             auto             *v_pixel   = reinterpret_cast<T *>(nv2(dst_coord));
@@ -826,16 +846,18 @@ inline void nv_to_yuv4(const SimpleTensor<T> src, const Format src_format, Simpl
 }
 
 template <typename T>
-inline void colorconvert_nv_to_iyuv(const std::vector<SimpleTensor<T>> src, const Format src_format, std::vector<SimpleTensor<T>> &dst)
+inline void colorconvert_nv_to_iyuv(const std::vector<SimpleTensor<T>> src,
+                                    const Format                       src_format,
+                                    std::vector<SimpleTensor<T>>      &dst)
 {
     int width  = dst[0].shape().x();
     int height = dst[0].shape().y();
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; ++x)
+        for (int x = 0; x < width; ++x)
         {
-            const Coordinates dst_coord{ x, y };
+            const Coordinates dst_coord{x, y};
 
             const auto *src_pixel = reinterpret_cast<const T *>(src[0](dst_coord));
             auto       *y_pixel   = reinterpret_cast<T *>(dst[0](dst_coord));
@@ -848,16 +870,18 @@ inline void colorconvert_nv_to_iyuv(const std::vector<SimpleTensor<T>> src, cons
 }
 
 template <typename T>
-inline void colorconvert_nv_to_yuv4(const std::vector<SimpleTensor<T>> src, const Format src_format, std::vector<SimpleTensor<T>> &dst)
+inline void colorconvert_nv_to_yuv4(const std::vector<SimpleTensor<T>> src,
+                                    const Format                       src_format,
+                                    std::vector<SimpleTensor<T>>      &dst)
 {
     int width  = dst[0].shape().x();
     int height = dst[0].shape().y();
 
-    for(int y = 0; y < height; ++y)
+    for (int y = 0; y < height; ++y)
     {
-        for(int x = 0; x < width; ++x)
+        for (int x = 0; x < width; ++x)
         {
-            const Coordinates dst_coord{ x, y };
+            const Coordinates dst_coord{x, y};
 
             const auto *src_pixel = reinterpret_cast<const T *>(src[0](dst_coord));
             auto       *y_pixel   = reinterpret_cast<T *>(dst[0](dst_coord));
@@ -870,7 +894,7 @@ inline void colorconvert_nv_to_yuv4(const std::vector<SimpleTensor<T>> src, cons
 }
 
 } // namespace detail
-} // color_convert_helper
+} // namespace colorconvert_helper
 } // namespace test
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_COLORCONVERTHELPER_H
